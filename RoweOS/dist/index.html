@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.0.7 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.0.8 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -14948,7 +14948,7 @@
       box-shadow: 0 0 0 2px var(--bg-primary);
     }
 
-    /* v12.0.7: Color Wheel Picker */
+    /* v12.0.8: Color Wheel Picker */
     .focus-2-color-wheel-container {
       display: flex;
       align-items: center;
@@ -15677,7 +15677,206 @@
       display: block;
       animation: slideDown 0.2s ease;
     }
-    
+
+    /* v12.0.8: Inline Category Edit */
+    .focus-2-category-card.editing .focus-2-category-expanded {
+      display: none;
+    }
+
+    .focus-2-inline-edit {
+      display: none;
+      padding: var(--space-4);
+      margin-top: var(--space-4);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+    }
+
+    .focus-2-category-card.editing .focus-2-inline-edit {
+      display: block;
+      animation: slideDown 0.2s ease;
+    }
+
+    .focus-2-inline-edit-field {
+      margin-bottom: var(--space-3);
+    }
+
+    .focus-2-inline-edit-field label {
+      display: block;
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-1);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .focus-2-inline-edit-field input[type="text"] {
+      width: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      font-size: var(--text-base);
+      color: var(--text-primary);
+    }
+
+    .focus-2-inline-edit-field input[type="text"]:focus {
+      outline: none;
+      border-color: var(--cat-color, var(--accent));
+    }
+
+    .focus-2-inline-color-picker {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .focus-2-inline-color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .focus-2-inline-color-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .focus-2-inline-color-btn.selected {
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 2px var(--bg-primary);
+    }
+
+    .focus-2-inline-custom-color-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: var(--text-xs);
+      cursor: pointer;
+    }
+
+    .focus-2-inline-custom-color-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .focus-2-inline-custom-color-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .focus-2-inline-color-wheel {
+      display: none;
+      margin-top: var(--space-3);
+      padding: var(--space-3);
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+    }
+
+    .focus-2-inline-color-wheel.visible {
+      display: block;
+    }
+
+    .focus-2-inline-color-wheel-canvas {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      cursor: crosshair;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .focus-2-inline-color-wheel-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto;
+    }
+
+    .focus-2-inline-color-wheel-pointer {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
+
+    .focus-2-inline-color-preview {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: var(--space-2);
+    }
+
+    .focus-2-inline-color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border-color);
+    }
+
+    .focus-2-inline-color-hex {
+      flex: 1;
+      padding: 6px 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: monospace;
+      font-size: var(--text-sm);
+    }
+
+    .focus-2-inline-edit-actions {
+      display: flex;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .focus-2-inline-edit-actions button {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .focus-2-inline-edit-cancel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .focus-2-inline-edit-cancel:hover {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .focus-2-inline-edit-save {
+      background: var(--cat-color, var(--accent));
+      border: none;
+      color: #000;
+    }
+
+    .focus-2-inline-edit-save:hover {
+      opacity: 0.9;
+    }
+
     /* Uncategorized Card - Full Width */
     .focus-2-category-card.uncategorized {
       grid-column: 1 / -1;
@@ -37092,7 +37291,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.0.7</div>
+      <div class="launch-version" id="launchVersionTag">v12.0.8</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -37401,7 +37600,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.7</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.8</div>
       
     </div>
   </div>
@@ -37591,7 +37790,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.7</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.8</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -38449,7 +38648,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.0.7</span>
+          <span class="sidebar-version">v12.0.8</span>
         </div>
       </div>
     </div>
@@ -38759,7 +38958,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.0.7 • Built for the future</p>
+        <p>RoweOS v12.0.8 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -38816,7 +39015,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.0.7</p>
+            <p class="onboarding-welcome-version">v12.0.8</p>
           </div>
         </div>
       </div>
@@ -44254,7 +44453,7 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.0.7: Sync Settings - Control what data syncs -->
+            <!-- v12.0.8: Sync Settings - Control what data syncs -->
             <div class="settings-row-desc" style="padding: 12px 16px 8px; color: var(--text-muted); font-size: var(--text-sm); border-top: 1px solid var(--border-color); margin-top: 8px;">
               Sync Settings — Control what data syncs to prevent trimming
             </div>
@@ -44785,7 +44984,7 @@ service cloud.firestore {
                 </svg>
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.7</div>
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.8</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -55441,7 +55640,7 @@ function init() {
   loadResponseCache();
   loadAutoPilotData();
 
-  // v12.0.7: Load sync settings
+  // v12.0.8: Load sync settings
   loadSyncSettings();
 
   // CRITICAL: Clear any residual conversation state on fresh load
@@ -65697,7 +65896,7 @@ function renderFocus2Categories() {
     var iconKey = cat.icon || cat.name || 'default';
     var iconSvg = focus2CategoryIconLibrary[iconKey] || focus2CategoryIconLibrary['default'];
 
-    // v12.0.7: Support custom hex colors via inline style
+    // v12.0.8: Support custom hex colors via inline style
     var colorStyle = customHex ? ' style="--cat-color: ' + customHex + ';"' : '';
     html += '<div class="focus-2-category-card' + (isExpanded ? ' expanded' : '') + '" data-color="' + colorPreset + '" data-category="' + escapeHtml(cat.name) + '"' + colorStyle + ' onclick="toggleFocus2CategoryExpand(\'' + escapeHtml(cat.name) + '\', event)">';
     
@@ -66929,7 +67128,7 @@ function closeFocus2NewCategory() {
     });
   }
 
-  // v12.0.7: Reset custom color wheel
+  // v12.0.8: Reset custom color wheel
   window.focus2CustomColor = null;
   var colorWheelWrapper = document.getElementById('focus2ColorWheelWrapper');
   var colorWheelToggle = document.getElementById('focus2ColorWheelToggle');
@@ -66998,18 +67197,18 @@ function initFocus2ColorPicker() {
     btn.onclick = function() {
       buttons.forEach(function(b) { b.classList.remove('selected'); });
       btn.classList.add('selected');
-      // v12.0.7: Deselect custom color when preset selected
+      // v12.0.8: Deselect custom color when preset selected
       window.focus2CustomColor = null;
       var toggleBtn = document.getElementById('focus2ColorWheelToggle');
       if (toggleBtn) toggleBtn.classList.remove('active');
     };
   });
-  // v12.0.7: Initialize color wheel
+  // v12.0.8: Initialize color wheel
   initFocus2ColorWheel();
 }
 
 /**
- * v12.0.7: Color Wheel Implementation
+ * v12.0.8: Color Wheel Implementation
  */
 var focus2ColorWheelState = {
   hue: 0,
@@ -67259,7 +67458,7 @@ function saveFocus2NewCategory() {
   
   var name = nameInput.value.trim();
   var selectedColor = colorPicker.querySelector('.focus-2-color-btn.selected');
-  // v12.0.7: Support custom hex colors from color wheel
+  // v12.0.8: Support custom hex colors from color wheel
   var colorPreset = window.focus2CustomColor || (selectedColor ? selectedColor.getAttribute('data-color') : 'gold');
   var customHex = window.focus2CustomColor || null;
   var selectedIcon = window.focus2SelectedIcon || 'default';
@@ -67338,78 +67537,388 @@ function saveFocus2NewCategory() {
 }
 
 /**
- * v10.5.25: Edit existing category - open modal in edit mode
+ * v12.0.8: Edit existing category - inline editing within category card
  */
 function editCategory(categoryName) {
   var categories = window.todoCategories || [];
   var cat = categories.find(function(c) { return c.name === categoryName; });
-  
+
   if (!cat) {
     showToast('Category not found', 'error');
     return;
   }
-  
-  // Set edit mode
-  var editModeInput = document.getElementById('focus2CategoryEditMode');
-  var originalNameInput = document.getElementById('focus2CategoryOriginalName');
-  var modalTitle = document.getElementById('focus2CategoryModalTitle');
-  var saveBtn = document.getElementById('focus2CategorySaveBtn');
-  
-  if (editModeInput) editModeInput.value = 'edit';
-  if (originalNameInput) originalNameInput.value = categoryName;
-  if (modalTitle) modalTitle.textContent = 'Edit Category';
-  if (saveBtn) saveBtn.textContent = 'Save Changes';
-  
-  // Populate form with existing values
-  var nameInput = document.getElementById('focus2NewCategoryName');
-  if (nameInput) nameInput.value = cat.name;
-  
-  // Select the icon
-  window.focus2SelectedIcon = cat.icon || 'default';
-  var picker = document.getElementById('focus2IconPicker');
-  if (picker) {
-    picker.querySelectorAll('.focus-2-icon-btn').forEach(function(btn) {
-      btn.classList.toggle('selected', btn.getAttribute('data-icon') === window.focus2SelectedIcon);
+
+  // Find the category card
+  var card = document.querySelector('.focus-2-category-card[data-category="' + categoryName.replace(/"/g, '\\"') + '"]');
+  if (!card) {
+    showToast('Category card not found', 'error');
+    return;
+  }
+
+  // Close any other editing categories
+  document.querySelectorAll('.focus-2-category-card.editing').forEach(function(c) {
+    c.classList.remove('editing');
+    var oldEdit = c.querySelector('.focus-2-inline-edit');
+    if (oldEdit) oldEdit.remove();
+  });
+
+  // Mark card as editing
+  card.classList.add('editing');
+  card.classList.add('expanded');
+
+  // Store current edit state
+  window.inlineEditState = {
+    categoryName: categoryName,
+    selectedColor: cat.colorPreset || 'gold',
+    customHex: cat.customHex || null
+  };
+
+  // Build inline edit HTML
+  var colorPresets = [
+    {name: 'gold', hex: '#d4af37'},
+    {name: 'blue', hex: '#3b82f6'},
+    {name: 'green', hex: '#22c55e'},
+    {name: 'purple', hex: '#a855f7'},
+    {name: 'red', hex: '#ef4444'},
+    {name: 'orange', hex: '#f97316'},
+    {name: 'pink', hex: '#ec4899'},
+    {name: 'cyan', hex: '#06b6d4'}
+  ];
+
+  var colorBtnsHtml = '';
+  colorPresets.forEach(function(preset) {
+    var isSelected = !cat.customHex && (cat.colorPreset || 'gold') === preset.name;
+    colorBtnsHtml += '<button class="focus-2-inline-color-btn' + (isSelected ? ' selected' : '') + '" data-color="' + preset.name + '" style="background: ' + preset.hex + ';" onclick="event.stopPropagation(); selectInlineEditColor(\'' + preset.name + '\', null)"></button>';
+  });
+
+  var editHtml = '<div class="focus-2-inline-edit" onclick="event.stopPropagation()">';
+  editHtml += '<div class="focus-2-inline-edit-field">';
+  editHtml += '<label>Name</label>';
+  editHtml += '<input type="text" id="inlineEditName" value="' + escapeHtml(cat.name) + '" onclick="event.stopPropagation()">';
+  editHtml += '</div>';
+  editHtml += '<div class="focus-2-inline-edit-field">';
+  editHtml += '<label>Color</label>';
+  editHtml += '<div class="focus-2-inline-color-picker">';
+  editHtml += colorBtnsHtml;
+  editHtml += '<button class="focus-2-inline-custom-color-btn' + (cat.customHex ? ' active' : '') + '" onclick="event.stopPropagation(); toggleInlineColorWheel()">';
+  editHtml += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>';
+  editHtml += 'Custom</button>';
+  editHtml += '</div>';
+  editHtml += '<div class="focus-2-inline-color-wheel' + (cat.customHex ? ' visible' : '') + '" id="inlineColorWheelWrapper">';
+  editHtml += '<div class="focus-2-inline-color-wheel-container">';
+  editHtml += '<canvas class="focus-2-inline-color-wheel-canvas" id="inlineColorWheelCanvas" width="140" height="140"></canvas>';
+  editHtml += '<div class="focus-2-inline-color-wheel-pointer" id="inlineColorWheelPointer"></div>';
+  editHtml += '</div>';
+  editHtml += '<div class="focus-2-inline-color-preview">';
+  editHtml += '<div class="focus-2-inline-color-swatch" id="inlineColorSwatch" style="background: ' + (cat.customHex || '#d4af37') + ';"></div>';
+  editHtml += '<input type="text" class="focus-2-inline-color-hex" id="inlineColorHex" value="' + (cat.customHex || '#d4af37') + '" maxlength="7" onclick="event.stopPropagation()" oninput="updateInlineColorFromHex()">';
+  editHtml += '</div>';
+  editHtml += '</div>';
+  editHtml += '</div>';
+  editHtml += '<div class="focus-2-inline-edit-actions">';
+  editHtml += '<button class="focus-2-inline-edit-cancel" onclick="event.stopPropagation(); cancelInlineEdit()">Cancel</button>';
+  editHtml += '<button class="focus-2-inline-edit-save" onclick="event.stopPropagation(); saveInlineEdit()">Save</button>';
+  editHtml += '</div>';
+  editHtml += '</div>';
+
+  // Insert edit form into card
+  card.insertAdjacentHTML('beforeend', editHtml);
+
+  // Initialize color wheel if custom color is shown
+  if (cat.customHex) {
+    setTimeout(function() {
+      initInlineColorWheel();
+    }, 50);
+  }
+
+  // Focus name input
+  setTimeout(function() {
+    var nameInput = document.getElementById('inlineEditName');
+    if (nameInput) {
+      nameInput.focus();
+      nameInput.select();
+    }
+  }, 100);
+}
+
+/**
+ * v12.0.8: Select a preset color in inline edit
+ */
+function selectInlineEditColor(colorName, customHex) {
+  window.inlineEditState.selectedColor = colorName;
+  window.inlineEditState.customHex = customHex;
+
+  // Update button states
+  document.querySelectorAll('.focus-2-inline-color-btn').forEach(function(btn) {
+    btn.classList.toggle('selected', btn.getAttribute('data-color') === colorName && !customHex);
+  });
+
+  var customBtn = document.querySelector('.focus-2-inline-custom-color-btn');
+  if (customBtn) customBtn.classList.toggle('active', !!customHex);
+
+  // Hide color wheel when preset selected
+  if (!customHex) {
+    var wrapper = document.getElementById('inlineColorWheelWrapper');
+    if (wrapper) wrapper.classList.remove('visible');
+  }
+}
+
+/**
+ * v12.0.8: Toggle inline color wheel
+ */
+function toggleInlineColorWheel() {
+  var wrapper = document.getElementById('inlineColorWheelWrapper');
+  var customBtn = document.querySelector('.focus-2-inline-custom-color-btn');
+  if (!wrapper) return;
+
+  var isVisible = wrapper.classList.contains('visible');
+  wrapper.classList.toggle('visible');
+  if (customBtn) customBtn.classList.toggle('active');
+
+  if (!isVisible) {
+    initInlineColorWheel();
+    // Deselect preset colors
+    document.querySelectorAll('.focus-2-inline-color-btn').forEach(function(btn) {
+      btn.classList.remove('selected');
     });
   }
-  var preview = document.getElementById('focus2IconPreviewIcon');
-  if (preview && focus2CategoryIconLibrary[window.focus2SelectedIcon]) {
-    preview.innerHTML = focus2CategoryIconLibrary[window.focus2SelectedIcon].replace('width="18"', 'width="24"').replace('height="18"', 'height="24"');
-  }
-  
-  // Select the color
-  var colorPicker = document.getElementById('focus2ColorPicker');
-  var colorWheelToggle = document.getElementById('focus2ColorWheelToggle');
-  var colorWheelWrapper = document.getElementById('focus2ColorWheelWrapper');
-  var hexInput = document.getElementById('focus2ColorWheelHex');
-  var swatch = document.getElementById('focus2ColorWheelSwatch');
+}
 
-  // v12.0.7: Handle custom hex color
-  if (cat.customHex) {
-    window.focus2CustomColor = cat.customHex;
-    if (colorPicker) {
-      colorPicker.querySelectorAll('.focus-2-color-btn').forEach(function(btn) {
-        btn.classList.remove('selected');
-      });
+/**
+ * v12.0.8: Initialize inline color wheel
+ */
+function initInlineColorWheel() {
+  var canvas = document.getElementById('inlineColorWheelCanvas');
+  if (!canvas) return;
+
+  var ctx = canvas.getContext('2d');
+  drawInlineColorWheel(ctx);
+
+  // Remove old listeners by cloning
+  var newCanvas = canvas.cloneNode(true);
+  canvas.parentNode.replaceChild(newCanvas, canvas);
+  canvas = newCanvas;
+  ctx = canvas.getContext('2d');
+  drawInlineColorWheel(ctx);
+
+  // Mouse events
+  canvas.addEventListener('mousedown', function(e) {
+    window.inlineColorDragging = true;
+    handleInlineColorWheelClick(e);
+  });
+
+  canvas.addEventListener('mousemove', function(e) {
+    if (window.inlineColorDragging) {
+      handleInlineColorWheelClick(e);
     }
-    if (colorWheelToggle) colorWheelToggle.classList.add('active');
-    if (colorWheelWrapper) colorWheelWrapper.classList.add('visible');
-    if (hexInput) hexInput.value = cat.customHex;
-    if (swatch) swatch.style.background = cat.customHex;
-  } else {
-    window.focus2CustomColor = null;
-    if (colorPicker) {
-      colorPicker.querySelectorAll('.focus-2-color-btn').forEach(function(btn) {
-        btn.classList.toggle('selected', btn.getAttribute('data-color') === (cat.colorPreset || 'gold'));
-      });
+  });
+
+  document.addEventListener('mouseup', function() {
+    window.inlineColorDragging = false;
+  });
+
+  // Touch events
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    window.inlineColorDragging = true;
+    handleInlineColorWheelTouch(e);
+  });
+
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (window.inlineColorDragging) {
+      handleInlineColorWheelTouch(e);
     }
-    if (colorWheelToggle) colorWheelToggle.classList.remove('active');
-    if (colorWheelWrapper) colorWheelWrapper.classList.remove('visible');
+  });
+
+  canvas.addEventListener('touchend', function() {
+    window.inlineColorDragging = false;
+  });
+}
+
+/**
+ * v12.0.8: Draw inline color wheel
+ */
+function drawInlineColorWheel(ctx) {
+  var canvas = ctx.canvas;
+  var centerX = canvas.width / 2;
+  var centerY = canvas.height / 2;
+  var radius = Math.min(centerX, centerY);
+
+  for (var angle = 0; angle < 360; angle++) {
+    var startAngle = (angle - 1) * Math.PI / 180;
+    var endAngle = (angle + 1) * Math.PI / 180;
+
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+    ctx.closePath();
+
+    var gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+    gradient.addColorStop(0, 'white');
+    gradient.addColorStop(1, 'hsl(' + angle + ', 100%, 50%)');
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }
+}
+
+/**
+ * v12.0.8: Handle inline color wheel click
+ */
+function handleInlineColorWheelClick(e) {
+  var canvas = document.getElementById('inlineColorWheelCanvas');
+  if (!canvas) return;
+  var rect = canvas.getBoundingClientRect();
+  var x = e.clientX - rect.left;
+  var y = e.clientY - rect.top;
+  updateInlineColorFromPosition(x, y);
+}
+
+/**
+ * v12.0.8: Handle inline color wheel touch
+ */
+function handleInlineColorWheelTouch(e) {
+  var canvas = document.getElementById('inlineColorWheelCanvas');
+  if (!canvas) return;
+  var rect = canvas.getBoundingClientRect();
+  var touch = e.touches[0];
+  var x = touch.clientX - rect.left;
+  var y = touch.clientY - rect.top;
+  updateInlineColorFromPosition(x, y);
+}
+
+/**
+ * v12.0.8: Update color from wheel position
+ */
+function updateInlineColorFromPosition(x, y) {
+  var canvas = document.getElementById('inlineColorWheelCanvas');
+  if (!canvas) return;
+  var centerX = canvas.width / 2;
+  var centerY = canvas.height / 2;
+  var radius = Math.min(centerX, centerY);
+
+  var dx = x - centerX;
+  var dy = y - centerY;
+  var distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance > radius) {
+    dx = dx * radius / distance;
+    dy = dy * radius / distance;
+    distance = radius;
   }
 
-  // Show modal
-  var modal = document.getElementById('focus2NewCategoryModal');
-  if (modal) modal.style.display = 'flex';
+  var angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (angle < 0) angle += 360;
+
+  var saturation = (distance / radius) * 100;
+  var hex = hslToHex(angle, saturation, 50);
+
+  // Update pointer
+  var pointer = document.getElementById('inlineColorWheelPointer');
+  if (pointer) {
+    pointer.style.left = (centerX + dx) + 'px';
+    pointer.style.top = (centerY + dy) + 'px';
+    pointer.style.background = hex;
+  }
+
+  // Update preview
+  var swatch = document.getElementById('inlineColorSwatch');
+  var hexInput = document.getElementById('inlineColorHex');
+  if (swatch) swatch.style.background = hex;
+  if (hexInput) hexInput.value = hex;
+
+  window.inlineEditState.customHex = hex;
+  window.inlineEditState.selectedColor = null;
+}
+
+/**
+ * v12.0.8: Update color from hex input
+ */
+function updateInlineColorFromHex() {
+  var hexInput = document.getElementById('inlineColorHex');
+  if (!hexInput) return;
+
+  var hex = hexInput.value.trim();
+  if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return;
+
+  var swatch = document.getElementById('inlineColorSwatch');
+  if (swatch) swatch.style.background = hex;
+
+  window.inlineEditState.customHex = hex;
+  window.inlineEditState.selectedColor = null;
+
+  // Deselect presets
+  document.querySelectorAll('.focus-2-inline-color-btn').forEach(function(btn) {
+    btn.classList.remove('selected');
+  });
+}
+
+/**
+ * v12.0.8: Cancel inline edit
+ */
+function cancelInlineEdit() {
+  var card = document.querySelector('.focus-2-category-card.editing');
+  if (card) {
+    card.classList.remove('editing');
+    var editForm = card.querySelector('.focus-2-inline-edit');
+    if (editForm) editForm.remove();
+  }
+  window.inlineEditState = null;
+}
+
+/**
+ * v12.0.8: Save inline edit
+ */
+function saveInlineEdit() {
+  if (!window.inlineEditState) return;
+
+  var nameInput = document.getElementById('inlineEditName');
+  if (!nameInput || !nameInput.value.trim()) {
+    showToast('Please enter a category name', 'warning');
+    return;
+  }
+
+  var newName = nameInput.value.trim();
+  var originalName = window.inlineEditState.categoryName;
+  var categories = window.todoCategories || [];
+
+  // Check for duplicate name
+  if (newName.toLowerCase() !== originalName.toLowerCase()) {
+    var exists = categories.some(function(c) { return c.name.toLowerCase() === newName.toLowerCase(); });
+    if (exists) {
+      showToast('Category name already exists', 'warning');
+      return;
+    }
+  }
+
+  // Find and update category
+  var catIdx = categories.findIndex(function(c) { return c.name === originalName; });
+  if (catIdx === -1) {
+    showToast('Category not found', 'error');
+    return;
+  }
+
+  categories[catIdx].name = newName;
+  categories[catIdx].colorPreset = window.inlineEditState.selectedColor || 'gold';
+  categories[catIdx].customHex = window.inlineEditState.customHex || null;
+
+  // Update tasks if name changed
+  if (newName !== originalName) {
+    todos.forEach(function(task) {
+      if (task.category === originalName) {
+        task.category = newName;
+      }
+    });
+    saveTodos();
+  }
+
+  window.todoCategories = categories;
+  saveTodoCategories();
+
+  // Close edit mode and re-render
+  cancelInlineEdit();
+  renderFocus2Categories();
+  showToast('Category updated', 'success');
 }
 
 /**
@@ -73886,7 +74395,7 @@ function addMessageToThread(role, content) {
 }
 
 function runAgent() {
-  // v12.0.7: Mark chat activity to defer sync during active conversation
+  // v12.0.8: Mark chat activity to defer sync during active conversation
   if (typeof markChatActivity === 'function') markChatActivity();
 
   var command = document.getElementById('agentCommand').value;
@@ -77416,14 +77925,14 @@ function getDeviceType() {
 // COMPREHENSIVE DATA SYNC
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// v12.0.7: Sync Settings - User controls for what data syncs
+// v12.0.8: Sync Settings - User controls for what data syncs
 var syncSettings = {
   conversations: true,      // Sync chat history (can be large)
   libraryContent: false,    // Sync full file contents (metadata always syncs)
   deferDuringChat: true     // Don't sync while actively chatting
 };
 
-// v12.0.7: Track chat activity for deferred sync
+// v12.0.8: Track chat activity for deferred sync
 var lastChatActivity = 0;
 var deferredSyncTimer = null;
 var CHAT_IDLE_THRESHOLD = 10000; // 10 seconds of idle before sync
@@ -77452,7 +77961,7 @@ function saveSyncSettings() {
 }
 
 function toggleSyncSetting(setting) {
-  // v12.0.7: Read from checkbox state
+  // v12.0.8: Read from checkbox state
   var checkbox = null;
   if (setting === 'conversations') {
     checkbox = document.getElementById('syncConversationsToggle');
@@ -77469,7 +77978,7 @@ function toggleSyncSetting(setting) {
 }
 
 function updateSyncSettingsUI() {
-  // v12.0.7: Update checkbox checked state
+  // v12.0.8: Update checkbox checked state
   var convToggle = document.getElementById('syncConversationsToggle');
   var libToggle = document.getElementById('syncLibraryContentToggle');
   var deferToggle = document.getElementById('syncDeferDuringChatToggle');
@@ -77485,7 +77994,7 @@ function updateSyncSettingsUI() {
   }
 }
 
-// v12.0.7: Mark chat activity for deferred sync
+// v12.0.8: Mark chat activity for deferred sync
 function markChatActivity() {
   lastChatActivity = Date.now();
   // Clear any pending deferred sync
@@ -77495,7 +78004,7 @@ function markChatActivity() {
   }
 }
 
-// v12.0.7: Request sync (may be deferred if chatting)
+// v12.0.8: Request sync (may be deferred if chatting)
 function requestSync() {
   if (!syncSettings.deferDuringChat) {
     // Immediate sync
@@ -77542,12 +78051,12 @@ async function syncToFirebase() {
     // showToast('Syncing to cloud...', 'info');
     updateSyncIndicator('syncing');
     
-    // v12.0.7: Only auto-trim if syncing conversations (the main cause of large data)
+    // v12.0.8: Only auto-trim if syncing conversations (the main cause of large data)
     if (syncSettings.conversations) {
       autoTrimDataForSync();
     }
 
-    // v12.0.7: Respect sync settings - skip conversations if disabled
+    // v12.0.8: Respect sync settings - skip conversations if disabled
     var conversationsData = {};
     if (syncSettings.conversations) {
       conversationsData = collectConversationsWithLimit();
@@ -77555,7 +78064,7 @@ async function syncToFirebase() {
       console.log('[Firebase Sync] Skipping conversations (disabled in settings)');
     }
 
-    // v12.0.7: Handle library content based on settings
+    // v12.0.8: Handle library content based on settings
     var brandLibrary = '{}';
     var lifeLibrary = '{"files":[],"folders":[]}';
 
@@ -83125,7 +83634,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.0.7 - ' + subtitle;
+  document.title = 'RoweOS v12.0.8 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
