@@ -14,7 +14,18 @@ Live:     roweos.vercel.app
 
 ### Deploy to Production
 ```bash
-cd ~/Downloads && rm -rf RoweOS && unzip RoweOS.zip && cd RoweOS/dist && npx vercel --prod
+./deploy.sh
+```
+This script automatically:
+1. Extracts version from index.html
+2. Updates CLAUDE.md with current version/line count
+3. Commits changes to git
+4. Pushes to origin/main
+5. Deploys to Vercel production
+
+**Manual deploy** (if needed):
+```bash
+cd RoweOS/dist && npx vercel --prod
 ```
 Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is missing `.vercel/` folder.
 
