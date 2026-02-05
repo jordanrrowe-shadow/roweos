@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.1 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.1.1 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -14948,7 +14948,7 @@
       box-shadow: 0 0 0 2px var(--bg-primary);
     }
 
-    /* v12.1: Color Wheel Picker */
+    /* v12.1.1: Color Wheel Picker */
     .focus-2-color-wheel-container {
       display: flex;
       align-items: center;
@@ -15678,7 +15678,7 @@
       animation: slideDown 0.2s ease;
     }
 
-    /* v12.1: Priority Tasks */
+    /* v12.1.1: Priority Tasks */
     .focus-2-category-task-item.priority {
       border-left: 3px solid var(--accent);
       background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
@@ -15712,7 +15712,7 @@
       height: 14px;
     }
 
-    /* v12.1: Recurring Task Indicator */
+    /* v12.1.1: Recurring Task Indicator */
     .focus-2-task-recurrence-badge {
       display: inline-flex;
       align-items: center;
@@ -15730,7 +15730,7 @@
       height: 10px;
     }
 
-    /* v12.1: Recurrence Picker in Task Detail */
+    /* v12.1.1: Recurrence Picker in Task Detail */
     .focus-2-recurrence-picker {
       display: flex;
       flex-direction: column;
@@ -15807,7 +15807,7 @@
       color: #000;
     }
 
-    /* v12.1: Category Sort Controls */
+    /* v12.1.1: Category Sort Controls */
     .focus-2-categories-header {
       display: flex;
       justify-content: space-between;
@@ -15840,7 +15840,7 @@
       color: var(--accent);
     }
 
-    /* v12.1: Inline Automation Creator */
+    /* v12.1.1: Inline Automation Creator */
     .focus-2-automation-inline {
       padding: var(--space-4);
       background: var(--bg-tertiary);
@@ -15908,7 +15908,7 @@
       color: var(--accent);
     }
 
-    /* v12.1: Journal Book UI */
+    /* v12.1.1: Journal Book UI */
     .journal-container {
       padding: var(--space-6);
       max-width: 900px;
@@ -16047,7 +16047,7 @@
       margin-bottom: var(--space-4);
     }
 
-    /* v12.1: Save to Journal Button */
+    /* v12.1.1: Save to Journal Button */
     .focus-2-save-journal-btn {
       display: flex;
       align-items: center;
@@ -16081,7 +16081,7 @@
       text-decoration: underline;
     }
 
-    /* v12.1: Journal Mobile */
+    /* v12.1.1: Journal Mobile */
     @media (max-width: 768px) {
       .journal-book {
         border-radius: 0;
@@ -16102,7 +16102,7 @@
       }
     }
 
-    /* v12.1: Inline Category Edit */
+    /* v12.1.1: Inline Category Edit */
     .focus-2-category-card.editing .focus-2-category-expanded {
       display: none;
     }
@@ -26723,7 +26723,7 @@
       font-size: var(--text-3xl);
     }
 
-    /* v12.1: Mobile Navigation Preferences */
+    /* v12.1.1: Mobile Navigation Preferences */
     html[data-mobile-nav="sidebar"] .mobile-nav,
     html[data-mobile-nav="sidebar"] .liquid-nav {
       display: none !important;
@@ -26734,7 +26734,7 @@
       display: none !important;
     }
 
-    /* v12.1: Swipe indicator on left edge */
+    /* v12.1.1: Swipe indicator on left edge */
     .mobile-swipe-indicator {
       display: none;
       position: fixed;
@@ -26759,12 +26759,12 @@
         display: none;
       }
 
-      /* v12.1: Show mobile-only settings on mobile */
+      /* v12.1.1: Show mobile-only settings on mobile */
       .mobile-only-setting {
         display: flex !important;
       }
 
-      /* v12.1: Prevent sidebar hover behavior on mobile */
+      /* v12.1.1: Prevent sidebar hover behavior on mobile */
       .sidebar:hover {
         width: 64px !important;
       }
@@ -26774,11 +26774,65 @@
         transform: translateX(0) !important;
       }
 
+      /* v12.1.1.1: Show nav labels when mobile sidebar is open */
+      .sidebar.mobile-open .nav-item-label {
+        opacity: 1 !important;
+        max-width: 180px !important;
+      }
+
+      .sidebar.mobile-open .nav-item {
+        justify-content: flex-start !important;
+        padding: 10px 16px !important;
+      }
+
+      .sidebar.mobile-open .nav-item-icon {
+        margin-right: 12px !important;
+      }
+
+      /* Show sidebar brand text on mobile */
+      .sidebar.mobile-open .sidebar-brand-title,
+      .sidebar.mobile-open .sidebar-brand-tagline,
+      .sidebar.mobile-open .sidebar-brand-name {
+        opacity: 1 !important;
+        max-width: 200px !important;
+      }
+
+      /* Show full logo area on mobile */
+      .sidebar.mobile-open .sidebar-logo-img {
+        opacity: 1 !important;
+      }
+
+      .sidebar.mobile-open .sidebar-logo-text {
+        opacity: 1 !important;
+        max-width: 150px !important;
+      }
+
+      .sidebar.mobile-open .sidebar-collapsed-logo {
+        display: none !important;
+      }
+
+      /* Hide tooltips when mobile sidebar is open (not needed) */
+      .sidebar.mobile-open .sidebar-tooltip {
+        display: none !important;
+      }
+
+      /* v12.1.1.1: Override pinned-collapsed styles on mobile when open */
+      .sidebar.mobile-open.pinned-collapsed .nav-item {
+        justify-content: flex-start !important;
+        padding: 10px 16px !important;
+        gap: 12px !important;
+      }
+
+      .sidebar.mobile-open.pinned-collapsed .nav-item-label {
+        max-width: 180px !important;
+        opacity: 1 !important;
+      }
+
       .sidebar:not(.mobile-open) {
         transform: translateX(-100%) !important;
       }
 
-      /* v12.1: Sidebar overlay for mobile */
+      /* v12.1.1: Sidebar overlay for mobile */
       .sidebar-mobile-overlay.show {
         display: block !important;
         position: fixed;
@@ -37783,7 +37837,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.1</div>
+      <div class="launch-version" id="launchVersionTag">v12.1.1</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38092,14 +38146,14 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.1</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.1.1</div>
       
     </div>
   </div>
   
   <!-- Sidebar Mobile Overlay -->
   <div class="sidebar-mobile-overlay" id="sidebarMobileOverlay" onclick="closeMobileSidebar()"></div>
-  <!-- v12.1: Visual hint for swipe-to-open sidebar -->
+  <!-- v12.1.1: Visual hint for swipe-to-open sidebar -->
   <div class="mobile-swipe-indicator"></div>
 
   <!-- Legacy Mobile Elements (hidden by CSS) -->
@@ -38284,7 +38338,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.1</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.1.1</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39142,7 +39196,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.1</span>
+          <span class="sidebar-version">v12.1.1</span>
         </div>
       </div>
     </div>
@@ -39452,7 +39506,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.1 • Built for the future</p>
+        <p>RoweOS v12.1.1 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39509,7 +39563,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.1</p>
+            <p class="onboarding-welcome-version">v12.1.1</p>
           </div>
         </div>
       </div>
@@ -42544,7 +42598,7 @@ service cloud.firestore {
                 </div>
               </div>
               <textarea class="focus-2-notes-input" id="focus2NotesInput" placeholder="Capture thoughts, ideas, or quick notes..." oninput="saveFocus2Notes()"></textarea>
-              <!-- v12.1: Link to Journal if entries exist -->
+              <!-- v12.1.1: Link to Journal if entries exist -->
               <div id="focus2JournalLink" style="display: none; margin-top: 8px;">
                 <a class="focus-2-journal-link" onclick="showView('journal')">
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -42720,7 +42774,7 @@ service cloud.firestore {
                   <button class="focus-2-task-detail-close" onclick="closeFocus2TaskDetail()">×</button>
                 </div>
                 <div class="focus-2-task-detail-body">
-                  <!-- v12.1: Priority Toggle -->
+                  <!-- v12.1.1: Priority Toggle -->
                   <div class="focus-2-task-detail-row" style="display: flex; justify-content: space-between; align-items: center;">
                     <label style="margin: 0;">Priority</label>
                     <button class="focus-2-task-priority-btn" id="focus2TaskDetailPriority" onclick="toggleFocus2TaskPriority()">
@@ -42739,7 +42793,7 @@ service cloud.firestore {
                     <label>Due Date</label>
                     <input type="date" id="focus2TaskDetailDate" onchange="updateFocus2TaskDate()">
                   </div>
-                  <!-- v12.1: Recurrence Settings -->
+                  <!-- v12.1.1: Recurrence Settings -->
                   <div class="focus-2-task-detail-row">
                     <label>Repeat</label>
                     <div class="focus-2-recurrence-picker">
@@ -44778,7 +44832,7 @@ service cloud.firestore {
         </div>
       </div>
 
-      <!-- v12.1: Journal View -->
+      <!-- v12.1.1: Journal View -->
       <div id="journalView" class="panel-view hidden">
         <div class="panel">
           <div class="breadcrumb">
@@ -45036,7 +45090,7 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.1: Sync Settings - Control what data syncs -->
+            <!-- v12.1.1: Sync Settings - Control what data syncs -->
             <div class="settings-row-desc" style="padding: 12px 16px 8px; color: var(--text-muted); font-size: var(--text-sm); border-top: 1px solid var(--border-color); margin-top: 8px;">
               Sync Settings — Control what data syncs to prevent trimming
             </div>
@@ -45406,7 +45460,7 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.1: Mobile Navigation Preference -->
+            <!-- v12.1.1: Mobile Navigation Preference -->
             <div class="settings-row mobile-only-setting" style="display: none;">
               <div class="settings-row-left">
                 <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
@@ -45588,7 +45642,7 @@ service cloud.firestore {
                 </svg>
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.1</div>
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.1.1</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -49197,7 +49251,7 @@ function showView(view) {
     viewEl.classList.remove('hidden');
   }
 
-  // v12.1: Render journal when switching to journal view
+  // v12.1.1: Render journal when switching to journal view
   if (view === 'journal') {
     renderJournal();
   }
@@ -50390,7 +50444,7 @@ function switchToBrandMode() {
   initTodoCategories();
   initTodos();
   initCalendar();
-  initJournal(); // v12.1
+  initJournal(); // v12.1.1
 
   // v10.5.25: FORCE hide Life containers and show Brand containers immediately
   var lifeContainer = document.getElementById('lifeIdentityCardsContainer');
@@ -50460,7 +50514,7 @@ function switchToLifeMode(profileIdx) {
   initTodoCategories();
   initTodos();
   initCalendar();
-  initJournal(); // v12.1
+  initJournal(); // v12.1.1
 
   // v10.5.25: FORCE hide Brand containers and show Life containers immediately
   var lifeContainer = document.getElementById('lifeIdentityCardsContainer');
@@ -56251,7 +56305,7 @@ function init() {
   loadResponseCache();
   loadAutoPilotData();
 
-  // v12.1: Load sync settings
+  // v12.1.1: Load sync settings
   loadSyncSettings();
 
   // CRITICAL: Clear any residual conversation state on fresh load
@@ -56296,7 +56350,7 @@ function init() {
   initTodoCategories();
   initDeletedBrands();
   initCalendar();
-  initJournal(); // v12.1
+  initJournal(); // v12.1.1
   initScheduledPrompts();
   initScheduledTasksEngine(); // Start scheduled task execution engine
   updateAPIsStatus();
@@ -66460,7 +66514,7 @@ function renderFocus2Categories() {
     }
   });
 
-  // v12.1: Apply sorting if enabled
+  // v12.1.1: Apply sorting if enabled
   if (getCategorySortPreference() === 'alphabetical') {
     categories = categories.slice().sort(function(a, b) {
       return (a.name || '').localeCompare(b.name || '');
@@ -66515,7 +66569,7 @@ function renderFocus2Categories() {
     var iconKey = cat.icon || cat.name || 'default';
     var iconSvg = focus2CategoryIconLibrary[iconKey] || focus2CategoryIconLibrary['default'];
 
-    // v12.1: Support custom hex colors via inline style
+    // v12.1.1: Support custom hex colors via inline style
     var colorStyle = customHex ? ' style="--cat-color: ' + customHex + ';"' : '';
     html += '<div class="focus-2-category-card' + (isExpanded ? ' expanded' : '') + '" data-color="' + colorPreset + '" data-category="' + escapeHtml(cat.name) + '"' + colorStyle + ' onclick="toggleFocus2CategoryExpand(\'' + escapeHtml(cat.name) + '\', event)">';
     
@@ -66581,7 +66635,7 @@ function renderFocus2Categories() {
       html += '</div>';
     }
 
-    // v12.1: Create Automation button
+    // v12.1.1: Create Automation button
     html += '<button class="focus-2-create-automation-btn" onclick="event.stopPropagation(); showInlineAutomation(\'' + escapeHtml(cat.name) + '\')">';
     html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
     html += 'Create Automation';
@@ -67294,7 +67348,7 @@ function initFocus2DragDrop() {
 
 /**
  * v10.5.25: Render single task item in expanded category - click opens detail
- * v12.1: Added priority styling and recurrence badge
+ * v12.1.1: Added priority styling and recurrence badge
  */
 function renderFocus2CategoryTaskItem(task) {
   var completed = task.completed ? 'completed' : '';
@@ -67305,7 +67359,7 @@ function renderFocus2CategoryTaskItem(task) {
   var html = '<div class="focus-2-category-task-item ' + completed + priority + '" onclick="if(!event.target.closest(\'.focus-2-category-task-check\')){openFocus2TaskDetail(' + task.id + ');}">';
   html += '<div class="focus-2-category-task-check ' + (task.completed ? 'checked' : '') + '" onclick="quickToggleFocus2Task(' + task.id + ', event)">' + checkIcon + '</div>';
   html += '<div class="focus-2-category-task-text">' + escapeHtml(task.text);
-  // v12.1: Recurrence badge
+  // v12.1.1: Recurrence badge
   if (task.recurrence && task.recurrence.type && task.recurrence.type !== 'none') {
     var recLabel = task.recurrence.type === 'daily' ? 'Daily' :
                    task.recurrence.type === 'weekly' ? 'Weekly' :
@@ -67324,7 +67378,7 @@ function renderFocus2CategoryTaskItem(task) {
 
 /**
  * v10.5.25: Quick toggle task without opening detail
- * v12.1: Create next recurring task when completed
+ * v12.1.1: Create next recurring task when completed
  */
 function quickToggleFocus2Task(taskId, event) {
   event.stopPropagation();
@@ -67335,7 +67389,7 @@ function quickToggleFocus2Task(taskId, event) {
   task.completed = !task.completed;
   if (task.completed) {
     task.completedAt = new Date().toISOString();
-    // v12.1: Create next occurrence if recurring
+    // v12.1.1: Create next occurrence if recurring
     if (task.recurrence && task.recurrence.type && task.recurrence.type !== 'none') {
       createNextRecurringTask(task);
     }
@@ -67522,7 +67576,7 @@ function openFocus2TaskDetail(taskId) {
   if (!task) return;
 
   focus2CurrentTaskId = taskId;
-  window.currentFocus2TaskId = taskId; // v12.1: For priority/recurrence functions
+  window.currentFocus2TaskId = taskId; // v12.1.1: For priority/recurrence functions
   var modal = document.getElementById('focus2TaskDetailModal');
   if (!modal) return;
 
@@ -67531,13 +67585,13 @@ function openFocus2TaskDetail(taskId) {
   document.getElementById('focus2TaskDetailDate').value = task.date || '';
   document.getElementById('focus2TaskDetailNotes').value = task.notes || '';
 
-  // v12.1: Priority button state
+  // v12.1.1: Priority button state
   var priorityBtn = document.getElementById('focus2TaskDetailPriority');
   if (priorityBtn) {
     priorityBtn.classList.toggle('active', !!task.priority);
   }
 
-  // v12.1: Recurrence state
+  // v12.1.1: Recurrence state
   var recType = (task.recurrence && task.recurrence.type) || 'none';
   document.querySelectorAll('.focus-2-recurrence-btn').forEach(function(btn) {
     btn.classList.toggle('active', btn.getAttribute('data-recurrence') === recType);
@@ -67814,7 +67868,7 @@ function closeFocus2NewCategory() {
     });
   }
 
-  // v12.1: Reset custom color wheel
+  // v12.1.1: Reset custom color wheel
   window.focus2CustomColor = null;
   var colorWheelWrapper = document.getElementById('focus2ColorWheelWrapper');
   var colorWheelToggle = document.getElementById('focus2ColorWheelToggle');
@@ -67883,18 +67937,18 @@ function initFocus2ColorPicker() {
     btn.onclick = function() {
       buttons.forEach(function(b) { b.classList.remove('selected'); });
       btn.classList.add('selected');
-      // v12.1: Deselect custom color when preset selected
+      // v12.1.1: Deselect custom color when preset selected
       window.focus2CustomColor = null;
       var toggleBtn = document.getElementById('focus2ColorWheelToggle');
       if (toggleBtn) toggleBtn.classList.remove('active');
     };
   });
-  // v12.1: Initialize color wheel
+  // v12.1.1: Initialize color wheel
   initFocus2ColorWheel();
 }
 
 /**
- * v12.1: Color Wheel Implementation
+ * v12.1.1: Color Wheel Implementation
  */
 var focus2ColorWheelState = {
   hue: 0,
@@ -68144,7 +68198,7 @@ function saveFocus2NewCategory() {
   
   var name = nameInput.value.trim();
   var selectedColor = colorPicker.querySelector('.focus-2-color-btn.selected');
-  // v12.1: Support custom hex colors from color wheel
+  // v12.1.1: Support custom hex colors from color wheel
   var colorPreset = window.focus2CustomColor || (selectedColor ? selectedColor.getAttribute('data-color') : 'gold');
   var customHex = window.focus2CustomColor || null;
   var selectedIcon = window.focus2SelectedIcon || 'default';
@@ -68223,7 +68277,7 @@ function saveFocus2NewCategory() {
 }
 
 /**
- * v12.1: Edit existing category - inline editing within category card
+ * v12.1.1: Edit existing category - inline editing within category card
  */
 function editCategory(categoryName) {
   var categories = window.todoCategories || [];
@@ -68328,7 +68382,7 @@ function editCategory(categoryName) {
 }
 
 /**
- * v12.1: Select a preset color in inline edit
+ * v12.1.1: Select a preset color in inline edit
  */
 function selectInlineEditColor(colorName, customHex) {
   window.inlineEditState.selectedColor = colorName;
@@ -68350,7 +68404,7 @@ function selectInlineEditColor(colorName, customHex) {
 }
 
 /**
- * v12.1: Toggle inline color wheel
+ * v12.1.1: Toggle inline color wheel
  */
 function toggleInlineColorWheel() {
   var wrapper = document.getElementById('inlineColorWheelWrapper');
@@ -68371,7 +68425,7 @@ function toggleInlineColorWheel() {
 }
 
 /**
- * v12.1: Initialize inline color wheel
+ * v12.1.1: Initialize inline color wheel
  */
 function initInlineColorWheel() {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -68423,7 +68477,7 @@ function initInlineColorWheel() {
 }
 
 /**
- * v12.1: Draw inline color wheel
+ * v12.1.1: Draw inline color wheel
  */
 function drawInlineColorWheel(ctx) {
   var canvas = ctx.canvas;
@@ -68449,7 +68503,7 @@ function drawInlineColorWheel(ctx) {
 }
 
 /**
- * v12.1: Handle inline color wheel click
+ * v12.1.1: Handle inline color wheel click
  */
 function handleInlineColorWheelClick(e) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -68461,7 +68515,7 @@ function handleInlineColorWheelClick(e) {
 }
 
 /**
- * v12.1: Handle inline color wheel touch
+ * v12.1.1: Handle inline color wheel touch
  */
 function handleInlineColorWheelTouch(e) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -68474,7 +68528,7 @@ function handleInlineColorWheelTouch(e) {
 }
 
 /**
- * v12.1: Update color from wheel position
+ * v12.1.1: Update color from wheel position
  */
 function updateInlineColorFromPosition(x, y) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -68518,7 +68572,7 @@ function updateInlineColorFromPosition(x, y) {
 }
 
 /**
- * v12.1: Update color from hex input
+ * v12.1.1: Update color from hex input
  */
 function updateInlineColorFromHex() {
   var hexInput = document.getElementById('inlineColorHex');
@@ -68540,7 +68594,7 @@ function updateInlineColorFromHex() {
 }
 
 /**
- * v12.1: Cancel inline edit
+ * v12.1.1: Cancel inline edit
  */
 function cancelInlineEdit() {
   var card = document.querySelector('.focus-2-category-card.editing');
@@ -68553,7 +68607,7 @@ function cancelInlineEdit() {
 }
 
 /**
- * v12.1: Save inline edit
+ * v12.1.1: Save inline edit
  */
 function saveInlineEdit() {
   if (!window.inlineEditState) return;
@@ -68945,11 +68999,11 @@ function clearFocus2Notes() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1: JOURNAL SYSTEM
+// v12.1.1: JOURNAL SYSTEM
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1: Initialize journal
+ * v12.1.1: Initialize journal
  */
 function initJournal() {
   var saved = localStorage.getItem('roweos_journal');
@@ -68966,7 +69020,7 @@ function initJournal() {
 }
 
 /**
- * v12.1: Save journal
+ * v12.1.1: Save journal
  */
 function saveJournal() {
   localStorage.setItem('roweos_journal', JSON.stringify(window.journalEntries || []));
@@ -68976,7 +69030,7 @@ function saveJournal() {
 }
 
 /**
- * v12.1: Save Today's Notes to Journal
+ * v12.1.1: Save Today's Notes to Journal
  */
 function saveNotesToJournal() {
   var textarea = document.getElementById('focus2NotesInput');
@@ -69003,7 +69057,7 @@ function saveNotesToJournal() {
 }
 
 /**
- * v12.1: Update journal link visibility
+ * v12.1.1: Update journal link visibility
  */
 function updateJournalLink() {
   var link = document.getElementById('focus2JournalLink');
@@ -69013,7 +69067,7 @@ function updateJournalLink() {
 }
 
 /**
- * v12.1: Render journal entries
+ * v12.1.1: Render journal entries
  */
 function renderJournal() {
   var container = document.getElementById('journalEntriesList');
@@ -69050,7 +69104,7 @@ function renderJournal() {
 }
 
 /**
- * v12.1: Toggle journal entry expanded view
+ * v12.1.1: Toggle journal entry expanded view
  */
 function toggleJournalEntry(idx) {
   var el = document.getElementById('journalEntry' + idx);
@@ -69067,7 +69121,7 @@ function toggleJournalEntry(idx) {
 }
 
 /**
- * v12.1: Delete journal entry
+ * v12.1.1: Delete journal entry
  */
 function deleteJournalEntry(idx) {
   if (!confirm('Delete this journal entry?')) return;
@@ -69082,11 +69136,11 @@ function deleteJournalEntry(idx) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1: PRIORITY TASKS
+// v12.1.1: PRIORITY TASKS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1: Toggle task priority from detail modal
+ * v12.1.1: Toggle task priority from detail modal
  */
 function toggleFocus2TaskPriority() {
   var taskId = window.currentFocus2TaskId;
@@ -69109,11 +69163,11 @@ function toggleFocus2TaskPriority() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1: RECURRING TASKS
+// v12.1.1: RECURRING TASKS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1: Set task recurrence type
+ * v12.1.1: Set task recurrence type
  */
 function setTaskRecurrence(type) {
   var taskId = window.currentFocus2TaskId;
@@ -69152,7 +69206,7 @@ function setTaskRecurrence(type) {
 }
 
 /**
- * v12.1: Toggle day for weekly recurrence
+ * v12.1.1: Toggle day for weekly recurrence
  */
 function toggleRecurrenceDay(day) {
   var taskId = window.currentFocus2TaskId;
@@ -69178,7 +69232,7 @@ function toggleRecurrenceDay(day) {
 }
 
 /**
- * v12.1: Update recurrence interval
+ * v12.1.1: Update recurrence interval
  */
 function updateTaskRecurrenceInterval() {
   var taskId = window.currentFocus2TaskId;
@@ -69195,7 +69249,7 @@ function updateTaskRecurrenceInterval() {
 }
 
 /**
- * v12.1: Update recurrence unit
+ * v12.1.1: Update recurrence unit
  */
 function updateTaskRecurrenceUnit() {
   var taskId = window.currentFocus2TaskId;
@@ -69212,7 +69266,7 @@ function updateTaskRecurrenceUnit() {
 }
 
 /**
- * v12.1: Update recurrence end date
+ * v12.1.1: Update recurrence end date
  */
 function updateTaskRecurrenceEndDate() {
   var taskId = window.currentFocus2TaskId;
@@ -69229,7 +69283,7 @@ function updateTaskRecurrenceEndDate() {
 }
 
 /**
- * v12.1: Create next occurrence of recurring task when completed
+ * v12.1.1: Create next occurrence of recurring task when completed
  */
 function createNextRecurringTask(task) {
   if (!task.recurrence || task.recurrence.type === 'none') return;
@@ -69282,18 +69336,18 @@ function createNextRecurringTask(task) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1: CATEGORY SORTING
+// v12.1.1: CATEGORY SORTING
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1: Get category sort preference
+ * v12.1.1: Get category sort preference
  */
 function getCategorySortPreference() {
   return localStorage.getItem('roweos_category_sort') || 'manual';
 }
 
 /**
- * v12.1: Toggle category sort
+ * v12.1.1: Toggle category sort
  */
 function toggleCategorySort() {
   var current = getCategorySortPreference();
@@ -69309,7 +69363,7 @@ function toggleCategorySort() {
 }
 
 /**
- * v12.1: Sort categories
+ * v12.1.1: Sort categories
  */
 function getSortedCategories() {
   var categories = window.todoCategories || [];
@@ -69325,11 +69379,11 @@ function getSortedCategories() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1: INLINE AUTOMATIONS
+// v12.1.1: INLINE AUTOMATIONS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1: Show inline automation creator
+ * v12.1.1: Show inline automation creator
  */
 function showInlineAutomation(categoryName) {
   // Close any existing
@@ -69380,7 +69434,7 @@ function showInlineAutomation(categoryName) {
 }
 
 /**
- * v12.1: Save inline automation
+ * v12.1.1: Save inline automation
  */
 function saveInlineAutomation(categoryName) {
   var trigger = document.getElementById('inlineAutoTrigger')?.value || 'time';
@@ -75550,7 +75604,7 @@ function addMessageToThread(role, content) {
 }
 
 function runAgent() {
-  // v12.1: Mark chat activity to defer sync during active conversation
+  // v12.1.1: Mark chat activity to defer sync during active conversation
   if (typeof markChatActivity === 'function') markChatActivity();
 
   var command = document.getElementById('agentCommand').value;
@@ -78130,7 +78184,7 @@ if (document.readyState === 'loading') {
 // END MOBILE SYSTEM v2.0
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// v12.1: Handle swipe gestures for mobile sidebar
+// v12.1.1: Handle swipe gestures for mobile sidebar
 var touchStartX = 0;
 var touchStartY = 0;
 var touchEndX = 0;
@@ -78185,7 +78239,7 @@ function handleSwipe() {
   }
 }
 
-// v12.1: Mobile Navigation Preference
+// v12.1.1: Mobile Navigation Preference
 function getMobileNavPreference() {
   return localStorage.getItem('roweos_mobile_nav') || 'both';
 }
@@ -79133,14 +79187,14 @@ function getDeviceType() {
 // COMPREHENSIVE DATA SYNC
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// v12.1: Sync Settings - User controls for what data syncs
+// v12.1.1: Sync Settings - User controls for what data syncs
 var syncSettings = {
   conversations: true,      // Sync chat history (can be large)
   libraryContent: false,    // Sync full file contents (metadata always syncs)
   deferDuringChat: true     // Don't sync while actively chatting
 };
 
-// v12.1: Track chat activity for deferred sync
+// v12.1.1: Track chat activity for deferred sync
 var lastChatActivity = 0;
 var deferredSyncTimer = null;
 var CHAT_IDLE_THRESHOLD = 10000; // 10 seconds of idle before sync
@@ -79169,7 +79223,7 @@ function saveSyncSettings() {
 }
 
 function toggleSyncSetting(setting) {
-  // v12.1: Read from checkbox state
+  // v12.1.1: Read from checkbox state
   var checkbox = null;
   if (setting === 'conversations') {
     checkbox = document.getElementById('syncConversationsToggle');
@@ -79186,7 +79240,7 @@ function toggleSyncSetting(setting) {
 }
 
 function updateSyncSettingsUI() {
-  // v12.1: Update checkbox checked state
+  // v12.1.1: Update checkbox checked state
   var convToggle = document.getElementById('syncConversationsToggle');
   var libToggle = document.getElementById('syncLibraryContentToggle');
   var deferToggle = document.getElementById('syncDeferDuringChatToggle');
@@ -79202,7 +79256,7 @@ function updateSyncSettingsUI() {
   }
 }
 
-// v12.1: Mark chat activity for deferred sync
+// v12.1.1: Mark chat activity for deferred sync
 function markChatActivity() {
   lastChatActivity = Date.now();
   // Clear any pending deferred sync
@@ -79212,7 +79266,7 @@ function markChatActivity() {
   }
 }
 
-// v12.1: Request sync (may be deferred if chatting)
+// v12.1.1: Request sync (may be deferred if chatting)
 function requestSync() {
   if (!syncSettings.deferDuringChat) {
     // Immediate sync
@@ -79259,12 +79313,12 @@ async function syncToFirebase() {
     // showToast('Syncing to cloud...', 'info');
     updateSyncIndicator('syncing');
     
-    // v12.1: Only auto-trim if syncing conversations (the main cause of large data)
+    // v12.1.1: Only auto-trim if syncing conversations (the main cause of large data)
     if (syncSettings.conversations) {
       autoTrimDataForSync();
     }
 
-    // v12.1: Respect sync settings - skip conversations if disabled
+    // v12.1.1: Respect sync settings - skip conversations if disabled
     var conversationsData = {};
     if (syncSettings.conversations) {
       conversationsData = collectConversationsWithLimit();
@@ -79272,7 +79326,7 @@ async function syncToFirebase() {
       console.log('[Firebase Sync] Skipping conversations (disabled in settings)');
     }
 
-    // v12.1: Handle library content based on settings
+    // v12.1.1: Handle library content based on settings
     var brandLibrary = '{}';
     var lifeLibrary = '{"files":[],"folders":[]}';
 
@@ -84842,7 +84896,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.1 - ' + subtitle;
+  document.title = 'RoweOS v12.1.1 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -100744,13 +100798,13 @@ window.onload = init;
   // Use pin button (⌘\) or settings dropdown to change sidebar state
 
   // ─── Hover Expand / Collapse (only when unpinned, desktop only) ───────
-  // v12.1: Helper to check if on mobile
+  // v12.1.1: Helper to check if on mobile
   function isMobileDevice() {
     return window.innerWidth <= 768 || ('ontouchstart' in window);
   }
 
   sidebar.addEventListener('mouseenter', function() {
-    if (isMobileDevice()) return;  // v12.1: Skip hover on mobile
+    if (isMobileDevice()) return;  // v12.1.1: Skip hover on mobile
     if (getState() !== 0) return;  // Skip hover if pinned in any state
     clearTimeout(hoverTimer);
     sidebar.classList.add('expanded');
@@ -100759,7 +100813,7 @@ window.onload = init;
   });
 
   sidebar.addEventListener('mouseleave', function() {
-    if (isMobileDevice()) return;  // v12.1: Skip hover on mobile
+    if (isMobileDevice()) return;  // v12.1.1: Skip hover on mobile
     if (getState() !== 0) return;
     hoverTimer = setTimeout(function() {
       sidebar.classList.remove('expanded');
