@@ -44259,7 +44259,7 @@ service cloud.firestore {
               Sync Settings — Control what data syncs to prevent trimming
             </div>
 
-            <div class="settings-row" onclick="toggleSyncSetting('conversations')">
+            <div class="settings-row">
               <div class="settings-row-left">
                 <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
                   <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -44270,11 +44270,14 @@ service cloud.firestore {
                 </div>
               </div>
               <div class="settings-row-action">
-                <div class="toggle-switch" id="syncConversationsToggle"></div>
+                <label class="toggle-switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="syncConversationsToggle" onchange="toggleSyncSetting('conversations')">
+                  <span class="toggle-slider"></span>
+                </label>
               </div>
             </div>
 
-            <div class="settings-row" onclick="toggleSyncSetting('libraryContent')">
+            <div class="settings-row">
               <div class="settings-row-left">
                 <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
                   <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -44286,11 +44289,14 @@ service cloud.firestore {
                 </div>
               </div>
               <div class="settings-row-action">
-                <div class="toggle-switch" id="syncLibraryContentToggle"></div>
+                <label class="toggle-switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="syncLibraryContentToggle" onchange="toggleSyncSetting('libraryContent')">
+                  <span class="toggle-slider"></span>
+                </label>
               </div>
             </div>
 
-            <div class="settings-row" onclick="toggleSyncSetting('deferDuringChat')">
+            <div class="settings-row">
               <div class="settings-row-left">
                 <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
@@ -44302,7 +44308,10 @@ service cloud.firestore {
                 </div>
               </div>
               <div class="settings-row-action">
-                <div class="toggle-switch" id="syncDeferDuringChatToggle"></div>
+                <label class="toggle-switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="syncDeferDuringChatToggle" onchange="toggleSyncSetting('deferDuringChat')">
+                  <span class="toggle-slider"></span>
+                </label>
               </div>
             </div>
 
@@ -77443,31 +77452,36 @@ function saveSyncSettings() {
 }
 
 function toggleSyncSetting(setting) {
+  // v12.0.7: Read from checkbox state
+  var checkbox = null;
   if (setting === 'conversations') {
-    syncSettings.conversations = !syncSettings.conversations;
+    checkbox = document.getElementById('syncConversationsToggle');
+    syncSettings.conversations = checkbox ? checkbox.checked : !syncSettings.conversations;
   } else if (setting === 'libraryContent') {
-    syncSettings.libraryContent = !syncSettings.libraryContent;
+    checkbox = document.getElementById('syncLibraryContentToggle');
+    syncSettings.libraryContent = checkbox ? checkbox.checked : !syncSettings.libraryContent;
   } else if (setting === 'deferDuringChat') {
-    syncSettings.deferDuringChat = !syncSettings.deferDuringChat;
+    checkbox = document.getElementById('syncDeferDuringChatToggle');
+    syncSettings.deferDuringChat = checkbox ? checkbox.checked : !syncSettings.deferDuringChat;
   }
   saveSyncSettings();
-  updateSyncSettingsUI();
   showToast('Sync setting updated', 'info');
 }
 
 function updateSyncSettingsUI() {
+  // v12.0.7: Update checkbox checked state
   var convToggle = document.getElementById('syncConversationsToggle');
   var libToggle = document.getElementById('syncLibraryContentToggle');
   var deferToggle = document.getElementById('syncDeferDuringChatToggle');
 
   if (convToggle) {
-    convToggle.className = 'toggle-switch' + (syncSettings.conversations ? ' active' : '');
+    convToggle.checked = syncSettings.conversations;
   }
   if (libToggle) {
-    libToggle.className = 'toggle-switch' + (syncSettings.libraryContent ? ' active' : '');
+    libToggle.checked = syncSettings.libraryContent;
   }
   if (deferToggle) {
-    deferToggle.className = 'toggle-switch' + (syncSettings.deferDuringChat ? ' active' : '');
+    deferToggle.checked = syncSettings.deferDuringChat;
   }
 }
 
