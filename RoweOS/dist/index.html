@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.0.6 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.0.7 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -14948,7 +14948,7 @@
       box-shadow: 0 0 0 2px var(--bg-primary);
     }
 
-    /* v12.0.6: Color Wheel Picker */
+    /* v12.0.7: Color Wheel Picker */
     .focus-2-color-wheel-container {
       display: flex;
       align-items: center;
@@ -37092,7 +37092,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.0.6</div>
+      <div class="launch-version" id="launchVersionTag">v12.0.7</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -37401,7 +37401,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.6</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.7</div>
       
     </div>
   </div>
@@ -37591,7 +37591,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.6</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.7</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -38449,7 +38449,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.0.6</span>
+          <span class="sidebar-version">v12.0.7</span>
         </div>
       </div>
     </div>
@@ -38759,7 +38759,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.0.6 • Built for the future</p>
+        <p>RoweOS v12.0.7 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -38816,7 +38816,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.0.6</p>
+            <p class="onboarding-welcome-version">v12.0.7</p>
           </div>
         </div>
       </div>
@@ -44253,6 +44253,59 @@ service cloud.firestore {
                 <span class="settings-chevron">›</span>
               </div>
             </div>
+
+            <!-- v12.0.7: Sync Settings - Control what data syncs -->
+            <div class="settings-row-desc" style="padding: 12px 16px 8px; color: var(--text-muted); font-size: var(--text-sm); border-top: 1px solid var(--border-color); margin-top: 8px;">
+              Sync Settings — Control what data syncs to prevent trimming
+            </div>
+
+            <div class="settings-row" onclick="toggleSyncSetting('conversations')">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Sync Conversations</div>
+                  <div class="settings-row-desc">Chat history across devices (can be large)</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <div class="toggle-switch" id="syncConversationsToggle"></div>
+              </div>
+            </div>
+
+            <div class="settings-row" onclick="toggleSyncSetting('libraryContent')">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Sync Library File Contents</div>
+                  <div class="settings-row-desc">Full document text (metadata always syncs)</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <div class="toggle-switch" id="syncLibraryContentToggle"></div>
+              </div>
+            </div>
+
+            <div class="settings-row" onclick="toggleSyncSetting('deferDuringChat')">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Defer Sync During Chat</div>
+                  <div class="settings-row-desc">Wait until chat is idle to sync (prevents interruptions)</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <div class="toggle-switch" id="syncDeferDuringChatToggle"></div>
+              </div>
+            </div>
+
             <!-- Firebase Config -->
             <div class="settings-row" onclick="openFirebaseConfigModal()">
               <div class="settings-row-left">
@@ -44723,7 +44776,7 @@ service cloud.firestore {
                 </svg>
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.6</div>
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.7</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -55379,6 +55432,9 @@ function init() {
   loadResponseCache();
   loadAutoPilotData();
 
+  // v12.0.7: Load sync settings
+  loadSyncSettings();
+
   // CRITICAL: Clear any residual conversation state on fresh load
   currentConversation = [];
   conversationStartBrand = null;
@@ -65632,7 +65688,7 @@ function renderFocus2Categories() {
     var iconKey = cat.icon || cat.name || 'default';
     var iconSvg = focus2CategoryIconLibrary[iconKey] || focus2CategoryIconLibrary['default'];
 
-    // v12.0.6: Support custom hex colors via inline style
+    // v12.0.7: Support custom hex colors via inline style
     var colorStyle = customHex ? ' style="--cat-color: ' + customHex + ';"' : '';
     html += '<div class="focus-2-category-card' + (isExpanded ? ' expanded' : '') + '" data-color="' + colorPreset + '" data-category="' + escapeHtml(cat.name) + '"' + colorStyle + ' onclick="toggleFocus2CategoryExpand(\'' + escapeHtml(cat.name) + '\', event)">';
     
@@ -66864,7 +66920,7 @@ function closeFocus2NewCategory() {
     });
   }
 
-  // v12.0.6: Reset custom color wheel
+  // v12.0.7: Reset custom color wheel
   window.focus2CustomColor = null;
   var colorWheelWrapper = document.getElementById('focus2ColorWheelWrapper');
   var colorWheelToggle = document.getElementById('focus2ColorWheelToggle');
@@ -66933,18 +66989,18 @@ function initFocus2ColorPicker() {
     btn.onclick = function() {
       buttons.forEach(function(b) { b.classList.remove('selected'); });
       btn.classList.add('selected');
-      // v12.0.6: Deselect custom color when preset selected
+      // v12.0.7: Deselect custom color when preset selected
       window.focus2CustomColor = null;
       var toggleBtn = document.getElementById('focus2ColorWheelToggle');
       if (toggleBtn) toggleBtn.classList.remove('active');
     };
   });
-  // v12.0.6: Initialize color wheel
+  // v12.0.7: Initialize color wheel
   initFocus2ColorWheel();
 }
 
 /**
- * v12.0.6: Color Wheel Implementation
+ * v12.0.7: Color Wheel Implementation
  */
 var focus2ColorWheelState = {
   hue: 0,
@@ -67194,7 +67250,7 @@ function saveFocus2NewCategory() {
   
   var name = nameInput.value.trim();
   var selectedColor = colorPicker.querySelector('.focus-2-color-btn.selected');
-  // v12.0.6: Support custom hex colors from color wheel
+  // v12.0.7: Support custom hex colors from color wheel
   var colorPreset = window.focus2CustomColor || (selectedColor ? selectedColor.getAttribute('data-color') : 'gold');
   var customHex = window.focus2CustomColor || null;
   var selectedIcon = window.focus2SelectedIcon || 'default';
@@ -67319,7 +67375,7 @@ function editCategory(categoryName) {
   var hexInput = document.getElementById('focus2ColorWheelHex');
   var swatch = document.getElementById('focus2ColorWheelSwatch');
 
-  // v12.0.6: Handle custom hex color
+  // v12.0.7: Handle custom hex color
   if (cat.customHex) {
     window.focus2CustomColor = cat.customHex;
     if (colorPicker) {
@@ -73821,8 +73877,11 @@ function addMessageToThread(role, content) {
 }
 
 function runAgent() {
+  // v12.0.7: Mark chat activity to defer sync during active conversation
+  if (typeof markChatActivity === 'function') markChatActivity();
+
   var command = document.getElementById('agentCommand').value;
-  
+
   // v9.1.14: Don't clear input immediately - keep it visible until response starts
   // Input will be cleared in showConversationView() when user message is displayed
   
@@ -77348,6 +77407,103 @@ function getDeviceType() {
 // COMPREHENSIVE DATA SYNC
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// v12.0.7: Sync Settings - User controls for what data syncs
+var syncSettings = {
+  conversations: true,      // Sync chat history (can be large)
+  libraryContent: false,    // Sync full file contents (metadata always syncs)
+  deferDuringChat: true     // Don't sync while actively chatting
+};
+
+// v12.0.7: Track chat activity for deferred sync
+var lastChatActivity = 0;
+var deferredSyncTimer = null;
+var CHAT_IDLE_THRESHOLD = 10000; // 10 seconds of idle before sync
+
+function loadSyncSettings() {
+  try {
+    var saved = localStorage.getItem('roweos_sync_settings');
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      syncSettings.conversations = parsed.conversations !== false;
+      syncSettings.libraryContent = parsed.libraryContent === true;
+      syncSettings.deferDuringChat = parsed.deferDuringChat !== false;
+    }
+    updateSyncSettingsUI();
+  } catch (e) {
+    console.warn('[SyncSettings] Error loading:', e);
+  }
+}
+
+function saveSyncSettings() {
+  try {
+    localStorage.setItem('roweos_sync_settings', JSON.stringify(syncSettings));
+  } catch (e) {
+    console.warn('[SyncSettings] Error saving:', e);
+  }
+}
+
+function toggleSyncSetting(setting) {
+  if (setting === 'conversations') {
+    syncSettings.conversations = !syncSettings.conversations;
+  } else if (setting === 'libraryContent') {
+    syncSettings.libraryContent = !syncSettings.libraryContent;
+  } else if (setting === 'deferDuringChat') {
+    syncSettings.deferDuringChat = !syncSettings.deferDuringChat;
+  }
+  saveSyncSettings();
+  updateSyncSettingsUI();
+  showToast('Sync setting updated', 'info');
+}
+
+function updateSyncSettingsUI() {
+  var convToggle = document.getElementById('syncConversationsToggle');
+  var libToggle = document.getElementById('syncLibraryContentToggle');
+  var deferToggle = document.getElementById('syncDeferDuringChatToggle');
+
+  if (convToggle) {
+    convToggle.className = 'toggle-switch' + (syncSettings.conversations ? ' active' : '');
+  }
+  if (libToggle) {
+    libToggle.className = 'toggle-switch' + (syncSettings.libraryContent ? ' active' : '');
+  }
+  if (deferToggle) {
+    deferToggle.className = 'toggle-switch' + (syncSettings.deferDuringChat ? ' active' : '');
+  }
+}
+
+// v12.0.7: Mark chat activity for deferred sync
+function markChatActivity() {
+  lastChatActivity = Date.now();
+  // Clear any pending deferred sync
+  if (deferredSyncTimer) {
+    clearTimeout(deferredSyncTimer);
+    deferredSyncTimer = null;
+  }
+}
+
+// v12.0.7: Request sync (may be deferred if chatting)
+function requestSync() {
+  if (!syncSettings.deferDuringChat) {
+    // Immediate sync
+    syncToFirebase();
+    return;
+  }
+
+  var timeSinceChat = Date.now() - lastChatActivity;
+  if (timeSinceChat > CHAT_IDLE_THRESHOLD) {
+    // Idle long enough, sync now
+    syncToFirebase();
+  } else {
+    // Defer sync until idle
+    if (deferredSyncTimer) clearTimeout(deferredSyncTimer);
+    deferredSyncTimer = setTimeout(function() {
+      deferredSyncTimer = null;
+      syncToFirebase();
+    }, CHAT_IDLE_THRESHOLD - timeSinceChat + 500);
+    console.log('[Sync] Deferred - chat active');
+  }
+}
+
 async function syncToFirebase() {
   console.log('[Firebase Sync] Starting sync...');
   console.log('[Firebase Sync] firebaseUser:', firebaseUser ? firebaseUser.email : 'null');
@@ -77372,38 +77528,74 @@ async function syncToFirebase() {
     // showToast('Syncing to cloud...', 'info');
     updateSyncIndicator('syncing');
     
-    // v11.0.5: AGGRESSIVE AUTO-TRIMMING - trim localStorage BEFORE collecting
-    autoTrimDataForSync();
-    
-    // v10.5.27: Collect conversations with size-aware trimming
-    var conversationsData = collectConversationsWithLimit();
-    
-    // v10.5.27: Trim libraries if needed to stay under Firestore 1MB limit
-    var brandLibrary = localStorage.getItem('roweosLibrary') || '{}';
-    var lifeLibrary = localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}';
-    
+    // v12.0.7: Only auto-trim if syncing conversations (the main cause of large data)
+    if (syncSettings.conversations) {
+      autoTrimDataForSync();
+    }
+
+    // v12.0.7: Respect sync settings - skip conversations if disabled
+    var conversationsData = {};
+    if (syncSettings.conversations) {
+      conversationsData = collectConversationsWithLimit();
+    } else {
+      console.log('[Firebase Sync] Skipping conversations (disabled in settings)');
+    }
+
+    // v12.0.7: Handle library content based on settings
+    var brandLibrary = '{}';
+    var lifeLibrary = '{"files":[],"folders":[]}';
+
+    if (syncSettings.libraryContent) {
+      // Full library with content
+      brandLibrary = localStorage.getItem('roweosLibrary') || '{}';
+      lifeLibrary = localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}';
+    } else {
+      // Metadata only - strip file contents
+      try {
+        var bl = JSON.parse(localStorage.getItem('roweosLibrary') || '{}');
+        if (bl.files) {
+          bl.files = bl.files.map(function(f) {
+            return { id: f.id, name: f.name, type: f.type, size: f.size, uploadedAt: f.uploadedAt, folderId: f.folderId };
+          });
+        }
+        brandLibrary = JSON.stringify(bl);
+      } catch (e) {}
+      try {
+        var ll = JSON.parse(localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}');
+        if (ll.files) {
+          ll.files = ll.files.map(function(f) {
+            return { id: f.id, name: f.name, type: f.type, size: f.size, uploadedAt: f.uploadedAt, folderId: f.folderId };
+          });
+        }
+        lifeLibrary = JSON.stringify(ll);
+      } catch (e) {}
+      console.log('[Firebase Sync] Using metadata-only for libraries (content sync disabled)');
+    }
+
     // Estimate base size (everything except big items)
     var baseSizeEstimate = 200000; // ~200KB for brands, settings, etc.
     var convSize = conversationsData.agentHistoryJson ? conversationsData.agentHistoryJson.length : 0;
     var brandLibSize = brandLibrary.length;
     var lifeLibSize = lifeLibrary.length;
     var totalEstimate = baseSizeEstimate + convSize + brandLibSize + lifeLibSize;
-    
+
     console.log('[Firebase Sync] Size estimate:', {
       base: baseSizeEstimate,
       conversations: convSize,
       brandLib: brandLibSize,
       lifeLib: lifeLibSize,
-      total: totalEstimate
+      total: totalEstimate,
+      syncConversations: syncSettings.conversations,
+      syncLibraryContent: syncSettings.libraryContent
     });
-    
+
     // If over ~900KB, start trimming (leave buffer)
     var MAX_SIZE = 900000;
     if (totalEstimate > MAX_SIZE) {
       console.log('[Firebase Sync] Data too large, trimming...');
-      
+
       // Strategy: Trim oldest conversation history first
-      if (conversationsData.agentHistoryJson && convSize > 100000) {
+      if (syncSettings.conversations && conversationsData.agentHistoryJson && convSize > 100000) {
         var historyArr = JSON.parse(conversationsData.agentHistoryJson);
         // Keep only last 20 conversations
         if (historyArr.length > 20) {
@@ -77423,9 +77615,9 @@ async function syncToFirebase() {
           console.log('[Firebase Sync] Trimmed conversation lengths');
         }
       }
-      
+
       // If libraries are huge, trim file content (keep metadata)
-      if (brandLibSize > 300000) {
+      if (syncSettings.libraryContent && brandLibSize > 300000) {
         try {
           var libObj = JSON.parse(brandLibrary);
           if (libObj.files) {
@@ -82919,7 +83111,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.0.6 - ' + subtitle;
+  document.title = 'RoweOS v12.0.7 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
