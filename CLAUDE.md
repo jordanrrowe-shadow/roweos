@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v12.1.2
-File:     ~/Downloads/RoweOS/dist/index.html (100858 lines)
+Version:  v12.1.3
+File:     ~/Downloads/RoweOS/dist/index.html (100998 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -102,7 +102,7 @@ let count = items.length;
 - Full null/undefined safety before property access
 - HTML escaping for all user input in innerHTML
 - Wrap localStorage reads and API calls in try/catch
-- Tag changes with version: `// v12.1.2: Fix brand name`
+- Tag changes with version: `// v12.1.3: Fix brand name`
 
 ### CSS
 - Use CSS custom properties (`var(--accent)`) for theme values

@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.1.2 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.1.3 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -1870,21 +1870,21 @@
       overflow: visible;
     }
     
-    /* v11.5.4: Collapsed logo SVG/img sizing — !important overrides applyBrandLogo inline styles */
+    /* v12.1.3: Collapsed logo SVG/img sizing — uses CSS var for slider control */
     .sidebar-collapsed-logo svg,
     .sidebar-collapsed-logo img {
-      width: 60px !important;
-      height: 60px !important;
+      width: var(--logo-size, 60px);
+      height: var(--logo-size, 60px);
       object-fit: contain;
       transition: width 0.25s ease, height 0.25s ease;
     }
-    /* v11.5.4: Bigger logo when sidebar expanded — image grows but container stays fixed */
+    /* v12.1.3: Bigger logo when sidebar expanded — scales from custom size */
     .sidebar.pinned .sidebar-collapsed-logo svg,
     .sidebar.pinned .sidebar-collapsed-logo img,
     .sidebar.expanded .sidebar-collapsed-logo svg,
     .sidebar.expanded .sidebar-collapsed-logo img {
-      width: 80px !important;
-      height: 80px !important;
+      width: calc(var(--logo-size, 60px) * 1.33);
+      height: calc(var(--logo-size, 60px) * 1.33);
     }
 
     /* v11.5.4: Full logo/brand — visible when pinned OR expanded (hover) */
@@ -14948,7 +14948,7 @@
       box-shadow: 0 0 0 2px var(--bg-primary);
     }
 
-    /* v12.1.2: Color Wheel Picker */
+    /* v12.1.3: Color Wheel Picker */
     .focus-2-color-wheel-container {
       display: flex;
       align-items: center;
@@ -15678,7 +15678,7 @@
       animation: slideDown 0.2s ease;
     }
 
-    /* v12.1.2: Priority Tasks */
+    /* v12.1.3: Priority Tasks */
     .focus-2-category-task-item.priority {
       border-left: 3px solid var(--accent);
       background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
@@ -15712,7 +15712,7 @@
       height: 14px;
     }
 
-    /* v12.1.2: Recurring Task Indicator */
+    /* v12.1.3: Recurring Task Indicator */
     .focus-2-task-recurrence-badge {
       display: inline-flex;
       align-items: center;
@@ -15730,7 +15730,7 @@
       height: 10px;
     }
 
-    /* v12.1.2: Recurrence Picker in Task Detail */
+    /* v12.1.3: Recurrence Picker in Task Detail */
     .focus-2-recurrence-picker {
       display: flex;
       flex-direction: column;
@@ -15807,7 +15807,7 @@
       color: #000;
     }
 
-    /* v12.1.2: Category Sort Controls */
+    /* v12.1.3: Category Sort Controls */
     .focus-2-categories-header {
       display: flex;
       justify-content: space-between;
@@ -15840,7 +15840,7 @@
       color: var(--accent);
     }
 
-    /* v12.1.2: Inline Automation Creator */
+    /* v12.1.3: Inline Automation Creator */
     .focus-2-automation-inline {
       padding: var(--space-4);
       background: var(--bg-tertiary);
@@ -15908,7 +15908,7 @@
       color: var(--accent);
     }
 
-    /* v12.1.2: Journal Book UI */
+    /* v12.1.3: Journal Book UI */
     .journal-container {
       padding: var(--space-6);
       max-width: 900px;
@@ -16047,7 +16047,7 @@
       margin-bottom: var(--space-4);
     }
 
-    /* v12.1.2: Save to Journal Button */
+    /* v12.1.3: Save to Journal Button */
     .focus-2-save-journal-btn {
       display: flex;
       align-items: center;
@@ -16081,7 +16081,7 @@
       text-decoration: underline;
     }
 
-    /* v12.1.2: Journal Mobile */
+    /* v12.1.3: Journal Mobile */
     @media (max-width: 768px) {
       .journal-book {
         border-radius: 0;
@@ -16102,7 +16102,7 @@
       }
     }
 
-    /* v12.1.2: Inline Category Edit */
+    /* v12.1.3: Inline Category Edit */
     .focus-2-category-card.editing .focus-2-category-expanded {
       display: none;
     }
@@ -26723,7 +26723,7 @@
       font-size: var(--text-3xl);
     }
 
-    /* v12.1.2: Mobile Navigation Preferences */
+    /* v12.1.3: Mobile Navigation Preferences */
     html[data-mobile-nav="sidebar"] .mobile-nav,
     html[data-mobile-nav="sidebar"] .liquid-nav {
       display: none !important;
@@ -26734,7 +26734,7 @@
       display: none !important;
     }
 
-    /* v12.1.2: Swipe indicator on left edge */
+    /* v12.1.3: Swipe indicator on left edge */
     .mobile-swipe-indicator {
       display: none;
       position: fixed;
@@ -26759,12 +26759,12 @@
         display: none;
       }
 
-      /* v12.1.2: Show mobile-only settings on mobile */
+      /* v12.1.3: Show mobile-only settings on mobile */
       .mobile-only-setting {
         display: flex !important;
       }
 
-      /* v12.1.2: Prevent sidebar hover behavior on mobile */
+      /* v12.1.3: Prevent sidebar hover behavior on mobile */
       .sidebar:hover {
         width: 64px !important;
       }
@@ -26774,7 +26774,7 @@
         transform: translateX(0) !important;
       }
 
-      /* v12.1.2.1: Show nav labels when mobile sidebar is open */
+      /* v12.1.3.1: Show nav labels when mobile sidebar is open */
       .sidebar.mobile-open .nav-item-label {
         opacity: 1 !important;
         max-width: 180px !important;
@@ -26789,7 +26789,7 @@
         margin-right: 12px !important;
       }
 
-      /* v12.1.2: Show sidebar brand text on mobile with proper height */
+      /* v12.1.3: Show sidebar brand text on mobile with proper height */
       .sidebar.mobile-open .sidebar-brand-title,
       .sidebar.mobile-open .sidebar-brand-tagline,
       .sidebar.mobile-open .sidebar-brand-name {
@@ -26799,7 +26799,7 @@
         overflow: visible !important;
       }
 
-      /* v12.1.2: Show monogram logo on mobile (condensed size) */
+      /* v12.1.3: Show monogram logo on mobile (uses CSS var for size, smaller on mobile) */
       .sidebar.mobile-open .sidebar-collapsed-logo {
         display: flex !important;
         opacity: 1 !important;
@@ -26809,22 +26809,32 @@
 
       .sidebar.mobile-open .sidebar-collapsed-logo svg,
       .sidebar.mobile-open .sidebar-collapsed-logo img {
-        width: 60px !important;
-        height: 60px !important;
+        width: var(--logo-size-mobile, 44px) !important;
+        height: var(--logo-size-mobile, 44px) !important;
       }
 
-      /* v12.1.2: Condense sidebar header on mobile */
+      /* v12.1.3: Mobile sidebar header with safe-area-inset-top for iPhone notch */
       .sidebar.mobile-open .sidebar-header {
-        padding: 12px 16px 8px 16px !important;
+        padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 6px 16px !important;
+        min-height: auto !important;
       }
 
       .sidebar.mobile-open .sidebar-brand-selector {
-        margin-top: 4px !important;
+        margin-top: 2px !important;
       }
 
       .sidebar.mobile-open .sidebar-brand-name {
-        font-size: 14px !important;
+        font-size: 13px !important;
         padding: 2px 4px !important;
+      }
+
+      /* v12.1.3: Compact nav items on mobile to prevent scrolling */
+      .sidebar.mobile-open .nav-item {
+        padding: 8px 16px !important;
+      }
+
+      .sidebar.mobile-open .sidebar-footer {
+        padding: 8px 16px !important;
       }
 
       /* Hide tooltips when mobile sidebar is open (not needed) */
@@ -26832,7 +26842,7 @@
         display: none !important;
       }
 
-      /* v12.1.2.1: Override pinned-collapsed styles on mobile when open */
+      /* v12.1.3.1: Override pinned-collapsed styles on mobile when open */
       .sidebar.mobile-open.pinned-collapsed .nav-item {
         justify-content: flex-start !important;
         padding: 10px 16px !important;
@@ -26848,7 +26858,7 @@
         transform: translateX(-100%) !important;
       }
 
-      /* v12.1.2: Sidebar overlay for mobile */
+      /* v12.1.3: Sidebar overlay for mobile */
       .sidebar-mobile-overlay.show {
         display: block !important;
         position: fixed;
@@ -37853,7 +37863,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.1.2</div>
+      <div class="launch-version" id="launchVersionTag">v12.1.3</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38162,14 +38172,14 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.1.2</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.1.3</div>
       
     </div>
   </div>
   
   <!-- Sidebar Mobile Overlay -->
   <div class="sidebar-mobile-overlay" id="sidebarMobileOverlay" onclick="closeMobileSidebar()"></div>
-  <!-- v12.1.2: Visual hint for swipe-to-open sidebar -->
+  <!-- v12.1.3: Visual hint for swipe-to-open sidebar -->
   <div class="mobile-swipe-indicator"></div>
 
   <!-- Legacy Mobile Elements (hidden by CSS) -->
@@ -38354,7 +38364,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.1.2</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.1.3</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39212,7 +39222,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.1.2</span>
+          <span class="sidebar-version">v12.1.3</span>
         </div>
       </div>
     </div>
@@ -39522,7 +39532,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.1.2 • Built for the future</p>
+        <p>RoweOS v12.1.3 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39579,7 +39589,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.1.2</p>
+            <p class="onboarding-welcome-version">v12.1.3</p>
           </div>
         </div>
       </div>
@@ -42614,7 +42624,7 @@ service cloud.firestore {
                 </div>
               </div>
               <textarea class="focus-2-notes-input" id="focus2NotesInput" placeholder="Capture thoughts, ideas, or quick notes..." oninput="saveFocus2Notes()"></textarea>
-              <!-- v12.1.2: Link to Journal if entries exist -->
+              <!-- v12.1.3: Link to Journal if entries exist -->
               <div id="focus2JournalLink" style="display: none; margin-top: 8px;">
                 <a class="focus-2-journal-link" onclick="showView('journal')">
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -42790,7 +42800,7 @@ service cloud.firestore {
                   <button class="focus-2-task-detail-close" onclick="closeFocus2TaskDetail()">×</button>
                 </div>
                 <div class="focus-2-task-detail-body">
-                  <!-- v12.1.2: Priority Toggle -->
+                  <!-- v12.1.3: Priority Toggle -->
                   <div class="focus-2-task-detail-row" style="display: flex; justify-content: space-between; align-items: center;">
                     <label style="margin: 0;">Priority</label>
                     <button class="focus-2-task-priority-btn" id="focus2TaskDetailPriority" onclick="toggleFocus2TaskPriority()">
@@ -42809,7 +42819,7 @@ service cloud.firestore {
                     <label>Due Date</label>
                     <input type="date" id="focus2TaskDetailDate" onchange="updateFocus2TaskDate()">
                   </div>
-                  <!-- v12.1.2: Recurrence Settings -->
+                  <!-- v12.1.3: Recurrence Settings -->
                   <div class="focus-2-task-detail-row">
                     <label>Repeat</label>
                     <div class="focus-2-recurrence-picker">
@@ -44848,7 +44858,7 @@ service cloud.firestore {
         </div>
       </div>
 
-      <!-- v12.1.2: Journal View -->
+      <!-- v12.1.3: Journal View -->
       <div id="journalView" class="panel-view hidden">
         <div class="panel">
           <div class="breadcrumb">
@@ -45106,7 +45116,7 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.1.2: Sync Settings - Control what data syncs -->
+            <!-- v12.1.3: Sync Settings - Control what data syncs -->
             <div class="settings-row-desc" style="padding: 12px 16px 8px; color: var(--text-muted); font-size: var(--text-sm); border-top: 1px solid var(--border-color); margin-top: 8px;">
               Sync Settings — Control what data syncs to prevent trimming
             </div>
@@ -45476,7 +45486,7 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.1.2: Mobile Navigation Preference -->
+            <!-- v12.1.3: Mobile Navigation Preference -->
             <div class="settings-row mobile-only-setting" style="display: none;">
               <div class="settings-row-left">
                 <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
@@ -45658,7 +45668,7 @@ service cloud.firestore {
                 </svg>
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.1.2</div>
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.1.3</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -49267,7 +49277,7 @@ function showView(view) {
     viewEl.classList.remove('hidden');
   }
 
-  // v12.1.2: Render journal when switching to journal view
+  // v12.1.3: Render journal when switching to journal view
   if (view === 'journal') {
     renderJournal();
   }
@@ -49652,6 +49662,15 @@ function onBrandChange() {
   // v10.5.25: Update BrandAI system prompt when brand changes
   if (typeof generateBrandAIPrompt === 'function') {
     generateBrandAIPrompt();
+  }
+
+  // v12.1.3: Load logo for the newly selected brand
+  if (typeof loadCurrentLogo === 'function') {
+    loadCurrentLogo();
+  }
+  // v12.1.3: Re-render logo picker if settings is open
+  if (currentView === 'settings' && typeof renderBrandLogoPicker === 'function') {
+    renderBrandLogoPicker('settingsBrandLogoUploader');
   }
 }
 
@@ -50460,7 +50479,7 @@ function switchToBrandMode() {
   initTodoCategories();
   initTodos();
   initCalendar();
-  initJournal(); // v12.1.2
+  initJournal(); // v12.1.3
 
   // v10.5.25: FORCE hide Life containers and show Brand containers immediately
   var lifeContainer = document.getElementById('lifeIdentityCardsContainer');
@@ -50496,6 +50515,11 @@ function switchToBrandMode() {
   // Force refresh any view
   showView(currentView);
 
+  // v12.1.3: Load logo for BrandAI mode
+  if (typeof loadCurrentLogo === 'function') {
+    loadCurrentLogo();
+  }
+
   showToast('Switched to BrandAI mode', 'success');
 }
 
@@ -50530,7 +50554,7 @@ function switchToLifeMode(profileIdx) {
   initTodoCategories();
   initTodos();
   initCalendar();
-  initJournal(); // v12.1.2
+  initJournal(); // v12.1.3
 
   // v10.5.25: FORCE hide Brand containers and show Life containers immediately
   var lifeContainer = document.getElementById('lifeIdentityCardsContainer');
@@ -50563,7 +50587,12 @@ function switchToLifeMode(profileIdx) {
   
   // Force refresh any view
   showView(currentView);
-  
+
+  // v12.1.3: Load logo for LifeAI mode
+  if (typeof loadCurrentLogo === 'function') {
+    loadCurrentLogo();
+  }
+
   var currentProfile = typeof getCurrentLifeProfile === 'function' ? getCurrentLifeProfile() : null;
   var profileName = currentProfile ? currentProfile.name : localStorage.getItem('roweos_user_name') || 'My Life';
   showToast('Switched to LifeAI - ' + profileName, 'success');
@@ -50913,30 +50942,63 @@ function lightenColor(hex, percent) {
 }
 
 /**
- * v10.5.25: BrandAI Custom Logo Functions
+ * v12.1.3: Per-Brand and Per-Mode Custom Logo Functions
  */
 
 // Default R logo SVG (used as fallback)
 var defaultBrandLogoSVG = '<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><text x="12" y="17" text-anchor="middle" font-size="14" font-weight="bold" fill="currentColor" stroke="none">R</text></svg>';
 
 /**
- * v10.5.25: Initialize BrandAI custom logo on page load
+ * v12.1.3: Get the current logo storage key based on mode and brand
+ */
+function getCurrentLogoKey() {
+  var isLife = typeof isLifeMode === 'function' && isLifeMode();
+  if (isLife) {
+    return 'roweos_lifeai_logo';
+  }
+  var brandSelect = document.getElementById('brand');
+  var brandIdx = brandSelect ? parseInt(brandSelect.value) : 0;
+  return 'roweos_brand_' + brandIdx + '_logo';
+}
+
+/**
+ * v12.1.3: Get the current logo size storage key based on mode and brand
+ */
+function getCurrentLogoSizeKey() {
+  return getCurrentLogoKey() + '_size';
+}
+
+/**
+ * v12.1.3: Initialize logo on page load (loads appropriate logo for current mode/brand)
  */
 function initBrandLogo() {
-  var savedLogo = localStorage.getItem('roweos_custom_brand_logo');
-  var savedSize = localStorage.getItem('roweos_custom_brand_logo_size');
+  loadCurrentLogo();
+}
+
+/**
+ * v12.1.3: Load and apply the logo for current mode/brand
+ */
+function loadCurrentLogo() {
+  var logoKey = getCurrentLogoKey();
+  var sizeKey = getCurrentLogoSizeKey();
+  var savedLogo = localStorage.getItem(logoKey);
+  var savedSize = localStorage.getItem(sizeKey);
+
   if (savedLogo) {
     applyBrandLogo(savedLogo, savedSize || 100);
+  } else {
+    // Reset to default logo
+    resetLogoToDefault();
   }
 }
 
 /**
- * v10.5.25: Apply custom brand logo to sidebar with size
+ * v12.1.3: Apply custom brand logo to sidebar with size via CSS custom properties
  */
 function applyBrandLogo(base64Logo, size) {
   var mainLogo = document.getElementById('mainLogo');
   if (!mainLogo) return;
-  
+
   var logoImg = mainLogo.querySelector('.sidebar-logo-img');
   if (logoImg && base64Logo) {
     // Store original src if not already stored
@@ -50945,59 +51007,89 @@ function applyBrandLogo(base64Logo, size) {
     }
     logoImg.src = base64Logo;
   }
-  
-  // v11.5.4: Apply size + src to collapsed logo (now the primary visible logo)
+
+  // v12.1.3: Apply size via CSS custom property for slider control
+  var sizeVal = parseInt(size) || 100;
+  var scale = sizeVal / 100;
+  var baseSize = 60;
+  var scaledSize = Math.round(baseSize * scale);
+  // Clamp between 32px and 96px
+  scaledSize = Math.min(96, Math.max(32, scaledSize));
+  // Mobile size scales proportionally but smaller
+  var mobileSize = Math.round(44 * scale);
+  mobileSize = Math.min(72, Math.max(24, mobileSize));
+
+  // Set CSS custom properties on root
+  document.documentElement.style.setProperty('--logo-size', scaledSize + 'px');
+  document.documentElement.style.setProperty('--logo-size-mobile', mobileSize + 'px');
+
+  // v12.1.3: Update collapsed logo image src
   var collapsedLogo = document.querySelector('.sidebar-collapsed-logo');
   if (collapsedLogo && base64Logo) {
-    var sizeVal = parseInt(size) || 100;
-    var scale = sizeVal / 100;
-    var baseSize = 60; // v11.5.4: Large base — fills 64px sidebar
-    var scaledSize = Math.round(baseSize * scale);
-    // Clamp between 32px and 96px
-    scaledSize = Math.min(96, Math.max(32, scaledSize));
-    collapsedLogo.innerHTML = '<img src="' + base64Logo + '" alt="Logo" style="width: ' + scaledSize + 'px; height: ' + scaledSize + 'px; object-fit: contain; border-radius: var(--radius-sm);">';
+    collapsedLogo.innerHTML = '<img src="' + base64Logo + '" alt="Logo" style="object-fit: contain; border-radius: var(--radius-sm);">';
   }
 }
 
 /**
- * v10.5.25: Reset brand logo to default
+ * v12.1.3: Reset logo to default (without removing from storage)
+ */
+function resetLogoToDefault() {
+  var collapsedLogo = document.querySelector('.sidebar-collapsed-logo');
+  if (collapsedLogo) {
+    var mainLogo = document.getElementById('mainLogo');
+    var logoImg = mainLogo ? mainLogo.querySelector('.sidebar-logo-img') : null;
+    var defaultLogoSrc = (logoImg && logoImg.dataset.originalSrc) || (logoImg && logoImg.src) || '';
+    if (defaultLogoSrc) {
+      collapsedLogo.innerHTML = '<img src="' + defaultLogoSrc + '" alt="Logo" style="object-fit: contain; border-radius: var(--radius-sm);">';
+    }
+  }
+  // Reset size to default
+  document.documentElement.style.setProperty('--logo-size', '60px');
+  document.documentElement.style.setProperty('--logo-size-mobile', '44px');
+}
+
+/**
+ * v12.1.3: Reset brand logo to default and remove from storage
  */
 function resetBrandLogo() {
   var mainLogo = document.getElementById('mainLogo');
   if (!mainLogo) return;
-  
+
   var logoImg = mainLogo.querySelector('.sidebar-logo-img');
   if (logoImg && logoImg.dataset.originalSrc) {
     logoImg.src = logoImg.dataset.originalSrc;
     logoImg.style.transform = '';
     logoImg.style.transformOrigin = '';
   }
-  
-  // v11.5.4: Reset collapsed logo to default gold emblem
-  var collapsedLogo = document.querySelector('.sidebar-collapsed-logo');
-  if (collapsedLogo) {
-    var defaultLogoSrc = document.getElementById('mainLogo').querySelector('.sidebar-logo-img').dataset.originalSrc || document.getElementById('mainLogo').querySelector('.sidebar-logo-img').src;
-    collapsedLogo.innerHTML = '<img src="' + defaultLogoSrc + '" alt="Logo" style="width: 60px; height: 60px; object-fit: contain; border-radius: var(--radius-sm);">';
-  }
-  
-  localStorage.removeItem('roweos_custom_brand_logo');
-  localStorage.removeItem('roweos_custom_brand_logo_size');
-  
+
+  // v12.1.3: Reset to default and remove per-brand/mode logo from storage
+  resetLogoToDefault();
+
+  var logoKey = getCurrentLogoKey();
+  var sizeKey = getCurrentLogoSizeKey();
+  localStorage.removeItem(logoKey);
+  localStorage.removeItem(sizeKey);
+
   // Re-render the picker to update UI
   renderBrandLogoPicker('settingsBrandLogoUploader');
-  
+
+  // v12.1.3: Sync removal to Firebase
+  syncBrandLogoToFirebase(null, null);
+
   showToast('Logo reset to default', 'info');
 }
 
 /**
- * v10.5.25: Handle brand logo size slider change
+ * v12.1.3: Handle brand logo size slider change (uses per-brand keys)
  */
 function handleBrandLogoSizeChange(value) {
-  var savedLogo = localStorage.getItem('roweos_custom_brand_logo');
+  var logoKey = getCurrentLogoKey();
+  var sizeKey = getCurrentLogoSizeKey();
+  var savedLogo = localStorage.getItem(logoKey);
   if (!savedLogo) return;
-  
+
   // Save size to localStorage
-  localStorage.setItem('roweos_custom_brand_logo_size', value);
+  localStorage.setItem(sizeKey, value);
   
   // Apply to sidebar collapsed logo
   applyBrandLogo(savedLogo, value);
@@ -51020,18 +51112,33 @@ function handleBrandLogoSizeChange(value) {
 }
 
 /**
- * v11.5.4: Sync brand logo to Firebase across devices
+ * v12.1.3: Sync brand logo to Firebase across devices (per-brand/mode)
  */
 function syncBrandLogoToFirebase(base64Logo, size) {
   try {
     if (typeof firebase !== 'undefined' && firebase.firestore && firebaseUser && firebaseUser.uid) {
-      firebase.firestore().collection('roweos_users').doc(firebaseUser.uid).set({
-        brandLogo: {
-          base64: base64Logo,
-          size: parseInt(size) || 100
+      var logoKey = getCurrentLogoKey();
+      var updateData = {};
+      updateData['logos'] = updateData['logos'] || {};
+
+      // Build the nested update path
+      var logoData = base64Logo ? { base64: base64Logo, size: parseInt(size) || 100 } : null;
+
+      firebase.firestore().collection('roweos_users').doc(firebaseUser.uid).get().then(function(doc) {
+        var existingData = doc.exists ? doc.data() : {};
+        var existingLogos = existingData.logos || {};
+
+        if (logoData) {
+          existingLogos[logoKey] = logoData;
+        } else {
+          delete existingLogos[logoKey];
         }
-      }, { merge: true }).then(function() {
-        console.log('[Logo] Synced to Firebase');
+
+        return firebase.firestore().collection('roweos_users').doc(firebaseUser.uid).set({
+          logos: existingLogos
+        }, { merge: true });
+      }).then(function() {
+        console.log('[Logo] Synced to Firebase:', logoKey);
       }).catch(function(error) {
         console.warn('[Logo] Firebase sync failed:', error);
       });
@@ -51042,46 +51149,48 @@ function syncBrandLogoToFirebase(base64Logo, size) {
 }
 
 /**
- * v10.5.25: Handle brand logo file upload
+ * v12.1.3: Handle brand logo file upload (uses per-brand/mode keys)
  */
 function handleBrandLogoUpload(input) {
   var file = input.files && input.files[0];
   if (!file) return;
-  
+
   // Validate file type
   if (!file.type.match(/^image\/(png|jpeg|jpg|webp|gif|svg\+xml)$/)) {
     showToast('Please upload a PNG, JPG, WebP, GIF, or SVG image', 'error');
     return;
   }
-  
+
   // Validate file size (max 2MB)
   if (file.size > 2 * 1024 * 1024) {
     showToast('Image must be under 2MB', 'error');
     return;
   }
-  
+
   var reader = new FileReader();
   reader.onload = function(e) {
     var base64Logo = e.target.result;
-    
-    // Save to localStorage
+    var logoKey = getCurrentLogoKey();
+    var sizeKey = getCurrentLogoSizeKey();
+
+    // Save to localStorage with per-brand/mode key
     try {
-      localStorage.setItem('roweos_custom_brand_logo', base64Logo);
-      // Set default size to 100%
-      localStorage.setItem('roweos_custom_brand_logo_size', '100');
-      
+      localStorage.setItem(logoKey, base64Logo);
+      localStorage.setItem(sizeKey, '100');
+
       // Apply to sidebar
       applyBrandLogo(base64Logo, 100);
-      
+
       // Re-render picker to show preview and slider
       renderBrandLogoPicker('settingsBrandLogoUploader');
-      
-      // v11.5.4: Sync logo to Firebase
+
+      // v12.1.3: Sync logo to Firebase
       syncBrandLogoToFirebase(base64Logo, 100);
-      
-      showToast('Custom logo uploaded successfully', 'success');
+
+      var isLife = typeof isLifeMode === 'function' && isLifeMode();
+      showToast((isLife ? 'LifeAI' : 'Brand') + ' logo uploaded successfully', 'success');
     } catch (err) {
-      console.error('[BrandAI Logo] Error saving logo:', err);
+      console.error('[Logo] Error saving logo:', err);
       showToast('Error saving logo. File may be too large.', 'error');
     }
   };
@@ -51092,23 +51201,42 @@ function handleBrandLogoUpload(input) {
 }
 
 /**
- * v10.5.25: Render the BrandAI logo picker UI with size slider
+ * v12.1.3: Render the logo picker UI with size slider (per-brand/mode)
  */
 function renderBrandLogoPicker(containerId) {
   var container = document.getElementById(containerId);
   if (!container) return;
-  
-  var savedLogo = localStorage.getItem('roweos_custom_brand_logo');
-  var savedSize = localStorage.getItem('roweos_custom_brand_logo_size') || '100';
+
+  var isLife = typeof isLifeMode === 'function' && isLifeMode();
+  var logoKey = getCurrentLogoKey();
+  var sizeKey = getCurrentLogoSizeKey();
+  var savedLogo = localStorage.getItem(logoKey);
+  var savedSize = localStorage.getItem(sizeKey) || '100';
   var hasLogo = !!savedLogo;
-  
+
+  // v12.1.3: Get brand name for label (if in BrandAI mode)
+  var brandLabel = 'Custom Logo';
+  var brandHint = 'Upload your logo to replace the default R symbol';
+  if (!isLife) {
+    var brandSelect = document.getElementById('brand');
+    var brandIdx = brandSelect ? parseInt(brandSelect.value) : 0;
+    if (typeof brands !== 'undefined' && brands[brandIdx]) {
+      var brandName = brands[brandIdx].shortName || brands[brandIdx].name;
+      brandLabel = brandName + ' Logo';
+      brandHint = 'Upload a logo for ' + brandName + '. Each brand can have its own logo.';
+    }
+  } else {
+    brandLabel = 'LifeAI Logo';
+    brandHint = 'Upload a personal logo for LifeAI mode.';
+  }
+
   var html = '<div class="brand-logo-picker">';
-  html += '<div class="brand-logo-picker-label">Custom Logo</div>';
-  html += '<div class="brand-logo-picker-sublabel">Upload your brand logo to replace the default R symbol</div>';
-  
+  html += '<div class="brand-logo-picker-label">' + brandLabel + '</div>';
+  html += '<div class="brand-logo-picker-sublabel">' + brandHint + '</div>';
+
   // Preview and actions container
   html += '<div class="brand-logo-preview-container">';
-  
+
   // Logo preview
   html += '<div class="brand-logo-preview' + (hasLogo ? ' has-logo' : '') + '">';
   if (hasLogo) {
@@ -51117,7 +51245,7 @@ function renderBrandLogoPicker(containerId) {
     html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/><path d="M21 15l-5-5L5 21"/></svg>';
   }
   html += '</div>';
-  
+
   // Actions
   html += '<div class="brand-logo-actions">';
   html += '<input type="file" id="brandLogoInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml" style="display:none;" onchange="handleBrandLogoUpload(this)">';
@@ -51125,16 +51253,16 @@ function renderBrandLogoPicker(containerId) {
   html += icon('upload', {strokeWidth: 2});
   html += hasLogo ? 'Change Logo' : 'Upload Logo';
   html += '</button>';
-  
+
   if (hasLogo) {
     html += '<button class="brand-logo-reset-btn" onclick="resetBrandLogo()">';
     html += 'Reset to Default';
     html += '</button>';
   }
-  
+
   html += '</div>'; // .brand-logo-actions
   html += '</div>'; // .brand-logo-preview-container
-  
+
   // Size slider (only show when logo is uploaded)
   if (hasLogo) {
     html += '<div class="brand-logo-size-control">';
@@ -51145,12 +51273,12 @@ function renderBrandLogoPicker(containerId) {
     html += '<input type="range" class="brand-logo-size-slider" id="brandLogoSizeSlider" min="30" max="200" value="' + savedSize + '" oninput="handleBrandLogoSizeChange(this.value)">';
     html += '</div>';
   }
-  
+
   // Hint text
-  html += '<div class="brand-logo-hint">PNG, JPG, WebP, GIF, or SVG recommended. Max 2MB. Logo will appear in the sidebar.</div>';
-  
+  html += '<div class="brand-logo-hint">PNG, JPG, WebP, GIF, or SVG recommended. Max 2MB.</div>';
+
   html += '</div>'; // .brand-logo-picker
-  
+
   container.innerHTML = html;
 }
 
@@ -56321,7 +56449,7 @@ function init() {
   loadResponseCache();
   loadAutoPilotData();
 
-  // v12.1.2: Load sync settings
+  // v12.1.3: Load sync settings
   loadSyncSettings();
 
   // CRITICAL: Clear any residual conversation state on fresh load
@@ -56366,7 +56494,7 @@ function init() {
   initTodoCategories();
   initDeletedBrands();
   initCalendar();
-  initJournal(); // v12.1.2
+  initJournal(); // v12.1.3
   initScheduledPrompts();
   initScheduledTasksEngine(); // Start scheduled task execution engine
   updateAPIsStatus();
@@ -66530,7 +66658,7 @@ function renderFocus2Categories() {
     }
   });
 
-  // v12.1.2: Apply sorting if enabled
+  // v12.1.3: Apply sorting if enabled
   if (getCategorySortPreference() === 'alphabetical') {
     categories = categories.slice().sort(function(a, b) {
       return (a.name || '').localeCompare(b.name || '');
@@ -66585,7 +66713,7 @@ function renderFocus2Categories() {
     var iconKey = cat.icon || cat.name || 'default';
     var iconSvg = focus2CategoryIconLibrary[iconKey] || focus2CategoryIconLibrary['default'];
 
-    // v12.1.2: Support custom hex colors via inline style
+    // v12.1.3: Support custom hex colors via inline style
     var colorStyle = customHex ? ' style="--cat-color: ' + customHex + ';"' : '';
     html += '<div class="focus-2-category-card' + (isExpanded ? ' expanded' : '') + '" data-color="' + colorPreset + '" data-category="' + escapeHtml(cat.name) + '"' + colorStyle + ' onclick="toggleFocus2CategoryExpand(\'' + escapeHtml(cat.name) + '\', event)">';
     
@@ -66651,7 +66779,7 @@ function renderFocus2Categories() {
       html += '</div>';
     }
 
-    // v12.1.2: Create Automation button
+    // v12.1.3: Create Automation button
     html += '<button class="focus-2-create-automation-btn" onclick="event.stopPropagation(); showInlineAutomation(\'' + escapeHtml(cat.name) + '\')">';
     html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
     html += 'Create Automation';
@@ -67364,7 +67492,7 @@ function initFocus2DragDrop() {
 
 /**
  * v10.5.25: Render single task item in expanded category - click opens detail
- * v12.1.2: Added priority styling and recurrence badge
+ * v12.1.3: Added priority styling and recurrence badge
  */
 function renderFocus2CategoryTaskItem(task) {
   var completed = task.completed ? 'completed' : '';
@@ -67375,7 +67503,7 @@ function renderFocus2CategoryTaskItem(task) {
   var html = '<div class="focus-2-category-task-item ' + completed + priority + '" onclick="if(!event.target.closest(\'.focus-2-category-task-check\')){openFocus2TaskDetail(' + task.id + ');}">';
   html += '<div class="focus-2-category-task-check ' + (task.completed ? 'checked' : '') + '" onclick="quickToggleFocus2Task(' + task.id + ', event)">' + checkIcon + '</div>';
   html += '<div class="focus-2-category-task-text">' + escapeHtml(task.text);
-  // v12.1.2: Recurrence badge
+  // v12.1.3: Recurrence badge
   if (task.recurrence && task.recurrence.type && task.recurrence.type !== 'none') {
     var recLabel = task.recurrence.type === 'daily' ? 'Daily' :
                    task.recurrence.type === 'weekly' ? 'Weekly' :
@@ -67394,7 +67522,7 @@ function renderFocus2CategoryTaskItem(task) {
 
 /**
  * v10.5.25: Quick toggle task without opening detail
- * v12.1.2: Create next recurring task when completed
+ * v12.1.3: Create next recurring task when completed
  */
 function quickToggleFocus2Task(taskId, event) {
   event.stopPropagation();
@@ -67405,7 +67533,7 @@ function quickToggleFocus2Task(taskId, event) {
   task.completed = !task.completed;
   if (task.completed) {
     task.completedAt = new Date().toISOString();
-    // v12.1.2: Create next occurrence if recurring
+    // v12.1.3: Create next occurrence if recurring
     if (task.recurrence && task.recurrence.type && task.recurrence.type !== 'none') {
       createNextRecurringTask(task);
     }
@@ -67592,7 +67720,7 @@ function openFocus2TaskDetail(taskId) {
   if (!task) return;
 
   focus2CurrentTaskId = taskId;
-  window.currentFocus2TaskId = taskId; // v12.1.2: For priority/recurrence functions
+  window.currentFocus2TaskId = taskId; // v12.1.3: For priority/recurrence functions
   var modal = document.getElementById('focus2TaskDetailModal');
   if (!modal) return;
 
@@ -67601,13 +67729,13 @@ function openFocus2TaskDetail(taskId) {
   document.getElementById('focus2TaskDetailDate').value = task.date || '';
   document.getElementById('focus2TaskDetailNotes').value = task.notes || '';
 
-  // v12.1.2: Priority button state
+  // v12.1.3: Priority button state
   var priorityBtn = document.getElementById('focus2TaskDetailPriority');
   if (priorityBtn) {
     priorityBtn.classList.toggle('active', !!task.priority);
   }
 
-  // v12.1.2: Recurrence state
+  // v12.1.3: Recurrence state
   var recType = (task.recurrence && task.recurrence.type) || 'none';
   document.querySelectorAll('.focus-2-recurrence-btn').forEach(function(btn) {
     btn.classList.toggle('active', btn.getAttribute('data-recurrence') === recType);
@@ -67884,7 +68012,7 @@ function closeFocus2NewCategory() {
     });
   }
 
-  // v12.1.2: Reset custom color wheel
+  // v12.1.3: Reset custom color wheel
   window.focus2CustomColor = null;
   var colorWheelWrapper = document.getElementById('focus2ColorWheelWrapper');
   var colorWheelToggle = document.getElementById('focus2ColorWheelToggle');
@@ -67953,18 +68081,18 @@ function initFocus2ColorPicker() {
     btn.onclick = function() {
       buttons.forEach(function(b) { b.classList.remove('selected'); });
       btn.classList.add('selected');
-      // v12.1.2: Deselect custom color when preset selected
+      // v12.1.3: Deselect custom color when preset selected
       window.focus2CustomColor = null;
       var toggleBtn = document.getElementById('focus2ColorWheelToggle');
       if (toggleBtn) toggleBtn.classList.remove('active');
     };
   });
-  // v12.1.2: Initialize color wheel
+  // v12.1.3: Initialize color wheel
   initFocus2ColorWheel();
 }
 
 /**
- * v12.1.2: Color Wheel Implementation
+ * v12.1.3: Color Wheel Implementation
  */
 var focus2ColorWheelState = {
   hue: 0,
@@ -68214,7 +68342,7 @@ function saveFocus2NewCategory() {
   
   var name = nameInput.value.trim();
   var selectedColor = colorPicker.querySelector('.focus-2-color-btn.selected');
-  // v12.1.2: Support custom hex colors from color wheel
+  // v12.1.3: Support custom hex colors from color wheel
   var colorPreset = window.focus2CustomColor || (selectedColor ? selectedColor.getAttribute('data-color') : 'gold');
   var customHex = window.focus2CustomColor || null;
   var selectedIcon = window.focus2SelectedIcon || 'default';
@@ -68293,7 +68421,7 @@ function saveFocus2NewCategory() {
 }
 
 /**
- * v12.1.2: Edit existing category - inline editing within category card
+ * v12.1.3: Edit existing category - inline editing within category card
  */
 function editCategory(categoryName) {
   var categories = window.todoCategories || [];
@@ -68398,7 +68526,7 @@ function editCategory(categoryName) {
 }
 
 /**
- * v12.1.2: Select a preset color in inline edit
+ * v12.1.3: Select a preset color in inline edit
  */
 function selectInlineEditColor(colorName, customHex) {
   window.inlineEditState.selectedColor = colorName;
@@ -68420,7 +68548,7 @@ function selectInlineEditColor(colorName, customHex) {
 }
 
 /**
- * v12.1.2: Toggle inline color wheel
+ * v12.1.3: Toggle inline color wheel
  */
 function toggleInlineColorWheel() {
   var wrapper = document.getElementById('inlineColorWheelWrapper');
@@ -68441,7 +68569,7 @@ function toggleInlineColorWheel() {
 }
 
 /**
- * v12.1.2: Initialize inline color wheel
+ * v12.1.3: Initialize inline color wheel
  */
 function initInlineColorWheel() {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -68493,7 +68621,7 @@ function initInlineColorWheel() {
 }
 
 /**
- * v12.1.2: Draw inline color wheel
+ * v12.1.3: Draw inline color wheel
  */
 function drawInlineColorWheel(ctx) {
   var canvas = ctx.canvas;
@@ -68519,7 +68647,7 @@ function drawInlineColorWheel(ctx) {
 }
 
 /**
- * v12.1.2: Handle inline color wheel click
+ * v12.1.3: Handle inline color wheel click
  */
 function handleInlineColorWheelClick(e) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -68531,7 +68659,7 @@ function handleInlineColorWheelClick(e) {
 }
 
 /**
- * v12.1.2: Handle inline color wheel touch
+ * v12.1.3: Handle inline color wheel touch
  */
 function handleInlineColorWheelTouch(e) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -68544,7 +68672,7 @@ function handleInlineColorWheelTouch(e) {
 }
 
 /**
- * v12.1.2: Update color from wheel position
+ * v12.1.3: Update color from wheel position
  */
 function updateInlineColorFromPosition(x, y) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -68588,7 +68716,7 @@ function updateInlineColorFromPosition(x, y) {
 }
 
 /**
- * v12.1.2: Update color from hex input
+ * v12.1.3: Update color from hex input
  */
 function updateInlineColorFromHex() {
   var hexInput = document.getElementById('inlineColorHex');
@@ -68610,7 +68738,7 @@ function updateInlineColorFromHex() {
 }
 
 /**
- * v12.1.2: Cancel inline edit
+ * v12.1.3: Cancel inline edit
  */
 function cancelInlineEdit() {
   var card = document.querySelector('.focus-2-category-card.editing');
@@ -68623,7 +68751,7 @@ function cancelInlineEdit() {
 }
 
 /**
- * v12.1.2: Save inline edit
+ * v12.1.3: Save inline edit
  */
 function saveInlineEdit() {
   if (!window.inlineEditState) return;
@@ -69015,11 +69143,11 @@ function clearFocus2Notes() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1.2: JOURNAL SYSTEM
+// v12.1.3: JOURNAL SYSTEM
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1.2: Initialize journal
+ * v12.1.3: Initialize journal
  */
 function initJournal() {
   var saved = localStorage.getItem('roweos_journal');
@@ -69036,7 +69164,7 @@ function initJournal() {
 }
 
 /**
- * v12.1.2: Save journal
+ * v12.1.3: Save journal
  */
 function saveJournal() {
   localStorage.setItem('roweos_journal', JSON.stringify(window.journalEntries || []));
@@ -69046,7 +69174,7 @@ function saveJournal() {
 }
 
 /**
- * v12.1.2: Save Today's Notes to Journal
+ * v12.1.3: Save Today's Notes to Journal
  */
 function saveNotesToJournal() {
   var textarea = document.getElementById('focus2NotesInput');
@@ -69073,7 +69201,7 @@ function saveNotesToJournal() {
 }
 
 /**
- * v12.1.2: Update journal link visibility
+ * v12.1.3: Update journal link visibility
  */
 function updateJournalLink() {
   var link = document.getElementById('focus2JournalLink');
@@ -69083,7 +69211,7 @@ function updateJournalLink() {
 }
 
 /**
- * v12.1.2: Render journal entries
+ * v12.1.3: Render journal entries
  */
 function renderJournal() {
   var container = document.getElementById('journalEntriesList');
@@ -69120,7 +69248,7 @@ function renderJournal() {
 }
 
 /**
- * v12.1.2: Toggle journal entry expanded view
+ * v12.1.3: Toggle journal entry expanded view
  */
 function toggleJournalEntry(idx) {
   var el = document.getElementById('journalEntry' + idx);
@@ -69137,7 +69265,7 @@ function toggleJournalEntry(idx) {
 }
 
 /**
- * v12.1.2: Delete journal entry
+ * v12.1.3: Delete journal entry
  */
 function deleteJournalEntry(idx) {
   if (!confirm('Delete this journal entry?')) return;
@@ -69152,11 +69280,11 @@ function deleteJournalEntry(idx) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1.2: PRIORITY TASKS
+// v12.1.3: PRIORITY TASKS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1.2: Toggle task priority from detail modal
+ * v12.1.3: Toggle task priority from detail modal
  */
 function toggleFocus2TaskPriority() {
   var taskId = window.currentFocus2TaskId;
@@ -69179,11 +69307,11 @@ function toggleFocus2TaskPriority() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1.2: RECURRING TASKS
+// v12.1.3: RECURRING TASKS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1.2: Set task recurrence type
+ * v12.1.3: Set task recurrence type
  */
 function setTaskRecurrence(type) {
   var taskId = window.currentFocus2TaskId;
@@ -69222,7 +69350,7 @@ function setTaskRecurrence(type) {
 }
 
 /**
- * v12.1.2: Toggle day for weekly recurrence
+ * v12.1.3: Toggle day for weekly recurrence
  */
 function toggleRecurrenceDay(day) {
   var taskId = window.currentFocus2TaskId;
@@ -69248,7 +69376,7 @@ function toggleRecurrenceDay(day) {
 }
 
 /**
- * v12.1.2: Update recurrence interval
+ * v12.1.3: Update recurrence interval
  */
 function updateTaskRecurrenceInterval() {
   var taskId = window.currentFocus2TaskId;
@@ -69265,7 +69393,7 @@ function updateTaskRecurrenceInterval() {
 }
 
 /**
- * v12.1.2: Update recurrence unit
+ * v12.1.3: Update recurrence unit
  */
 function updateTaskRecurrenceUnit() {
   var taskId = window.currentFocus2TaskId;
@@ -69282,7 +69410,7 @@ function updateTaskRecurrenceUnit() {
 }
 
 /**
- * v12.1.2: Update recurrence end date
+ * v12.1.3: Update recurrence end date
  */
 function updateTaskRecurrenceEndDate() {
   var taskId = window.currentFocus2TaskId;
@@ -69299,7 +69427,7 @@ function updateTaskRecurrenceEndDate() {
 }
 
 /**
- * v12.1.2: Create next occurrence of recurring task when completed
+ * v12.1.3: Create next occurrence of recurring task when completed
  */
 function createNextRecurringTask(task) {
   if (!task.recurrence || task.recurrence.type === 'none') return;
@@ -69352,18 +69480,18 @@ function createNextRecurringTask(task) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1.2: CATEGORY SORTING
+// v12.1.3: CATEGORY SORTING
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1.2: Get category sort preference
+ * v12.1.3: Get category sort preference
  */
 function getCategorySortPreference() {
   return localStorage.getItem('roweos_category_sort') || 'manual';
 }
 
 /**
- * v12.1.2: Toggle category sort
+ * v12.1.3: Toggle category sort
  */
 function toggleCategorySort() {
   var current = getCategorySortPreference();
@@ -69379,7 +69507,7 @@ function toggleCategorySort() {
 }
 
 /**
- * v12.1.2: Sort categories
+ * v12.1.3: Sort categories
  */
 function getSortedCategories() {
   var categories = window.todoCategories || [];
@@ -69395,11 +69523,11 @@ function getSortedCategories() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v12.1.2: INLINE AUTOMATIONS
+// v12.1.3: INLINE AUTOMATIONS
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * v12.1.2: Show inline automation creator
+ * v12.1.3: Show inline automation creator
  */
 function showInlineAutomation(categoryName) {
   // Close any existing
@@ -69450,7 +69578,7 @@ function showInlineAutomation(categoryName) {
 }
 
 /**
- * v12.1.2: Save inline automation
+ * v12.1.3: Save inline automation
  */
 function saveInlineAutomation(categoryName) {
   var trigger = document.getElementById('inlineAutoTrigger')?.value || 'time';
@@ -75620,7 +75748,7 @@ function addMessageToThread(role, content) {
 }
 
 function runAgent() {
-  // v12.1.2: Mark chat activity to defer sync during active conversation
+  // v12.1.3: Mark chat activity to defer sync during active conversation
   if (typeof markChatActivity === 'function') markChatActivity();
 
   var command = document.getElementById('agentCommand').value;
@@ -78200,7 +78328,7 @@ if (document.readyState === 'loading') {
 // END MOBILE SYSTEM v2.0
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// v12.1.2: Handle swipe gestures for mobile sidebar
+// v12.1.3: Handle swipe gestures for mobile sidebar
 var touchStartX = 0;
 var touchStartY = 0;
 var touchEndX = 0;
@@ -78255,7 +78383,7 @@ function handleSwipe() {
   }
 }
 
-// v12.1.2: Mobile Navigation Preference
+// v12.1.3: Mobile Navigation Preference
 function getMobileNavPreference() {
   return localStorage.getItem('roweos_mobile_nav') || 'both';
 }
@@ -79203,14 +79331,14 @@ function getDeviceType() {
 // COMPREHENSIVE DATA SYNC
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// v12.1.2: Sync Settings - User controls for what data syncs
+// v12.1.3: Sync Settings - User controls for what data syncs
 var syncSettings = {
   conversations: true,      // Sync chat history (can be large)
   libraryContent: false,    // Sync full file contents (metadata always syncs)
   deferDuringChat: true     // Don't sync while actively chatting
 };
 
-// v12.1.2: Track chat activity for deferred sync
+// v12.1.3: Track chat activity for deferred sync
 var lastChatActivity = 0;
 var deferredSyncTimer = null;
 var CHAT_IDLE_THRESHOLD = 10000; // 10 seconds of idle before sync
@@ -79239,7 +79367,7 @@ function saveSyncSettings() {
 }
 
 function toggleSyncSetting(setting) {
-  // v12.1.2: Read from checkbox state
+  // v12.1.3: Read from checkbox state
   var checkbox = null;
   if (setting === 'conversations') {
     checkbox = document.getElementById('syncConversationsToggle');
@@ -79256,7 +79384,7 @@ function toggleSyncSetting(setting) {
 }
 
 function updateSyncSettingsUI() {
-  // v12.1.2: Update checkbox checked state
+  // v12.1.3: Update checkbox checked state
   var convToggle = document.getElementById('syncConversationsToggle');
   var libToggle = document.getElementById('syncLibraryContentToggle');
   var deferToggle = document.getElementById('syncDeferDuringChatToggle');
@@ -79272,7 +79400,7 @@ function updateSyncSettingsUI() {
   }
 }
 
-// v12.1.2: Mark chat activity for deferred sync
+// v12.1.3: Mark chat activity for deferred sync
 function markChatActivity() {
   lastChatActivity = Date.now();
   // Clear any pending deferred sync
@@ -79282,7 +79410,7 @@ function markChatActivity() {
   }
 }
 
-// v12.1.2: Request sync (may be deferred if chatting)
+// v12.1.3: Request sync (may be deferred if chatting)
 function requestSync() {
   if (!syncSettings.deferDuringChat) {
     // Immediate sync
@@ -79329,12 +79457,12 @@ async function syncToFirebase() {
     // showToast('Syncing to cloud...', 'info');
     updateSyncIndicator('syncing');
     
-    // v12.1.2: Only auto-trim if syncing conversations (the main cause of large data)
+    // v12.1.3: Only auto-trim if syncing conversations (the main cause of large data)
     if (syncSettings.conversations) {
       autoTrimDataForSync();
     }
 
-    // v12.1.2: Respect sync settings - skip conversations if disabled
+    // v12.1.3: Respect sync settings - skip conversations if disabled
     var conversationsData = {};
     if (syncSettings.conversations) {
       conversationsData = collectConversationsWithLimit();
@@ -79342,7 +79470,7 @@ async function syncToFirebase() {
       console.log('[Firebase Sync] Skipping conversations (disabled in settings)');
     }
 
-    // v12.1.2: Handle library content based on settings
+    // v12.1.3: Handle library content based on settings
     var brandLibrary = '{}';
     var lifeLibrary = '{"files":[],"folders":[]}';
 
@@ -80174,15 +80302,29 @@ function applyCloudData(data) {
     console.log('[Firebase] Loaded LifeAI data, userName:', data.lifeAI.userName, 'accentLight:', data.lifeAI.accentLightMode, 'accentDark:', data.lifeAI.accentDarkMode);
   }
   
-  // v11.5.4: Sync custom brand logo across devices
-  if (data.brandLogo) {
-    localStorage.setItem('roweos_custom_brand_logo', data.brandLogo.base64);
-    localStorage.setItem('roweos_custom_brand_logo_size', String(data.brandLogo.size || 100));
-    // Apply logo to sidebar immediately
-    if (typeof applyBrandLogo === 'function') {
-      applyBrandLogo(data.brandLogo.base64, data.brandLogo.size || 100);
+  // v12.1.3: Load per-brand/mode logos from Firebase
+  if (data.logos) {
+    // New per-brand/mode logo format
+    Object.keys(data.logos).forEach(function(logoKey) {
+      var logoData = data.logos[logoKey];
+      if (logoData && logoData.base64) {
+        localStorage.setItem(logoKey, logoData.base64);
+        localStorage.setItem(logoKey + '_size', String(logoData.size || 100));
+      }
+    });
+    console.log('[Firebase] Loaded per-brand logos:', Object.keys(data.logos).length);
+    // Apply current logo
+    if (typeof loadCurrentLogo === 'function') {
+      loadCurrentLogo();
     }
-    console.log('[Firebase] Loaded custom brand logo');
+  } else if (data.brandLogo) {
+    // Legacy single logo format - migrate to brand_0
+    localStorage.setItem('roweos_brand_0_logo', data.brandLogo.base64);
+    localStorage.setItem('roweos_brand_0_logo_size', String(data.brandLogo.size || 100));
+    if (typeof loadCurrentLogo === 'function') {
+      loadCurrentLogo();
+    }
+    console.log('[Firebase] Migrated legacy brand logo to brand_0');
   }
   
   lastCloudUpdate = data.meta?.lastUpdated?.toDate?.() || new Date();
@@ -84912,7 +85054,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.1.2 - ' + subtitle;
+  document.title = 'RoweOS v12.1.3 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -100778,11 +100920,9 @@ window.onload = init;
       if (pinBtn) pinBtn.title = 'Pin sidebar open (⌘\\)';
     }
     
-    // v11.5.4: Re-apply brand logo to ensure collapsed logo is updated
-    var savedLogo = localStorage.getItem('roweos_custom_brand_logo');
-    var savedSize = localStorage.getItem('roweos_custom_brand_logo_size') || '100';
-    if (savedLogo && typeof applyBrandLogo === 'function') {
-      applyBrandLogo(savedLogo, savedSize);
+    // v12.1.3: Re-apply brand logo to ensure collapsed logo is updated
+    if (typeof loadCurrentLogo === 'function') {
+      loadCurrentLogo();
     }
   }
 
@@ -100814,13 +100954,13 @@ window.onload = init;
   // Use pin button (⌘\) or settings dropdown to change sidebar state
 
   // ─── Hover Expand / Collapse (only when unpinned, desktop only) ───────
-  // v12.1.2: Helper to check if on mobile
+  // v12.1.3: Helper to check if on mobile
   function isMobileDevice() {
     return window.innerWidth <= 768 || ('ontouchstart' in window);
   }
 
   sidebar.addEventListener('mouseenter', function() {
-    if (isMobileDevice()) return;  // v12.1.2: Skip hover on mobile
+    if (isMobileDevice()) return;  // v12.1.3: Skip hover on mobile
     if (getState() !== 0) return;  // Skip hover if pinned in any state
     clearTimeout(hoverTimer);
     sidebar.classList.add('expanded');
@@ -100829,7 +100969,7 @@ window.onload = init;
   });
 
   sidebar.addEventListener('mouseleave', function() {
-    if (isMobileDevice()) return;  // v12.1.2: Skip hover on mobile
+    if (isMobileDevice()) return;  // v12.1.3: Skip hover on mobile
     if (getState() !== 0) return;
     hoverTimer = setTimeout(function() {
       sidebar.classList.remove('expanded');
