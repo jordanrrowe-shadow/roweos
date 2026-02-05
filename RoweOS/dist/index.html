@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.0.9 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.1 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -14948,7 +14948,7 @@
       box-shadow: 0 0 0 2px var(--bg-primary);
     }
 
-    /* v12.0.9: Color Wheel Picker */
+    /* v12.1: Color Wheel Picker */
     .focus-2-color-wheel-container {
       display: flex;
       align-items: center;
@@ -15678,7 +15678,431 @@
       animation: slideDown 0.2s ease;
     }
 
-    /* v12.0.9: Inline Category Edit */
+    /* v12.1: Priority Tasks */
+    .focus-2-category-task-item.priority {
+      border-left: 3px solid var(--accent);
+      background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
+    }
+
+    .focus-2-category-task-item.priority .focus-2-category-task-text {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .focus-2-task-priority-btn {
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: all 0.15s ease;
+    }
+
+    .focus-2-task-priority-btn:hover {
+      opacity: 0.8;
+    }
+
+    .focus-2-task-priority-btn.active {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    .focus-2-task-priority-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* v12.1: Recurring Task Indicator */
+    .focus-2-task-recurrence-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      background: rgba(106, 184, 148, 0.15);
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      color: #6ab894;
+      margin-left: 8px;
+    }
+
+    .focus-2-task-recurrence-badge svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    /* v12.1: Recurrence Picker in Task Detail */
+    .focus-2-recurrence-picker {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .focus-2-recurrence-type {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .focus-2-recurrence-btn {
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .focus-2-recurrence-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .focus-2-recurrence-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    .focus-2-recurrence-options {
+      display: none;
+      padding: var(--space-3);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-2);
+    }
+
+    .focus-2-recurrence-options.visible {
+      display: block;
+    }
+
+    .focus-2-recurrence-days {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: var(--space-2);
+    }
+
+    .focus-2-recurrence-day {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      font-size: var(--text-xs);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .focus-2-recurrence-day:hover {
+      border-color: var(--accent);
+    }
+
+    .focus-2-recurrence-day.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+
+    /* v12.1: Category Sort Controls */
+    .focus-2-categories-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-4);
+      padding: 0 var(--space-2);
+    }
+
+    .focus-2-sort-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .focus-2-sort-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+
+    .focus-2-sort-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* v12.1: Inline Automation Creator */
+    .focus-2-automation-inline {
+      padding: var(--space-4);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      margin-top: var(--space-3);
+      border: 1px solid var(--border-color);
+    }
+
+    .focus-2-automation-inline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-3);
+    }
+
+    .focus-2-automation-inline-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .focus-2-automation-field {
+      margin-bottom: var(--space-3);
+    }
+
+    .focus-2-automation-field label {
+      display: block;
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-1);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .focus-2-automation-field select,
+    .focus-2-automation-field input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: var(--text-sm);
+    }
+
+    .focus-2-create-automation-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      margin-top: var(--space-3);
+    }
+
+    .focus-2-create-automation-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* v12.1: Journal Book UI */
+    .journal-container {
+      padding: var(--space-6);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .journal-book {
+      background: linear-gradient(135deg, #1a1816 0%, #0f0e0d 100%);
+      border-radius: 4px 16px 16px 4px;
+      box-shadow:
+        -4px 0 8px rgba(0,0,0,0.3),
+        0 8px 32px rgba(0,0,0,0.4),
+        inset 2px 0 4px rgba(255,255,255,0.03);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .journal-book::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      background: linear-gradient(90deg,
+        rgba(139, 90, 43, 0.3) 0%,
+        rgba(139, 90, 43, 0.15) 50%,
+        transparent 100%);
+      border-right: 2px solid rgba(139, 90, 43, 0.2);
+    }
+
+    .journal-spine {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background: linear-gradient(90deg, #5c3d2e 0%, #8b5a2b 50%, #5c3d2e 100%);
+      box-shadow: 2px 0 4px rgba(0,0,0,0.3);
+    }
+
+    .journal-header {
+      padding: var(--space-5) var(--space-6);
+      padding-left: 60px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .journal-title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'Great Vibes', cursive;
+      letter-spacing: 1px;
+    }
+
+    .journal-entries {
+      padding: var(--space-4) var(--space-6);
+      padding-left: 60px;
+      min-height: 400px;
+    }
+
+    .journal-entry {
+      padding: var(--space-4);
+      margin-bottom: var(--space-4);
+      background: rgba(255,255,255,0.02);
+      border-radius: var(--radius-lg);
+      border-left: 3px solid var(--accent);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .journal-entry:hover {
+      background: rgba(255,255,255,0.04);
+      transform: translateX(4px);
+    }
+
+    .journal-entry-date {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-bottom: var(--space-2);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .journal-entry-preview {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .journal-entry-expanded {
+      display: none;
+      padding: var(--space-5);
+      background: rgba(255,255,255,0.02);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-4);
+    }
+
+    .journal-entry-expanded.show {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+
+    .journal-entry-full {
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .journal-entry-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--space-4);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .journal-empty {
+      text-align: center;
+      padding: var(--space-8);
+      color: var(--text-muted);
+    }
+
+    .journal-empty-icon {
+      font-size: 48px;
+      opacity: 0.3;
+      margin-bottom: var(--space-4);
+    }
+
+    /* v12.1: Save to Journal Button */
+    .focus-2-save-journal-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .focus-2-save-journal-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .focus-2-journal-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--accent);
+      font-size: var(--text-sm);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .focus-2-journal-link:hover {
+      text-decoration: underline;
+    }
+
+    /* v12.1: Journal Mobile */
+    @media (max-width: 768px) {
+      .journal-book {
+        border-radius: 0;
+        margin: -16px;
+      }
+
+      .journal-book::before {
+        width: 24px;
+      }
+
+      .journal-header,
+      .journal-entries {
+        padding-left: 40px;
+      }
+
+      .journal-entry {
+        padding: var(--space-3);
+      }
+    }
+
+    /* v12.1: Inline Category Edit */
     .focus-2-category-card.editing .focus-2-category-expanded {
       display: none;
     }
@@ -26299,7 +26723,7 @@
       font-size: var(--text-3xl);
     }
 
-    /* v12.0.9: Mobile Navigation Preferences */
+    /* v12.1: Mobile Navigation Preferences */
     html[data-mobile-nav="sidebar"] .mobile-nav,
     html[data-mobile-nav="sidebar"] .liquid-nav {
       display: none !important;
@@ -26310,7 +26734,7 @@
       display: none !important;
     }
 
-    /* v12.0.9: Swipe indicator on left edge */
+    /* v12.1: Swipe indicator on left edge */
     .mobile-swipe-indicator {
       display: none;
       position: fixed;
@@ -26335,12 +26759,12 @@
         display: none;
       }
 
-      /* v12.0.9: Show mobile-only settings on mobile */
+      /* v12.1: Show mobile-only settings on mobile */
       .mobile-only-setting {
         display: flex !important;
       }
 
-      /* v12.0.9: Prevent sidebar hover behavior on mobile */
+      /* v12.1: Prevent sidebar hover behavior on mobile */
       .sidebar:hover {
         width: 64px !important;
       }
@@ -26354,7 +26778,7 @@
         transform: translateX(-100%) !important;
       }
 
-      /* v12.0.9: Sidebar overlay for mobile */
+      /* v12.1: Sidebar overlay for mobile */
       .sidebar-mobile-overlay.show {
         display: block !important;
         position: fixed;
@@ -37359,7 +37783,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.0.9</div>
+      <div class="launch-version" id="launchVersionTag">v12.1</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -37668,14 +38092,14 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.9</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.1</div>
       
     </div>
   </div>
   
   <!-- Sidebar Mobile Overlay -->
   <div class="sidebar-mobile-overlay" id="sidebarMobileOverlay" onclick="closeMobileSidebar()"></div>
-  <!-- v12.0.9: Visual hint for swipe-to-open sidebar -->
+  <!-- v12.1: Visual hint for swipe-to-open sidebar -->
   <div class="mobile-swipe-indicator"></div>
 
   <!-- Legacy Mobile Elements (hidden by CSS) -->
@@ -37860,7 +38284,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.9</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.1</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -38718,7 +39142,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.0.9</span>
+          <span class="sidebar-version">v12.1</span>
         </div>
       </div>
     </div>
@@ -39028,7 +39452,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.0.9 • Built for the future</p>
+        <p>RoweOS v12.1 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39085,7 +39509,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.0.9</p>
+            <p class="onboarding-welcome-version">v12.1</p>
           </div>
         </div>
       </div>
@@ -42111,9 +42535,22 @@ service cloud.firestore {
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
                   Today's Notes
                 </div>
-                <button class="focus-2-widget-action" onclick="clearFocus2Notes()">Clear</button>
+                <div style="display: flex; gap: 8px;">
+                  <button class="focus-2-save-journal-btn" onclick="saveNotesToJournal()" title="Save to Journal">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    Save
+                  </button>
+                  <button class="focus-2-widget-action" onclick="clearFocus2Notes()">Clear</button>
+                </div>
               </div>
               <textarea class="focus-2-notes-input" id="focus2NotesInput" placeholder="Capture thoughts, ideas, or quick notes..." oninput="saveFocus2Notes()"></textarea>
+              <!-- v12.1: Link to Journal if entries exist -->
+              <div id="focus2JournalLink" style="display: none; margin-top: 8px;">
+                <a class="focus-2-journal-link" onclick="showView('journal')">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                  View Journal
+                </a>
+              </div>
             </div>
             
             <!-- Stats Card -->
@@ -42283,6 +42720,13 @@ service cloud.firestore {
                   <button class="focus-2-task-detail-close" onclick="closeFocus2TaskDetail()">×</button>
                 </div>
                 <div class="focus-2-task-detail-body">
+                  <!-- v12.1: Priority Toggle -->
+                  <div class="focus-2-task-detail-row" style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="margin: 0;">Priority</label>
+                    <button class="focus-2-task-priority-btn" id="focus2TaskDetailPriority" onclick="toggleFocus2TaskPriority()">
+                      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </button>
+                  </div>
                   <div class="focus-2-task-detail-row">
                     <label>Category</label>
                     <select id="focus2TaskDetailCategory" onchange="updateFocus2TaskCategory()"></select>
@@ -42294,6 +42738,48 @@ service cloud.firestore {
                   <div class="focus-2-task-detail-row">
                     <label>Due Date</label>
                     <input type="date" id="focus2TaskDetailDate" onchange="updateFocus2TaskDate()">
+                  </div>
+                  <!-- v12.1: Recurrence Settings -->
+                  <div class="focus-2-task-detail-row">
+                    <label>Repeat</label>
+                    <div class="focus-2-recurrence-picker">
+                      <div class="focus-2-recurrence-type">
+                        <button class="focus-2-recurrence-btn" data-recurrence="none" onclick="setTaskRecurrence('none')">None</button>
+                        <button class="focus-2-recurrence-btn" data-recurrence="daily" onclick="setTaskRecurrence('daily')">Daily</button>
+                        <button class="focus-2-recurrence-btn" data-recurrence="weekly" onclick="setTaskRecurrence('weekly')">Weekly</button>
+                        <button class="focus-2-recurrence-btn" data-recurrence="monthly" onclick="setTaskRecurrence('monthly')">Monthly</button>
+                        <button class="focus-2-recurrence-btn" data-recurrence="custom" onclick="setTaskRecurrence('custom')">Custom</button>
+                      </div>
+                      <div class="focus-2-recurrence-options" id="focus2RecurrenceOptions">
+                        <div id="focus2RecurrenceWeeklyDays" style="display: none;">
+                          <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 8px;">Repeat on:</div>
+                          <div class="focus-2-recurrence-days">
+                            <div class="focus-2-recurrence-day" data-day="0" onclick="toggleRecurrenceDay(0)">S</div>
+                            <div class="focus-2-recurrence-day" data-day="1" onclick="toggleRecurrenceDay(1)">M</div>
+                            <div class="focus-2-recurrence-day" data-day="2" onclick="toggleRecurrenceDay(2)">T</div>
+                            <div class="focus-2-recurrence-day" data-day="3" onclick="toggleRecurrenceDay(3)">W</div>
+                            <div class="focus-2-recurrence-day" data-day="4" onclick="toggleRecurrenceDay(4)">T</div>
+                            <div class="focus-2-recurrence-day" data-day="5" onclick="toggleRecurrenceDay(5)">F</div>
+                            <div class="focus-2-recurrence-day" data-day="6" onclick="toggleRecurrenceDay(6)">S</div>
+                          </div>
+                        </div>
+                        <div id="focus2RecurrenceCustom" style="display: none; margin-top: 8px;">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: var(--text-sm); color: var(--text-secondary);">Every</span>
+                            <input type="number" id="focus2RecurrenceInterval" value="1" min="1" max="365" style="width: 60px; padding: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);" onchange="updateTaskRecurrenceInterval()">
+                            <select id="focus2RecurrenceUnit" style="padding: 6px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);" onchange="updateTaskRecurrenceUnit()">
+                              <option value="days">days</option>
+                              <option value="weeks">weeks</option>
+                              <option value="months">months</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div style="margin-top: 12px;">
+                          <div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 4px;">End date (optional)</div>
+                          <input type="date" id="focus2RecurrenceEndDate" style="width: 100%; padding: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);" onchange="updateTaskRecurrenceEndDate()">
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div class="focus-2-task-detail-row">
                     <label>Notes</label>
@@ -44292,6 +44778,33 @@ service cloud.firestore {
         </div>
       </div>
 
+      <!-- v12.1: Journal View -->
+      <div id="journalView" class="panel-view hidden">
+        <div class="panel">
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item"><a href="#" onclick="showView('pulse'); return false;">Focus</a></span>
+            <span class="breadcrumb-item active">Journal</span>
+          </div>
+
+          <div class="journal-container">
+            <div class="journal-book">
+              <div class="journal-spine"></div>
+              <div class="journal-header">
+                <div class="journal-title">My Journal</div>
+                <button class="focus-2-widget-action" onclick="showView('pulse')">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Back to Focus
+                </button>
+              </div>
+              <div class="journal-entries" id="journalEntriesList">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Settings View -->
       <div id="settingsView" class="panel-view hidden">
         <div class="panel">
@@ -44523,7 +45036,7 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.0.9: Sync Settings - Control what data syncs -->
+            <!-- v12.1: Sync Settings - Control what data syncs -->
             <div class="settings-row-desc" style="padding: 12px 16px 8px; color: var(--text-muted); font-size: var(--text-sm); border-top: 1px solid var(--border-color); margin-top: 8px;">
               Sync Settings — Control what data syncs to prevent trimming
             </div>
@@ -44893,7 +45406,7 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.0.9: Mobile Navigation Preference -->
+            <!-- v12.1: Mobile Navigation Preference -->
             <div class="settings-row mobile-only-setting" style="display: none;">
               <div class="settings-row-left">
                 <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
@@ -45075,7 +45588,7 @@ service cloud.firestore {
                 </svg>
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.9</div>
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.1</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -48672,16 +49185,21 @@ function showView(view) {
   });
   
   // Hide all views
-  var allViews = ['agent', 'studio', 'identity', 'signal', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'commerce'];
+  var allViews = ['agent', 'studio', 'identity', 'signal', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'commerce', 'journal'];
   allViews.forEach(function(v) {
     var el = document.getElementById(v + 'View');
     if (el) el.classList.add('hidden');
   });
-  
+
   // Show selected view
   var viewEl = document.getElementById(view + 'View');
   if (viewEl) {
     viewEl.classList.remove('hidden');
+  }
+
+  // v12.1: Render journal when switching to journal view
+  if (view === 'journal') {
+    renderJournal();
   }
   
   // Special handling
@@ -49872,6 +50390,7 @@ function switchToBrandMode() {
   initTodoCategories();
   initTodos();
   initCalendar();
+  initJournal(); // v12.1
 
   // v10.5.25: FORCE hide Life containers and show Brand containers immediately
   var lifeContainer = document.getElementById('lifeIdentityCardsContainer');
@@ -49941,6 +50460,7 @@ function switchToLifeMode(profileIdx) {
   initTodoCategories();
   initTodos();
   initCalendar();
+  initJournal(); // v12.1
 
   // v10.5.25: FORCE hide Brand containers and show Life containers immediately
   var lifeContainer = document.getElementById('lifeIdentityCardsContainer');
@@ -55731,7 +56251,7 @@ function init() {
   loadResponseCache();
   loadAutoPilotData();
 
-  // v12.0.9: Load sync settings
+  // v12.1: Load sync settings
   loadSyncSettings();
 
   // CRITICAL: Clear any residual conversation state on fresh load
@@ -55776,6 +56296,7 @@ function init() {
   initTodoCategories();
   initDeletedBrands();
   initCalendar();
+  initJournal(); // v12.1
   initScheduledPrompts();
   initScheduledTasksEngine(); // Start scheduled task execution engine
   updateAPIsStatus();
@@ -65938,6 +66459,13 @@ function renderFocus2Categories() {
       return cat.isLife !== true;
     }
   });
+
+  // v12.1: Apply sorting if enabled
+  if (getCategorySortPreference() === 'alphabetical') {
+    categories = categories.slice().sort(function(a, b) {
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
   
   // v10.5.25: Fixed filtering - BrandAI gets all regular tasks, LifeAI only gets _life tagged
   // BrandAI mode: Tasks for current brand OR unassigned tasks (typical workflow)
@@ -65987,7 +66515,7 @@ function renderFocus2Categories() {
     var iconKey = cat.icon || cat.name || 'default';
     var iconSvg = focus2CategoryIconLibrary[iconKey] || focus2CategoryIconLibrary['default'];
 
-    // v12.0.9: Support custom hex colors via inline style
+    // v12.1: Support custom hex colors via inline style
     var colorStyle = customHex ? ' style="--cat-color: ' + customHex + ';"' : '';
     html += '<div class="focus-2-category-card' + (isExpanded ? ' expanded' : '') + '" data-color="' + colorPreset + '" data-category="' + escapeHtml(cat.name) + '"' + colorStyle + ' onclick="toggleFocus2CategoryExpand(\'' + escapeHtml(cat.name) + '\', event)">';
     
@@ -66052,7 +66580,13 @@ function renderFocus2Categories() {
       });
       html += '</div>';
     }
-    
+
+    // v12.1: Create Automation button
+    html += '<button class="focus-2-create-automation-btn" onclick="event.stopPropagation(); showInlineAutomation(\'' + escapeHtml(cat.name) + '\')">';
+    html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
+    html += 'Create Automation';
+    html += '</button>';
+
     html += '</div>'; // expanded
     html += '</div>'; // card
   });
@@ -66760,34 +67294,52 @@ function initFocus2DragDrop() {
 
 /**
  * v10.5.25: Render single task item in expanded category - click opens detail
+ * v12.1: Added priority styling and recurrence badge
  */
 function renderFocus2CategoryTaskItem(task) {
   var completed = task.completed ? 'completed' : '';
+  var priority = task.priority ? ' priority' : '';
   var checkIcon = task.completed ? icon('check', {size: 12, strokeWidth: 3}) : '';
-  
+
   // v10.5.25: Fixed - parent onclick checks if click was on checkbox
-  var html = '<div class="focus-2-category-task-item ' + completed + '" onclick="if(!event.target.closest(\'.focus-2-category-task-check\')){openFocus2TaskDetail(' + task.id + ');}">';
+  var html = '<div class="focus-2-category-task-item ' + completed + priority + '" onclick="if(!event.target.closest(\'.focus-2-category-task-check\')){openFocus2TaskDetail(' + task.id + ');}">';
   html += '<div class="focus-2-category-task-check ' + (task.completed ? 'checked' : '') + '" onclick="quickToggleFocus2Task(' + task.id + ', event)">' + checkIcon + '</div>';
-  html += '<div class="focus-2-category-task-text">' + escapeHtml(task.text) + '</div>';
+  html += '<div class="focus-2-category-task-text">' + escapeHtml(task.text);
+  // v12.1: Recurrence badge
+  if (task.recurrence && task.recurrence.type && task.recurrence.type !== 'none') {
+    var recLabel = task.recurrence.type === 'daily' ? 'Daily' :
+                   task.recurrence.type === 'weekly' ? 'Weekly' :
+                   task.recurrence.type === 'monthly' ? 'Monthly' : 'Repeats';
+    html += '<span class="focus-2-task-recurrence-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>' + recLabel + '</span>';
+  }
+  html += '</div>';
   if (task.date) {
     var d = new Date(task.date + 'T12:00:00');
     html += '<div class="focus-2-category-task-date">' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '</div>';
   }
   html += '</div>';
-  
+
   return html;
 }
 
 /**
  * v10.5.25: Quick toggle task without opening detail
+ * v12.1: Create next recurring task when completed
  */
 function quickToggleFocus2Task(taskId, event) {
   event.stopPropagation();
   var task = todos.find(function(t) { return t.id === taskId; });
   if (!task) return;
-  
+
+  var wasCompleted = task.completed;
   task.completed = !task.completed;
-  if (task.completed) task.completedAt = new Date().toISOString();
+  if (task.completed) {
+    task.completedAt = new Date().toISOString();
+    // v12.1: Create next occurrence if recurring
+    if (task.recurrence && task.recurrence.type && task.recurrence.type !== 'none') {
+      createNextRecurringTask(task);
+    }
+  }
   saveTodos();
   renderFocus2Categories();
   updateFocus2Stats();
@@ -66968,16 +67520,59 @@ var focus2CurrentTaskId = null;
 function openFocus2TaskDetail(taskId) {
   var task = todos.find(function(t) { return t.id === taskId; });
   if (!task) return;
-  
+
   focus2CurrentTaskId = taskId;
+  window.currentFocus2TaskId = taskId; // v12.1: For priority/recurrence functions
   var modal = document.getElementById('focus2TaskDetailModal');
   if (!modal) return;
-  
+
   // Populate fields
   document.getElementById('focus2TaskDetailTitle').value = task.text || '';
   document.getElementById('focus2TaskDetailDate').value = task.date || '';
   document.getElementById('focus2TaskDetailNotes').value = task.notes || '';
-  
+
+  // v12.1: Priority button state
+  var priorityBtn = document.getElementById('focus2TaskDetailPriority');
+  if (priorityBtn) {
+    priorityBtn.classList.toggle('active', !!task.priority);
+  }
+
+  // v12.1: Recurrence state
+  var recType = (task.recurrence && task.recurrence.type) || 'none';
+  document.querySelectorAll('.focus-2-recurrence-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-recurrence') === recType);
+  });
+
+  var optionsEl = document.getElementById('focus2RecurrenceOptions');
+  var weeklyDays = document.getElementById('focus2RecurrenceWeeklyDays');
+  var customEl = document.getElementById('focus2RecurrenceCustom');
+
+  if (optionsEl) optionsEl.classList.toggle('visible', recType !== 'none');
+  if (weeklyDays) weeklyDays.style.display = recType === 'weekly' ? 'block' : 'none';
+  if (customEl) customEl.style.display = recType === 'custom' ? 'block' : 'none';
+
+  // Set recurrence days if weekly
+  if (task.recurrence && task.recurrence.days) {
+    document.querySelectorAll('.focus-2-recurrence-day').forEach(function(dayEl) {
+      var day = parseInt(dayEl.getAttribute('data-day'));
+      dayEl.classList.toggle('selected', task.recurrence.days.indexOf(day) !== -1);
+    });
+  } else {
+    document.querySelectorAll('.focus-2-recurrence-day').forEach(function(dayEl) {
+      dayEl.classList.remove('selected');
+    });
+  }
+
+  // Set custom interval/unit
+  if (task.recurrence) {
+    var intervalInput = document.getElementById('focus2RecurrenceInterval');
+    var unitSelect = document.getElementById('focus2RecurrenceUnit');
+    var endDateInput = document.getElementById('focus2RecurrenceEndDate');
+    if (intervalInput) intervalInput.value = task.recurrence.interval || 1;
+    if (unitSelect) unitSelect.value = task.recurrence.unit || 'days';
+    if (endDateInput) endDateInput.value = task.recurrence.endDate || '';
+  }
+
   // Check box
   var checkEl = document.getElementById('focus2TaskDetailCheck');
   if (checkEl) {
@@ -66989,7 +67584,7 @@ function openFocus2TaskDetail(taskId) {
       checkEl.innerHTML = '';
     }
   }
-  
+
   // Populate category select
   var catSelect = document.getElementById('focus2TaskDetailCategory');
   if (catSelect) {
@@ -67000,7 +67595,7 @@ function openFocus2TaskDetail(taskId) {
       catSelect.innerHTML += '<option value="' + escapeHtml(cat.name) + '"' + selected + '>' + escapeHtml(cat.name) + '</option>';
     });
   }
-  
+
   // Populate brand select
   var brandSelect = document.getElementById('focus2TaskDetailBrand');
   if (brandSelect) {
@@ -67012,9 +67607,9 @@ function openFocus2TaskDetail(taskId) {
       brandSelect.innerHTML += '<option value="' + escapeHtml(b.name) + '"' + selected + '>' + escapeHtml(b.name) + '</option>';
     });
   }
-  
+
   modal.style.display = 'block';
-  
+
   // v10.5.25: Show backdrop on mobile
   var backdrop = document.getElementById('focus2TaskDetailBackdrop');
   if (backdrop) backdrop.style.display = 'block';
@@ -67219,7 +67814,7 @@ function closeFocus2NewCategory() {
     });
   }
 
-  // v12.0.9: Reset custom color wheel
+  // v12.1: Reset custom color wheel
   window.focus2CustomColor = null;
   var colorWheelWrapper = document.getElementById('focus2ColorWheelWrapper');
   var colorWheelToggle = document.getElementById('focus2ColorWheelToggle');
@@ -67288,18 +67883,18 @@ function initFocus2ColorPicker() {
     btn.onclick = function() {
       buttons.forEach(function(b) { b.classList.remove('selected'); });
       btn.classList.add('selected');
-      // v12.0.9: Deselect custom color when preset selected
+      // v12.1: Deselect custom color when preset selected
       window.focus2CustomColor = null;
       var toggleBtn = document.getElementById('focus2ColorWheelToggle');
       if (toggleBtn) toggleBtn.classList.remove('active');
     };
   });
-  // v12.0.9: Initialize color wheel
+  // v12.1: Initialize color wheel
   initFocus2ColorWheel();
 }
 
 /**
- * v12.0.9: Color Wheel Implementation
+ * v12.1: Color Wheel Implementation
  */
 var focus2ColorWheelState = {
   hue: 0,
@@ -67549,7 +68144,7 @@ function saveFocus2NewCategory() {
   
   var name = nameInput.value.trim();
   var selectedColor = colorPicker.querySelector('.focus-2-color-btn.selected');
-  // v12.0.9: Support custom hex colors from color wheel
+  // v12.1: Support custom hex colors from color wheel
   var colorPreset = window.focus2CustomColor || (selectedColor ? selectedColor.getAttribute('data-color') : 'gold');
   var customHex = window.focus2CustomColor || null;
   var selectedIcon = window.focus2SelectedIcon || 'default';
@@ -67628,7 +68223,7 @@ function saveFocus2NewCategory() {
 }
 
 /**
- * v12.0.9: Edit existing category - inline editing within category card
+ * v12.1: Edit existing category - inline editing within category card
  */
 function editCategory(categoryName) {
   var categories = window.todoCategories || [];
@@ -67733,7 +68328,7 @@ function editCategory(categoryName) {
 }
 
 /**
- * v12.0.9: Select a preset color in inline edit
+ * v12.1: Select a preset color in inline edit
  */
 function selectInlineEditColor(colorName, customHex) {
   window.inlineEditState.selectedColor = colorName;
@@ -67755,7 +68350,7 @@ function selectInlineEditColor(colorName, customHex) {
 }
 
 /**
- * v12.0.9: Toggle inline color wheel
+ * v12.1: Toggle inline color wheel
  */
 function toggleInlineColorWheel() {
   var wrapper = document.getElementById('inlineColorWheelWrapper');
@@ -67776,7 +68371,7 @@ function toggleInlineColorWheel() {
 }
 
 /**
- * v12.0.9: Initialize inline color wheel
+ * v12.1: Initialize inline color wheel
  */
 function initInlineColorWheel() {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -67828,7 +68423,7 @@ function initInlineColorWheel() {
 }
 
 /**
- * v12.0.9: Draw inline color wheel
+ * v12.1: Draw inline color wheel
  */
 function drawInlineColorWheel(ctx) {
   var canvas = ctx.canvas;
@@ -67854,7 +68449,7 @@ function drawInlineColorWheel(ctx) {
 }
 
 /**
- * v12.0.9: Handle inline color wheel click
+ * v12.1: Handle inline color wheel click
  */
 function handleInlineColorWheelClick(e) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -67866,7 +68461,7 @@ function handleInlineColorWheelClick(e) {
 }
 
 /**
- * v12.0.9: Handle inline color wheel touch
+ * v12.1: Handle inline color wheel touch
  */
 function handleInlineColorWheelTouch(e) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -67879,7 +68474,7 @@ function handleInlineColorWheelTouch(e) {
 }
 
 /**
- * v12.0.9: Update color from wheel position
+ * v12.1: Update color from wheel position
  */
 function updateInlineColorFromPosition(x, y) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -67923,7 +68518,7 @@ function updateInlineColorFromPosition(x, y) {
 }
 
 /**
- * v12.0.9: Update color from hex input
+ * v12.1: Update color from hex input
  */
 function updateInlineColorFromHex() {
   var hexInput = document.getElementById('inlineColorHex');
@@ -67945,7 +68540,7 @@ function updateInlineColorFromHex() {
 }
 
 /**
- * v12.0.9: Cancel inline edit
+ * v12.1: Cancel inline edit
  */
 function cancelInlineEdit() {
   var card = document.querySelector('.focus-2-category-card.editing');
@@ -67958,7 +68553,7 @@ function cancelInlineEdit() {
 }
 
 /**
- * v12.0.9: Save inline edit
+ * v12.1: Save inline edit
  */
 function saveInlineEdit() {
   if (!window.inlineEditState) return;
@@ -68347,6 +68942,475 @@ function clearFocus2Notes() {
       saveFocus2Notes();
     }
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// v12.1: JOURNAL SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * v12.1: Initialize journal
+ */
+function initJournal() {
+  var saved = localStorage.getItem('roweos_journal');
+  if (saved) {
+    try {
+      window.journalEntries = JSON.parse(saved);
+    } catch(e) {
+      window.journalEntries = [];
+    }
+  } else {
+    window.journalEntries = [];
+  }
+  updateJournalLink();
+}
+
+/**
+ * v12.1: Save journal
+ */
+function saveJournal() {
+  localStorage.setItem('roweos_journal', JSON.stringify(window.journalEntries || []));
+  if (typeof syncToFirebase === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
+    syncToFirebase();
+  }
+}
+
+/**
+ * v12.1: Save Today's Notes to Journal
+ */
+function saveNotesToJournal() {
+  var textarea = document.getElementById('focus2NotesInput');
+  if (!textarea || !textarea.value.trim()) {
+    showToast('No notes to save', 'warning');
+    return;
+  }
+
+  var now = new Date();
+  var entry = {
+    id: Date.now(),
+    date: now.toISOString(),
+    dateFormatted: now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+    content: textarea.value.trim(),
+    mode: getCurrentMode()
+  };
+
+  if (!window.journalEntries) window.journalEntries = [];
+  window.journalEntries.unshift(entry);
+  saveJournal();
+  updateJournalLink();
+
+  showToast('Saved to Journal', 'success');
+}
+
+/**
+ * v12.1: Update journal link visibility
+ */
+function updateJournalLink() {
+  var link = document.getElementById('focus2JournalLink');
+  if (link) {
+    link.style.display = (window.journalEntries && window.journalEntries.length > 0) ? 'block' : 'none';
+  }
+}
+
+/**
+ * v12.1: Render journal entries
+ */
+function renderJournal() {
+  var container = document.getElementById('journalEntriesList');
+  if (!container) return;
+
+  var entries = window.journalEntries || [];
+
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="journal-empty">' +
+      '<div class="journal-empty-icon"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>' +
+      '<div>No journal entries yet.</div>' +
+      '<div style="margin-top: 8px; font-size: var(--text-sm);">Save notes from Focus to start your journal.</div>' +
+      '</div>';
+    return;
+  }
+
+  var html = '';
+  entries.forEach(function(entry, idx) {
+    var preview = entry.content.substring(0, 150) + (entry.content.length > 150 ? '...' : '');
+    html += '<div class="journal-entry" onclick="toggleJournalEntry(' + idx + ')" data-entry-idx="' + idx + '">';
+    html += '<div class="journal-entry-date">' + escapeHtml(entry.dateFormatted) + '</div>';
+    html += '<div class="journal-entry-preview">' + escapeHtml(preview) + '</div>';
+    html += '</div>';
+    html += '<div class="journal-entry-expanded" id="journalEntry' + idx + '">';
+    html += '<div class="journal-entry-full">' + escapeHtml(entry.content) + '</div>';
+    html += '<div class="journal-entry-meta">';
+    html += '<span style="font-size: var(--text-xs); color: var(--text-muted);">' + (entry.mode === 'life' ? 'LifeAI' : 'BrandAI') + '</span>';
+    html += '<button class="focus-2-btn focus-2-btn-danger" style="padding: 6px 12px; font-size: var(--text-xs);" onclick="event.stopPropagation(); deleteJournalEntry(' + idx + ')">Delete</button>';
+    html += '</div>';
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+/**
+ * v12.1: Toggle journal entry expanded view
+ */
+function toggleJournalEntry(idx) {
+  var el = document.getElementById('journalEntry' + idx);
+  if (el) {
+    var isShown = el.classList.contains('show');
+    // Close all others
+    document.querySelectorAll('.journal-entry-expanded').forEach(function(e) {
+      e.classList.remove('show');
+    });
+    if (!isShown) {
+      el.classList.add('show');
+    }
+  }
+}
+
+/**
+ * v12.1: Delete journal entry
+ */
+function deleteJournalEntry(idx) {
+  if (!confirm('Delete this journal entry?')) return;
+
+  if (window.journalEntries && window.journalEntries[idx]) {
+    window.journalEntries.splice(idx, 1);
+    saveJournal();
+    renderJournal();
+    updateJournalLink();
+    showToast('Entry deleted', 'success');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// v12.1: PRIORITY TASKS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * v12.1: Toggle task priority from detail modal
+ */
+function toggleFocus2TaskPriority() {
+  var taskId = window.currentFocus2TaskId;
+  if (!taskId) return;
+
+  var task = todos.find(function(t) { return t.id === taskId; });
+  if (!task) return;
+
+  task.priority = !task.priority;
+  saveTodos();
+
+  // Update button state
+  var btn = document.getElementById('focus2TaskDetailPriority');
+  if (btn) {
+    btn.classList.toggle('active', task.priority);
+  }
+
+  renderFocus2Categories();
+  showToast(task.priority ? 'Marked as priority' : 'Priority removed', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// v12.1: RECURRING TASKS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * v12.1: Set task recurrence type
+ */
+function setTaskRecurrence(type) {
+  var taskId = window.currentFocus2TaskId;
+  if (!taskId) return;
+
+  var task = todos.find(function(t) { return t.id === taskId; });
+  if (!task) return;
+
+  // Update button states
+  document.querySelectorAll('.focus-2-recurrence-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-recurrence') === type);
+  });
+
+  // Show/hide options
+  var optionsEl = document.getElementById('focus2RecurrenceOptions');
+  var weeklyDays = document.getElementById('focus2RecurrenceWeeklyDays');
+  var customEl = document.getElementById('focus2RecurrenceCustom');
+
+  if (type === 'none') {
+    task.recurrence = null;
+    if (optionsEl) optionsEl.classList.remove('visible');
+  } else {
+    if (!task.recurrence) {
+      task.recurrence = { type: type, interval: 1, days: [], endDate: null };
+    } else {
+      task.recurrence.type = type;
+    }
+
+    if (optionsEl) optionsEl.classList.add('visible');
+    if (weeklyDays) weeklyDays.style.display = type === 'weekly' ? 'block' : 'none';
+    if (customEl) customEl.style.display = type === 'custom' ? 'block' : 'none';
+  }
+
+  saveTodos();
+  renderFocus2Categories();
+}
+
+/**
+ * v12.1: Toggle day for weekly recurrence
+ */
+function toggleRecurrenceDay(day) {
+  var taskId = window.currentFocus2TaskId;
+  if (!taskId) return;
+
+  var task = todos.find(function(t) { return t.id === taskId; });
+  if (!task || !task.recurrence) return;
+
+  if (!task.recurrence.days) task.recurrence.days = [];
+
+  var idx = task.recurrence.days.indexOf(day);
+  if (idx === -1) {
+    task.recurrence.days.push(day);
+  } else {
+    task.recurrence.days.splice(idx, 1);
+  }
+
+  // Update UI
+  var dayEl = document.querySelector('.focus-2-recurrence-day[data-day="' + day + '"]');
+  if (dayEl) dayEl.classList.toggle('selected', idx === -1);
+
+  saveTodos();
+}
+
+/**
+ * v12.1: Update recurrence interval
+ */
+function updateTaskRecurrenceInterval() {
+  var taskId = window.currentFocus2TaskId;
+  if (!taskId) return;
+
+  var task = todos.find(function(t) { return t.id === taskId; });
+  if (!task || !task.recurrence) return;
+
+  var input = document.getElementById('focus2RecurrenceInterval');
+  if (input) {
+    task.recurrence.interval = parseInt(input.value) || 1;
+    saveTodos();
+  }
+}
+
+/**
+ * v12.1: Update recurrence unit
+ */
+function updateTaskRecurrenceUnit() {
+  var taskId = window.currentFocus2TaskId;
+  if (!taskId) return;
+
+  var task = todos.find(function(t) { return t.id === taskId; });
+  if (!task || !task.recurrence) return;
+
+  var select = document.getElementById('focus2RecurrenceUnit');
+  if (select) {
+    task.recurrence.unit = select.value;
+    saveTodos();
+  }
+}
+
+/**
+ * v12.1: Update recurrence end date
+ */
+function updateTaskRecurrenceEndDate() {
+  var taskId = window.currentFocus2TaskId;
+  if (!taskId) return;
+
+  var task = todos.find(function(t) { return t.id === taskId; });
+  if (!task || !task.recurrence) return;
+
+  var input = document.getElementById('focus2RecurrenceEndDate');
+  if (input) {
+    task.recurrence.endDate = input.value || null;
+    saveTodos();
+  }
+}
+
+/**
+ * v12.1: Create next occurrence of recurring task when completed
+ */
+function createNextRecurringTask(task) {
+  if (!task.recurrence || task.recurrence.type === 'none') return;
+
+  var today = new Date();
+  var nextDate = new Date(task.date || today);
+
+  // Calculate next date based on recurrence type
+  switch (task.recurrence.type) {
+    case 'daily':
+      nextDate.setDate(nextDate.getDate() + 1);
+      break;
+    case 'weekly':
+      nextDate.setDate(nextDate.getDate() + 7);
+      break;
+    case 'monthly':
+      nextDate.setMonth(nextDate.getMonth() + 1);
+      break;
+    case 'custom':
+      var interval = task.recurrence.interval || 1;
+      var unit = task.recurrence.unit || 'days';
+      if (unit === 'days') nextDate.setDate(nextDate.getDate() + interval);
+      else if (unit === 'weeks') nextDate.setDate(nextDate.getDate() + (interval * 7));
+      else if (unit === 'months') nextDate.setMonth(nextDate.getMonth() + interval);
+      break;
+  }
+
+  // Check if past end date
+  if (task.recurrence.endDate && nextDate > new Date(task.recurrence.endDate)) {
+    return; // Don't create if past end date
+  }
+
+  // Create new task
+  var newTask = {
+    id: Date.now(),
+    text: task.text,
+    date: nextDate.toISOString().slice(0, 10),
+    category: task.category,
+    brand: task.brand,
+    isLife: task.isLife,
+    notes: task.notes,
+    priority: task.priority,
+    recurrence: JSON.parse(JSON.stringify(task.recurrence)),
+    completed: false,
+    createdAt: new Date().toISOString()
+  };
+
+  todos.push(newTask);
+  saveTodos();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// v12.1: CATEGORY SORTING
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * v12.1: Get category sort preference
+ */
+function getCategorySortPreference() {
+  return localStorage.getItem('roweos_category_sort') || 'manual';
+}
+
+/**
+ * v12.1: Toggle category sort
+ */
+function toggleCategorySort() {
+  var current = getCategorySortPreference();
+  var next = current === 'manual' ? 'alphabetical' : 'manual';
+  localStorage.setItem('roweos_category_sort', next);
+
+  // Update button state
+  var btn = document.querySelector('.focus-2-sort-btn');
+  if (btn) btn.classList.toggle('active', next === 'alphabetical');
+
+  renderFocus2Categories();
+  showToast(next === 'alphabetical' ? 'Sorted A-Z' : 'Manual order', 'success');
+}
+
+/**
+ * v12.1: Sort categories
+ */
+function getSortedCategories() {
+  var categories = window.todoCategories || [];
+  var sortPref = getCategorySortPreference();
+
+  if (sortPref === 'alphabetical') {
+    return categories.slice().sort(function(a, b) {
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }
+
+  return categories;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// v12.1: INLINE AUTOMATIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * v12.1: Show inline automation creator
+ */
+function showInlineAutomation(categoryName) {
+  // Close any existing
+  document.querySelectorAll('.focus-2-automation-inline').forEach(function(el) {
+    el.remove();
+  });
+
+  var card = document.querySelector('.focus-2-category-card[data-category="' + categoryName.replace(/"/g, '\\"') + '"]');
+  if (!card) return;
+
+  var html = '<div class="focus-2-automation-inline" onclick="event.stopPropagation()">';
+  html += '<div class="focus-2-automation-inline-header">';
+  html += '<div class="focus-2-automation-inline-title">Quick Automation</div>';
+  html += '<button onclick="event.stopPropagation(); this.closest(\'.focus-2-automation-inline\').remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;">×</button>';
+  html += '</div>';
+  html += '<div class="focus-2-automation-field">';
+  html += '<label>When</label>';
+  html += '<select id="inlineAutoTrigger">';
+  html += '<option value="time">At a specific time</option>';
+  html += '<option value="complete">When task completed</option>';
+  html += '<option value="daily">Daily</option>';
+  html += '<option value="weekly">Weekly</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '<div class="focus-2-automation-field">';
+  html += '<label>Then</label>';
+  html += '<select id="inlineAutoAction">';
+  html += '<option value="notify">Send notification</option>';
+  html += '<option value="create">Create a task</option>';
+  html += '<option value="message">Send to AI</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '<div class="focus-2-automation-field" id="inlineAutoTimeField">';
+  html += '<label>Time</label>';
+  html += '<input type="time" id="inlineAutoTime" value="09:00">';
+  html += '</div>';
+  html += '<div class="focus-2-automation-field">';
+  html += '<label>Description</label>';
+  html += '<input type="text" id="inlineAutoDesc" placeholder="e.g., Review ' + escapeHtml(categoryName) + ' tasks">';
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px;margin-top:var(--space-3);">';
+  html += '<button class="focus-2-btn" onclick="event.stopPropagation(); this.closest(\'.focus-2-automation-inline\').remove()">Cancel</button>';
+  html += '<button class="focus-2-btn focus-2-btn-primary" onclick="event.stopPropagation(); saveInlineAutomation(\'' + escapeHtml(categoryName) + '\')">Create</button>';
+  html += '</div>';
+  html += '</div>';
+
+  card.insertAdjacentHTML('beforeend', html);
+}
+
+/**
+ * v12.1: Save inline automation
+ */
+function saveInlineAutomation(categoryName) {
+  var trigger = document.getElementById('inlineAutoTrigger')?.value || 'time';
+  var action = document.getElementById('inlineAutoAction')?.value || 'notify';
+  var time = document.getElementById('inlineAutoTime')?.value || '09:00';
+  var desc = document.getElementById('inlineAutoDesc')?.value || 'Automation for ' + categoryName;
+
+  var automation = {
+    id: Date.now(),
+    name: desc,
+    trigger: trigger,
+    action: action,
+    time: time,
+    category: categoryName,
+    enabled: true,
+    mode: getCurrentMode(),
+    createdAt: new Date().toISOString()
+  };
+
+  // Get existing automations
+  var automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+  automations.push(automation);
+  localStorage.setItem('roweos_automations', JSON.stringify(automations));
+
+  // Close the inline form
+  document.querySelectorAll('.focus-2-automation-inline').forEach(function(el) {
+    el.remove();
+  });
+
+  showToast('Automation created', 'success');
 }
 
 /**
@@ -74486,7 +75550,7 @@ function addMessageToThread(role, content) {
 }
 
 function runAgent() {
-  // v12.0.9: Mark chat activity to defer sync during active conversation
+  // v12.1: Mark chat activity to defer sync during active conversation
   if (typeof markChatActivity === 'function') markChatActivity();
 
   var command = document.getElementById('agentCommand').value;
@@ -77066,7 +78130,7 @@ if (document.readyState === 'loading') {
 // END MOBILE SYSTEM v2.0
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// v12.0.9: Handle swipe gestures for mobile sidebar
+// v12.1: Handle swipe gestures for mobile sidebar
 var touchStartX = 0;
 var touchStartY = 0;
 var touchEndX = 0;
@@ -77121,7 +78185,7 @@ function handleSwipe() {
   }
 }
 
-// v12.0.9: Mobile Navigation Preference
+// v12.1: Mobile Navigation Preference
 function getMobileNavPreference() {
   return localStorage.getItem('roweos_mobile_nav') || 'both';
 }
@@ -78069,14 +79133,14 @@ function getDeviceType() {
 // COMPREHENSIVE DATA SYNC
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// v12.0.9: Sync Settings - User controls for what data syncs
+// v12.1: Sync Settings - User controls for what data syncs
 var syncSettings = {
   conversations: true,      // Sync chat history (can be large)
   libraryContent: false,    // Sync full file contents (metadata always syncs)
   deferDuringChat: true     // Don't sync while actively chatting
 };
 
-// v12.0.9: Track chat activity for deferred sync
+// v12.1: Track chat activity for deferred sync
 var lastChatActivity = 0;
 var deferredSyncTimer = null;
 var CHAT_IDLE_THRESHOLD = 10000; // 10 seconds of idle before sync
@@ -78105,7 +79169,7 @@ function saveSyncSettings() {
 }
 
 function toggleSyncSetting(setting) {
-  // v12.0.9: Read from checkbox state
+  // v12.1: Read from checkbox state
   var checkbox = null;
   if (setting === 'conversations') {
     checkbox = document.getElementById('syncConversationsToggle');
@@ -78122,7 +79186,7 @@ function toggleSyncSetting(setting) {
 }
 
 function updateSyncSettingsUI() {
-  // v12.0.9: Update checkbox checked state
+  // v12.1: Update checkbox checked state
   var convToggle = document.getElementById('syncConversationsToggle');
   var libToggle = document.getElementById('syncLibraryContentToggle');
   var deferToggle = document.getElementById('syncDeferDuringChatToggle');
@@ -78138,7 +79202,7 @@ function updateSyncSettingsUI() {
   }
 }
 
-// v12.0.9: Mark chat activity for deferred sync
+// v12.1: Mark chat activity for deferred sync
 function markChatActivity() {
   lastChatActivity = Date.now();
   // Clear any pending deferred sync
@@ -78148,7 +79212,7 @@ function markChatActivity() {
   }
 }
 
-// v12.0.9: Request sync (may be deferred if chatting)
+// v12.1: Request sync (may be deferred if chatting)
 function requestSync() {
   if (!syncSettings.deferDuringChat) {
     // Immediate sync
@@ -78195,12 +79259,12 @@ async function syncToFirebase() {
     // showToast('Syncing to cloud...', 'info');
     updateSyncIndicator('syncing');
     
-    // v12.0.9: Only auto-trim if syncing conversations (the main cause of large data)
+    // v12.1: Only auto-trim if syncing conversations (the main cause of large data)
     if (syncSettings.conversations) {
       autoTrimDataForSync();
     }
 
-    // v12.0.9: Respect sync settings - skip conversations if disabled
+    // v12.1: Respect sync settings - skip conversations if disabled
     var conversationsData = {};
     if (syncSettings.conversations) {
       conversationsData = collectConversationsWithLimit();
@@ -78208,7 +79272,7 @@ async function syncToFirebase() {
       console.log('[Firebase Sync] Skipping conversations (disabled in settings)');
     }
 
-    // v12.0.9: Handle library content based on settings
+    // v12.1: Handle library content based on settings
     var brandLibrary = '{}';
     var lifeLibrary = '{"files":[],"folders":[]}';
 
@@ -83778,7 +84842,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.0.9 - ' + subtitle;
+  document.title = 'RoweOS v12.1 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -99680,13 +100744,13 @@ window.onload = init;
   // Use pin button (⌘\) or settings dropdown to change sidebar state
 
   // ─── Hover Expand / Collapse (only when unpinned, desktop only) ───────
-  // v12.0.9: Helper to check if on mobile
+  // v12.1: Helper to check if on mobile
   function isMobileDevice() {
     return window.innerWidth <= 768 || ('ontouchstart' in window);
   }
 
   sidebar.addEventListener('mouseenter', function() {
-    if (isMobileDevice()) return;  // v12.0.9: Skip hover on mobile
+    if (isMobileDevice()) return;  // v12.1: Skip hover on mobile
     if (getState() !== 0) return;  // Skip hover if pinned in any state
     clearTimeout(hoverTimer);
     sidebar.classList.add('expanded');
@@ -99695,7 +100759,7 @@ window.onload = init;
   });
 
   sidebar.addEventListener('mouseleave', function() {
-    if (isMobileDevice()) return;  // v12.0.9: Skip hover on mobile
+    if (isMobileDevice()) return;  // v12.1: Skip hover on mobile
     if (getState() !== 0) return;
     hoverTimer = setTimeout(function() {
       sidebar.classList.remove('expanded');
