@@ -9,11 +9,11 @@ cd "$PROJECT_DIR"
 
 echo "=== RoweOS Deploy ==="
 
-# 1. Extract current version from index.html (in extracted folder or zip)
+# 1. Extract current version from title tag in index.html
 if [ -f "RoweOS/dist/index.html" ]; then
-    CURRENT_VERSION=$(grep -o "v[0-9]*\.[0-9]*\.[0-9]*" RoweOS/dist/index.html | head -1)
+    CURRENT_VERSION=$(grep -o '<title>RoweOS v[^<]*' RoweOS/dist/index.html | head -1 | sed 's/<title>RoweOS //' | sed 's/ -.*//')
 else
-    CURRENT_VERSION=$(unzip -p RoweOS.zip "RoweOS/dist/index.html" | grep -o "v[0-9]*\.[0-9]*\.[0-9]*" | head -1)
+    CURRENT_VERSION=$(unzip -p RoweOS.zip "RoweOS/dist/index.html" | grep -o '<title>RoweOS v[^<]*' | head -1 | sed 's/<title>RoweOS //' | sed 's/ -.*//')
 fi
 
 if [ -z "$CURRENT_VERSION" ]; then
@@ -34,8 +34,8 @@ echo "Line count: $LINE_COUNT"
 
 # 3. Update CLAUDE.md with current version and line count
 if [ -f "CLAUDE.md" ]; then
-    # Update version in quick reference
-    sed -i '' "s/Version:  v[0-9]*\.[0-9]*\.[0-9]*/Version:  $CURRENT_VERSION/" CLAUDE.md
+    # Update version in quick reference (supports both v12.0.9 and v12.1 formats)
+    sed -i '' "s/Version:  v[0-9]*\.[0-9]*\(\.[0-9]*\)*/Version:  $CURRENT_VERSION/" CLAUDE.md
 
     # Update line count in quick reference
     sed -i '' "s/index.html ([0-9,]* lines)/index.html ($LINE_COUNT lines)/" CLAUDE.md
