@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.0.8 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.0.9 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -14948,7 +14948,7 @@
       box-shadow: 0 0 0 2px var(--bg-primary);
     }
 
-    /* v12.0.8: Color Wheel Picker */
+    /* v12.0.9: Color Wheel Picker */
     .focus-2-color-wheel-container {
       display: flex;
       align-items: center;
@@ -15678,7 +15678,7 @@
       animation: slideDown 0.2s ease;
     }
 
-    /* v12.0.8: Inline Category Edit */
+    /* v12.0.9: Inline Category Edit */
     .focus-2-category-card.editing .focus-2-category-expanded {
       display: none;
     }
@@ -26298,7 +26298,75 @@
     .mobile-nav-item .nav-icon {
       font-size: var(--text-3xl);
     }
-    
+
+    /* v12.0.9: Mobile Navigation Preferences */
+    html[data-mobile-nav="sidebar"] .mobile-nav,
+    html[data-mobile-nav="sidebar"] .liquid-nav {
+      display: none !important;
+    }
+
+    html[data-mobile-nav="bottom"] .sidebar-mobile-overlay,
+    html[data-mobile-nav="bottom"] .sidebar.mobile-open {
+      display: none !important;
+    }
+
+    /* v12.0.9: Swipe indicator on left edge */
+    .mobile-swipe-indicator {
+      display: none;
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--accent), transparent);
+      border-radius: 0 4px 4px 0;
+      opacity: 0.3;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-swipe-indicator {
+        display: block;
+      }
+
+      html[data-mobile-nav="bottom"] .mobile-swipe-indicator {
+        display: none;
+      }
+
+      /* v12.0.9: Show mobile-only settings on mobile */
+      .mobile-only-setting {
+        display: flex !important;
+      }
+
+      /* v12.0.9: Prevent sidebar hover behavior on mobile */
+      .sidebar:hover {
+        width: 64px !important;
+      }
+
+      .sidebar.mobile-open {
+        width: 280px !important;
+        transform: translateX(0) !important;
+      }
+
+      .sidebar:not(.mobile-open) {
+        transform: translateX(-100%) !important;
+      }
+
+      /* v12.0.9: Sidebar overlay for mobile */
+      .sidebar-mobile-overlay.show {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 999;
+      }
+    }
+
     /* Mobile Slide-Out Menu */
     .mobile-menu-overlay {
       display: none;
@@ -37291,7 +37359,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.0.8</div>
+      <div class="launch-version" id="launchVersionTag">v12.0.9</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -37600,14 +37668,16 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.8</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.9</div>
       
     </div>
   </div>
   
   <!-- Sidebar Mobile Overlay -->
   <div class="sidebar-mobile-overlay" id="sidebarMobileOverlay" onclick="closeMobileSidebar()"></div>
-  
+  <!-- v12.0.9: Visual hint for swipe-to-open sidebar -->
+  <div class="mobile-swipe-indicator"></div>
+
   <!-- Legacy Mobile Elements (hidden by CSS) -->
   <div class="mobile-header" id="mobileHeader" style="display:none;"></div>
   <nav class="mobile-nav" style="display:none;"></nav>
@@ -37790,7 +37860,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.8</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.9</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -38648,7 +38718,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.0.8</span>
+          <span class="sidebar-version">v12.0.9</span>
         </div>
       </div>
     </div>
@@ -38958,7 +39028,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.0.8 • Built for the future</p>
+        <p>RoweOS v12.0.9 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39015,7 +39085,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.0.8</p>
+            <p class="onboarding-welcome-version">v12.0.9</p>
           </div>
         </div>
       </div>
@@ -44453,7 +44523,7 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.0.8: Sync Settings - Control what data syncs -->
+            <!-- v12.0.9: Sync Settings - Control what data syncs -->
             <div class="settings-row-desc" style="padding: 12px 16px 8px; color: var(--text-muted); font-size: var(--text-sm); border-top: 1px solid var(--border-color); margin-top: 8px;">
               Sync Settings — Control what data syncs to prevent trimming
             </div>
@@ -44822,7 +44892,28 @@ service cloud.firestore {
                 </select>
               </div>
             </div>
-            
+
+            <!-- v12.0.9: Mobile Navigation Preference -->
+            <div class="settings-row mobile-only-setting" style="display: none;">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M12 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Mobile Navigation</div>
+                  <div class="settings-row-desc">Choose navigation style on mobile devices</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <select id="mobileNavPreferenceSelect" onchange="changeMobileNavPreference(this.value)" style="padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-sm); color: var(--text-primary); font-size: var(--text-base); cursor: pointer;">
+                  <option value="both">Both (Bottom + Sidebar)</option>
+                  <option value="bottom">Bottom Nav Only</option>
+                  <option value="sidebar">Sidebar Only (Swipe)</option>
+                </select>
+              </div>
+            </div>
+
             <div class="settings-row" onclick="openModal('shortcutsCustomModal')">
               <div class="settings-row-left">
                 <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
@@ -44984,7 +45075,7 @@ service cloud.firestore {
                 </svg>
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.8</div>
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.9</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -55640,7 +55731,7 @@ function init() {
   loadResponseCache();
   loadAutoPilotData();
 
-  // v12.0.8: Load sync settings
+  // v12.0.9: Load sync settings
   loadSyncSettings();
 
   // CRITICAL: Clear any residual conversation state on fresh load
@@ -65896,7 +65987,7 @@ function renderFocus2Categories() {
     var iconKey = cat.icon || cat.name || 'default';
     var iconSvg = focus2CategoryIconLibrary[iconKey] || focus2CategoryIconLibrary['default'];
 
-    // v12.0.8: Support custom hex colors via inline style
+    // v12.0.9: Support custom hex colors via inline style
     var colorStyle = customHex ? ' style="--cat-color: ' + customHex + ';"' : '';
     html += '<div class="focus-2-category-card' + (isExpanded ? ' expanded' : '') + '" data-color="' + colorPreset + '" data-category="' + escapeHtml(cat.name) + '"' + colorStyle + ' onclick="toggleFocus2CategoryExpand(\'' + escapeHtml(cat.name) + '\', event)">';
     
@@ -67128,7 +67219,7 @@ function closeFocus2NewCategory() {
     });
   }
 
-  // v12.0.8: Reset custom color wheel
+  // v12.0.9: Reset custom color wheel
   window.focus2CustomColor = null;
   var colorWheelWrapper = document.getElementById('focus2ColorWheelWrapper');
   var colorWheelToggle = document.getElementById('focus2ColorWheelToggle');
@@ -67197,18 +67288,18 @@ function initFocus2ColorPicker() {
     btn.onclick = function() {
       buttons.forEach(function(b) { b.classList.remove('selected'); });
       btn.classList.add('selected');
-      // v12.0.8: Deselect custom color when preset selected
+      // v12.0.9: Deselect custom color when preset selected
       window.focus2CustomColor = null;
       var toggleBtn = document.getElementById('focus2ColorWheelToggle');
       if (toggleBtn) toggleBtn.classList.remove('active');
     };
   });
-  // v12.0.8: Initialize color wheel
+  // v12.0.9: Initialize color wheel
   initFocus2ColorWheel();
 }
 
 /**
- * v12.0.8: Color Wheel Implementation
+ * v12.0.9: Color Wheel Implementation
  */
 var focus2ColorWheelState = {
   hue: 0,
@@ -67458,7 +67549,7 @@ function saveFocus2NewCategory() {
   
   var name = nameInput.value.trim();
   var selectedColor = colorPicker.querySelector('.focus-2-color-btn.selected');
-  // v12.0.8: Support custom hex colors from color wheel
+  // v12.0.9: Support custom hex colors from color wheel
   var colorPreset = window.focus2CustomColor || (selectedColor ? selectedColor.getAttribute('data-color') : 'gold');
   var customHex = window.focus2CustomColor || null;
   var selectedIcon = window.focus2SelectedIcon || 'default';
@@ -67537,7 +67628,7 @@ function saveFocus2NewCategory() {
 }
 
 /**
- * v12.0.8: Edit existing category - inline editing within category card
+ * v12.0.9: Edit existing category - inline editing within category card
  */
 function editCategory(categoryName) {
   var categories = window.todoCategories || [];
@@ -67642,7 +67733,7 @@ function editCategory(categoryName) {
 }
 
 /**
- * v12.0.8: Select a preset color in inline edit
+ * v12.0.9: Select a preset color in inline edit
  */
 function selectInlineEditColor(colorName, customHex) {
   window.inlineEditState.selectedColor = colorName;
@@ -67664,7 +67755,7 @@ function selectInlineEditColor(colorName, customHex) {
 }
 
 /**
- * v12.0.8: Toggle inline color wheel
+ * v12.0.9: Toggle inline color wheel
  */
 function toggleInlineColorWheel() {
   var wrapper = document.getElementById('inlineColorWheelWrapper');
@@ -67685,7 +67776,7 @@ function toggleInlineColorWheel() {
 }
 
 /**
- * v12.0.8: Initialize inline color wheel
+ * v12.0.9: Initialize inline color wheel
  */
 function initInlineColorWheel() {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -67737,7 +67828,7 @@ function initInlineColorWheel() {
 }
 
 /**
- * v12.0.8: Draw inline color wheel
+ * v12.0.9: Draw inline color wheel
  */
 function drawInlineColorWheel(ctx) {
   var canvas = ctx.canvas;
@@ -67763,7 +67854,7 @@ function drawInlineColorWheel(ctx) {
 }
 
 /**
- * v12.0.8: Handle inline color wheel click
+ * v12.0.9: Handle inline color wheel click
  */
 function handleInlineColorWheelClick(e) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -67775,7 +67866,7 @@ function handleInlineColorWheelClick(e) {
 }
 
 /**
- * v12.0.8: Handle inline color wheel touch
+ * v12.0.9: Handle inline color wheel touch
  */
 function handleInlineColorWheelTouch(e) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -67788,7 +67879,7 @@ function handleInlineColorWheelTouch(e) {
 }
 
 /**
- * v12.0.8: Update color from wheel position
+ * v12.0.9: Update color from wheel position
  */
 function updateInlineColorFromPosition(x, y) {
   var canvas = document.getElementById('inlineColorWheelCanvas');
@@ -67832,7 +67923,7 @@ function updateInlineColorFromPosition(x, y) {
 }
 
 /**
- * v12.0.8: Update color from hex input
+ * v12.0.9: Update color from hex input
  */
 function updateInlineColorFromHex() {
   var hexInput = document.getElementById('inlineColorHex');
@@ -67854,7 +67945,7 @@ function updateInlineColorFromHex() {
 }
 
 /**
- * v12.0.8: Cancel inline edit
+ * v12.0.9: Cancel inline edit
  */
 function cancelInlineEdit() {
   var card = document.querySelector('.focus-2-category-card.editing');
@@ -67867,7 +67958,7 @@ function cancelInlineEdit() {
 }
 
 /**
- * v12.0.8: Save inline edit
+ * v12.0.9: Save inline edit
  */
 function saveInlineEdit() {
   if (!window.inlineEditState) return;
@@ -74395,7 +74486,7 @@ function addMessageToThread(role, content) {
 }
 
 function runAgent() {
-  // v12.0.8: Mark chat activity to defer sync during active conversation
+  // v12.0.9: Mark chat activity to defer sync during active conversation
   if (typeof markChatActivity === 'function') markChatActivity();
 
   var command = document.getElementById('agentCommand').value;
@@ -76975,33 +77066,86 @@ if (document.readyState === 'loading') {
 // END MOBILE SYSTEM v2.0
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Handle swipe gestures for mobile menu
+// v12.0.9: Handle swipe gestures for mobile sidebar
 var touchStartX = 0;
+var touchStartY = 0;
 var touchEndX = 0;
+var touchEndY = 0;
 
 document.addEventListener('touchstart', function(e) {
   touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
 }, { passive: true });
 
 document.addEventListener('touchend', function(e) {
   touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
   handleSwipe();
 }, { passive: true });
 
 function handleSwipe() {
-  var swipeThreshold = 80;
+  var swipeThreshold = 50;
+  var edgeThreshold = 30; // Distance from edge to trigger swipe
+  var horizontalSwipe = touchEndX - touchStartX;
+  var verticalSwipe = Math.abs(touchEndY - touchStartY);
+
+  // Only handle if horizontal swipe is greater than vertical (not scrolling)
+  if (verticalSwipe > Math.abs(horizontalSwipe)) return;
+
+  var sidebar = document.querySelector('.sidebar');
+  var isSidebarOpen = sidebar && sidebar.classList.contains('mobile-open');
+
+  // Swipe right from left edge to open sidebar
+  if (touchStartX < edgeThreshold && horizontalSwipe > swipeThreshold && !isSidebarOpen) {
+    openMobileSidebar();
+    return;
+  }
+
+  // Swipe left to close sidebar
+  if (isSidebarOpen && horizontalSwipe < -swipeThreshold) {
+    closeMobileSidebar();
+    return;
+  }
+
+  // Legacy: Swipe left from right edge to open menu
   var menu = document.getElementById('mobileMenu');
-  var isOpen = menu.classList.contains('show');
-  
-  // Swipe left to open menu (from right edge)
-  if (touchStartX > window.innerWidth - 30 && touchStartX - touchEndX > swipeThreshold && !isOpen) {
+  var isMenuOpen = menu && menu.classList.contains('show');
+
+  if (touchStartX > window.innerWidth - edgeThreshold && horizontalSwipe < -swipeThreshold && !isMenuOpen) {
     toggleMobileMenu();
   }
-  
+
   // Swipe right to close menu
-  if (touchEndX - touchStartX > swipeThreshold && isOpen) {
+  if (isMenuOpen && horizontalSwipe > swipeThreshold) {
     closeMobileMenu();
   }
+}
+
+// v12.0.9: Mobile Navigation Preference
+function getMobileNavPreference() {
+  return localStorage.getItem('roweos_mobile_nav') || 'both';
+}
+
+function changeMobileNavPreference(value) {
+  localStorage.setItem('roweos_mobile_nav', value);
+  applyMobileNavPreference();
+  showToast('Mobile navigation updated', 'success');
+}
+
+function applyMobileNavPreference() {
+  var pref = getMobileNavPreference();
+  document.documentElement.setAttribute('data-mobile-nav', pref);
+
+  // Update dropdown if exists
+  var dropdown = document.getElementById('mobileNavPreferenceSelect');
+  if (dropdown) {
+    dropdown.value = pref;
+  }
+}
+
+// Initialize mobile nav preference on load
+if (typeof window !== 'undefined') {
+  applyMobileNavPreference();
 }
 
 // Prevent body scroll when modal is open on iOS
@@ -77925,14 +78069,14 @@ function getDeviceType() {
 // COMPREHENSIVE DATA SYNC
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// v12.0.8: Sync Settings - User controls for what data syncs
+// v12.0.9: Sync Settings - User controls for what data syncs
 var syncSettings = {
   conversations: true,      // Sync chat history (can be large)
   libraryContent: false,    // Sync full file contents (metadata always syncs)
   deferDuringChat: true     // Don't sync while actively chatting
 };
 
-// v12.0.8: Track chat activity for deferred sync
+// v12.0.9: Track chat activity for deferred sync
 var lastChatActivity = 0;
 var deferredSyncTimer = null;
 var CHAT_IDLE_THRESHOLD = 10000; // 10 seconds of idle before sync
@@ -77961,7 +78105,7 @@ function saveSyncSettings() {
 }
 
 function toggleSyncSetting(setting) {
-  // v12.0.8: Read from checkbox state
+  // v12.0.9: Read from checkbox state
   var checkbox = null;
   if (setting === 'conversations') {
     checkbox = document.getElementById('syncConversationsToggle');
@@ -77978,7 +78122,7 @@ function toggleSyncSetting(setting) {
 }
 
 function updateSyncSettingsUI() {
-  // v12.0.8: Update checkbox checked state
+  // v12.0.9: Update checkbox checked state
   var convToggle = document.getElementById('syncConversationsToggle');
   var libToggle = document.getElementById('syncLibraryContentToggle');
   var deferToggle = document.getElementById('syncDeferDuringChatToggle');
@@ -77994,7 +78138,7 @@ function updateSyncSettingsUI() {
   }
 }
 
-// v12.0.8: Mark chat activity for deferred sync
+// v12.0.9: Mark chat activity for deferred sync
 function markChatActivity() {
   lastChatActivity = Date.now();
   // Clear any pending deferred sync
@@ -78004,7 +78148,7 @@ function markChatActivity() {
   }
 }
 
-// v12.0.8: Request sync (may be deferred if chatting)
+// v12.0.9: Request sync (may be deferred if chatting)
 function requestSync() {
   if (!syncSettings.deferDuringChat) {
     // Immediate sync
@@ -78051,12 +78195,12 @@ async function syncToFirebase() {
     // showToast('Syncing to cloud...', 'info');
     updateSyncIndicator('syncing');
     
-    // v12.0.8: Only auto-trim if syncing conversations (the main cause of large data)
+    // v12.0.9: Only auto-trim if syncing conversations (the main cause of large data)
     if (syncSettings.conversations) {
       autoTrimDataForSync();
     }
 
-    // v12.0.8: Respect sync settings - skip conversations if disabled
+    // v12.0.9: Respect sync settings - skip conversations if disabled
     var conversationsData = {};
     if (syncSettings.conversations) {
       conversationsData = collectConversationsWithLimit();
@@ -78064,7 +78208,7 @@ async function syncToFirebase() {
       console.log('[Firebase Sync] Skipping conversations (disabled in settings)');
     }
 
-    // v12.0.8: Handle library content based on settings
+    // v12.0.9: Handle library content based on settings
     var brandLibrary = '{}';
     var lifeLibrary = '{"files":[],"folders":[]}';
 
@@ -83634,7 +83778,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.0.8 - ' + subtitle;
+  document.title = 'RoweOS v12.0.9 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -99535,8 +99679,14 @@ window.onload = init;
   // v11.5.4: Removed click-to-expand on pinned-collapsed
   // Use pin button (⌘\) or settings dropdown to change sidebar state
 
-  // ─── Hover Expand / Collapse (only when unpinned) ───────
+  // ─── Hover Expand / Collapse (only when unpinned, desktop only) ───────
+  // v12.0.9: Helper to check if on mobile
+  function isMobileDevice() {
+    return window.innerWidth <= 768 || ('ontouchstart' in window);
+  }
+
   sidebar.addEventListener('mouseenter', function() {
+    if (isMobileDevice()) return;  // v12.0.9: Skip hover on mobile
     if (getState() !== 0) return;  // Skip hover if pinned in any state
     clearTimeout(hoverTimer);
     sidebar.classList.add('expanded');
@@ -99545,6 +99695,7 @@ window.onload = init;
   });
 
   sidebar.addEventListener('mouseleave', function() {
+    if (isMobileDevice()) return;  // v12.0.9: Skip hover on mobile
     if (getState() !== 0) return;
     hoverTimer = setTimeout(function() {
       sidebar.classList.remove('expanded');
