@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.0.5 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.0.6 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -14948,7 +14948,7 @@
       box-shadow: 0 0 0 2px var(--bg-primary);
     }
 
-    /* v12.0.5: Color Wheel Picker */
+    /* v12.0.6: Color Wheel Picker */
     .focus-2-color-wheel-container {
       display: flex;
       align-items: center;
@@ -37092,7 +37092,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.0.5</div>
+      <div class="launch-version" id="launchVersionTag">v12.0.6</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -37401,7 +37401,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.5</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.0.6</div>
       
     </div>
   </div>
@@ -37591,7 +37591,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.5</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.0.6</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -38449,7 +38449,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.0.5</span>
+          <span class="sidebar-version">v12.0.6</span>
         </div>
       </div>
     </div>
@@ -38759,7 +38759,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.0.5 • Built for the future</p>
+        <p>RoweOS v12.0.6 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -38816,7 +38816,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.0.5</p>
+            <p class="onboarding-welcome-version">v12.0.6</p>
           </div>
         </div>
       </div>
@@ -44723,7 +44723,7 @@ service cloud.firestore {
                 </svg>
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.5</div>
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v12.0.6</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -65632,7 +65632,7 @@ function renderFocus2Categories() {
     var iconKey = cat.icon || cat.name || 'default';
     var iconSvg = focus2CategoryIconLibrary[iconKey] || focus2CategoryIconLibrary['default'];
 
-    // v12.0.5: Support custom hex colors via inline style
+    // v12.0.6: Support custom hex colors via inline style
     var colorStyle = customHex ? ' style="--cat-color: ' + customHex + ';"' : '';
     html += '<div class="focus-2-category-card' + (isExpanded ? ' expanded' : '') + '" data-color="' + colorPreset + '" data-category="' + escapeHtml(cat.name) + '"' + colorStyle + ' onclick="toggleFocus2CategoryExpand(\'' + escapeHtml(cat.name) + '\', event)">';
     
@@ -66864,7 +66864,7 @@ function closeFocus2NewCategory() {
     });
   }
 
-  // v12.0.5: Reset custom color wheel
+  // v12.0.6: Reset custom color wheel
   window.focus2CustomColor = null;
   var colorWheelWrapper = document.getElementById('focus2ColorWheelWrapper');
   var colorWheelToggle = document.getElementById('focus2ColorWheelToggle');
@@ -66933,18 +66933,18 @@ function initFocus2ColorPicker() {
     btn.onclick = function() {
       buttons.forEach(function(b) { b.classList.remove('selected'); });
       btn.classList.add('selected');
-      // v12.0.5: Deselect custom color when preset selected
+      // v12.0.6: Deselect custom color when preset selected
       window.focus2CustomColor = null;
       var toggleBtn = document.getElementById('focus2ColorWheelToggle');
       if (toggleBtn) toggleBtn.classList.remove('active');
     };
   });
-  // v12.0.5: Initialize color wheel
+  // v12.0.6: Initialize color wheel
   initFocus2ColorWheel();
 }
 
 /**
- * v12.0.5: Color Wheel Implementation
+ * v12.0.6: Color Wheel Implementation
  */
 var focus2ColorWheelState = {
   hue: 0,
@@ -67194,7 +67194,7 @@ function saveFocus2NewCategory() {
   
   var name = nameInput.value.trim();
   var selectedColor = colorPicker.querySelector('.focus-2-color-btn.selected');
-  // v12.0.5: Support custom hex colors from color wheel
+  // v12.0.6: Support custom hex colors from color wheel
   var colorPreset = window.focus2CustomColor || (selectedColor ? selectedColor.getAttribute('data-color') : 'gold');
   var customHex = window.focus2CustomColor || null;
   var selectedIcon = window.focus2SelectedIcon || 'default';
@@ -67319,7 +67319,7 @@ function editCategory(categoryName) {
   var hexInput = document.getElementById('focus2ColorWheelHex');
   var swatch = document.getElementById('focus2ColorWheelSwatch');
 
-  // v12.0.5: Handle custom hex color
+  // v12.0.6: Handle custom hex color
   if (cat.customHex) {
     window.focus2CustomColor = cat.customHex;
     if (colorPicker) {
@@ -75834,8 +75834,21 @@ function mobileMenuNavTo(view) {
 
 // Mobile Brand Change v2
 function onMobileBrandChangeV2(value) {
+  // v12.0.4: Handle LifeAI switch
+  if (value === 'life') {
+    localStorage.setItem('roweos_mode', 'life');
+    localStorage.setItem('roweos_app_mode', 'life');
+    updateModeUI('life');
+    syncMobileBrandV2();
+    if (typeof renderFocus2Categories === 'function') renderFocus2Categories();
+    if (typeof renderFocusTodoList === 'function') renderFocusTodoList();
+    var userName = localStorage.getItem('roweos_user_name') || 'Jordan';
+    showToast('Switched to ' + userName + ' (LifeAI)', 'success');
+    return;
+  }
+
   var brandIdx = parseInt(value);
-  
+
   // Sync all brand selectors
   document.getElementById('brand').value = brandIdx;
   if (document.getElementById('agentBrand')) document.getElementById('agentBrand').value = brandIdx;
@@ -76197,8 +76210,21 @@ function syncMobileBrandV2() {
       if (!isLife && idx === brandIdx) opt.selected = true;
       selector.appendChild(opt);
     });
+
+    // v12.0.4: Add LifeAI option when in BrandAI mode
+    if (!isLife) {
+      var sep = document.createElement('option');
+      sep.disabled = true;
+      sep.textContent = '── Switch to LifeAI ──';
+      selector.appendChild(sep);
+
+      var lifeOpt = document.createElement('option');
+      lifeOpt.value = 'life';
+      lifeOpt.textContent = '◇ ' + userName + ' (Personal)';
+      selector.appendChild(lifeOpt);
+    }
   }
-  
+
   // Populate header dropdown (brand/profile switcher)
   if (headerDropdown) {
     headerDropdown.innerHTML = '';
@@ -76224,7 +76250,7 @@ function syncMobileBrandV2() {
         headerDropdown.appendChild(opt);
       });
     } else {
-      // BrandAI mode - show brands only
+      // BrandAI mode - show brands
       brands.forEach(function(brand, idx) {
         var opt = document.createElement('option');
         opt.value = idx;
@@ -76232,6 +76258,17 @@ function syncMobileBrandV2() {
         if (idx === brandIdx) opt.selected = true;
         headerDropdown.appendChild(opt);
       });
+
+      // v12.0.4: Add separator and LifeAI option for switching
+      var sep = document.createElement('option');
+      sep.disabled = true;
+      sep.textContent = '── Switch to LifeAI ──';
+      headerDropdown.appendChild(sep);
+
+      var lifeOpt = document.createElement('option');
+      lifeOpt.value = 'life';
+      lifeOpt.textContent = userName + ' (Personal)';
+      headerDropdown.appendChild(lifeOpt);
     }
   }
   
@@ -82882,7 +82919,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.0.5 - ' + subtitle;
+  document.title = 'RoweOS v12.0.6 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
