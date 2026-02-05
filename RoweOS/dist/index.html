@@ -75889,13 +75889,16 @@ function sendFollowup() {
   // v10.5.28: Reset textarea height after clearing
   followupInput.style.height = 'auto';
   
-  // Check if file is selected but still loading
-  if (currentFollowupFile && !currentFollowupFileContent) {
-    showToast('Please wait for file to finish loading', 'warning');
+  // v12.1.3: Check shared currentAgentFiles for loading/ready state
+  var loadingFiles = currentAgentFiles.filter(function(f) { return f.status === 'loading'; });
+  if (loadingFiles.length > 0) {
+    showToast('Please wait for ' + loadingFiles.length + ' file(s) to finish loading', 'warning');
     return;
   }
-  
-  if (!followup.trim() && !currentFollowupFileContent) {
+
+  var hasFiles = currentAgentFiles.length > 0 && currentAgentFiles.some(function(f) { return f.status === 'ready'; });
+
+  if (!followup.trim() && !hasFiles) {
     showToast('Please enter a follow-up or attach a file', 'warning');
     return;
   }
@@ -75918,47 +75921,76 @@ function sendFollowup() {
     brand = brands[brandIdx];
   }
   
-  // Build message with file content if present
+  // v12.1.3: Build message with multi-file content from currentAgentFiles (same as runAgent)
   var messageContent;
   var displayContent = followup;
-  
-  if (currentFollowupFileContent && currentFollowupFile) {
-    if (currentFollowupFile.type.startsWith('image/')) {
-      // Multimodal format for images
-      var base64Data = currentFollowupFileContent.split(',')[1];
-      var mediaType = currentFollowupFile.type;
-      messageContent = [
-        {
+  var readyFiles = currentAgentFiles.filter(function(f) { return f.status === 'ready' && f.content; });
+
+  if (readyFiles.length > 0) {
+    console.log('[Followup] Including ' + readyFiles.length + ' file(s) in message');
+
+    var imageFiles = readyFiles.filter(function(f) { return f.type && f.type.startsWith('image/'); });
+    var textFiles = readyFiles.filter(function(f) { return !f.type || !f.type.startsWith('image/'); });
+
+    if (imageFiles.length > 0 && textFiles.length === 0) {
+      // Only images - use multimodal format
+      var contentParts = [];
+      imageFiles.forEach(function(f) {
+        var base64Data = f.content.split(',')[1];
+        contentParts.push({
           type: 'image',
           source: {
             type: 'base64',
-            media_type: mediaType,
+            media_type: f.type,
             data: base64Data
           }
-        },
-        {
-          type: 'text',
-          text: followup || 'Please analyze this image.'
-        }
-      ];
-      displayContent = followup + '\n\n[Attached Image: ' + currentFollowupFile.name + ']';
+        });
+      });
+      contentParts.push({
+        type: 'text',
+        text: followup || 'Please analyze these image(s).'
+      });
+      messageContent = contentParts;
+      displayContent = followup + '\n\n[Attached ' + imageFiles.length + ' image(s): ' + imageFiles.map(function(f) { return f.name; }).join(', ') + ']';
     } else {
-      messageContent = followup + '\n\n--- ATTACHED FILE: ' + currentFollowupFile.name + ' ---\n' + currentFollowupFileContent + '\n--- END OF FILE ---';
-      displayContent = messageContent;
+      // Text files (or mixed) - include content inline
+      var allFileContents = getAllAgentFileContents();
+      messageContent = followup + '\n\n' + allFileContents;
+      displayContent = followup + '\n\n[Attached ' + readyFiles.length + ' file(s): ' + readyFiles.map(function(f) { return f.name; }).join(', ') + ']';
     }
+
+    showToast(readyFiles.length + ' file(s) included', 'info');
   } else {
     messageContent = followup;
     displayContent = followup;
   }
-  
+
+  // v12.1.3: Build file metadata for display (same as runAgent)
+  var attachedFiles = readyFiles.map(function(f) {
+    return {
+      id: f.id,
+      name: f.name,
+      type: f.type,
+      size: f.file ? f.file.size : null,
+      pages: f.pages || null,
+      content: f.content,
+      hasContent: !!f.content
+    };
+  });
+
   // Add to conversation
-  currentConversation.push({ role: 'user', content: messageContent, displayContent: displayContent });
+  var userMessage = { role: 'user', content: messageContent, displayContent: displayContent };
+  if (attachedFiles.length > 0) {
+    userMessage.attachedFiles = attachedFiles;
+    userMessage.id = Date.now();
+  }
+  currentConversation.push(userMessage);
   renderConversation();
-  
+
   // v11.0.5: Immediate save after user message to prevent loss
   autoSaveConversation(true);
-  
-  // Clear file after including in message
+
+  // Clear files after including in message
   removeFollowupFile();
   
   executeAgentRequest(brand, messageContent, btn, 'followupBtn');
