@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v12.1.4
-File:     ~/Downloads/RoweOS/dist/index.html (101028 lines)
+Version:  v12.1.5
+File:     ~/Downloads/RoweOS/dist/index.html (101031 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -40,7 +40,7 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 index.html
 ├── Lines 1–15,000      CSS (themes, components, animations)
 ├── Lines 15,000–44,000 HTML (views, modals, overlays)
-└── Lines 44,000–101028 JavaScript (state, API, logic)
+└── Lines 44,000–101031 JavaScript (state, API, logic)
 ```
 
 ---
@@ -102,7 +102,7 @@ let count = items.length;
 - Full null/undefined safety before property access
 - HTML escaping for all user input in innerHTML
 - Wrap localStorage reads and API calls in try/catch
-- Tag changes with version: `// v12.1.4: Fix brand name`
+- Tag changes with version: `// v12.1.5: Fix brand name`
 
 ### CSS
 - Use CSS custom properties (`var(--accent)`) for theme values
