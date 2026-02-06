@@ -76339,10 +76339,15 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       var streamContent = document.getElementById('streamingContent');
       if (streamContent) {
         streamContent.innerHTML = formatMessageContent(fullText);
+
+        // v12.2.3: Check for attached files and offer save to identity
+        if (typeof checkForSaveToIdentity === 'function') {
+          checkForSaveToIdentity(streamContent, fullText, 'life');
+        }
       }
-      
+
       currentConversation.push({ role: 'assistant', content: fullText });
-      
+
       // v10.5.25: Save to agentCommands for History view
       // v11.0.5: Update preliminary entry instead of creating new one
       console.log('[LifeAI] onComplete - currentConversation.length:', currentConversation.length);
@@ -86270,7 +86275,12 @@ runAgent = async function() {
     setupStreamListeners(streamElements, function(fullText) {
       // On complete
       currentConversation.push({ role: 'assistant', content: fullText });
-      
+
+      // v12.2.3: Check for attached files and offer save to identity
+      if (typeof checkForSaveToIdentity === 'function' && streamElements.textSpan) {
+        checkForSaveToIdentity(streamElements.textSpan, fullText, 'brand');
+      }
+
       // Save to history
       agentCommands.push({
         id: Date.now(),
@@ -86280,7 +86290,7 @@ runAgent = async function() {
         time: new Date().toLocaleString()
       });
       saveRuns();
-      
+
       cleanupStreamListeners();
       setAgentStatus('ready');
     }, function(error) {
@@ -89393,6 +89403,186 @@ async function reanalyzeDocument() {
       if (processingEl) processingEl.style.display = 'none';
     }
   }
+}
+
+/**
+ * v12.2.3: Check for attached files and show save-to-identity option
+ */
+function checkForSaveToIdentity(streamContainer, aiResponse, mode) {
+  // Check if the first message in conversation had attached files
+  if (!currentConversation || currentConversation.length === 0) return;
+
+  var userMsg = currentConversation[0];
+  if (!userMsg.attachedFiles || userMsg.attachedFiles.length === 0) return;
+
+  // Create save-to-identity action bar
+  var actionBar = document.createElement('div');
+  actionBar.className = 'chat-save-identity-bar';
+  actionBar.style.cssText = 'margin-top: 12px; padding: 12px 16px; background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; gap: 12px;';
+
+  var infoDiv = document.createElement('div');
+  infoDiv.style.cssText = 'display: flex; align-items: center; gap: 10px; flex: 1;';
+  infoDiv.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#d4af37" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>' +
+    '<div style="flex: 1;">' +
+      '<div style="font-weight: 500; color: var(--text-primary); font-size: var(--text-sm);">Save document to ' + (mode === 'life' ? 'Life' : 'Brand') + ' Identity?</div>' +
+      '<div style="font-size: var(--text-xs); color: var(--text-muted);">' + userMsg.attachedFiles.length + ' file(s) analyzed - save insights for future reference</div>' +
+    '</div>';
+
+  var btnGroup = document.createElement('div');
+  btnGroup.style.cssText = 'display: flex; gap: 8px;';
+
+  var dismissBtn = document.createElement('button');
+  dismissBtn.style.cssText = 'padding: 6px 12px; background: transparent; border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; font-size: var(--text-sm);';
+  dismissBtn.textContent = 'Dismiss';
+  dismissBtn.onclick = function() { actionBar.remove(); };
+
+  var saveBtn = document.createElement('button');
+  saveBtn.style.cssText = 'padding: 6px 12px; background: var(--accent); border: none; border-radius: var(--radius-sm); color: #000; cursor: pointer; font-size: var(--text-sm); font-weight: 500;';
+  saveBtn.textContent = 'Save to Identity';
+  saveBtn.onclick = function() {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+    saveChatDocToIdentity(userMsg.attachedFiles, aiResponse, mode);
+    actionBar.remove();
+  };
+
+  btnGroup.appendChild(dismissBtn);
+  btnGroup.appendChild(saveBtn);
+  actionBar.appendChild(infoDiv);
+  actionBar.appendChild(btnGroup);
+
+  // Find the message bubble to append to
+  if (streamContainer && streamContainer.parentElement) {
+    var bubble = streamContainer.closest('.conversation-message-bubble') || streamContainer.parentElement;
+    bubble.appendChild(actionBar);
+  }
+}
+
+/**
+ * v12.2.3: Save document from chat to Identity
+ */
+async function saveChatDocToIdentity(attachedFiles, aiResponse, mode) {
+  var savedCount = 0;
+
+  for (var i = 0; i < attachedFiles.length; i++) {
+    var file = attachedFiles[i];
+    var docId = Date.now() + i;
+
+    if (mode === 'life') {
+      // Save to LifeAI Identity
+      var lifeMemory = JSON.parse(localStorage.getItem('roweos_life_memory') || '{}');
+      if (!lifeMemory.documents) lifeMemory.documents = [];
+
+      // Extract insights from AI response
+      var insights = extractInsightsFromResponse(aiResponse, 'life');
+
+      lifeMemory.documents.push({
+        id: docId,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        content: file.content ? file.content.substring(0, 50000) : '',
+        docType: 'Chat Analysis',
+        uploadedAt: new Date().toISOString(),
+        insights: insights,
+        summary: 'Analyzed via ' + (mode === 'life' ? 'LifeAI' : 'BrandAI') + ' chat',
+        processed: true,
+        source: 'chat'
+      });
+
+      localStorage.setItem('roweos_life_memory', JSON.stringify(lifeMemory));
+      savedCount++;
+
+    } else {
+      // Save to BrandAI Identity
+      var brandKey = 'brand_' + selectedBrand;
+      if (!brandMemory[brandKey]) {
+        brandMemory[brandKey] = { documents: [], chunks: 0, lastUpdate: null };
+      }
+
+      // Extract insights from AI response
+      var insights = extractInsightsFromResponse(aiResponse, 'brand');
+
+      brandMemory[brandKey].documents.push({
+        id: docId,
+        name: file.name,
+        size: file.size,
+        chunks: file.content ? Math.ceil(file.content.length / 2000) : 0,
+        content: file.content ? file.content.substring(0, 50000) : '',
+        docType: 'Chat Analysis',
+        uploadedAt: new Date().toISOString(),
+        insights: insights,
+        summary: 'Analyzed via BrandAI chat',
+        processed: true,
+        source: 'chat'
+      });
+      brandMemory[brandKey].lastUpdate = new Date().toISOString();
+
+      localStorage.setItem('brandMemory', JSON.stringify(brandMemory));
+      savedCount++;
+    }
+  }
+
+  showToast(savedCount + ' document(s) saved to ' + (mode === 'life' ? 'Life' : 'Brand') + ' Identity', 'success');
+
+  // Sync to Firebase
+  if (typeof syncToFirebase === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
+    syncToFirebase();
+  }
+}
+
+/**
+ * v12.2.3: Extract insights from AI response text
+ */
+function extractInsightsFromResponse(response, mode) {
+  var insights = [];
+
+  // Simple extraction based on response structure
+  // Look for bullet points, numbered lists, key findings
+  var lines = response.split('\n');
+  var currentCategory = 'other';
+
+  var categoryKeywords = {
+    health: ['health', 'medical', 'medication', 'symptom', 'diagnosis', 'treatment', 'wellness'],
+    goals: ['goal', 'objective', 'target', 'milestone', 'achieve', 'plan'],
+    preferences: ['prefer', 'like', 'favorite', 'style', 'choice'],
+    work: ['work', 'job', 'career', 'professional', 'business', 'company'],
+    finance: ['finance', 'money', 'budget', 'investment', 'savings', 'expense'],
+    essence: ['brand', 'identity', 'mission', 'vision', 'value', 'purpose'],
+    voice: ['voice', 'tone', 'communication', 'style', 'language'],
+    audience: ['audience', 'customer', 'client', 'demographic', 'target market'],
+    messaging: ['message', 'tagline', 'slogan', 'value proposition'],
+    products: ['product', 'service', 'offering', 'solution']
+  };
+
+  lines.forEach(function(line) {
+    line = line.trim();
+    // Look for bullet points or key statements
+    if ((line.startsWith('-') || line.startsWith('•') || line.startsWith('*') || line.match(/^\d+\./)) && line.length > 20) {
+      var content = line.replace(/^[-•*]\s*/, '').replace(/^\d+\.\s*/, '');
+
+      // Detect category
+      var detectedCategory = 'other';
+      var lowerLine = line.toLowerCase();
+      Object.keys(categoryKeywords).forEach(function(cat) {
+        categoryKeywords[cat].forEach(function(kw) {
+          if (lowerLine.includes(kw)) {
+            detectedCategory = cat;
+          }
+        });
+      });
+
+      insights.push({
+        category: detectedCategory,
+        title: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
+        content: content,
+        importance: 'medium'
+      });
+    }
+  });
+
+  // Limit to 10 insights
+  return insights.slice(0, 10);
 }
 
 /**
