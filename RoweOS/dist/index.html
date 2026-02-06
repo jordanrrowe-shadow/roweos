@@ -2620,6 +2620,7 @@
       padding-top: 38px;
       transition: margin-left var(--sidebar-transition);
       will-change: margin-left; /* v11.5.4: GPU hint for smooth sidebar transition */
+      background: var(--bg-primary); /* v12.2.5: Prevent body bg showing between sidebar and content */
     }
     html.sidebar-pinned .main-wrapper {
       margin-left: var(--sidebar-expanded-width);
@@ -79913,7 +79914,7 @@ async function syncToFirebase() {
       brandSettings: JSON.parse(localStorage.getItem(USER_DATA_KEYS.brandSettings) || '{}'),
       
       // v7.10: Brand Memory (document uploads with AI summaries)
-      brandMemory: JSON.parse(localStorage.getItem('brandMemory') || '{}'),
+      brandMemory: JSON.parse(localStorage.getItem('roweos_brand_memory') || localStorage.getItem('brandMemory') || '{}'),
       
       // BrandAI conversations (CRITICAL for continuity)
       conversations: conversationsData,
@@ -80509,7 +80510,7 @@ function applyCloudData(data) {
   
   // v7.10: Brand Memory (document uploads with AI summaries)
   if (data.brandMemory) {
-    localStorage.setItem('brandMemory', JSON.stringify(data.brandMemory));
+    localStorage.setItem('roweos_brand_memory', JSON.stringify(data.brandMemory)); // v12.2.5: Use canonical key
     if (typeof brandMemory !== 'undefined') {
       Object.assign(brandMemory, data.brandMemory);
     }
@@ -81058,7 +81059,7 @@ async function silentSyncToFirebase() {
     var syncData = {
       brands: JSON.parse(localStorage.getItem(USER_DATA_KEYS.brands) || '[]'),
       brandSettings: JSON.parse(localStorage.getItem(USER_DATA_KEYS.brandSettings) || '{}'),
-      brandMemory: JSON.parse(localStorage.getItem('brandMemory') || '{}'),
+      brandMemory: JSON.parse(localStorage.getItem('roweos_brand_memory') || localStorage.getItem('brandMemory') || '{}'),
       conversations: collectConversations(),
       knowledge: collectKnowledge(),
       runs: JSON.parse(localStorage.getItem('roweos_runs') || '[]'),
@@ -85498,7 +85499,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.2.4 - ' + subtitle;
+  document.title = 'RoweOS v12.2.5 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -88045,6 +88046,22 @@ function loadBrandMemory() {
   if (saved) {
     brandMemory = JSON.parse(saved);
   }
+  // v12.2.5: Migrate data from legacy 'brandMemory' key if it exists
+  var legacy = localStorage.getItem('brandMemory');
+  if (legacy) {
+    try {
+      var legacyData = JSON.parse(legacy);
+      // Merge legacy data into main brandMemory (don't overwrite existing)
+      for (var key in legacyData) {
+        if (legacyData.hasOwnProperty(key) && !brandMemory[key]) {
+          brandMemory[key] = legacyData[key];
+        }
+      }
+      // Save merged data to canonical key and remove legacy
+      localStorage.setItem('roweos_brand_memory', JSON.stringify(brandMemory));
+      localStorage.removeItem('brandMemory');
+    } catch(e) { console.warn('[loadBrandMemory] Legacy migration error:', e); }
+  }
   // Don't call updateMemoryUI here - it will be called when the view is shown
 }
 
@@ -89405,7 +89422,7 @@ async function reanalyzeDocument() {
         brandMemory[brandKey].documents[docIndex].summary = summary;
         brandMemory[brandKey].documents[docIndex].processed = true;
       }
-      localStorage.setItem('brandMemory', JSON.stringify(brandMemory));
+      saveBrandMemory();
 
       loadIdentityDocs();
       showToast('Document re-analyzed', 'success');
@@ -89530,7 +89547,7 @@ async function saveChatDocToIdentity(attachedFiles, aiResponse, mode) {
       });
       brandMemory[brandKey].lastUpdate = new Date().toISOString();
 
-      localStorage.setItem('brandMemory', JSON.stringify(brandMemory));
+      saveBrandMemory();
       savedCount++;
     }
   }
@@ -90649,7 +90666,7 @@ async function processIdentityDocumentWithContext(file, docType, instructions) {
     brandMemory[brandKey].chunks += chunks.length;
     brandMemory[brandKey].lastUpdate = new Date().toISOString();
 
-    localStorage.setItem('brandMemory', JSON.stringify(brandMemory));
+    saveBrandMemory();
     loadIdentityDocs();
 
     // Process with AI
@@ -90667,7 +90684,7 @@ async function processIdentityDocumentWithContext(file, docType, instructions) {
         brandMemory[brandKey].documents[docIndex].insights = summary.allInsights || [];
       }
     }
-    localStorage.setItem('brandMemory', JSON.stringify(brandMemory));
+    saveBrandMemory();
 
     loadIdentityDocs();
     loadIdentityData();
@@ -90913,7 +90930,7 @@ async function processIdentityDocument(file) {
     brandMemory[brandKey].lastUpdate = new Date().toISOString();
     
     // Save memory
-    localStorage.setItem('brandMemory', JSON.stringify(brandMemory));
+    saveBrandMemory();
     
     // Update UI
     loadIdentityDocs();
@@ -90930,7 +90947,7 @@ async function processIdentityDocument(file) {
     if (summary) {
       brandMemory[brandKey].documents[docIndex].summary = summary;
     }
-    localStorage.setItem('brandMemory', JSON.stringify(brandMemory));
+    saveBrandMemory();
     
     loadIdentityDocs();
     loadIdentityData();
@@ -91143,7 +91160,7 @@ function removeIdentityDoc(index) {
   // Remove document
   brandMemory[brandKey].chunks -= doc.chunks;
   brandMemory[brandKey].documents.splice(index, 1);
-  localStorage.setItem('brandMemory', JSON.stringify(brandMemory));
+  saveBrandMemory();
   
   // Update UI
   loadIdentityDocs();
@@ -100054,8 +100071,7 @@ async function renderSyncInventory() {
 
   html += '</tbody></table>';
 
-  // Add storage capacity section
-  html += renderStorageCapacity();
+  // v12.2.5: Storage bar now rendered in standalone #storageCapacityBar container
 
   container.innerHTML = html;
 }
@@ -100273,13 +100289,13 @@ function renderStorageManagement() {
       desc: 'Clear uploaded brand knowledge',
       icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>',
       size: function() {
-        var s = getKeySize('brandMemory');
+        var s = getKeySize('roweos_brand_memory') + getKeySize('brandMemory');
         for (var i = 0; i < 5; i++) { s += getKeySize('brand_' + i); }
         return s;
       },
       count: function() {
         var c = 0;
-        if (localStorage.getItem('brandMemory')) c++;
+        if (localStorage.getItem('roweos_brand_memory') || localStorage.getItem('brandMemory')) c++;
         for (var i = 0; i < 5; i++) { if (localStorage.getItem('brand_' + i)) c++; }
         return c;
       }
@@ -100295,10 +100311,15 @@ function renderStorageManagement() {
   html += '<h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">Storage Management</h3>';
   html += '<p style="color: var(--text-tertiary); margin-bottom: var(--space-4); font-size: var(--text-sm);">Choose what to clear to free up storage. Sorted by size.</p>';
 
+  // v12.2.5: Load per-category sync preferences
+  var syncCats = {};
+  try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
+
   items.forEach(function(item) {
     var isEmpty = item.size === 0 && item.count === 0;
     var sizeStr = formatStorageSize(item.size);
     var countStr = item.count > 0 ? item.count + ' item' + (item.count !== 1 ? 's' : '') : 'Empty';
+    var isCloud = syncCats[item.key] !== 'local'; // Default to cloud
 
     html += '<div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-color);">';
     html += '<div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">';
@@ -100308,11 +100329,24 @@ function renderStorageManagement() {
     html += '<div style="font-size: var(--text-xs); color: var(--text-muted);">' + item.desc + '</div>';
     html += '</div>';
     html += '</div>';
-    html += '<div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">';
-    html += '<div style="text-align: right;">';
+    html += '<div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">';
+
+    // Storage location toggle
+    html += '<button onclick="toggleStorageLocation(\'' + item.key + '\')" style="display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 12px; border: 1px solid var(--border-color); background: ' + (isCloud ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-tertiary)') + '; cursor: pointer; font-size: 11px; color: ' + (isCloud ? '#3b82f6' : 'var(--text-muted)') + '; white-space: nowrap;">';
+    if (isCloud) {
+      html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg> Cloud';
+    } else {
+      html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Local';
+    }
+    html += '</button>';
+
+    // Size info
+    html += '<div style="text-align: right; min-width: 60px;">';
     html += '<div style="font-size: var(--text-sm); font-weight: 500; ' + (item.size > 100000 ? 'color: #f59e0b;' : '') + '">' + sizeStr + '</div>';
     html += '<div style="font-size: var(--text-xs); color: var(--text-muted);">' + countStr + '</div>';
     html += '</div>';
+
+    // Clear button
     if (!isEmpty) {
       html += '<button onclick="clearStorageCategory(\'' + item.key + '\')" class="btn btn-secondary" style="padding: 4px 10px; font-size: var(--text-xs); white-space: nowrap;">Clear</button>';
     } else {
@@ -100330,6 +100364,25 @@ function renderStorageManagement() {
 
   html += '</div>';
   panel.innerHTML = html;
+}
+
+/**
+ * v12.2.5: Toggle storage location (local/cloud) for a category
+ */
+function toggleStorageLocation(categoryKey) {
+  var syncCats = {};
+  try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
+
+  if (syncCats[categoryKey] === 'local') {
+    syncCats[categoryKey] = 'cloud';
+    showToast(categoryKey.replace(/_/g, ' ') + ' will sync to cloud', 'success');
+  } else {
+    syncCats[categoryKey] = 'local';
+    showToast(categoryKey.replace(/_/g, ' ') + ' set to local only', 'info');
+  }
+
+  localStorage.setItem('roweos_sync_categories', JSON.stringify(syncCats));
+  renderStorageManagement();
 }
 
 /**
@@ -100491,7 +100544,9 @@ function clearStorageCategory(category) {
 
     } else if (category === 'knowledge') {
       // v12.2.5: Clear brand knowledge
+      localStorage.removeItem('roweos_brand_memory');
       localStorage.removeItem('brandMemory');
+      brandMemory = {};
       for (var j = 0; j < 5; j++) {
         localStorage.removeItem('brand_' + j);
       }
