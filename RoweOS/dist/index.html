@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.2.7 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.2.8 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -37897,7 +37897,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.2.7</div>
+      <div class="launch-version" id="launchVersionTag">v12.2.8</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38206,7 +38206,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.2.7</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.2.8</div>
       
     </div>
   </div>
@@ -38490,7 +38490,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.2.7</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.2.8</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39357,7 +39357,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.2.7</span>
+          <span class="sidebar-version">v12.2.8</span>
         </div>
       </div>
     </div>
@@ -39667,7 +39667,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.2.7 • Built for the future</p>
+        <p>RoweOS v12.2.8 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39724,7 +39724,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.2.7</p>
+            <p class="onboarding-welcome-version">v12.2.8</p>
           </div>
         </div>
       </div>
@@ -45275,6 +45275,28 @@ service cloud.firestore {
           <!-- v12.2.6: Granular Storage Management -->
           <div id="storageManagementPanel" style="margin-bottom: var(--space-6);">
             <!-- Populated by renderStorageManagement() -->
+          </div>
+
+          <!-- v12.2.7: AI Storage Assistant -->
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5); margin-bottom: var(--space-6);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+              <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="2" style="vertical-align: -3px; margin-right: 6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Storage Assistant
+              </h3>
+              <span style="font-size: var(--text-xs); color: var(--text-muted);">AI-powered storage analysis</span>
+            </div>
+            <div id="storageAssistantMessages" style="max-height: 400px; overflow-y: auto; margin-bottom: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3);">
+              <div style="padding: 12px 16px; background: var(--bg-tertiary); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-secondary);">
+                Ask me anything about your storage, sync status, or data. I can also toggle categories between cloud and local for you.
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-2);">
+              <input type="text" id="storageAssistantInput" class="form-control" placeholder="e.g. Why is my cloud usage so high?" style="flex: 1; padding: 10px 14px; font-size: var(--text-sm);" onkeypress="if(event.key==='Enter') sendStorageAssistantMessage()" />
+              <button onclick="sendStorageAssistantMessage()" class="btn btn-primary" style="padding: 10px 16px; white-space: nowrap;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              </button>
+            </div>
           </div>
 
           <!-- Diagnostics -->
@@ -80155,6 +80177,13 @@ function requestSync() {
   }
 }
 
+// v12.2.7: Check if a sync category should go to cloud
+function shouldSyncCategory(key) {
+  var syncCats = {};
+  try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
+  return syncCats[key] !== 'local';
+}
+
 async function syncToFirebase() {
   console.log('[Firebase Sync] Starting sync...');
   console.log('[Firebase Sync] firebaseUser:', firebaseUser ? firebaseUser.email : 'null');
@@ -80180,26 +80209,28 @@ async function syncToFirebase() {
     updateSyncIndicator('syncing');
     
     // v12.2.4: Only auto-trim if syncing conversations (the main cause of large data)
-    if (syncSettings.conversations) {
+    if (syncSettings.conversations && shouldSyncCategory('brandai_chats')) {
       autoTrimDataForSync();
     }
 
-    // v12.2.4: Respect sync settings - skip conversations if disabled
+    // v12.2.7: Respect both syncSettings and per-category sync preferences
     var conversationsData = {};
-    if (syncSettings.conversations) {
+    if (syncSettings.conversations && shouldSyncCategory('brandai_chats')) {
       conversationsData = collectConversationsWithLimit();
     } else {
-      console.log('[Firebase Sync] Skipping conversations (disabled in settings)');
+      console.log('[Firebase Sync] Skipping conversations (disabled or set to local)');
     }
 
     // v12.2.4: Handle library content based on settings
     var brandLibrary = '{}';
     var lifeLibrary = '{"files":[],"folders":[]}';
 
-    if (syncSettings.libraryContent) {
+    if (syncSettings.libraryContent && shouldSyncCategory('library')) {
       // Full library with content
       brandLibrary = localStorage.getItem('roweosLibrary') || '{}';
       lifeLibrary = localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}';
+    } else if (!shouldSyncCategory('library')) {
+      console.log('[Firebase Sync] Library set to local-only, skipping');
     } else {
       // Metadata only - strip file contents
       try {
@@ -80313,26 +80344,26 @@ async function syncToFirebase() {
       // BrandAI conversations (CRITICAL for continuity)
       conversations: conversationsData,
       
-      // User knowledge
-      knowledge: collectKnowledge(),
-      
-      // Operations & runs
-      runs: JSON.parse(localStorage.getItem('roweos_runs') || '[]'),
+      // v12.2.7: User knowledge (gated by sync category)
+      knowledge: shouldSyncCategory('knowledge') ? collectKnowledge() : {},
+
+      // v12.2.7: Operations & runs (gated by sync category)
+      runs: shouldSyncCategory('runs') ? JSON.parse(localStorage.getItem('roweos_runs') || '[]') : [],
       customOps: JSON.parse(localStorage.getItem('roweos_customOps') || '[]'),
       pinnedOps: JSON.parse(localStorage.getItem('roweos_pinnedOps') || '{}'),
       recentOps: JSON.parse(localStorage.getItem('roweos_recentOps') || '{}'),
       generatedBrandOps: JSON.parse(localStorage.getItem('roweos_generated_brand_ops') || '[]'),
       
-      // Calendar & scheduling
-      calendar: JSON.parse(localStorage.getItem('roweos_calendar') || '[]'),
-      automations: JSON.parse(localStorage.getItem('roweos_automations') || '[]'),
-      scheduledTasks: JSON.parse(localStorage.getItem('roweos_scheduled_tasks') || '[]'),
-      scheduledPrompts: JSON.parse(localStorage.getItem('roweosScheduledPrompts') || '[]'),
-      
-      // To-Do items
-      todos: JSON.parse(localStorage.getItem('roweosTodos') || '[]'),
-      todoCategories: JSON.parse(localStorage.getItem('roweos_todo_categories') || '[]'),
-      taskHistory: JSON.parse(localStorage.getItem('roweos_task_history') || '[]'),
+      // v12.2.7: Calendar & scheduling (gated by sync category)
+      calendar: shouldSyncCategory('calendar') ? JSON.parse(localStorage.getItem('roweos_calendar') || '[]') : [],
+      automations: shouldSyncCategory('calendar') ? JSON.parse(localStorage.getItem('roweos_automations') || '[]') : [],
+      scheduledTasks: shouldSyncCategory('calendar') ? JSON.parse(localStorage.getItem('roweos_scheduled_tasks') || '[]') : [],
+      scheduledPrompts: shouldSyncCategory('calendar') ? JSON.parse(localStorage.getItem('roweosScheduledPrompts') || '[]') : [],
+
+      // v12.2.7: To-Do items (gated by sync category)
+      todos: shouldSyncCategory('brand_todos') ? JSON.parse(localStorage.getItem('roweosTodos') || '[]') : [],
+      todoCategories: shouldSyncCategory('brand_todos') ? JSON.parse(localStorage.getItem('roweos_todo_categories') || '[]') : [],
+      taskHistory: shouldSyncCategory('brand_todos') ? JSON.parse(localStorage.getItem('roweos_task_history') || '[]') : [],
       
       // Settings & preferences
       settings: {
@@ -80356,8 +80387,8 @@ async function syncToFirebase() {
         lastStreakDate: localStorage.getItem('roweosLastStreakDate') || ''
       },
       
-      // v11.0.5: Inventory (Products & Services) - with image size limiting
-      inventory: (function() {
+      // v12.2.7: Inventory (gated by sync category)
+      inventory: !shouldSyncCategory('inventory') ? {items:[], categories:[]} : (function() {
         var inv = JSON.parse(localStorage.getItem('roweos_inventory') || '{"items":[],"categories":["General","Products","Services","Digital","Consulting"]}');
         // Trim large images to prevent sync size issues
         if (inv.items && inv.items.length > 0) {
@@ -80402,20 +80433,20 @@ async function syncToFirebase() {
         goals: JSON.parse(localStorage.getItem('roweos_life_goals') || '[]'),
         routines: JSON.parse(localStorage.getItem('roweos_life_routines') || '[]'),
         habits: JSON.parse(localStorage.getItem('roweos_life_habits') || '[]'),
-        todoCategories: JSON.parse(localStorage.getItem('roweos_life_todo_categories') || '[]'),
-        // v12.2.6: LifeAI todos and calendar (were missing from sync!)
-        todos: JSON.parse(localStorage.getItem('roweos_life_todos') || '[]'),
-        calendar: JSON.parse(localStorage.getItem('roweos_life_calendar') || '[]'),
-        // v12.2.4: LifeAI conversations (separate from BrandAI)
-        agentCommands: JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]'),
+        todoCategories: shouldSyncCategory('life_todos') ? JSON.parse(localStorage.getItem('roweos_life_todo_categories') || '[]') : [],
+        // v12.2.7: LifeAI todos and calendar (gated by sync category)
+        todos: shouldSyncCategory('life_todos') ? JSON.parse(localStorage.getItem('roweos_life_todos') || '[]') : [],
+        calendar: shouldSyncCategory('calendar') ? JSON.parse(localStorage.getItem('roweos_life_calendar') || '[]') : [],
+        // v12.2.7: LifeAI conversations (gated by sync category)
+        agentCommands: shouldSyncCategory('lifeai_chats') ? JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]') : [],
         // v12.2.4: LifeAI Identity document uploads
         memory: JSON.parse(localStorage.getItem('roweos_life_memory') || '{}')
       },
 
-      // v12.2.4: Journal & Pulse data
-      journal: JSON.parse(localStorage.getItem('roweos_journal') || '[]'),
+      // v12.2.7: Journal & Pulse data (gated by sync category)
+      journal: shouldSyncCategory('journal') ? JSON.parse(localStorage.getItem('roweos_journal') || '[]') : [],
       pulse: {
-        goals: JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]'),
+        goals: shouldSyncCategory('goals') ? JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]') : [],
         journal: JSON.parse(localStorage.getItem('roweos_pulse_journal') || '[]'),
         insights: JSON.parse(localStorage.getItem('roweos_pulse_insights') || '[]'),
         entries: JSON.parse(localStorage.getItem('roweos_pulse2_entries') || '[]')
@@ -80845,8 +80876,8 @@ function applyCloudData(data) {
     localStorage.setItem(USER_DATA_KEYS.brandSettings, JSON.stringify(data.brandSettings));
   }
   
-  // Conversations (CRITICAL)
-  if (data.conversations) {
+  // v12.2.7: Conversations (gated by sync category)
+  if (data.conversations && shouldSyncCategory('brandai_chats')) {
     if (data.conversations.history) {
       localStorage.setItem('roweos_conversations', JSON.stringify(data.conversations.history));
     }
@@ -80878,8 +80909,8 @@ function applyCloudData(data) {
     }
   }
   
-  // Knowledge
-  if (data.knowledge) {
+  // v12.2.7: Knowledge (gated by sync category)
+  if (data.knowledge && shouldSyncCategory('knowledge')) {
     Object.keys(data.knowledge).forEach(function(key) {
       if (key.startsWith('brand_')) {
         localStorage.setItem('roweos_knowledge_' + key.replace('brand_', ''), JSON.stringify(data.knowledge[key]));
@@ -80889,8 +80920,8 @@ function applyCloudData(data) {
     });
   }
   
-  // Operations
-  if (data.runs) localStorage.setItem('roweos_runs', JSON.stringify(data.runs));
+  // v12.2.7: Operations (gated by sync category)
+  if (data.runs && shouldSyncCategory('runs')) localStorage.setItem('roweos_runs', JSON.stringify(data.runs));
   if (data.customOps) localStorage.setItem('roweos_customOps', JSON.stringify(data.customOps));
   if (data.pinnedOps) localStorage.setItem('roweos_pinnedOps', JSON.stringify(data.pinnedOps));
   if (data.recentOps) localStorage.setItem('roweos_recentOps', JSON.stringify(data.recentOps));
@@ -80914,16 +80945,16 @@ function applyCloudData(data) {
     console.log('[Firebase] Loaded brandMemory');
   }
   
-  // Calendar
-  if (data.calendar) localStorage.setItem('roweos_calendar', JSON.stringify(data.calendar));
+  // v12.2.7: Calendar (gated by sync category)
+  if (data.calendar && shouldSyncCategory('calendar')) localStorage.setItem('roweos_calendar', JSON.stringify(data.calendar));
   if (data.automations) localStorage.setItem('roweos_automations', JSON.stringify(data.automations));
   if (data.scheduledTasks) localStorage.setItem('roweos_scheduled_tasks', JSON.stringify(data.scheduledTasks));
   if (data.scheduledPrompts) localStorage.setItem('roweosScheduledPrompts', JSON.stringify(data.scheduledPrompts));
   
-  // To-Do items
-  if (data.todos) localStorage.setItem('roweosTodos', JSON.stringify(data.todos));
-  if (data.todoCategories) localStorage.setItem('roweos_todo_categories', JSON.stringify(data.todoCategories));
-  if (data.taskHistory) localStorage.setItem('roweos_task_history', JSON.stringify(data.taskHistory));
+  // v12.2.7: BrandAI To-Do items (gated by sync category)
+  if (data.todos && shouldSyncCategory('brand_todos')) localStorage.setItem('roweosTodos', JSON.stringify(data.todos));
+  if (data.todoCategories && shouldSyncCategory('brand_todos')) localStorage.setItem('roweos_todo_categories', JSON.stringify(data.todoCategories));
+  if (data.taskHistory && shouldSyncCategory('brand_todos')) localStorage.setItem('roweos_task_history', JSON.stringify(data.taskHistory));
   
   // Settings
   if (data.settings) {
@@ -80961,8 +80992,8 @@ function applyCloudData(data) {
     if (data.focus.lastStreakDate) localStorage.setItem('roweosLastStreakDate', data.focus.lastStreakDate);
   }
   
-  // v11.0.5: Inventory (Products & Services) - SMART MERGE (don't overwrite newer local data!)
-  if (data.inventory) {
+  // v12.2.7: Inventory (gated by sync category)
+  if (data.inventory && shouldSyncCategory('inventory')) {
     var fbInvData = typeof data.inventory === 'string' ? JSON.parse(data.inventory) : data.inventory;
     var fbItems = fbInvData.items || [];
     var fbUpdatedAt = fbInvData.updatedAt || '1970-01-01';
@@ -81005,8 +81036,8 @@ function applyCloudData(data) {
     }
   }
   
-  // v10.5.25: Library — handle both string (new) and object (legacy) formats
-  if (data.library) {
+  // v12.2.7: Library (gated by sync category)
+  if (data.library && shouldSyncCategory('library')) {
     var libraryStr = typeof data.library === 'string' ? data.library : JSON.stringify(data.library);
     localStorage.setItem('roweosLibrary', libraryStr);
     if (typeof fileLibrary !== 'undefined') {
@@ -81078,8 +81109,8 @@ function applyCloudData(data) {
       }
       console.log('[Firebase] Loaded', data.lifeAI.generatedOps.length, 'generated LifeAI ops');
     }
-    // v10.5.25: Restore LifeAI Library — handle string (new) and object (legacy) formats
-    if (data.lifeAI.library) {
+    // v12.2.7: Restore LifeAI Library (gated by sync category)
+    if (data.lifeAI.library && shouldSyncCategory('library')) {
       var lifeLibStr = typeof data.lifeAI.library === 'string' ? data.lifeAI.library : JSON.stringify(data.lifeAI.library);
       localStorage.setItem('roweos_life_library', lifeLibStr);
       console.log('[Firebase] Loaded LifeAI library');
@@ -81089,24 +81120,26 @@ function applyCloudData(data) {
     if (data.lifeAI.routines) localStorage.setItem('roweos_life_routines', JSON.stringify(data.lifeAI.routines));
     if (data.lifeAI.habits) localStorage.setItem('roweos_life_habits', JSON.stringify(data.lifeAI.habits));
     if (data.lifeAI.todoCategories) localStorage.setItem('roweos_life_todo_categories', JSON.stringify(data.lifeAI.todoCategories));
-    // v12.2.6: Restore LifeAI todos and calendar (were missing!)
-    if (data.lifeAI.todos) localStorage.setItem('roweos_life_todos', JSON.stringify(data.lifeAI.todos));
-    if (data.lifeAI.calendar) localStorage.setItem('roweos_life_calendar', JSON.stringify(data.lifeAI.calendar));
-    // v12.2.4: Restore LifeAI conversations
-    if (data.lifeAI.agentCommands && Array.isArray(data.lifeAI.agentCommands)) {
+    // v12.2.7: Restore LifeAI todos (gated by sync category)
+    if (data.lifeAI.todos && shouldSyncCategory('life_todos')) localStorage.setItem('roweos_life_todos', JSON.stringify(data.lifeAI.todos));
+    if (data.lifeAI.todoCategories && shouldSyncCategory('life_todos')) localStorage.setItem('roweos_life_todo_categories', JSON.stringify(data.lifeAI.todoCategories));
+    // v12.2.7: Restore LifeAI calendar (gated by sync category)
+    if (data.lifeAI.calendar && shouldSyncCategory('calendar')) localStorage.setItem('roweos_life_calendar', JSON.stringify(data.lifeAI.calendar));
+    // v12.2.7: Restore LifeAI conversations (gated by sync category)
+    if (data.lifeAI.agentCommands && Array.isArray(data.lifeAI.agentCommands) && shouldSyncCategory('lifeai_chats')) {
       localStorage.setItem('roweos_life_agentCommands', JSON.stringify(data.lifeAI.agentCommands));
       console.log('[Firebase] Loaded LifeAI conversations:', data.lifeAI.agentCommands.length);
     }
     console.log('[Firebase] Loaded LifeAI data, userName:', data.lifeAI.userName, 'accentLight:', data.lifeAI.accentLightMode, 'accentDark:', data.lifeAI.accentDarkMode);
   }
 
-  // v12.2.4: Journal & Pulse data
-  if (data.journal && Array.isArray(data.journal)) {
+  // v12.2.7: Journal (gated by sync category)
+  if (data.journal && Array.isArray(data.journal) && shouldSyncCategory('journal')) {
     localStorage.setItem('roweos_journal', JSON.stringify(data.journal));
     console.log('[Firebase] Loaded journal entries:', data.journal.length);
   }
   if (data.pulse) {
-    if (data.pulse.goals) localStorage.setItem('roweos_pulse_goals', JSON.stringify(data.pulse.goals));
+    if (data.pulse.goals && shouldSyncCategory('goals')) localStorage.setItem('roweos_pulse_goals', JSON.stringify(data.pulse.goals));
     if (data.pulse.journal) localStorage.setItem('roweos_pulse_journal', JSON.stringify(data.pulse.journal));
     if (data.pulse.insights) localStorage.setItem('roweos_pulse_insights', JSON.stringify(data.pulse.insights));
     if (data.pulse.entries) localStorage.setItem('roweos_pulse2_entries', JSON.stringify(data.pulse.entries));
@@ -82874,7 +82907,8 @@ function renderOnboardingSyncPrefs() {
     { key: 'brandai_chats', name: 'BrandAI Chats', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' },
     { key: 'lifeai_chats', name: 'LifeAI Chats', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' },
     { key: 'library', name: 'Library Files', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' },
-    { key: 'todos', name: 'To-Do Items', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>' },
+    { key: 'brand_todos', name: 'BrandAI To-Dos', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>' },
+    { key: 'life_todos', name: 'LifeAI To-Dos', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>' },
     { key: 'calendar', name: 'Calendar Events', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>' },
     { key: 'logos', name: 'Brand Logos', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>' },
     { key: 'goals', name: 'Pulse Goals', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>' },
@@ -86104,7 +86138,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.2.7 - ' + subtitle;
+  document.title = 'RoweOS v12.2.8 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -100583,9 +100617,14 @@ async function renderSyncInventory() {
       cloudCount: function(d) { return d.lifeAI && d.lifeAI.agentCommands ? d.lifeAI.agentCommands.length : 0; }
     },
     {
-      name: 'To-Do Items',
+      name: 'BrandAI To-Dos',
       localCount: function() { try { return JSON.parse(localStorage.getItem('roweosTodos') || '[]').length; } catch(e) { return 0; } },
       cloudCount: function(d) { return (d.todos || []).length; }
+    },
+    {
+      name: 'LifeAI To-Dos',
+      localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_life_todos') || '[]').length; } catch(e) { return 0; } },
+      cloudCount: function(d) { return d.lifeAI && d.lifeAI.todos ? d.lifeAI.todos.length : 0; }
     },
     {
       name: 'Calendar',
@@ -100692,41 +100731,57 @@ async function renderSyncInventory() {
  * v12.2.4.1: Render storage capacity indicator
  */
 function renderStorageCapacity() {
-  // Calculate approximate localStorage usage
+  // v12.2.7: Calculate localStorage usage with cloud/local split
   var totalSize = 0;
+  var cloudSize = 0;
   var breakdown = {};
+  var cloudBreakdown = {};
+
+  // v12.2.7: Map localStorage keys to sync categories
+  function getCategoryForKey(key) {
+    if (key.includes('agentCommands') && key.includes('life')) return 'lifeai_chats';
+    if (key.includes('agentCommands') || key.includes('conversation')) return 'brandai_chats';
+    if (key.includes('library') || key.includes('Library')) return 'library';
+    if (key.includes('logo')) return 'logos';
+    if (key.includes('inventory')) return 'inventory';
+    if (key.includes('life_todos') || key.includes('life_todo_cat')) return 'life_todos';
+    if (key.includes('Todos') || key.includes('todo_cat') || key.includes('task_history')) return 'brand_todos';
+    if (key.includes('calendar') || key.includes('scheduled') || key.includes('automations')) return 'calendar';
+    if (key.includes('journal')) return 'journal';
+    if (key.includes('pulse_goals')) return 'goals';
+    if (key.includes('brand_memory') || key.includes('brandMemory') || key.match(/^brand_\d/)) return 'knowledge';
+    if (key.includes('runs')) return 'runs';
+    return 'other';
+  }
 
   for (var key in localStorage) {
     if (localStorage.hasOwnProperty(key) && key.startsWith('roweos')) {
-      var size = (localStorage.getItem(key) || '').length * 2; // UTF-16 = 2 bytes per char
+      var size = (localStorage.getItem(key) || '').length * 2;
       totalSize += size;
 
-      // Categorize
-      if (key.includes('agentCommands') || key.includes('conversation')) {
-        breakdown.conversations = (breakdown.conversations || 0) + size;
-      } else if (key.includes('library') || key.includes('Library')) {
-        breakdown.library = (breakdown.library || 0) + size;
-      } else if (key.includes('logo')) {
-        breakdown.logos = (breakdown.logos || 0) + size;
-      } else if (key.includes('inventory')) {
-        breakdown.inventory = (breakdown.inventory || 0) + size;
-      } else {
-        breakdown.other = (breakdown.other || 0) + size;
+      var cat = getCategoryForKey(key);
+      breakdown[cat] = (breakdown[cat] || 0) + size;
+
+      // v12.2.7: Only count towards cloud if category is set to cloud
+      if (shouldSyncCategory(cat)) {
+        cloudSize += size;
+        cloudBreakdown[cat] = (cloudBreakdown[cat] || 0) + size;
       }
     }
   }
 
-  // localStorage limit is typically 5-10MB, Firestore limit is 1MB per doc
-  var localLimit = 5 * 1024 * 1024; // 5MB
-  var firestoreLimit = 1 * 1024 * 1024; // 1MB
+  var localLimit = 5 * 1024 * 1024;
+  var firestoreLimit = 1 * 1024 * 1024;
   var localPercent = Math.min(100, Math.round((totalSize / localLimit) * 100));
-  var cloudPercent = Math.min(100, Math.round((totalSize / firestoreLimit) * 100));
+  var cloudPercent = Math.min(100, Math.round((cloudSize / firestoreLimit) * 100));
 
   var formatSize = function(bytes) {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
+
+  var localOnlySize = totalSize - cloudSize;
 
   var html = '<div style="margin-top: var(--space-6); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);">';
   html += '<h4 style="margin: 0 0 var(--space-4) 0; font-size: var(--text-base); font-weight: 600;">Storage Usage</h4>';
@@ -100738,26 +100793,39 @@ function renderStorageCapacity() {
   html += '<div style="height: 100%; width: ' + localPercent + '%; background: ' + (localPercent > 80 ? '#ef4444' : localPercent > 50 ? '#f59e0b' : '#22c55e') + '; transition: width 0.3s;"></div>';
   html += '</div></div>';
 
-  // Cloud storage bar (estimate)
+  // v12.2.7: Cloud storage bar (only counts cloud-synced categories)
   html += '<div style="margin-bottom: var(--space-3);">';
-  html += '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Cloud Sync Limit</span><span>' + formatSize(totalSize) + ' / 1 MB</span></div>';
+  html += '<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Cloud Sync Limit</span><span>' + formatSize(cloudSize) + ' / 1 MB</span></div>';
   html += '<div style="height: 8px; background: var(--bg-tertiary); border-radius: 4px; overflow: hidden;">';
   html += '<div style="height: 100%; width: ' + cloudPercent + '%; background: ' + (cloudPercent > 80 ? '#ef4444' : cloudPercent > 50 ? '#f59e0b' : '#22c55e') + '; transition: width 0.3s;"></div>';
   html += '</div></div>';
 
+  // v12.2.7: Local-only indicator
+  if (localOnlySize > 0) {
+    html += '<div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--space-2);">';
+    html += formatSize(localOnlySize) + ' kept local-only (not synced to cloud)';
+    html += '</div>';
+  }
+
   // Breakdown
   html += '<div style="font-size: var(--text-sm); color: var(--text-tertiary); margin-top: var(--space-3);">';
-  html += '<strong>Breakdown:</strong> ';
-  html += 'Conversations: ' + formatSize(breakdown.conversations || 0) + ' | ';
-  html += 'Library: ' + formatSize(breakdown.library || 0) + ' | ';
-  html += 'Logos: ' + formatSize(breakdown.logos || 0) + ' | ';
-  html += 'Inventory: ' + formatSize(breakdown.inventory || 0) + ' | ';
-  html += 'Other: ' + formatSize(breakdown.other || 0);
+  html += '<strong>Cloud:</strong> ';
+  var cloudParts = [];
+  if (cloudBreakdown.brandai_chats) cloudParts.push('BrandAI Chats: ' + formatSize(cloudBreakdown.brandai_chats));
+  if (cloudBreakdown.lifeai_chats) cloudParts.push('LifeAI Chats: ' + formatSize(cloudBreakdown.lifeai_chats));
+  if (cloudBreakdown.library) cloudParts.push('Library: ' + formatSize(cloudBreakdown.library));
+  if (cloudBreakdown.brand_todos) cloudParts.push('Brand To-Dos: ' + formatSize(cloudBreakdown.brand_todos));
+  if (cloudBreakdown.life_todos) cloudParts.push('Life To-Dos: ' + formatSize(cloudBreakdown.life_todos));
+  if (cloudBreakdown.inventory) cloudParts.push('Inventory: ' + formatSize(cloudBreakdown.inventory));
+  if (cloudBreakdown.logos) cloudParts.push('Logos: ' + formatSize(cloudBreakdown.logos));
+  var otherCloud = (cloudBreakdown.calendar || 0) + (cloudBreakdown.journal || 0) + (cloudBreakdown.goals || 0) + (cloudBreakdown.knowledge || 0) + (cloudBreakdown.runs || 0) + (cloudBreakdown.other || 0);
+  if (otherCloud) cloudParts.push('Other: ' + formatSize(otherCloud));
+  html += cloudParts.length > 0 ? cloudParts.join(' | ') : 'None';
   html += '</div>';
 
   if (cloudPercent > 80) {
     html += '<div style="margin-top: var(--space-3); padding: 8px 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); color: #ef4444; font-size: var(--text-sm);">';
-    html += 'Warning: Approaching cloud sync limit. Consider enabling auto-trim in settings or clearing old conversations.';
+    html += 'Warning: Approaching cloud sync limit. Toggle some categories to Local in Storage Management below.';
     html += '</div>';
   }
 
@@ -100872,12 +100940,20 @@ function renderStorageManagement() {
       count: function() { try { return JSON.parse(localStorage.getItem('roweos_calendar') || '[]').length; } catch(e) { return 0; } }
     },
     {
-      key: 'todos',
-      name: 'To-Do Items',
-      desc: 'Clear all to-do items',
+      key: 'brand_todos',
+      name: 'BrandAI To-Dos',
+      desc: 'Clear BrandAI to-do items',
       icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
-      size: function() { return getKeySize('roweosTodos'); },
+      size: function() { return getKeySize('roweosTodos') + getKeySize('roweos_todo_categories'); },
       count: function() { try { return JSON.parse(localStorage.getItem('roweosTodos') || '[]').length; } catch(e) { return 0; } }
+    },
+    {
+      key: 'life_todos',
+      name: 'LifeAI To-Dos',
+      desc: 'Clear LifeAI to-do items',
+      icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
+      size: function() { return getKeySize('roweos_life_todos') + getKeySize('roweos_life_todo_categories'); },
+      count: function() { try { return JSON.parse(localStorage.getItem('roweos_life_todos') || '[]').length; } catch(e) { return 0; } }
     },
     {
       key: 'runs',
@@ -101137,8 +101213,8 @@ function clearStorageCategory(category) {
   var categoryNames = {
     brandai_chats: 'BrandAI Chats', lifeai_chats: 'LifeAI Chats', library: 'Library Files',
     logos: 'Brand Logos', inventory: 'Inventory Images', journal: 'Journal Entries',
-    calendar: 'Calendar Events', todos: 'To-Do Items', runs: 'Studio Runs',
-    goals: 'Pulse Goals', knowledge: 'Brand Knowledge', conversations: 'Old Conversations'
+    calendar: 'Calendar Events', brand_todos: 'BrandAI To-Dos', life_todos: 'LifeAI To-Dos',
+    runs: 'Studio Runs', goals: 'Pulse Goals', knowledge: 'Brand Knowledge', conversations: 'Old Conversations'
   };
   var displayName = categoryNames[category] || category;
   var confirmed = confirm('Clear ' + displayName + '? This will free up storage space.');
@@ -101215,10 +101291,17 @@ function clearStorageCategory(category) {
       if (typeof calendar !== 'undefined') calendar = [];
       showToast('Cleared all calendar events', 'success');
 
-    } else if (category === 'todos') {
-      // v12.2.6: Clear todos
+    } else if (category === 'brand_todos') {
+      // v12.2.7: Clear BrandAI todos
       localStorage.removeItem('roweosTodos');
-      showToast('Cleared all to-do items', 'success');
+      localStorage.removeItem('roweos_todo_categories');
+      showToast('Cleared BrandAI to-do items', 'success');
+
+    } else if (category === 'life_todos') {
+      // v12.2.7: Clear LifeAI todos
+      localStorage.removeItem('roweos_life_todos');
+      localStorage.removeItem('roweos_life_todo_categories');
+      showToast('Cleared LifeAI to-do items', 'success');
 
     } else if (category === 'runs') {
       // v12.2.6: Clear studio runs
@@ -101253,6 +101336,230 @@ function clearStorageCategory(category) {
 /**
  * v12.2.4: Clear all synced cloud data
  */
+// v12.2.7: AI Storage Assistant
+function buildStorageAssistantPrompt(userMessage) {
+  // Gather comprehensive storage stats
+  var syncCats = {};
+  try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
+
+  var categories = [
+    { key: 'brandai_chats', name: 'BrandAI Chats', lsKey: 'roweos_agentCommands' },
+    { key: 'lifeai_chats', name: 'LifeAI Chats', lsKey: 'roweos_life_agentCommands' },
+    { key: 'library', name: 'Library Files', lsKey: 'roweosLibrary' },
+    { key: 'brand_todos', name: 'BrandAI To-Dos', lsKey: 'roweosTodos' },
+    { key: 'life_todos', name: 'LifeAI To-Dos', lsKey: 'roweos_life_todos' },
+    { key: 'calendar', name: 'Calendar Events', lsKey: 'roweos_calendar' },
+    { key: 'logos', name: 'Brand Logos', lsKey: null },
+    { key: 'goals', name: 'Pulse Goals', lsKey: 'roweos_pulse_goals' },
+    { key: 'knowledge', name: 'Brand Knowledge', lsKey: 'roweos_brand_memory' },
+    { key: 'journal', name: 'Journal Entries', lsKey: 'roweos_journal' },
+    { key: 'inventory', name: 'Inventory', lsKey: 'roweos_inventory' },
+    { key: 'runs', name: 'Studio Runs', lsKey: 'roweos_runs' }
+  ];
+
+  var stats = categories.map(function(cat) {
+    var size = 0;
+    var count = 0;
+    if (cat.lsKey) {
+      size = getKeySize(cat.lsKey);
+      try {
+        var val = JSON.parse(localStorage.getItem(cat.lsKey) || '[]');
+        count = Array.isArray(val) ? val.length : (val.items ? val.items.length : (val.files ? val.files.length : 0));
+      } catch(e) {}
+    } else if (cat.key === 'logos') {
+      for (var i = 0; i < 10; i++) { size += getKeySize('roweos_brand_' + i + '_logo'); }
+      size += getKeySize('roweos_lifeai_logo');
+    }
+    var location = syncCats[cat.key] === 'local' ? 'LOCAL' : 'CLOUD';
+    return cat.name + ': ' + formatStorageSize(size) + ', ' + count + ' items, ' + location + ' (key: ' + cat.key + ')';
+  });
+
+  var totalLocal = 0;
+  var totalCloud = 0;
+  for (var key in localStorage) {
+    if (localStorage.hasOwnProperty(key) && key.startsWith('roweos')) {
+      var s = (localStorage.getItem(key) || '').length * 2;
+      totalLocal += s;
+    }
+  }
+
+  // Calculate cloud size
+  categories.forEach(function(cat) {
+    if (syncCats[cat.key] !== 'local') {
+      if (cat.lsKey) {
+        totalCloud += getKeySize(cat.lsKey);
+      } else if (cat.key === 'logos') {
+        for (var i = 0; i < 10; i++) totalCloud += getKeySize('roweos_brand_' + i + '_logo');
+        totalCloud += getKeySize('roweos_lifeai_logo');
+      }
+    }
+  });
+
+  var hasFirebase = typeof firebaseUser !== 'undefined' && firebaseUser && firebaseUser.email;
+
+  var systemPrompt = 'You are the RoweOS Storage Assistant. You have complete knowledge of the user\'s storage situation.\n\n';
+  systemPrompt += '## Current Storage Status\n';
+  systemPrompt += '- Total Local: ' + formatStorageSize(totalLocal) + ' / 5 MB\n';
+  systemPrompt += '- Cloud Sync: ' + formatStorageSize(totalCloud) + ' / 1 MB (Firestore limit)\n';
+  systemPrompt += '- Firebase Connected: ' + (hasFirebase ? 'Yes (' + firebaseUser.email + ')' : 'No') + '\n\n';
+  systemPrompt += '## Per-Category Breakdown\n';
+  stats.forEach(function(s) { systemPrompt += '- ' + s + '\n'; });
+  systemPrompt += '\n## Rules\n';
+  systemPrompt += '- Categories set to CLOUD will be synced to Firebase. Categories set to LOCAL stay only on this device.\n';
+  systemPrompt += '- Firestore limit is 1 MB per document. If cloud usage exceeds this, sync will fail.\n';
+  systemPrompt += '- When the user asks you to toggle a category, include this exact tag in your response: [TOGGLE:category_key:cloud] or [TOGGLE:category_key:local]\n';
+  systemPrompt += '- Available category keys: brandai_chats, lifeai_chats, library, brand_todos, life_todos, calendar, logos, goals, knowledge, journal, inventory, runs\n';
+  systemPrompt += '- Be concise. Give specific size numbers. Recommend which categories to move to local if cloud is over limit.\n';
+  systemPrompt += '- Never use emoji. Use plain text only.\n';
+
+  return systemPrompt;
+}
+
+function sendStorageAssistantMessage() {
+  var input = document.getElementById('storageAssistantInput');
+  var messagesEl = document.getElementById('storageAssistantMessages');
+  if (!input || !input.value.trim() || !messagesEl) return;
+
+  var userMsg = input.value.trim();
+  input.value = '';
+
+  // Add user message
+  var userDiv = document.createElement('div');
+  userDiv.style.cssText = 'padding: 10px 14px; background: var(--accent-10, rgba(212, 175, 55, 0.1)); border: 1px solid var(--accent-20, rgba(212, 175, 55, 0.2)); border-radius: var(--radius-md); font-size: var(--text-sm); align-self: flex-end; max-width: 85%;';
+  userDiv.textContent = userMsg;
+  messagesEl.appendChild(userDiv);
+
+  // Add loading indicator
+  var loadingDiv = document.createElement('div');
+  loadingDiv.id = 'storageAssistantLoading';
+  loadingDiv.style.cssText = 'padding: 10px 14px; background: var(--bg-tertiary); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-muted);';
+  loadingDiv.textContent = 'Analyzing storage...';
+  messagesEl.appendChild(loadingDiv);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  // Build prompt and send to AI
+  var systemPrompt = buildStorageAssistantPrompt(userMsg);
+
+  // Determine API provider
+  var apiKeys = {};
+  try { apiKeys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}'); } catch(e) {}
+
+  var provider = null;
+  var apiKey = null;
+  if (apiKeys.anthropic) { provider = 'anthropic'; apiKey = apiKeys.anthropic; }
+  else if (apiKeys.openai) { provider = 'openai'; apiKey = apiKeys.openai; }
+  else if (apiKeys.google) { provider = 'google'; apiKey = apiKeys.google; }
+
+  if (!provider) {
+    loadingDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+    loadingDiv.style.color = '#ef4444';
+    loadingDiv.textContent = 'No API key configured. Add one in Settings to use the Storage Assistant.';
+    return;
+  }
+
+  callStorageAssistantAPI(provider, apiKey, systemPrompt, userMsg, function(response) {
+    loadingDiv.remove();
+
+    // Parse and execute any TOGGLE commands
+    var cleanResponse = response.replace(/\[TOGGLE:([a-z_]+):(cloud|local)\]/g, function(match, catKey, value) {
+      var syncCats = {};
+      try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
+      syncCats[catKey] = value;
+      localStorage.setItem('roweos_sync_categories', JSON.stringify(syncCats));
+      refreshStorageDisplays();
+      return '';
+    });
+
+    var responseDiv = document.createElement('div');
+    responseDiv.style.cssText = 'padding: 12px 16px; background: var(--bg-tertiary); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.5;';
+    if (typeof marked !== 'undefined' && marked.parse) {
+      responseDiv.innerHTML = marked.parse(cleanResponse.trim());
+    } else {
+      responseDiv.textContent = cleanResponse.trim();
+    }
+    messagesEl.appendChild(responseDiv);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }, function(error) {
+    loadingDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+    loadingDiv.style.color = '#ef4444';
+    loadingDiv.textContent = 'Error: ' + error;
+  });
+}
+
+function callStorageAssistantAPI(provider, apiKey, systemPrompt, userMsg, onSuccess, onError) {
+  if (provider === 'anthropic') {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.anthropic.com/v1/messages');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('x-api-key', apiKey);
+    xhr.setRequestHeader('anthropic-version', '2023-06-01');
+    xhr.setRequestHeader('anthropic-dangerous-direct-browser-access', 'true');
+    xhr.onload = function() {
+      try {
+        var data = JSON.parse(xhr.responseText);
+        if (data.content && data.content[0]) {
+          onSuccess(data.content[0].text);
+        } else if (data.error) {
+          onError(data.error.message);
+        }
+      } catch(e) { onError(e.message); }
+    };
+    xhr.onerror = function() { onError('Network error'); };
+    xhr.send(JSON.stringify({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMsg }]
+    }));
+
+  } else if (provider === 'openai') {
+    var xhr2 = new XMLHttpRequest();
+    xhr2.open('POST', 'https://api.openai.com/v1/chat/completions');
+    xhr2.setRequestHeader('Content-Type', 'application/json');
+    xhr2.setRequestHeader('Authorization', 'Bearer ' + apiKey);
+    xhr2.onload = function() {
+      try {
+        var data = JSON.parse(xhr2.responseText);
+        if (data.choices && data.choices[0]) {
+          onSuccess(data.choices[0].message.content);
+        } else if (data.error) {
+          onError(data.error.message);
+        }
+      } catch(e) { onError(e.message); }
+    };
+    xhr2.onerror = function() { onError('Network error'); };
+    xhr2.send(JSON.stringify({
+      model: 'gpt-4o-mini',
+      max_tokens: 1024,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMsg }
+      ]
+    }));
+
+  } else if (provider === 'google') {
+    var xhr3 = new XMLHttpRequest();
+    xhr3.open('POST', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + apiKey);
+    xhr3.setRequestHeader('Content-Type', 'application/json');
+    xhr3.onload = function() {
+      try {
+        var data = JSON.parse(xhr3.responseText);
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+          onSuccess(data.candidates[0].content.parts[0].text);
+        } else if (data.error) {
+          onError(data.error.message);
+        }
+      } catch(e) { onError(e.message); }
+    };
+    xhr3.onerror = function() { onError('Network error'); };
+    xhr3.send(JSON.stringify({
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+      generationConfig: { maxOutputTokens: 1024 }
+    }));
+  }
+}
+
 async function clearAllSyncData() {
   var confirmed = confirm('WARNING: This will delete ALL your data from the cloud. Your local data will remain. Continue?');
   if (!confirmed) return;
