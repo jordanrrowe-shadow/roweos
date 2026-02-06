@@ -68,10 +68,15 @@ if [ ! -f "RoweOS/dist/index.html" ]; then
     unzip -o RoweOS.zip
 fi
 
-# 5. Check for changes and commit
-if ! git diff --quiet CLAUDE.md 2>/dev/null || ! git diff --quiet RoweOS/dist/ 2>/dev/null; then
+# 5. Regenerate RoweOS.zip to ensure it matches RoweOS/dist/
+echo "Updating RoweOS.zip..."
+rm -f RoweOS.zip
+zip -r RoweOS.zip RoweOS/dist/ -x "*.DS_Store"
+
+# 6. Check for changes and commit
+if ! git diff --quiet CLAUDE.md 2>/dev/null || ! git diff --quiet RoweOS/dist/ 2>/dev/null || ! git diff --quiet RoweOS.zip 2>/dev/null; then
     echo "Staging changes..."
-    git add CLAUDE.md RoweOS/dist/ .gitignore 2>/dev/null || true
+    git add CLAUDE.md RoweOS/dist/ RoweOS.zip .gitignore 2>/dev/null || true
 
     if ! git diff --cached --quiet; then
         echo "Committing..."
@@ -82,11 +87,11 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
     fi
 fi
 
-# 6. Push to git
+# 7. Push to git
 echo "Pushing to git..."
 git push origin main
 
-# 7. Deploy to Vercel
+# 8. Deploy to Vercel
 echo "Deploying to Vercel..."
 cd RoweOS/dist
 npx vercel --prod
