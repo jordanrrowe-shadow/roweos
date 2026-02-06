@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.2.6 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.2.7 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -37897,7 +37897,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.2.6</div>
+      <div class="launch-version" id="launchVersionTag">v12.2.7</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38206,7 +38206,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.2.6</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.2.7</div>
       
     </div>
   </div>
@@ -38490,7 +38490,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.2.6</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.2.7</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39357,7 +39357,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.2.6</span>
+          <span class="sidebar-version">v12.2.7</span>
         </div>
       </div>
     </div>
@@ -39667,7 +39667,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.2.6 • Built for the future</p>
+        <p>RoweOS v12.2.7 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39724,7 +39724,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.2.6</p>
+            <p class="onboarding-welcome-version">v12.2.7</p>
           </div>
         </div>
       </div>
@@ -40934,6 +40934,104 @@ service cloud.firestore {
         </div>
       </div>
       
+      <!-- v12.2.7: Onboarding Logo Upload -->
+      <div id="onboardingStepLogo" class="onboarding-step" style="display: none;">
+        <div class="onboarding-header">
+          <h2 class="onboarding-title">Upload Your Logo</h2>
+          <p class="onboarding-subtitle" id="onboardingLogoSubtitle">Add a custom logo for your brand</p>
+        </div>
+
+        <div class="onboarding-content" style="max-width: 500px; margin: 0 auto;">
+          <div id="onboardingLogoUploader" style="text-align: center;">
+            <div id="onboardingLogoPreview" style="width: 120px; height: 120px; border-radius: var(--radius-lg); border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-5); overflow: hidden; background: var(--bg-tertiary);">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--text-muted)" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </div>
+
+            <input type="file" id="onboardingLogoInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/svg+xml" style="display: none;" onchange="handleOnboardingLogoUpload(this)" />
+
+            <button type="button" class="onboarding-btn onboarding-btn-secondary" onclick="document.getElementById('onboardingLogoInput').click()" style="margin-bottom: var(--space-3);">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: -2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Choose Image
+            </button>
+
+            <p style="color: var(--text-muted); font-size: var(--text-sm);">PNG, JPG, WebP, or SVG. Max 2MB.</p>
+            <p style="color: var(--text-muted); font-size: var(--text-xs); margin-top: var(--space-2);">This replaces the default R logo in the sidebar.</p>
+          </div>
+        </div>
+
+        <div class="onboarding-actions">
+          <button class="onboarding-btn onboarding-btn-secondary" onclick="goToOnboardingStep(5)">← Back</button>
+          <button class="onboarding-btn onboarding-btn-primary" onclick="proceedFromOnboardingLogo()">Continue →</button>
+        </div>
+      </div>
+
+      <!-- v12.2.7: Onboarding Firebase Setup -->
+      <div id="onboardingStepFirebase" class="onboarding-step" style="display: none;">
+        <div class="onboarding-header">
+          <h2 class="onboarding-title">Cloud Sync Setup</h2>
+          <p class="onboarding-subtitle">Connect Firebase to sync data across devices (optional)</p>
+        </div>
+
+        <div class="onboarding-content" style="max-width: 600px; margin: 0 auto;">
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);">
+            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+              <div>
+                <div style="font-weight: 600; font-size: var(--text-base);">Firebase Cloud Sync</div>
+                <div style="font-size: var(--text-sm); color: var(--text-secondary);">Sync conversations, library, and more across devices</div>
+              </div>
+            </div>
+
+            <div style="margin-bottom: var(--space-4);">
+              <label style="display: block; font-weight: 500; font-size: var(--text-sm); margin-bottom: var(--space-2); color: var(--text-primary);">Firebase Config</label>
+              <textarea id="onboardingFirebaseInput" class="onboarding-form-textarea" rows="6" placeholder='Paste your Firebase config object here, e.g.
+{
+  "apiKey": "...",
+  "authDomain": "...",
+  "projectId": "..."
+}' style="font-family: monospace; font-size: var(--text-sm);"></textarea>
+              <p style="font-size: var(--text-xs); color: var(--text-muted); margin-top: var(--space-2);">Get this from Firebase Console &rarr; Project Settings &rarr; Your Apps &rarr; Config</p>
+            </div>
+
+            <div id="onboardingFirebaseStatus" style="display: none; padding: 8px 12px; border-radius: var(--radius-md); font-size: var(--text-sm); margin-bottom: var(--space-3);"></div>
+
+            <button type="button" class="onboarding-btn onboarding-btn-secondary" onclick="connectOnboardingFirebase()" style="width: 100%;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: -2px;"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+              Connect Firebase
+            </button>
+          </div>
+        </div>
+
+        <div class="onboarding-actions">
+          <button class="onboarding-btn onboarding-btn-secondary" onclick="goToOnboardingStep('logo')">← Back</button>
+          <button class="onboarding-btn onboarding-btn-primary" onclick="proceedFromOnboardingFirebase()">Continue →</button>
+        </div>
+      </div>
+
+      <!-- v12.2.7: Onboarding Sync Preferences -->
+      <div id="onboardingStepSync" class="onboarding-step" style="display: none;">
+        <div class="onboarding-header">
+          <h2 class="onboarding-title">Storage Preferences</h2>
+          <p class="onboarding-subtitle">Choose what stays local and what syncs to the cloud</p>
+        </div>
+
+        <div class="onboarding-content" style="max-width: 600px; margin: 0 auto;">
+          <div id="onboardingSyncGrid" style="display: flex; flex-direction: column; gap: var(--space-2);">
+            <!-- Populated dynamically by renderOnboardingSyncPrefs() -->
+          </div>
+          <p style="text-align: center; color: var(--text-muted); font-size: var(--text-xs); margin-top: var(--space-4);">You can change these anytime in Settings &rarr; Sync</p>
+        </div>
+
+        <div class="onboarding-actions">
+          <button class="onboarding-btn onboarding-btn-secondary" onclick="goToOnboardingStep('firebase')">← Back</button>
+          <button class="onboarding-btn onboarding-btn-primary" onclick="proceedFromOnboardingSync()">Continue →</button>
+        </div>
+      </div>
+
       <!-- Step 6: Create Your Brand -->
       <div id="onboardingStep6" class="onboarding-step" style="display: none;">
         <div class="onboarding-header">
@@ -79485,7 +79583,24 @@ function completeFirebaseLogin(user) {
     
     // Close any modals
     if (typeof closeFirebaseConfigModal === 'function') closeFirebaseConfigModal();
-    
+
+    // v12.2.7: If connecting during onboarding, don't hide onboarding screens
+    if (window._onboardingInProgress) {
+      console.log('Firebase: Connected during onboarding, staying in onboarding flow');
+      var onbFirebaseStatus = document.getElementById('onboardingFirebaseStatus');
+      if (onbFirebaseStatus) {
+        onbFirebaseStatus.style.display = 'block';
+        onbFirebaseStatus.style.background = 'rgba(74, 222, 128, 0.1)';
+        onbFirebaseStatus.style.color = '#4ade80';
+        onbFirebaseStatus.textContent = 'Signed in as ' + user.email;
+      }
+      if (typeof showToast === 'function') {
+        showToast('Signed in as ' + user.email, 'success');
+      }
+      window._firebaseLoginInProgress = false;
+      return;
+    }
+
     // Hide ALL possible screens that might be showing
     var elementsToHide = [
       document.getElementById('onboardingView'),
@@ -79495,7 +79610,7 @@ function completeFirebaseLogin(user) {
       document.querySelector('.welcome-screen'),
       document.querySelector('.onboarding-container')
     ];
-    
+
     elementsToHide.forEach(function(el) {
       if (el) {
         el.classList.add('hidden');
@@ -79504,16 +79619,16 @@ function completeFirebaseLogin(user) {
         el.style.opacity = '0';
       }
     });
-    
+
     // Remove any body classes that might interfere
     document.body.classList.remove('onboarding-active');
     document.body.classList.remove('welcome-active');
-    
+
     // Force show the agent view
     if (typeof showView === 'function') {
       showView('agent');
     }
-    
+
     // Show success toast
     if (typeof showToast === 'function') {
       showToast('Signed in as ' + user.email, 'success');
@@ -82285,7 +82400,7 @@ function goToOnboardingStep(step) {
   console.log('=== goToOnboardingStep called with step:', step);
   
   // Hide all steps (including new wizard steps 6-11 and import steps)
-  var stepIds = ['onboardingStep0', 'onboardingStepMode', 'onboardingStepName', 'onboardingStepProvider', 'onboardingStep1', 'onboardingBrandName', 'onboardingStep2', 'onboardingTemplateSelection', 'onboardingStep3', 'onboardingStep4', 'onboardingStep5', 'onboardingStep6', 'onboardingStep7', 'onboardingStep8', 'onboardingStep9', 'onboardingStep10', 'onboardingStep11', 'onboardingWebsiteImport', 'onboardingDocumentUpload', 'onboardingLifeStep1', 'onboardingLifeStep2', 'onboardingLifeStep3', 'onboardingLifeStep4', 'onboardingLifeBuilding', 'onboardingLifeStep5'];
+  var stepIds = ['onboardingStep0', 'onboardingStepMode', 'onboardingStepName', 'onboardingStepProvider', 'onboardingStep1', 'onboardingBrandName', 'onboardingStep2', 'onboardingTemplateSelection', 'onboardingStep3', 'onboardingStep4', 'onboardingStep5', 'onboardingStepLogo', 'onboardingStepFirebase', 'onboardingStepSync', 'onboardingStep6', 'onboardingStep7', 'onboardingStep8', 'onboardingStep9', 'onboardingStep10', 'onboardingStep11', 'onboardingWebsiteImport', 'onboardingDocumentUpload', 'onboardingLifeStep1', 'onboardingLifeStep2', 'onboardingLifeStep3', 'onboardingLifeStep4', 'onboardingLifeBuilding', 'onboardingLifeStep5'];
   stepIds.forEach(function(id) {
     var stepEl = document.getElementById(id);
     if (stepEl) {
@@ -82303,6 +82418,12 @@ function goToOnboardingStep(step) {
     targetStepId = 'onboardingStepName';
   } else if (step === 'provider') {
     targetStepId = 'onboardingStepProvider';
+  } else if (step === 'logo') {
+    targetStepId = 'onboardingStepLogo';
+  } else if (step === 'firebase') {
+    targetStepId = 'onboardingStepFirebase';
+  } else if (step === 'sync') {
+    targetStepId = 'onboardingStepSync';
   } else if (step === 'lifeBuilding') {
     targetStepId = 'onboardingLifeBuilding';
   } else if (typeof step === 'string' && step.startsWith('life')) {
@@ -82357,6 +82478,21 @@ function goToOnboardingStep(step) {
     updateStep5ForMode();
   }
   
+  // v12.2.7: Update logo subtitle based on mode
+  if (step === 'logo') {
+    var logoSub = document.getElementById('onboardingLogoSubtitle');
+    if (logoSub) {
+      logoSub.textContent = selectedOnboardingMode === 'life'
+        ? 'Add a personal logo for LifeAI mode'
+        : 'Add a custom logo for your brand';
+    }
+  }
+
+  // v12.2.7: Render sync preferences grid
+  if (step === 'sync' && typeof renderOnboardingSyncPrefs === 'function') {
+    setTimeout(function() { renderOnboardingSyncPrefs(); }, 50);
+  }
+
   // v10.5.25: Render LifeAI accent color picker on life5 step
   if (step === 'life5' && typeof renderLifeAccentPicker === 'function') {
     setTimeout(function() {
@@ -82584,30 +82720,205 @@ function updateStep5ForMode() {
   var continueBtn = document.getElementById('step5ContinueBtn');
   
   if (isLife) {
-    // v10.5.25: Updated for survey flow
+    // v12.2.7: Updated to mention logo, cloud sync, and sync preferences
     if (subtitle) subtitle.textContent = "Now let's personalize your experience";
-    if (nextTitle) nextTitle.textContent = "Next: Quick Setup (4 steps)";
-    if (nextDesc) nextDesc.textContent = "Life areas, goals, preferences";
-    if (thenTitle) thenTitle.textContent = "Then: Start Organizing";
-    if (thenDesc) thenDesc.textContent = "Track goals, manage tasks with LifeAI";
-    if (continueBtn) continueBtn.textContent = "Personalize LifeAI →";
+    if (nextTitle) nextTitle.textContent = "Next: Logo, Cloud Sync & Preferences";
+    if (nextDesc) nextDesc.textContent = "Upload a logo, connect Firebase, choose storage settings";
+    if (thenTitle) thenTitle.textContent = "Then: Set Up LifeAI";
+    if (thenDesc) thenDesc.textContent = "Life areas, goals, and personalization";
+    if (continueBtn) continueBtn.textContent = "Continue Setup →";
   } else {
-    if (subtitle) subtitle.textContent = "Now let's build your brand profile";
-    if (nextTitle) nextTitle.textContent = "Next: Build Your BrandAI";
-    if (nextDesc) nextDesc.textContent = "Import from website, upload docs, or create manually";
-    if (thenTitle) thenTitle.textContent = "Then: Start Creating";
-    if (thenDesc) thenDesc.textContent = "Use BrandAI and Studio";
-    if (continueBtn) continueBtn.textContent = "Build Your BrandAI →";
+    // v12.2.7: Updated to mention logo, cloud sync, and sync preferences
+    if (subtitle) subtitle.textContent = "Now let's finish setting up your workspace";
+    if (nextTitle) nextTitle.textContent = "Next: Logo, Cloud Sync & Preferences";
+    if (nextDesc) nextDesc.textContent = "Upload a logo, connect Firebase, choose storage settings";
+    if (thenTitle) thenTitle.textContent = "Then: Build Your BrandAI";
+    if (thenDesc) thenDesc.textContent = "Import from website, upload docs, or create manually";
+    if (continueBtn) continueBtn.textContent = "Continue Setup →";
   }
 }
 
 // v10.5.25: Handle Step 5 continue button based on mode
 function proceedFromStep5() {
+  // v12.2.7: Route to new logo/firebase/sync steps before brand/life setup
+  goToOnboardingStep('logo');
+}
+
+// v12.2.7: Onboarding Logo Upload
+function handleOnboardingLogoUpload(input) {
+  var file = input && input.files && input.files[0];
+  if (!file) return;
+
+  if (!file.type.match(/^image\/(png|jpeg|jpg|webp|gif|svg\+xml)$/)) {
+    showToast('Please upload a PNG, JPG, WebP, GIF, or SVG image', 'error');
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('Image must be under 2MB', 'error');
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var base64Logo = e.target.result;
+    window._onboardingLogo = base64Logo;
+
+    var preview = document.getElementById('onboardingLogoPreview');
+    if (preview) {
+      var img = document.createElement('img');
+      img.src = base64Logo;
+      img.alt = 'Logo';
+      img.style.cssText = 'width: 100%; height: 100%; object-fit: contain;';
+      preview.innerHTML = '';
+      preview.appendChild(img);
+      preview.style.borderStyle = 'solid';
+      preview.style.borderColor = 'var(--accent)';
+    }
+    showToast('Logo selected', 'success');
+  };
+  reader.onerror = function() {
+    showToast('Error reading file', 'error');
+  };
+  reader.readAsDataURL(file);
+}
+
+function proceedFromOnboardingLogo() {
+  // v12.2.7: Save logo if one was uploaded
+  if (window._onboardingLogo) {
+    var isLife = selectedOnboardingMode === 'life';
+    var logoKey = isLife ? 'roweos_lifeai_logo' : 'roweos_brand_0_logo';
+    try {
+      localStorage.setItem(logoKey, window._onboardingLogo);
+      localStorage.setItem(logoKey + '_size', '100');
+      if (typeof applyBrandLogo === 'function') {
+        applyBrandLogo(window._onboardingLogo, 100);
+      }
+    } catch (err) {
+      console.error('[Onboarding] Logo save error:', err);
+      showToast('Error saving logo. File may be too large.', 'error');
+    }
+  }
+  goToOnboardingStep('firebase');
+}
+
+// v12.2.7: Onboarding Firebase Connect
+function connectOnboardingFirebase() {
+  var configInput = document.getElementById('onboardingFirebaseInput');
+  var statusEl = document.getElementById('onboardingFirebaseStatus');
+
+  if (!configInput || !configInput.value.trim()) {
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
+      statusEl.style.color = '#ef4444';
+      statusEl.textContent = 'Please paste your Firebase config';
+    }
+    return;
+  }
+
+  // v12.2.7: Copy config to main Firebase input and reuse connectFirebase()
+  var mainInput = document.getElementById('firebaseConfigInput');
+  if (mainInput) {
+    mainInput.value = configInput.value;
+  }
+
+  // Set flag to prevent completeFirebaseLogin from hiding onboarding
+  window._onboardingInProgress = true;
+
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'rgba(168, 152, 120, 0.1)';
+    statusEl.style.color = 'var(--accent)';
+    statusEl.textContent = 'Connecting to Firebase...';
+  }
+
+  try {
+    connectFirebase().then(function() {
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(74, 222, 128, 0.1)';
+        statusEl.style.color = '#4ade80';
+        statusEl.textContent = 'Firebase connected successfully!';
+      }
+    }).catch(function(err) {
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
+        statusEl.style.color = '#ef4444';
+        statusEl.textContent = 'Error: ' + (err.message || 'Connection failed');
+      }
+    });
+  } catch (err) {
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
+      statusEl.style.color = '#ef4444';
+      statusEl.textContent = 'Error: ' + (err.message || 'Connection failed');
+    }
+  }
+}
+
+function proceedFromOnboardingFirebase() {
+  goToOnboardingStep('sync');
+}
+
+// v12.2.7: Onboarding Sync Preferences
+function renderOnboardingSyncPrefs() {
+  var container = document.getElementById('onboardingSyncGrid');
+  if (!container) return;
+
+  var syncCats = {};
+  try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
+
+  var categories = [
+    { key: 'brandai_chats', name: 'BrandAI Chats', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' },
+    { key: 'lifeai_chats', name: 'LifeAI Chats', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' },
+    { key: 'library', name: 'Library Files', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>' },
+    { key: 'todos', name: 'To-Do Items', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>' },
+    { key: 'calendar', name: 'Calendar Events', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>' },
+    { key: 'logos', name: 'Brand Logos', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>' },
+    { key: 'goals', name: 'Pulse Goals', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>' },
+    { key: 'knowledge', name: 'Brand Knowledge', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>' },
+    { key: 'journal', name: 'Journal Entries', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>' },
+    { key: 'inventory', name: 'Inventory Images', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>' }
+  ];
+
+  var html = '';
+  categories.forEach(function(cat) {
+    var isCloud = syncCats[cat.key] !== 'local';
+    html += '<div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md);">';
+    html += '<div style="display: flex; align-items: center; gap: 12px;">';
+    html += '<span style="color: var(--text-tertiary);">' + cat.icon + '</span>';
+    html += '<span style="font-weight: 500; font-size: var(--text-sm);">' + cat.name + '</span>';
+    html += '</div>';
+    html += '<button onclick="toggleOnboardingSyncPref(\'' + cat.key + '\')" style="display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 16px; border: 1px solid var(--border-color); background: ' + (isCloud ? 'rgba(59, 130, 246, 0.1)' : 'var(--bg-tertiary)') + '; cursor: pointer; font-size: 12px; color: ' + (isCloud ? '#3b82f6' : 'var(--text-muted)') + ';">';
+    if (isCloud) {
+      html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg> Cloud';
+    } else {
+      html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Local';
+    }
+    html += '</button>';
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleOnboardingSyncPref(categoryKey) {
+  var syncCats = {};
+  try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
+  syncCats[categoryKey] = syncCats[categoryKey] === 'local' ? 'cloud' : 'local';
+  localStorage.setItem('roweos_sync_categories', JSON.stringify(syncCats));
+  renderOnboardingSyncPrefs();
+}
+
+function proceedFromOnboardingSync() {
+  // v12.2.7: Clear onboarding flag, continue to brand/life setup
+  window._onboardingInProgress = false;
+
   if (selectedOnboardingMode === 'life') {
-    // v10.5.25: LifeAI: Go to survey (Step life1 - Life Areas)
     goToOnboardingStep('life1');
   } else {
-    // BrandAI: Continue to brand building (Step 2)
     goToOnboardingStep(2);
   }
 }
@@ -85518,7 +85829,11 @@ function completeBrandSetup() {
 function finalizeOnboarding() {
   console.log('=== Finalizing onboarding ===');
   localStorage.setItem(USER_DATA_KEYS.onboardingCompleted, 'true');
-  
+
+  // v12.2.7: Clear onboarding flags
+  window._onboardingInProgress = false;
+  window._onboardingLogo = null;
+
   // v9.1.14: Clear onboarding temp data
   window.onboardingPrefillData = null;
   window.onboardingBrandName = null;
@@ -85559,6 +85874,9 @@ function skipBrandSetup() {
 // Close Onboarding Modal
 function closeOnboardingModal() {
   if (confirm('Exit setup? You can complete this later by clicking "Get Started" in the sidebar.')) {
+    // v12.2.7: Clear onboarding flags
+    window._onboardingInProgress = false;
+    window._onboardingLogo = null;
     hideOnboarding();
     localStorage.setItem(USER_DATA_KEYS.onboardingCompleted, 'true');
     
@@ -85786,7 +86104,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.2.6 - ' + subtitle;
+  document.title = 'RoweOS v12.2.7 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
