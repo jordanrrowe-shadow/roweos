@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.2.5 - Brand Intelligence Platform</title>
+  <title>RoweOS v12.2.6 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -2620,7 +2620,7 @@
       padding-top: 38px;
       transition: margin-left var(--sidebar-transition);
       will-change: margin-left; /* v11.5.4: GPU hint for smooth sidebar transition */
-      background: var(--bg-primary); /* v12.2.5: Prevent body bg showing between sidebar and content */
+      background: var(--bg-primary); /* v12.2.6: Prevent body bg showing between sidebar and content */
     }
     html.sidebar-pinned .main-wrapper {
       margin-left: var(--sidebar-expanded-width);
@@ -3267,7 +3267,8 @@
     
     /* Full-screen layout for Governance views */
     /* v11.5.4: Default left = collapsed width (Auto/state 0 is default) */
-    #memoryView, #tuningView, #settingsView, #exportView, #guardrailsView, #libraryView, #inventoryView {
+    /* v12.2.6: Added #commerceView and #syncView for consistent margins */
+    #memoryView, #tuningView, #settingsView, #exportView, #guardrailsView, #libraryView, #inventoryView, #commerceView, #syncView {
       position: fixed;
       top: 38px;
       left: var(--sidebar-collapsed-width);
@@ -3279,9 +3280,9 @@
       overflow-y: auto;
       transition: left var(--sidebar-transition);
     }
-    #memoryView > .panel, #tuningView > .panel, #settingsView > .panel, 
+    #memoryView > .panel, #tuningView > .panel, #settingsView > .panel,
     #exportView > .panel, #guardrailsView > .panel, #libraryView > .finder-layout,
-    #inventoryView > .panel {
+    #inventoryView > .panel, #commerceView > .panel, #syncView > .panel {
       max-width: none;
       width: 100%;
       margin: 0;
@@ -21646,6 +21647,8 @@
       border-radius: var(--radius-md);
       padding: var(--space-3);
       min-height: 110px;
+      max-height: 130px; /* v12.2.6: Prevent day overflow */
+      overflow: hidden;
       font-size: var(--text-base);
       transition: all 0.15s ease;
       cursor: pointer;
@@ -37894,7 +37897,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.2.5</div>
+      <div class="launch-version" id="launchVersionTag">v12.2.6</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38203,7 +38206,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.2.5</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.2.6</div>
       
     </div>
   </div>
@@ -38487,7 +38490,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.2.5</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.2.6</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39272,9 +39275,18 @@ html.light-mode .onboarding-mode-features span {
         </div>
       </div>
       
-      <!-- v9.1.14: GOVERNANCE - System, Inventory, Commerce -->
+      <!-- v12.2.6: GOVERNANCE - Sync moved above System -->
       <div class="nav-section">
         <div class="nav-section-title">Governance</div>
+        <div class="nav-item" onclick="showView('sync')" data-view="sync">
+          <span class="nav-item-icon svg-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="svg-icon" style="width: 16px; height: 16px;">
+              <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 0 1 9-9"/>
+            </svg>
+          </span>
+          <span class="nav-item-label">Sync</span>
+          <span class="sidebar-tooltip">Sync</span>
+        </div>
         <div class="nav-item" onclick="showView('settings')" data-view="settings">
           <span class="nav-item-icon svg-icon-wrapper">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="svg-icon" style="width: 16px; height: 16px;">
@@ -39305,15 +39317,6 @@ html.light-mode .onboarding-mode-features span {
           </span>
           <span class="nav-item-label">Commerce</span>
           <span class="sidebar-tooltip">Commerce</span>
-        </div>
-        <div class="nav-item" onclick="showView('sync')" data-view="sync">
-          <span class="nav-item-icon svg-icon-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="svg-icon" style="width: 16px; height: 16px;">
-              <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 0 1 9-9"/>
-            </svg>
-          </span>
-          <span class="nav-item-label">Sync</span>
-          <span class="sidebar-tooltip">Sync</span>
         </div>
       </div>
     </nav>
@@ -39354,7 +39357,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.2.5</span>
+          <span class="sidebar-version">v12.2.6</span>
         </div>
       </div>
     </div>
@@ -39664,7 +39667,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.2.5 • Built for the future</p>
+        <p>RoweOS v12.2.6 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39721,7 +39724,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.2.5</p>
+            <p class="onboarding-welcome-version">v12.2.6</p>
           </div>
         </div>
       </div>
@@ -41704,7 +41707,18 @@ service cloud.firestore {
                   <span class="studio-v2-config-badge" id="configAgentBadge">STRATEGIC</span>
                   <span id="configTaskName">Task Name</span>
                 </div>
-                <button class="studio-v2-config-close" onclick="closeConfigPanel()">×</button>
+                <!-- v12.2.6: Edit/Delete controls for custom tasks -->
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                  <button id="studioEditOpBtn" class="btn btn-secondary" style="display: none; padding: 4px 10px; font-size: var(--text-xs);" onclick="editCustomOpPrompt()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Edit
+                  </button>
+                  <button id="studioDeleteOpBtn" class="btn" style="display: none; padding: 4px 10px; font-size: var(--text-xs); background: #ef4444; border-color: #ef4444;" onclick="deleteCustomOp()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    Delete
+                  </button>
+                  <button class="studio-v2-config-close" onclick="closeConfigPanel()">&times;</button>
+                </div>
               </div>
               
               <div class="studio-v2-config-body">
@@ -42473,14 +42487,19 @@ service cloud.firestore {
           <div class="library-header">
             <h1 class="library-title">Library</h1>
             <!-- v10.5.25: Quick action buttons in header -->
+            <!-- v12.2.6: All 3 action buttons in header -->
             <div class="library-header-actions">
-              <button class="library-header-btn" onclick="createModeAwareStickyNote()" title="New Sticky Note">
+              <button class="library-header-btn" onclick="createModeAwareStickyNote()" title="New Note">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 New Note
               </button>
               <button class="library-header-btn" onclick="openModeAwareFolderModal()" title="New Folder">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
                 New Folder
+              </button>
+              <button class="library-header-btn" onclick="uploadFileToModeLibrary()" title="Upload File">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload File
               </button>
             </div>
             <div class="library-filter-toggle" id="libraryFilterToggle" onclick="toggleLibraryBrandFilter()">
@@ -42671,10 +42690,10 @@ service cloud.firestore {
               <div id="focus2DayDetailContent">
                 <!-- Populated by JS -->
               </div>
+              <!-- v12.2.6: Today/Upcoming filter replaces All/Brand/Life -->
               <div class="focus-2-mode-filter">
-                <button class="focus-2-mode-filter-btn active" id="focus2FilterAll" onclick="setFocus2DayFilter('all')">All</button>
-                <button class="focus-2-mode-filter-btn" id="focus2FilterBrand" onclick="setFocus2DayFilter('brand')">Brand</button>
-                <button class="focus-2-mode-filter-btn" id="focus2FilterLife" onclick="setFocus2DayFilter('life')">Life</button>
+                <button class="focus-2-mode-filter-btn active" id="focus2FilterToday" onclick="setFocus2DayFilter('today')">Today</button>
+                <button class="focus-2-mode-filter-btn" id="focus2FilterUpcoming" onclick="setFocus2DayFilter('upcoming')">Upcoming</button>
               </div>
             </div>
             
@@ -45152,10 +45171,10 @@ service cloud.firestore {
             </div>
           </div>
 
-          <!-- v12.2.5: Storage Bar (live-updating) -->
+          <!-- v12.2.6: Storage Bar (live-updating) -->
           <div id="storageCapacityBar"></div>
 
-          <!-- v12.2.5: Granular Storage Management -->
+          <!-- v12.2.6: Granular Storage Management -->
           <div id="storageManagementPanel" style="margin-bottom: var(--space-6);">
             <!-- Populated by renderStorageManagement() -->
           </div>
@@ -45432,64 +45451,19 @@ service cloud.firestore {
               </div>
             </div>
 
-            <!-- v12.2.4: Sync Settings - Control what data syncs -->
-            <div class="settings-row-desc" style="padding: 12px 16px 8px; color: var(--text-muted); font-size: var(--text-sm); border-top: 1px solid var(--border-color); margin-top: 8px;">
-              Sync Settings — Control what data syncs to prevent trimming
-            </div>
-
-            <div class="settings-row">
+            <!-- v12.2.6: Removed duplicate sync settings - now in Sync view only -->
+            <div class="settings-row" onclick="showView('sync')" style="cursor: pointer;">
               <div class="settings-row-left">
                 <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
-                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 019-9" stroke="currentColor" stroke-width="2" fill="none"/>
                 </svg>
                 <div class="settings-row-text">
-                  <div class="settings-row-label">Sync Conversations</div>
-                  <div class="settings-row-desc">Chat history across devices (can be large)</div>
+                  <div class="settings-row-label">Sync Settings</div>
+                  <div class="settings-row-desc">Manage sync preferences, storage, and diagnostics</div>
                 </div>
               </div>
               <div class="settings-row-action">
-                <label class="toggle-switch" onclick="event.stopPropagation()">
-                  <input type="checkbox" id="syncConversationsToggle" onchange="toggleSyncSetting('conversations')">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" fill="none"/>
-                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
-                </svg>
-                <div class="settings-row-text">
-                  <div class="settings-row-label">Sync Library File Contents</div>
-                  <div class="settings-row-desc">Full document text (metadata always syncs)</div>
-                </div>
-              </div>
-              <div class="settings-row-action">
-                <label class="toggle-switch" onclick="event.stopPropagation()">
-                  <input type="checkbox" id="syncLibraryContentToggle" onchange="toggleSyncSetting('libraryContent')">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="settings-row">
-              <div class="settings-row-left">
-                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                  <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
-                </svg>
-                <div class="settings-row-text">
-                  <div class="settings-row-label">Defer Sync During Chat</div>
-                  <div class="settings-row-desc">Wait until chat is idle to sync (prevents interruptions)</div>
-                </div>
-              </div>
-              <div class="settings-row-action">
-                <label class="toggle-switch" onclick="event.stopPropagation()">
-                  <input type="checkbox" id="syncDeferDuringChatToggle" onchange="toggleSyncSetting('deferDuringChat')">
-                  <span class="toggle-slider"></span>
-                </label>
+                <span class="settings-chevron">&rsaquo;</span>
               </div>
             </div>
 
@@ -49751,7 +49725,7 @@ function clearData(type) {
   renderCalendar();
   renderOperations();
   closeClearModal();
-  // v12.2.5: Refresh storage bar after clearing data
+  // v12.2.6: Refresh storage bar after clearing data
   refreshStorageDisplays();
 }
 
@@ -54476,6 +54450,76 @@ function openModeAwareFolderModal() {
 }
 
 /**
+ * v12.2.6: Mode-aware file upload for Library header button
+ */
+function uploadFileToModeLibrary() {
+  var isLifeMode = document.documentElement.classList.contains('life-mode');
+  if (isLifeMode) {
+    uploadFileToLifeLibrary(null);
+  } else {
+    // Brand mode: upload to currently selected brand
+    var brandIdx = selectedBrand || 0;
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.txt,.md,.jpg,.jpeg,.png,.gif,.csv,.xlsx,.xls';
+    input.multiple = true;
+    var MAX_FILE_SIZE = 5 * 1024 * 1024;
+    input.onchange = function(e) {
+      var files = e.target.files;
+      if (!files || files.length === 0) return;
+      var oversized = Array.from(files).filter(function(f) { return f.size > MAX_FILE_SIZE; });
+      if (oversized.length > 0) {
+        showToast('Files over 5MB not supported: ' + oversized.map(function(f) { return f.name; }).join(', '), 'error');
+        return;
+      }
+      var lib = getLibraryForBrandIndex(brandIdx);
+      if (!lib) lib = { files: [], folders: [] };
+      var processedCount = 0;
+      Array.from(files).forEach(function(file) {
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+          var content = evt.target.result;
+          var isImage = file.type.startsWith('image/');
+          var newFile = {
+            id: 'upload_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            name: file.name,
+            type: isImage ? 'image' : 'document',
+            content: content,
+            fileType: file.type,
+            fileSize: file.size,
+            folderId: libraryCurrentFolder || null,
+            savedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            isUploaded: true
+          };
+          lib.files.push(newFile);
+          processedCount++;
+          if (processedCount === files.length) {
+            saveBrandLibrary(brandIdx, lib);
+            showToast(files.length + ' file' + (files.length > 1 ? 's' : '') + ' uploaded', 'success');
+            renderLibrary();
+          }
+        };
+        if (file.type.startsWith('text/') || file.name.match(/\.(txt|md|csv)$/i)) {
+          reader.readAsText(file);
+        } else {
+          reader.readAsDataURL(file);
+        }
+      });
+    };
+    input.click();
+  }
+}
+
+function saveBrandLibrary(brandIdx, lib) {
+  try {
+    localStorage.setItem('roweos_brand_library_' + brandIdx, JSON.stringify(lib));
+  } catch(e) {
+    console.error('Error saving brand library:', e);
+  }
+}
+
+/**
  * v10.5.25: Open folder modal from files header (uses current viewing context)
  */
 function openFilesHeaderFolderModal() {
@@ -57117,7 +57161,13 @@ function showConfigPanel(op) {
     }
   }
   if (nameEl) nameEl.textContent = op.name;
-  
+
+  // v12.2.6: Show edit/delete for custom operations
+  var editBtn = document.getElementById('studioEditOpBtn');
+  var deleteBtn = document.getElementById('studioDeleteOpBtn');
+  if (editBtn) editBtn.style.display = op.customCreated || op.aiGenerated ? 'inline-flex' : 'none';
+  if (deleteBtn) deleteBtn.style.display = op.customCreated || op.aiGenerated ? 'inline-flex' : 'none';
+
   // Show/hide model controls vs image provider
   var modelControls = document.getElementById('studioModelControlsRow');
   var imageProvider = document.getElementById('imageProviderSelector');
@@ -57138,6 +57188,49 @@ function showConfigPanel(op) {
   
   // Scroll to config panel
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// v12.2.6: Edit custom operation prompt from config panel
+function editCustomOpPrompt() {
+  if (!selectedOp) return;
+  // Switch prompt preview to edit mode
+  var preview = document.getElementById('studioPromptPreview');
+  var edit = document.getElementById('studioPromptEdit');
+  if (preview) preview.classList.add('hidden');
+  if (edit) {
+    edit.classList.remove('hidden');
+    edit.value = selectedOp.userPrompt || selectedOp.desc || '';
+    edit.focus();
+  }
+  var toggleText = document.getElementById('promptEditToggleText');
+  if (toggleText) toggleText.textContent = 'Save';
+}
+
+// v12.2.6: Delete custom operation from config panel
+function deleteCustomOp() {
+  if (!selectedOp) return;
+  if (!confirm('Delete "' + selectedOp.name + '"?')) return;
+
+  var opId = String(selectedOp.id);
+  var isLife = getCurrentMode() === 'life';
+
+  if (isLife) {
+    var lifeOps = JSON.parse(localStorage.getItem('roweos_generated_life_ops') || '[]');
+    lifeOps = lifeOps.filter(function(o) { return String(o.id) !== opId; });
+    localStorage.setItem('roweos_generated_life_ops', JSON.stringify(lifeOps));
+    if (typeof generatedLifeOps !== 'undefined') {
+      generatedLifeOps.length = 0;
+      lifeOps.forEach(function(o) { generatedLifeOps.push(o); });
+    }
+  } else {
+    generatedBrandOps = generatedBrandOps.filter(function(o) { return String(o.id) !== opId; });
+    saveBrandAIGeneratedOps();
+  }
+
+  selectedOp = null;
+  closeConfigPanel();
+  renderOperations();
+  showToast('Operation deleted', 'success');
 }
 
 // v10.5.25: Close configuration panel
@@ -57815,6 +57908,18 @@ function togglePromptPreviewEdit() {
     if (editedPrompt) {
       // Store the custom prompt to be used when running
       window.customStudioPrompt = editedPrompt;
+      // v12.2.6: Also save back to custom op if applicable
+      if (selectedOp && (selectedOp.customCreated || selectedOp.aiGenerated)) {
+        selectedOp.userPrompt = editedPrompt;
+        if (getCurrentMode() === 'life') {
+          var lifeOps = JSON.parse(localStorage.getItem('roweos_generated_life_ops') || '[]');
+          var idx = lifeOps.findIndex(function(o) { return String(o.id) === String(selectedOp.id); });
+          if (idx >= 0) { lifeOps[idx].userPrompt = editedPrompt; localStorage.setItem('roweos_generated_life_ops', JSON.stringify(lifeOps)); }
+        } else {
+          var bOp = generatedBrandOps.find(function(o) { return String(o.id) === String(selectedOp.id); });
+          if (bOp) { bOp.userPrompt = editedPrompt; saveBrandAIGeneratedOps(); }
+        }
+      }
       showToast('Prompt saved', 'success');
     }
     preview.classList.remove('hidden');
@@ -65603,33 +65708,54 @@ function renderCalendar() {
       
       html += '<div class="calendar-month-day drop-zone' + (isOther ? ' other-month' : '') + (isToday ? ' is-today' : '') + '" data-date="' + dateStr + '" onclick="openDayView(\'' + dateStr + '\')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">';
       html += '<div class="calendar-month-day-number">' + current.getDate() + '</div>';
-      
-      // Events (with event icon)
-      calendar.filter(function(item) { return item.date === dateStr; }).forEach(function(item) {
+
+      // v12.2.6: Cap visible items per day cell to prevent overflow
+      var MAX_DAY_ITEMS = 3;
+      var dayItemCount = 0;
+      var dayTotalItems = 0;
+
+      // Count total items for this day
+      var dayEvents = calendar.filter(function(item) { return item.date === dateStr; });
+      var dayTodos = todos.filter(function(t) { return t.date === dateStr; });
+      var scheduledTasks = getScheduledTasks();
+      var dayAutos = scheduledTasks.filter(function(a) { return a.scheduledDate && a.scheduledDate.slice(0, 10) === dateStr; });
+      dayTotalItems = dayEvents.length + dayTodos.length + dayAutos.length;
+
+      // Events
+      dayEvents.forEach(function(item) {
+        if (dayItemCount >= MAX_DAY_ITEMS) return;
+        dayItemCount++;
         var brandColor = getBrandColor(item.brand);
         html += '<div class="calendar-item event-item ' + item.status + '" draggable="true" data-item-id="' + item.id + '" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)" onclick="event.stopPropagation(); openCalendarItem(' + item.id + ')" style="padding:4px 8px;font-size:11px;cursor:grab;border-left:3px solid ' + brandColor + ';margin-top:4px">';
-        html += '<div style="font-weight:600;display:flex;align-items:center;gap:4px;"><span style="color:' + brandColor + '">◆</span>' + escapeHtml(item.title.substring(0, 15)) + '</div>';
+        html += '<div style="font-weight:600;display:flex;align-items:center;gap:4px;"><span style="color:' + brandColor + '">\u25C6</span>' + escapeHtml(item.title.substring(0, 15)) + '</div>';
         html += '</div>';
       });
-      
-      // Tasks (with checkbox icon)
-      todos.filter(function(t) { return t.date === dateStr; }).forEach(function(task) {
+
+      // Tasks
+      dayTodos.forEach(function(task) {
+        if (dayItemCount >= MAX_DAY_ITEMS) return;
+        dayItemCount++;
         var taskClass = task.completed ? 'completed' : '';
         html += '<div class="calendar-item task-item ' + taskClass + '" onclick="event.stopPropagation(); toggleRhythmTask(' + task.id + ')" style="padding:4px 8px;font-size:11px;cursor:pointer;border-left:3px solid #6ab894;margin-top:4px;' + (task.completed ? 'opacity:0.5;' : '') + '">';
-        html += '<div style="font-weight:500;display:flex;align-items:center;gap:4px;' + (task.completed ? 'text-decoration:line-through;' : '') + '"><span style="color:#6ab894">' + (task.completed ? '☑' : '☐') + '</span>' + escapeHtml((task.text || '').substring(0, 15)) + '</div>';
+        html += '<div style="font-weight:500;display:flex;align-items:center;gap:4px;' + (task.completed ? 'text-decoration:line-through;' : '') + '"><span style="color:#6ab894">' + (task.completed ? '\u2611' : '\u2610') + '</span>' + escapeHtml((task.text || '').substring(0, 15)) + '</div>';
         html += '</div>';
       });
-      
-      // v10.5.25: Automations (with lightning icon)
-      var scheduledTasks = getScheduledTasks();
-      scheduledTasks.filter(function(a) { 
-        return a.scheduledDate && a.scheduledDate.slice(0, 10) === dateStr; 
-      }).forEach(function(automation) {
+
+      // Automations
+      dayAutos.forEach(function(automation) {
+        if (dayItemCount >= MAX_DAY_ITEMS) return;
+        dayItemCount++;
         html += '<div class="calendar-item automation-item" onclick="event.stopPropagation(); openScheduledTaskDetails(' + automation.id + ')" style="padding:4px 8px;font-size:11px;cursor:pointer;border-left:3px solid #d4af37;margin-top:4px;">';
-        html += '<div style="font-weight:500;display:flex;align-items:center;gap:4px;"><span style="color:#d4af37">⚡</span>' + escapeHtml((automation.name || '').substring(0, 15)) + '</div>';
+        html += '<div style="font-weight:500;display:flex;align-items:center;gap:4px;"><span style="color:#d4af37">\u26A1</span>' + escapeHtml((automation.name || '').substring(0, 15)) + '</div>';
         html += '</div>';
       });
-      
+
+      // v12.2.6: Show "+N more" if items exceed cap
+      var remaining = dayTotalItems - dayItemCount;
+      if (remaining > 0) {
+        html += '<div onclick="event.stopPropagation(); openDayView(\'' + dateStr + '\')" style="padding:2px 8px;font-size:10px;color:var(--accent);cursor:pointer;margin-top:2px;font-weight:600;">+' + remaining + ' more</div>';
+      }
+
       html += '</div>';
       current.setDate(current.getDate() + 1);
     }
@@ -66646,7 +66772,7 @@ function selectFocus2Date(dateStr) {
 }
 
 // v10.5.25: Track current day filter mode
-var focus2DayFilter = 'all';
+var focus2DayFilter = 'today'; // v12.2.6: Default to today view
 
 /**
  * v10.5.25: Show day detail card
@@ -66686,51 +66812,72 @@ function showFocus2DayDetail(dateStr) {
 function renderFocus2DayDetailContent(dateStr) {
   var content = document.getElementById('focus2DayDetailContent');
   if (!content) return;
-  
+
   // v11.0.5: Prevent layout shift by maintaining height during rebuild
   var contentHeight = content.offsetHeight;
   if (contentHeight > 0) {
     content.style.minHeight = contentHeight + 'px';
   }
-  
-  var isLife = getCurrentMode() === 'life';
-  var brandIdx = parseInt(document.getElementById('brand')?.value || '0');
-  var brand = window.brands && window.brands[brandIdx] ? window.brands[brandIdx].name : '';
-  
-  // Get tasks for this day
-  var dayTasks = todos.filter(function(t) {
-    if (t.date !== dateStr) return false;
-    if (focus2DayFilter === 'all') return true;
-    if (focus2DayFilter === 'brand') return t.brand && t.brand === brand;
-    if (focus2DayFilter === 'life') return !t.brand || t.brand === '';
-    return true;
-  });
-  
-  // Get events for this day
-  var dayEvents = calendar.filter(function(e) {
-    if (e.date !== dateStr) return false;
-    if (focus2DayFilter === 'all') return true;
-    if (focus2DayFilter === 'brand') return e.brand && e.brand === brand;
-    if (focus2DayFilter === 'life') return !e.brand || e.brand === '';
-    return true;
-  });
-  
-  // Get automations for this day
-  var scheduledTasks = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
-  var dayAutomations = scheduledTasks.filter(function(a) {
-    return a.scheduledDate && a.scheduledDate.slice(0, 10) === dateStr && a.enabled;
-  });
-  
+
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var isUpcoming = dateStr === '__upcoming__';
+  var titleEl = document.getElementById('focus2DayDetailTitle');
+  var dateEl = document.getElementById('focus2DayDetailDate');
+
+  // v12.2.6: Today/Upcoming filter logic
+  var dayTasks, dayEvents, dayAutomations;
+
+  if (isUpcoming) {
+    // Upcoming: show all pending tasks without a date, or with a future date
+    if (titleEl) titleEl.textContent = 'Upcoming';
+    if (dateEl) dateEl.textContent = 'Tasks to work on';
+    dayTasks = todos.filter(function(t) {
+      if (t.completed) return false;
+      return !t.date || t.date === '' || t.date > todayStr;
+    });
+    // Sort: tasks with dates first (nearest), then undated
+    dayTasks.sort(function(a, b) {
+      if (a.date && !b.date) return -1;
+      if (!a.date && b.date) return 1;
+      if (a.date && b.date) return a.date < b.date ? -1 : 1;
+      return (a.createdAt || 0) - (b.createdAt || 0);
+    });
+    dayEvents = [];
+    dayAutomations = [];
+  } else {
+    // Today or specific date view
+    if (dateStr === todayStr) {
+      if (titleEl) titleEl.textContent = 'Today';
+    } else {
+      var d = new Date(dateStr + 'T12:00:00');
+      if (titleEl) titleEl.textContent = d.toLocaleDateString('en-US', { weekday: 'long' });
+    }
+    var displayDate = new Date(dateStr + 'T12:00:00');
+    if (dateEl) dateEl.textContent = displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    dayTasks = todos.filter(function(t) {
+      return t.date === dateStr;
+    });
+
+    dayEvents = calendar.filter(function(e) {
+      return e.date === dateStr;
+    });
+
+    var scheduledTasks = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
+    dayAutomations = scheduledTasks.filter(function(a) {
+      return a.scheduledDate && a.scheduledDate.slice(0, 10) === dateStr && a.enabled;
+    });
+  }
+
   var html = '';
-  
-  // Tasks section - v10.5.25: Added clickable checkbox to toggle completion
+
+  // Tasks section
   if (dayTasks.length > 0) {
     html += '<div class="focus-2-day-detail-section">';
     html += '<div class="focus-2-day-detail-section-title"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg> TASKS (' + dayTasks.length + ')</div>';
     dayTasks.forEach(function(task) {
       var completedClass = task.completed ? 'completed' : '';
       html += '<div class="focus-2-day-detail-item ' + completedClass + '">';
-      // Clickable checkbox
       html += '<div class="focus-2-day-detail-item-check ' + (task.completed ? 'checked' : '') + '" onclick="event.stopPropagation(); toggleDayDetailTask(' + task.id + ')">';
       html += '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/>' + (task.completed ? '<path d="M9 12l2 2 4-4"/>' : '') + '</svg>';
       html += '</div>';
@@ -66738,14 +66885,20 @@ function renderFocus2DayDetailContent(dateStr) {
       html += '<div class="focus-2-day-detail-item-name">' + escapeHtml(task.text) + '</div>';
       var meta = [];
       if (task.category) meta.push(task.category);
-      // v10.5.25: Show "Life" instead of "_life"
       if (task.brand) meta.push(task.brand === '_life' ? 'Life' : task.brand);
-      if (meta.length > 0) html += '<div class="focus-2-day-detail-item-meta">' + escapeHtml(meta.join(' • ')) + '</div>';
+      // v12.2.6: Show date for upcoming tasks
+      if (isUpcoming && task.date) {
+        var taskDate = new Date(task.date + 'T12:00:00');
+        meta.push(taskDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      } else if (isUpcoming && !task.date) {
+        meta.push('No date');
+      }
+      if (meta.length > 0) html += '<div class="focus-2-day-detail-item-meta">' + escapeHtml(meta.join(' \u2022 ')) + '</div>';
       html += '</div></div>';
     });
     html += '</div>';
   }
-  
+
   // Events section
   if (dayEvents.length > 0) {
     html += '<div class="focus-2-day-detail-section">';
@@ -66760,7 +66913,7 @@ function renderFocus2DayDetailContent(dateStr) {
     });
     html += '</div>';
   }
-  
+
   // Automations section
   if (dayAutomations.length > 0) {
     html += '<div class="focus-2-day-detail-section">';
@@ -66775,14 +66928,14 @@ function renderFocus2DayDetailContent(dateStr) {
     });
     html += '</div>';
   }
-  
+
   // Empty state
   if (dayTasks.length === 0 && dayEvents.length === 0 && dayAutomations.length === 0) {
-    html = '<div class="focus-2-day-detail-empty">Nothing scheduled for this day</div>';
+    html = '<div class="focus-2-day-detail-empty">' + (isUpcoming ? 'No upcoming tasks' : 'Nothing scheduled for this day') + '</div>';
   }
-  
+
   content.innerHTML = html;
-  
+
   // v11.0.5: Reset minHeight after content is set
   setTimeout(function() {
     content.style.minHeight = '';
@@ -66825,20 +66978,19 @@ function closeFocus2DayDetail() {
  * v10.5.25: Set day detail filter
  */
 function setFocus2DayFilter(filter) {
+  // v12.2.6: Changed from all/brand/life to today/upcoming
   focus2DayFilter = filter;
-  
+
   // Update button states
   document.querySelectorAll('.focus-2-mode-filter-btn').forEach(function(btn) {
     btn.classList.remove('active');
   });
-  
+
   var activeBtn = document.getElementById('focus2Filter' + filter.charAt(0).toUpperCase() + filter.slice(1));
   if (activeBtn) activeBtn.classList.add('active');
-  
-  // Re-render content
-  if (window.focus2SelectedDate) {
-    renderFocus2DayDetailContent(window.focus2SelectedDate);
-  }
+
+  // Re-render content with new filter
+  renderFocus2DayDetailContent(filter === 'today' ? new Date().toISOString().slice(0, 10) : '__upcoming__');
 }
 
 // v10.5.25: Track which category is expanded
@@ -69254,31 +69406,130 @@ function updateFocus2Stats() {
 function renderFocus2Automations() {
   var container = document.getElementById('focus2AutomationsList');
   if (!container) return;
-  
+
   var today = new Date().toISOString().slice(0, 10);
+  // v12.2.6: Check both scheduled tasks and automations
   var scheduledTasks = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
-  var todayAutomations = scheduledTasks.filter(function(a) {
-    return a.scheduledDate && a.scheduledDate.slice(0, 10) === today && a.enabled;
+  var savedAutomations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+
+  // Merge - avoid duplicates by id
+  var allIds = {};
+  var allAutomations = [];
+  scheduledTasks.forEach(function(a) {
+    if (a.enabled !== false) {
+      allIds[a.id] = true;
+      allAutomations.push(a);
+    }
   });
-  
-  if (todayAutomations.length === 0) {
-    container.innerHTML = '<div class="focus-2-empty" style="padding: var(--space-5);"><div class="focus-2-empty-text" style="font-size: var(--text-base); color: var(--text-muted);">No automations scheduled for today</div></div>';
-    return;
-  }
-  
+  savedAutomations.forEach(function(a) {
+    if (!allIds[a.id] && a.enabled !== false) {
+      allAutomations.push(a);
+    }
+  });
+
   var html = '';
-  todayAutomations.forEach(function(auto) {
-    html += '<div class="focus-2-automation-item">';
-    html += '<div class="focus-2-automation-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
-    html += '<div class="focus-2-automation-info">';
-    html += '<div class="focus-2-automation-name">' + escapeHtml(auto.name) + '</div>';
-    html += '<div class="focus-2-automation-time">' + (auto.time || '9:00 AM') + ' • ' + (auto.action || 'Reminder') + '</div>';
-    html += '</div>';
-    html += '<button class="focus-2-automation-run" onclick="runManualTask(' + auto.id + ')">Run</button>';
-    html += '</div>';
-  });
-  
+  if (allAutomations.length === 0) {
+    html += '<div class="focus-2-empty" style="padding: var(--space-4);"><div class="focus-2-empty-text" style="font-size: var(--text-sm); color: var(--text-muted);">No automations yet</div></div>';
+  } else {
+    allAutomations.forEach(function(auto) {
+      html += '<div class="focus-2-automation-item">';
+      html += '<div class="focus-2-automation-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
+      html += '<div class="focus-2-automation-info">';
+      html += '<div class="focus-2-automation-name">' + escapeHtml(auto.name) + '</div>';
+      html += '<div class="focus-2-automation-time">' + (auto.time || '9:00 AM') + ' \u2022 ' + (auto.trigger || 'time') + ' \u2022 ' + (auto.action || 'Reminder') + '</div>';
+      html += '</div>';
+      html += '<button class="focus-2-automation-run" onclick="deleteFocusAutomation(' + auto.id + ')" title="Delete" style="background: transparent; color: var(--text-muted); border: none; padding: 4px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>';
+      html += '</div>';
+    });
+  }
+
+  // v12.2.6: + Create Automation button at bottom of widget
+  html += '<button class="focus-2-create-automation-btn" onclick="showFocusGlobalAutomationForm()" style="margin-top: var(--space-3);">';
+  html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
+  html += '+ Create Automation';
+  html += '</button>';
+
   container.innerHTML = html;
+}
+
+// v12.2.6: Global automation form (not category-specific)
+function showFocusGlobalAutomationForm() {
+  var container = document.getElementById('focus2AutomationsList');
+  if (!container) return;
+
+  // Check if form already exists
+  if (document.getElementById('globalAutoForm')) return;
+
+  var html = '<div id="globalAutoForm" class="focus-2-automation-inline" style="margin-top: var(--space-3);">';
+  html += '<div class="focus-2-automation-inline-header">';
+  html += '<div class="focus-2-automation-inline-title">New Automation</div>';
+  html += '<button onclick="document.getElementById(\'globalAutoForm\').remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;">\u00d7</button>';
+  html += '</div>';
+  html += '<div class="focus-2-automation-field"><label>When</label>';
+  html += '<select id="globalAutoTrigger"><option value="time">At a specific time</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></div>';
+  html += '<div class="focus-2-automation-field"><label>Then</label>';
+  html += '<select id="globalAutoAction"><option value="notify">Send notification</option><option value="create">Create a task</option><option value="message">Send to AI</option></select></div>';
+  html += '<div class="focus-2-automation-field"><label>Time</label>';
+  html += '<input type="time" id="globalAutoTime" value="09:00"></div>';
+  html += '<div class="focus-2-automation-field"><label>Description</label>';
+  html += '<input type="text" id="globalAutoDesc" placeholder="e.g., Check tasks at 9am"></div>';
+  html += '<div style="display:flex;gap:8px;margin-top:var(--space-3);">';
+  html += '<button class="focus-2-btn" onclick="document.getElementById(\'globalAutoForm\').remove()">Cancel</button>';
+  html += '<button class="focus-2-btn focus-2-btn-primary" onclick="saveGlobalAutomation()">Create</button>';
+  html += '</div></div>';
+
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+function saveGlobalAutomation() {
+  var trigger = document.getElementById('globalAutoTrigger') ? document.getElementById('globalAutoTrigger').value : 'time';
+  var action = document.getElementById('globalAutoAction') ? document.getElementById('globalAutoAction').value : 'notify';
+  var time = document.getElementById('globalAutoTime') ? document.getElementById('globalAutoTime').value : '09:00';
+  var desc = document.getElementById('globalAutoDesc') ? document.getElementById('globalAutoDesc').value : '';
+  if (!desc) { showToast('Please enter a description', 'warning'); return; }
+
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var automation = {
+    id: Date.now(),
+    name: desc,
+    trigger: trigger,
+    action: action,
+    time: time,
+    enabled: true,
+    mode: getCurrentMode(),
+    scheduledDate: todayStr,
+    createdAt: new Date().toISOString()
+  };
+
+  var automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+  automations.push(automation);
+  localStorage.setItem('roweos_automations', JSON.stringify(automations));
+
+  var scheduled = getScheduledTasks();
+  scheduled.push(automation);
+  saveScheduledTasks(scheduled);
+
+  var form = document.getElementById('globalAutoForm');
+  if (form) form.remove();
+
+  renderFocus2Automations();
+  showToast('Automation created', 'success');
+}
+
+function deleteFocusAutomation(autoId) {
+  if (!confirm('Delete this automation?')) return;
+  var idStr = String(autoId);
+
+  var automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+  automations = automations.filter(function(a) { return String(a.id) !== idStr; });
+  localStorage.setItem('roweos_automations', JSON.stringify(automations));
+
+  var scheduled = getScheduledTasks();
+  scheduled = scheduled.filter(function(a) { return String(a.id) !== idStr; });
+  saveScheduledTasks(scheduled);
+
+  renderFocus2Automations();
+  showToast('Automation deleted', 'success');
 }
 
 /**
@@ -69904,11 +70155,13 @@ function showInlineAutomation(categoryName) {
  * v12.2.4: Save inline automation
  */
 function saveInlineAutomation(categoryName) {
-  var trigger = document.getElementById('inlineAutoTrigger')?.value || 'time';
-  var action = document.getElementById('inlineAutoAction')?.value || 'notify';
-  var time = document.getElementById('inlineAutoTime')?.value || '09:00';
-  var desc = document.getElementById('inlineAutoDesc')?.value || 'Automation for ' + categoryName;
+  var trigger = document.getElementById('inlineAutoTrigger') ? document.getElementById('inlineAutoTrigger').value : 'time';
+  var action = document.getElementById('inlineAutoAction') ? document.getElementById('inlineAutoAction').value : 'notify';
+  var time = document.getElementById('inlineAutoTime') ? document.getElementById('inlineAutoTime').value : '09:00';
+  var desc = document.getElementById('inlineAutoDesc') ? document.getElementById('inlineAutoDesc').value : 'Automation for ' + categoryName;
+  if (!desc) desc = 'Automation for ' + categoryName;
 
+  var todayStr = new Date().toISOString().slice(0, 10);
   var automation = {
     id: Date.now(),
     name: desc,
@@ -69918,19 +70171,27 @@ function saveInlineAutomation(categoryName) {
     category: categoryName,
     enabled: true,
     mode: getCurrentMode(),
+    scheduledDate: todayStr,
     createdAt: new Date().toISOString()
   };
 
-  // Get existing automations
+  // v12.2.6: Save to both roweos_automations and roweos_scheduled_tasks
   var automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
   automations.push(automation);
   localStorage.setItem('roweos_automations', JSON.stringify(automations));
+
+  // Also add to scheduled tasks so it shows in the Focus automations widget
+  var scheduled = getScheduledTasks();
+  scheduled.push(automation);
+  saveScheduledTasks(scheduled);
 
   // Close the inline form
   document.querySelectorAll('.focus-2-automation-inline').forEach(function(el) {
     el.remove();
   });
 
+  // Refresh automations widget
+  renderFocus2Automations();
   showToast('Automation created', 'success');
 }
 
@@ -74537,28 +74798,46 @@ function executeAutoPilotAction(action) {
 }
 
 function analyzeUserPatterns() {
-  if (localStorage.getItem('roweos_feature_autoPilot') !== 'true') {
-    return;
-  }
+  // v12.2.6: Removed feature flag gate - button click should always work
+  // Auto-enable autoPilot when user clicks Analyze Patterns
+  localStorage.setItem('roweos_feature_autoPilot', 'true');
 
   // Analyze conversation history for patterns
   var patterns = [];
 
   // Check agentCommands for recurring themes
-  if (typeof agentCommands !== 'undefined' && agentCommands.length > 5) {
-    // Look for repeated query types
+  var cmds = typeof agentCommands !== 'undefined' ? agentCommands : [];
+  if (cmds.length < 2) {
+    // Also check todos for task patterns
+    var taskPatterns = {};
+    todos.forEach(function(t) {
+      var cat = (t.category || 'general').toLowerCase();
+      taskPatterns[cat] = (taskPatterns[cat] || 0) + 1;
+    });
+    Object.keys(taskPatterns).forEach(function(cat) {
+      if (taskPatterns[cat] >= 2) {
+        patterns.push({
+          type: cat,
+          frequency: taskPatterns[cat],
+          suggestion: 'You have ' + taskPatterns[cat] + ' tasks in "' + cat + '". Consider scheduling a regular review.'
+        });
+      }
+    });
+  }
+
+  if (cmds.length >= 2) {
     var queryTypes = {};
-    agentCommands.slice(-20).forEach(function(cmd) {
-      var query = (cmd.command || '').toLowerCase();
+    cmds.slice(-20).forEach(function(cmd) {
+      var query = (cmd.command || cmd.query || '').toLowerCase();
       if (query.includes('report')) queryTypes.reports = (queryTypes.reports || 0) + 1;
       if (query.includes('content') || query.includes('write')) queryTypes.content = (queryTypes.content || 0) + 1;
       if (query.includes('schedule') || query.includes('remind')) queryTypes.scheduling = (queryTypes.scheduling || 0) + 1;
       if (query.includes('analyze') || query.includes('review')) queryTypes.analysis = (queryTypes.analysis || 0) + 1;
+      if (query.includes('market') || query.includes('social')) queryTypes.marketing = (queryTypes.marketing || 0) + 1;
     });
 
-    // Generate suggestions based on patterns
     Object.keys(queryTypes).forEach(function(type) {
-      if (queryTypes[type] >= 3) {
+      if (queryTypes[type] >= 2) {
         patterns.push({
           type: type,
           frequency: queryTypes[type],
@@ -74568,26 +74847,26 @@ function analyzeUserPatterns() {
     });
   }
 
-  // Check for time-based patterns (e.g., always checking at certain times)
-  // This would need more sophisticated tracking
-
   autoPilotLearnings.patterns = patterns;
   autoPilotLearnings.lastAnalysis = new Date().toISOString();
   saveAutoPilotData();
 
-  // Generate suggestions if patterns found
+  // Generate suggestions
   patterns.forEach(function(pattern) {
-    if (pattern.type === 'reports' && !autoPilotQueue.find(function(a) { return a.type === 'suggestion' && a.title.includes('report'); })) {
-      addAutoPilotAction('suggestion', 'Daily Report Automation',
-        'You frequently request reports. Would you like to set up a daily automated report?',
-        { suggestedAction: 'schedule_daily_report' });
-    }
-    if (pattern.type === 'content' && !autoPilotQueue.find(function(a) { return a.type === 'suggestion' && a.title.includes('content'); })) {
-      addAutoPilotAction('suggestion', 'Content Calendar',
-        'You often create content. Would you like help setting up a content calendar?',
-        { suggestedAction: 'setup_content_calendar' });
+    if (!autoPilotQueue.find(function(a) { return a.type === 'suggestion' && a.title.toLowerCase().includes(pattern.type); })) {
+      addAutoPilotAction('suggestion', pattern.type.charAt(0).toUpperCase() + pattern.type.slice(1) + ' Automation',
+        pattern.suggestion, { suggestedAction: 'automate_' + pattern.type });
     }
   });
+
+  // v12.2.6: Always render results and show feedback
+  renderAutoPilotActions();
+
+  if (patterns.length > 0) {
+    showToast('Found ' + patterns.length + ' pattern' + (patterns.length > 1 ? 's' : '') + ' - suggestions added', 'success');
+  } else {
+    showToast('No patterns detected yet. Keep using RoweOS and try again later.', 'info');
+  }
 
   return patterns;
 }
@@ -80009,6 +80288,9 @@ async function syncToFirebase() {
         routines: JSON.parse(localStorage.getItem('roweos_life_routines') || '[]'),
         habits: JSON.parse(localStorage.getItem('roweos_life_habits') || '[]'),
         todoCategories: JSON.parse(localStorage.getItem('roweos_life_todo_categories') || '[]'),
+        // v12.2.6: LifeAI todos and calendar (were missing from sync!)
+        todos: JSON.parse(localStorage.getItem('roweos_life_todos') || '[]'),
+        calendar: JSON.parse(localStorage.getItem('roweos_life_calendar') || '[]'),
         // v12.2.4: LifeAI conversations (separate from BrandAI)
         agentCommands: JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]'),
         // v12.2.4: LifeAI Identity document uploads
@@ -80510,7 +80792,7 @@ function applyCloudData(data) {
   
   // v7.10: Brand Memory (document uploads with AI summaries)
   if (data.brandMemory) {
-    localStorage.setItem('roweos_brand_memory', JSON.stringify(data.brandMemory)); // v12.2.5: Use canonical key
+    localStorage.setItem('roweos_brand_memory', JSON.stringify(data.brandMemory)); // v12.2.6: Use canonical key
     if (typeof brandMemory !== 'undefined') {
       Object.assign(brandMemory, data.brandMemory);
     }
@@ -80692,6 +80974,9 @@ function applyCloudData(data) {
     if (data.lifeAI.routines) localStorage.setItem('roweos_life_routines', JSON.stringify(data.lifeAI.routines));
     if (data.lifeAI.habits) localStorage.setItem('roweos_life_habits', JSON.stringify(data.lifeAI.habits));
     if (data.lifeAI.todoCategories) localStorage.setItem('roweos_life_todo_categories', JSON.stringify(data.lifeAI.todoCategories));
+    // v12.2.6: Restore LifeAI todos and calendar (were missing!)
+    if (data.lifeAI.todos) localStorage.setItem('roweos_life_todos', JSON.stringify(data.lifeAI.todos));
+    if (data.lifeAI.calendar) localStorage.setItem('roweos_life_calendar', JSON.stringify(data.lifeAI.calendar));
     // v12.2.4: Restore LifeAI conversations
     if (data.lifeAI.agentCommands && Array.isArray(data.lifeAI.agentCommands)) {
       localStorage.setItem('roweos_life_agentCommands', JSON.stringify(data.lifeAI.agentCommands));
@@ -82626,9 +82911,11 @@ function renderBrandIdentityView() {
   if (brandContainer) brandContainer.style.display = 'block';
   if (brandUploadSection) brandUploadSection.style.display = 'block';
 
-  // Also show document upload sections (brand only)
+  // v12.2.6: Show brand-only document sections, explicitly hide Life sections
   document.querySelectorAll('.identity-upload-section').forEach(function(el) {
-    if (el.id !== 'lifeIdentityCardsContainer' && el.id !== 'lifeIdentityUploadSection') {
+    if (el.id === 'lifeIdentityUploadSection') {
+      el.style.display = 'none';
+    } else {
       el.style.display = 'block';
     }
   });
@@ -85499,7 +85786,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.2.5 - ' + subtitle;
+  document.title = 'RoweOS v12.2.6 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -88046,7 +88333,7 @@ function loadBrandMemory() {
   if (saved) {
     brandMemory = JSON.parse(saved);
   }
-  // v12.2.5: Migrate data from legacy 'brandMemory' key if it exists
+  // v12.2.6: Migrate data from legacy 'brandMemory' key if it exists
   var legacy = localStorage.getItem('brandMemory');
   if (legacy) {
     try {
@@ -89019,7 +89306,11 @@ function openDocContextModal(files, mode) {
   if (modeLabel) modeLabel.textContent = mode === 'life' ? 'LifeAI' : 'BrandAI';
   if (typeInput) typeInput.value = '';
   if (instructionsInput) instructionsInput.value = '';
-  if (modal) modal.style.display = 'flex';
+  // v12.2.6: Must add 'show' class for CSS visibility + set display
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('show');
+  }
 }
 
 /**
@@ -89027,7 +89318,10 @@ function openDocContextModal(files, mode) {
  */
 function closeDocContextModal() {
   var modal = document.getElementById('docContextModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+  }
   pendingDocFiles = [];
 }
 
@@ -100071,7 +100365,7 @@ async function renderSyncInventory() {
 
   html += '</tbody></table>';
 
-  // v12.2.5: Storage bar now rendered in standalone #storageCapacityBar container
+  // v12.2.6: Storage bar now rendered in standalone #storageCapacityBar container
 
   container.innerHTML = html;
 }
@@ -100154,7 +100448,7 @@ function renderStorageCapacity() {
 }
 
 /**
- * v12.2.5: Update standalone storage bar immediately
+ * v12.2.6: Update standalone storage bar immediately
  */
 function updateStorageBar() {
   var container = document.getElementById('storageCapacityBar');
@@ -100164,7 +100458,7 @@ function updateStorageBar() {
 }
 
 /**
- * v12.2.5: Format byte size for display
+ * v12.2.6: Format byte size for display
  */
 function formatStorageSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
@@ -100173,7 +100467,7 @@ function formatStorageSize(bytes) {
 }
 
 /**
- * v12.2.5: Calculate size of a localStorage key
+ * v12.2.6: Calculate size of a localStorage key
  */
 function getKeySize(key) {
   var val = localStorage.getItem(key);
@@ -100181,7 +100475,7 @@ function getKeySize(key) {
 }
 
 /**
- * v12.2.5: Render granular storage management panel with per-category sizes and clear buttons
+ * v12.2.6: Render granular storage management panel with per-category sizes and clear buttons
  */
 function renderStorageManagement() {
   var panel = document.getElementById('storageManagementPanel');
@@ -100311,7 +100605,7 @@ function renderStorageManagement() {
   html += '<h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-2);">Storage Management</h3>';
   html += '<p style="color: var(--text-tertiary); margin-bottom: var(--space-4); font-size: var(--text-sm);">Choose what to clear to free up storage. Sorted by size.</p>';
 
-  // v12.2.5: Load per-category sync preferences
+  // v12.2.6: Load per-category sync preferences
   var syncCats = {};
   try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
 
@@ -100367,26 +100661,103 @@ function renderStorageManagement() {
 }
 
 /**
- * v12.2.5: Toggle storage location (local/cloud) for a category
+ * v12.2.6: Toggle storage location with immediate bar update + confirm button
  */
+var pendingStorageChanges = {};
+
 function toggleStorageLocation(categoryKey) {
   var syncCats = {};
   try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
 
-  if (syncCats[categoryKey] === 'local') {
-    syncCats[categoryKey] = 'cloud';
-    showToast(categoryKey.replace(/_/g, ' ') + ' will sync to cloud', 'success');
-  } else {
-    syncCats[categoryKey] = 'local';
-    showToast(categoryKey.replace(/_/g, ' ') + ' set to local only', 'info');
-  }
+  var newValue = syncCats[categoryKey] === 'local' ? 'cloud' : 'local';
+  syncCats[categoryKey] = newValue;
+  pendingStorageChanges[categoryKey] = newValue;
 
   localStorage.setItem('roweos_sync_categories', JSON.stringify(syncCats));
-  renderStorageManagement();
+
+  // v12.2.6: Immediately refresh both storage bar and management panel
+  refreshStorageDisplays();
+
+  // Show confirm banner
+  showStorageConfirmBanner();
+}
+
+function showStorageConfirmBanner() {
+  var existing = document.getElementById('storageConfirmBanner');
+  if (existing) existing.remove();
+
+  var changeCount = Object.keys(pendingStorageChanges).length;
+  if (changeCount === 0) return;
+
+  var banner = document.createElement('div');
+  banner.id = 'storageConfirmBanner';
+  banner.style.cssText = 'position: sticky; top: 0; z-index: 50; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: var(--space-4); display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);';
+
+  var text = document.createElement('span');
+  text.style.cssText = 'font-size: var(--text-sm); color: var(--text-primary);';
+  text.textContent = changeCount + ' storage change' + (changeCount > 1 ? 's' : '') + ' pending';
+
+  var btnWrap = document.createElement('div');
+  btnWrap.style.cssText = 'display: flex; gap: var(--space-2);';
+
+  var confirmBtn = document.createElement('button');
+  confirmBtn.className = 'btn';
+  confirmBtn.style.cssText = 'padding: 6px 16px; font-size: var(--text-sm); background: var(--accent); border-color: var(--accent); color: #000;';
+  confirmBtn.textContent = 'Confirm Changes';
+  confirmBtn.onclick = function() { confirmStorageChanges(); };
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-secondary';
+  cancelBtn.style.cssText = 'padding: 6px 16px; font-size: var(--text-sm);';
+  cancelBtn.textContent = 'Undo';
+  cancelBtn.onclick = function() { revertStorageChanges(); };
+
+  btnWrap.appendChild(cancelBtn);
+  btnWrap.appendChild(confirmBtn);
+  banner.appendChild(text);
+  banner.appendChild(btnWrap);
+
+  var panel = document.getElementById('storageManagementPanel');
+  if (panel) panel.insertBefore(banner, panel.firstChild);
+}
+
+function confirmStorageChanges() {
+  // Trigger a sync to apply changes
+  if (typeof syncToFirebase === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
+    syncToFirebase();
+  }
+  pendingStorageChanges = {};
+  var banner = document.getElementById('storageConfirmBanner');
+  if (banner) banner.remove();
+  showToast('Storage changes saved and synced', 'success');
+  refreshStorageDisplays();
+}
+
+function revertStorageChanges() {
+  var syncCats = {};
+  try { syncCats = JSON.parse(localStorage.getItem('roweos_sync_categories') || '{}'); } catch(e) {}
+
+  // Revert each pending change
+  Object.keys(pendingStorageChanges).forEach(function(key) {
+    var current = pendingStorageChanges[key];
+    // Flip back
+    if (current === 'local') {
+      syncCats[key] = 'cloud';
+    } else {
+      syncCats[key] = 'local';
+    }
+  });
+
+  localStorage.setItem('roweos_sync_categories', JSON.stringify(syncCats));
+  pendingStorageChanges = {};
+  var banner = document.getElementById('storageConfirmBanner');
+  if (banner) banner.remove();
+  showToast('Changes reverted', 'info');
+  refreshStorageDisplays();
 }
 
 /**
- * v12.2.5: Refresh all storage displays after data changes
+ * v12.2.6: Refresh all storage displays after data changes
  */
 function refreshStorageDisplays() {
   updateStorageBar();
@@ -100442,7 +100813,7 @@ function manualSyncNow() {
 }
 
 /**
- * v12.2.5: Clear specific storage category with immediate UI refresh
+ * v12.2.6: Clear specific storage category with immediate UI refresh
  */
 function clearStorageCategory(category) {
   var categoryNames = {
@@ -100465,7 +100836,7 @@ function clearStorageCategory(category) {
       showToast('Cleared old conversations, kept last 10', 'success');
 
     } else if (category === 'brandai_chats') {
-      // v12.2.5: Clear all BrandAI chats
+      // v12.2.6: Clear all BrandAI chats
       localStorage.removeItem('roweos_agentCommands');
       if (typeof agentCommands !== 'undefined') agentCommands = [];
       if (typeof currentConversation !== 'undefined') currentConversation = [];
@@ -100474,7 +100845,7 @@ function clearStorageCategory(category) {
       showToast('Cleared all BrandAI conversations', 'success');
 
     } else if (category === 'lifeai_chats') {
-      // v12.2.5: Clear all LifeAI chats
+      // v12.2.6: Clear all LifeAI chats
       localStorage.removeItem('roweos_life_agentCommands');
       showToast('Cleared all LifeAI conversations', 'success');
 
@@ -100516,34 +100887,34 @@ function clearStorageCategory(category) {
       showToast('Cleared inventory images', 'success');
 
     } else if (category === 'journal') {
-      // v12.2.5: Clear journal
+      // v12.2.6: Clear journal
       localStorage.removeItem('roweos_journal');
       showToast('Cleared all journal entries', 'success');
 
     } else if (category === 'calendar') {
-      // v12.2.5: Clear calendar
+      // v12.2.6: Clear calendar
       localStorage.removeItem('roweos_calendar');
       if (typeof calendar !== 'undefined') calendar = [];
       showToast('Cleared all calendar events', 'success');
 
     } else if (category === 'todos') {
-      // v12.2.5: Clear todos
+      // v12.2.6: Clear todos
       localStorage.removeItem('roweosTodos');
       showToast('Cleared all to-do items', 'success');
 
     } else if (category === 'runs') {
-      // v12.2.5: Clear studio runs
+      // v12.2.6: Clear studio runs
       localStorage.removeItem('roweos_runs');
       if (typeof runs !== 'undefined') runs = [];
       showToast('Cleared studio run history', 'success');
 
     } else if (category === 'goals') {
-      // v12.2.5: Clear pulse goals
+      // v12.2.6: Clear pulse goals
       localStorage.removeItem('roweos_pulse_goals');
       showToast('Cleared all pulse goals', 'success');
 
     } else if (category === 'knowledge') {
-      // v12.2.5: Clear brand knowledge
+      // v12.2.6: Clear brand knowledge
       localStorage.removeItem('roweos_brand_memory');
       localStorage.removeItem('brandMemory');
       brandMemory = {};
@@ -100556,7 +100927,7 @@ function clearStorageCategory(category) {
     showToast('Error clearing ' + displayName + ': ' + e.message, 'error');
   }
 
-  // v12.2.5: Immediately refresh storage displays
+  // v12.2.6: Immediately refresh storage displays
   refreshStorageDisplays();
   renderSyncInventory();
 }
