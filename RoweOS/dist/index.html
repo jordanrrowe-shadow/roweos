@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v12.2.8 - Brand Intelligence Platform</title>
+  <title>RoweOS v13.0 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -72,11 +72,12 @@
       --accent-muted: #8c7c62;
       --accent-glow: rgba(168, 152, 120, 0.12);
       --accent-gold: #d4af37;
+      --brand-accent: #d4af37; /* v13.0: Per-brand accent color, updated via JS */
       --gold: #a89878;
       --success: #22c55e;
       --error: #ef4444;
       --warning: #f59e0b;
-      
+
       /* v10.5.25: LifeAI Customizable Accent Color System */
       --life-accent: #22c55e;
       --life-accent-dark: #16a34a;
@@ -37897,7 +37898,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v12.2.8</div>
+      <div class="launch-version" id="launchVersionTag">v13.0</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38206,7 +38207,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v12.2.8</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.0</div>
       
     </div>
   </div>
@@ -38490,7 +38491,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v12.2.8</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.0</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39357,7 +39358,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v12.2.8</span>
+          <span class="sidebar-version">v13.0</span>
         </div>
       </div>
     </div>
@@ -39667,7 +39668,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v12.2.8 • Built for the future</p>
+        <p>RoweOS v13.0 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39724,7 +39725,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v12.2.8</p>
+            <p class="onboarding-welcome-version">v13.0</p>
           </div>
         </div>
       </div>
@@ -41087,9 +41088,19 @@ service cloud.firestore {
               <label class="onboarding-form-label">What does your brand do? *</label>
               <textarea id="wizardBrandDescription" class="onboarding-form-textarea" rows="4" placeholder="Describe your brand, products, or services in a few sentences"></textarea>
             </div>
+
+            <!-- v13.0: Brand color picker in onboarding -->
+            <div class="onboarding-form-group">
+              <label class="onboarding-form-label">Brand Color</label>
+              <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+                <input type="color" id="wizardBrandColor" value="#d4af37" style="width: 44px; height: 44px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: transparent; cursor: pointer; padding: 2px;">
+                <div id="wizardBrandColorPresets" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+              </div>
+              <div class="onboarding-form-hint">Choose an accent color for your brand throughout RoweOS</div>
+            </div>
           </div>
         </div>
-        
+
         <div class="onboarding-actions">
           <button class="onboarding-btn onboarding-btn-secondary" onclick="goToOnboardingStep(2)">← Back</button>
           <button class="onboarding-btn onboarding-btn-primary" onclick="goToOnboardingStep(8)">Continue →</button>
@@ -46265,7 +46276,7 @@ service cloud.firestore {
             Short Name 
             <span style="font-weight: 400; color: var(--accent);">(for sidebar)</span>
           </label>
-          <input type="text" id="editBrandShortName" class="modal-input" placeholder="e.g., TRC, RST, RR">
+          <input type="text" id="editBrandShortName" class="modal-input" placeholder="e.g., Acme, HQ, Main">
           <div style="font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-1);">
             Abbreviated name shown in the brand switcher. Leave empty to use full name.
           </div>
@@ -46276,7 +46287,22 @@ service cloud.firestore {
           <input type="text" id="editBrandTagline" class="modal-input" readonly style="background: var(--bg-secondary); cursor: not-allowed;">
           <div style="font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-1);">Edit in Identity → Brand Essence</div>
         </div>
-        
+
+        <!-- v13.0: Per-brand accent color picker -->
+        <div class="modal-form-group" style="margin-top: var(--space-5);">
+          <label class="modal-label">
+            Brand Color
+            <span style="font-weight: 400; color: var(--accent);">(accent)</span>
+          </label>
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-2);">
+            <input type="color" id="editBrandColor" value="#d4af37" style="width: 44px; height: 44px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: transparent; cursor: pointer; padding: 2px;">
+            <div id="editBrandColorPresets" style="display: flex; gap: var(--space-2); flex-wrap: wrap;"></div>
+          </div>
+          <div style="font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-2);">
+            Used for calendar items, Signal dashboard, and UI accents when this brand is active
+          </div>
+        </div>
+
         <div style="margin-top: var(--space-6); padding: var(--space-4); background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
           <div style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.5;">
             <strong style="color: var(--text-primary);">Tip:</strong> All other brand details (voice, tone, messaging, etc.) are managed in the Identity section. Use the expandable cards there to edit your brand's full profile.
@@ -46285,7 +46311,7 @@ service cloud.firestore {
       </div>
       <div class="modal-footer">
         <button class="modal-button-secondary" onclick="closeModal('editBrandModal')">Cancel</button>
-        <button class="modal-button-primary" onclick="saveShortName()">Save Short Name</button>
+        <button class="modal-button-primary" onclick="saveBrandSettings()">Save</button>
       </div>
     </div>
   </div>
@@ -46974,15 +47000,6 @@ var CONST = {
     AUTO: 'auto',
     ALWAYS_OPEN: 'always-open',
     ALWAYS_COLLAPSED: 'always-collapsed'
-  },
-
-  // Default brand indices
-  BRANDS: {
-    TRC: 0,
-    SOLO: 1,
-    RETREATS: 2,
-    RESERVE: 3,
-    RCO: 4
   },
 
   // File/storage limits
@@ -48878,65 +48895,8 @@ var ops = [
     { id: 'style', label: 'Style', type: 'select', options: ['Photorealistic', 'Digital Art', 'Illustration', 'Minimalist', '3D Render'], default: 'Photorealistic' }
   ]},
 
-  // ═══════════════════════════════════════════════════════════════
-  // ROWE SOLO TRAINING - IDs 101-112
-  // ═══════════════════════════════════════════════════════════════
-  { id: 101, name: 'Client Intake Form', desc: 'Comprehensive 5-7 page intake document', category: 'documents', brand: 'Rowe Solo Training', outputs: ['Contact info section', 'Dog details', 'Training history', 'Goals assessment', 'Medical clearance'] },
-  { id: 102, name: 'Training Curriculum Builder', desc: 'Staged program from foundation to graduation', category: 'brand-specific', brand: 'Rowe Solo Training', outputs: ['Stage 1: Foundation', 'Stage 2: Duration/Distraction', 'Stage 3: Off-leash', 'Stage 4: Task-specific', 'Stage 5: Graduation'] },
-  { id: 103, name: 'Breed-Specific Guide', desc: 'Training approach customized by breed', category: 'brand-specific', brand: 'Rowe Solo Training', outputs: ['Breed temperament', 'Common challenges', 'Training adjustments', 'Exercise needs', 'Socialization tips'] },
-  { id: 104, name: 'Session Progress Report', desc: 'Skills practiced, improvements, notes', category: 'operations', brand: 'Rowe Solo Training', outputs: ['Session summary', 'Skills covered', 'Progress notes', 'Homework assignments', 'Next session goals'] },
-  { id: 105, name: 'Training Report Card', desc: 'Visual progress tracker for clients', category: 'brand-specific', brand: 'Rowe Solo Training', outputs: ['Skill checklist', 'Rating scales', 'Milestone badges', 'Trainer notes', 'Photo documentation'] },
-  { id: 106, name: 'Handler Manual', desc: '20-30 page comprehensive service dog guide', category: 'documents', brand: 'Rowe Solo Training', outputs: ['ADA rights', 'Public access etiquette', 'Equipment guide', 'Health maintenance', 'Emergency protocols'] },
-  { id: 107, name: 'Liability Waiver', desc: 'Risk acknowledgment and terms', category: 'documents', brand: 'Rowe Solo Training', outputs: ['Risk disclosure', 'Indemnification', 'Medical authorization', 'Photo release', 'Signature blocks'] },
-  { id: 108, name: 'Service Agreement', desc: 'Training contract template', category: 'documents', brand: 'Rowe Solo Training', outputs: ['Program description', 'Timeline', 'Payment terms', 'Cancellation policy', 'Handler obligations'] },
-  { id: 109, name: 'Behavior Assessment', desc: 'Reactivity and anxiety intake form', category: 'brand-specific', brand: 'Rowe Solo Training', outputs: ['Trigger inventory', 'Threshold assessment', 'Body language notes', 'History documentation', 'Management plan'] },
-  { id: 110, name: 'Graduation Certificate', desc: 'Program completion documentation', category: 'documents', brand: 'Rowe Solo Training', outputs: ['Certificate design', 'Achievement summary', 'Skills verified', 'Trainer signature', 'Date/program details'] },
-  { id: 111, name: 'New Client Welcome Packet', desc: '10-15 page onboarding guide', category: 'documents', brand: 'Rowe Solo Training', outputs: ['Welcome letter', 'Program philosophy', 'Equipment checklist', 'Preparation guide', 'FAQ'] },
-  { id: 112, name: 'Public Access Test Prep', desc: 'Evaluation checklist and study guide', category: 'brand-specific', brand: 'Rowe Solo Training', outputs: ['Test criteria', 'Practice scenarios', 'Common mistakes', 'Handler tips', 'Evaluation rubric'] },
-
-  // ═══════════════════════════════════════════════════════════════
-  // ROWE RETREATS - IDs 201-211
-  // ═══════════════════════════════════════════════════════════════
-  { id: 201, name: 'Property Listing Optimizer', desc: 'Compelling Airbnb/VRBO copy', category: 'brand-specific', brand: 'Rowe Retreats', outputs: ['Headline options', 'Description copy', 'Amenity highlights', 'SEO keywords', 'Photo shot list'] },
-  { id: 202, name: 'Guest Welcome Book', desc: '16-20 page comprehensive property guide', category: 'documents', brand: 'Rowe Retreats', outputs: ['Welcome message', 'House manual', 'Check-in/out instructions', 'Emergency contacts', 'House rules'] },
-  { id: 203, name: 'Local Experience Guide', desc: 'Curated Austin/Domain recommendations', category: 'brand-specific', brand: 'Rowe Retreats', outputs: ['Dining guide', 'Shopping recommendations', 'Entertainment', 'Hidden gems', 'Transportation tips'] },
-  { id: 204, name: 'Guest Message Sequence', desc: 'Booking through checkout automation', category: 'operations', brand: 'Rowe Retreats', outputs: ['Booking confirmation', 'Pre-arrival', 'Check-in day', 'Mid-stay check-in', 'Checkout reminder', 'Post-stay thank you'] },
-  { id: 205, name: 'Turnover Cleaning Checklist', desc: 'Room-by-room inspection guide', category: 'operations', brand: 'Rowe Retreats', outputs: ['Kitchen checklist', 'Bathroom checklist', 'Bedroom checklist', 'Living area checklist', 'Amenity restocking'] },
-  { id: 206, name: 'Maintenance Schedule', desc: 'Weekly, monthly, quarterly task calendar', category: 'operations', brand: 'Rowe Retreats', outputs: ['Weekly tasks', 'Monthly tasks', 'Quarterly inspections', 'Annual maintenance', 'Vendor contacts'] },
-  { id: 207, name: 'Quick Reply Templates', desc: 'Common guest question responses', category: 'operations', brand: 'Rowe Retreats', outputs: ['WiFi/tech questions', 'Early check-in requests', 'Local recommendations', 'Amenity questions', 'Problem resolution'] },
-  { id: 208, name: 'Property Inspection Checklist', desc: 'Pre and post stay verification', category: 'operations', brand: 'Rowe Retreats', outputs: ['Pre-arrival verification', 'Post-departure assessment', 'Damage documentation', 'Inventory check', 'Photo requirements'] },
-  { id: 209, name: 'House Rules Document', desc: 'Guest expectations and policies', category: 'documents', brand: 'Rowe Retreats', outputs: ['Noise policy', 'Guest limits', 'Pet policy', 'Smoking policy', 'Parking rules'] },
-  { id: 210, name: 'Emergency Protocol Guide', desc: 'Crisis response procedures', category: 'operations', brand: 'Rowe Retreats', outputs: ['Emergency contacts', 'Medical emergencies', 'Property damage', 'Weather events', 'Guest incidents'] },
-  { id: 211, name: 'Seasonal Listing Refresh', desc: 'Copy variations by season', category: 'brand-specific', brand: 'Rowe Retreats', outputs: ['Spring copy', 'Summer copy', 'Fall copy', 'Winter copy', 'Event-based variations'] },
-
-  // ═══════════════════════════════════════════════════════════════
-  // ROWE RESERVE - IDs 301-310
-  // ═══════════════════════════════════════════════════════════════
-  { id: 301, name: 'Service Menu Builder', desc: 'Categorized offerings with pricing', category: 'brand-specific', brand: 'Rowe Reserve', outputs: ['Service categories', 'Descriptions', 'Pricing tiers', 'Add-ons', 'Terms'] },
-  { id: 302, name: 'Client Preference Profile', desc: 'Lifestyle and vendor preferences intake', category: 'documents', brand: 'Rowe Reserve', outputs: ['Contact preferences', 'Lifestyle details', 'Brand preferences', 'Budget parameters', 'Special requirements'] },
-  { id: 303, name: 'Experience Package Creator', desc: 'Themed service bundles', category: 'brand-specific', brand: 'Rowe Reserve', outputs: ['Package concept', 'Included services', 'Pricing', 'Customization options', 'Booking terms'] },
-  { id: 304, name: 'Vendor Partnership Brief', desc: 'Onboarding and standards document', category: 'documents', brand: 'Rowe Reserve', outputs: ['Company intro', 'Service standards', 'Communication protocols', 'Billing terms', 'Confidentiality'] },
-  { id: 305, name: 'Concierge Request Template', desc: 'Service fulfillment form', category: 'operations', brand: 'Rowe Reserve', outputs: ['Request details', 'Client preferences', 'Budget', 'Timeline', 'Special instructions'] },
-  { id: 306, name: 'Client Proposal Generator', desc: 'Custom service proposals', category: 'brand-specific', brand: 'Rowe Reserve', outputs: ['Executive summary', 'Service details', 'Options presented', 'Pricing breakdown', 'Next steps'] },
-  { id: 307, name: 'Membership Tier Guide', desc: 'Access, Priority, Elite benefits overview', category: 'documents', brand: 'Rowe Reserve', outputs: ['Tier comparison', 'Benefits matrix', 'Pricing', 'Upgrade path', 'Terms'] },
-  { id: 308, name: 'Vendor Directory Template', desc: 'Preferred partner database structure', category: 'operations', brand: 'Rowe Reserve', outputs: ['Categories', 'Contact fields', 'Rating system', 'Notes fields', 'Booking procedures'] },
-  { id: 309, name: 'Request Tracking System', desc: 'Status workflow documentation', category: 'operations', brand: 'Rowe Reserve', outputs: ['Status stages', 'Update templates', 'Escalation triggers', 'Completion criteria', 'Follow-up schedule'] },
-  { id: 310, name: 'Corporate Package Builder', desc: 'Business client offerings', category: 'brand-specific', brand: 'Rowe Reserve', outputs: ['Corporate services', 'Volume pricing', 'Account management', 'Billing options', 'SLA terms'] },
-
-  // ═══════════════════════════════════════════════════════════════
-  // ROWE & CO. - IDs 401-411
-  // ═══════════════════════════════════════════════════════════════
-  { id: 401, name: 'Product Description Writer', desc: 'E-commerce copy for each item', category: 'brand-specific', brand: 'Rowe & Co.', outputs: ['Benefit headline', 'Description copy', 'Material details', 'Care instructions', 'SEO keywords'] },
-  { id: 402, name: 'Custom Order Form', desc: 'Measurements and specifications intake', category: 'documents', brand: 'Rowe & Co.', outputs: ['Customer info', 'Pet measurements', 'Customization options', 'Design uploads', 'Approval workflow'] },
-  { id: 403, name: 'Pet Size Guide', desc: 'Measurement instructions and chart', category: 'brand-specific', brand: 'Rowe & Co.', outputs: ['Measurement instructions', 'Size chart', 'Breed examples', 'Fit tips', 'Visual guide'] },
-  { id: 404, name: 'Collection Lookbook', desc: '20-32 page digital catalog', category: 'brand-specific', brand: 'Rowe & Co.', outputs: ['Cover design', 'Collection story', 'Product features', 'Lifestyle shots', 'Order information'] },
-  { id: 405, name: 'Collection Launch Kit', desc: 'Press, social, email bundle', category: 'marketing', brand: 'Rowe & Co.', outputs: ['Press release', 'Social posts (10-15)', 'Email sequence', 'Influencer outreach', 'Launch timeline'] },
-  { id: 406, name: 'Order Confirmation Sequence', desc: 'Transactional email flow', category: 'operations', brand: 'Rowe & Co.', outputs: ['Order confirmation', 'Production update', 'Shipping notification', 'Delivery confirmation', 'Review request'] },
-  { id: 407, name: 'Design Proof Template', desc: 'Approval workflow document', category: 'operations', brand: 'Rowe & Co.', outputs: ['Proof presentation', 'Revision request form', 'Approval confirmation', 'Production release', 'Timeline updates'] },
-  { id: 408, name: 'Care Instruction Cards', desc: 'Product-specific care guides', category: 'documents', brand: 'Rowe & Co.', outputs: ['Washing instructions', 'Storage tips', 'Material care', 'Longevity tips', 'Warranty info'] },
-  { id: 409, name: 'Wholesale Line Sheet', desc: 'B2B pricing and ordering', category: 'documents', brand: 'Rowe & Co.', outputs: ['Product grid', 'Wholesale pricing', 'MOQ requirements', 'Order deadlines', 'Terms'] },
-  { id: 410, name: 'Quality Control Checklist', desc: 'Production inspection guide', category: 'operations', brand: 'Rowe & Co.', outputs: ['Pre-production check', 'During production', 'Final inspection', 'Packaging verification', 'Photo documentation'] },
-  { id: 411, name: 'Abandoned Cart Sequence', desc: 'Recovery email series', category: 'marketing', brand: 'Rowe & Co.', outputs: ['Reminder email', 'Incentive email', 'Urgency email', 'Alternative suggestions', 'Final notice'] },
+  // v13.0: Brand-specific operations removed. Adaptive Operations Engine (v13.1) will
+  // generate custom ops from Identity data. Universal ops (1-44) + Parent ops (501-507) remain.
 
   // ═══════════════════════════════════════════════════════════════
   // THE ROWE COLLECTION (Parent Brand) - IDs 501-507
@@ -49971,7 +49931,12 @@ function onBrandChange() {
   
   // v9.1.14: CRITICAL - Update selectedBrand for Memory view and Edit Brand modal
   selectedBrand = brandIdx;
-  
+
+  // v13.0: Apply per-brand accent color
+  if (brands[brandIdx] && brands[brandIdx].brandColor) {
+    applyBrandAccentColor(brands[brandIdx].brandColor);
+  }
+
   // v9.1.14: Simplified - just switch brand, no multi-brand context tracking
   // Update last active brand
   window.lastActiveBrandIdx = brandIdx;
@@ -65885,15 +65850,16 @@ function renderCalendar() {
   }
 }
 
-function getBrandColor(brand) {
-  var colors = {
-    'The Rowe Collection': '#b8986a',
-    'Rowe Solo Training': '#6ab894',
-    'Rowe Retreats': '#6a8eb8',
-    'Rowe Reserve': '#b86a9e',
-    'Rowe & Co.': '#b8a86a'
-  };
-  return colors[brand] || '#888';
+// v13.0: Per-brand accent color - reads from brand.brandColor, falls back to default gold
+function getBrandColor(brandName) {
+  if (!brandName) return '#d4af37';
+  // Look up brand by name and return its custom color
+  for (var i = 0; i < brands.length; i++) {
+    if (brands[i] && brands[i].name === brandName) {
+      return brands[i].brandColor || '#d4af37';
+    }
+  }
+  return '#d4af37';
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -72203,48 +72169,16 @@ function getBrandSpecificRecommendations(brand) {
   var today = new Date();
   var dayOfWeek = today.getDay();
   var dayOfMonth = today.getDate();
-  
-  // Brand-specific suggestions pool
-  var brandSuggestions = {
-    'The Rowe Collection': [
-      { title: 'Portfolio Performance Review', reason: 'Analyze cross-brand metrics and identify growth opportunities', action: "goToStudioOperation('SWOT Analysis')", actionLabel: 'Open Analysis' },
-      { title: 'Brand Cohesion Audit', reason: 'Ensure visual and voice consistency across all sub-brands', action: "goToStudioOperation('Brand Voice Guide')", actionLabel: 'Open in Studio' },
-      { title: 'VIP Client Touchpoint', reason: 'Strengthen relationships with high-value clients and partners', action: "showView('agent')", actionLabel: 'Draft with BrandAI' },
-      { title: 'Create Luxury Content', reason: 'Develop premium content that elevates the parent brand', action: "goToStudioOperation('Ad Copy Kit')", actionLabel: 'Create Content' },
-      { title: 'Strategic Planning Session', reason: 'Plan quarterly objectives and key initiatives', action: "goToStudioOperation('Customer Persona Builder')", actionLabel: 'Start Planning' }
-    ],
-    'Rowe Solo Training': [
-      { title: 'Update Training Curriculum', reason: 'Refresh service dog certification materials for industry leadership', action: "goToStudioOperation('Training Curriculum Builder')", actionLabel: 'Review Materials' },
-      { title: 'Student Progress Check-ins', reason: 'Follow up with current certification candidates', action: "showView('agent')", actionLabel: 'Draft Outreach' },
-      { title: 'Create Training Video', reason: 'Film educational content demonstrating key techniques', action: "goToStudioOperation('Weekly Content Calendar')", actionLabel: 'Plan Content' },
-      { title: 'Certification Standards Review', reason: 'Ensure compliance with latest service dog regulations', action: "goToStudioOperation('SWOT Analysis')", actionLabel: 'Run Analysis' },
-      { title: 'Alumni Success Stories', reason: 'Gather testimonials from certified trainers', action: "goToStudioOperation('Ad Copy Kit')", actionLabel: 'Create Post' }
-    ],
-    'Rowe Retreats': [
-      { title: 'Property Standards Check', reason: 'Ensure luxury standards are maintained across Domain properties', action: "showView('agent')", actionLabel: 'Create Checklist' },
-      { title: 'Guest Experience Enhancement', reason: 'Research new amenities to elevate the retreat experience', action: "goToStudioOperation('SWOT Analysis')", actionLabel: 'Run Analysis' },
-      { title: 'Seasonal Pricing Review', reason: 'Optimize pricing strategy based on booking trends', action: "showView('agent')", actionLabel: 'Analyze with BrandAI' },
-      { title: 'Create Property Showcase', reason: 'Develop visual content highlighting property features', action: "goToStudioOperation('Property Listing Optimizer')", actionLabel: 'Create Content' },
-      { title: 'Review Guest Feedback', reason: 'Analyze recent reviews to identify improvement areas', action: "goToStudioOperation('Review Response Pack')", actionLabel: 'Start Analysis' }
-    ],
-    'Rowe Reserve': [
-      { title: 'Concierge Service Expansion', reason: 'Identify new premium services for members', action: "goToStudioOperation('Service Menu Builder')", actionLabel: 'Run Analysis' },
-      { title: 'Member Satisfaction Outreach', reason: 'Connect with reserve members for feedback', action: "showView('agent')", actionLabel: 'Draft Message' },
-      { title: 'Partnership Opportunity Review', reason: 'Evaluate luxury brand partnerships for member benefits', action: "goToStudioOperation('Competitor Analysis')", actionLabel: 'Open Strategy' },
-      { title: 'Exclusive Event Planning', reason: 'Plan member-only experiences and gatherings', action: "showView('rhythm')", actionLabel: 'View Calendar' },
-      { title: 'Service Quality Audit', reason: 'Review and refine concierge service standards', action: "goToStudioOperation('SWOT Analysis')", actionLabel: 'Start Audit' }
-    ],
-    'Rowe & Co.': [
-      { title: 'Custom Order Pipeline Review', reason: 'Check pending orders and production timelines', action: "showView('agent')", actionLabel: 'Review Status' },
-      { title: 'Artisan Collaboration Outreach', reason: 'Connect with craftspeople for new collaborations', action: "showView('agent')", actionLabel: 'Draft Outreach' },
-      { title: 'Product Photography Session', reason: 'Schedule professional photos for new pieces', action: "showView('rhythm')", actionLabel: 'Schedule Session' },
-      { title: 'Catalog Update', reason: 'Refresh product catalog with latest custom offerings', action: "goToStudioOperation('Collection Lookbook')", actionLabel: 'Plan Update' },
-      { title: 'Craftsmanship Showcase', reason: 'Create content highlighting the artisan process', action: "goToStudioOperation('Product Description Writer')", actionLabel: 'Create Content' }
-    ]
-  };
-  
-  // Get brand-specific pool
-  var pool = brandSuggestions[brand.name] || brandSuggestions['The Rowe Collection'];
+
+  // v13.0: Generic brand management suggestions (personalized with brand.name)
+  var brandName = brand.shortName || brand.name;
+  var pool = [
+    { title: 'Content Planning Session', reason: 'Plan upcoming content and campaigns for ' + brandName, action: "goToStudioOperation('Weekly Content Calendar')", actionLabel: 'Plan Content' },
+    { title: 'Brand Strategy Review', reason: 'Analyze ' + brandName + ' positioning and identify growth opportunities', action: "goToStudioOperation('SWOT Analysis')", actionLabel: 'Open Analysis' },
+    { title: 'Client Outreach', reason: 'Strengthen relationships with key ' + brandName + ' clients and partners', action: "showView('agent')", actionLabel: 'Draft with BrandAI' },
+    { title: 'Voice & Messaging Audit', reason: 'Ensure ' + brandName + ' voice consistency across all channels', action: "goToStudioOperation('Brand Voice Guide')", actionLabel: 'Open in Studio' },
+    { title: 'Competitive Analysis', reason: 'Review ' + brandName + ' competitive landscape and market position', action: "goToStudioOperation('Competitor Analysis')", actionLabel: 'Run Analysis' }
+  ];
   
   // Add time-based suggestions
   if (dayOfWeek === 1) {
@@ -73914,43 +73848,21 @@ function resetDaySidebar() {
 }
 
 function getAISuggestionsForDay(brandName, dayName) {
-  var suggestions = {
-    'The Rowe Collection': [
-      { title: 'Review brand portfolio', description: 'Analyze cross-brand metrics and identify synergy opportunities.' },
-      { title: 'Plan content calendar', description: 'Schedule premium content for the parent brand.' },
-      { title: 'VIP client touchpoint', description: 'Reach out to strengthen high-value relationships.' }
-    ],
-    'Rowe Solo Training': [
-      { title: 'Update curriculum', description: 'Refresh service dog training materials.' },
-      { title: 'Student check-ins', description: 'Follow up with certification candidates.' },
-      { title: 'Create training content', description: 'Film educational technique videos.' }
-    ],
-    'Rowe Retreats': [
-      { title: 'Property inspection', description: 'Ensure luxury standards at Domain properties.' },
-      { title: 'Guest experience review', description: 'Research new amenities to elevate stays.' },
-      { title: 'Pricing optimization', description: 'Analyze booking trends for pricing.' }
-    ],
-    'Rowe Reserve': [
-      { title: 'Concierge expansion', description: 'Identify new premium member services.' },
-      { title: 'Member outreach', description: 'Connect for feedback and satisfaction.' },
-      { title: 'Partnership review', description: 'Evaluate luxury brand partnerships.' }
-    ],
-    'Rowe & Co.': [
-      { title: 'Order pipeline review', description: 'Check pending orders and timelines.' },
-      { title: 'Artisan outreach', description: 'Connect for new collaborations.' },
-      { title: 'Product photography', description: 'Schedule shots for new pieces.' }
-    ]
-  };
-  
+  // v13.0: Generic brand management suggestions personalized with brand name
+  var genericSuggestions = [
+    { title: 'Review ' + brandName + ' strategy', description: 'Analyze brand metrics and identify growth opportunities.' },
+    { title: 'Plan content for ' + brandName, description: 'Schedule upcoming content and campaigns.' },
+    { title: 'Client relationship check', description: 'Reach out to strengthen key ' + brandName + ' relationships.' }
+  ];
+
   var daySpecific = [];
   if (dayName === 'Monday') {
     daySpecific.push({ title: 'Weekly planning', description: 'Set priorities and key objectives for the week ahead.' });
   } else if (dayName === 'Friday') {
     daySpecific.push({ title: 'Week-in-review', description: 'Reflect on wins and prepare for next week.' });
   }
-  
-  var brandSuggestions = suggestions[brandName] || suggestions['The Rowe Collection'];
-  return daySpecific.concat(brandSuggestions).slice(0, 4);
+
+  return daySpecific.concat(genericSuggestions).slice(0, 4);
 }
 
 // Subtask functions
@@ -82526,6 +82438,21 @@ function goToOnboardingStep(step) {
     setTimeout(function() { renderOnboardingSyncPrefs(); }, 50);
   }
 
+  // v13.0: Render brand color presets on step 7
+  if (step === 7) {
+    setTimeout(function() {
+      var presetsEl = document.getElementById('wizardBrandColorPresets');
+      if (presetsEl) {
+        var presets = ['#d4af37', '#b8986a', '#6ab894', '#6a8eb8', '#b86a9e', '#b8a86a', '#e06666', '#8e7cc3', '#76a5af', '#f6b26b'];
+        var html = '';
+        for (var p = 0; p < presets.length; p++) {
+          html += '<div onclick="var c=\'' + presets[p] + '\';var el=document.getElementById(\'wizardBrandColor\');if(el)el.value=c;this.parentElement.querySelectorAll(\'div\').forEach(function(d){d.style.borderColor=\'transparent\'});this.style.borderColor=\'var(--text-primary)\'" style="width: 28px; height: 28px; border-radius: 50%; background: ' + presets[p] + '; cursor: pointer; border: 2px solid ' + (presets[p] === '#d4af37' ? 'var(--text-primary)' : 'transparent') + '; transition: border-color 0.15s;"></div>';
+        }
+        presetsEl.innerHTML = html;
+      }
+    }, 100);
+  }
+
   // v10.5.25: Render LifeAI accent color picker on life5 step
   if (step === 'life5' && typeof renderLifeAccentPicker === 'function') {
     setTimeout(function() {
@@ -85719,6 +85646,10 @@ function completeBrandSetup() {
   // Build positioning from description or extracted
   var positioning = brandDescription || extractedData.essence || '';
   
+  // v13.0: Get brand color from onboarding picker
+  var wizardColorEl = document.getElementById('wizardBrandColor');
+  var brandColor = wizardColorEl ? wizardColorEl.value : '#d4af37';
+
   // Create new brand object with extracted data merged in
   var newBrand = {
     name: brandName,
@@ -85732,6 +85663,7 @@ function completeBrandSetup() {
     vocabDo: wizardValues.join(', ') || 'excellence, quality, innovation',
     vocabDont: 'cheap, rushed, generic',
     mission: '',
+    brandColor: brandColor, // v13.0: Per-brand accent color
     // v9.1.14: Store import source for reference
     importMethod: extractedData.importMethod || 'manual',
     // v9.1.14: Initialize identityData with ALL extracted/entered values
@@ -86138,7 +86070,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v12.2.8 - ' + subtitle;
+  document.title = 'RoweOS v13.0 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -88717,63 +88649,8 @@ var currentKnowledgeBrand = 'brand_0';
 var brandKnowledgeData = JSON.parse(localStorage.getItem('roweos_brand_knowledge') || '{}');
 
 // Initialize default knowledge for each brand
-var defaultBrandKnowledge = {
-  'rowe-collection': {
-    name: 'The Rowe Collection',
-    tagline: 'Parent luxury brand portfolio',
-    essence: 'The Rowe Collection represents Austin-based luxury living at its finest. As the parent brand, it embodies sophistication, exclusivity, and meticulous attention to detail. The portfolio serves discerning clients who value premium experiences across training, hospitality, concierge services, and custom goods.',
-    voice: 'Confident yet approachable. Luxurious without being ostentatious. Every communication should feel like a personal conversation with a trusted advisor who happens to have impeccable taste. Avoid hyperbole—let quality speak for itself.',
-    audience: 'Affluent professionals and families in Austin and beyond. Tech executives, entrepreneurs, and established wealth. They value time, appreciate craftsmanship, and seek premium experiences without compromise. Age 35-65, household income $500K+.',
-    messaging: '• "Quiet luxury, extraordinary results"\n• "Where excellence is the standard"\n• "Curated experiences for discerning individuals"\n• "The Austin standard for premium living"',
-    visual: 'Primary: Deep black (#0a0a0a), Champagne gold (#d4af37)\nTypography: Clean, modern serifs for headlines; refined sans-serifs for body\nImagery: Moody, editorial photography. Rich shadows, warm highlights. Never stock-looking—always feels curated and intentional.',
-    competitive: 'Unlike fragmented luxury services, The Rowe Collection offers a cohesive ecosystem. Competitors offer individual services; we offer a lifestyle. Our Austin roots give authenticity that national chains can\'t match.',
-    insights: '• The brand benefits from maintaining exclusivity—scarcity creates desire\n• Austin\'s tech wealth demographic responds well to understated luxury over flashy displays\n• Cross-promotion between sub-brands strengthens the ecosystem\n• Personal touches (handwritten notes, custom packaging) have outsized impact on client retention'
-  },
-  'solo-training': {
-    name: 'Rowe Solo Training',
-    tagline: 'Premier service dog certification',
-    essence: 'Rowe Solo Training specializes in training and certifying owner-trained service dogs. We believe in empowering handlers to develop deep, working partnerships with their dogs through professional guidance and structured certification programs.',
-    voice: 'Knowledgeable, supportive, and professional. Balances expertise with warmth—clients are often navigating disabilities and need both competence and compassion. Clear, direct communication without condescension.',
-    audience: 'Individuals with disabilities seeking to owner-train their service dogs. Often highly motivated, research-driven, and seeking professional validation for their training efforts. Values independence and partnership.',
-    messaging: '• "Your partnership, professionally certified"\n• "Empowering handlers, elevating standards"\n• "Excellence in owner-trained service dogs"\n• "Where dedication meets certification"',
-    visual: 'Inherits Rowe Collection palette with emphasis on warmth and approachability. Photography features authentic handler-dog partnerships in real-world settings. Clean, accessible design.',
-    competitive: 'Unlike program dogs or online-only certifications, we bridge the gap—providing legitimate certification for the growing owner-trainer community with in-person evaluation and professional standards.',
-    insights: '• Handler confidence is as important as dog performance\n• Community building among clients creates loyalty and referrals\n• Educational content establishes authority in the space\n• Flexibility in training approaches respects different handler needs'
-  },
-  'retreats': {
-    name: 'Rowe Retreats',
-    tagline: 'Luxury Airbnb experiences in The Domain',
-    essence: 'Rowe Retreats offers curated luxury short-term rentals in Austin\'s premier shopping and entertainment district, The Domain. Each property delivers hotel-quality amenities with the privacy and space of a home.',
-    voice: 'Welcoming, aspirational, and detail-oriented. Makes guests feel like VIPs from first inquiry to checkout. Anticipates needs before they\'re expressed.',
-    audience: 'Business travelers seeking upscale alternatives to hotels. Couples celebrating special occasions. Families wanting space without sacrificing luxury. Corporate retreat planners.',
-    messaging: '• "Luxury stays in Austin\'s most coveted location"\n• "Hotel quality, home comfort"\n• "Your Domain retreat awaits"\n• "Where business meets pleasure"',
-    visual: 'Bright, airy photography showcasing properties. Lifestyle imagery of guests enjoying Domain amenities. Emphasis on space, light, and premium finishes.',
-    competitive: 'Standard Airbnbs lack consistency; hotels lack space and character. Rowe Retreats delivers the best of both—vetted properties with professional management in the best location.',
-    insights: '• The Domain location is the primary draw—leverage it heavily\n• Business travelers are repeat customers when treated well\n• Welcome amenities set the tone and drive reviews\n• Fast, responsive communication is non-negotiable'
-  },
-  'reserve': {
-    name: 'Rowe Reserve',
-    tagline: 'Private concierge services',
-    essence: 'Rowe Reserve provides white-glove concierge services for discerning clients who value their time above all else. From travel planning to personal shopping, event coordination to daily logistics—we handle the details so clients can focus on what matters.',
-    voice: 'Discreet, efficient, and anticipatory. Communication is precise and professional. Never presumes familiarity but builds trusted relationships over time.',
-    audience: 'High-net-worth individuals and families. Busy executives who outsource personal logistics. Those who value privacy and discretion. Membership by referral or application.',
-    messaging: '• "Your time, protected"\n• "Discretion as standard"\n• "The luxury of delegation"\n• "Reserved for the discerning few"',
-    visual: 'Minimal, sophisticated. Suggests exclusivity through restraint. Black and gold predominate. Photography is rare and intentionally sparse—maintains mystique.',
-    competitive: 'Mass-market concierge services lack personalization. Rowe Reserve offers dedicated relationships, not call centers. Local expertise combined with global reach.',
-    insights: '• Exclusivity is the product—never appear too available\n• Anticipate needs before clients articulate them\n• Relationship building happens through consistent small wins\n• Referral incentives can cheapen the brand—rely on organic word-of-mouth'
-  },
-  'rowe-co': {
-    name: 'Rowe & Co.',
-    tagline: 'Custom goods and craftsmanship',
-    essence: 'Rowe & Co. creates bespoke goods for those who appreciate the art of craftsmanship. From custom leather goods to personalized gifts, every piece reflects meticulous attention to detail and premium materials.',
-    voice: 'Artisanal, thoughtful, and quality-focused. Speaks to the craft without pretension. Celebrates the stories behind objects and the hands that make them.',
-    audience: 'Gift-givers seeking meaningful presents. Collectors who appreciate craftsmanship. Corporations seeking elevated branded merchandise. Those who value quality over quantity.',
-    messaging: '• "Crafted for keeps"\n• "Where quality is handmade"\n• "Bespoke goods, lasting impressions"\n• "The art of the personal"',
-    visual: 'Close-up product photography showcasing materials and details. Warm, tactile imagery. Workshop and process shots add authenticity. Rich textures and natural materials.',
-    competitive: 'Mass-produced "luxury" goods flood the market. Rowe & Co. offers genuine bespoke creation—clients participate in the design process and receive truly one-of-a-kind pieces.',
-    insights: '• Process transparency builds value perception\n• Lead times communicate quality—don\'t rush\n• Gift market peaks around holidays—plan inventory accordingly\n• Corporate clients want easy reordering and consistency'
-  }
-};
+// v13.0: Default brand knowledge removed. Users build their own via Identity + Memory.
+var defaultBrandKnowledge = {};
 
 // Brand knowledge is loaded on demand from brands array or left empty for AI to fill
 
@@ -88977,22 +88854,30 @@ function askClaudeAboutBrand() {
  * @param {File} file - PDF file to extract text from
  * @returns {Promise<string>} - Extracted text content
  */
+// v13.0: Fixed ES5 compliance
 async function extractTextFromPDF(file) {
   if (typeof pdfjsLib === 'undefined') {
     throw new Error('PDF.js library not loaded');
   }
-  
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let fullText = '';
-  
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items.map(item => item.str).join(' ');
+
+  // Read file as ArrayBuffer using FileReader (ES5 compatible)
+  var arrayBuffer = await new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result); };
+    reader.onerror = function() { reject(new Error('Failed to read PDF file')); };
+    reader.readAsArrayBuffer(file);
+  });
+
+  var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  var fullText = '';
+
+  for (var i = 1; i <= pdf.numPages; i++) {
+    var page = await pdf.getPage(i);
+    var textContent = await page.getTextContent();
+    var pageText = textContent.items.map(function(item) { return item.str; }).join(' ');
     fullText += pageText + '\n\n';
   }
-  
+
   return fullText.trim();
 }
 
@@ -89001,18 +88886,19 @@ async function extractTextFromPDF(file) {
  * @param {File} file - File to extract text from
  * @returns {Promise<string>} - Extracted text content
  */
+// v13.0: Fixed ES5 compliance
 async function extractTextFromDocument(file) {
-  const fileName = file.name.toLowerCase();
-  
+  var fileName = file.name.toLowerCase();
+
   if (fileName.endsWith('.pdf')) {
     return await extractTextFromPDF(file);
   }
-  
+
   // For text-based formats, read as text
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result);
-    reader.onerror = () => reject(new Error('Failed to read file'));
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result); };
+    reader.onerror = function() { reject(new Error('Failed to read file')); };
     reader.readAsText(file);
   });
 }
@@ -89023,15 +88909,17 @@ async function extractTextFromDocument(file) {
  * @param {number} maxChunkSize - Maximum characters per chunk
  * @returns {Array<string>} - Array of text chunks
  */
-function chunkText(text, maxChunkSize = 1500) {
-  const sentences = text.split(/[.!?]+/);
-  const chunks = [];
-  let currentChunk = '';
-  
-  for (const sentence of sentences) {
-    const trimmedSentence = sentence.trim();
+// v13.0: Fixed ES5 compliance
+function chunkText(text, maxChunkSize) {
+  if (!maxChunkSize) maxChunkSize = 1500;
+  var sentences = text.split(/[.!?]+/);
+  var chunks = [];
+  var currentChunk = '';
+
+  for (var s = 0; s < sentences.length; s++) {
+    var trimmedSentence = sentences[s].trim();
     if (!trimmedSentence) continue;
-    
+
     if ((currentChunk + trimmedSentence).length > maxChunkSize) {
       if (currentChunk) chunks.push(currentChunk.trim());
       currentChunk = trimmedSentence + '. ';
@@ -89040,7 +88928,7 @@ function chunkText(text, maxChunkSize = 1500) {
     }
   }
   if (currentChunk.trim()) chunks.push(currentChunk.trim());
-  
+
   return chunks;
 }
 
@@ -89050,38 +88938,34 @@ function chunkText(text, maxChunkSize = 1500) {
  * @param {string} brandName - Name of the brand
  * @returns {Promise<Object>} - Structured analysis results
  */
+// v13.0: Fixed ES5 compliance
 async function analyzeDocumentWithAI(chunks, brandName) {
   // Get API key - MUST use await since getApiKey is async
-  const apiKey = await getApiKey('anthropic');
+  var apiKey = await getApiKey('anthropic');
   if (!apiKey) {
     throw new Error('Anthropic API key not configured. Please add your API key in Settings.');
   }
-  
+
   // Combine chunks for analysis (limit to prevent token overflow)
-  const combinedText = chunks.slice(0, 8).join('\n\n');
-  
-  const analysisPrompt = `You are analyzing a business document for "${brandName}". Extract structured brand information.
+  var combinedText = chunks.slice(0, 8).join('\n\n');
 
-DOCUMENT CONTENT:
-${combinedText}
+  var analysisPrompt = 'You are analyzing a business document for "' + brandName + '". Extract structured brand information.\n\n' +
+    'DOCUMENT CONTENT:\n' + combinedText + '\n\n' +
+    'Analyze this document and extract the following in JSON format. Be thorough but concise. If information is not present, use null:\n\n' +
+    '{\n' +
+    '  "summary": "2-3 sentence overview of the document\'s key content",\n' +
+    '  "products": "Products or services mentioned (comma-separated list or null)",\n' +
+    '  "targetAudience": "Who the brand serves based on this document (or null)",\n' +
+    '  "voiceTone": "The writing tone/voice used (e.g., \'professional\', \'casual\', \'luxurious\')",\n' +
+    '  "vocabulary": ["5-10 key terms or phrases that define this brand\'s language"],\n' +
+    '  "insights": ["3-5 strategic observations about the brand based on this document"],\n' +
+    '  "values": ["Core values or principles evident in the document"],\n' +
+    '  "differentiators": "What makes this brand unique based on the document (or null)",\n' +
+    '  "brandPromise": "Any brand promise or commitment mentioned (or null)"\n' +
+    '}\n\n' +
+    'Respond ONLY with valid JSON. No explanation or markdown.';
 
-Analyze this document and extract the following in JSON format. Be thorough but concise. If information is not present, use null:
-
-{
-  "summary": "2-3 sentence overview of the document's key content",
-  "products": "Products or services mentioned (comma-separated list or null)",
-  "targetAudience": "Who the brand serves based on this document (or null)",
-  "voiceTone": "The writing tone/voice used (e.g., 'professional', 'casual', 'luxurious')",
-  "vocabulary": ["5-10 key terms or phrases that define this brand's language"],
-  "insights": ["3-5 strategic observations about the brand based on this document"],
-  "values": ["Core values or principles evident in the document"],
-  "differentiators": "What makes this brand unique based on the document (or null)",
-  "brandPromise": "Any brand promise or commitment mentioned (or null)"
-}
-
-Respond ONLY with valid JSON. No explanation or markdown.`;
-
-  return new Promise((resolve, reject) => {
+  return new Promise(function(resolve, reject) {
     fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -89096,25 +88980,25 @@ Respond ONLY with valid JSON. No explanation or markdown.`;
         messages: [{ role: 'user', content: analysisPrompt }]
       })
     })
-    .then(response => {
+    .then(function(response) {
       if (!response.ok) {
-        return response.json().then(err => {
-          throw new Error(err.error?.message || 'API request failed');
+        return response.json().then(function(err) {
+          throw new Error((err.error && err.error.message) || 'API request failed');
         });
       }
       return response.json();
     })
-    .then(data => {
-      const content = data.content?.[0]?.text;
+    .then(function(data) {
+      var content = (data.content && data.content[0] && data.content[0].text) || '';
       if (!content) {
         throw new Error('No content in AI response');
       }
-      
+
       // Parse JSON response
       try {
         // Handle potential markdown code blocks
-        let jsonStr = content.trim();
-        if (jsonStr.startsWith('```')) {
+        var jsonStr = content.trim();
+        if (jsonStr.indexOf('```') === 0) {
           jsonStr = jsonStr.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
         }
         resolve(JSON.parse(jsonStr));
@@ -89145,14 +89029,15 @@ Respond ONLY with valid JSON. No explanation or markdown.`;
  * @param {Object} analysis - AI analysis results
  * @returns {Object} - Updated knowledge object
  */
+// v13.0: Fixed ES5 compliance
 function storeBrandKnowledge(brandName, documentData, analysis) {
-  const key = 'roweos_brand_knowledge_' + brandName.replace(/\s+/g, '_').toLowerCase();
-  let knowledge = JSON.parse(localStorage.getItem(key) || JSON.stringify({
+  var key = 'roweos_brand_knowledge_' + brandName.replace(/\s+/g, '_').toLowerCase();
+  var knowledge = JSON.parse(localStorage.getItem(key) || JSON.stringify({
     documents: [],
     insights: [],
     systemPromptAdditions: ''
   }));
-  
+
   // Add document
   knowledge.documents.push({
     name: documentData.name,
@@ -89161,18 +89046,18 @@ function storeBrandKnowledge(brandName, documentData, analysis) {
     summary: analysis.summary,
     extractedData: analysis
   });
-  
+
   // v9.1.14: Merge insights with source tracking (for removal later)
   if (analysis.insights && analysis.insights.length > 0) {
     analysis.insights.forEach(function(insight) {
       if (!insight) return;
-      
+
       // Check for duplicates (compare text only)
       var isDuplicate = knowledge.insights.some(function(existing) {
         var existingText = typeof existing === 'object' ? existing.text : existing;
         return existingText === insight;
       });
-      
+
       if (!isDuplicate) {
         // Store as object with source for later removal
         knowledge.insights.push({
@@ -89183,39 +89068,39 @@ function storeBrandKnowledge(brandName, documentData, analysis) {
       }
     });
   }
-  
+
   // Build system prompt addition from all document knowledge
-  let promptAddition = '\n\n=== LEARNED BRAND KNOWLEDGE (from uploaded documents) ===\n';
-  
+  var promptAddition = '\n\n=== LEARNED BRAND KNOWLEDGE (from uploaded documents) ===\n';
+
   if (analysis.products) {
-    promptAddition += `Products/Services: ${analysis.products}\n`;
+    promptAddition += 'Products/Services: ' + analysis.products + '\n';
   }
   if (analysis.targetAudience) {
-    promptAddition += `Target Audience: ${analysis.targetAudience}\n`;
+    promptAddition += 'Target Audience: ' + analysis.targetAudience + '\n';
   }
   if (analysis.voiceTone) {
-    promptAddition += `Document Voice: ${analysis.voiceTone}\n`;
+    promptAddition += 'Document Voice: ' + analysis.voiceTone + '\n';
   }
   if (analysis.vocabulary && analysis.vocabulary.length > 0) {
-    promptAddition += `Key Vocabulary: ${analysis.vocabulary.join(', ')}\n`;
+    promptAddition += 'Key Vocabulary: ' + analysis.vocabulary.join(', ') + '\n';
   }
   if (analysis.differentiators) {
-    promptAddition += `Differentiators: ${analysis.differentiators}\n`;
+    promptAddition += 'Differentiators: ' + analysis.differentiators + '\n';
   }
   if (analysis.brandPromise) {
-    promptAddition += `Brand Promise: ${analysis.brandPromise}\n`;
+    promptAddition += 'Brand Promise: ' + analysis.brandPromise + '\n';
   }
   if (knowledge.insights.length > 0) {
-    promptAddition += `\nKey Insights:\n`;
+    promptAddition += '\nKey Insights:\n';
     // Get last 10 insights, handle both object and string formats
     knowledge.insights.slice(-10).forEach(function(insight) {
       var insightText = typeof insight === 'object' ? insight.text : insight;
-      promptAddition += `• ${insightText}\n`;
+      promptAddition += '- ' + insightText + '\n';
     });
   }
-  
+
   knowledge.systemPromptAdditions = promptAddition;
-  
+
   localStorage.setItem(key, JSON.stringify(knowledge));
   return knowledge;
 }
@@ -89226,8 +89111,8 @@ function storeBrandKnowledge(brandName, documentData, analysis) {
  * @returns {Object|null} - Brand knowledge or null
  */
 function getBrandKnowledge(brandName) {
-  const key = 'roweos_brand_knowledge_' + brandName.replace(/\s+/g, '_').toLowerCase();
-  const stored = localStorage.getItem(key);
+  var key = 'roweos_brand_knowledge_' + brandName.replace(/\s+/g, '_').toLowerCase();
+  var stored = localStorage.getItem(key);
   return stored ? JSON.parse(stored) : null;
 }
 
@@ -89236,9 +89121,10 @@ function getBrandKnowledge(brandName) {
  * @param {number} brandIndex - Index of the brand
  * @param {Object} analysis - AI analysis results
  */
+// v13.0: Fixed ES5 compliance
 function autoPopulateIdentity(brandIndex, analysis) {
-  const brand = brands[brandIndex];
-  let updated = false;
+  var brand = brands[brandIndex];
+  var updated = false;
   
   // Only fill empty fields - never overwrite existing data
   if (!brand.products && analysis.products) {
@@ -89294,9 +89180,9 @@ function autoPopulateIdentity(brandIndex, analysis) {
  */
 function updateProcessingUI(progress, status, step) {
   // v9.1.14: Use Identity processing overlay (merged views)
-  const overlay = document.getElementById('identityProcessing') || document.getElementById('documentProcessingOverlay');
-  const textEl = document.getElementById('identityProcessingText') || document.getElementById('processingStatus');
-  
+  var overlay = document.getElementById('identityProcessing') || document.getElementById('documentProcessingOverlay');
+  var textEl = document.getElementById('identityProcessingText') || document.getElementById('processingStatus');
+
   if (overlay) overlay.style.display = 'flex';
   if (textEl) textEl.textContent = status + (step ? ' - ' + step : '');
 }
@@ -89305,33 +89191,35 @@ function updateProcessingUI(progress, status, step) {
  * v9.1.14: Hide processing overlay
  */
 function hideProcessingUI() {
-  const overlay = document.getElementById('identityProcessing') || document.getElementById('documentProcessingOverlay');
+  var overlay = document.getElementById('identityProcessing') || document.getElementById('documentProcessingOverlay');
   if (overlay) overlay.style.display = 'none';
 }
 
 /**
  * v9.1.14: Save brand insights to localStorage
  */
+// v13.0: Fixed ES5 compliance
 function saveBrandInsights() {
-  const textarea = document.getElementById('knowledge-insights');
+  var textarea = document.getElementById('knowledge-insights');
   if (!textarea) return;
-  
-  const brandName = brands[selectedBrand]?.name;
+
+  var brand = brands[selectedBrand];
+  var brandName = brand ? brand.name : '';
   if (!brandName) return;
-  
-  const key = 'roweos_brand_knowledge_' + brandName.replace(/\s+/g, '_').toLowerCase();
-  let knowledge = JSON.parse(localStorage.getItem(key) || '{"documents":[],"insights":[],"systemPromptAdditions":""}');
-  
+
+  var key = 'roweos_brand_knowledge_' + brandName.replace(/\s+/g, '_').toLowerCase();
+  var knowledge = JSON.parse(localStorage.getItem(key) || '{"documents":[],"insights":[],"systemPromptAdditions":""}');
+
   // Parse textarea content into insights array
-  const lines = textarea.value.split('\n').filter(line => line.trim());
-  knowledge.insights = lines.map(line => line.replace(/^[•\-\*]\s*/, '').trim());
-  
+  var lines = textarea.value.split('\n').filter(function(line) { return line.trim(); });
+  knowledge.insights = lines.map(function(line) { return line.replace(/^[•\-\*]\s*/, '').trim(); });
+
   // Update system prompt additions
   if (knowledge.insights.length > 0) {
-    knowledge.systemPromptAdditions = '\n\n=== BRAND INSIGHTS ===\n' + 
-      knowledge.insights.map(i => '• ' + i).join('\n');
+    knowledge.systemPromptAdditions = '\n\n=== BRAND INSIGHTS ===\n' +
+      knowledge.insights.map(function(i) { return '- ' + i; }).join('\n');
   }
-  
+
   localStorage.setItem(key, JSON.stringify(knowledge));
   console.log('[v9.1.14] Brand insights saved:', knowledge.insights.length, 'items');
 }
@@ -89339,13 +89227,15 @@ function saveBrandInsights() {
 /**
  * v9.1.14: Load and display brand insights
  */
+// v13.0: Fixed ES5 compliance
 function loadBrandInsights() {
-  const brandName = brands[selectedBrand]?.name;
+  var brand = brands[selectedBrand];
+  var brandName = brand ? brand.name : '';
   if (!brandName) return;
-  
-  const knowledge = getBrandKnowledge(brandName);
-  const textarea = document.getElementById('knowledge-insights');
-  const countEl = document.getElementById('memoryInsightCount');
+
+  var knowledge = getBrandKnowledge(brandName);
+  var textarea = document.getElementById('knowledge-insights');
+  var countEl = document.getElementById('memoryInsightCount');
   
   // v9.1.14: Always update textarea - clear if no insights
   if (textarea) {
@@ -89372,7 +89262,7 @@ function loadBrandInsights() {
  */
 function handleDocumentDrop(event) {
   event.preventDefault();
-  const files = event.dataTransfer.files;
+  var files = event.dataTransfer.files;
   if (files.length > 0) {
     // Trigger the same handler as file input
     handleMemoryUpload({ target: { files: files } });
@@ -89455,7 +89345,7 @@ async function handleMemoryUpload(event) {
       updateMemoryUI();
       
       // Short delay to show completion
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(function(resolve) { setTimeout(resolve, 800); });
       
       showToast('Document "' + file.name + '" processed and learned', 'success');
       
@@ -99386,10 +99276,15 @@ function openEditBrandModal() {
     
     var taglineEl = document.getElementById('editBrandTagline');
     if (taglineEl) taglineEl.value = brand.tagline || '';
-    
+
+    // v13.0: Load brand color
+    var colorEl = document.getElementById('editBrandColor');
+    if (colorEl) colorEl.value = brand.brandColor || '#d4af37';
+    renderBrandColorPresets(brand.brandColor || '#d4af37');
+
     // Open modal
     openModal('editBrandModal');
-    
+
     // Focus the short name input
     setTimeout(function() {
       var shortNameInput = document.getElementById('editBrandShortName');
@@ -99403,45 +99298,89 @@ function openEditBrandModal() {
 }
 
 /**
- * v11.0.5: Simple function to save just the short name
+ * v13.0: Save short name + brand color from edit modal
  */
-function saveShortName() {
+function saveBrandSettings() {
   try {
     var indexEl = document.getElementById('editBrandIndex');
     var idx = parseInt(indexEl ? indexEl.value : '');
-    
+
     if (isNaN(idx) || idx < 0 || idx >= brands.length) {
       showToast('Invalid brand selection', 'error');
       return;
     }
-    
+
     var shortNameInput = document.getElementById('editBrandShortName');
     var shortName = shortNameInput ? shortNameInput.value.trim() : '';
-    
-    // Update the brand's short name
+
+    // v13.0: Read brand color
+    var colorInput = document.getElementById('editBrandColor');
+    var brandColor = colorInput ? colorInput.value : '#d4af37';
+
+    // Update the brand
     brands[idx].shortName = shortName;
-    
+    brands[idx].brandColor = brandColor;
+
     // Save to storage
     saveBrands();
     syncToFirebase('brands', brands);
-    
+
     // Update all UI elements that show the brand name
     updateBrandName();
     populateSidebarBrandDropdown();
     syncBrandDropdowns();
-    
+
+    // v13.0: Apply brand color if this is the active brand
+    if (idx === selectedBrand) {
+      applyBrandAccentColor(brandColor);
+    }
+
     closeModal('editBrandModal');
-    
+
     if (shortName) {
       showToast('Short name updated to "' + shortName + '"', 'success');
     } else {
-      showToast('Short name removed - using full name', 'success');
+      showToast('Brand settings saved', 'success');
     }
-    
+
   } catch (err) {
-    console.error('[saveShortName] Error:', err);
-    showToast('Error saving short name: ' + err.message, 'error');
+    console.error('[saveBrandSettings] Error:', err);
+    showToast('Error saving brand settings: ' + err.message, 'error');
   }
+}
+
+/**
+ * v13.0: Render brand color preset swatches
+ */
+function renderBrandColorPresets(currentColor) {
+  var container = document.getElementById('editBrandColorPresets');
+  if (!container) return;
+  var presets = ['#d4af37', '#b8986a', '#6ab894', '#6a8eb8', '#b86a9e', '#b8a86a', '#e06666', '#8e7cc3', '#76a5af', '#f6b26b'];
+  var html = '';
+  for (var i = 0; i < presets.length; i++) {
+    var selected = presets[i] === currentColor;
+    html += '<div onclick="selectBrandColorPreset(\'' + presets[i] + '\')" style="width: 28px; height: 28px; border-radius: 50%; background: ' + presets[i] + '; cursor: pointer; border: 2px solid ' + (selected ? 'var(--text-primary)' : 'transparent') + '; transition: border-color 0.15s;"></div>';
+  }
+  container.innerHTML = html;
+}
+
+/**
+ * v13.0: Select a brand color preset
+ */
+function selectBrandColorPreset(color) {
+  var colorInput = document.getElementById('editBrandColor');
+  if (colorInput) colorInput.value = color;
+  renderBrandColorPresets(color);
+}
+
+/**
+ * v13.0: Apply brand accent color to CSS custom property
+ */
+function applyBrandAccentColor(color) {
+  if (!color) return;
+  var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
+  if (currentMode !== 'brand') return;
+  document.documentElement.style.setProperty('--brand-accent', color);
 }
 
 function saveBrandEdits() {
