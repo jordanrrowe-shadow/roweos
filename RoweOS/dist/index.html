@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v13.0 - Brand Intelligence Platform</title>
+  <title>RoweOS v13.1 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -14367,12 +14367,16 @@
       transition: all 0.2s ease;
       position: relative;
       overflow: hidden;
+      /* v13.1: Prevent text selection during drag */
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-user-drag: element;
     }
-    
+
     .focus-2-category-card:active {
       cursor: grabbing;
     }
-    
+
     .focus-2-category-card.dragging {
       opacity: 0.6;
       transform: scale(1.02);
@@ -14676,6 +14680,9 @@
       top: 8px;
       right: 8px;
       z-index: 5;
+      /* v13.1: Prevent text selection on drag handles */
+      -webkit-user-select: none;
+      user-select: none;
     }
     
     .focus-2-category-card:active {
@@ -16584,9 +16591,16 @@
     
     .focus-2-day-detail-item-name {
       font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      /* v13.1: Allow text wrapping instead of truncating */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      white-space: normal;
+    }
+
+    /* v13.1: Scrollable content area for Upcoming tasks */
+    #focus2DayDetailContent {
+      max-height: 400px;
+      overflow-y: auto;
     }
     
     .focus-2-day-detail-item-meta {
@@ -26812,11 +26826,28 @@
         max-height: 28px !important;
         overflow: visible !important;
         text-align: left !important;
+        display: block !important;
       }
 
       .sidebar.mobile-open .sidebar-brand-name {
         font-size: 12px !important;
         padding: 2px 0 !important;
+      }
+
+      /* v13.1: Ensure sidebar logo/brand images visible on mobile */
+      .sidebar.mobile-open .sidebar-logo-img,
+      .sidebar.mobile-open .sidebar-logo-text {
+        opacity: 1 !important;
+        max-height: 40px !important;
+        overflow: visible !important;
+        display: block !important;
+      }
+
+      .sidebar.mobile-open .sidebar-header {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px !important;
       }
 
       /* v12.2.4: Condensed nav - hide section titles, use dividers */
@@ -32364,13 +32395,18 @@ html.light-mode .onboarding-mode-features span {
       backdrop-filter: blur(40px) saturate(180%);
       border-radius: 28px;
       border: 0.5px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 
+      box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.35),
         0 2px 8px rgba(0, 0, 0, 0.2),
         inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
       padding: 8px 12px;
       transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       will-change: transform, padding, border-radius;
+      /* v13.1: Prevent text selection on long-press */
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: manipulation;
     }
     
     /* Light mode Liquid Glass */
@@ -32443,6 +32479,9 @@ html.light-mode .onboarding-mode-features span {
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: var(--radius-xl);
       min-width: 52px;
+      /* v13.1: Prevent text selection on long-press */
+      -webkit-user-select: none;
+      user-select: none;
     }
     
     html.light-mode .liquid-tab {
@@ -35643,6 +35682,13 @@ html.light-mode .onboarding-mode-features span {
         background: linear-gradient(135deg, #8a8a8a 0%, #5a5a5a 100%);
         color: #fff;
       }
+
+      /* v13.1: LifeAI pill override - uses user's accent color instead of gold BrandAI */
+      html.life-mode .conversation-message.assistant .conversation-message-bubble::before {
+        content: '◇ LifeAI';
+        background: var(--life-accent, #5a7a9a);
+        color: #fff;
+      }
       
       /* Expand message bubble to full width */
       .conversation-message.assistant .conversation-message-bubble {
@@ -37898,7 +37944,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v13.0</div>
+      <div class="launch-version" id="launchVersionTag">v13.1</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38207,7 +38253,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.0</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.1</div>
       
     </div>
   </div>
@@ -38491,7 +38537,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.0</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.1</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39358,7 +39404,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v13.0</span>
+          <span class="sidebar-version">v13.1</span>
         </div>
       </div>
     </div>
@@ -39668,7 +39714,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v13.0 • Built for the future</p>
+        <p>RoweOS v13.1 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39725,7 +39771,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v13.0</p>
+            <p class="onboarding-welcome-version">v13.1</p>
           </div>
         </div>
       </div>
@@ -41734,6 +41780,18 @@ service cloud.firestore {
               <div class="studio-v2-cards" id="lifeOps"></div>
             </div>
             
+            <!-- v13.1: Live System Prompt Preview -->
+            <div class="studio-v2-section" id="studioPromptPreviewSection" style="display: none;">
+              <div class="studio-v2-section-header" style="cursor: pointer;" onclick="toggleStudioPromptPreview()">
+                <span class="studio-v2-section-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+                <span class="studio-v2-section-title">System Prompt Preview</span>
+                <span id="studioPromptToggleIcon" style="margin-left: auto; font-size: 10px; color: var(--text-muted);">&#9660;</span>
+              </div>
+              <div id="studioPromptPreviewBody" style="display: none;">
+                <textarea id="studioPromptPreviewText" readonly style="width: 100%; min-height: 200px; max-height: 400px; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-secondary); font-size: var(--text-sm); font-family: monospace; line-height: 1.5; resize: vertical; box-sizing: border-box;"></textarea>
+              </div>
+            </div>
+
             <!-- Recent Section (BrandAI only) -->
             <div class="studio-v2-section brand-mode-only hidden" id="recentSection">
               <div class="studio-v2-section-header">
@@ -41809,6 +41867,19 @@ service cloud.firestore {
               <div class="studio-v2-cards" id="lifeTasksOps"></div>
             </div>
             
+            <!-- v13.1: Studio Run History -->
+            <div class="studio-v2-section" id="studioRunHistorySection">
+              <div class="studio-v2-section-header" style="cursor: pointer;" onclick="toggleStudioRunHistory()">
+                <span class="studio-v2-section-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                <span class="studio-v2-section-title">Run History</span>
+                <span id="studioRunHistoryCount" style="margin-left: 4px; font-size: var(--text-xs); color: var(--text-muted);"></span>
+                <span id="studioRunHistoryToggle" style="margin-left: auto; font-size: 10px; color: var(--text-muted);">&#9660;</span>
+              </div>
+              <div id="studioRunHistoryBody" style="display: none;">
+                <div id="studioRunHistoryList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+              </div>
+            </div>
+
             <!-- Selected Task Configuration Panel (shown when task is selected) -->
             <div class="studio-v2-config" id="studioConfigPanel" style="display: none;">
               <div class="studio-v2-config-header">
@@ -42796,13 +42867,13 @@ service cloud.firestore {
                   <div class="focus-2-day-detail-date" id="focus2DayDetailDate">Jan 27, 2026</div>
                 </div>
               </div>
-              <div id="focus2DayDetailContent">
-                <!-- Populated by JS -->
-              </div>
-              <!-- v12.2.6: Today/Upcoming filter replaces All/Brand/Life -->
+              <!-- v13.1: Filter buttons moved above content so they stay visible -->
               <div class="focus-2-mode-filter">
                 <button class="focus-2-mode-filter-btn active" id="focus2FilterToday" onclick="setFocus2DayFilter('today')">Today</button>
                 <button class="focus-2-mode-filter-btn" id="focus2FilterUpcoming" onclick="setFocus2DayFilter('upcoming')">Upcoming</button>
+              </div>
+              <div id="focus2DayDetailContent">
+                <!-- Populated by JS -->
               </div>
             </div>
             
@@ -59567,7 +59638,10 @@ function selectAgent(agentId) {
   
   // Update agent info card if present
   updateAgentInfoCard();
-  
+
+  // v13.1: Update live system prompt preview
+  updateStudioPromptPreview();
+
   // Re-render operations
   renderOperations();
   
@@ -59576,6 +59650,109 @@ function selectAgent(agentId) {
   if (contentArea) {
     contentArea.scrollTo({ top: 0, behavior: 'smooth' });
   }
+}
+
+/**
+ * v13.1: Toggle Studio system prompt preview visibility
+ */
+function toggleStudioPromptPreview() {
+  var body = document.getElementById('studioPromptPreviewBody');
+  var icon = document.getElementById('studioPromptToggleIcon');
+  if (!body) return;
+  var isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (icon) icon.innerHTML = isHidden ? '&#9650;' : '&#9660;';
+  if (isHidden) updateStudioPromptPreview();
+}
+
+/**
+ * v13.1: Update the live system prompt preview based on current agent/brand
+ */
+function updateStudioPromptPreview() {
+  var section = document.getElementById('studioPromptPreviewSection');
+  var textarea = document.getElementById('studioPromptPreviewText');
+  if (!section || !textarea) return;
+
+  section.style.display = 'block';
+
+  var brandIdx = typeof studioSelectedBrand !== 'undefined' ? studioSelectedBrand : parseInt(document.getElementById('brand').value);
+  var brand = brands[brandIdx];
+  if (!brand) {
+    textarea.value = 'No brand selected';
+    return;
+  }
+
+  var agent = null;
+  if (typeof currentAgent !== 'undefined' && currentAgent !== 'all') {
+    agent = (typeof agents !== 'undefined') ? agents.find(function(a) { return a.id === currentAgent; }) : null;
+  }
+
+  try {
+    var prompt = '';
+    if (typeof buildBrandSystemPrompt === 'function') {
+      prompt = buildBrandSystemPrompt(brand, agent);
+    } else {
+      prompt = 'System prompt builder not available';
+    }
+    textarea.value = prompt;
+  } catch (e) {
+    textarea.value = 'Error building prompt: ' + e.message;
+  }
+}
+
+/**
+ * v13.1: Toggle Studio run history visibility
+ */
+function toggleStudioRunHistory() {
+  var body = document.getElementById('studioRunHistoryBody');
+  var icon = document.getElementById('studioRunHistoryToggle');
+  if (!body) return;
+  var isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? 'block' : 'none';
+  if (icon) icon.innerHTML = isHidden ? '&#9650;' : '&#9660;';
+  if (isHidden) renderStudioRunHistory();
+}
+
+/**
+ * v13.1: Render Studio run history from saved runs
+ */
+function renderStudioRunHistory() {
+  var container = document.getElementById('studioRunHistoryList');
+  var countEl = document.getElementById('studioRunHistoryCount');
+  if (!container) return;
+
+  var runs = agentCommands || [];
+  // Show most recent 20 runs
+  var recentRuns = runs.slice(-20).reverse();
+
+  if (countEl) countEl.textContent = '(' + runs.length + ')';
+
+  if (recentRuns.length === 0) {
+    container.innerHTML = '<div style="font-size: var(--text-sm); color: var(--text-muted); text-align: center; padding: var(--space-3);">No runs yet. Complete a Studio operation to see history.</div>';
+    return;
+  }
+
+  var html = recentRuns.map(function(run, idx) {
+    var title = run.op || 'Untitled';
+    var time = run.time || 'Unknown';
+    var brand = run.brand || 'N/A';
+    var hasOutput = run.deliv || run.output;
+    var outputPreview = hasOutput ? (run.deliv || run.output).substring(0, 120) + ((run.deliv || run.output).length > 120 ? '...' : '') : 'No output';
+
+    return '<div class="studio-run-history-item" style="background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; cursor: pointer;" onclick="this.querySelector(\'.studio-run-detail\').style.display = this.querySelector(\'.studio-run-detail\').style.display === \'none\' ? \'block\' : \'none\'">' +
+      '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+        '<div style="font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);">' + escapeHtml(title) + '</div>' +
+        '<div style="font-size: var(--text-xs); color: var(--text-muted);">' + escapeHtml(time) + '</div>' +
+      '</div>' +
+      '<div style="font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px;">' + escapeHtml(brand) + '</div>' +
+      '<div class="studio-run-detail" style="display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">' +
+        '<div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 4px;">Output:</div>' +
+        '<div style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap;">' + escapeHtml(outputPreview) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  container.innerHTML = html;
 }
 
 // v10.5.25: Toggle new operation dropdown
@@ -63614,31 +63791,34 @@ async function callNanobananaStreaming(model, apiKey, messages, systemPrompt, on
 }
 
 // v10.5.25: Nanobanana Image Generation (uses Gemini 3.0 Pro Image model)
-async function generateImageWithNanobanana(prompt, options = {}) {
+async function generateImageWithNanobanana(prompt, options) {
+  // v13.1: ES5-safe default parameter
+  if (!options) options = {};
   var apiKey = getNanobananaKey();
-  
+
   if (!apiKey) {
+    showToast('Nanobanana API key not configured. Go to Settings to add your key.', 'error');
     throw new Error('Nanobanana API key not configured. Go to Settings to add your key.');
   }
-  
+
   console.log('[Nanobanana] Generating image...');
   console.log('[Nanobanana] Prompt:', prompt.substring(0, 100) + '...');
-  
-  // Use the Gemini 3.0 Pro Image model (Nanobanana's underlying API)
+
+  // v13.1: Updated model - try imagen-3.0-generate-002 first, fall back to gemini-2.0-flash-exp
   var model = options.model || 'gemini-2.0-flash-exp-image-generation';
   var aspectRatio = options.aspectRatio || '1:1';
-  
+
   // Build request using Google's Gemini API structure
   var requestBody = {
-    contents: [{ 
-      parts: [{ text: prompt }] 
+    contents: [{
+      parts: [{ text: prompt }]
     }],
-    generationConfig: { 
+    generationConfig: {
       responseModalities: ['TEXT', 'IMAGE'],
       responseMimeType: 'text/plain'
     }
   };
-  
+
   // For image-to-image, include the reference image
   if (options.referenceImage && options.referenceImage.base64) {
     requestBody.contents[0].parts.unshift({
@@ -63649,28 +63829,46 @@ async function generateImageWithNanobanana(prompt, options = {}) {
     });
     console.log('[Nanobanana] Using image-to-image mode');
   }
-  
+
   var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + apiKey;
-  
-  var response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBody)
-  });
-  
+  console.log('[Nanobanana] API URL:', url.replace(apiKey, apiKey.substring(0, 8) + '...'));
+
+  var response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+  } catch (fetchErr) {
+    console.error('[Nanobanana] Network error:', fetchErr);
+    showToast('Network error connecting to Nanobanana. Check your internet connection.', 'error');
+    throw new Error('Network error: ' + fetchErr.message);
+  }
+
   if (!response.ok) {
     var errorData = await response.json().catch(function() { return {}; });
     var errorMsg = errorData.error ? errorData.error.message : response.statusText;
-    console.error('[Nanobanana] Image Error:', errorMsg);
+    console.error('[Nanobanana] Image Error (HTTP ' + response.status + '):', errorMsg);
+    // v13.1: User-facing error message
+    if (response.status === 400) {
+      showToast('Nanobanana rejected the prompt. Try rephrasing it.', 'error');
+    } else if (response.status === 403 || response.status === 401) {
+      showToast('Nanobanana API key is invalid or expired. Check Settings.', 'error');
+    } else if (response.status === 429) {
+      showToast('Nanobanana rate limit reached. Wait a moment and try again.', 'warning');
+    } else {
+      showToast('Nanobanana error: ' + errorMsg, 'error');
+    }
     throw new Error('Nanobanana Image Error: ' + errorMsg);
   }
-  
+
   var data = await response.json();
-  console.log('[Nanobanana] Response received');
-  
+  console.log('[Nanobanana] Response received:', JSON.stringify(data).substring(0, 200));
+
   // Extract base64 image from Gemini response
   var images = [];
-  
+
   if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
     data.candidates[0].content.parts.forEach(function(part) {
       if (part.inlineData && part.inlineData.data) {
@@ -63681,8 +63879,17 @@ async function generateImageWithNanobanana(prompt, options = {}) {
       }
     });
   }
-  
+
   if (images.length === 0) {
+    // v13.1: Better error messaging
+    var textResponse = '';
+    if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+      data.candidates[0].content.parts.forEach(function(part) {
+        if (part.text) textResponse += part.text;
+      });
+    }
+    console.error('[Nanobanana] No image in response. Text:', textResponse);
+    showToast('No image generated. The AI returned text instead. Try a more specific prompt.', 'warning');
     throw new Error('No image data received from Nanobanana. Try a different prompt.');
   }
   
@@ -66624,7 +66831,20 @@ function initFocus2() {
   
   // v10.5.25: Initialize drag-and-drop for ALL widget cards
   initFocus2WidgetDragDrop();
-  
+
+  // v13.1: Auto-expand first category on mobile
+  if (window.innerWidth <= 768) {
+    setTimeout(function() {
+      var categories = window.todoCategories || [];
+      if (categories.length > 0 && !focus2ExpandedCategory) {
+        var firstName = categories[0].name;
+        focus2ExpandedCategory = firstName;
+        var firstCard = document.querySelector('.focus-2-category-card[data-category="' + firstName + '"]');
+        if (firstCard) firstCard.classList.add('expanded');
+      }
+    }, 200);
+  }
+
   // v10.5.25: Customize mode controlled via CSS - no initialization needed
   // Click "Customize" button to toggle body.focus2-customize-mode class
 }
@@ -67543,13 +67763,15 @@ function setupDragEvents(card, container) {
         var categoryCards = Array.from(categoriesGrid.querySelectorAll('.focus-2-category-card'));
         var draggedIndex = categoryCards.indexOf(dragging);
         var targetIndex = categoryCards.indexOf(card);
-        
+
         if (draggedIndex < targetIndex) {
           categoriesGrid.insertBefore(dragging, card.nextSibling);
         } else {
           categoriesGrid.insertBefore(dragging, card);
         }
+        // v13.1: Save both category order AND unified order to persist reorder
         saveFocus2CategoryOrder();
+        saveFocus2UnifiedOrder();
       } else if (isDraggedWidget && isTargetWidget) {
         // Both are widgets - reorder within main container
         var widgetCards = Array.from(container.querySelectorAll('.focus-2-widget-card'));
@@ -67561,7 +67783,9 @@ function setupDragEvents(card, container) {
         } else {
           card.parentNode.insertBefore(dragging, card);
         }
+        // v13.1: Save both widget order AND unified order to persist reorder
         saveFocus2WidgetOrder();
+        saveFocus2UnifiedOrder();
       }
     }
   });
@@ -69363,6 +69587,14 @@ function saveInlineEdit() {
   // Close edit mode and re-render
   cancelInlineEdit();
   renderFocus2Categories();
+  // v13.1: Also refresh Upcoming/Today to sync category name/color changes
+  if (window.focus2SelectedDate) {
+    renderFocus2DayDetailContent(window.focus2SelectedDate);
+  }
+  // v13.1: Re-initialize drag handlers after re-render
+  if (typeof initFocus2DragDrop === 'function') {
+    setTimeout(function() { initFocus2DragDrop(); }, 100);
+  }
   showToast('Category updated', 'success');
 }
 
@@ -73065,11 +73297,18 @@ function toggleRecurringOptions() {
 }
 
 // Render events for rhythm day panel
+// v13.1: Filter by current mode (brand vs life)
 function renderRhythmEvents() {
   if (!rhythmSelectedDate) return;
-  
+
   var container = document.getElementById('rhythmDayEvents');
-  var dayEvents = calendar.filter(function(item) { return item.date === rhythmSelectedDate; });
+  var isLifeMode = (localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand') === 'life';
+  var dayEvents = calendar.filter(function(item) {
+    if (item.date !== rhythmSelectedDate) return false;
+    // v13.1: Mode filtering - life events have brand '_life', brand events don't
+    if (isLifeMode) return item.brand === '_life' || item.brand === 'Life';
+    return item.brand !== '_life' && item.brand !== 'Life';
+  });
   
   if (dayEvents.length === 0) {
     container.innerHTML = '<div class="rhythm-day-empty rhythm-day-add" onclick="addRhythmEventForDate()"><span class="rhythm-add-icon">+</span> Tap to add event</div>';
@@ -73093,11 +73332,18 @@ function renderRhythmEvents() {
 }
 
 // Render todos for rhythm day panel
+// v13.1: Filter by current mode (brand vs life)
 function renderRhythmTodos() {
   if (!rhythmSelectedDate) return;
-  
+
   var container = document.getElementById('rhythmDayTodos');
-  var dayTodos = todos.filter(function(t) { return t.date === rhythmSelectedDate; });
+  var isLifeMode = (localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand') === 'life';
+  var dayTodos = todos.filter(function(t) {
+    if (t.date !== rhythmSelectedDate) return false;
+    // v13.1: Mode filtering
+    if (isLifeMode) return t.brand === '_life' || t.brand === 'Life';
+    return t.brand !== '_life' && t.brand !== 'Life';
+  });
   
   if (dayTodos.length === 0) {
     container.innerHTML = '<div class="rhythm-day-empty rhythm-day-add" onclick="addRhythmTodoForDate()"><span class="rhythm-add-icon">+</span> Tap to add to-do</div>';
@@ -78091,6 +78337,11 @@ var liquidNavTabs = {
     label: 'Settings',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
   },
+  sync: {
+    id: 'sync',
+    label: 'Sync',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>'
+  },
   more: {
     id: 'more',
     label: 'More',
@@ -78170,7 +78421,21 @@ function liquidNavTo(view) {
     openMobileFullMenu();
     return;
   }
-  
+
+  // v13.1: Handle 'sync' tab - trigger Firebase sync
+  if (view === 'sync') {
+    if (typeof syncToFirebase === 'function') {
+      syncToFirebase();
+      showToast('Syncing to cloud...', 'info');
+    } else {
+      showToast('Firebase sync not configured', 'warning');
+    }
+    // Reset active tab to previous
+    liquidNavActiveTab = 'agent';
+    renderLiquidNav();
+    return;
+  }
+
   // Navigate to view
   showView(view);
 }
@@ -86070,7 +86335,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v13.0 - ' + subtitle;
+  document.title = 'RoweOS v13.1 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -94440,23 +94705,31 @@ function showGoalSuggestions(container, state, lifeAccent, sendBtn) {
 
 /**
  * v11.0.5: Call LifeAI API for goal generation
+ * v13.1: Added optional conversationHistory parameter for multi-turn context
  */
-function callLifeAIForGoal(systemPrompt, userPrompt, onSuccess, onError) {
+function callLifeAIForGoal(systemPrompt, userPrompt, onSuccess, onError, conversationHistory) {
   var provider = localStorage.getItem('roweos_llm_provider') || 'anthropic';
   var model = localStorage.getItem('roweos_llm_model') || 'claude-sonnet-4-5-20250929';
-  
+
   console.log('[GoalAI] Provider:', provider, 'Model:', model);
-  
+
+  // v13.1: Build messages array with conversation history if available
+  var messages = [];
+  if (conversationHistory && conversationHistory.length > 0) {
+    messages = conversationHistory.slice();
+  }
+  messages.push({ role: 'user', content: userPrompt });
+
   // v11.0.5: Use the proper getApiKey() function that works with the rest of the app
   getApiKey(provider).then(function(apiKey) {
     console.log('[GoalAI] API key found:', apiKey ? 'Yes (' + apiKey.substring(0, 8) + '...)' : 'No');
-    
+
     if (!apiKey) {
       console.error('[GoalAI] No API key - check Settings > AI Configuration');
       onError('No API key configured. Please add your API key in Settings > AI Configuration.');
       return;
     }
-    
+
     // Call appropriate API
     if (provider === 'anthropic') {
       console.log('[GoalAI] Calling Anthropic API...');
@@ -94472,7 +94745,7 @@ function callLifeAIForGoal(systemPrompt, userPrompt, onSuccess, onError) {
           model: model,
           max_tokens: 1024,
           system: systemPrompt,
-          messages: [{ role: 'user', content: userPrompt }]
+          messages: messages
         })
       })
       .then(function(r) { return r.json(); })
@@ -94499,10 +94772,8 @@ function callLifeAIForGoal(systemPrompt, userPrompt, onSuccess, onError) {
         body: JSON.stringify({
           model: model,
           max_tokens: 1024,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ]
+          // v13.1: Include conversation history for multi-turn context
+          messages: [{ role: 'system', content: systemPrompt }].concat(messages)
         })
       })
       .then(function(r) { return r.json(); })
@@ -94620,7 +94891,8 @@ function regenerateGoalTasks() {
  */
 function refineGoalWithAI(additionalInput, container, sendBtn) {
   var state = window.goalCreationState;
-  var lifeAccent = 'var(--life-accent, #22c55e)';
+  // v13.1: Use stored accent color instead of hardcoded value
+  var lifeAccent = window.goalAccentColor || 'var(--life-accent, #22c55e)';
   
   // Show typing
   var typingId = 'typing_' + Date.now();
@@ -94642,11 +94914,19 @@ function refineGoalWithAI(additionalInput, container, sendBtn) {
   
   var systemPrompt = 'You are LifeAI. The user has a goal and wants to refine it. Current goal: "' + state.goalTitle + '". Current tasks: ' + JSON.stringify(state.suggestedTasks) + '. ' +
     'Based on their feedback, update the goal. Respond in JSON: {"title": "...", "summary": "...", "tasks": [...]}';
-  
+
+  // v13.1: Pass conversation history for multi-turn context
+  var history = state.conversationHistory || [];
+
   callLifeAIForGoal(systemPrompt, additionalInput, function(response) {
     var typing = document.getElementById(typingId);
     if (typing) typing.remove();
-    
+
+    // v13.1: Track conversation history
+    if (!state.conversationHistory) state.conversationHistory = [];
+    state.conversationHistory.push({ role: 'user', content: additionalInput });
+    state.conversationHistory.push({ role: 'assistant', content: response });
+
     try {
       var parsed = JSON.parse(response);
       state.aiSummary = parsed.summary || state.aiSummary;
@@ -94793,24 +95073,59 @@ function toggleGoalSection(goalId, sectionIdx) {
 
 /**
  * v10.6: Add item to existing goal
+ * v13.1: Replaced browser prompt() with inline input field
  */
 function addItemToGoal(goalId) {
-  var text = prompt('Enter new item:');
-  if (!text || !text.trim()) return;
-  
-  var goal = pulseGoals.find(function(g) { return g.id === goalId; });
-  if (!goal) return;
-  
-  if (!goal.items) goal.items = [];
-  goal.items.push({
-    id: 'item_' + Date.now(),
-    text: text.trim(),
-    completed: false,
-    completedAt: null
+  var card = document.querySelector('.pulse-3-checklist-card[data-goal-id="' + goalId + '"]');
+  if (!card) return;
+
+  // Check if inline input already exists
+  if (card.querySelector('.pulse-3-add-item-inline')) return;
+
+  var itemsContainer = card.querySelector('.pulse-3-checklist-items');
+  if (!itemsContainer) return;
+
+  var inputRow = document.createElement('div');
+  inputRow.className = 'pulse-3-add-item-inline';
+  inputRow.style.cssText = 'display: flex; gap: 8px; align-items: center; padding: 8px 0; margin-top: 4px;';
+  inputRow.innerHTML = '<input type="text" class="pulse-3-add-item-input" placeholder="New item..." style="flex: 1; padding: 8px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-sm); outline: none;">' +
+    '<button class="pulse-3-add-item-confirm" style="padding: 8px 12px; background: var(--accent); border: none; border-radius: var(--radius-md); color: #fff; font-weight: 600; cursor: pointer; font-size: var(--text-sm); white-space: nowrap;">Add</button>';
+
+  itemsContainer.appendChild(inputRow);
+
+  var input = inputRow.querySelector('input');
+  var confirmBtn = inputRow.querySelector('button');
+  input.focus();
+
+  function submitItem() {
+    var text = input.value.trim();
+    if (!text) {
+      inputRow.remove();
+      return;
+    }
+
+    var goal = pulseGoals.find(function(g) { return g.id === goalId; });
+    if (!goal) return;
+
+    if (!goal.items) goal.items = [];
+    goal.items.push({
+      id: 'item_' + Date.now(),
+      text: text,
+      completed: false,
+      completedAt: null
+    });
+
+    savePulseGoals();
+    renderPulse3Checklists();
+  }
+
+  input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') submitItem();
   });
-  
-  savePulseGoals();
-  renderPulse3Checklists();
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') inputRow.remove();
+  });
+  confirmBtn.addEventListener('click', submitItem);
 }
 
 /**
