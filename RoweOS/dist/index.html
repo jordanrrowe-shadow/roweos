@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v13.2 - Brand Intelligence Platform</title>
+  <title>RoweOS v13.3 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -5331,6 +5331,59 @@
       border-radius: var(--radius-xs);
     }
     
+    /* v13.3: Identity Depth Badge */
+    .studio-depth-badge {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: var(--radius-full);
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      cursor: pointer; font-size: var(--text-sm); color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    .studio-depth-badge:hover { border-color: var(--accent); color: var(--text-primary); }
+    .studio-depth-ring {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: conic-gradient(var(--accent) var(--depth-pct, 0%), var(--bg-elevated) 0%);
+      position: relative;
+    }
+    .studio-depth-ring::after {
+      content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--bg-tertiary);
+    }
+    .studio-depth-badge[data-tier="complete"] { border-color: #4ade80; }
+    .studio-depth-badge[data-tier="moderate"] { border-color: var(--accent); }
+    .studio-depth-badge[data-tier="minimal"] { border-color: #f59e0b; }
+
+    /* v13.3: Smart Suggestions Bar */
+    .studio-suggestions-bar {
+      margin: 0 0 var(--space-4); padding: var(--space-3) var(--space-4);
+      background: var(--bg-secondary); border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+    .studio-suggestions-header {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);
+      margin-bottom: var(--space-3);
+    }
+    .studio-suggestions-list { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .studio-suggestion-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: var(--radius-full);
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      font-size: var(--text-sm); color: var(--text-secondary);
+      cursor: pointer; transition: all 0.2s; max-width: 100%;
+    }
+    .studio-suggestion-chip:hover {
+      border-color: var(--accent); color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+    .studio-suggestion-chip .suggestion-dismiss {
+      opacity: 0; width: 14px; height: 14px; transition: opacity 0.15s; flex-shrink: 0;
+    }
+    .studio-suggestion-chip:hover .suggestion-dismiss { opacity: 0.6; }
+
+    /* LifeAI mode variants */
+    html[data-mode="life"] .studio-depth-badge[data-tier="complete"] { border-color: var(--life-accent); }
+    html[data-mode="life"] .studio-suggestion-chip:hover { border-color: var(--life-accent); }
+
     /* Sections */
     .studio-v2-section {
       margin-bottom: 32px;
@@ -38098,7 +38151,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v13.2</div>
+      <div class="launch-version" id="launchVersionTag">v13.3</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38407,7 +38460,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.2</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.3</div>
       
     </div>
   </div>
@@ -38691,7 +38744,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.2</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.3</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39558,7 +39611,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v13.2</span>
+          <span class="sidebar-version">v13.3</span>
         </div>
       </div>
     </div>
@@ -39868,7 +39921,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v13.2 • Built for the future</p>
+        <p>RoweOS v13.3 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39925,7 +39978,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v13.2</p>
+            <p class="onboarding-welcome-version">v13.3</p>
           </div>
         </div>
       </div>
@@ -41846,6 +41899,11 @@ service cloud.firestore {
               <span class="studio-v2-brand-name life-mode-only" id="studioLifeName" style=" background: var(--life-accent, #22c55e); border-color: var(--life-accent, #22c55e);">Personal Tasks</span>
             </div>
             <div class="studio-v2-header-right">
+              <!-- v13.3: Identity Depth Indicator -->
+              <div class="studio-depth-badge brand-mode-only" id="studioDepthBadge" onclick="showView('memory')" title="Identity completeness">
+                <div class="studio-depth-ring" id="studioDepthRing"></div>
+                <span class="studio-depth-label" id="studioDepthLabel">0%</span>
+              </div>
               <div class="studio-v2-search">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                 <input type="text" id="opsSearch" placeholder="Search..." oninput="searchOperations(this.value)">
@@ -41887,7 +41945,19 @@ service cloud.firestore {
           
           <!-- Main Content Area (Scrollable) -->
           <div class="studio-v2-content" id="studioV2Content">
-            
+
+            <!-- v13.3: Smart Studio Suggestions -->
+            <div class="studio-suggestions-bar brand-mode-only" id="studioSuggestionsBar" style="display: none;">
+              <div class="studio-suggestions-header">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 01-1 1H9a1 1 0 01-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/>
+                  <path d="M9 18h6M10 22h4"/>
+                </svg>
+                Suggested for You
+              </div>
+              <div class="studio-suggestions-list" id="studioSuggestionsList"></div>
+            </div>
+
             <!-- BrandAI Creator Section (Brand Mode) -->
             <div class="studio-v2-section brand-mode-only" id="brandCreatorSection">
               <div class="studio-v2-section-header">
@@ -59289,6 +59359,280 @@ function getOutputLengthInstruction() {
 var generatedBrandOps = []; // Track AI-generated BrandAI operations
 var generatedLifeOps = [];  // v10.5.25: Track AI-generated LifeAI operations
 
+// v13.3: Central brand context aggregator for Adaptive Operations Engine
+function getFullBrandContext(brand) {
+  if (!brand) return {};
+  var ctx = {};
+
+  // Identity depth fields
+  ctx.name = brand.name || '';
+  ctx.shortName = brand.shortName || brand.name || '';
+  ctx.tagline = brand.tagline || '';
+  ctx.essence = brand.essence || '';
+  ctx.voice = brand.voice || '';
+  ctx.tone = brand.tone || '';
+  ctx.audience = brand.audience || '';
+  ctx.positioning = brand.positioning || '';
+  ctx.values = brand.values || '';
+  ctx.messaging = brand.messaging || '';
+  ctx.products = brand.products || '';
+  ctx.promise = brand.promise || '';
+  ctx.visual = brand.visual || '';
+  ctx.competitive = brand.competitive || '';
+  ctx.location = brand.location || '';
+  ctx.industry = brand.industry || '';
+  ctx.philosophy = brand.philosophy || '';
+  ctx.vocabDo = brand.vocabDo || '';
+  ctx.vocabDont = brand.vocabDont || '';
+  ctx.constraints = brand.constraints || '';
+
+  // Identity card data (may be richer than brand object fields)
+  try {
+    var brandIdx = brands.indexOf(brand);
+    if (brandIdx === -1) brandIdx = parseInt(localStorage.getItem('selectedBrand') || '0');
+    var sections = ['role', 'essence', 'voice', 'audience', 'messaging', 'products', 'visual', 'competitive'];
+    ctx.identityCards = {};
+    sections.forEach(function(s) {
+      var aiVal = localStorage.getItem('identity_' + s + '_ai_' + brandIdx) || '';
+      var ownerVal = localStorage.getItem('identity_' + s + '_owner_' + brandIdx) || '';
+      if (aiVal || ownerVal) ctx.identityCards[s] = { ai: aiVal, owner: ownerVal };
+    });
+  } catch(e) {}
+
+  // Active Pulse goals for this brand
+  ctx.goals = (pulseGoals || []).filter(function(g) {
+    return !g.archived && !g.completed && (g.source === 'brandai' || g.source === 'studio');
+  }).map(function(g) {
+    var items = (g.items || []);
+    if (g.sections) g.sections.forEach(function(s) { items = items.concat(s.items || []); });
+    var done = items.filter(function(i) { return i.completed; }).length;
+    return { title: g.title, progress: items.length > 0 ? Math.round((done / items.length) * 100) : 0, total: items.length, done: done };
+  });
+
+  // Pending Focus todos for this brand
+  var brandIdx2 = brands.indexOf(brand);
+  ctx.pendingTodos = (todos || []).filter(function(t) {
+    return !t.completed && (t.brand === brandIdx2 || t.brand === String(brandIdx2));
+  }).length;
+  ctx.overdueTodos = (todos || []).filter(function(t) {
+    return !t.completed && (t.brand === brandIdx2 || t.brand === String(brandIdx2)) && t.date && t.date < new Date().toISOString().slice(0, 10);
+  }).length;
+
+  // Recent Studio runs for this brand (last 30 days)
+  var thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  ctx.recentRuns = (runs || []).filter(function(r) {
+    return r.brand === brand.name && new Date(r.time || r.timestamp).getTime() > thirtyDaysAgo;
+  }).map(function(r) { return r.op; });
+
+  // Inventory item count
+  try {
+    var inv = JSON.parse(localStorage.getItem('roweos_inventory') || '[]');
+    ctx.inventoryCount = inv.filter(function(item) { return item.brand === brand.name || item.brand === brandIdx2; }).length;
+  } catch(e) { ctx.inventoryCount = 0; }
+
+  // Knowledge documents
+  try {
+    var kb = localStorage.getItem('brand_' + brandIdx2);
+    ctx.hasKnowledge = !!(kb && kb.length > 50);
+  } catch(e) { ctx.hasKnowledge = false; }
+
+  return ctx;
+}
+
+// v13.3: Central life context aggregator
+function getFullLifeContext() {
+  var ctx = {};
+
+  // LifeAI profile
+  try {
+    var profile = typeof getCurrentLifeProfile === 'function' ? getCurrentLifeProfile() : null;
+    if (profile) {
+      ctx.name = profile.name || '';
+      ctx.identityData = profile.identityData || {};
+    }
+  } catch(e) {}
+
+  // Life identity
+  try {
+    var identity = JSON.parse(localStorage.getItem('roweos_life_identity') || '{}');
+    ctx.role = identity.role || '';
+    ctx.location = identity.location || '';
+    ctx.values = identity.values || [];
+    ctx.goals = identity.goals || [];
+    ctx.interests = identity.interests || [];
+    ctx.focusAreas = identity.focusAreas || [];
+  } catch(e) {}
+
+  // Active Pulse goals (life mode)
+  ctx.pulseGoals = (pulseGoals || []).filter(function(g) {
+    return !g.archived && !g.completed && g.source === 'lifeai';
+  }).map(function(g) {
+    var items = (g.items || []);
+    if (g.sections) g.sections.forEach(function(s) { items = items.concat(s.items || []); });
+    var done = items.filter(function(i) { return i.completed; }).length;
+    return { title: g.title, progress: items.length > 0 ? Math.round((done / items.length) * 100) : 0 };
+  });
+
+  // Pending life todos
+  ctx.pendingTodos = (todos || []).filter(function(t) { return !t.completed && t.brand === '_life'; }).length;
+
+  // Recent life runs
+  var thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  ctx.recentRuns = (runs || []).filter(function(r) {
+    return r.lifeMode && new Date(r.time || r.timestamp).getTime() > thirtyDaysAgo;
+  }).map(function(r) { return r.op; });
+
+  // Journal tags (last 7 days)
+  var weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  ctx.recentTags = [];
+  (pulse2JournalEntries || []).forEach(function(e) {
+    if (e.date >= weekAgo && e.tag && ctx.recentTags.indexOf(e.tag) === -1) ctx.recentTags.push(e.tag);
+  });
+
+  // Rhythm preferences
+  try {
+    ctx.rhythmPrefs = JSON.parse(localStorage.getItem('roweos_life_rhythm_preferences') || 'null');
+  } catch(e) { ctx.rhythmPrefs = null; }
+
+  return ctx;
+}
+
+// v13.3: Identity depth score -- maps to brand guide's Minimal/Moderate/Complete tiers
+function getIdentityDepthScore(brand) {
+  if (!brand) return { score: 0, filled: 0, total: 8, tier: 'minimal', gaps: [] };
+
+  var sections = [
+    { key: 'essence', label: 'Brand Essence', field: 'essence' },
+    { key: 'voice', label: 'Voice & Tone', field: 'voice' },
+    { key: 'audience', label: 'Target Audience', field: 'audience' },
+    { key: 'messaging', label: 'Key Messaging', field: 'messaging' },
+    { key: 'products', label: 'Products & Services', field: 'products' },
+    { key: 'visual', label: 'Visual Identity', field: 'visual' },
+    { key: 'competitive', label: 'Competitive Positioning', field: 'competitive' },
+    { key: 'role', label: 'Your Role', field: 'philosophy' }
+  ];
+
+  var brandIdx = brands.indexOf(brand);
+  if (brandIdx === -1) brandIdx = parseInt(localStorage.getItem('selectedBrand') || '0');
+
+  var filled = 0;
+  var gaps = [];
+
+  sections.forEach(function(s) {
+    var hasContent = false;
+    // Check Identity card data
+    var aiVal = localStorage.getItem('identity_' + s.key + '_ai_' + brandIdx) || '';
+    var ownerVal = localStorage.getItem('identity_' + s.key + '_owner_' + brandIdx) || '';
+    if (aiVal.trim().length > 10 || ownerVal.trim().length > 10) hasContent = true;
+    // Fallback: check brand object field
+    if (!hasContent && brand[s.field] && String(brand[s.field]).trim().length > 10) hasContent = true;
+
+    if (hasContent) {
+      filled++;
+    } else {
+      gaps.push(s.label);
+    }
+  });
+
+  var pct = Math.round((filled / sections.length) * 100);
+  var tier = pct >= 80 ? 'complete' : (pct >= 50 ? 'moderate' : 'minimal');
+
+  return { score: pct, filled: filled, total: sections.length, tier: tier, gaps: gaps };
+}
+
+// v13.3: Smart Studio suggestions based on cross-system context
+function getStudioSuggestions(brand) {
+  if (!brand) return [];
+  var suggestions = [];
+  var ctx = getFullBrandContext(brand);
+  var depth = getIdentityDepthScore(brand);
+
+  // 1. Identity gaps
+  if (depth.tier === 'minimal') {
+    suggestions.push({
+      icon: 'identity',
+      text: 'Your Identity is ' + depth.score + '% complete. Fill in ' + depth.gaps[0] + ' to unlock better AI output.',
+      action: 'identity',
+      priority: 1
+    });
+  }
+
+  // 2. No recent runs
+  if (ctx.recentRuns.length === 0) {
+    suggestions.push({
+      icon: 'studio',
+      text: 'No operations run in 30 days. Try a Weekly Content Calendar to get started.',
+      action: 'op',
+      opName: 'Weekly Content Calendar',
+      priority: 2
+    });
+  }
+
+  // 3. Has products but never ran product ops
+  if (ctx.products && ctx.recentRuns.indexOf('Product Description Writer') === -1 && ctx.inventoryCount > 0) {
+    suggestions.push({
+      icon: 'inventory',
+      text: 'You have ' + ctx.inventoryCount + ' inventory items. Generate product descriptions with Studio.',
+      action: 'op',
+      opName: 'Product Description Writer',
+      priority: 3
+    });
+  }
+
+  // 4. Has audience defined but no persona
+  if (ctx.audience && ctx.recentRuns.indexOf('Customer Persona Builder') === -1) {
+    suggestions.push({
+      icon: 'audience',
+      text: 'Audience defined -- build a Customer Persona to sharpen targeting.',
+      action: 'op',
+      opName: 'Customer Persona Builder',
+      priority: 3
+    });
+  }
+
+  // 5. Has goals but no related ops run
+  if (ctx.goals.length > 0) {
+    var lowestGoal = ctx.goals.reduce(function(low, g) {
+      return g.progress < low.progress ? g : low;
+    }, ctx.goals[0]);
+    if (lowestGoal.progress < 50) {
+      suggestions.push({
+        icon: 'goal',
+        text: '"' + lowestGoal.title + '" is at ' + lowestGoal.progress + '%. Run an operation to move it forward.',
+        action: 'dismiss',
+        priority: 2
+      });
+    }
+  }
+
+  // 6. Overdue todos
+  if (ctx.overdueTodos > 0) {
+    suggestions.push({
+      icon: 'warning',
+      text: ctx.overdueTodos + ' overdue tasks. Consider a Priority Matrix operation.',
+      action: 'op',
+      opName: 'Priority Matrix',
+      priority: 1
+    });
+  }
+
+  // 7. Content calendar cadence
+  var lastCalendar = ctx.recentRuns.filter(function(r) { return r.indexOf('Content Calendar') !== -1; });
+  if (lastCalendar.length === 0 && ctx.voice) {
+    suggestions.push({
+      icon: 'calendar',
+      text: 'No content calendar this month. Stay consistent with weekly content.',
+      action: 'op',
+      opName: 'Weekly Content Calendar',
+      priority: 3
+    });
+  }
+
+  // Sort by priority, limit to 4
+  suggestions.sort(function(a, b) { return a.priority - b.priority; });
+  return suggestions.slice(0, 4);
+}
+
 async function generateBrandAIRecommendations() {
   var btn = document.querySelector('.studio-v2-generate-btn');
   if (!btn || btn.classList.contains('generating')) return;
@@ -59313,30 +59657,54 @@ async function generateBrandAIRecommendations() {
   btn.classList.add('generating');
   btn.querySelector('span').textContent = 'Generating...';
   
-  var prompt = `You are an expert brand strategist. Based on this brand profile, suggest 3 highly specific, actionable operations that would benefit this brand right now.
+  // v13.3: Use full brand context for deeper analysis
+  var ctx = getFullBrandContext(brand);
+  var depth = getIdentityDepthScore(brand);
 
-BRAND: ${brand.name}
-TAGLINE: ${brand.tagline || 'N/A'}
-VOICE: ${brand.voice || 'Professional'}
-AUDIENCE: ${brand.audience || 'General'}
-PRODUCTS/SERVICES: ${brand.products || brand.positioning || 'N/A'}
-VALUES: ${brand.values || 'N/A'}
+  var prompt = 'You are an expert brand strategist. Based on this brand profile, suggest 5-8 highly specific, actionable operations that would benefit this brand right now.\n\n';
+  prompt += 'BRAND IDENTITY (COMPLETE):\n';
+  prompt += '- Name: ' + (ctx.name || 'N/A') + '\n';
+  prompt += '- Tagline: ' + (ctx.tagline || 'N/A') + '\n';
+  prompt += '- Essence: ' + (ctx.essence || 'N/A') + '\n';
+  prompt += '- Voice: ' + (ctx.voice || 'Professional') + '\n';
+  prompt += '- Audience: ' + (ctx.audience || 'General') + '\n';
+  prompt += '- Messaging: ' + (ctx.messaging || 'N/A') + '\n';
+  prompt += '- Products/Services: ' + (ctx.products || ctx.positioning || 'N/A') + '\n';
+  prompt += '- Visual Identity: ' + (ctx.visual || 'N/A') + '\n';
+  prompt += '- Competitive Positioning: ' + (ctx.competitive || 'N/A') + '\n';
+  prompt += '- Location/Industry: ' + (ctx.industry ? ctx.industry + ' in ' : '') + (ctx.location || 'N/A') + '\n';
+  if (ctx.vocabDo) prompt += '- Vocabulary Do\'s: ' + ctx.vocabDo + '\n';
+  if (ctx.vocabDont) prompt += '- Vocabulary Don\'ts: ' + ctx.vocabDont + '\n';
 
-Return ONLY a JSON array with exactly 3 operations. Each operation must have:
-- name: Short, specific operation name (5-7 words max)
-- desc: One-line description (under 60 chars)
-- category: One of "marketing", "strategic", "operations", "documents"
-- outputs: Array of 4-5 specific deliverables
+  prompt += '\nCURRENT STATE:\n';
+  if (ctx.goals && ctx.goals.length > 0) {
+    prompt += '- Active Goals: ' + ctx.goals.map(function(g) { return g.title + ' (' + g.progress + '%)'; }).join(', ') + '\n';
+  }
+  prompt += '- Pending Tasks: ' + (ctx.pendingTodos || 0) + (ctx.overdueTodos > 0 ? ' (' + ctx.overdueTodos + ' overdue)' : '') + '\n';
+  if (ctx.recentRuns && ctx.recentRuns.length > 0) {
+    prompt += '- Recent Operations: ' + ctx.recentRuns.slice(0, 5).join(', ') + '\n';
+  }
+  prompt += '- Inventory Items: ' + (ctx.inventoryCount || 0) + '\n';
+  prompt += '- Knowledge Documents: ' + (ctx.hasKnowledge ? 'Yes' : 'No') + '\n';
+  prompt += '- Identity Completeness: ' + depth.score + '% (' + depth.tier + ')\n';
 
-Focus on what THIS specific brand needs - not generic operations. Consider their industry, audience, and current positioning.
+  prompt += '\nGenerate 5-8 highly specific operations. Name them with brand-specific details.\n';
+  prompt += 'BAD: "Guest Welcome Guide"\n';
+  prompt += 'GOOD: "Domain Property Guest Welcome Book" (if brand is luxury rentals in The Domain)\n\n';
 
-Example format:
-[
-  {"name": "Q1 Loyalty Program Launch Kit", "desc": "Member acquisition campaign materials", "category": "marketing", "outputs": ["Welcome sequence", "Tier benefits guide", "Referral program copy", "Social announcement posts"]},
-  ...
-]
+  if (ctx.recentRuns && ctx.recentRuns.length > 0) {
+    prompt += 'Do NOT suggest operations similar to recently run: ' + ctx.recentRuns.slice(0, 5).join(', ') + '\n\n';
+  }
 
-Return ONLY the JSON array, no other text.`;
+  prompt += 'Return ONLY a JSON array. Each operation must have:\n';
+  prompt += '- name: Short, specific operation name (5-8 words max)\n';
+  prompt += '- desc: One-line description (under 60 chars)\n';
+  prompt += '- category: One of "marketing", "strategic", "operations", "documents"\n';
+  prompt += '- outputs: Array of 4-5 specific deliverables\n\n';
+  prompt += 'Focus on what THIS specific brand needs. Use their industry, audience, location, and positioning.\n\n';
+  prompt += 'Example format:\n';
+  prompt += '[{"name": "Q1 Loyalty Program Launch Kit", "desc": "Member acquisition campaign materials", "category": "marketing", "outputs": ["Welcome sequence", "Tier benefits guide", "Referral program copy", "Social announcement posts"]}]\n\n';
+  prompt += 'Return ONLY the JSON array, no other text.';
 
   try {
     var response = await callBrandAIGeneratorAPI(provider, model, apiKey, prompt);
@@ -59626,10 +59994,10 @@ function renderOperations() {
   var brandSpecificOps = opsToUse.filter(function(op) { return op.brand === currentBrandName && matchesFilters(op); });
   var universalOpsList = opsToUse.filter(function(op) { return op.brand === null && matchesFilters(op); });
   
-  // v9.1.14: Include AI-generated operations for this brand (only in BrandAI mode)
-  var aiGeneratedOps = isLifeMode ? [] : generatedBrandOps.filter(function(op) { 
-    return op.generatedForBrand === currentBrandName && matchesFilters(op); 
-  });
+  // v13.3: Include AI-generated operations -- brand mode by brand name, life mode by mode flag
+  var aiGeneratedOps = isLifeMode
+    ? generatedBrandOps.filter(function(op) { return op.generatedForMode === 'life' && matchesFilters(op); })
+    : generatedBrandOps.filter(function(op) { return op.generatedForBrand === currentBrandName && matchesFilters(op); });
   
   // Update op count
   var totalForBrand = brandSpecificOps.length + universalOpsList.length + aiGeneratedOps.length;
@@ -59722,6 +60090,78 @@ function renderOperations() {
   // Update selected op display and run button
   updateSelectedOpDisplay();
   updateRunButton();
+
+  // v13.3: Update depth badge and suggestions
+  updateStudioDepthBadge();
+  renderStudioSuggestions();
+}
+
+// v13.3: Update Identity Depth badge in Studio header
+function updateStudioDepthBadge() {
+  var badge = document.getElementById('studioDepthBadge');
+  var ring = document.getElementById('studioDepthRing');
+  var label = document.getElementById('studioDepthLabel');
+  if (!badge || !ring || !label) return;
+
+  var brand = brands[studioSelectedBrand];
+  if (!brand) return;
+
+  var depth = getIdentityDepthScore(brand);
+  ring.style.setProperty('--depth-pct', depth.score + '%');
+  label.textContent = depth.score + '%';
+  badge.setAttribute('data-tier', depth.tier);
+
+  var tierDesc = depth.tier === 'complete' ? 'Identity complete' : (depth.tier === 'moderate' ? 'Identity moderate' : 'Identity minimal');
+  var tipText = tierDesc + ' (' + depth.filled + '/' + depth.total + ')';
+  if (depth.gaps.length > 0) tipText += ' -- Missing: ' + depth.gaps[0];
+  badge.title = tipText;
+}
+
+// v13.3: Render Smart Studio Suggestions
+function renderStudioSuggestions() {
+  var bar = document.getElementById('studioSuggestionsBar');
+  var list = document.getElementById('studioSuggestionsList');
+  if (!bar || !list) return;
+
+  var brand = brands[studioSelectedBrand];
+  var suggestions = getStudioSuggestions(brand);
+
+  if (suggestions.length === 0) {
+    bar.style.display = 'none';
+    return;
+  }
+
+  bar.style.display = '';
+  list.innerHTML = '';
+
+  suggestions.forEach(function(s) {
+    var chip = document.createElement('div');
+    chip.className = 'studio-suggestion-chip';
+    chip.innerHTML = '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(s.text) + '</span>' +
+      '<svg class="suggestion-dismiss" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+
+    chip.addEventListener('click', function(e) {
+      if (e.target.closest('.suggestion-dismiss')) {
+        chip.remove();
+        if (list.children.length === 0) bar.style.display = 'none';
+        return;
+      }
+      if (s.action === 'identity') {
+        showView('memory');
+      } else if (s.action === 'op' && s.opName) {
+        // Find and select the operation
+        var allOps = (window.lifeOps || []).concat(ops || []);
+        var targetOp = allOps.find(function(op) { return op.name === s.opName; });
+        if (targetOp) {
+          selectedOp = targetOp;
+          updateSelectedOpDisplay();
+          updateRunButton();
+        }
+      }
+    });
+
+    list.appendChild(chip);
+  });
 }
 
 function changeStudioBrand(value) {
@@ -59768,7 +60208,11 @@ function changeStudioBrand(value) {
   
   renderOperations();
   updateBreadcrumb();
-  
+
+  // v13.3: Update depth badge and suggestions on brand change
+  updateStudioDepthBadge();
+  renderStudioSuggestions();
+
   // v9.1.14: Removed toast - silent brand switch
 }
 
@@ -65482,12 +65926,46 @@ async function runOp() {
   selectedOp.outputs.forEach(function(o) { aiPrompt += '• ' + o + '\n'; });
   aiPrompt += '\n';
   
+  // v13.3: Cross-system context injection
+  var currentRunMode = getCurrentMode ? getCurrentMode() : (localStorage.getItem('roweos_mode') || 'brand');
+  var isLifeModeRun = currentRunMode === 'life';
+  var fullCtx = isLifeModeRun ? getFullLifeContext() : getFullBrandContext(brand);
+
+  // Active goals context (if any)
+  var goalCtx = isLifeModeRun ? (fullCtx.pulseGoals || []) : (fullCtx.goals || []);
+  if (goalCtx.length > 0) {
+    aiPrompt += '\nACTIVE GOALS (for context -- align output with these where relevant):\n';
+    goalCtx.forEach(function(g) {
+      aiPrompt += '- ' + g.title + ' (' + g.progress + '% complete)\n';
+    });
+  }
+
+  // Workload context
+  var todoCount = fullCtx.pendingTodos || 0;
+  if (todoCount > 0) {
+    aiPrompt += '\nCURRENT WORKLOAD: ' + todoCount + ' pending tasks';
+    if (fullCtx.overdueTodos > 0) aiPrompt += ' (' + fullCtx.overdueTodos + ' overdue)';
+    aiPrompt += '\n';
+  }
+
+  // Deep Identity injection (for richer brand ops)
+  if (!isLifeModeRun && fullCtx.identityCards) {
+    var deepFields = [];
+    if (fullCtx.identityCards.essence) deepFields.push('Essence: ' + (fullCtx.identityCards.essence.owner || fullCtx.identityCards.essence.ai));
+    if (fullCtx.identityCards.competitive) deepFields.push('Competitive Edge: ' + (fullCtx.identityCards.competitive.owner || fullCtx.identityCards.competitive.ai));
+    if (fullCtx.vocabDo) deepFields.push('Vocabulary Do: ' + fullCtx.vocabDo);
+    if (fullCtx.vocabDont) deepFields.push('Vocabulary Dont: ' + fullCtx.vocabDont);
+    if (deepFields.length > 0) {
+      aiPrompt += '\nDEEP BRAND IDENTITY:\n' + deepFields.join('\n') + '\n';
+    }
+  }
+
   // v9.1.14: Add operation parameters
   var paramsString = getOperationParamsString();
   if (paramsString) {
     aiPrompt += paramsString + '\n';
   }
-  
+
   if (context) {
     aiPrompt += 'ADDITIONAL CONTEXT:\n' + context + '\n\n';
   }
@@ -86643,7 +87121,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v13.2 - ' + subtitle;
+  document.title = 'RoweOS v13.3 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -93500,86 +93978,122 @@ function loadGeneratedLifeOps() {
 async function generateLifeAIRecommendations() {
   var btn = document.querySelector('#lifeCreatorSection .studio-v2-generate-btn');
   if (!btn || btn.classList.contains('generating')) return;
-  
-  // Get profile for context
-  var profile = getLifeAIProfile();
-  if (!profile) {
-    showToast('Please complete LifeAI setup first', 'warning');
-    return;
-  }
-  
+
+  // v13.3: Use full life context for deeper analysis
+  var ctx = getFullLifeContext();
+
   // Get API key
   var provider = lifeAISelectedProvider || 'anthropic';
+  var model = 'claude-sonnet-4-5-20250929';
   var apiKey = await getApiKey(provider);
-  
+
   if (!apiKey) {
     showToast('API key not configured', 'error');
     return;
   }
-  
+
   // UI feedback
   btn.classList.add('generating');
   btn.innerHTML = '<div class="loading-spinner" style="width:14px;height:14px;margin-right:8px;"></div><span>Generating...</span>';
   showToast('Analyzing your profile to generate personalized tasks...', 'info');
-  
-  // Build prompt based on profile
-  var prompt = 'Based on this user profile, generate 3-5 personalized life tasks/operations that would be most helpful right now.\n\n';
-  prompt += 'User Profile:\n';
-  prompt += '- Name: ' + (profile.name || 'User') + '\n';
-  if (profile.lifeAreas && profile.lifeAreas.length) {
-    prompt += '- Focus Areas: ' + profile.lifeAreas.join(', ') + '\n';
+
+  // v13.3: Build enriched prompt with LifeAI identity data
+  var prompt = 'You are a personal life strategist. Based on this person\'s profile, suggest 5-8 specific LifeAI operations.\n\n';
+
+  prompt += 'ABOUT THE USER:\n';
+  if (ctx.name) prompt += '- Name: ' + ctx.name + '\n';
+  if (ctx.role) prompt += '- Role: ' + ctx.role + '\n';
+  if (ctx.location) prompt += '- Location: ' + ctx.location + '\n';
+  if (ctx.values && ctx.values.length) prompt += '- Values: ' + ctx.values.join(', ') + '\n';
+  if (ctx.goals && ctx.goals.length) prompt += '- Life Goals: ' + ctx.goals.join(', ') + '\n';
+  if (ctx.interests && ctx.interests.length) prompt += '- Interests: ' + ctx.interests.join(', ') + '\n';
+  if (ctx.focusAreas && ctx.focusAreas.length) prompt += '- Focus Areas: ' + ctx.focusAreas.join(', ') + '\n';
+
+  // Rhythm preferences
+  if (ctx.rhythmPrefs && ctx.rhythmPrefs.areas) {
+    prompt += '- Rhythm Focus: ' + ctx.rhythmPrefs.areas.join(', ') + '\n';
   }
-  if (profile.goals && profile.goals.length) {
-    prompt += '- Goals: ' + profile.goals.join(', ') + '\n';
+
+  // Fallback: try legacy profile
+  if (!ctx.name && !ctx.role) {
+    try {
+      var profile = typeof getLifeAIProfile === 'function' ? getLifeAIProfile() : null;
+      if (profile) {
+        if (profile.name) prompt += '- Name: ' + profile.name + '\n';
+        if (profile.lifeAreas && profile.lifeAreas.length) prompt += '- Focus Areas: ' + profile.lifeAreas.join(', ') + '\n';
+        if (profile.goals && profile.goals.length) prompt += '- Goals: ' + profile.goals.join(', ') + '\n';
+        if (profile.commStyle) prompt += '- Communication Style: ' + profile.commStyle + '\n';
+      }
+    } catch(e) {}
   }
-  if (profile.commStyle) {
-    prompt += '- Communication Style: ' + profile.commStyle + '\n';
+
+  // Active goals
+  if (ctx.pulseGoals && ctx.pulseGoals.length > 0) {
+    prompt += '\nACTIVE GOALS:\n';
+    ctx.pulseGoals.forEach(function(g) { prompt += '- ' + g.title + ' (' + g.progress + '% done)\n'; });
   }
-  
-  prompt += '\nReturn ONLY a JSON array (no markdown, no explanation) with this exact format:\n';
-  prompt += '[{"name": "Task Name", "desc": "Brief description", "category": "planning|development|wellness|relationships|finances|taxes|home|creativity|reflection"}]\n';
-  prompt += '\nMake tasks specific, actionable, and personalized to the user\'s goals and focus areas.';
-  
+
+  // Recent runs (avoid duplicates)
+  if (ctx.recentRuns && ctx.recentRuns.length > 0) {
+    prompt += '\nRECENTLY RUN (do not suggest these): ' + ctx.recentRuns.slice(0, 5).join(', ') + '\n';
+  }
+
+  // Journal mood
+  if (ctx.recentTags && ctx.recentTags.length > 0) {
+    prompt += '\nRECENT JOURNAL THEMES: ' + ctx.recentTags.join(', ') + '\n';
+  }
+
+  prompt += '\nGenerate 5-8 operations personalized to this user. Use their specific details in names.\n';
+  prompt += 'BAD: "Wellness Check-In"\nGOOD: "Morning Yoga Routine for Back Pain" (if user mentioned back issues)\n\n';
+  prompt += 'Return ONLY a JSON array: [{"name":"...","desc":"...","category":"planning|development|wellness|relationships|finances|home|creativity|reflection","outputs":["..."]}]\n';
+
   try {
-    var response;
-    if (provider === 'anthropic') {
-      response = await callAnthropicAPI('claude-sonnet-4-5-20250929', apiKey, [{ role: 'user', content: prompt }], 'You are a life coach assistant. Return only valid JSON arrays.');
-    } else if (provider === 'openai') {
-      response = await callOpenAIAPI('gpt-4o', apiKey, [{ role: 'user', content: prompt }], 'You are a life coach assistant. Return only valid JSON arrays.');
-    } else if (provider === 'google') {
-      response = await callGoogleAPI('gemini-2.0-flash', apiKey, [{ role: 'user', content: prompt }], 'You are a life coach assistant. Return only valid JSON arrays.');
-    }
-    
-    // Parse response
+    var response = await callBrandAIGeneratorAPI(provider, model, apiKey, prompt);
     var cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    var tasks = JSON.parse(cleanResponse);
-    
-    if (Array.isArray(tasks) && tasks.length > 0) {
-      // Add to generatedLifeOps
-      tasks.forEach(function(task) {
-        var newOp = {
+    var operations = JSON.parse(cleanResponse);
+
+    if (Array.isArray(operations) && operations.length > 0) {
+      // v13.3: Store as generated life ops using generatedBrandOps with mode flag
+      var existingNonLife = generatedBrandOps.filter(function(op) { return op.generatedForMode !== 'life'; });
+      operations.forEach(function(op, idx) {
+        existingNonLife.push({
+          id: 'gen-life-' + Date.now() + '-' + idx,
+          name: op.name,
+          desc: op.desc || '',
+          category: op.category || 'planning',
+          brand: null,
+          outputs: op.outputs || ['Custom output'],
+          aiGenerated: true,
+          generatedForMode: 'life',
+          generatedAt: new Date().toISOString()
+        });
+      });
+      generatedBrandOps = existingNonLife;
+      saveBrandAIGeneratedOps();
+
+      // Also add to legacy generatedLifeOps for compatibility
+      operations.forEach(function(task) {
+        generatedLifeOps.push({
           id: 9000 + Date.now() + Math.random() * 1000,
           name: task.name,
-          desc: task.desc,
+          desc: task.desc || '',
           category: task.category || 'planning',
-          outputs: [],
+          outputs: task.outputs || [],
           aiGenerated: true,
           generatedAt: new Date().toISOString()
-        };
-        generatedLifeOps.push(newOp);
+        });
       });
-      
-      saveGeneratedLifeOps();
-      renderLifeOps();
-      
-      showToast(tasks.length + ' personalized tasks generated!', 'success');
+      if (typeof saveGeneratedLifeOps === 'function') saveGeneratedLifeOps();
+      if (typeof renderLifeOps === 'function') renderLifeOps();
+      renderOperations();
+
+      showToast('Generated ' + operations.length + ' personalized operations', 'success');
     } else {
       showToast('Could not generate tasks. Try again.', 'warning');
     }
-    
-  } catch (error) {
-    console.error('[LifeAI] Error generating recommendations:', error);
-    showToast('Error generating tasks: ' + error.message, 'error');
+  } catch(e) {
+    console.error('v13.3: LifeAI generation error:', e);
+    showToast('Could not generate operations: ' + e.message, 'error');
   } finally {
     btn.classList.remove('generating');
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.5 3.5l1.4 1.4M11.1 11.1l1.4 1.4M3.5 12.5l1.4-1.4M11.1 4.9l1.4-1.4"/></svg><span>Generate Personalized Tasks</span>';
