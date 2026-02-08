@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v13.1 - Brand Intelligence Platform</title>
+  <title>RoweOS v13.2 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -14776,7 +14776,96 @@
     html.light-mode .focus-2-category-action-btn.delete:hover {
       background: rgba(220, 38, 38, 0.1);
     }
-    
+
+    /* v13.2: Multi-select toolbar */
+    .focus-2-multiselect-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: rgba(30, 30, 30, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-4);
+    }
+    html.light-mode .focus-2-multiselect-toolbar {
+      background: rgba(255, 255, 255, 0.85);
+    }
+    .focus-2-multiselect-count {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 80px;
+    }
+    .focus-2-multiselect-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .focus-2-multiselect-btn:hover {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+    .focus-2-multiselect-btn-danger:hover {
+      background: #dc2626;
+      color: #fff;
+      border-color: #dc2626;
+    }
+    .focus-2-multiselect-btn-cancel {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text-muted);
+    }
+    .focus-2-multiselect-btn-cancel:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+    .focus-2-multiselect-check {
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+    .focus-2-multiselect-check.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+    .focus-2-category-task-item.multi-selected {
+      background: rgba(212, 175, 55, 0.08);
+      border-color: rgba(212, 175, 55, 0.3);
+    }
+    @media (max-width: 768px) {
+      .focus-2-multiselect-toolbar {
+        flex-wrap: wrap;
+        gap: var(--space-2);
+      }
+      .focus-2-multiselect-btn {
+        font-size: var(--text-xs);
+        padding: 4px 8px;
+      }
+    }
+
     .focus-2-category-title {
       font-size: var(--text-xl);
       font-weight: 700;
@@ -16417,7 +16506,19 @@
       font-size: var(--text-sm);
       color: var(--text-muted);
     }
-    
+    /* v13.2: Recurrence badge */
+    .focus-2-automation-recur {
+      display: inline-block;
+      padding: 1px 6px;
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--accent);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
     .focus-2-automation-run {
       padding: 6px 12px;
       background: var(--accent);
@@ -17996,6 +18097,27 @@
       margin-bottom: var(--space-5);
     }
     
+    /* v13.2: Subject input */
+    .pulse-2-entry-subject {
+      width: 100%;
+      padding: 10px var(--space-4);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--text-primary);
+      font-family: inherit;
+      margin-bottom: var(--space-2);
+    }
+    .pulse-2-entry-subject:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .pulse-2-entry-subject::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
     .pulse-2-entry-input {
       width: 100%;
       min-height: 100px;
@@ -18070,6 +18192,38 @@
       border-color: var(--life-accent, #22c55e);
     }
     
+    /* v13.2: Tag pills */
+    .pulse-2-entry-tags {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+    .pulse-2-tag-btn {
+      padding: 6px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full, 9999px);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pulse-2-tag-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+    }
+    .pulse-2-tag-btn.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+    }
+    html.life-mode .pulse-2-tag-btn.selected {
+      background: var(--life-accent, #22c55e);
+      border-color: var(--life-accent, #22c55e);
+      color: #fff;
+    }
+
     html.life-mode .pulse-2-btn-primary {
       background: var(--life-accent, #22c55e);
       border-color: var(--life-accent, #22c55e);
@@ -37944,7 +38098,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v13.1</div>
+      <div class="launch-version" id="launchVersionTag">v13.2</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38253,7 +38407,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.1</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.2</div>
       
     </div>
   </div>
@@ -38537,7 +38691,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.1</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.2</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39404,7 +39558,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v13.1</span>
+          <span class="sidebar-version">v13.2</span>
         </div>
       </div>
     </div>
@@ -39714,7 +39868,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v13.1 • Built for the future</p>
+        <p>RoweOS v13.2 • Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39771,7 +39925,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v13.1</p>
+            <p class="onboarding-welcome-version">v13.2</p>
           </div>
         </div>
       </div>
@@ -42222,6 +42376,10 @@ service cloud.firestore {
                     </div>
                   </div>
                 </div>
+                <button class="btn btn-secondary btn-small" onclick="showLifeRhythmSurvey()" title="Customize areas">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                  Customize
+                </button>
                 <span style="color: var(--border-color);">|</span>
                 <button class="btn btn-secondary btn-small" onclick="toggleLifeCalendarView()">
                   <span id="lifeCalViewToggle">Week View</span>
@@ -42282,7 +42440,7 @@ service cloud.firestore {
                       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                       <span>Active Goals</span>
                     </div>
-                    <button class="life-rhythm-add-btn" onclick="addLifeGoal()" title="Add goal">
+                    <button class="life-rhythm-add-btn" onclick="showView('pulse')" title="Add goal in Pulse">
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
                     </button>
                   </div>
@@ -42290,8 +42448,24 @@ service cloud.firestore {
                     <!-- Goals populated by JS -->
                   </div>
                 </div>
+
+                <!-- v13.2: Patterns Card -->
+                <div class="life-rhythm-card">
+                  <div class="life-rhythm-card-header">
+                    <div class="life-rhythm-card-title">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                      <span>Patterns</span>
+                    </div>
+                    <button class="life-rhythm-add-btn" onclick="analyzeLifePatterns()" title="Refresh patterns">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                    </button>
+                  </div>
+                  <div id="lifePatternsContent">
+                    <div class="life-empty-state">Tap refresh to analyze your patterns.</div>
+                  </div>
+                </div>
               </div>
-              
+
               <!-- Right: Calendar + Day Panel -->
               <div class="life-calendar-panel">
                 <div id="lifeCalendar">
@@ -42899,36 +43073,22 @@ service cloud.firestore {
               </div>
             </div>
             
-            <!-- AI Assistant Card -->
-            <div class="focus-2-widget-card" data-widget="assistant" data-size="wide" draggable="true">
-              <div class="focus-2-widget-controls">
-                <div class="focus-2-widget-drag-handle">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" opacity="0.5"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-                </div>
-                <button class="focus-2-widget-resize-btn" onclick="event.stopPropagation(); cycleFocus2WidgetSize(this.closest('.focus-2-widget-card'))" title="Resize widget">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                </button>
-              </div>
-              <div class="focus-2-ai-assistant-header">
-                <div class="focus-2-ai-assistant-avatar" id="focus2AIAvatar">
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                </div>
-                <div class="focus-2-ai-assistant-info">
-                  <div class="focus-2-ai-assistant-name" id="focus2AIName">BrandAI</div>
-                  <div class="focus-2-ai-assistant-status">Focus Assistant</div>
-                </div>
-              </div>
-              <div class="focus-2-ai-assistant-messages" id="focus2AIMessages">
-                <div class="focus-2-ai-message" id="focus2AIMessage">
-                  Ready to help you organize your day.
-                </div>
-              </div>
-              <div class="focus-2-ai-assistant-input">
-                <input type="text" class="focus-2-ai-input" id="focus2AIInput" placeholder="Ask about your tasks..." onkeypress="if(event.key==='Enter')sendFocus2AIMessage()">
-                <button class="focus-2-ai-send" onclick="sendFocus2AIMessage()">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                </button>
-              </div>
+            <!-- v13.2: Multi-select toolbar (hidden by default, replaces removed AI Assistant) -->
+            <div class="focus-2-multiselect-toolbar" id="focus2MultiSelectToolbar" style="display: none;">
+              <div class="focus-2-multiselect-count" id="focus2SelectCount">0 selected</div>
+              <button class="focus-2-multiselect-btn" onclick="addSelectedTasksToPulse()">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Add to Pulse
+              </button>
+              <button class="focus-2-multiselect-btn" onclick="completeSelectedTasks()">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                Complete All
+              </button>
+              <button class="focus-2-multiselect-btn focus-2-multiselect-btn-danger" onclick="deleteSelectedTasks()">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                Delete
+              </button>
+              <button class="focus-2-multiselect-btn focus-2-multiselect-btn-cancel" onclick="exitFocus2MultiSelect()">Cancel</button>
             </div>
             
             <!-- Notes Card -->
@@ -43547,7 +43707,20 @@ service cloud.firestore {
           <div class="pulse-3-checklists" id="pulse3Checklists">
             <!-- Populated by JS -->
           </div>
-          
+
+          <!-- v13.2: Smart Suggestions -->
+          <div class="pulse-3-suggestions" id="pulse3Suggestions" style="display: none;">
+            <div class="pulse-3-section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 01-1 1H9a1 1 0 01-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/></svg>
+                Smart Suggestions
+                <span id="pulse3SuggestionsTime" style="font-size: var(--text-xs); color: var(--text-muted);"></span>
+              </div>
+              <button class="pulse-3-btn pulse-3-btn-secondary" onclick="refreshPulseSuggestions()">Refresh</button>
+            </div>
+            <div id="pulse3SuggestionsList"></div>
+          </div>
+
           <!-- v10.5.25: Pulse 2.0 - Journal & Analytics Redesign -->
           <div class="pulse-2-container">
             <!-- Left Column - Journal & Activity -->
@@ -43572,13 +43745,17 @@ service cloud.firestore {
                 
                 <!-- New Entry Input -->
                 <div class="pulse-2-new-entry">
+                  <!-- v13.2: Subject field -->
+                  <input type="text" class="pulse-2-entry-subject" id="pulse2EntrySubject" placeholder="Subject (optional)...">
                   <textarea class="pulse-2-entry-input" id="pulse2EntryInput" placeholder="What's on your mind today? Reflect on your progress, challenges, or wins..."></textarea>
                   <div class="pulse-2-entry-actions">
-                    <div class="pulse-2-mood-selector">
-                      <button class="pulse-2-mood-btn" data-mood="great" title="Great">Great</button>
-                      <button class="pulse-2-mood-btn" data-mood="good" title="Good">Good</button>
-                      <button class="pulse-2-mood-btn" data-mood="okay" title="Okay">Okay</button>
-                      <button class="pulse-2-mood-btn" data-mood="challenging" title="Challenging">Hard</button>
+                    <!-- v13.2: Tag pills replace mood selector -->
+                    <div class="pulse-2-entry-tags" id="pulse2EntryTags">
+                      <button class="pulse-2-tag-btn" data-tag="reflection" onclick="togglePulse2Tag(this)">Reflection</button>
+                      <button class="pulse-2-tag-btn" data-tag="progress" onclick="togglePulse2Tag(this)">Progress</button>
+                      <button class="pulse-2-tag-btn" data-tag="challenge" onclick="togglePulse2Tag(this)">Challenge</button>
+                      <button class="pulse-2-tag-btn" data-tag="idea" onclick="togglePulse2Tag(this)">Idea</button>
+                      <button class="pulse-2-tag-btn" data-tag="win" onclick="togglePulse2Tag(this)">Win</button>
                     </div>
                     <button class="pulse-2-btn pulse-2-btn-primary" onclick="savePulse2Entry()">Save Entry</button>
                   </div>
@@ -43629,16 +43806,7 @@ service cloud.firestore {
                 </div>
               </div>
               
-              <!-- Mood Tracker -->
-              <div class="pulse-2-mood-card">
-                <div class="pulse-2-card-title">Mood Tracker</div>
-                <div class="pulse-2-mood-chart" id="pulse2MoodChart">
-                  <!-- Visual mood history -->
-                </div>
-                <div class="pulse-2-mood-summary" id="pulse2MoodSummary">
-                  Most common: Productive
-                </div>
-              </div>
+              <!-- v13.2: Mood Tracker removed, replaced by Focus Notes integration in journal -->
               
               <!-- Focus Session Summary -->
               <div class="pulse-2-focus-card">
@@ -66826,8 +66994,7 @@ function initFocus2() {
   // v10.5.25: Init day detail with today's data
   showFocus2DayDetail(today);
   
-  // v10.5.25: Init AI assistant
-  updateFocus2AIAssistant();
+  // v13.2: AI assistant removed, multi-select toolbar added
   
   // v10.5.25: Initialize drag-and-drop for ALL widget cards
   initFocus2WidgetDragDrop();
@@ -66883,89 +67050,7 @@ function restoreFocus2WidgetOrder() {
   });
 }
 
-/**
- * v10.5.25: Update AI assistant UI based on mode
- */
-function updateFocus2AIAssistant() {
-  var isLife = getCurrentMode() === 'life';
-  var aiName = document.getElementById('focus2AIName');
-  var aiMessage = document.getElementById('focus2AIMessage');
-  var aiAvatar = document.getElementById('focus2AIAvatar');
-  
-  if (aiName) aiName.textContent = isLife ? 'LifeAI' : 'BrandAI';
-  
-  // Generate contextual suggestion
-  var todayTasks = todos.filter(function(t) {
-    return !t.completed && (!t.date || t.date === new Date().toISOString().slice(0, 10));
-  });
-  
-  var suggestion = '';
-  if (todayTasks.length === 0) {
-    suggestion = isLife 
-      ? "You have a clear schedule today! Would you like me to help you plan something productive or take some time for self-care?"
-      : "No pending tasks today. Consider generating fresh content in Studio to stay ahead of your content calendar.";
-  } else if (todayTasks.length > 5) {
-    suggestion = isLife
-      ? "You have " + todayTasks.length + " tasks lined up. Let me help you prioritize what matters most today."
-      : "Heavy workload today with " + todayTasks.length + " items. I recommend batching similar tasks in Studio for efficiency.";
-  } else {
-    suggestion = isLife
-      ? "You have " + todayTasks.length + " tasks today. Start with the most important one - I'm here if you need help!"
-      : "You have " + todayTasks.length + " tasks for today. Need help with any content or planning?";
-  }
-  
-  if (aiMessage) aiMessage.textContent = suggestion;
-  
-  // Update avatar color for LifeAI
-  if (aiAvatar) {
-    aiAvatar.style.background = isLife 
-      ? 'linear-gradient(135deg, var(--life-accent), var(--life-accent-30))'
-      : 'linear-gradient(135deg, var(--accent), rgba(212, 175, 55, 0.6))';
-  }
-}
-
-/**
- * v10.5.25: Send message to Focus AI assistant
- */
-function sendFocus2AIMessage() {
-  var input = document.getElementById('focus2AIInput');
-  var messagesContainer = document.getElementById('focus2AIMessages');
-  if (!input || !messagesContainer || !input.value.trim()) return;
-  
-  var userMessage = input.value.trim();
-  input.value = '';
-  
-  // Add user message
-  var userDiv = document.createElement('div');
-  userDiv.className = 'focus-2-ai-message user';
-  userDiv.textContent = userMessage;
-  messagesContainer.appendChild(userDiv);
-  
-  // Generate AI response (local, context-aware)
-  var isLife = getCurrentMode() === 'life';
-  var todayTasks = todos.filter(function(t) {
-    return !t.completed && (!t.date || t.date === new Date().toISOString().slice(0, 10));
-  });
-  
-  var responses = isLife ? [
-    "Based on your schedule, I'd suggest tackling that first. Let me know if you need help breaking it down.",
-    "That's a great question! Looking at your tasks, I think focusing on one thing at a time will help most.",
-    "I can help with that. Would you like me to create a task or find related items in your Library?"
-  ] : [
-    "I can help with that. Want me to open Studio to generate some content?",
-    "Based on your brand voice and recent activity, I have some suggestions. Shall I elaborate?",
-    "Great idea! I can help you schedule this or create related content. What would you prefer?"
-  ];
-  
-  // Add AI response after delay
-  setTimeout(function() {
-    var aiDiv = document.createElement('div');
-    aiDiv.className = 'focus-2-ai-message';
-    aiDiv.textContent = responses[Math.floor(Math.random() * responses.length)];
-    messagesContainer.appendChild(aiDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }, 500);
-}
+// v13.2: updateFocus2AIAssistant() and sendFocus2AIMessage() removed -- assistant widget replaced by multi-select toolbar
 
 /**
  * v10.5.25: Populate category dropdown
@@ -67303,6 +67388,10 @@ function setFocus2DayFilter(filter) {
 var focus2ExpandedCategory = null;
 var focus2ShowCompleted = false;
 
+// v13.2: Multi-select state
+var focus2MultiSelectMode = false;
+var focus2SelectedTaskIds = [];
+
 // Color presets for categories
 var focus2CategoryColors = ['gold', 'blue', 'green', 'purple', 'red', 'orange', 'pink', 'cyan'];
 
@@ -67508,6 +67597,8 @@ function renderFocus2Categories() {
     html += '<div class="focus-2-category-header">';
     html += '<div class="focus-2-category-title">' + escapeHtml(cat.name) + ' <span class="focus-2-category-count">' + pendingTasks.length + '</span></div>';
     html += '<div class="focus-2-category-actions" onclick="event.stopPropagation()">';
+    // v13.2: Multi-select button
+    html += '<button class="focus-2-category-action-btn" onclick="toggleFocus2MultiSelect(\'' + escapeHtml(cat.name) + '\')" title="Select tasks"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>';
     html += '<button class="focus-2-category-action-btn" onclick="editCategory(\'' + escapeHtml(cat.name) + '\')" title="Edit category"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
     html += '<button class="focus-2-category-action-btn delete" onclick="deleteCategory(\'' + escapeHtml(cat.name) + '\')" title="Delete category"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>';
     html += '</div>';
@@ -68284,6 +68375,16 @@ function renderFocus2CategoryTaskItem(task) {
   var priority = task.priority ? ' priority' : '';
   var checkIcon = task.completed ? icon('check', {size: 12, strokeWidth: 3}) : '';
 
+  // v13.2: Multi-select mode shows selection checkboxes
+  if (focus2MultiSelectMode) {
+    var isSelected = focus2SelectedTaskIds.indexOf(task.id) !== -1;
+    var html = '<div class="focus-2-category-task-item ' + completed + priority + (isSelected ? ' multi-selected' : '') + '" onclick="toggleFocus2TaskSelect(' + task.id + ')">';
+    html += '<div class="focus-2-multiselect-check ' + (isSelected ? 'checked' : '') + '">' + (isSelected ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' : '') + '</div>';
+    html += '<div class="focus-2-category-task-text">' + escapeHtml(task.text) + '</div>';
+    html += '</div>';
+    return html;
+  }
+
   // v10.5.25: Fixed - parent onclick checks if click was on checkbox
   var html = '<div class="focus-2-category-task-item ' + completed + priority + '" onclick="if(!event.target.closest(\'.focus-2-category-task-check\')){openFocus2TaskDetail(' + task.id + ');}">';
   html += '<div class="focus-2-category-task-check ' + (task.completed ? 'checked' : '') + '" onclick="quickToggleFocus2Task(' + task.id + ', event)">' + checkIcon + '</div>';
@@ -68303,6 +68404,132 @@ function renderFocus2CategoryTaskItem(task) {
   html += '</div>';
 
   return html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// v13.2: MULTI-SELECT FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * v13.2: Toggle multi-select mode for a category
+ */
+function toggleFocus2MultiSelect(categoryName) {
+  focus2MultiSelectMode = !focus2MultiSelectMode;
+  focus2SelectedTaskIds = [];
+  if (focus2MultiSelectMode && categoryName) {
+    focus2ExpandedCategory = categoryName;
+  }
+  var toolbar = document.getElementById('focus2MultiSelectToolbar');
+  if (toolbar) toolbar.style.display = focus2MultiSelectMode ? 'flex' : 'none';
+  updateFocus2SelectCount();
+  renderFocus2Categories();
+}
+
+/**
+ * v13.2: Toggle individual task selection
+ */
+function toggleFocus2TaskSelect(taskId) {
+  var idx = focus2SelectedTaskIds.indexOf(taskId);
+  if (idx === -1) {
+    focus2SelectedTaskIds.push(taskId);
+  } else {
+    focus2SelectedTaskIds.splice(idx, 1);
+  }
+  updateFocus2SelectCount();
+  renderFocus2Categories();
+}
+
+/**
+ * v13.2: Update selection count display
+ */
+function updateFocus2SelectCount() {
+  var el = document.getElementById('focus2SelectCount');
+  if (el) el.textContent = focus2SelectedTaskIds.length + ' selected';
+}
+
+/**
+ * v13.2: Add selected tasks to Pulse as a new goal
+ */
+function addSelectedTasksToPulse() {
+  if (focus2SelectedTaskIds.length === 0) {
+    showToast('No tasks selected', 'warning');
+    return;
+  }
+  var selectedTasks = todos.filter(function(t) {
+    return focus2SelectedTaskIds.indexOf(t.id) !== -1;
+  });
+  if (selectedTasks.length === 0) return;
+
+  var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+  var newGoal = {
+    id: 'goal_' + Date.now(),
+    title: 'Tasks from Focus',
+    items: selectedTasks.map(function(t, i) {
+      return {
+        id: 'item_' + Date.now() + '_' + i,
+        text: t.text,
+        completed: !!t.completed,
+        completedAt: t.completedAt || null
+      };
+    }),
+    createdAt: new Date().toISOString(),
+    source: isLifeMode ? 'lifeai' : 'brandai'
+  };
+  pulseGoals.unshift(newGoal);
+  savePulseGoals();
+  exitFocus2MultiSelect();
+  showToast('Added ' + selectedTasks.length + ' tasks to Pulse goal', 'success');
+}
+
+/**
+ * v13.2: Complete all selected tasks
+ */
+function completeSelectedTasks() {
+  if (focus2SelectedTaskIds.length === 0) {
+    showToast('No tasks selected', 'warning');
+    return;
+  }
+  var count = 0;
+  var nowStr = new Date().toISOString();
+  todos.forEach(function(t) {
+    if (focus2SelectedTaskIds.indexOf(t.id) !== -1 && !t.completed) {
+      t.completed = true;
+      t.completedAt = nowStr;
+      count++;
+    }
+  });
+  saveTodos();
+  exitFocus2MultiSelect();
+  showToast('Completed ' + count + ' tasks', 'success');
+}
+
+/**
+ * v13.2: Delete all selected tasks
+ */
+function deleteSelectedTasks() {
+  if (focus2SelectedTaskIds.length === 0) {
+    showToast('No tasks selected', 'warning');
+    return;
+  }
+  var count = focus2SelectedTaskIds.length;
+  todos = todos.filter(function(t) {
+    return focus2SelectedTaskIds.indexOf(t.id) === -1;
+  });
+  saveTodos();
+  exitFocus2MultiSelect();
+  showToast('Deleted ' + count + ' tasks', 'success');
+}
+
+/**
+ * v13.2: Exit multi-select mode
+ */
+function exitFocus2MultiSelect() {
+  focus2MultiSelectMode = false;
+  focus2SelectedTaskIds = [];
+  var toolbar = document.getElementById('focus2MultiSelectToolbar');
+  if (toolbar) toolbar.style.display = 'none';
+  renderFocus2Categories();
+  updateFocus2Stats();
 }
 
 /**
@@ -69750,11 +69977,22 @@ function renderFocus2Automations() {
     html += '<div class="focus-2-empty" style="padding: var(--space-4);"><div class="focus-2-empty-text" style="font-size: var(--text-sm); color: var(--text-muted);">No automations yet</div></div>';
   } else {
     allAutomations.forEach(function(auto) {
+      // v13.2: Show recurrence badge and date
+      var recurLabel = '';
+      if (auto.recurType && auto.recurType !== 'none') {
+        var recurMap = { daily: 'Daily', weekdays: 'Weekdays', weekly: 'Weekly', biweekly: 'Biweekly', monthly: 'Monthly' };
+        recurLabel = '<span class="focus-2-automation-recur">' + (recurMap[auto.recurType] || auto.recurType) + '</span>';
+      } else if (auto.trigger && auto.trigger !== 'time') {
+        recurLabel = '<span class="focus-2-automation-recur">' + auto.trigger + '</span>';
+      }
+      var dateLabel = auto.scheduledDate ? auto.scheduledDate : '';
+      var actionLabel = auto.action || 'notify';
+      var actionMap = { notify: 'Notify', create: 'Create task', message: 'AI message', studio: 'Studio op', pulse: 'Pulse update', rhythm: 'Rhythm event', library: 'Save to Library' };
       html += '<div class="focus-2-automation-item">';
       html += '<div class="focus-2-automation-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
       html += '<div class="focus-2-automation-info">';
-      html += '<div class="focus-2-automation-name">' + escapeHtml(auto.name) + '</div>';
-      html += '<div class="focus-2-automation-time">' + (auto.time || '9:00 AM') + ' \u2022 ' + (auto.trigger || 'time') + ' \u2022 ' + (auto.action || 'Reminder') + '</div>';
+      html += '<div class="focus-2-automation-name">' + escapeHtml(auto.name) + ' ' + recurLabel + '</div>';
+      html += '<div class="focus-2-automation-time">' + (auto.time || '9:00') + (dateLabel ? ' | ' + dateLabel : '') + ' | ' + (actionMap[actionLabel] || actionLabel) + '</div>';
       html += '</div>';
       html += '<button class="focus-2-automation-run" onclick="deleteFocusAutomation(' + auto.id + ')" title="Delete" style="background: transparent; color: var(--text-muted); border: none; padding: 4px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>';
       html += '</div>';
@@ -69778,44 +70016,116 @@ function showFocusGlobalAutomationForm() {
   // Check if form already exists
   if (document.getElementById('globalAutoForm')) return;
 
+  // v13.2: Expanded automation form with date, recurrence, and module targets
+  var todayStr = new Date().toISOString().slice(0, 10);
   var html = '<div id="globalAutoForm" class="focus-2-automation-inline" style="margin-top: var(--space-3);">';
   html += '<div class="focus-2-automation-inline-header">';
   html += '<div class="focus-2-automation-inline-title">New Automation</div>';
-  html += '<button onclick="document.getElementById(\'globalAutoForm\').remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;">\u00d7</button>';
+  html += '<button onclick="cancelAutomationForm()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;">x</button>';
   html += '</div>';
-  html += '<div class="focus-2-automation-field"><label>When</label>';
-  html += '<select id="globalAutoTrigger"><option value="time">At a specific time</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></div>';
-  html += '<div class="focus-2-automation-field"><label>Then</label>';
-  html += '<select id="globalAutoAction"><option value="notify">Send notification</option><option value="create">Create a task</option><option value="message">Send to AI</option></select></div>';
+  html += '<div class="focus-2-automation-field"><label>Name</label>';
+  html += '<input type="text" id="globalAutoDesc" placeholder="Automation name..."></div>';
+  html += '<div class="focus-2-automation-field"><label>Date</label>';
+  html += '<input type="date" id="globalAutoDate" value="' + todayStr + '"></div>';
   html += '<div class="focus-2-automation-field"><label>Time</label>';
   html += '<input type="time" id="globalAutoTime" value="09:00"></div>';
-  html += '<div class="focus-2-automation-field"><label>Description</label>';
-  html += '<input type="text" id="globalAutoDesc" placeholder="e.g., Check tasks at 9am"></div>';
+  html += '<div class="focus-2-automation-field"><label>Recurrence</label>';
+  html += '<select id="globalAutoRecur">';
+  html += '<option value="none">None (one-time)</option>';
+  html += '<option value="daily">Daily</option>';
+  html += '<option value="weekdays">Weekdays</option>';
+  html += '<option value="weekly">Weekly</option>';
+  html += '<option value="biweekly">Biweekly</option>';
+  html += '<option value="monthly">Monthly</option>';
+  html += '</select></div>';
+  html += '<div class="focus-2-automation-field"><label>Action</label>';
+  html += '<select id="globalAutoAction" onchange="renderAutoTargetConfig(this.value)">';
+  html += '<option value="notify">Send notification</option>';
+  html += '<option value="create">Create a task</option>';
+  html += '<option value="message">Send to AI</option>';
+  html += '<option value="studio">Run Studio operation</option>';
+  html += '<option value="pulse">Update Pulse goal</option>';
+  html += '<option value="rhythm">Add Rhythm event</option>';
+  html += '<option value="library">Save to Library</option>';
+  html += '</select></div>';
+  html += '<div id="globalAutoTargetConfig"></div>';
   html += '<div style="display:flex;gap:8px;margin-top:var(--space-3);">';
-  html += '<button class="focus-2-btn" onclick="document.getElementById(\'globalAutoForm\').remove()">Cancel</button>';
-  html += '<button class="focus-2-btn focus-2-btn-primary" onclick="saveGlobalAutomation()">Create</button>';
+  html += '<button class="focus-2-btn" onclick="cancelAutomationForm()">Cancel</button>';
+  html += '<button class="focus-2-btn focus-2-btn-primary" onclick="saveGlobalAutomation()">Save</button>';
   html += '</div></div>';
 
   container.insertAdjacentHTML('beforeend', html);
 }
 
-function saveGlobalAutomation() {
-  var trigger = document.getElementById('globalAutoTrigger') ? document.getElementById('globalAutoTrigger').value : 'time';
-  var action = document.getElementById('globalAutoAction') ? document.getElementById('globalAutoAction').value : 'notify';
-  var time = document.getElementById('globalAutoTime') ? document.getElementById('globalAutoTime').value : '09:00';
-  var desc = document.getElementById('globalAutoDesc') ? document.getElementById('globalAutoDesc').value : '';
-  if (!desc) { showToast('Please enter a description', 'warning'); return; }
+/**
+ * v13.2: Render target config sub-options based on selected action
+ */
+function renderAutoTargetConfig(action) {
+  var container = document.getElementById('globalAutoTargetConfig');
+  if (!container) return;
+  var html = '';
+  if (action === 'create') {
+    var cats = (window.todoCategories || []);
+    html += '<div class="focus-2-automation-field"><label>Category</label>';
+    html += '<select id="globalAutoTargetCat"><option value="">Default</option>';
+    cats.forEach(function(c) { html += '<option value="' + escapeHtml(c.name) + '">' + escapeHtml(c.name) + '</option>'; });
+    html += '</select></div>';
+    html += '<div class="focus-2-automation-field"><label>Task Text</label>';
+    html += '<input type="text" id="globalAutoTargetText" placeholder="Task to create..."></div>';
+  } else if (action === 'message') {
+    html += '<div class="focus-2-automation-field"><label>Message</label>';
+    html += '<input type="text" id="globalAutoTargetText" placeholder="Message to send to AI..."></div>';
+  } else if (action === 'pulse') {
+    html += '<div class="focus-2-automation-field"><label>Goal</label>';
+    html += '<select id="globalAutoTargetGoal"><option value="">Select goal...</option>';
+    (pulseGoals || []).forEach(function(g) {
+      if (!g.completed && !g.archived) html += '<option value="' + g.id + '">' + escapeHtml(g.title) + '</option>';
+    });
+    html += '</select></div>';
+  } else if (action === 'studio') {
+    html += '<div class="focus-2-automation-field"><label>Operation</label>';
+    html += '<input type="text" id="globalAutoTargetText" placeholder="Studio operation name..."></div>';
+  }
+  container.innerHTML = html;
+}
 
-  var todayStr = new Date().toISOString().slice(0, 10);
+/**
+ * v13.2: Cancel and remove automation form
+ */
+function cancelAutomationForm() {
+  var form = document.getElementById('globalAutoForm');
+  if (form) form.remove();
+}
+
+function saveGlobalAutomation() {
+  // v13.2: Read expanded form fields
+  var desc = document.getElementById('globalAutoDesc') ? document.getElementById('globalAutoDesc').value.trim() : '';
+  var date = document.getElementById('globalAutoDate') ? document.getElementById('globalAutoDate').value : '';
+  var time = document.getElementById('globalAutoTime') ? document.getElementById('globalAutoTime').value : '09:00';
+  var recurType = document.getElementById('globalAutoRecur') ? document.getElementById('globalAutoRecur').value : 'none';
+  var action = document.getElementById('globalAutoAction') ? document.getElementById('globalAutoAction').value : 'notify';
+  if (!desc) { showToast('Please enter a name', 'warning'); return; }
+
+  // Build target config based on action type
+  var target = {};
+  var targetText = document.getElementById('globalAutoTargetText');
+  var targetCat = document.getElementById('globalAutoTargetCat');
+  var targetGoal = document.getElementById('globalAutoTargetGoal');
+  if (targetText) target.text = targetText.value.trim();
+  if (targetCat) target.category = targetCat.value;
+  if (targetGoal) target.goalId = targetGoal.value;
+  target.module = action;
+
   var automation = {
     id: Date.now(),
     name: desc,
-    trigger: trigger,
-    action: action,
+    scheduledDate: date,
     time: time,
+    recurType: recurType,
+    action: action,
+    target: target,
     enabled: true,
     mode: getCurrentMode(),
-    scheduledDate: todayStr,
     createdAt: new Date().toISOString()
   };
 
@@ -69823,13 +70133,11 @@ function saveGlobalAutomation() {
   automations.push(automation);
   localStorage.setItem('roweos_automations', JSON.stringify(automations));
 
-  var scheduled = getScheduledTasks();
+  var scheduled = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
   scheduled.push(automation);
-  saveScheduledTasks(scheduled);
+  if (typeof saveScheduledTasks === 'function') saveScheduledTasks(scheduled);
 
-  var form = document.getElementById('globalAutoForm');
-  if (form) form.remove();
-
+  cancelAutomationForm();
   renderFocus2Automations();
   showToast('Automation created', 'success');
 }
@@ -86335,7 +86643,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v13.1 - ' + subtitle;
+  document.title = 'RoweOS v13.2 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -93294,6 +93602,13 @@ var lifeDragItem = null;
  * Initialize Life Rhythm view
  */
 function initLifeRhythm() {
+  // v13.2: Check for personalization survey
+  var prefs = null;
+  try { prefs = JSON.parse(localStorage.getItem('roweos_life_rhythm_preferences') || 'null'); } catch(e) {}
+  if (!prefs) {
+    showLifeRhythmSurvey();
+  }
+
   // Initialize with defaults if empty
   if (lifeRoutines.length === 0) {
     lifeRoutines = getDefaultLifeRoutines();
@@ -93307,8 +93622,129 @@ function initLifeRhythm() {
     lifeGoals = getDefaultLifeGoals();
     saveLifeGoals();
   }
-  
+
   renderLifeRhythm();
+}
+
+/**
+ * v13.2: Show Life Rhythm personalization survey
+ */
+function showLifeRhythmSurvey() {
+  var container = document.getElementById('rhythmLifeContent');
+  if (!container) return;
+
+  // Check if survey already showing
+  if (document.getElementById('lifeRhythmSurvey')) return;
+
+  var overlay = document.createElement('div');
+  overlay.id = 'lifeRhythmSurvey';
+  overlay.style.cssText = 'position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);';
+
+  var areas = [
+    { key: 'health', label: 'Health & Fitness', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>' },
+    { key: 'productivity', label: 'Productivity', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>' },
+    { key: 'mindfulness', label: 'Mindfulness', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>' },
+    { key: 'relationships', label: 'Relationships', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>' },
+    { key: 'learning', label: 'Learning', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>' },
+    { key: 'finance', label: 'Finance', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>' },
+    { key: 'creativity', label: 'Creativity', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' }
+  ];
+
+  var checkboxes = areas.map(function(a) {
+    return '<label style="display: flex; align-items: center; gap: var(--space-3); padding: 12px; background: var(--bg-tertiary); border-radius: var(--radius-md); cursor: pointer; border: 1px solid var(--border-color); transition: all 0.15s ease;" onmouseover="this.style.borderColor=\'var(--life-accent)\'" onmouseout="this.style.borderColor=\'var(--border-color)\'">' +
+      '<input type="checkbox" class="rhythm-pref-check" value="' + a.key + '" style="accent-color: var(--life-accent); width: 18px; height: 18px;">' +
+      '<div style="color: var(--life-accent);">' + a.icon + '</div>' +
+      '<span style="color: var(--text-primary); font-weight: 500;">' + a.label + '</span>' +
+    '</label>';
+  }).join('');
+
+  overlay.innerHTML = '<div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--space-6); max-width: 480px; width: 90%;">' +
+    '<div style="text-align: center; margin-bottom: var(--space-5);">' +
+      '<div style="font-size: var(--text-2xl); font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-2);">Personalize Your Rhythm</div>' +
+      '<div style="color: var(--text-muted);">Select the areas you want to focus on. We\'ll customize your routines, habits, and goals.</div>' +
+    '</div>' +
+    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-bottom: var(--space-5);">' + checkboxes + '</div>' +
+    '<button class="pulse-3-btn pulse-3-btn-primary" onclick="saveLifeRhythmSurvey()" style="width: 100%; padding: 12px; font-size: var(--text-base); background: var(--life-accent, #22c55e); border: none; border-radius: var(--radius-lg); color: #fff; font-weight: 600; cursor: pointer;">Get Started</button>' +
+  '</div>';
+
+  container.style.position = 'relative';
+  container.appendChild(overlay);
+}
+
+/**
+ * v13.2: Save survey selections and generate personalized defaults
+ */
+function saveLifeRhythmSurvey() {
+  var checks = document.querySelectorAll('.rhythm-pref-check:checked');
+  var selected = [];
+  checks.forEach(function(c) { selected.push(c.value); });
+
+  if (selected.length === 0) {
+    showToast('Please select at least one area', 'warning');
+    return;
+  }
+
+  var prefs = { areas: selected, completedAt: new Date().toISOString() };
+  localStorage.setItem('roweos_life_rhythm_preferences', JSON.stringify(prefs));
+
+  // Generate personalized defaults
+  generatePersonalizedDefaults(prefs);
+
+  // Remove survey overlay
+  var overlay = document.getElementById('lifeRhythmSurvey');
+  if (overlay) overlay.remove();
+
+  renderLifeRhythm();
+  showToast('Rhythm personalized!', 'success');
+}
+
+/**
+ * v13.2: Generate personalized routines, habits, and goals based on survey
+ */
+function generatePersonalizedDefaults(prefs) {
+  var areas = prefs.areas || [];
+  var newRoutines = [];
+  var newHabits = [];
+  var baseId = Date.now();
+
+  if (areas.indexOf('health') !== -1) {
+    newRoutines.push({ id: baseId++, name: 'Morning workout', time: '06:30', duration: 30, status: '' });
+    newHabits.push({ id: baseId++, name: 'Drink 8 glasses of water', streak: 0, completedDates: [] });
+    newHabits.push({ id: baseId++, name: '10,000 steps', streak: 0, completedDates: [] });
+  }
+  if (areas.indexOf('productivity') !== -1) {
+    newRoutines.push({ id: baseId++, name: 'Deep work block', time: '09:00', duration: 90, status: '' });
+    newHabits.push({ id: baseId++, name: 'Plan tomorrow tonight', streak: 0, completedDates: [] });
+    newRoutines.push({ id: baseId++, name: 'Weekly review', time: '17:00', duration: 30, status: '' });
+  }
+  if (areas.indexOf('mindfulness') !== -1) {
+    newRoutines.push({ id: baseId++, name: 'Morning meditation', time: '07:00', duration: 15, status: '' });
+    newHabits.push({ id: baseId++, name: 'Gratitude journaling', streak: 0, completedDates: [] });
+  }
+  if (areas.indexOf('relationships') !== -1) {
+    newHabits.push({ id: baseId++, name: 'Reach out to a friend', streak: 0, completedDates: [] });
+  }
+  if (areas.indexOf('learning') !== -1) {
+    newRoutines.push({ id: baseId++, name: 'Reading time', time: '20:00', duration: 30, status: '' });
+    newHabits.push({ id: baseId++, name: 'Learn something new', streak: 0, completedDates: [] });
+  }
+  if (areas.indexOf('finance') !== -1) {
+    newHabits.push({ id: baseId++, name: 'Track expenses', streak: 0, completedDates: [] });
+  }
+  if (areas.indexOf('creativity') !== -1) {
+    newRoutines.push({ id: baseId++, name: 'Creative session', time: '14:00', duration: 45, status: '' });
+    newHabits.push({ id: baseId++, name: 'Create or make something', streak: 0, completedDates: [] });
+  }
+
+  // Only set defaults if user has no existing data
+  if (lifeRoutines.length === 0 && newRoutines.length > 0) {
+    lifeRoutines = newRoutines;
+    saveLifeRoutines();
+  }
+  if (lifeHabits.length === 0 && newHabits.length > 0) {
+    lifeHabits = newHabits;
+    saveLifeHabits();
+  }
 }
 
 /**
@@ -93348,6 +93784,94 @@ function getDefaultLifeGoals() {
     { id: 2, name: 'Read 12 books this year', progress: 15, dueDate: null },
     { id: 3, name: 'Exercise 4x per week', progress: 50, dueDate: nextMonth.toISOString().slice(0, 10) }
   ];
+}
+
+/**
+ * v13.2: Analyze life patterns from local data
+ */
+function analyzeLifePatterns() {
+  var container = document.getElementById('lifePatternsContent');
+  if (!container) return;
+
+  var patterns = [];
+  var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Task completion by day of week
+  var dayStats = [0, 0, 0, 0, 0, 0, 0];
+  (todos || []).filter(function(t) { return t.completed && t.completedAt; }).forEach(function(t) {
+    try {
+      var day = new Date(t.completedAt).getDay();
+      dayStats[day]++;
+    } catch(e) {}
+  });
+  var maxDay = dayStats.indexOf(Math.max.apply(null, dayStats));
+  var totalCompleted = dayStats.reduce(function(a, b) { return a + b; }, 0);
+  if (totalCompleted > 0) {
+    patterns.push({
+      icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+      label: 'Most productive day',
+      value: dayNames[maxDay] + ' (' + dayStats[maxDay] + ' tasks)'
+    });
+  }
+
+  // Habit streaks
+  var bestHabit = { name: 'None', streak: 0 };
+  (lifeHabits || []).forEach(function(h) {
+    if ((h.streak || 0) > bestHabit.streak) {
+      bestHabit = { name: h.name, streak: h.streak };
+    }
+  });
+  if (bestHabit.streak > 0) {
+    patterns.push({
+      icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>',
+      label: 'Strongest habit',
+      value: bestHabit.name + ' (' + bestHabit.streak + ' day streak)'
+    });
+  }
+
+  // Journal frequency (last 30 days)
+  var thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  var recentEntries = (pulse2JournalEntries || []).filter(function(e) {
+    return new Date(e.timestamp).getTime() > thirtyDaysAgo;
+  });
+  var uniqueDays = {};
+  recentEntries.forEach(function(e) { uniqueDays[e.date] = true; });
+  var journalDayCount = Object.keys(uniqueDays).length;
+  patterns.push({
+    icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>',
+    label: 'Journal frequency',
+    value: journalDayCount + ' days in last 30'
+  });
+
+  // Routine completion rate
+  var routineCompleted = (lifeRoutines || []).filter(function(r) { return r.status === 'completed'; }).length;
+  var routineTotal = (lifeRoutines || []).length;
+  if (routineTotal > 0) {
+    var routinePct = Math.round((routineCompleted / routineTotal) * 100);
+    patterns.push({
+      icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+      label: 'Today\'s routine',
+      value: routinePct + '% complete (' + routineCompleted + '/' + routineTotal + ')'
+    });
+  }
+
+  if (patterns.length === 0) {
+    container.innerHTML = '<div class="life-empty-state">Not enough data yet. Keep using RoweOS!</div>';
+    return;
+  }
+
+  var html = patterns.map(function(p) {
+    return '<div style="display: flex; align-items: center; gap: var(--space-3); padding: 8px 0; border-bottom: 1px solid var(--border-color);">' +
+      '<div style="flex-shrink: 0;">' + p.icon + '</div>' +
+      '<div style="flex: 1;">' +
+        '<div style="font-size: var(--text-sm); color: var(--text-muted);">' + p.label + '</div>' +
+        '<div style="font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);">' + escapeHtml(p.value) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  container.innerHTML = html;
+  showToast('Patterns analyzed', 'success');
 }
 
 /**
@@ -93484,6 +94008,54 @@ function lifeRoutineDrop(e) {
   }
 }
 
+// v13.2: Habit drag-drop handlers (same pattern as routine)
+var lifeHabitDragItem = null;
+
+function lifeHabitDragStart(e) {
+  lifeHabitDragItem = e.target.closest('.life-habit-item');
+  if (lifeHabitDragItem) {
+    lifeHabitDragItem.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  }
+}
+
+function lifeHabitDragEnd(e) {
+  if (lifeHabitDragItem) {
+    lifeHabitDragItem.classList.remove('dragging');
+    lifeHabitDragItem = null;
+  }
+  document.querySelectorAll('.life-habit-item').forEach(function(el) {
+    el.classList.remove('drag-over');
+  });
+}
+
+function lifeHabitDragOver(e) {
+  e.preventDefault();
+  var target = e.target.closest('.life-habit-item');
+  if (target && target !== lifeHabitDragItem) {
+    document.querySelectorAll('.life-habit-item').forEach(function(el) {
+      el.classList.remove('drag-over');
+    });
+    target.classList.add('drag-over');
+  }
+}
+
+function lifeHabitDrop(e) {
+  e.preventDefault();
+  var target = e.target.closest('.life-habit-item');
+  if (target && lifeHabitDragItem && target !== lifeHabitDragItem) {
+    var fromIdx = parseInt(lifeHabitDragItem.dataset.idx);
+    var toIdx = parseInt(target.dataset.idx);
+
+    var item = lifeHabits.splice(fromIdx, 1)[0];
+    lifeHabits.splice(toIdx, 0, item);
+
+    saveLifeHabits();
+    renderLifeHabitsList();
+    showToast('Habits reordered', 'success');
+  }
+}
+
 /**
  * Toggle routine item status
  */
@@ -93580,18 +94152,20 @@ function deleteLifeRoutineItem(id) {
 function renderLifeHabitsList() {
   var container = document.getElementById('lifeHabitsList');
   if (!container) return;
-  
+
   var today = new Date().toISOString().slice(0, 10);
-  
+
   if (lifeHabits.length === 0) {
     container.innerHTML = '<div class="life-empty-state">No habits yet.</div>';
     return;
   }
-  
+
   var html = '';
-  lifeHabits.forEach(function(habit) {
+  lifeHabits.forEach(function(habit, idx) {
     var isChecked = habit.completedDates && habit.completedDates.indexOf(today) !== -1;
-    html += '<div class="life-habit-item">';
+    // v13.2: Add draggable support and streak fire icon
+    html += '<div class="life-habit-item" draggable="true" data-id="' + habit.id + '" data-idx="' + idx + '" ondragstart="lifeHabitDragStart(event)" ondragend="lifeHabitDragEnd(event)" ondragover="lifeHabitDragOver(event)" ondrop="lifeHabitDrop(event)">';
+    html += '<div class="life-routine-drag-handle"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg></div>';
     html += '<div class="life-habit-check ' + (isChecked ? 'checked' : '') + '" onclick="toggleLifeHabit(' + habit.id + ')">';
     if (isChecked) {
       html += icon('check', {size: 12, strokeWidth: 3});
@@ -93599,12 +94173,17 @@ function renderLifeHabitsList() {
     html += '</div>';
     html += '<div class="life-habit-info" style="flex:1;">';
     html += '<input type="text" class="life-habit-name-input" value="' + escapeHtml(habit.name) + '" onchange="updateLifeHabitName(' + habit.id + ', this.value)" onclick="event.stopPropagation()" placeholder="Habit name"/>';
-    html += '<div class="life-habit-streak">' + (habit.streak || 0) + ' day streak</div>';
+    // v13.2: Fire icon for 7+ day streaks
+    var streakDisplay = (habit.streak || 0) + ' day streak';
+    if ((habit.streak || 0) >= 7) {
+      streakDisplay = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#f59e0b" stroke-width="2" style="vertical-align: -1px;"><path d="M12 2L2 12l3 1L2 22l14-9-3-1 6-9z"/></svg> ' + streakDisplay;
+    }
+    html += '<div class="life-habit-streak">' + streakDisplay + '</div>';
     html += '</div>';
     html += '<button class="life-routine-action-btn delete-btn" onclick="deleteLifeHabit(' + habit.id + ')" title="Delete"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
     html += '</div>';
   });
-  
+
   container.innerHTML = html;
 }
 
@@ -93680,26 +94259,39 @@ function addLifeHabit() {
 function renderLifeGoalsPanel() {
   var container = document.getElementById('lifeGoalsListPanel');
   if (!container) return;
-  
-  if (lifeGoals.length === 0) {
-    container.innerHTML = '<div class="life-empty-state">No goals yet.</div>';
+
+  // v13.2: Pull from Pulse goals instead of separate lifeGoals
+  var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+  var goals = (pulseGoals || []).filter(function(g) {
+    if (g.completed || g.archived) return false;
+    if (isLifeMode) return g.source === 'lifeai';
+    return g.source === 'brandai' || g.source === 'studio';
+  });
+
+  if (goals.length === 0) {
+    container.innerHTML = '<div class="life-empty-state">No active goals. Create one in Pulse.</div>';
     return;
   }
-  
-  var html = '';
-  lifeGoals.forEach(function(goal) {
-    html += '<div class="life-goal-item">';
-    html += '<div class="life-goal-top">';
-    html += '<input type="text" class="life-goal-name-input" value="' + escapeHtml(goal.name) + '" onchange="updateLifeGoalName(' + goal.id + ', this.value)" onclick="event.stopPropagation()" placeholder="Goal name"/>';
-    html += '<div style="display:flex;align-items:center;gap:6px;">';
-    html += '<input type="number" class="life-goal-progress-input" value="' + (goal.progress || 0) + '" onchange="updateLifeGoalProgress(' + goal.id + ', this.value)" onclick="event.stopPropagation()" min="0" max="100"/>%';
-    html += '<button class="life-routine-action-btn delete-btn" onclick="deleteLifeGoal(' + goal.id + ')" title="Delete"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
-    html += '</div>';
-    html += '</div>';
-    html += '<div class="life-goal-bar"><div class="life-goal-fill" style="width: ' + (goal.progress || 0) + '%;"></div></div>';
-    html += '</div>';
-  });
-  
+
+  var html = goals.map(function(goal) {
+    var allItems = (goal.items || []);
+    if (goal.sections) {
+      goal.sections.forEach(function(s) { allItems = allItems.concat(s.items || []); });
+    }
+    var total = allItems.length;
+    var done = allItems.filter(function(i) { return i.completed; }).length;
+    var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    return '<div class="life-goal-item">' +
+      '<div class="life-goal-top">' +
+        '<div class="life-goal-name" style="flex:1;font-weight:500;color:var(--text-primary);font-size:var(--text-sm);">' + escapeHtml(goal.title) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+          '<span style="font-size:var(--text-sm);color:var(--text-muted);">' + pct + '%</span>' +
+          '<button class="life-goal-pulse-link" onclick="showView(\'pulse\')" title="View in Pulse" style="background:none;border:none;color:var(--life-accent,var(--accent));cursor:pointer;padding:2px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="life-goal-bar"><div class="life-goal-fill" style="width:' + pct + '%;"></div></div>' +
+    '</div>';
+  }).join('');
   container.innerHTML = html;
 }
 
@@ -93707,19 +94299,11 @@ function renderLifeGoalsPanel() {
  * Add goal
  */
 function addLifeGoal() {
-  var name = prompt('Goal name:');
-  if (!name || !name.trim()) return;
-  
-  lifeGoals.push({
-    id: Date.now(),
-    name: name.trim(),
-    progress: 0,
-    dueDate: null
-  });
-  
-  saveLifeGoals();
-  renderLifeGoalsPanel();
-  showToast('Goal added!', 'success');
+  // v13.2: Redirect to Pulse for goal creation
+  showView('pulse');
+  setTimeout(function() {
+    if (typeof openNewGoalModal === 'function') openNewGoalModal();
+  }, 300);
 }
 
 /**
@@ -94248,6 +94832,7 @@ function renderPulse3Checklists() {
       '<div class="pulse-3-checklist-items">' + itemsHtml + '</div>' +
       '<div class="pulse-3-checklist-actions">' +
         '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="addItemToGoal(\'' + goal.id + '\')">+ Add Item</button>' +
+        '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="showTodoImportForGoal(\'' + goal.id + '\')">Import Todos</button>' +
         '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="editGoal(\'' + goal.id + '\')">Edit</button>' +
         '<button class="pulse-3-btn pulse-3-btn-danger" onclick="deleteGoal(\'' + goal.id + '\')">Delete</button>' +
         (progress === 100 ? '<button class="pulse-3-btn pulse-3-btn-primary" onclick="completeGoal(\'' + goal.id + '\')">Mark Complete</button>' : '') +
@@ -94420,7 +95005,22 @@ function getLifeIdentityContextForGoals() {
     if (identity.values && identity.values.length) context.push('Core Values: ' + identity.values.join(', '));
     if (identity.goals && identity.goals.length) context.push('Life Goals: ' + identity.goals.join(', '));
     if (identity.interests && identity.interests.length) context.push('Interests: ' + identity.interests.join(', '));
-    
+
+    // v13.2: Add todos summary for richer context
+    var todayStr = new Date().toISOString().slice(0, 10);
+    var pendingTodos = (todos || []).filter(function(t) { return !t.completed && t.brand === '_life'; });
+    var categories = (window.todoCategories || []).map(function(c) { return c.name; });
+    if (pendingTodos.length > 0) context.push('Pending Tasks: ' + pendingTodos.length + ' across categories: ' + categories.join(', '));
+    var overdue = pendingTodos.filter(function(t) { return t.date && t.date < todayStr; });
+    if (overdue.length > 0) context.push('Overdue Tasks: ' + overdue.length);
+
+    // v13.2: Add recent library titles
+    try {
+      var lifeLib = JSON.parse(localStorage.getItem('roweos_life_library') || '{}');
+      var libFiles = (lifeLib.files || []).slice(-5);
+      if (libFiles.length > 0) context.push('Recent Documents: ' + libFiles.map(function(f) { return f.name; }).join(', '));
+    } catch(e2) {}
+
     return context.length > 0 ? '\n\n=== ABOUT THE USER ===\n' + context.join('\n') : '';
   } catch (e) {
     return '';
@@ -94444,7 +95044,23 @@ function getBrandContextForGoals() {
     if (brand.mission) context.push('Mission: ' + brand.mission);
     if (brand.targetAudience) context.push('Target Audience: ' + brand.targetAudience);
     if (brand.differentiators) context.push('Key Differentiators: ' + brand.differentiators);
-    
+
+    // v13.2: Add brand-mode todos summary
+    var todayStr = new Date().toISOString().slice(0, 10);
+    var brandIdx = selectedBrand;
+    var pendingTodos = (todos || []).filter(function(t) { return !t.completed && (t.brand === String(brandIdx) || t.brand === brand.name); });
+    var categories = (window.todoCategories || []).map(function(c) { return c.name; });
+    if (pendingTodos.length > 0) context.push('Pending Tasks: ' + pendingTodos.length + ' across categories: ' + categories.join(', '));
+    var overdue = pendingTodos.filter(function(t) { return t.date && t.date < todayStr; });
+    if (overdue.length > 0) context.push('Overdue Tasks: ' + overdue.length);
+
+    // v13.2: Add brand library titles
+    try {
+      var brandLib = JSON.parse(localStorage.getItem('roweos_brand_library_' + brandIdx) || localStorage.getItem('roweos_library') || '{}');
+      var libFiles = (brandLib.files || []).slice(-5);
+      if (libFiles.length > 0) context.push('Recent Documents: ' + libFiles.map(function(f) { return f.name; }).join(', '));
+    } catch(e2) {}
+
     return context.length > 0 ? '\n\n=== BRAND CONTEXT ===\n' + context.join('\n') : '';
   } catch (e) {
     return '';
@@ -95129,6 +95745,92 @@ function addItemToGoal(goalId) {
 }
 
 /**
+ * v13.2: Show todo import panel for a goal
+ */
+function showTodoImportForGoal(goalId) {
+  var card = document.querySelector('.pulse-3-checklist-card[data-goal-id="' + goalId + '"]');
+  if (!card) return;
+
+  // Don't add twice
+  if (card.querySelector('.pulse-3-todo-import-panel')) return;
+
+  var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+  var pendingTodos = (todos || []).filter(function(t) {
+    if (t.completed) return false;
+    if (isLifeMode) return t.brand === '_life';
+    return t.brand !== '_life';
+  });
+
+  // Group by category
+  var grouped = {};
+  pendingTodos.forEach(function(t) {
+    var cat = t.category || 'Uncategorized';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(t);
+  });
+
+  var html = '<div class="pulse-3-todo-import-panel" style="margin-top: var(--space-3); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">';
+  html += '<div style="font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-3); display: flex; justify-content: space-between; align-items: center;">Import from Focus<button onclick="this.closest(\'.pulse-3-todo-import-panel\').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer;">x</button></div>';
+
+  if (pendingTodos.length === 0) {
+    html += '<div style="color: var(--text-muted); font-size: var(--text-sm);">No pending tasks to import.</div>';
+  } else {
+    for (var cat in grouped) {
+      html += '<div style="font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); margin: var(--space-2) 0;">' + escapeHtml(cat) + '</div>';
+      grouped[cat].forEach(function(t) {
+        html += '<label style="display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: var(--text-sm); color: var(--text-primary); cursor: pointer;">';
+        html += '<input type="checkbox" class="todo-import-check" data-todo-id="' + t.id + '" style="accent-color: var(--accent);">';
+        html += escapeHtml(t.text);
+        html += '</label>';
+      });
+    }
+    html += '<button class="pulse-3-btn pulse-3-btn-primary" onclick="importSelectedTodosToGoal(\'' + goalId + '\')" style="margin-top: var(--space-3);">Import Selected</button>';
+  }
+  html += '</div>';
+
+  var actionsDiv = card.querySelector('.pulse-3-checklist-actions');
+  if (actionsDiv) {
+    actionsDiv.insertAdjacentHTML('beforebegin', html);
+  } else {
+    card.insertAdjacentHTML('beforeend', html);
+  }
+}
+
+/**
+ * v13.2: Import selected todos into a goal
+ */
+function importSelectedTodosToGoal(goalId) {
+  var goal = pulseGoals.find(function(g) { return g.id === goalId; });
+  if (!goal) return;
+
+  var checks = document.querySelectorAll('.todo-import-check:checked');
+  if (checks.length === 0) {
+    showToast('No tasks selected', 'warning');
+    return;
+  }
+
+  if (!goal.items) goal.items = [];
+  var count = 0;
+  checks.forEach(function(cb) {
+    var todoId = parseInt(cb.getAttribute('data-todo-id'));
+    var todo = todos.find(function(t) { return t.id === todoId; });
+    if (todo) {
+      goal.items.push({
+        id: 'item_' + Date.now() + '_' + count,
+        text: todo.text,
+        completed: false,
+        completedAt: null
+      });
+      count++;
+    }
+  });
+
+  savePulseGoals();
+  renderPulse3Checklists();
+  showToast('Imported ' + count + ' tasks', 'success');
+}
+
+/**
  * v10.7.11: AI-powered custom LifeAI task creation with category detection
  * Uses AI to detect category from task description
  */
@@ -95766,9 +96468,9 @@ function initPulse2() {
   renderPulse2Journal();
   renderPulse2Activity();
   renderPulse2Overview();
-  renderPulse2MoodChart();
   renderPulse2FocusSessions();
-  initPulse2MoodSelector();
+  // v13.2: Mood chart and mood selector removed, replaced by tags
+  checkPulseSuggestionsStale(); // v13.2: Auto-refresh suggestions if stale
 }
 
 /**
@@ -95823,18 +96525,35 @@ function renderPulse2Journal() {
   }
   
   var html = dayEntries.map(function(entry) {
-    var moodLabel = { great: 'Great', good: 'Good', okay: 'Okay', challenging: 'Hard' }[entry.mood] || '';
+    // v13.2: Show tag badge instead of mood, show subject as heading
+    var tagLabel = entry.tag || entry.mood || '';
+    var tagColors = { reflection: '#60a5fa', progress: '#22c55e', challenge: '#f59e0b', idea: '#a78bfa', win: '#34d399', great: '#22c55e', good: '#60a5fa', okay: '#f59e0b', challenging: '#ef4444' };
+    var tagColor = tagColors[tagLabel] || 'var(--text-muted)';
     var time = new Date(entry.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    
+    var subjectHtml = entry.subject ? '<div class="pulse-2-entry-item-subject" style="font-weight: 600; font-size: var(--text-base); color: var(--text-primary); margin-bottom: 4px;">' + escapeHtml(entry.subject) + '</div>' : '';
+    var tagHtml = tagLabel ? '<div style="font-size: var(--text-xs); padding: 2px 8px; background: ' + tagColor + '22; color: ' + tagColor + '; border-radius: var(--radius-xs); font-weight: 600;">' + tagLabel.charAt(0).toUpperCase() + tagLabel.slice(1) + '</div>' : '';
+
     return '<div class="pulse-2-entry-item">' +
       '<div class="pulse-2-entry-item-header">' +
         '<div class="pulse-2-entry-item-date">' + time + '</div>' +
-        '<div class="pulse-2-entry-item-mood" style="font-size: var(--text-sm); padding: 2px 8px; background: var(--bg-tertiary); border-radius: var(--radius-xs);">' + moodLabel + '</div>' +
+        tagHtml +
       '</div>' +
+      subjectHtml +
       '<div class="pulse-2-entry-item-text">' + escapeHtml(entry.text) + '</div>' +
     '</div>';
   }).join('');
-  
+
+  // v13.2: Pull today's Focus notes into journal view
+  try {
+    var focusNotes = localStorage.getItem('roweos_focus_notes_' + targetDateStr);
+    if (focusNotes && focusNotes.trim()) {
+      html += '<div class="pulse-2-focus-notes" style="margin-top: var(--space-4); padding: var(--space-3); background: var(--bg-tertiary); border-radius: var(--radius-md); border-left: 3px solid var(--accent);">' +
+        '<div style="font-size: var(--text-sm); font-weight: 600; color: var(--accent); margin-bottom: 4px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Focus Notes</div>' +
+        '<div style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.5;">' + escapeHtml(focusNotes) + '</div>' +
+      '</div>';
+    }
+  } catch(e) {}
+
   listEl.innerHTML = html;
 }
 
@@ -95856,33 +96575,47 @@ function initPulse2MoodSelector() {
  */
 function savePulse2Entry() {
   var input = document.getElementById('pulse2EntryInput');
-  var selectedMood = document.querySelector('.pulse-2-mood-btn.selected');
-  
+  var subjectInput = document.getElementById('pulse2EntrySubject');
+  // v13.2: Get selected tag instead of mood
+  var selectedTag = document.querySelector('.pulse-2-tag-btn.selected');
+
   if (!input || !input.value.trim()) {
     showToast('Please write something first', 'warning');
     return;
   }
-  
+
   var entry = {
     id: Date.now(),
     date: new Date().toISOString().slice(0, 10),
     timestamp: new Date().toISOString(),
     text: input.value.trim(),
-    mood: selectedMood ? selectedMood.getAttribute('data-mood') : 'okay'
+    subject: subjectInput ? subjectInput.value.trim() : '',
+    tag: selectedTag ? selectedTag.getAttribute('data-tag') : '',
+    mood: selectedTag ? selectedTag.getAttribute('data-tag') : 'okay'  // backward compat
   };
-  
+
   pulse2JournalEntries.push(entry);
   localStorage.setItem('roweos_pulse2_entries', JSON.stringify(pulse2JournalEntries));
-  
+
   input.value = '';
-  var buttons = document.querySelectorAll('.pulse-2-mood-btn');
-  buttons.forEach(function(b) { b.classList.remove('selected'); });
-  
+  if (subjectInput) subjectInput.value = '';
+  var tagBtns = document.querySelectorAll('.pulse-2-tag-btn');
+  tagBtns.forEach(function(b) { b.classList.remove('selected'); });
+
   pulse2CurrentDateOffset = 0;
   renderPulse2Journal();
-  renderPulse2MoodChart();
   renderPulse2Activity();
   showToast('Entry saved', 'success');
+}
+
+/**
+ * v13.2: Toggle tag selection on journal entry
+ */
+function togglePulse2Tag(btn) {
+  var siblings = btn.parentElement.querySelectorAll('.pulse-2-tag-btn');
+  var wasSelected = btn.classList.contains('selected');
+  siblings.forEach(function(b) { b.classList.remove('selected'); });
+  if (!wasSelected) btn.classList.add('selected');
 }
 
 /**
@@ -96056,13 +96789,213 @@ function renderPulse2FocusSessions() {
   container.innerHTML = html;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// v13.2: SMART SUGGESTIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * v13.2: Refresh AI-driven smart suggestions
+ */
+function refreshPulseSuggestions() {
+  var container = document.getElementById('pulse3SuggestionsList');
+  var wrapper = document.getElementById('pulse3Suggestions');
+  if (!container) return;
+
+  var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+  var mode = isLifeMode ? 'life' : 'brand';
+
+  // Build context
+  var activeGoals = (pulseGoals || []).filter(function(g) { return !g.archived && !g.completed; });
+  var goalSummary = activeGoals.slice(0, 3).map(function(g) {
+    var items = (g.items || []);
+    if (g.sections) g.sections.forEach(function(s) { items = items.concat(s.items || []); });
+    var done = items.filter(function(i) { return i.completed; }).length;
+    return g.title + ' (' + done + '/' + items.length + ')';
+  }).join('; ');
+
+  var pendingTodos = (todos || []).filter(function(t) { return !t.completed; });
+  var overdueTodos = pendingTodos.filter(function(t) {
+    return t.date && t.date < new Date().toISOString().slice(0, 10);
+  });
+
+  var recentTags = [];
+  pulse2JournalEntries.slice(-5).forEach(function(e) {
+    if (e.tag) recentTags.push(e.tag);
+  });
+
+  // Generate suggestions locally (no API call needed)
+  var suggestions = [];
+
+  if (overdueTodos.length > 0) {
+    suggestions.push({ text: 'You have ' + overdueTodos.length + ' overdue tasks. Consider rescheduling or completing them today.', actionType: 'task', category: 'focus' });
+  }
+
+  if (activeGoals.length === 0) {
+    suggestions.push({ text: 'No active goals yet. Create a goal to track your progress.', actionType: 'goal', category: 'pulse' });
+  } else {
+    var lowestGoal = activeGoals.reduce(function(low, g) {
+      var items = (g.items || []);
+      if (g.sections) g.sections.forEach(function(s) { items = items.concat(s.items || []); });
+      var pct = items.length > 0 ? (items.filter(function(i) { return i.completed; }).length / items.length) : 1;
+      var lowItems = (low.items || []);
+      if (low.sections) low.sections.forEach(function(s) { lowItems = lowItems.concat(s.items || []); });
+      var lowPct = lowItems.length > 0 ? (lowItems.filter(function(i) { return i.completed; }).length / lowItems.length) : 1;
+      return pct < lowPct ? g : low;
+    }, activeGoals[0]);
+    suggestions.push({ text: 'Focus on "' + lowestGoal.title + '" -- it has the most room for progress.', actionType: 'dismiss', category: 'pulse' });
+  }
+
+  if (recentTags.indexOf('challenge') !== -1) {
+    suggestions.push({ text: 'You recently logged a challenge. Break it into smaller actionable tasks.', actionType: 'task', category: 'focus' });
+  }
+
+  if (pendingTodos.length > 10) {
+    suggestions.push({ text: 'You have ' + pendingTodos.length + ' pending tasks. Consider grouping related ones into a Pulse goal.', actionType: 'goal', category: 'focus' });
+  }
+
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var todayEntries = pulse2JournalEntries.filter(function(e) { return e.date === todayStr; });
+  if (todayEntries.length === 0) {
+    suggestions.push({ text: 'Take a moment to journal today. Quick reflections build self-awareness.', actionType: 'dismiss', category: 'journal' });
+  }
+
+  suggestions = suggestions.slice(0, 5);
+
+  // Cache suggestions
+  var cache = { suggestions: suggestions, timestamp: Date.now(), mode: mode };
+  localStorage.setItem('roweos_pulse_suggestions', JSON.stringify(cache));
+
+  renderPulseSuggestions();
+}
+
+/**
+ * v13.2: Render cached suggestions
+ */
+function renderPulseSuggestions() {
+  var container = document.getElementById('pulse3SuggestionsList');
+  var wrapper = document.getElementById('pulse3Suggestions');
+  var timeEl = document.getElementById('pulse3SuggestionsTime');
+  if (!container) return;
+
+  try {
+    var cache = JSON.parse(localStorage.getItem('roweos_pulse_suggestions') || 'null');
+    if (!cache || !cache.suggestions || cache.suggestions.length === 0) {
+      if (wrapper) wrapper.style.display = 'none';
+      return;
+    }
+
+    if (wrapper) wrapper.style.display = 'block';
+
+    // Show time since last refresh
+    if (timeEl) {
+      var mins = Math.round((Date.now() - cache.timestamp) / 60000);
+      timeEl.textContent = mins < 1 ? 'Just now' : mins + 'm ago';
+    }
+
+    var actionIcons = {
+      goal: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+      task: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>',
+      dismiss: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 01-1 1H9a1 1 0 01-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/></svg>'
+    };
+
+    var html = cache.suggestions.map(function(s, idx) {
+      var actionBtn = '';
+      if (s.actionType === 'goal') {
+        actionBtn = '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="pulseSuggestionAction(' + idx + ', \'goal\')" style="font-size: var(--text-xs); padding: 4px 8px;">Add as Goal</button>';
+      } else if (s.actionType === 'task') {
+        actionBtn = '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="pulseSuggestionAction(' + idx + ', \'task\')" style="font-size: var(--text-xs); padding: 4px 8px;">Add as Task</button>';
+      }
+      return '<div class="pulse-3-suggestion-card" style="display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--bg-tertiary); border-radius: var(--radius-md); margin-bottom: var(--space-2);">' +
+        '<div style="flex-shrink: 0; color: var(--accent);">' + (actionIcons[s.actionType] || actionIcons.dismiss) + '</div>' +
+        '<div style="flex: 1; font-size: var(--text-sm); color: var(--text-primary);">' + escapeHtml(s.text) + '</div>' +
+        actionBtn +
+        '<button style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 2px;" onclick="dismissPulseSuggestion(' + idx + ')" title="Dismiss"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>' +
+      '</div>';
+    }).join('');
+
+    container.innerHTML = html;
+  } catch(e) {
+    if (wrapper) wrapper.style.display = 'none';
+  }
+}
+
+/**
+ * v13.2: Handle suggestion action (add as goal or task)
+ */
+function pulseSuggestionAction(idx, type) {
+  try {
+    var cache = JSON.parse(localStorage.getItem('roweos_pulse_suggestions') || '{}');
+    var suggestion = cache.suggestions && cache.suggestions[idx];
+    if (!suggestion) return;
+
+    if (type === 'goal') {
+      var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+      var newGoal = {
+        id: 'goal_' + Date.now(),
+        title: suggestion.text.substring(0, 60),
+        items: [{ id: 'item_' + Date.now(), text: suggestion.text, completed: false }],
+        createdAt: new Date().toISOString(),
+        source: isLifeMode ? 'lifeai' : 'brandai'
+      };
+      pulseGoals.unshift(newGoal);
+      savePulseGoals();
+      if (typeof renderPulse3Checklists === 'function') renderPulse3Checklists();
+      showToast('Goal created from suggestion', 'success');
+    } else if (type === 'task') {
+      var newTodo = {
+        id: Date.now(),
+        text: suggestion.text,
+        completed: false,
+        date: new Date().toISOString().slice(0, 10),
+        brand: (localStorage.getItem('roweos_app_mode') || 'brand') === 'life' ? '_life' : (localStorage.getItem('selectedBrand') || '0'),
+        category: ''
+      };
+      todos.push(newTodo);
+      saveTodos();
+      showToast('Task created from suggestion', 'success');
+    }
+
+    dismissPulseSuggestion(idx);
+  } catch(e) {}
+}
+
+/**
+ * v13.2: Dismiss a suggestion
+ */
+function dismissPulseSuggestion(idx) {
+  try {
+    var cache = JSON.parse(localStorage.getItem('roweos_pulse_suggestions') || '{}');
+    if (cache.suggestions) {
+      cache.suggestions.splice(idx, 1);
+      localStorage.setItem('roweos_pulse_suggestions', JSON.stringify(cache));
+      renderPulseSuggestions();
+    }
+  } catch(e) {}
+}
+
+/**
+ * v13.2: Check if suggestions are stale and auto-refresh
+ */
+function checkPulseSuggestionsStale() {
+  try {
+    var cache = JSON.parse(localStorage.getItem('roweos_pulse_suggestions') || 'null');
+    if (!cache || (Date.now() - cache.timestamp) > 3600000) {
+      refreshPulseSuggestions();
+    } else {
+      renderPulseSuggestions();
+    }
+  } catch(e) {
+    refreshPulseSuggestions();
+  }
+}
+
 /**
  * v10.5.25: Generate AI insights
  */
 function generatePulse2Insights() {
   var container = document.getElementById('pulse2InsightsList');
   if (!container) return;
-  
+
   // v11.0.5: SVG icons instead of emojis
   var icons = {
     target: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
@@ -96070,49 +97003,86 @@ function generatePulse2Insights() {
     journal: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>',
     lightbulb: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 01-1 1H9a1 1 0 01-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/></svg>',
     sparkle: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m-7.071-2.929l.707-.707m12.728 0l.707.707M3 12h1m16 0h1M5.636 5.636l.707.707m12.728 12.728l-.707-.707"/><path d="M12 8l1.5 3 3.5.5-2.5 2.5.5 3.5L12 16l-3 1.5.5-3.5L7 11.5l3.5-.5z"/></svg>',
-    chart: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>'
+    chart: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
   };
-  
+
   var insights = [];
-  
-  // Check task completion rate
+
+  // v13.2: Goal-aware insights - reference specific goals by name and progress
+  var activeGoals = (pulseGoals || []).filter(function(g) { return !g.archived && !g.completed; });
+  if (activeGoals.length > 0) {
+    var topGoal = activeGoals[0];
+    var allItems = (topGoal.items || []);
+    if (topGoal.sections) {
+      topGoal.sections.forEach(function(s) { allItems = allItems.concat(s.items || []); });
+    }
+    var totalItems = allItems.length;
+    var doneItems = allItems.filter(function(i) { return i.completed; }).length;
+    var goalPct = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
+    if (goalPct === 100) {
+      insights.push({ icon: icons.target, text: '"' + topGoal.title + '" is 100% complete! Mark it as done and start your next goal.' });
+    } else if (goalPct > 50) {
+      insights.push({ icon: icons.target, text: '"' + topGoal.title + '" is ' + goalPct + '% complete. Keep pushing -- you\'re over halfway!' });
+    } else {
+      var nextItem = allItems.filter(function(i) { return !i.completed; })[0];
+      var nextText = nextItem ? ' Next step: ' + nextItem.text : '';
+      insights.push({ icon: icons.arrow, text: '"' + topGoal.title + '" is at ' + goalPct + '%.' + nextText });
+    }
+  }
+
+  // v13.2: Recent journal tag analysis
+  var recentEntries = pulse2JournalEntries.filter(function(e) {
+    return new Date(e.timestamp) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  });
+  var tagCounts = {};
+  recentEntries.forEach(function(e) {
+    var t = e.tag || e.mood || '';
+    if (t) tagCounts[t] = (tagCounts[t] || 0) + 1;
+  });
+  var topTag = '';
+  var topTagCount = 0;
+  for (var tk in tagCounts) {
+    if (tagCounts[tk] > topTagCount) { topTag = tk; topTagCount = tagCounts[tk]; }
+  }
+  if (topTag === 'challenge' && topTagCount >= 2) {
+    insights.push({ icon: icons.strength, text: 'You\'ve logged ' + topTagCount + ' challenges this week. Consider breaking blockers into smaller tasks.' });
+  } else if (topTag === 'win' && topTagCount >= 2) {
+    insights.push({ icon: icons.sparkle, text: topTagCount + ' wins this week! You\'re on a roll. Keep the momentum going.' });
+  } else if (recentEntries.length === 0) {
+    insights.push({ icon: icons.lightbulb, text: 'No journal entries this week. A quick daily reflection helps track progress.' });
+  } else {
+    insights.push({ icon: icons.journal, text: recentEntries.length + ' journal entries this week. Consistent reflection builds momentum.' });
+  }
+
+  // Task completion check
   var totalTasks = todos.length;
   var completedTasks = todos.filter(function(t) { return t.completed; }).length;
   var rate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-  
   if (rate > 80) {
-    insights.push({ icon: icons.target, text: 'Great job! You\'ve completed ' + rate + '% of your tasks.' });
+    insights.push({ icon: icons.chart, text: rate + '% task completion rate. Outstanding productivity!' });
   } else if (rate < 30 && totalTasks > 5) {
-    insights.push({ icon: icons.strength, text: 'You have some pending tasks. Consider breaking them into smaller steps.' });
+    insights.push({ icon: icons.strength, text: 'Task completion at ' + rate + '%. Try completing just 3 tasks today to build momentum.' });
   }
-  
-  // Check journaling streak
-  var journalDays = {};
-  pulse2JournalEntries.forEach(function(e) { journalDays[e.date] = true; });
-  if (Object.keys(journalDays).length >= 7) {
-    insights.push({ icon: icons.journal, text: 'You\'ve been journaling consistently! Keep up the great habit.' });
-  } else {
-    insights.push({ icon: icons.lightbulb, text: 'Daily journaling helps track progress. Try writing a quick reflection today.' });
-  }
-  
-  // Content creation check
-  var recentRuns = runs.filter(function(r) {
+
+  // Content creation
+  var recentRuns = (typeof runs !== 'undefined' ? runs : []).filter(function(r) {
     return new Date(r.timestamp) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   }).length;
-  
-  if (recentRuns === 0) {
-    insights.push({ icon: icons.sparkle, text: 'No content created this week. Consider running a Studio operation to stay active.' });
-  } else {
-    insights.push({ icon: icons.chart, text: 'You\'ve created ' + recentRuns + ' pieces of content this week.' });
+  if (recentRuns > 0) {
+    insights.push({ icon: icons.chart, text: recentRuns + ' Studio operations this week. Your content pipeline is active.' });
   }
-  
+
+  // Limit to 4 insights
+  insights = insights.slice(0, 4);
+
   var html = insights.map(function(i) {
     return '<div class="pulse-2-insight">' +
       '<div class="pulse-2-insight-icon">' + i.icon + '</div>' +
       '<div class="pulse-2-insight-text">' + i.text + '</div>' +
     '</div>';
   }).join('');
-  
+
   container.innerHTML = html;
   showToast('Insights updated', 'success');
 }
