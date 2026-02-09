@@ -41,7 +41,7 @@
   <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px)" href="icons/splash-1170x2532.png">
   -->
   
-  <title>RoweOS v13.3 - Brand Intelligence Platform</title>
+  <title>RoweOS v13.4 - Brand Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -2509,6 +2509,10 @@
     .nav-item-label {
       font-size: var(--text-base);
       font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .nav-item.active .nav-item-label {
+      color: var(--text-primary);
     }
     .sidebar-footer {
       flex-shrink: 0;
@@ -16453,9 +16457,9 @@
       opacity: 0.9;
     }
 
-    /* Uncategorized Card - Full Width */
+    /* v13.4: Uncategorized Card - same width as other cards */
     .focus-2-category-card.uncategorized {
-      grid-column: 1 / -1;
+      grid-column: auto;
       background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
     }
     
@@ -17067,11 +17071,11 @@
         width: 100% !important;
       }
       
-      /* v10.5.25: Mobile resize controls HEIGHT (expand down / compact up) */
-      /* Compact mode (wide) - shorter, limited height */
+      /* v13.4: Mobile resize controls HEIGHT (expand down / compact up) */
+      /* Compact mode (wide) - allow scrolling instead of truncation */
       .focus-2-widget-card.focus-2-widget-wide {
         max-height: 180px !important;
-        overflow: hidden !important;
+        overflow-y: auto !important;
       }
       
       /* Expanded mode (full) - taller, auto height */
@@ -18148,6 +18152,9 @@
       border-radius: var(--radius-xl);
       padding: var(--space-5);
       margin-bottom: var(--space-5);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-color);
     }
     
     /* v13.2: Subject input */
@@ -38151,7 +38158,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- v10.5.25: Version indicator -->
-      <div class="launch-version" id="launchVersionTag">v13.3</div>
+      <div class="launch-version" id="launchVersionTag">v13.4</div>
     </div>
   </div>
   <!-- Title Bar Drag Region (Electron) -->
@@ -38439,6 +38446,17 @@ html.light-mode .onboarding-mode-features span {
             </span>
             <span class="mobile-menu-item-label" id="mobileModeLabelV2">LifeAI</span>
           </button>
+          <!-- v13.4: Sync button for mobile -->
+          <button class="mobile-menu-item" onclick="liquidNavTo('sync'); closeMobileFullMenu();" data-menu-view="sync">
+            <span class="mobile-menu-item-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+            </span>
+            <span class="mobile-menu-item-label">Sync</span>
+          </button>
           <button class="mobile-menu-item" onclick="forceReloadFromServer(); closeMobileFullMenu();" data-menu-view="update">
             <span class="mobile-menu-item-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -38460,7 +38478,7 @@ html.light-mode .onboarding-mode-features span {
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.3</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v13.4</div>
       
     </div>
   </div>
@@ -38744,7 +38762,7 @@ html.light-mode .onboarding-mode-features span {
       <div style="font-size: var(--text-base); line-height: 1.6;">
         <div style="margin-bottom: var(--space-6); padding: var(--space-4); background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.02) 100%); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.3</span>
+            <span style="font-weight: 600; color: var(--accent); font-size: var(--text-lg);">v13.4</span>
             <span style="font-size: var(--text-xs); padding: 3px 8px; background: var(--accent); color: #000; border-radius: var(--radius-xs); font-weight: 600;">CURRENT</span>
           </div>
           <div style="color: var(--text-secondary); font-size: var(--text-sm);">
@@ -39611,7 +39629,7 @@ html.light-mode .onboarding-mode-features span {
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version">v13.3</span>
+          <span class="sidebar-version">v13.4</span>
         </div>
       </div>
     </div>
@@ -39921,7 +39939,7 @@ service cloud.firestore {
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v13.3 • Built for the future</p>
+        <p>RoweOS v13.4 -- Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -39978,7 +39996,7 @@ service cloud.firestore {
           
           <div class="onboarding-welcome-cta">
             <button class="onboarding-btn onboarding-btn-primary onboarding-btn-large" onclick="goToOnboardingStep('mode')">Get Started →</button>
-            <p class="onboarding-welcome-version">v13.3</p>
+            <p class="onboarding-welcome-version">v13.4</p>
           </div>
         </div>
       </div>
@@ -42154,7 +42172,7 @@ service cloud.firestore {
                       <div class="studio-model-section">
                         <div class="studio-model-section-label">NANOBANANA</div>
                         <div class="studio-model-item" data-provider="nanobanana" data-model="gemini-2.0-flash" onclick="selectStudioModel('nanobanana', 'gemini-2.0-flash', 'Flash (Text)')"><span>Flash (Text)</span><span class="studio-model-check">✓</span></div>
-                        <div class="studio-model-item" data-provider="nanobanana" data-model="gemini-2.0-flash-exp-image-generation" onclick="selectStudioModel('nanobanana', 'gemini-2.0-flash-exp-image-generation', 'Studio (Image)')"><span>Studio (Image)</span><span class="studio-model-check">✓</span></div>
+                        <div class="studio-model-item" data-provider="nanobanana" data-model="imagen-3.0-generate-002" onclick="selectStudioModel('nanobanana', 'imagen-3.0-generate-002', 'Studio (Image)')"><span>Studio (Image)</span><span class="studio-model-check">✓</span></div>
                       </div>
                     </div>
                   </div>
@@ -43184,6 +43202,8 @@ service cloud.firestore {
                   <button class="focus-2-widget-action" onclick="clearFocus2Notes()">Clear</button>
                 </div>
               </div>
+              <!-- v13.4: Date indicator for daily notes -->
+              <div id="focus2NotesDateLabel" style="font-size:11px;color:var(--text-muted);margin-bottom:4px;display:flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> <span id="focus2NotesDateText"></span></div>
               <textarea class="focus-2-notes-input" id="focus2NotesInput" placeholder="Capture thoughts, ideas, or quick notes..." oninput="saveFocus2Notes()"></textarea>
               <!-- v12.2.4: Link to Journal if entries exist -->
               <div id="focus2JournalLink" style="display: none; margin-top: 8px;">
@@ -51727,6 +51747,8 @@ function applyBrandLogo(base64Logo, size) {
 function resetLogoToDefault() {
   var collapsedLogo = document.querySelector('.sidebar-collapsed-logo');
   if (collapsedLogo) {
+    // v13.4: Clear existing content first to prevent duplication
+    collapsedLogo.innerHTML = '';
     var mainLogo = document.getElementById('mainLogo');
     var logoImg = mainLogo ? mainLogo.querySelector('.sidebar-logo-img') : null;
     var defaultLogoSrc = (logoImg && logoImg.dataset.originalSrc) || (logoImg && logoImg.src) || '';
@@ -57481,12 +57503,19 @@ function createOpCard(op, container, enableHighlight, isAIGenerated) {
   // v10.5.25: Add sparkle icon for AI-generated operations
   var sparkleIcon = (op.aiGenerated || isAIGenerated) ? '<svg class="ai-sparkle-icon" width="12" height="12" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 4px; color: var(--accent, #d4af37);"><path d="M8 0l1.5 4.5L14 6l-4.5 1.5L8 12l-1.5-4.5L2 6l4.5-1.5L8 0z"/><path d="M13 9l.75 2.25L16 12l-2.25.75L13 15l-.75-2.25L10 12l2.25-.75L13 9z" opacity="0.6"/></svg>' : '';
   
-  card.innerHTML = 
+  // v13.4: Map category to agent
+  var agentMap = { strategy: 'Strategy', marketing: 'Marketing', content: 'Marketing', operations: 'Operations', documents: 'Documents', guided: 'Strategy', research: 'Strategy', image: 'Marketing' };
+  var agentColorMap = { Strategy: '#a78bfa', Marketing: '#f472b6', Operations: '#4ade80', Documents: '#fbbf24' };
+  var agentName = agentMap[categoryLabel] || 'Operations';
+  var agentColor = agentColorMap[agentName] || 'var(--accent)';
+
+  card.innerHTML =
     '<div class="studio-v2-card-header">' +
       '<span class="studio-v2-card-name">' + sparkleIcon + displayName + '</span>' +
       '<span class="studio-v2-card-badge ' + badgeClass + '">' + badgeText + '</span>' +
     '</div>' +
-    '<div class="studio-v2-card-desc">' + displayDesc + '</div>';
+    '<div class="studio-v2-card-desc">' + displayDesc + '</div>' +
+    '<div style="margin-top:6px;"><span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:var(--radius-sm);background:' + agentColor + '15;color:' + agentColor + ';font-size:10px;font-weight:500;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg> ' + agentName + '</span></div>';
   
   // Click handler - select card and show config panel
   card.onclick = function(e) {
@@ -59235,7 +59264,7 @@ function showStudioModelActionSheet() {
     '<div class="studio-mobile-model-section">' +
       '<div class="studio-mobile-model-label">Nanobanana</div>' +
       '<div class="studio-mobile-model-item' + (currentModel === 'gemini-2.0-flash' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'nanobanana\', \'gemini-2.0-flash\', \'Flash (Text)\')">Flash (Text)</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'gemini-2.0-flash-exp-image-generation' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'nanobanana\', \'gemini-2.0-flash-exp-image-generation\', \'Studio (Image)\')">Studio (Image)</div>' +
+      '<div class="studio-mobile-model-item' + (currentModel === 'imagen-3.0-generate-002' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'nanobanana\', \'imagen-3.0-generate-002\', \'Studio (Image)\')">Studio (Image)</div>' +
     '</div>';
   
   document.body.appendChild(backdrop);
@@ -60349,14 +60378,26 @@ function renderStudioRunHistory() {
     var time = run.time || 'Unknown';
     var brand = run.brand || 'N/A';
     var hasOutput = run.deliv || run.output;
-    var outputPreview = hasOutput ? (run.deliv || run.output).substring(0, 120) + ((run.deliv || run.output).length > 120 ? '...' : '') : 'No output';
+    var outputPreview = hasOutput ? (run.deliv || run.output).substring(0, 200) + ((run.deliv || run.output).length > 200 ? '...' : '') : 'No output';
+    // v13.4: Better timestamp formatting
+    var timeDisplay = time;
+    try {
+      var d = new Date(time);
+      if (!isNaN(d.getTime())) {
+        timeDisplay = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      }
+    } catch(e) {}
 
     return '<div class="studio-run-history-item" style="background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; cursor: pointer;" onclick="this.querySelector(\'.studio-run-detail\').style.display = this.querySelector(\'.studio-run-detail\').style.display === \'none\' ? \'block\' : \'none\'">' +
       '<div style="display: flex; justify-content: space-between; align-items: center;">' +
         '<div style="font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);">' + escapeHtml(title) + '</div>' +
-        '<div style="font-size: var(--text-xs); color: var(--text-muted);">' + escapeHtml(time) + '</div>' +
+        '<div style="font-size: var(--text-xs); color: var(--text-muted);">' + escapeHtml(timeDisplay) + '</div>' +
       '</div>' +
-      '<div style="font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px;">' + escapeHtml(brand) + '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">' +
+        '<div style="font-size: var(--text-xs); color: var(--text-muted);">' + escapeHtml(brand) + '</div>' +
+        '<button onclick="event.stopPropagation(); rerunStudioOp(\'' + escapeHtml(title).replace(/'/g, "\\'") + '\')" style="background:none;border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:2px 8px;font-size:10px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:3px;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg> Re-run</button>' +
+      '</div>' +
+      (hasOutput ? '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(outputPreview.substring(0, 80)) + '</div>' : '') +
       '<div class="studio-run-detail" style="display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">' +
         '<div style="font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 4px;">Output:</div>' +
         '<div style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap;">' + escapeHtml(outputPreview) + '</div>' +
@@ -60365,6 +60406,21 @@ function renderStudioRunHistory() {
   }).join('');
 
   container.innerHTML = html;
+}
+
+/**
+ * v13.4: Re-run a Studio operation by name
+ */
+function rerunStudioOp(opName) {
+  var allOps = (ops || []).concat(window.lifeOps || []).concat(generatedBrandOps || []);
+  var op = allOps.find(function(o) { return o.name === opName; });
+  if (op) {
+    selectedOp = op;
+    showConfigPanel(op);
+    showToast('Ready to re-run: ' + opName, 'info');
+  } else {
+    showToast('Operation not found: ' + opName, 'warning');
+  }
 }
 
 // v10.5.25: Toggle new operation dropdown
@@ -64416,8 +64472,8 @@ async function generateImageWithNanobanana(prompt, options) {
   console.log('[Nanobanana] Generating image...');
   console.log('[Nanobanana] Prompt:', prompt.substring(0, 100) + '...');
 
-  // v13.1: Updated model - try imagen-3.0-generate-002 first, fall back to gemini-2.0-flash-exp
-  var model = options.model || 'gemini-2.0-flash-exp-image-generation';
+  // v13.4: Updated to imagen-3.0-generate-002 as primary model
+  var model = options.model || 'imagen-3.0-generate-002';
   var aspectRatio = options.aspectRatio || '1:1';
 
   // Build request using Google's Gemini API structure
@@ -66488,9 +66544,10 @@ function proposeSchedule() {
     notes: window.currentRun.context || '',
     opName: window.currentRun.op
   });
-  
-  saveRuns();
-  showToast('Scheduled for ' + dateStr + ' — view in Calendar', 'success');
+
+  // v13.4: Fix - save to calendar, not runs
+  saveCalendar();
+  showToast('Scheduled for ' + dateStr + ' -- view in Calendar', 'success');
 }
 
 // v9.1.14: Toggle Automations section in Rhythm view
@@ -67447,6 +67504,12 @@ function initFocus2() {
     fixFocusMobileLayout();
   }
   
+  // v13.4: Restore expanded category from localStorage
+  try {
+    var savedExpanded = localStorage.getItem('roweos_focus2_expanded_category');
+    if (savedExpanded) focus2ExpandedCategory = savedExpanded;
+  } catch(e) {}
+
   // v10.5.25: Restore saved widget order and sizes first
   restoreFocus2WidgetOrder();
   restoreFocus2WidgetSizes();
@@ -67817,18 +67880,25 @@ function renderFocus2DayDetailContent(dateStr) {
 function toggleDayDetailTask(taskId) {
   var task = todos.find(function(t) { return t.id === taskId; });
   if (!task) return;
-  
+
   task.completed = !task.completed;
-  if (task.completed) task.completedAt = new Date().toISOString();
+  if (task.completed) {
+    task.completedAt = new Date().toISOString();
+    // v13.4: Prompt to add to Pulse
+    promptAddToPulse(task);
+  }
   saveTodos();
-  
-  // v11.0.5: Use requestAnimationFrame to batch DOM updates and prevent glitch
+
+  // v13.4: Use requestAnimationFrame to batch DOM updates and prevent glitch
+  // Preserve current tab (Today vs Upcoming) instead of resetting to Today
   requestAnimationFrame(function() {
-    // Re-render the day detail content
-    if (window.focus2SelectedDate) {
+    // Re-render the day detail content based on active filter
+    if (focus2DayFilter === 'upcoming') {
+      renderFocus2DayDetailContent('__upcoming__');
+    } else if (window.focus2SelectedDate) {
       renderFocus2DayDetailContent(window.focus2SelectedDate);
     }
-    
+
     // Also update other views if visible
     if (typeof renderFocus2Categories === 'function') renderFocus2Categories();
     if (typeof updateFocus2Stats === 'function') updateFocus2Stats();
@@ -67869,6 +67939,45 @@ var focus2ShowCompleted = false;
 // v13.2: Multi-select state
 var focus2MultiSelectMode = false;
 var focus2SelectedTaskIds = [];
+
+// v13.4: Per-category task sort preferences
+function getCategoryTaskSort(catName) {
+  try {
+    var prefs = JSON.parse(localStorage.getItem('roweos_focus2_cat_sort') || '{}');
+    return prefs[catName] || 'manual';
+  } catch(e) { return 'manual'; }
+}
+
+function setCategoryTaskSort(catName, sortType) {
+  try {
+    var prefs = JSON.parse(localStorage.getItem('roweos_focus2_cat_sort') || '{}');
+    prefs[catName] = sortType;
+    localStorage.setItem('roweos_focus2_cat_sort', JSON.stringify(prefs));
+  } catch(e) {}
+  renderFocus2Categories();
+}
+
+function sortCategoryTasks(tasks, sortType) {
+  if (!sortType || sortType === 'manual') return tasks;
+  var sorted = tasks.slice();
+  if (sortType === 'date') {
+    sorted.sort(function(a, b) {
+      if (a.date && !b.date) return -1;
+      if (!a.date && b.date) return 1;
+      if (a.date && b.date) return a.date < b.date ? -1 : 1;
+      return 0;
+    });
+  } else if (sortType === 'priority') {
+    sorted.sort(function(a, b) {
+      return (b.priority ? 1 : 0) - (a.priority ? 1 : 0);
+    });
+  } else if (sortType === 'alpha') {
+    sorted.sort(function(a, b) {
+      return (a.text || '').localeCompare(b.text || '');
+    });
+  }
+  return sorted;
+}
 
 // Color presets for categories
 var focus2CategoryColors = ['gold', 'blue', 'green', 'purple', 'red', 'orange', 'pink', 'cyan'];
@@ -68107,10 +68216,24 @@ function renderFocus2Categories() {
     html += '<input type="text" class="focus-2-category-add-input" id="focus2AddInput_' + idx + '" placeholder="Add a task..." onclick="event.stopPropagation()" onkeypress="if(event.key===\'Enter\'){event.stopPropagation(); addTaskToCategory(\'' + escapeHtml(cat.name) + '\', ' + idx + ');}">';
     html += '<button class="focus-2-category-add-btn" onclick="event.stopPropagation(); addTaskToCategory(\'' + escapeHtml(cat.name) + '\', ' + idx + ')">Add</button>';
     html += '</div>';
-    
+
+    // v13.4: Per-category sort dropdown
+    var catSortPref = getCategoryTaskSort(cat.name);
+    html += '<div class="focus-2-category-sort" onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">';
+    html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5;"><path d="M3 6h18M6 12h12M9 18h6"/></svg>';
+    html += '<select onchange="setCategoryTaskSort(\'' + escapeHtml(cat.name) + '\', this.value)" style="background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:2px 6px;font-size:11px;cursor:pointer;">';
+    html += '<option value="manual"' + (catSortPref === 'manual' ? ' selected' : '') + '>Manual</option>';
+    html += '<option value="date"' + (catSortPref === 'date' ? ' selected' : '') + '>Date</option>';
+    html += '<option value="priority"' + (catSortPref === 'priority' ? ' selected' : '') + '>Priority</option>';
+    html += '<option value="alpha"' + (catSortPref === 'alpha' ? ' selected' : '') + '>A-Z</option>';
+    html += '</select></div>';
+
+    // v13.4: Apply per-category sort to pending tasks
+    var sortedPending = sortCategoryTasks(pendingTasks, catSortPref);
+
     // Full task list (pending)
     html += '<div class="focus-2-category-task-list">';
-    pendingTasks.forEach(function(task) {
+    sortedPending.forEach(function(task) {
       html += renderFocus2CategoryTaskItem(task);
     });
     html += '</div>';
@@ -68249,11 +68372,18 @@ function setupDragEvents(card, container) {
   // Skip if already has listeners
   if (card.dataset.dragInit) return;
   card.dataset.dragInit = 'true';
-  
-  card.setAttribute('draggable', 'true');
-  
+
+  // v13.4: Only enable dragging in Customize mode
+  var isCustomize = document.body.classList.contains('focus2-customize-mode');
+  card.setAttribute('draggable', isCustomize ? 'true' : 'false');
+
   // Desktop drag events
   card.addEventListener('dragstart', function(e) {
+    // v13.4: Block drag outside Customize mode
+    if (!document.body.classList.contains('focus2-customize-mode')) {
+      e.preventDefault();
+      return;
+    }
     card.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', card.getAttribute('data-widget') || card.getAttribute('data-category') || '');
@@ -68688,6 +68818,11 @@ function toggleFocus2Customize() {
     btn.style.fontWeight = isActive ? '600' : '400';
   }
   
+  // v13.4: Update draggable attribute on all cards when toggling customize mode
+  document.querySelectorAll('[data-drag-init]').forEach(function(card) {
+    card.setAttribute('draggable', isActive ? 'true' : 'false');
+  });
+
   showToast(isActive ? 'Customize mode ON' : 'Customize mode OFF', 'info');
 }
 
@@ -69011,6 +69146,56 @@ function exitFocus2MultiSelect() {
 }
 
 /**
+ * v13.4: Show "Add to Pulse" toast after completing a categorized task
+ */
+function promptAddToPulse(task) {
+  if (!task || !task.category || !task.completed) return;
+  var categoryName = task.category;
+  var toastEl = document.createElement('div');
+  toastEl.className = 'toast-notification';
+  toastEl.style.cssText = 'display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-xl);backdrop-filter:blur(20px);position:fixed;bottom:80px;right:20px;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,0.3);animation:slideUp 0.3s ease;';
+  toastEl.innerHTML = '<span style="color:var(--text-secondary);font-size:13px;">Add to Pulse goal?</span>' +
+    '<button onclick="addCompletedTaskToPulse(' + task.id + ');this.parentElement.remove();" style="background:var(--accent);color:white;border:none;border-radius:var(--radius-md);padding:4px 10px;font-size:12px;cursor:pointer;">Yes</button>' +
+    '<button onclick="this.parentElement.remove();" style="background:transparent;color:var(--text-muted);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:4px 10px;font-size:12px;cursor:pointer;">No</button>';
+  document.body.appendChild(toastEl);
+  setTimeout(function() { if (toastEl.parentElement) toastEl.remove(); }, 6000);
+}
+
+/**
+ * v13.4: Add a completed task to a Pulse goal matching its category
+ */
+function addCompletedTaskToPulse(taskId) {
+  var task = todos.find(function(t) { return t.id === taskId; });
+  if (!task || !task.category) return;
+  var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+  // Find existing goal for this category or create one
+  var existingGoal = pulseGoals.find(function(g) { return g.title === task.category; });
+  if (existingGoal) {
+    existingGoal.items.push({
+      id: 'item_' + Date.now(),
+      text: task.text,
+      completed: true,
+      completedAt: task.completedAt || new Date().toISOString()
+    });
+  } else {
+    pulseGoals.unshift({
+      id: 'goal_' + Date.now(),
+      title: task.category,
+      items: [{
+        id: 'item_' + Date.now(),
+        text: task.text,
+        completed: true,
+        completedAt: task.completedAt || new Date().toISOString()
+      }],
+      createdAt: new Date().toISOString(),
+      source: isLifeMode ? 'lifeai' : 'brandai'
+    });
+  }
+  savePulseGoals();
+  showToast('Added to Pulse goal: ' + task.category, 'success');
+}
+
+/**
  * v10.5.25: Quick toggle task without opening detail
  * v12.2.4: Create next recurring task when completed
  */
@@ -69027,6 +69212,8 @@ function quickToggleFocus2Task(taskId, event) {
     if (task.recurrence && task.recurrence.type && task.recurrence.type !== 'none') {
       createNextRecurringTask(task);
     }
+    // v13.4: Prompt to add to Pulse
+    promptAddToPulse(task);
   }
   saveTodos();
   renderFocus2Categories();
@@ -69059,8 +69246,15 @@ function toggleFocus2CategoryExpand(categoryName, event) {
     focus2ExpandedCategory = categoryName;
     if (clickedCard) clickedCard.classList.add('expanded');
   }
-  
-  // No full re-render needed - just CSS class toggle
+
+  // v13.4: Persist expanded category to localStorage
+  try {
+    if (focus2ExpandedCategory) {
+      localStorage.setItem('roweos_focus2_expanded_category', focus2ExpandedCategory);
+    } else {
+      localStorage.removeItem('roweos_focus2_expanded_category');
+    }
+  } catch(e) {}
 }
 
 /**
@@ -70435,17 +70629,15 @@ function renderFocus2Automations() {
   var scheduledTasks = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
   var savedAutomations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
 
-  // Merge - avoid duplicates by id
+  // v13.4: Merge - avoid duplicates by id, show all (enabled + disabled)
   var allIds = {};
   var allAutomations = [];
   scheduledTasks.forEach(function(a) {
-    if (a.enabled !== false) {
-      allIds[a.id] = true;
-      allAutomations.push(a);
-    }
+    allIds[a.id] = true;
+    allAutomations.push(a);
   });
   savedAutomations.forEach(function(a) {
-    if (!allIds[a.id] && a.enabled !== false) {
+    if (!allIds[a.id]) {
       allAutomations.push(a);
     }
   });
@@ -70468,10 +70660,23 @@ function renderFocus2Automations() {
       var actionMap = { notify: 'Notify', create: 'Create task', message: 'AI message', studio: 'Studio op', pulse: 'Pulse update', rhythm: 'Rhythm event', library: 'Save to Library' };
       html += '<div class="focus-2-automation-item">';
       html += '<div class="focus-2-automation-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>';
-      html += '<div class="focus-2-automation-info">';
-      html += '<div class="focus-2-automation-name">' + escapeHtml(auto.name) + ' ' + recurLabel + '</div>';
+      // v13.4: Agent badge
+      var agentBadge = '';
+      if (auto.agent) {
+        var agentColors = { strategy: '#a78bfa', marketing: '#f472b6', operations: '#4ade80', documents: '#fbbf24', coach: '#60a5fa', wellness: '#34d399', taxcopilot: '#fbbf24', personal: '#a78bfa' };
+        var agentColor = agentColors[auto.agent] || 'var(--accent)';
+        agentBadge = '<span style="display:inline-block;padding:1px 6px;border-radius:var(--radius-sm);background:' + agentColor + '20;color:' + agentColor + ';font-size:10px;margin-left:4px;">' + auto.agent + '</span>';
+      }
+      html += '<div class="focus-2-automation-info" style="flex:1;min-width:0;">';
+      html += '<div class="focus-2-automation-name">' + escapeHtml(auto.name) + ' ' + recurLabel + agentBadge + '</div>';
       html += '<div class="focus-2-automation-time">' + (auto.time || '9:00') + (dateLabel ? ' | ' + dateLabel : '') + ' | ' + (actionMap[actionLabel] || actionLabel) + '</div>';
+      // v13.4: Show description/target text if available
+      if (auto.target && auto.target.text) {
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(auto.target.text) + '</div>';
+      }
       html += '</div>';
+      // v13.4: Enable/disable toggle
+      html += '<button onclick="toggleAutomationEnabled(' + auto.id + ')" title="' + (auto.enabled !== false ? 'Disable' : 'Enable') + '" style="background:transparent;border:none;padding:4px;cursor:pointer;color:' + (auto.enabled !== false ? 'var(--accent)' : 'var(--text-muted)') + ';"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/>' + (auto.enabled !== false ? '<path d="M9 12l2 2 4-4"/>' : '<path d="M15 9l-6 6M9 9l6 6"/>') + '</svg></button>';
       html += '<button class="focus-2-automation-run" onclick="deleteFocusAutomation(' + auto.id + ')" title="Delete" style="background: transparent; color: var(--text-muted); border: none; padding: 4px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>';
       html += '</div>';
     });
@@ -70480,7 +70685,7 @@ function renderFocus2Automations() {
   // v12.2.6: + Create Automation button at bottom of widget
   html += '<button class="focus-2-create-automation-btn" onclick="showFocusGlobalAutomationForm()" style="margin-top: var(--space-3);">';
   html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>';
-  html += '+ Create Automation';
+  html += ' Create Automation';
   html += '</button>';
 
   container.innerHTML = html;
@@ -70515,6 +70720,22 @@ function showFocusGlobalAutomationForm() {
   html += '<option value="weekly">Weekly</option>';
   html += '<option value="biweekly">Biweekly</option>';
   html += '<option value="monthly">Monthly</option>';
+  html += '</select></div>';
+  // v13.4: Agent selector
+  var isLife = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+  html += '<div class="focus-2-automation-field"><label>Agent</label>';
+  html += '<select id="globalAutoAgent">';
+  if (isLife) {
+    html += '<option value="coach">Life Coach</option>';
+    html += '<option value="wellness">Wellness Coach</option>';
+    html += '<option value="taxcopilot">Tax Copilot</option>';
+    html += '<option value="personal">Personal AI</option>';
+  } else {
+    html += '<option value="strategy">Strategy</option>';
+    html += '<option value="marketing">Marketing</option>';
+    html += '<option value="operations">Operations</option>';
+    html += '<option value="documents">Documents</option>';
+  }
   html += '</select></div>';
   html += '<div class="focus-2-automation-field"><label>Action</label>';
   html += '<select id="globalAutoAction" onchange="renderAutoTargetConfig(this.value)">';
@@ -70594,6 +70815,10 @@ function saveGlobalAutomation() {
   if (targetGoal) target.goalId = targetGoal.value;
   target.module = action;
 
+  // v13.4: Include agent selection
+  var agentEl = document.getElementById('globalAutoAgent');
+  var agent = agentEl ? agentEl.value : '';
+
   var automation = {
     id: Date.now(),
     name: desc,
@@ -70601,6 +70826,7 @@ function saveGlobalAutomation() {
     time: time,
     recurType: recurType,
     action: action,
+    agent: agent,
     target: target,
     enabled: true,
     mode: getCurrentMode(),
@@ -70634,6 +70860,24 @@ function deleteFocusAutomation(autoId) {
 
   renderFocus2Automations();
   showToast('Automation deleted', 'success');
+}
+
+/**
+ * v13.4: Toggle automation enabled/disabled
+ */
+function toggleAutomationEnabled(autoId) {
+  var idStr = String(autoId);
+  var automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+  automations.forEach(function(a) {
+    if (String(a.id) === idStr) a.enabled = !(a.enabled !== false);
+  });
+  localStorage.setItem('roweos_automations', JSON.stringify(automations));
+  var scheduled = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
+  scheduled.forEach(function(a) {
+    if (String(a.id) === idStr) a.enabled = !(a.enabled !== false);
+  });
+  if (typeof saveScheduledTasks === 'function') saveScheduledTasks(scheduled);
+  renderFocus2Automations();
 }
 
 /**
@@ -70804,6 +71048,12 @@ function loadFocus2Notes() {
   if (textarea) {
     var today = new Date().toISOString().slice(0, 10);
     textarea.value = localStorage.getItem('roweos_focus_notes_' + today) || '';
+    // v13.4: Update date label to clarify notes are per-day
+    var dateLabel = document.getElementById('focus2NotesDateText');
+    if (dateLabel) {
+      var d = new Date();
+      dateLabel.textContent = 'Notes for ' + d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
   }
 }
 
@@ -76454,6 +76704,9 @@ function removeAgentFile() {
   var followupAttach = document.getElementById('followupAttachBtn');
   if (landingAttach) landingAttach.classList.remove('has-file');
   if (followupAttach) followupAttach.classList.remove('has-file');
+
+  // v13.4: Extra safety - clear any stray file chip elements
+  document.querySelectorAll('.agent-file-chip, .file-chip').forEach(function(el) { el.remove(); });
   console.log('All files removed');
 }
 
@@ -79822,11 +80075,11 @@ function syncMobileBrandV2() {
       selector.appendChild(sep);
     }
     
-    // Always show brands (for switching)
+    // v13.4: Always show brands (for switching) - use shortName for mobile
     brands.forEach(function(brand, idx) {
       var opt = document.createElement('option');
       opt.value = idx;
-      opt.textContent = brand.name;
+      opt.textContent = brand.shortName || brand.name;
       if (!isLife && idx === brandIdx) opt.selected = true;
       selector.appendChild(opt);
     });
@@ -79863,18 +80116,19 @@ function syncMobileBrandV2() {
       sep.textContent = '── Switch to Brand ──';
       headerDropdown.appendChild(sep);
       
+      // v13.4: Use shortName for mobile header
       brands.forEach(function(brand, idx) {
         var opt = document.createElement('option');
         opt.value = 'brand_' + idx;
-        opt.textContent = brand.name;
+        opt.textContent = brand.shortName || brand.name;
         headerDropdown.appendChild(opt);
       });
     } else {
-      // BrandAI mode - show brands
+      // v13.4: BrandAI mode - show brands with shortName
       brands.forEach(function(brand, idx) {
         var opt = document.createElement('option');
         opt.value = idx;
-        opt.textContent = brand.name;
+        opt.textContent = brand.shortName || brand.name;
         if (idx === brandIdx) opt.selected = true;
         headerDropdown.appendChild(opt);
       });
@@ -79892,12 +80146,12 @@ function syncMobileBrandV2() {
     }
   }
   
-  // Set pill text - show profile name or brand name
+  // v13.4: Set pill text - use shortName for mobile
   if (pill) {
     if (isLife) {
       pill.textContent = userName;
     } else if (brands[brandIdx]) {
-      pill.textContent = brands[brandIdx].name;
+      pill.textContent = brands[brandIdx].shortName || brands[brandIdx].name;
     }
   }
 }
@@ -87121,7 +87375,7 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  document.title = 'RoweOS v13.3 - ' + subtitle;
+  document.title = 'RoweOS v13.4 - ' + subtitle;
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');
@@ -94213,6 +94467,45 @@ function saveLifeRhythmSurvey() {
 }
 
 /**
+ * v13.4: Render survey results as data cards in Rhythm left panel
+ */
+function renderLifeRhythmSurveyWidgets() {
+  var container = document.getElementById('rhythmLifeContent');
+  if (!container) return;
+  // Remove old survey widgets if any
+  var old = document.getElementById('rhythmSurveyWidgets');
+  if (old) old.remove();
+  try {
+    var prefs = JSON.parse(localStorage.getItem('roweos_life_rhythm_preferences') || 'null');
+    if (!prefs || !prefs.areas || prefs.areas.length === 0) return;
+    var areaLabels = { health: 'Health & Fitness', productivity: 'Productivity', mindfulness: 'Mindfulness', relationships: 'Relationships', learning: 'Learning', finance: 'Finance', creativity: 'Creativity' };
+    var areaIcons = {
+      health: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
+      productivity: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>',
+      mindfulness: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>',
+      relationships: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+      learning: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>',
+      finance: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+      creativity: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+    };
+    var html = '<div id="rhythmSurveyWidgets" style="margin-top:var(--space-4);padding:var(--space-4);background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-xl);">';
+    html += '<div style="font-size:var(--text-sm);font-weight:600;color:var(--text-primary);margin-bottom:var(--space-3);">Focus Areas</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+    prefs.areas.forEach(function(area) {
+      html += '<div style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--life-accent,#22c55e)15;border:1px solid var(--life-accent,#22c55e)40;border-radius:var(--radius-md);font-size:12px;color:var(--life-accent,#22c55e);">';
+      html += (areaIcons[area] || '') + ' ' + (areaLabels[area] || area);
+      html += '</div>';
+    });
+    html += '</div></div>';
+    // Insert after the main content area (before calendar)
+    var goalsPanel = document.getElementById('lifeGoalsPanel');
+    if (goalsPanel && goalsPanel.parentElement) {
+      goalsPanel.parentElement.insertAdjacentHTML('beforeend', html);
+    }
+  } catch(e) {}
+}
+
+/**
  * v13.2: Generate personalized routines, habits, and goals based on survey
  */
 function generatePersonalizedDefaults(prefs) {
@@ -94397,6 +94690,7 @@ function renderLifeRhythm() {
   renderLifeGoalsPanel();
   renderLifeCalendar();
   updateLifeWeekDisplay();
+  renderLifeRhythmSurveyWidgets();
   
   // v10.5.25: Auto-select today and show day panel
   var today = new Date();
@@ -94774,12 +95068,12 @@ function renderLifeGoalsPanel() {
   var container = document.getElementById('lifeGoalsListPanel');
   if (!container) return;
 
-  // v13.2: Pull from Pulse goals instead of separate lifeGoals
+  // v13.4: Pull from Pulse goals, include all sources relevant to current mode
   var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
   var goals = (pulseGoals || []).filter(function(g) {
     if (g.completed || g.archived) return false;
-    if (isLifeMode) return g.source === 'lifeai';
-    return g.source === 'brandai' || g.source === 'studio';
+    if (isLifeMode) return !g.source || g.source === 'lifeai';
+    return !g.source || g.source === 'brandai' || g.source === 'studio';
   });
 
   if (goals.length === 0) {
@@ -95687,14 +95981,32 @@ function generateGoalSummaryAndTasks(description, container, sendBtn) {
     
     try {
       // Parse JSON response - handle markdown code blocks
+      // v13.4: More robust JSON extraction
       var jsonStr = response;
-      if (response.indexOf('```') >= 0) {
+      var parsed = null;
+      // Try 1: Parse full response as JSON
+      try { parsed = JSON.parse(jsonStr.trim()); } catch(e1) {}
+      // Try 2: Extract from markdown code blocks
+      if (!parsed && response.indexOf('```') >= 0) {
         var match = response.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (match) jsonStr = match[1];
+        if (match) { try { parsed = JSON.parse(match[1].trim()); } catch(e2) {} }
       }
-      jsonStr = jsonStr.trim();
-      
-      var parsed = JSON.parse(jsonStr);
+      // Try 3: Find JSON object with curly braces
+      if (!parsed) {
+        var braceMatch = response.match(/\{[\s\S]*\}/);
+        if (braceMatch) { try { parsed = JSON.parse(braceMatch[0]); } catch(e3) {} }
+      }
+      // Try 4: Find JSON array with square brackets
+      if (!parsed) {
+        var bracketMatch = response.match(/\[[\s\S]*\]/);
+        if (bracketMatch) {
+          try {
+            var arr = JSON.parse(bracketMatch[0]);
+            parsed = { tasks: arr.map(function(item) { return typeof item === 'string' ? item : (item.text || item.task || item.name || String(item)); }), title: 'My Goal', summary: 'Goal from AI' };
+          } catch(e4) {}
+        }
+      }
+      if (!parsed) throw new Error('Could not parse JSON from response');
       state.aiSummary = parsed.summary || 'Goal created from your description';
       state.suggestedTasks = parsed.tasks || [];
       state.goalTitle = parsed.title || 'My Goal';
@@ -96058,7 +96370,18 @@ function refineGoalWithAI(additionalInput, container, sendBtn) {
     state.conversationHistory.push({ role: 'assistant', content: response });
 
     try {
-      var parsed = JSON.parse(response);
+      // v13.4: More robust JSON extraction for refine response
+      var parsed = null;
+      try { parsed = JSON.parse(response.trim()); } catch(e1) {}
+      if (!parsed && response.indexOf('```') >= 0) {
+        var codeMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (codeMatch) { try { parsed = JSON.parse(codeMatch[1].trim()); } catch(e2) {} }
+      }
+      if (!parsed) {
+        var braceMatch = response.match(/\{[\s\S]*\}/);
+        if (braceMatch) { try { parsed = JSON.parse(braceMatch[0]); } catch(e3) {} }
+      }
+      if (!parsed) throw new Error('Could not parse');
       state.aiSummary = parsed.summary || state.aiSummary;
       state.suggestedTasks = parsed.tasks || state.suggestedTasks;
       state.goalTitle = parsed.title || state.goalTitle;
@@ -97283,23 +97606,47 @@ function renderPulse2MoodChart() {
 function renderPulse2FocusSessions() {
   var container = document.getElementById('pulse2FocusList');
   if (!container) return;
-  
-  var focusNotes = JSON.parse(localStorage.getItem('roweos_focus2_notes') || '[]');
-  var recent = focusNotes.slice(-3).reverse();
-  
+
+  // v13.4: Read actual per-date focus notes from localStorage
+  var notes = [];
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i);
+      if (key && key.indexOf('roweos_focus_notes_') === 0) {
+        var dateStr = key.replace('roweos_focus_notes_', '');
+        var text = localStorage.getItem(key);
+        if (text && text.trim()) {
+          notes.push({ date: dateStr, text: text.trim() });
+        }
+      }
+    }
+  } catch(e) {}
+  // Sort by date descending, take last 5
+  notes.sort(function(a, b) { return b.date.localeCompare(a.date); });
+  var recent = notes.slice(0, 5);
+
   if (recent.length === 0) {
-    container.innerHTML = '<div class="pulse-2-focus-item"><em style="color: var(--text-muted);">Notes from Focus will appear here</em></div>';
+    // v13.4: Also check task completion stats
+    var completedToday = todos.filter(function(t) {
+      return t.completed && t.completedAt && t.completedAt.slice(0, 10) === new Date().toISOString().slice(0, 10);
+    }).length;
+    if (completedToday > 0) {
+      container.innerHTML = '<div class="pulse-2-focus-item"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg> ' + completedToday + ' task' + (completedToday > 1 ? 's' : '') + ' completed today</div>';
+    } else {
+      container.innerHTML = '<div class="pulse-2-focus-item" style="color:var(--text-muted);font-size:var(--text-sm);">No focus sessions recorded yet. Notes from Focus will appear here.</div>';
+    }
     return;
   }
-  
+
   var html = recent.map(function(note) {
     var preview = note.text.length > 80 ? note.text.substring(0, 80) + '...' : note.text;
+    var d = new Date(note.date + 'T12:00:00');
     return '<div class="pulse-2-focus-item">' +
-      preview +
-      '<div class="pulse-2-focus-item-date">' + new Date(note.date).toLocaleDateString() + '</div>' +
+      '<div style="font-size:var(--text-sm);color:var(--text-secondary);">' + escapeHtml(preview) + '</div>' +
+      '<div class="pulse-2-focus-item-date">' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '</div>' +
     '</div>';
   }).join('');
-  
+
   container.innerHTML = html;
 }
 
