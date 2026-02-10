@@ -91,10 +91,18 @@ fi
 echo "Pushing to git..."
 git push origin main
 
-# 8. Deploy to Vercel
+# 8. Minify for production
+echo "Building minified version..."
+"$PROJECT_DIR/build.sh"
+
+# 9. Deploy to Vercel
 echo "Deploying to Vercel..."
-cd RoweOS/dist
+cd "$PROJECT_DIR/RoweOS/dist"
 npx vercel --prod
+
+# 10. Restore source (un-minify)
+echo "Restoring source..."
+"$PROJECT_DIR/build.sh" --restore
 
 echo ""
 echo "=== Deploy Complete ==="
