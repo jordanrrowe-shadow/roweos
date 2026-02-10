@@ -1,1 +1,12 @@
-{"version":2,"routes":[{"src":"/(.*)","dest":"/index.html"}]}
+{
+  "version": 2,
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/login.html", "dest": "/login.html" },
+    { "src": "/favicon.ico", "dest": "/favicon.ico" },
+    { "src": "/apple-touch-icon.png", "dest": "/apple-touch-icon.png" },
+    { "src": "/manifest.json", "dest": "/manifest.json" },
+    { "src": "/icons/(.*)", "dest": "/icons/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
