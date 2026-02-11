@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Version:  v15.3
-File:     ~/Downloads/RoweOS/dist/index.html (113067 lines)
+File:     ~/Downloads/RoweOS/dist/index.html (113071 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -17,7 +17,7 @@ Live:     roweos.vercel.app
 ./deploy.sh
 ```
 This script automatically:
-1. Extracts version from index.html
+1. Extracts version from `ROWEOS_VERSION` JS constant in index.html
 2. Updates CLAUDE.md with current version/line count
 3. Commits changes to git
 4. Pushes to origin/main
@@ -33,14 +33,16 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 1. **Brand names:** Always use `brands[idx].shortName || brands[idx].name` — never `.name` alone
 2. **No emoji:** Always use inline SVG icons
 3. **ES5 only:** No arrow functions, no let/const, no template literals
-4. **Bracket balance:** One missing bracket breaks the entire 96K-line file
+4. **Bracket balance:** One missing bracket breaks the entire 113K-line file
+5. **Logo injection:** Use `document.createElement('img')` — never innerHTML for user-provided base64 logos
+6. **Init ordering:** `initBrandAccentColor()` and `initBrandLogo()` run before brand selector is set — must re-call after brand restoration
 
 ### File Structure
 ```
 index.html
 ├── Lines 1–15,000      CSS (themes, components, animations)
 ├── Lines 15,000–44,000 HTML (views, modals, overlays)
-└── Lines 44,000–113067 JavaScript (state, API, logic)
+└── Lines 44,000–113071 JavaScript (state, API, logic)
 ```
 
 ---
@@ -65,7 +67,7 @@ A private AI platform with two modes:
 - "Quiet competence" — professional elegance, no hype
 - Apple-like restraint — minimalist, dark theme default
 - Glass morphism: `backdrop-filter: blur(20px)`
-- Gold accents (#d4af37)
+- Gold accents (#a89878) — per-brand customizable via `--brand-accent` CSS variable
 
 ---
 
@@ -107,8 +109,17 @@ let count = items.length;
 ### CSS
 - Use CSS custom properties (`var(--accent)`) for theme values
 - Light mode via `html.light-mode` selector
+- Mode targeting via `html.brand-mode` / `html.life-mode` (set early in init)
 - Mobile breakpoint: `@media (max-width: 768px)`
 - Avoid `!important` except to override JS inline styles
+
+### Brand Color System
+- Default gold: `#a89878` (RGB 168, 152, 120)
+- CSS variables: `--brand-accent`, `--brand-accent-dark`, `--brand-accent-light`, `--brand-accent-rgb`, `--brand-accent-10` through `--brand-accent-70`
+- `applyBrandAccentColor(color)` sets both `--brand-accent-*` AND `--accent-*` variables
+- `applyCurrentBrandAccent()` reads current brand's color and applies it
+- Per-brand colors stored in `brands[idx].brandColor` (dark) / `brands[idx].brandColorLight` (light)
+- Logo container: `.sidebar-collapsed-logo` is active display; `#mainLogo` is kept hidden
 
 ### SVG Icons (Never Emoji)
 ```html
@@ -148,7 +159,7 @@ grep -c 'v12.0.8' index.html  # Should be 0
 grep -c 'v12\.0\.8' index.html  # Should be 10+
 ```
 
-Version appears in: `<title>`, launch screen, mobile header, settings, sidebar footer, console logs, comments.
+Version appears in: `ROWEOS_VERSION` constant, launch screen, mobile header, settings, sidebar footer, console logs, comments. (Not in `<title>` — title is just "RoweOS - Intelligence Platform".)
 
 ### Delivery Checklist
 1. RoweOS.zip with correct structure (RoweOS/dist/, not bare dist/)
@@ -217,6 +228,8 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `roweos_conversations` | Chat history |
 | `roweos_theme` | 'dark' or 'light' |
 | `roweos_sidebar_behavior` | 'always-collapsed', 'auto', 'always-pinned' |
+| `roweos_selected_brand` | Last selected brand index (persists across reload) |
+| `roweos_app_mode` | Primary mode key: 'brand' or 'life' |
 | `brand_0` through `brand_4` | Per-brand knowledge |
 | `brandMemory` | Uploaded knowledge |
 
@@ -233,6 +246,12 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `toggleMode()` | Switch BrandAI/LifeAI |
 | `showToast(msg, type)` | Notifications |
 | `escapeHtml(str)` | Sanitize for innerHTML |
+| `applyBrandAccentColor(color)` | Set brand color CSS variables |
+| `applyCurrentBrandAccent()` | Apply current brand's accent color |
+| `loadCurrentLogo()` | Load brand/life logo from storage |
+| `initBrandAccentColor()` | Init brand color on page load |
+| `switchToBrandMode()` | Switch from LifeAI to BrandAI |
+| `switchToLifeMode()` | Switch from BrandAI to LifeAI |
 
 ---
 
@@ -264,9 +283,10 @@ unzip -l RoweOS.zip | head -10
 
 ### Known Technical Debt
 1. **Category card reorder not persisting** — `saveFocus2WidgetOrder()` saves widgets but not category cards
-2. **Logo internal whitespace** — JPEG has padding; compensated with CSS overrides
+2. **Init ordering fragility** — `initBrandAccentColor()` and `initBrandLogo()` run before brand dropdown is populated; mitigated by re-calling after brand restoration, but ideally init order should be refactored
 3. **5+ brand name update points** — All must use `shortName || name` pattern
 4. **No automated tests** — All testing is manual
+5. **Duplicate ROWEOS_VERSION** — Two declarations exist (line ~49443 for data migration, line ~50796 for current); keep both in sync
 
 ---
 
