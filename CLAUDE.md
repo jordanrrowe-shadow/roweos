@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v15.12
-File:     ~/Downloads/RoweOS/dist/index.html (115525 lines)
+Version:  v15.13
+File:     ~/Downloads/RoweOS/dist/index.html (115556 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -42,7 +42,7 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 index.html
 ├── Lines 1–15,000      CSS (themes, components, animations)
 ├── Lines 15,000–44,000 HTML (views, modals, overlays)
-└── Lines 44,000–115525 JavaScript (state, API, logic)
+└── Lines 44,000–115556 JavaScript (state, API, logic)
 ```
 
 ---
@@ -281,6 +281,20 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `calculatePeriodStats()` | Aggregate analytics by time period |
 | `trackAPIUsage(params)` | Log API call to analytics |
 | `syncToFirebaseV2()` | Full Firebase sync (all categories) |
+| `clearFirestoreSubcollection()` | Delete all docs in a subcollection before re-writing |
+| `scheduleAutoSync()` | Debounced (2s) auto-sync after any data save |
+| `shouldSyncCategory(key)` | Check if category syncs to cloud (default: true) |
+
+### Firebase Sync Architecture
+- **V2 subcollections** are the live format: `roweos_users/{uid}/brands/{idx}`, `/todos/{id}`, `/calendar/{id}`, `/runs/{id}`, `/inventory/{id}`, `/automations/{id}`, `/library/{brand,life}`, `/pulse/main`, `/profile/main`, `/lifeAI/main`, `/conversations/{current,history,agentHistory}`
+- **V1 root doc** (`roweos_users/{uid}`) is legacy — only written for backwards compat, never read
+- `syncToFirebase()` and `silentSyncToFirebase()` both redirect to `syncToFirebaseV2()`
+- **Subcollections must be cleared before writing** — `clearFirestoreSubcollection()` prevents orphaned docs when items are deleted locally
+- `shouldSyncCategory(key)` defaults to **true** (cloud) unless explicitly set to 'local' in `roweos_sync_categories`
+- Library data is nested per-brand: `{ brandIdx: { files: [...] } }` — not flat `{ files: [...] }`
+- Journal syncs to both `/pulse/main.journal` AND `/profile/main.journal`
+- LifeAI chats/todos stored in `/lifeAI/main` doc (not subcollections)
+- `scheduleAutoSync()` debounces (2s) after any data save — wired into saveBrands, saveTodos, saveCalendar, saveBrandModelConfig, saveBrandKnowledge
 
 ---
 
@@ -316,6 +330,8 @@ unzip -l RoweOS.zip | head -10
 3. **5+ brand name update points** — All must use `shortName || name` pattern
 4. **No automated tests** — All testing is manual
 5. **Duplicate ROWEOS_VERSION** — Two declarations exist (line ~49443 for data migration, line ~50796 for current); keep both in sync
+6. **Three sync UI sections count differently** — Data Inventory (item counts from V2 subcollections), Storage Management (localStorage byte sizes), Diagnostics (V2 subcollections). All must use V2 reads.
+7. **Don't use optimistic rendering for sync counts** — Faking "Synced" status after push masks real bugs. Always re-fetch actual Firestore counts (with ~1s delay for consistency).
 
 ---
 
