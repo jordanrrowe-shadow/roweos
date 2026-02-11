@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v15.2
-File:     ~/Downloads/RoweOS/dist/index.html (112867 lines)
+Version:  v15.3
+File:     ~/Downloads/RoweOS/dist/index.html (113067 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -40,7 +40,7 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 index.html
 ├── Lines 1–15,000      CSS (themes, components, animations)
 ├── Lines 15,000–44,000 HTML (views, modals, overlays)
-└── Lines 44,000–112867 JavaScript (state, API, logic)
+└── Lines 44,000–113067 JavaScript (state, API, logic)
 ```
 
 ---
@@ -297,3 +297,38 @@ unzip -l RoweOS.zip | head -10
 - Suggesting `--yes` flag instead of fixing root cause
 - Breaking existing features
 - Missing version references
+
+---
+
+## PLUGINS & WORKFLOW AUTOMATION
+
+Claude Code plugins are installed and should be used automatically based on context. Match user intent to the right plugin — don't wait to be asked by name.
+
+### When to Use Each Plugin
+
+| Plugin | Trigger Context | Command/Skill |
+|--------|----------------|---------------|
+| **feature-dev** | "add [feature]", "build [feature]", new functionality requests, version updates with multiple features | `/feature-dev` |
+| **commit-commands** | "commit", "push", "create PR", "ship it", done with changes | `/commit`, `/commit-push-pr` |
+| **vercel** | "deploy", "check logs", "setup vercel", post-version deployment | `/deploy`, `/logs`, `/setup` |
+| **claude-md-management** | "update claude.md", end of version update sessions, after significant discoveries | `/revise-claude-md` |
+| **frontend-design** | "redesign", "improve UI", "make it look better", visual/layout changes | Activates automatically for UI work |
+| **greptile** | PR review, code review requests | MCP tools (requires GREPTILE_API_KEY) |
+| **serena** | "analyze code", semantic navigation, refactoring analysis | MCP tools (requires uvx/Python) |
+
+### Version Update Workflow
+
+For version updates (e.g., "let's do v15.3"), use plugins in this order:
+
+1. **feature-dev** `/feature-dev` — Plan and architect the changes (discovery, exploration, design phases)
+2. **frontend-design** — Activate for any UI/visual changes during implementation
+3. **commit-commands** `/commit` — Commit completed changes
+4. **vercel** `/deploy` — Deploy to production (or use `./deploy.sh` which also handles git)
+5. **claude-md-management** `/revise-claude-md` — Capture learnings and update CLAUDE.md
+
+### Guidelines
+- Use `/feature-dev` for any non-trivial feature work — it enforces structured thinking
+- Use `/commit` instead of manual git commands for cleaner workflow
+- Run `/revise-claude-md` at the end of major sessions to keep project memory current
+- frontend-design skill should inform all UI changes to avoid generic patterns
+- Always prefer `./deploy.sh` over `/deploy` unless deploy.sh is broken — it handles version sync + git + Vercel in one step
