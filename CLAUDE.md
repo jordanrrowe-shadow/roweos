@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v15.6
-File:     ~/Downloads/RoweOS/dist/index.html (115382 lines)
+Version:  v15.7
+File:     ~/Downloads/RoweOS/dist/index.html (115409 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -33,7 +33,7 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 1. **Brand names:** Always use `brands[idx].shortName || brands[idx].name` — never `.name` alone
 2. **No emoji:** Always use inline SVG icons
 3. **ES5 only:** No arrow functions, no let/const, no template literals
-4. **Bracket balance:** One missing bracket breaks the entire 113K-line file
+4. **Bracket balance:** One missing bracket breaks the entire 115K-line file (pre-existing 3-brace gap is normal — `{` count is ~3 less than `}` count due to HTML/CSS contexts)
 5. **Logo injection:** Use `document.createElement('img')` — never innerHTML for user-provided base64 logos
 6. **Init ordering:** `initBrandAccentColor()` and `initBrandLogo()` run before brand selector is set — must re-call after brand restoration
 
@@ -42,7 +42,7 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 index.html
 ├── Lines 1–15,000      CSS (themes, components, animations)
 ├── Lines 15,000–44,000 HTML (views, modals, overlays)
-└── Lines 44,000–115382 JavaScript (state, API, logic)
+└── Lines 44,000–115409 JavaScript (state, API, logic)
 ```
 
 ---
@@ -61,7 +61,7 @@ A private AI platform with two modes:
 - Pure vanilla HTML/CSS/JS
 - CDN dependencies: Firebase SDK, Marked.js
 - Direct browser API calls to Anthropic/OpenAI/Google (keys in localStorage)
-- Optional Firebase sync (user-configured)
+- Optional Firebase sync (user-configured) — syncs brands, conversations, settings, inventory, calendar, automations, library, pulse, todos. **API keys are NOT synced** (security). Settings toggles (cache, web search, auto-pilot) ARE synced in `profile.settings`.
 
 ### Design Philosophy
 - "Quiet competence" — professional elegance, no hype
@@ -151,12 +151,12 @@ RoweOS.zip
 
 ### Version Updates
 ```bash
-# Update version everywhere (macOS)
-sed -i '' 's/v12.0.8/v12.0.9/g' index.html
+# Update version everywhere (macOS) — use two-part format (v15.6, not v15.6.0)
+sed -i '' 's/v15.5/v15.6/g' index.html
 
 # Verify update
-grep -c 'v12.0.8' index.html  # Should be 0
-grep -c 'v12\.0\.8' index.html  # Should be 10+
+grep -c 'v15\.5' index.html  # Should be 0
+grep -c 'v15\.6' index.html  # Should be 30+
 ```
 
 Version appears in: `ROWEOS_VERSION` constant, launch screen, mobile header, settings, sidebar footer, console logs, comments. (Not in `<title>` — title is just "RoweOS - Intelligence Platform".)
@@ -185,11 +185,21 @@ Version appears in: `ROWEOS_VERSION` constant, launch screen, mobile header, set
 | Identity | tuning | tuningView | Brand config |
 | Settings | settings | settingsView | App config |
 | Inventory | inventory | inventoryView | Products |
-| Commerce | commerce | commerceView | Metrics |
+| Commerce | commerce | commerceView | Analytics & business |
 
 ```javascript
 showView('agent');  // Switch view, update sidebar, breadcrumbs, title
 ```
+
+### Commerce Tabs (showCommerceTab)
+
+| Tab | ID | Content |
+|-----|----|---------|
+| Overview | overview | Summary cards, model comparison chart, model breakdown table |
+| API Costs | api | Provider status cards, settings toggles, cost dashboard |
+| Invoices | invoices | Invoice list, builder with product picker, preview/print |
+| Clients | clients | Client cards with logos, add modal with logo upload |
+| Budget | budget | Monthly budget tracking (LifeAI) |
 
 ### BrandAI Agents
 
@@ -232,6 +242,15 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `roweos_app_mode` | Primary mode key: 'brand' or 'life' |
 | `brand_0` through `brand_4` | Per-brand knowledge |
 | `brandMemory` | Uploaded knowledge |
+| `roweos_analytics` | API usage entries (provider, model, tokens, cost, cached) |
+| `roweos_invoices` | Invoice array (number, client, lineItems, total, status) |
+| `roweos_clients` | Client array (name, email, company, phone, logo) |
+| `roweos_inventory` | Products/services `{items: [], categories: []}` |
+| `roweos_response_cache` | Cached API responses (1hr TTL, max 100) |
+| `roweos_feature_responseCache` | Cache toggle ('true'/'false') |
+| `roweos_feature_autoPilot` | Auto-pilot toggle ('true'/'false') |
+| `roweos_claude_web_search` | Claude web search toggle |
+| `roweos_gemini_web_search` | Gemini web search toggle |
 
 ### Key Functions
 
@@ -252,6 +271,16 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `initBrandAccentColor()` | Init brand color on page load |
 | `switchToBrandMode()` | Switch from LifeAI to BrandAI |
 | `switchToLifeMode()` | Switch from BrandAI to LifeAI |
+| `showCommerceTab(tab)` | Switch Commerce sub-tabs |
+| `renderCommerceOverview()` | Analytics overview dashboard |
+| `renderApiProviderStatus()` | Live API key status cards |
+| `renderApiCostsDashboard(period)` | API cost charts/tables |
+| `viewInvoice(id)` | Invoice preview with logos |
+| `printInvoice(id)` | Print invoice in new window |
+| `openInvoiceProductPicker()` | Browse inventory for invoice items |
+| `calculatePeriodStats()` | Aggregate analytics by time period |
+| `trackAPIUsage(params)` | Log API call to analytics |
+| `syncToFirebaseV2()` | Full Firebase sync (all categories) |
 
 ---
 
