@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Version:  v15.13
-File:     ~/Downloads/RoweOS/dist/index.html (115556 lines)
+File:     ~/Downloads/RoweOS/dist/index.html (115565 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -42,7 +42,7 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 index.html
 ├── Lines 1–15,000      CSS (themes, components, animations)
 ├── Lines 15,000–44,000 HTML (views, modals, overlays)
-└── Lines 44,000–115556 JavaScript (state, API, logic)
+└── Lines 44,000–115565 JavaScript (state, API, logic)
 ```
 
 ---
@@ -295,6 +295,23 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 - Journal syncs to both `/pulse/main.journal` AND `/profile/main.journal`
 - LifeAI chats/todos stored in `/lifeAI/main` doc (not subcollections)
 - `scheduleAutoSync()` debounces (2s) after any data save — wired into saveBrands, saveTodos, saveCalendar, saveBrandModelConfig, saveBrandKnowledge
+- **Always use `safeParse()`/try-catch** for `JSON.parse(localStorage.getItem(...))` in sync data builders — corrupted data crashes the entire sync
+
+### Brand Selector Sync
+- Three selectors: `#brand` (sidebar), `#agentBrand` (ChatAI hidden input), `#studioBrand` (Studio)
+- `executeAgentRequest()` reads `#agentBrand` — so `selectModel()` and `updateStarButtonProvider()` must also prefer `#agentBrand`
+- `selectAgentBrand()` does NOT call `onBrandChange()` — must manually call `updateStarButtonProvider()`, `updateDeepResearchButton()`, `applyBrandAccentColor()`
+- `syncBrandDropdowns()` rebuilds dropdowns — must use current `agentBrand.value` for selected state, not hardcoded index 0
+
+### API Key Routing
+- `getApiKey('google')` — for Gemini chat, Deep Research (Interactions API)
+- `getNanobananaKey()` — for Nanobanana image generation only (reads `apiKeys.nanobanana`)
+- Deep Research (`startDeepResearch`, `pollDeepResearch`) must use `getApiKey('google')`, NOT `getNanobananaKey()`
+
+### Nanobanana Multi-turn Images
+- `generateImageWithNanobanana()` must extract text from BOTH success and failure responses
+- History format: `{ role: 'user'/'model', parts: [{ text: '...' }, { inlineData: { mimeType, data } }] }`
+- Initial request must include `role: 'user'` for Gemini API consistency
 
 ---
 
