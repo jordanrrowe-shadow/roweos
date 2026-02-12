@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Version:  v15.14
-File:     ~/Downloads/RoweOS/dist/index.html (116041 lines)
+File:     ~/Downloads/RoweOS/dist/index.html (116183 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -42,7 +42,7 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 index.html
 ├── Lines 1–15,000      CSS (themes, components, animations)
 ├── Lines 15,000–44,000 HTML (views, modals, overlays)
-└── Lines 44,000–116041 JavaScript (state, API, logic)
+└── Lines 44,000–116183 JavaScript (state, API, logic)
 ```
 
 ---
@@ -245,7 +245,12 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `roweos_analytics` | API usage entries (provider, model, tokens, cost, cached) |
 | `roweos_invoices` | Invoice array (number, client, lineItems, total, status) |
 | `roweos_clients` | Client array (name, email, company, phone, logo) |
-| `roweos_inventory` | Products/services `{items: [], categories: []}` |
+| `roweos_inventory` | Brand products/services `{items: [], categories: []}` |
+| `roweos_life_inventory` | LifeAI inventory (separate from brand `roweos_inventory`) |
+| `roweos_brand_knowledge_BRANDNAME` | Per-brand Identity document analysis (insights, systemPromptAdditions) |
+| `roweos_brand_memory` | Brand Memory — uploaded documents with insights (`brandMemory` var) |
+| `roweosScheduledPrompts` | Adaptive Operations scheduled prompts array |
+| `roweos_scheduled_tasks` | Rhythm scheduled tasks array |
 | `roweos_response_cache` | Cached API responses (1hr TTL, max 100) |
 | `roweos_feature_responseCache` | Cache toggle ('true'/'false') |
 | `roweos_feature_autoPilot` | Auto-pilot toggle ('true'/'false') |
@@ -258,8 +263,11 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 |----------|---------|
 | `showView(name)` | Switch views |
 | `sendAgentMessage()` | Send chat message |
-| `buildSystemPromptForBrand()` | Construct BrandAI prompt |
+| `buildBrandSystemPrompt(brand, agent)` | BrandAI prompt for Studio operations |
+| `executeAgentRequest()` | Main Chat — builds BrandAI prompt inline (~line 82978) |
+| `getBrandIdentityIntelligence(brand)` | Pulls Identity knowledge into BrandAI prompts |
 | `buildLifeAISystemPrompt()` | Construct LifeAI prompt |
+| `getLifeAIUserKnowledge(agentType)` | Pulls Identity knowledge into LifeAI prompts |
 | `onBrandChange()` | Handle brand switch |
 | `updateBrandName()` | Update sidebar (uses shortName) |
 | `toggleMode()` | Switch BrandAI/LifeAI |
@@ -308,6 +316,12 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 - `getNanobananaKey()` — for Nanobanana image generation only (reads `apiKeys.nanobanana`)
 - Deep Research (`startDeepResearch`, `pollDeepResearch`) must use `getApiKey('google')`, NOT `getNanobananaKey()`
 
+### Brand Identity Intelligence (v15.14)
+- **Two BrandAI prompt builders** — `buildBrandSystemPrompt()` (Studio) and inline in `executeAgentRequest()` (~line 82978, Chat). Both must include Identity knowledge.
+- `getBrandIdentityIntelligence(brand)` pulls from 3 sources: `roweos_brand_knowledge_BRANDNAME` (document analysis with `systemPromptAdditions`), `brandMemory['brand_X']` (uploaded doc insights), `brand_X` (knowledge repository)
+- LifeAI equivalent: `getLifeAIUserKnowledge(agentType)` pulls from `profile.aboutMe`, `profile.identityData`, coach contexts
+- Identity data syncs under the `knowledge` sync category toggle (not its own section)
+
 ### Nanobanana Multi-turn Images
 - `generateImageWithNanobanana()` must extract text from BOTH success and failure responses
 - History format: `{ role: 'user'/'model', parts: [{ text: '...' }, { inlineData: { mimeType, data } }] }`
@@ -349,6 +363,7 @@ unzip -l RoweOS.zip | head -10
 5. **Duplicate ROWEOS_VERSION** — Two declarations exist (line ~49443 for data migration, line ~50796 for current); keep both in sync
 6. **Three sync UI sections count differently** — Data Inventory (item counts from V2 subcollections), Storage Management (localStorage byte sizes), Diagnostics (V2 subcollections). All must use V2 reads.
 7. **Don't use optimistic rendering for sync counts** — Faking "Synced" status after push masks real bugs. Always re-fetch actual Firestore counts (with ~1s delay for consistency).
+8. **ES6 in `buildBrandSystemPrompt()`** — Uses backtick template literals (line ~62262) despite ES5-only rule. Pre-existing, not blocking.
 
 ---
 
