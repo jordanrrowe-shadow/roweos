@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v15.13
-File:     ~/Downloads/RoweOS/dist/index.html (115672 lines)
+Version:  v15.14
+File:     ~/Downloads/RoweOS/dist/index.html (116041 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -42,7 +42,7 @@ Must execute with ZERO prompts. If Vercel asks "Set up and deploy?" the ZIP is m
 index.html
 ├── Lines 1–15,000      CSS (themes, components, animations)
 ├── Lines 15,000–44,000 HTML (views, modals, overlays)
-└── Lines 44,000–115672 JavaScript (state, API, logic)
+└── Lines 44,000–116041 JavaScript (state, API, logic)
 ```
 
 ---
