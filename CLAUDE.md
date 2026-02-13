@@ -256,6 +256,7 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `roweos_feature_autoPilot` | Auto-pilot toggle ('true'/'false') |
 | `roweos_claude_web_search` | Claude web search toggle |
 | `roweos_gemini_web_search` | Gemini web search toggle |
+| `roweos_prompt_timestamps` | Per-brand/life prompt last-updated timestamps (JSON) |
 
 ### Key Functions
 
@@ -292,6 +293,9 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `clearFirestoreSubcollection()` | Delete all docs in a subcollection before re-writing |
 | `scheduleAutoSync()` | Debounced (2s) auto-sync after any data save |
 | `shouldSyncCategory(key)` | Check if category syncs to cloud (default: true) |
+| `generateBrandAIPrompt()` | Guardrails display — builds BrandAI prompt with Identity data |
+| `updateBrandSelectors(force)` | Rebuilds all brand dropdowns — must preserve selected values |
+| `storeBrandKnowledge(brandName, doc, analysis)` | Saves Identity document analysis to localStorage |
 
 ### Firebase Sync Architecture
 - **V2 subcollections** are the live format: `roweos_users/{uid}/brands/{idx}`, `/todos/{id}`, `/calendar/{id}`, `/runs/{id}`, `/inventory/{id}`, `/automations/{id}`, `/library/{brand,life}`, `/pulse/main`, `/profile/main`, `/lifeAI/main`, `/conversations/{current,history,agentHistory}`
@@ -307,6 +311,7 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 
 ### Brand Selector Sync
 - Three selectors: `#brand` (sidebar), `#agentBrand` (ChatAI hidden input), `#studioBrand` (Studio)
+- `updateBrandSelectors()` clears and rebuilds all selectors — MUST save/restore `.value` before/after rebuild or brand resets to 0
 - `executeAgentRequest()` reads `#agentBrand` — so `selectModel()` and `updateStarButtonProvider()` must also prefer `#agentBrand`
 - `selectAgentBrand()` does NOT call `onBrandChange()` — must manually call `updateStarButtonProvider()`, `updateDeepResearchButton()`, `applyBrandAccentColor()`
 - `syncBrandDropdowns()` rebuilds dropdowns — must use current `agentBrand.value` for selected state, not hardcoded index 0
@@ -317,7 +322,7 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 - Deep Research (`startDeepResearch`, `pollDeepResearch`) must use `getApiKey('google')`, NOT `getNanobananaKey()`
 
 ### Brand Identity Intelligence (v15.14)
-- **Two BrandAI prompt builders** — `buildBrandSystemPrompt()` (Studio) and inline in `executeAgentRequest()` (~line 82978, Chat). Both must include Identity knowledge.
+- **Three BrandAI prompt paths** — `generateBrandAIPrompt()` (Guardrails display), `buildBrandSystemPrompt()` (Studio), and inline in `executeAgentRequest()` (Chat). All three must include Identity knowledge via `getBrandIdentityIntelligence()`.
 - `getBrandIdentityIntelligence(brand)` pulls from 3 sources: `roweos_brand_knowledge_BRANDNAME` (document analysis with `systemPromptAdditions`), `brandMemory['brand_X']` (uploaded doc insights), `brand_X` (knowledge repository)
 - LifeAI equivalent: `getLifeAIUserKnowledge(agentType)` pulls from `profile.aboutMe`, `profile.identityData`, coach contexts
 - Identity data syncs under the `knowledge` sync category toggle (not its own section)
