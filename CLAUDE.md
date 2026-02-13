@@ -61,7 +61,7 @@ A private AI platform with two modes:
 - Pure vanilla HTML/CSS/JS
 - CDN dependencies: Firebase SDK, Marked.js
 - Direct browser API calls to Anthropic/OpenAI/Google (keys in localStorage)
-- Optional Firebase sync (user-configured) — syncs brands, conversations, settings, inventory, calendar, automations, library, pulse, todos. **API keys are NOT synced** (security). Settings toggles (cache, web search, auto-pilot) ARE synced in `profile.settings`.
+- Optional Firebase sync (user-configured) — syncs brands, conversations, settings, inventory, calendar, automations, library, pulse, todos. **API keys are NOT synced** (security). Settings toggles ARE synced in `profile.settings`.
 
 ### Design Philosophy
 - "Quiet competence" — professional elegance, no hype
@@ -185,13 +185,13 @@ Version appears in: `ROWEOS_VERSION` constant, launch screen, mobile header, set
 | Identity | tuning | tuningView | Brand config |
 | Settings | settings | settingsView | App config |
 | Inventory | inventory | inventoryView | Products |
-| Commerce | commerce | commerceView | Analytics & business |
+| Analytics | commerce | commerceView | Analytics & business (renamed from Commerce in v15.15; internal IDs still `commerce*`) |
 
 ```javascript
 showView('agent');  // Switch view, update sidebar, breadcrumbs, title
 ```
 
-### Commerce Tabs (showCommerceTab)
+### Analytics Tabs (showCommerceTab)
 
 | Tab | ID | Content |
 |-----|----|---------|
@@ -288,7 +288,7 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 | `printInvoice(id)` | Print invoice in new window |
 | `openInvoiceProductPicker()` | Browse inventory for invoice items |
 | `calculatePeriodStats()` | Aggregate analytics by time period |
-| `trackAPIUsage(params)` | Log API call to analytics |
+| `trackAPIUsage(params)` | Log API call to analytics (v15.15: called by ALL API paths — streaming AND non-streaming) |
 | `syncToFirebaseV2()` | Full Firebase sync (all categories) |
 | `clearFirestoreSubcollection()` | Delete all docs in a subcollection before re-writing |
 | `scheduleAutoSync()` | Debounced (2s) auto-sync after any data save |
@@ -308,6 +308,11 @@ Classes: `.sidebar`, `.sidebar.expanded`, `.sidebar.pinned`
 - LifeAI chats/todos stored in `/lifeAI/main` doc (not subcollections)
 - `scheduleAutoSync()` debounces (2s) after any data save — wired into saveBrands, saveTodos, saveCalendar, saveBrandModelConfig, saveBrandKnowledge
 - **Always use `safeParse()`/try-catch** for `JSON.parse(localStorage.getItem(...))` in sync data builders — corrupted data crashes the entire sync
+
+### Firebase Theme Sync (v15.15)
+- Firebase V3 listener and V2 load both check `localStorage.getItem('roweos_theme')` before applying — only updates DOM if cloud value differs from local
+- **Never** directly toggle `classList` for theme without also updating `localStorage('roweos_theme')` — causes random theme flipping on next load
+- Studio `runOp()` now saves to BOTH `runs` (Studio history) AND `agentCommands` (main History + Firebase sync) with `source: 'studio'`
 
 ### Brand Selector Sync
 - Three selectors: `#brand` (sidebar), `#agentBrand` (ChatAI hidden input), `#studioBrand` (Studio)
@@ -369,6 +374,9 @@ unzip -l RoweOS.zip | head -10
 6. **Three sync UI sections count differently** — Data Inventory (item counts from V2 subcollections), Storage Management (localStorage byte sizes), Diagnostics (V2 subcollections). All must use V2 reads.
 7. **Don't use optimistic rendering for sync counts** — Faking "Synced" status after push masks real bugs. Always re-fetch actual Firestore counts (with ~1s delay for consistency).
 8. **ES6 in `buildBrandSystemPrompt()`** — Uses backtick template literals (line ~62262) despite ES5-only rule. Pre-existing, not blocking.
+9. **`renderMemoryView()` doesn't exist** — LifeAI Identity must use `renderLifeIdentityView()` for re-rendering identity cards. Fixed in v15.15 but watch for any remaining callers.
+10. **Studio brand resolution** — `runOp()` must prefer `#studioBrand` over `#brand` for correct brand context. Pattern: `parseInt((studioBrandEl.value) || (brandEl.value) || selectedBrand || 0)`
+11. **Advanced Features toggles removed (v15.15)** — Web Search (Claude/Gemini), Response Caching, Auto-Pilot toggles removed from Settings UI. Cross-Mode Intelligence kept under "Intelligence" section. The `localStorage` keys still exist and are read by API functions; only the Settings UI was removed.
 
 ---
 
