@@ -9,11 +9,11 @@ cd "$PROJECT_DIR"
 
 echo "=== RoweOS Deploy ==="
 
-# 1. Extract current version from title tag in index.html
+# 1. Extract current version from ROWEOS_VERSION constant in index.html
 if [ -f "RoweOS/dist/index.html" ]; then
-    CURRENT_VERSION=$(grep -o '<title>RoweOS v[^<]*' RoweOS/dist/index.html | head -1 | sed 's/<title>RoweOS //' | sed 's/ -.*//')
+    CURRENT_VERSION=$(grep -o "var ROWEOS_VERSION = 'v[^']*'" RoweOS/dist/index.html | tail -1 | sed "s/var ROWEOS_VERSION = '//" | sed "s/'//")
 else
-    CURRENT_VERSION=$(unzip -p RoweOS.zip "RoweOS/dist/index.html" | grep -o '<title>RoweOS v[^<]*' | head -1 | sed 's/<title>RoweOS //' | sed 's/ -.*//')
+    CURRENT_VERSION=$(unzip -p RoweOS.zip "RoweOS/dist/index.html" | grep -o "var ROWEOS_VERSION = 'v[^']*'" | tail -1 | sed "s/var ROWEOS_VERSION = '//" | sed "s/'//")
 fi
 
 if [ -z "$CURRENT_VERSION" ]; then
@@ -82,7 +82,7 @@ if ! git diff --quiet CLAUDE.md 2>/dev/null || ! git diff --quiet RoweOS/dist/ 2
         echo "Committing..."
         git commit -m "$CURRENT_VERSION: Sync and deploy
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
         echo "Committed changes"
     fi
 fi
