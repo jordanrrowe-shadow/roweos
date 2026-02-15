@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v15.23
+Version:  v15.24
 File:     RoweOS/dist/index.html (118078 lines)
 Live:     roweos.vercel.app
 ```
