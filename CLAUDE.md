@@ -7,9 +7,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v15.37
-File:     RoweOS/dist/index.html (119408 lines)
+Version:  v15.38
+File:     RoweOS/dist/index.html (119539 lines)
 Live:     roweos.vercel.app
+```
+
+### Session Startup
+At the beginning of each session, run:
+```bash
+serena start-mcp-server --language-backend JetBrains
 ```
 
 ### Deploy to Production
