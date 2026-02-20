@@ -1,6 +1,8 @@
 {
   "version": 2,
   "routes": [
+    { "src": "/info/api/(.*)", "dest": "https://roweoswebsite.vercel.app/api/$1" },
+    { "src": "/info", "dest": "https://roweoswebsite.vercel.app/" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/login.html", "dest": "/login.html" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
