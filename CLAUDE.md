@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v16.0
-File:     RoweOS/dist/index.html (120489 lines)
+Version:  v16.1
+File:     RoweOS/dist/index.html (120505 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -164,6 +164,17 @@ Key patterns to remember without looking up:
 - `showToast(msg, type)` for notifications
 - `escapeHtml(str)` for innerHTML sanitization
 - `syncToFirebaseV2()` for full sync, `scheduleAutoSync()` for debounced auto-sync
+- `getAccentFallback()` for accent color with fallback (replaces inline `getComputedStyle` calls)
+- `AGENT_COLORS` global constant for agent color map (strategy, marketing, operations, documents, coach, etc.)
+- `ROWEOS_DEBUG` — `console.log` gated by `localStorage.getItem('roweos_debug') === 'true'`
+
+### Enterprise / Access Key System
+- `isAdmin()` — checks `firebaseUser.uid === ADMIN_UID`
+- `getUserTier()` — cached (5min TTL), returns `'free'|'basic'|'pro'|'enterprise'`
+- `hasFeatureAccess(feature)` — tier-based gate (sync, export, whiteLabel, multiUser)
+- `generateAccessKey(tier, note)` / `revokeAccessKey(key)` — admin-only
+- `validateAccessKey(key)` / `linkAccessKeyToUser(key)` / `checkUserAccessKey()` — user flow
+- Firestore collections: `access_keys`, `roweos_users`
 
 ---
 
