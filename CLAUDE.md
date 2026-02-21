@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v16.10
-File:     RoweOS/dist/index.html (121495 lines)
+Version:  v16.11
+File:     RoweOS/dist/index.html (122173 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -145,6 +145,7 @@ Two-part format (v15.6, not v15.6.0). Version appears in: `ROWEOS_VERSION` const
 | Identity | tuning | tuningView |
 | Settings | settings | settingsView |
 | Inventory | inventory | inventoryView |
+| Clients | clients | clientsView |
 | Analytics | commerce | commerceView |
 
 Analytics was renamed from Commerce in v15.15; internal IDs still `commerce*`.
