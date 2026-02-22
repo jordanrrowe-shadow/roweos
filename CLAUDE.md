@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v17.4
-File:     RoweOS/dist/index.html (126015 lines)
+Version:  v18.0
+File:     RoweOS/dist/index.html (126147 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -168,6 +168,10 @@ Key patterns to remember without looking up:
 - `getAccentFallback()` for accent color with fallback (replaces inline `getComputedStyle` calls)
 - `AGENT_COLORS` global constant for agent color map (strategy, marketing, operations, documents, coach, etc.)
 - `ROWEOS_DEBUG` — `console.log` gated by `localStorage.getItem('roweos_debug') === 'true'`
+- `findOperationById(id)` — unified operation lookup across ops, generatedBrandOps, custom ops, lifeOps, generatedLifeOps
+- Automations dual storage: `roweos_automations` (localStorage) AND `getScheduledTasks()`/`saveScheduledTasks()` — both must be updated on save
+- `executeWorkflow(workflow)` — runs multi-step pipelines; `executeWorkflowStep()` handles: post, studio, image, library, notify
+- `WORKFLOW_PRESETS` — predefined multi-step workflow templates; `resolveTemplateVars()` resolves `{{stepN_output}}` between steps
 
 ### Enterprise / Access Key System
 - `isAdmin()` — checks `firebaseUser.uid === ADMIN_UID`

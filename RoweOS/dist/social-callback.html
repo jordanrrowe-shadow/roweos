@@ -44,6 +44,33 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     }
   }
 
+  // v18.0: Parse brand/life scope from pending context or state prefix
+  function getScopeFromContext(state) {
+    // Primary: read from localStorage (set by connect function before popup opened)
+    try {
+      var pending = localStorage.getItem('roweos_social_pending_context');
+      if (pending && (pending.indexOf('_brand_') === 0 || pending.indexOf('_life_') === 0)) {
+        localStorage.removeItem('roweos_social_pending_context');
+        return pending;
+      }
+    } catch(e) {}
+    // Fallback: parse scope code from state prefix (iOS Safari localStorage partitioning)
+    // State format: "platform_scopeCode_randomString" e.g. "x_b2_abc123" or "threads_l1_xyz789"
+    if (state) {
+      var parts = state.split('_');
+      // parts[0] = platform prefix (x, threads, ig), parts[1] might be scope code
+      var scopePart = parts.length >= 3 ? parts[1] : null;
+      if (scopePart && scopePart.length >= 2) {
+        var scopeType = scopePart.charAt(0); // 'b' or 'l'
+        var scopeIdx = scopePart.substring(1);
+        if (scopeType === 'b' && !isNaN(parseInt(scopeIdx))) return '_brand_' + scopeIdx;
+        if (scopeType === 'l' && !isNaN(parseInt(scopeIdx))) return '_life_' + scopeIdx;
+      }
+    }
+    // Default: brand 0 (backward compat with old state format like "x_abc123")
+    return '_brand_0';
+  }
+
   try {
     var params = new URLSearchParams(window.location.search);
     var code = params.get('code');
@@ -85,6 +112,9 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       return;
     }
 
+    // v18.0: Determine brand/life scope for this connection
+    var scope = getScopeFromContext(state);
+
     var platformNames = { x: 'X', threads: 'Threads', instagram: 'Instagram' };
     setStatus('Connecting ' + platformNames[platform] + '...');
 
@@ -123,6 +153,7 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       }
 
       // Store token data in localStorage for the main app to pick up
+      // v18.0: Write to scoped keys using brand/life scope
       var tokenData = {
         accessToken: data.accessToken || '',
         refreshToken: data.refreshToken || '',
@@ -130,25 +161,49 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
         userId: data.userId || '',
         updatedAt: new Date().toISOString()
       };
-      localStorage.setItem('roweos_social_pending_token_' + platform, JSON.stringify(tokenData));
+      localStorage.setItem('roweos_social_pending_token_' + platform + scope, JSON.stringify(tokenData));
       // v17.2: Also write to final token key directly (pending pickup has timing bug)
-      localStorage.setItem('roweos_social_token_' + platform, JSON.stringify(tokenData));
+      localStorage.setItem('roweos_social_token_' + platform + scope, JSON.stringify(tokenData));
 
-      // Set connected state (main app polls for this)
-      localStorage.setItem('roweos_social_' + platform + '_connected', 'true');
+      // Set connected state (main app polls for this) — scoped key
+      localStorage.setItem('roweos_social_' + platform + '_connected' + scope, 'true');
 
-      // For X, try to get handle
+      // v17.5: Fetch @handle for X, Threads, and Instagram — write to scoped handle key
       if (platform === 'x' && data.accessToken) {
         setStatus('Getting your X profile...');
         fetch('https://api.x.com/2/users/me', {
           headers: { 'Authorization': 'Bearer ' + data.accessToken }
         }).then(function(r) { return r.json(); }).then(function(user) {
           var handle = user.data && user.data.username ? user.data.username : '';
-          if (handle) localStorage.setItem('roweos_social_x_handle', '@' + handle);
+          if (handle) localStorage.setItem('roweos_social_x_handle' + scope, handle);
           setStatus('Connected as @' + handle, 'success');
           done(true);
         }).catch(function() {
           setStatus('X connected', 'success');
+          done(true);
+        });
+      } else if (platform === 'threads' && data.accessToken) {
+        setStatus('Getting your Threads profile...');
+        fetch('https://graph.threads.net/v1.0/me?fields=username&access_token=' + encodeURIComponent(data.accessToken))
+        .then(function(r) { return r.json(); }).then(function(user) {
+          var handle = user.username || '';
+          if (handle) localStorage.setItem('roweos_social_threads_handle' + scope, handle);
+          setStatus(handle ? 'Connected as @' + handle : 'Threads connected', 'success');
+          done(true);
+        }).catch(function() {
+          setStatus('Threads connected', 'success');
+          done(true);
+        });
+      } else if (platform === 'instagram' && data.accessToken) {
+        setStatus('Getting your Instagram profile...');
+        fetch('https://graph.instagram.com/v21.0/me?fields=username&access_token=' + encodeURIComponent(data.accessToken))
+        .then(function(r) { return r.json(); }).then(function(user) {
+          var handle = user.username || '';
+          if (handle) localStorage.setItem('roweos_social_instagram_handle' + scope, handle);
+          setStatus(handle ? 'Connected as @' + handle : 'Instagram connected', 'success');
+          done(true);
+        }).catch(function() {
+          setStatus('Instagram connected', 'success');
           done(true);
         });
       } else {
