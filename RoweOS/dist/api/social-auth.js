@@ -42,7 +42,7 @@ export default async function handler(req, res) {
     // --- X/Twitter Token Refresh ---
     if (platform === 'x' && action === 'refresh') {
       var xRefreshToken = body.refreshToken;
-      var xClientId = body.clientId || process.env.ROWEOS_X_CLIENT_ID;
+      var xClientId = (body.clientId || process.env.ROWEOS_X_CLIENT_ID || '').trim();
       if (!xRefreshToken) {
         return res.status(400).json({ error: 'Missing refreshToken for X refresh' });
       }
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       var xCode = body.code;
       var xRedirectUri = body.redirectUri;
       var xCodeVerifier = body.codeVerifier;
-      var xClientIdExch = body.clientId || process.env.ROWEOS_X_CLIENT_ID;
+      var xClientIdExch = (body.clientId || process.env.ROWEOS_X_CLIENT_ID || '').trim();
 
       if (!xCode || !xRedirectUri || !xCodeVerifier) {
         return res.status(400).json({ error: 'Missing code, redirectUri, or codeVerifier for X exchange' });
@@ -109,8 +109,8 @@ export default async function handler(req, res) {
     if (platform === 'threads') {
       var tCode = body.code;
       var tRedirectUri = body.redirectUri;
-      var tAppId = body.appId || process.env.ROWEOS_THREADS_APP_ID;
-      var tAppSecret = body.appSecret || process.env.ROWEOS_THREADS_APP_SECRET;
+      var tAppId = (body.appId || process.env.ROWEOS_THREADS_APP_ID || '').trim();
+      var tAppSecret = (body.appSecret || process.env.ROWEOS_THREADS_APP_SECRET || '').trim();
 
       if (!tCode || !tRedirectUri) {
         return res.status(400).json({ error: 'Missing code or redirectUri for Threads exchange' });
@@ -191,8 +191,8 @@ export default async function handler(req, res) {
     if (platform === 'instagram') {
       var igCode = body.code;
       var igRedirectUri = body.redirectUri;
-      var igAppId = body.appId || process.env.ROWEOS_IG_APP_ID;
-      var igAppSecret = body.appSecret || process.env.ROWEOS_IG_APP_SECRET;
+      var igAppId = (body.appId || process.env.ROWEOS_IG_APP_ID || '').trim();
+      var igAppSecret = (body.appSecret || process.env.ROWEOS_IG_APP_SECRET || '').trim();
 
       if (!igCode || !igRedirectUri) {
         return res.status(400).json({ error: 'Missing code or redirectUri for Instagram exchange' });
