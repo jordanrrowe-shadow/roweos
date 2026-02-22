@@ -72,6 +72,13 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     else if (state === tState) platform = 'threads';
     else if (state === igState) platform = 'instagram';
 
+    // v17.3: Fallback — detect platform from state prefix (iOS Safari partitions localStorage between popup/redirect contexts)
+    if (!platform && state) {
+      if (state.indexOf('x_') === 0) platform = 'x';
+      else if (state.indexOf('threads_') === 0) platform = 'threads';
+      else if (state.indexOf('ig_') === 0) platform = 'instagram';
+    }
+
     if (!platform) {
       setStatus('Unknown authorization state. Please try connecting again.', 'error');
       done(false);
