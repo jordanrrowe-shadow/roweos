@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     var contentType = body.contentType || 'application/xml; charset=utf-8';
 
     // v16.14: Validate URL — allow caldav.icloud.com and partition servers (pXX-caldav)
-    var icloudPattern = /^https:\/\/([a-z0-9-]+\.)?caldav\.icloud\.com(\/|$)/;
+    var icloudPattern = /^https:\/\/([a-z0-9-]+\.)?caldav\.icloud\.com(:\d+)?(\/|$)/;
     if (!url || !icloudPattern.test(url)) {
       console.error('[CalDAV Proxy] URL rejected:', url);
       return res.status(400).json({ error: 'Invalid CalDAV URL: ' + (url || '(empty)') + '. Only caldav.icloud.com is allowed.' });
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
         location = urlObj.origin + location;
       }
       // Validate redirect target is still iCloud
-      if (!icloudPattern.test(location)) {
+      if (!(/^https:\/\/([a-z0-9-]+\.)?caldav\.icloud\.com(:\d+)?(\/|$)/).test(location)) {
         console.error('[CalDAV Proxy] Redirect to disallowed host:', location);
         return res.status(400).json({ error: 'Redirect to disallowed host: ' + location });
       }
