@@ -36,11 +36,16 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     }
   }
 
+  // v18.3: Track platform for redirect flow
+  var _detectedPlatform = null;
+
   function done(success) {
     if (window.opener) {
       setTimeout(function() { window.close(); }, success ? 1000 : 3000);
     } else {
-      setTimeout(function() { window.location.href = '/'; }, success ? 1000 : 3000);
+      // v18.3: Redirect flow (mobile Safari popup blocked) — return to app with query param
+      var returnUrl = '/' + (success && _detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
+      setTimeout(function() { window.location.href = returnUrl; }, success ? 1000 : 3000);
     }
   }
 
@@ -111,6 +116,9 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       done(false);
       return;
     }
+
+    // v18.3: Store detected platform for redirect flow
+    _detectedPlatform = platform;
 
     // v18.0: Determine brand/life scope for this connection
     var scope = getScopeFromContext(state);
