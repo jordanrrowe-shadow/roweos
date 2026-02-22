@@ -10,11 +10,28 @@ export default async function handler(req, res) {
   } else {
     res.setHeader('Access-Control-Allow-Origin', 'https://roweos.vercel.app');
   }
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // v18.5: GET handler — server-side 302 redirect for OAuth URLs
+  // Prevents iOS universal links from intercepting threads.net/instagram.com URLs
+  if (req.method === 'GET') {
+    var authUrl = req.query && req.query.authUrl;
+    if (authUrl && typeof authUrl === 'string') {
+      // Whitelist allowed OAuth domains
+      var allowed = ['https://threads.net/', 'https://www.threads.net/',
+                     'https://api.instagram.com/', 'https://x.com/'];
+      var isAllowed = allowed.some(function(prefix) { return authUrl.indexOf(prefix) === 0; });
+      if (isAllowed) {
+        res.writeHead(302, { 'Location': authUrl, 'Cache-Control': 'no-cache, no-store' });
+        return res.end();
+      }
+    }
+    return res.status(400).json({ error: 'Invalid or missing authUrl parameter' });
   }
 
   if (req.method !== 'POST') {
