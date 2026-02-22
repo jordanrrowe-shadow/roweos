@@ -5,6 +5,7 @@
     { "src": "/info", "dest": "https://roweoswebsite.vercel.app/" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/privacy", "dest": "/privacy.html" },
+    { "src": "/social-callback", "dest": "/social-callback.html" },
     { "src": "/login.html", "dest": "/login.html" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
     { "src": "/apple-touch-icon.png", "dest": "/apple-touch-icon.png" },

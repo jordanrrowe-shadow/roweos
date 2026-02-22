@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS - Connecting...</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#09090b;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center}
+.container{max-width:360px;padding:40px}
+.spinner{width:40px;height:40px;border:3px solid rgba(168,152,120,0.15);border-top-color:#a89878;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 24px}
+@keyframes spin{to{transform:rotate(360deg)}}
+h2{font-size:18px;font-weight:600;margin-bottom:8px}
+.status{font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:16px;min-height:40px}
+.error{color:#ef4444}
+.success{color:#22c55e}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="spinner" id="spinner"></div>
+  <h2>Connecting Account</h2>
+  <div class="status" id="status">Exchanging authorization...</div>
+</div>
+
+<script>
+(function() {
+  var statusEl = document.getElementById('status');
+  var spinnerEl = document.getElementById('spinner');
+
+  function setStatus(msg, type) {
+    statusEl.textContent = msg;
+    statusEl.className = 'status' + (type ? ' ' + type : '');
+    if (type === 'success' || type === 'error') {
+      spinnerEl.style.display = 'none';
+    }
+  }
+
+  function done(success) {
+    if (window.opener) {
+      setTimeout(function() { window.close(); }, success ? 1000 : 3000);
+    } else {
+      setTimeout(function() { window.location.href = '/'; }, success ? 1000 : 3000);
+    }
+  }
+
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var code = params.get('code');
+    var state = params.get('state');
+    var error = params.get('error');
+
+    if (error) {
+      setStatus('Authorization denied: ' + (params.get('error_description') || error), 'error');
+      done(false);
+      return;
+    }
+
+    if (!code || !state) {
+      setStatus('Missing authorization code. Please try again.', 'error');
+      done(false);
+      return;
+    }
+
+    // Determine platform from stored state (localStorage, shared with opener)
+    var xState = localStorage.getItem('roweos_x_state');
+    var tState = localStorage.getItem('roweos_threads_state');
+    var igState = localStorage.getItem('roweos_ig_state');
+    var platform = null;
+
+    if (state === xState) platform = 'x';
+    else if (state === tState) platform = 'threads';
+    else if (state === igState) platform = 'instagram';
+
+    if (!platform) {
+      setStatus('Unknown authorization state. Please try connecting again.', 'error');
+      done(false);
+      return;
+    }
+
+    var platformNames = { x: 'X', threads: 'Threads', instagram: 'Instagram' };
+    setStatus('Connecting ' + platformNames[platform] + '...');
+
+    var origin = window.location.origin;
+    var redirectUri = origin + '/social-callback';
+
+    // Build request body
+    var body = { platform: platform, code: code, redirectUri: redirectUri };
+
+    if (platform === 'x') {
+      body.action = 'exchange';
+      body.codeVerifier = localStorage.getItem('roweos_x_code_verifier') || '';
+      body.clientId = localStorage.getItem('roweos_x_client_id') || '';
+      localStorage.removeItem('roweos_x_code_verifier');
+      localStorage.removeItem('roweos_x_state');
+      localStorage.removeItem('roweos_x_client_id');
+    } else if (platform === 'threads') {
+      localStorage.removeItem('roweos_threads_state');
+    } else if (platform === 'instagram') {
+      localStorage.removeItem('roweos_ig_state');
+    }
+
+    // Exchange code for tokens via Vercel function
+    fetch('/api/social-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        setStatus('Connection failed: ' + data.error, 'error');
+        done(false);
+        return;
+      }
+
+      // Store token data in localStorage for the main app to pick up
+      var tokenData = {
+        accessToken: data.accessToken || '',
+        refreshToken: data.refreshToken || '',
+        expiresAt: data.expiresAt || 0,
+        userId: data.userId || '',
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem('roweos_social_pending_token_' + platform, JSON.stringify(tokenData));
+
+      // Set connected state (main app polls for this)
+      localStorage.setItem('roweos_social_' + platform + '_connected', 'true');
+
+      // For X, try to get handle
+      if (platform === 'x' && data.accessToken) {
+        setStatus('Getting your X profile...');
+        fetch('https://api.x.com/2/users/me', {
+          headers: { 'Authorization': 'Bearer ' + data.accessToken }
+        }).then(function(r) { return r.json(); }).then(function(user) {
+          var handle = user.data && user.data.username ? user.data.username : '';
+          if (handle) localStorage.setItem('roweos_social_x_handle', '@' + handle);
+          setStatus('Connected as @' + handle, 'success');
+          done(true);
+        }).catch(function() {
+          setStatus('X connected', 'success');
+          done(true);
+        });
+      } else {
+        setStatus(platformNames[platform] + ' connected', 'success');
+        done(true);
+      }
+    })
+    .catch(function(err) {
+      setStatus('Connection failed: ' + (err.message || 'Network error'), 'error');
+      done(false);
+    });
+
+  } catch(e) {
+    setStatus('Unexpected error: ' + e.message, 'error');
+    done(false);
+  }
+})();
+</script>
+</body>
+</html>
