@@ -80,25 +80,28 @@ export default async function handler(req, res) {
     }
 
     // --- Threads Post (two-step: create container, then publish) ---
+    // v18.1: BUG 5 — Switch to POST body with Content-Type (matches Instagram pattern), add 200ms delay
     if (platform === 'threads') {
       if (!userId) {
         return res.status(400).json({ error: 'Missing userId for Threads post' });
       }
 
-      // Step 1: Create media container
-      var tContainerParams = 'media_type=TEXT&text=' + encodeURIComponent(content) +
+      // Step 1: Create media container via POST body (not URL params)
+      var tContainerBody = 'media_type=TEXT&text=' + encodeURIComponent(content) +
         '&access_token=' + encodeURIComponent(accessToken);
 
       // If image is attached, switch to IMAGE type
       if (mediaIds.length > 0 && mediaIds[0]) {
-        tContainerParams = 'media_type=IMAGE' +
+        tContainerBody = 'media_type=IMAGE' +
           '&image_url=' + encodeURIComponent(mediaIds[0]) +
           '&text=' + encodeURIComponent(content) +
           '&access_token=' + encodeURIComponent(accessToken);
       }
 
-      var tContainerResp = await fetch('https://graph.threads.net/v1.0/' + userId + '/threads?' + tContainerParams, {
-        method: 'POST'
+      var tContainerResp = await fetch('https://graph.threads.net/v1.0/' + userId + '/threads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: tContainerBody
       });
       var tContainerData = await tContainerResp.json();
 
@@ -107,11 +110,15 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Threads container creation failed', detail: tContainerData });
       }
 
-      // Step 2: Publish the container
-      var tPublishResp = await fetch('https://graph.threads.net/v1.0/' + userId + '/threads_publish?' +
-        'creation_id=' + tContainerData.id +
-        '&access_token=' + encodeURIComponent(accessToken), {
-        method: 'POST'
+      // v18.1: Brief delay between container creation and publish
+      await new Promise(function(resolve) { setTimeout(resolve, 200); });
+
+      // Step 2: Publish the container via POST body
+      var tPublishResp = await fetch('https://graph.threads.net/v1.0/' + userId + '/threads_publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'creation_id=' + tContainerData.id +
+              '&access_token=' + encodeURIComponent(accessToken)
       });
       var tPublishData = await tPublishResp.json();
 
