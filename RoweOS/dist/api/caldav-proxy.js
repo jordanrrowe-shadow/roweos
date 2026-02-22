@@ -1,4 +1,4 @@
-// v16.12: CalDAV proxy for iCloud Calendar integration
+// v16.13: CalDAV proxy for iCloud Calendar integration
 // Vercel serverless function — stateless pass-through to caldav.icloud.com
 // Browser cannot call CalDAV directly due to CORS restrictions
 
@@ -46,6 +46,7 @@ export default async function handler(req, res) {
     var fetchOpts = {
       method: method,
       headers: headers,
+      redirect: 'manual', // v16.13: Handle redirects manually to preserve CalDAV methods
     };
 
     // Only add body for methods that use it
@@ -53,13 +54,34 @@ export default async function handler(req, res) {
       fetchOpts.body = xmlBody;
     }
 
+    // v16.13: Follow redirects manually (up to 5 hops) — preserves PROPFIND/REPORT method
     var response = await fetch(url, fetchOpts);
+    var redirectCount = 0;
+    while (response.status >= 300 && response.status < 400 && redirectCount < 5) {
+      var location = response.headers.get('location');
+      if (!location) break;
+      // Make absolute if relative
+      if (location.indexOf('http') !== 0) {
+        var urlObj = new URL(url);
+        location = urlObj.origin + location;
+      }
+      // Validate redirect target is still iCloud
+      if (!/^https:\/\/(p\d+-)?caldav\.icloud\.com\//.test(location)) {
+        return res.status(400).json({ error: 'Redirect to disallowed host: ' + location });
+      }
+      url = location;
+      fetchOpts.headers = { ...headers, 'Authorization': 'Basic ' + authStr };
+      response = await fetch(url, fetchOpts);
+      redirectCount++;
+    }
+
     var responseBody = await response.text();
 
     return res.status(200).json({
       status: response.status,
       body: responseBody,
       contentType: response.headers.get('content-type') || '',
+      finalUrl: url, // v16.13: Return final URL after redirects for client-side origin detection
     });
   } catch (err) {
     console.error('[CalDAV Proxy] Error:', err.message);
