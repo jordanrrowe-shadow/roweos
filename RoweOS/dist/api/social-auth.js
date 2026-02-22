@@ -129,7 +129,17 @@ export default async function handler(req, res) {
               '&redirect_uri=' + encodeURIComponent(tRedirectUri) +
               '&code=' + encodeURIComponent(tCode)
       });
-      var tShortData = await tShortResp.json();
+      // v17.2: Parse as text first to preserve user_id precision (exceeds Number.MAX_SAFE_INTEGER)
+      var tShortText = await tShortResp.text();
+      var tShortUserId = '';
+      var userIdMatch = tShortText.match(/"user_id"\s*:\s*(\d+)/);
+      if (userIdMatch) tShortUserId = userIdMatch[1];
+      var tShortData;
+      try { tShortData = JSON.parse(tShortText); } catch(e) {
+        return res.status(400).json({ error: 'Threads token parse failed', detail: tShortText.substring(0, 200) });
+      }
+      // Use string-extracted userId, not the JSON-parsed (lossy) number
+      var tUserId = tShortUserId || String(tShortData.user_id || '');
 
       if (!tShortResp.ok || !tShortData.access_token) {
         console.error('[Social Auth] Threads short token failed:', tShortData);
@@ -148,7 +158,7 @@ export default async function handler(req, res) {
         // Fall back to short-lived token
         return res.status(200).json({
           accessToken: tShortData.access_token,
-          userId: tShortData.user_id,
+          userId: tUserId,
           expiresIn: 3600,
           expiresAt: Date.now() + 3600000,
           longLived: false
@@ -157,7 +167,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         accessToken: tLongData.access_token,
-        userId: tShortData.user_id,
+        userId: tUserId,
         expiresIn: tLongData.expires_in || 5184000,
         expiresAt: Date.now() + ((tLongData.expires_in || 5184000) * 1000),
         longLived: true
@@ -211,7 +221,15 @@ export default async function handler(req, res) {
               '&redirect_uri=' + encodeURIComponent(igRedirectUri) +
               '&code=' + encodeURIComponent(igCode)
       });
-      var igShortData = await igShortResp.json();
+      // v17.2: Parse as text first to preserve user_id precision
+      var igShortText = await igShortResp.text();
+      var igUserIdMatch = igShortText.match(/"user_id"\s*:\s*(\d+)/);
+      var igUserId = igUserIdMatch ? igUserIdMatch[1] : '';
+      var igShortData;
+      try { igShortData = JSON.parse(igShortText); } catch(e) {
+        return res.status(400).json({ error: 'Instagram token parse failed', detail: igShortText.substring(0, 200) });
+      }
+      if (!igUserId) igUserId = String(igShortData.user_id || '');
 
       if (!igShortResp.ok || !igShortData.access_token) {
         console.error('[Social Auth] Instagram short token failed:', igShortData);
@@ -228,7 +246,7 @@ export default async function handler(req, res) {
       if (!igLongResp.ok || !igLongData.access_token) {
         return res.status(200).json({
           accessToken: igShortData.access_token,
-          userId: igShortData.user_id,
+          userId: igUserId,
           expiresIn: 3600,
           expiresAt: Date.now() + 3600000,
           longLived: false
@@ -237,7 +255,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         accessToken: igLongData.access_token,
-        userId: igShortData.user_id,
+        userId: igUserId,
         expiresIn: igLongData.expires_in || 5184000,
         expiresAt: Date.now() + ((igLongData.expires_in || 5184000) * 1000),
         longLived: true
