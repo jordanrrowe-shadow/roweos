@@ -124,6 +124,8 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
         updatedAt: new Date().toISOString()
       };
       localStorage.setItem('roweos_social_pending_token_' + platform, JSON.stringify(tokenData));
+      // v17.2: Also write to final token key directly (pending pickup has timing bug)
+      localStorage.setItem('roweos_social_token_' + platform, JSON.stringify(tokenData));
 
       // Set connected state (main app polls for this)
       localStorage.setItem('roweos_social_' + platform + '_connected', 'true');
