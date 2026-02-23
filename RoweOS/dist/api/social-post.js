@@ -105,6 +105,8 @@ export default async function handler(req, res) {
       uploadedImageUrl = await uploadImageToBlob(imageBase64);
       if (!uploadedImageUrl) {
         console.warn('[Social Post] Image upload failed for ' + platform + ' — posting text only');
+        // v18.6: Return error instead of silently falling back to text-only
+        return res.status(400).json({ error: 'Image upload failed — ensure BLOB_READ_WRITE_TOKEN is configured in Vercel environment variables', detail: 'Image was provided but could not be uploaded to Vercel Blob storage' });
       }
     }
 
@@ -167,8 +169,13 @@ export default async function handler(req, res) {
       var tContainerData = await tContainerResp.json();
 
       if (!tContainerResp.ok || !tContainerData.id) {
-        console.error('[Social Post] Threads container failed:', tContainerData);
-        return res.status(400).json({ error: 'Threads container creation failed', detail: tContainerData });
+        console.error('[Social Post] Threads container failed:', JSON.stringify(tContainerData), 'Status:', tContainerResp.status, 'Image URL:', tImageUrl ? tImageUrl.substring(0, 100) : 'none');
+        // v18.6: More descriptive error for common Threads failures
+        var tErrMsg = 'Threads container creation failed';
+        if (tContainerData.error && tContainerData.error.message) {
+          tErrMsg = 'Threads: ' + tContainerData.error.message;
+        }
+        return res.status(400).json({ error: tErrMsg, detail: tContainerData });
       }
 
       // v18.5: Wait for container to finish processing (especially for image uploads)
@@ -203,8 +210,12 @@ export default async function handler(req, res) {
       var tPublishData = await tPublishResp.json();
 
       if (!tPublishResp.ok || !tPublishData.id) {
-        console.error('[Social Post] Threads publish failed:', tPublishData);
-        return res.status(400).json({ error: 'Threads publish failed', detail: tPublishData });
+        console.error('[Social Post] Threads publish failed:', JSON.stringify(tPublishData), 'Status:', tPublishResp.status);
+        var tPubErrMsg = 'Threads publish failed';
+        if (tPublishData.error && tPublishData.error.message) {
+          tPubErrMsg = 'Threads publish: ' + tPublishData.error.message;
+        }
+        return res.status(400).json({ error: tPubErrMsg, detail: tPublishData });
       }
 
       return res.status(200).json({
