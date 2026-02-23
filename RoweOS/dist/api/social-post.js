@@ -2,14 +2,14 @@
 // Vercel serverless function — posts content to X, Threads, Instagram APIs
 // Handles platform-specific posting flows (X direct, Threads/Instagram two-step container)
 // v18.5: Added imageBase64 → Vercel Blob upload for Threads/Instagram image posting
-// v18.7: Switched from raw fetch to @vercel/blob SDK for reliable uploads
+// v18.7: Switched from raw fetch to @vercel/blob SDK; supports private stores via proxy
 
 import { put } from '@vercel/blob';
 
-// Upload base64 image to Vercel Blob and return public URL
+// Upload base64 image to Vercel Blob and return publicly accessible URL
+// Uses private access + proxy endpoint if store is private (most Vercel stores default to private)
 // Returns { url } on success or { error } on failure
-async function uploadImageToBlob(base64Data) {
-  // @vercel/blob reads BLOB_READ_WRITE_TOKEN from env automatically
+async function uploadImageToBlob(base64Data, reqHost) {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return { error: 'BLOB_READ_WRITE_TOKEN not configured in Vercel environment variables' };
   }
@@ -34,17 +34,35 @@ async function uploadImageToBlob(base64Data) {
 
   console.log('[Social Post] Attempting blob upload:', filename, contentType, buffer.length, 'bytes');
 
+  // Try public access first, fall back to private + proxy
   try {
     var blob = await put(filename, buffer, {
       access: 'public',
       contentType: contentType
     });
     if (blob.url) {
-      console.log('[Social Post] Image uploaded to Vercel Blob:', blob.url);
+      console.log('[Social Post] Image uploaded (public):', blob.url);
       return { url: blob.url };
     }
-    console.error('[Social Post] Blob upload returned no URL:', JSON.stringify(blob));
-    return { error: 'Blob upload returned no URL' };
+  } catch (pubErr) {
+    console.log('[Social Post] Public upload failed (' + pubErr.message + '), trying private + proxy...');
+  }
+
+  // Private store fallback: upload as private, return proxy URL
+  try {
+    var blob = await put(filename, buffer, {
+      access: 'private',
+      contentType: contentType
+    });
+    if (blob.pathname) {
+      // Construct proxy URL that serves this private blob publicly
+      var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.vercel.app';
+      var proxyUrl = baseUrl + '/api/blob-proxy?p=' + encodeURIComponent(blob.pathname);
+      console.log('[Social Post] Image uploaded (private→proxy):', proxyUrl);
+      return { url: proxyUrl };
+    }
+    console.error('[Social Post] Blob upload returned no pathname:', JSON.stringify(blob));
+    return { error: 'Blob upload returned no URL or pathname' };
   } catch (err) {
     console.error('[Social Post] Blob upload error:', err.message, err.stack);
     return { error: 'Blob upload failed: ' + err.message };
@@ -101,7 +119,7 @@ export default async function handler(req, res) {
     // v18.5: For Threads/Instagram, upload base64 image to Vercel Blob to get a public URL
     var uploadedImageUrl = null;
     if (imageBase64 && (platform === 'threads' || platform === 'instagram')) {
-      var blobResult = await uploadImageToBlob(imageBase64);
+      var blobResult = await uploadImageToBlob(imageBase64, req.headers.host);
       if (blobResult.error) {
         console.warn('[Social Post] Image upload failed for ' + platform + ':', blobResult.error);
         return res.status(400).json({ error: 'Image upload failed: ' + blobResult.error, detail: 'Image was provided but could not be uploaded to Vercel Blob storage' });

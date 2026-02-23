@@ -2,7 +2,8 @@
   "version": 2,
   "functions": {
     "api/social-post.js": { "maxDuration": 60 },
-    "api/social-media.js": { "maxDuration": 30 }
+    "api/social-media.js": { "maxDuration": 30 },
+    "api/blob-proxy.js": { "maxDuration": 30 }
   },
   "routes": [
     { "src": "/info/api/(.*)", "dest": "https://roweoswebsite.vercel.app/api/$1" },
