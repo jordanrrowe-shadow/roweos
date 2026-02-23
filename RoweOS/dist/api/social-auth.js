@@ -24,6 +24,7 @@ export default async function handler(req, res) {
     if (authUrl && typeof authUrl === 'string') {
       // Whitelist allowed OAuth domains
       var allowed = ['https://threads.net/', 'https://www.threads.net/',
+                     'https://www.threads.com/', 'https://threads.com/',
                      'https://api.instagram.com/', 'https://x.com/'];
       var isAllowed = allowed.some(function(prefix) { return authUrl.indexOf(prefix) === 0; });
       if (isAllowed) {
