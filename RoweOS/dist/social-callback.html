@@ -43,7 +43,16 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     if (window.opener) {
       setTimeout(function() { window.close(); }, success ? 1000 : 3000);
     } else {
-      // v18.3: Redirect flow (mobile Safari popup blocked) — return to app with query param
+      // v19.0: Mobile PWA — don't redirect (loads login screen in Safari, confusing).
+      // Show "go back to RoweOS" message. The PWA's visibilitychange listener detects the connection.
+      var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile && success) {
+        spinnerEl.style.display = 'none';
+        statusEl.innerHTML = '<span style="color:#22c55e;font-weight:600;">Connected!</span><br><br>' +
+          '<span style="font-size:15px;">Switch back to RoweOS<br>on your Home Screen</span>';
+        return; // Stay on this page — user manually returns to PWA
+      }
+      // Desktop fallback: redirect with query param
       var returnUrl = '/' + (success && _detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
       setTimeout(function() { window.location.href = returnUrl; }, success ? 1000 : 3000);
     }
