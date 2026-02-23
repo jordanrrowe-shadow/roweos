@@ -171,8 +171,27 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Threads container creation failed', detail: tContainerData });
       }
 
-      // v18.1: Brief delay between container creation and publish
-      await new Promise(function(resolve) { setTimeout(resolve, 200); });
+      // v18.5: Wait for container to finish processing (especially for image uploads)
+      if (tImageUrl) {
+        var tReady = false;
+        for (var tPoll = 0; tPoll < 15; tPoll++) {
+          await new Promise(function(resolve) { setTimeout(resolve, 2000); });
+          try {
+            var tStatusResp = await fetch('https://graph.threads.net/v1.0/' + tContainerData.id + '?fields=status&access_token=' + encodeURIComponent(accessToken));
+            var tStatusData = await tStatusResp.json();
+            console.log('[Social Post] Threads container status poll ' + tPoll + ':', tStatusData.status);
+            if (tStatusData.status === 'FINISHED') { tReady = true; break; }
+            if (tStatusData.status === 'ERROR') {
+              return res.status(400).json({ error: 'Threads media processing failed', detail: tStatusData });
+            }
+          } catch (pollErr) { console.warn('[Social Post] Threads poll error:', pollErr.message); }
+        }
+        if (!tReady) {
+          return res.status(400).json({ error: 'Threads media processing timed out after 30s' });
+        }
+      } else {
+        await new Promise(function(resolve) { setTimeout(resolve, 500); });
+      }
 
       // Step 2: Publish the container via POST body
       var tPublishResp = await fetch('https://graph.threads.net/v1.0/' + userId + '/threads_publish', {
@@ -223,6 +242,24 @@ export default async function handler(req, res) {
       if (!igContainerResp.ok || !igContainerData.id) {
         console.error('[Social Post] Instagram container failed:', igContainerData);
         return res.status(400).json({ error: 'Instagram container creation failed', detail: igContainerData });
+      }
+
+      // v18.5: Wait for Instagram container to finish processing
+      var igReady = false;
+      for (var igPoll = 0; igPoll < 15; igPoll++) {
+        await new Promise(function(resolve) { setTimeout(resolve, 2000); });
+        try {
+          var igStatusResp = await fetch('https://graph.instagram.com/v21.0/' + igContainerData.id + '?fields=status_code&access_token=' + encodeURIComponent(accessToken));
+          var igStatusData = await igStatusResp.json();
+          console.log('[Social Post] Instagram container status poll ' + igPoll + ':', igStatusData.status_code);
+          if (igStatusData.status_code === 'FINISHED') { igReady = true; break; }
+          if (igStatusData.status_code === 'ERROR') {
+            return res.status(400).json({ error: 'Instagram media processing failed', detail: igStatusData });
+          }
+        } catch (igPollErr) { console.warn('[Social Post] Instagram poll error:', igPollErr.message); }
+      }
+      if (!igReady) {
+        return res.status(400).json({ error: 'Instagram media processing timed out after 30s' });
       }
 
       // Step 2: Publish
