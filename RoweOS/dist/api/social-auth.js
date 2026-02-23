@@ -17,9 +17,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // v19.0: GET handler — serve HTML page with JS redirect for OAuth URLs
-  // iOS universal links intercept 302 redirects to registered domains (threads.net, x.com, instagram.com)
-  // JS navigation from a rendered page bypasses universal link interception
+  // v19.0: GET handler — serve HTML page with auto-submitting form for OAuth URLs
+  // iOS universal links intercept both 302 redirects AND JS window.location to registered domains
+  // (threads.com, x.com, instagram.com). Form GET submissions bypass universal link interception.
   if (req.method === 'GET') {
     var authUrl = req.query && req.query.authUrl;
     if (authUrl && typeof authUrl === 'string') {
@@ -29,8 +29,15 @@ export default async function handler(req, res) {
                      'https://api.instagram.com/', 'https://x.com/'];
       var isAllowed = allowed.some(function(prefix) { return authUrl.indexOf(prefix) === 0; });
       if (isAllowed) {
-        // Serve HTML page with JS redirect — NOT a 302 which iOS intercepts
-        var safeUrl = JSON.stringify(authUrl);
+        // Parse URL into base + query params for form submission
+        var urlObj = new URL(authUrl);
+        var formAction = (urlObj.origin + urlObj.pathname).replace(/"/g, '&quot;');
+        var hiddenInputs = '';
+        urlObj.searchParams.forEach(function(value, key) {
+          hiddenInputs += '<input type="hidden" name="' + key.replace(/"/g, '&quot;').replace(/</g, '&lt;') +
+            '" value="' + value.replace(/"/g, '&quot;').replace(/</g, '&lt;') + '">';
+        });
+
         var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Redirecting...</title>' +
           '<style>*{margin:0;padding:0;box-sizing:border-box}' +
           'body{background:#09090b;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,sans-serif;' +
@@ -38,8 +45,10 @@ export default async function handler(req, res) {
           '.spinner{width:32px;height:32px;border:3px solid rgba(168,152,120,0.15);border-top-color:#a89878;' +
           'border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}' +
           '@keyframes spin{to{transform:rotate(360deg)}}</style></head><body>' +
-          '<div><div class="spinner"></div><p style="font-size:14px;opacity:0.7">Redirecting to sign in...</p></div>' +
-          '<script>window.location.replace(' + safeUrl + ');</script></body></html>';
+          '<div><div class="spinner"></div><p style="font-size:14px;opacity:0.7">Redirecting to sign in...</p>' +
+          '<noscript><p style="margin-top:16px;"><a href="' + authUrl.replace(/"/g, '&quot;') + '">Click here to continue</a></p></noscript></div>' +
+          '<form id="f" method="GET" action="' + formAction + '" style="display:none">' + hiddenInputs + '</form>' +
+          '<script>document.getElementById("f").submit();</script></body></html>';
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache, no-store');
         return res.status(200).send(html);
