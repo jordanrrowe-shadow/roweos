@@ -7,11 +7,11 @@
 import { put } from '@vercel/blob';
 
 // Upload base64 image to Vercel Blob and return public URL
+// Returns { url } on success or { error } on failure
 async function uploadImageToBlob(base64Data) {
   // @vercel/blob reads BLOB_READ_WRITE_TOKEN from env automatically
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    console.warn('[Social Post] BLOB_READ_WRITE_TOKEN not configured — cannot upload image for Threads/Instagram');
-    return null;
+    return { error: 'BLOB_READ_WRITE_TOKEN not configured in Vercel environment variables' };
   }
 
   // Strip data URI prefix if present
@@ -32,6 +32,8 @@ async function uploadImageToBlob(base64Data) {
   var ext = contentType === 'image/jpeg' ? '.jpg' : contentType === 'image/webp' ? '.webp' : contentType === 'image/gif' ? '.gif' : '.png';
   var filename = 'roweos-social-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8) + ext;
 
+  console.log('[Social Post] Attempting blob upload:', filename, contentType, buffer.length, 'bytes');
+
   try {
     var blob = await put(filename, buffer, {
       access: 'public',
@@ -39,13 +41,13 @@ async function uploadImageToBlob(base64Data) {
     });
     if (blob.url) {
       console.log('[Social Post] Image uploaded to Vercel Blob:', blob.url);
-      return blob.url;
+      return { url: blob.url };
     }
-    console.error('[Social Post] Blob upload returned no URL:', blob);
-    return null;
+    console.error('[Social Post] Blob upload returned no URL:', JSON.stringify(blob));
+    return { error: 'Blob upload returned no URL' };
   } catch (err) {
-    console.error('[Social Post] Blob upload error:', err.message);
-    return null;
+    console.error('[Social Post] Blob upload error:', err.message, err.stack);
+    return { error: 'Blob upload failed: ' + err.message };
   }
 }
 
@@ -99,12 +101,12 @@ export default async function handler(req, res) {
     // v18.5: For Threads/Instagram, upload base64 image to Vercel Blob to get a public URL
     var uploadedImageUrl = null;
     if (imageBase64 && (platform === 'threads' || platform === 'instagram')) {
-      uploadedImageUrl = await uploadImageToBlob(imageBase64);
-      if (!uploadedImageUrl) {
-        console.warn('[Social Post] Image upload failed for ' + platform + ' — posting text only');
-        // v18.6: Return error instead of silently falling back to text-only
-        return res.status(400).json({ error: 'Image upload failed — ensure BLOB_READ_WRITE_TOKEN is configured in Vercel environment variables', detail: 'Image was provided but could not be uploaded to Vercel Blob storage' });
+      var blobResult = await uploadImageToBlob(imageBase64);
+      if (blobResult.error) {
+        console.warn('[Social Post] Image upload failed for ' + platform + ':', blobResult.error);
+        return res.status(400).json({ error: 'Image upload failed: ' + blobResult.error, detail: 'Image was provided but could not be uploaded to Vercel Blob storage' });
       }
+      uploadedImageUrl = blobResult.url;
     }
 
     // --- X/Twitter Post ---
