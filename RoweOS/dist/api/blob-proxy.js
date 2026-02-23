@@ -1,14 +1,12 @@
-// v18.7: Proxy endpoint for private Vercel Blob images
+// v18.7: Proxy for private Vercel Blob images
 // Threads/Instagram APIs require publicly accessible image URLs.
-// When Blob store is private, this endpoint serves as a public proxy.
-
-import { get } from '@vercel/blob';
+// This endpoint fetches private blobs using the auth token and serves them publicly.
 
 export default async function handler(req, res) {
-  var p = req.query.p || '';
+  var blobUrl = req.query.url || '';
 
-  // Only allow our social images
-  if (!p || p.indexOf('roweos-social-') !== 0) {
+  // Security: only allow Vercel Blob URLs for roweos-social images
+  if (!blobUrl || blobUrl.indexOf('blob.vercel-storage.com') === -1 || blobUrl.indexOf('roweos-social-') === -1) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
@@ -21,27 +19,27 @@ export default async function handler(req, res) {
   }
 
   try {
-    var blob = await get(p, { access: 'private' });
-    if (!blob || !blob.body) {
-      return res.status(404).json({ error: 'Not found' });
-    }
-
-    res.setHeader('Content-Type', blob.contentType || 'image/png');
-
-    // Read the stream into a buffer and send
-    var chunks = [];
-    var reader = blob.body.getReader();
-    var done = false;
-    while (!done) {
-      var result = await reader.read();
-      if (result.done) {
-        done = true;
-      } else {
-        chunks.push(Buffer.from(result.value));
+    // Fetch blob with auth token (required for private stores)
+    var fetchResp = await fetch(blobUrl, {
+      headers: {
+        'authorization': 'Bearer ' + (process.env.BLOB_READ_WRITE_TOKEN || '')
       }
+    });
+
+    // Fallback: try without auth (public stores)
+    if (!fetchResp.ok && (fetchResp.status === 401 || fetchResp.status === 403)) {
+      fetchResp = await fetch(blobUrl);
     }
-    var buffer = Buffer.concat(chunks);
-    res.send(buffer);
+
+    if (!fetchResp.ok) {
+      console.error('[Blob Proxy] Fetch failed:', fetchResp.status);
+      return res.status(fetchResp.status).json({ error: 'Blob fetch failed: ' + fetchResp.status });
+    }
+
+    res.setHeader('Content-Type', fetchResp.headers.get('content-type') || 'image/png');
+
+    var arrayBuffer = await fetchResp.arrayBuffer();
+    res.send(Buffer.from(arrayBuffer));
   } catch (err) {
     console.error('[Blob Proxy] Error:', err.message);
     return res.status(500).json({ error: 'Failed to read blob: ' + err.message });

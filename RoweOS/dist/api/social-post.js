@@ -2,12 +2,10 @@
 // Vercel serverless function — posts content to X, Threads, Instagram APIs
 // Handles platform-specific posting flows (X direct, Threads/Instagram two-step container)
 // v18.5: Added imageBase64 → Vercel Blob upload for Threads/Instagram image posting
-// v18.7: Switched from raw fetch to @vercel/blob SDK; supports private stores via proxy
+// v18.7: Raw REST API for Vercel Blob — no SDK, supports private stores via proxy
 
-import { put } from '@vercel/blob';
-
-// Upload base64 image to Vercel Blob and return publicly accessible URL
-// Uses private access + proxy endpoint if store is private (most Vercel stores default to private)
+// Upload base64 image to Vercel Blob via REST API and return accessible URL
+// For private stores: uploads via REST, serves through /api/blob-proxy endpoint
 // Returns { url } on success or { error } on failure
 async function uploadImageToBlob(base64Data, reqHost) {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
@@ -31,42 +29,83 @@ async function uploadImageToBlob(base64Data, reqHost) {
   var buffer = Buffer.from(cleanBase64, 'base64');
   var ext = contentType === 'image/jpeg' ? '.jpg' : contentType === 'image/webp' ? '.webp' : contentType === 'image/gif' ? '.gif' : '.png';
   var filename = 'roweos-social-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8) + ext;
+  var token = process.env.BLOB_READ_WRITE_TOKEN;
+  var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.vercel.app';
 
-  console.log('[Social Post] Attempting blob upload:', filename, contentType, buffer.length, 'bytes');
+  console.log('[Social Post] Uploading:', filename, contentType, buffer.length, 'bytes');
 
-  // Try public access first, fall back to private + proxy
+  // Attempt 1: REST API without access param (works for private stores)
   try {
-    var blob = await put(filename, buffer, {
-      access: 'public',
-      contentType: contentType
+    var resp1 = await fetch('https://blob.vercel-storage.com/' + filename, {
+      method: 'PUT',
+      headers: {
+        'authorization': 'Bearer ' + token,
+        'content-type': contentType,
+        'x-api-version': '7',
+        'x-add-random-suffix': '1'
+      },
+      body: buffer
     });
-    if (blob.url) {
-      console.log('[Social Post] Image uploaded (public):', blob.url);
-      return { url: blob.url };
+
+    if (resp1.ok) {
+      var data1 = await resp1.json();
+      console.log('[Social Post] Upload success (no access param):', JSON.stringify(data1));
+
+      if (data1.url) {
+        // Check if publicly accessible
+        try {
+          var headResp = await fetch(data1.url, { method: 'HEAD' });
+          if (headResp.ok) {
+            console.log('[Social Post] Blob URL is public:', data1.url);
+            return { url: data1.url };
+          }
+        } catch (e) {}
+
+        // Not public — proxy it through our endpoint
+        var proxyUrl = baseUrl + '/api/blob-proxy?url=' + encodeURIComponent(data1.url);
+        console.log('[Social Post] Using proxy for private blob:', proxyUrl);
+        return { url: proxyUrl };
+      }
+    } else {
+      var err1 = '';
+      try { err1 = await resp1.text(); } catch(e) {}
+      console.log('[Social Post] Upload attempt 1 failed:', resp1.status, err1);
     }
-  } catch (pubErr) {
-    console.log('[Social Post] Public upload failed (' + pubErr.message + '), trying private + proxy...');
+  } catch (e1) {
+    console.log('[Social Post] Upload attempt 1 error:', e1.message);
   }
 
-  // Private store fallback: upload as private, return proxy URL
+  // Attempt 2: REST API with access=public (works for public stores)
   try {
-    var blob = await put(filename, buffer, {
-      access: 'private',
-      contentType: contentType
+    var resp2 = await fetch('https://blob.vercel-storage.com/' + filename + '?access=public', {
+      method: 'PUT',
+      headers: {
+        'authorization': 'Bearer ' + token,
+        'content-type': contentType,
+        'x-api-version': '7',
+        'x-add-random-suffix': '1'
+      },
+      body: buffer
     });
-    if (blob.pathname) {
-      // Construct proxy URL that serves this private blob publicly
-      var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.vercel.app';
-      var proxyUrl = baseUrl + '/api/blob-proxy?p=' + encodeURIComponent(blob.pathname);
-      console.log('[Social Post] Image uploaded (private→proxy):', proxyUrl);
-      return { url: proxyUrl };
+
+    if (resp2.ok) {
+      var data2 = await resp2.json();
+      console.log('[Social Post] Upload success (public access):', JSON.stringify(data2));
+      if (data2.url) {
+        return { url: data2.url };
+      }
+    } else {
+      var err2 = '';
+      try { err2 = await resp2.text(); } catch(e) {}
+      console.log('[Social Post] Upload attempt 2 failed:', resp2.status, err2);
     }
-    console.error('[Social Post] Blob upload returned no pathname:', JSON.stringify(blob));
-    return { error: 'Blob upload returned no URL or pathname' };
-  } catch (err) {
-    console.error('[Social Post] Blob upload error:', err.message, err.stack);
-    return { error: 'Blob upload failed: ' + err.message };
+  } catch (e2) {
+    console.log('[Social Post] Upload attempt 2 error:', e2.message);
   }
+
+  return {
+    error: 'Image upload failed. Your Vercel Blob store is private. Create a new PUBLIC blob store: Vercel Dashboard → Storage → Create Database → Blob → select Public access, then connect it to your project.'
+  };
 }
 
 export default async function handler(req, res) {
