@@ -2,11 +2,14 @@
 // Vercel serverless function — posts content to X, Threads, Instagram APIs
 // Handles platform-specific posting flows (X direct, Threads/Instagram two-step container)
 // v18.5: Added imageBase64 → Vercel Blob upload for Threads/Instagram image posting
+// v18.7: Switched from raw fetch to @vercel/blob SDK for reliable uploads
+
+import { put } from '@vercel/blob';
 
 // Upload base64 image to Vercel Blob and return public URL
 async function uploadImageToBlob(base64Data) {
-  var token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) {
+  // @vercel/blob reads BLOB_READ_WRITE_TOKEN from env automatically
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
     console.warn('[Social Post] BLOB_READ_WRITE_TOKEN not configured — cannot upload image for Threads/Instagram');
     return null;
   }
@@ -30,21 +33,15 @@ async function uploadImageToBlob(base64Data) {
   var filename = 'roweos-social-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8) + ext;
 
   try {
-    var resp = await fetch('https://blob.vercel-storage.com/' + filename, {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': contentType,
-        'x-api-version': '7'
-      },
-      body: buffer
+    var blob = await put(filename, buffer, {
+      access: 'public',
+      contentType: contentType
     });
-    var data = await resp.json();
-    if (data.url) {
-      console.log('[Social Post] Image uploaded to Vercel Blob:', data.url);
-      return data.url;
+    if (blob.url) {
+      console.log('[Social Post] Image uploaded to Vercel Blob:', blob.url);
+      return blob.url;
     }
-    console.error('[Social Post] Blob upload response:', data);
+    console.error('[Social Post] Blob upload returned no URL:', blob);
     return null;
   } catch (err) {
     console.error('[Social Post] Blob upload error:', err.message);
