@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v18.6
+Version:  v18.7
 File:     RoweOS/dist/index.html (128181 lines)
 Live:     roweos.vercel.app
 ```
@@ -172,6 +172,14 @@ Key patterns to remember without looking up:
 - Automations dual storage: `roweos_automations` (localStorage) AND `getScheduledTasks()`/`saveScheduledTasks()` — both must be updated on save
 - `executeWorkflow(workflow)` — runs multi-step pipelines; `executeWorkflowStep()` handles: post, studio, image, library, notify
 - `WORKFLOW_PRESETS` — predefined multi-step workflow templates; `resolveTemplateVars()` resolves `{{stepN_output}}` between steps
+
+### Automation History (3 stores — all must be written on execution)
+- `roweos_auto_lab_history` — Automations Lab timeline (20K char limit per entry)
+- `roweos_task_history` — Used by Focus `viewCompletedAutomation()` and result modals
+- `roweos_completed_automations` — Metadata only (no result text), used for completion badges
+- `saveTaskResult()` writes to `roweos_task_history` — must be called from ALL execution paths (AI, post, image, pipeline)
+- `addAutoLabHistory()` writes to `roweos_auto_lab_history` — called from all paths
+- `addCompletedAutomation()` writes to `roweos_completed_automations` — called from all paths
 
 ### Social Connections (v18.0)
 - Per-brand/per-life-profile: `getSocialKeyScope()` returns `_brand_N` or `_life_N`, appended to all social localStorage keys
