@@ -17,8 +17,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // v18.5: GET handler — server-side 302 redirect for OAuth URLs
-  // Prevents iOS universal links from intercepting threads.net/instagram.com URLs
+  // v19.0: GET handler — serve HTML page with JS redirect for OAuth URLs
+  // iOS universal links intercept 302 redirects to registered domains (threads.net, x.com, instagram.com)
+  // JS navigation from a rendered page bypasses universal link interception
   if (req.method === 'GET') {
     var authUrl = req.query && req.query.authUrl;
     if (authUrl && typeof authUrl === 'string') {
@@ -28,8 +29,20 @@ export default async function handler(req, res) {
                      'https://api.instagram.com/', 'https://x.com/'];
       var isAllowed = allowed.some(function(prefix) { return authUrl.indexOf(prefix) === 0; });
       if (isAllowed) {
-        res.writeHead(302, { 'Location': authUrl, 'Cache-Control': 'no-cache, no-store' });
-        return res.end();
+        // Serve HTML page with JS redirect — NOT a 302 which iOS intercepts
+        var safeUrl = JSON.stringify(authUrl);
+        var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Redirecting...</title>' +
+          '<style>*{margin:0;padding:0;box-sizing:border-box}' +
+          'body{background:#09090b;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,sans-serif;' +
+          'display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center}' +
+          '.spinner{width:32px;height:32px;border:3px solid rgba(168,152,120,0.15);border-top-color:#a89878;' +
+          'border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}' +
+          '@keyframes spin{to{transform:rotate(360deg)}}</style></head><body>' +
+          '<div><div class="spinner"></div><p style="font-size:14px;opacity:0.7">Redirecting to sign in...</p></div>' +
+          '<script>window.location.replace(' + safeUrl + ');</script></body></html>';
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store');
+        return res.status(200).send(html);
       }
     }
     return res.status(400).json({ error: 'Invalid or missing authUrl parameter' });
