@@ -137,9 +137,7 @@ export default async function handler(req, res) {
 
     // --- Threads / Instagram ---
     // These platforms require a publicly accessible image URL.
-    // If imageUrl is provided, return it directly for use in the post container.
-    // If only base64 is provided, the client should use an image hosting service
-    // or pass a previously generated image URL.
+    // v18.5: Upload base64 to Vercel Blob to get public URL
     if (platform === 'threads' || platform === 'instagram') {
       if (imageUrl) {
         return res.status(200).json({
@@ -149,13 +147,58 @@ export default async function handler(req, res) {
         });
       }
 
-      // Base64 only — Threads/Instagram cannot accept base64 directly.
-      // Return an error with guidance.
-      return res.status(400).json({
-        error: platform + ' requires a publicly accessible image URL. ' +
-               'Upload the image to a hosting service first, or use an image URL from a previous generation.',
-        platform: platform
-      });
+      // Upload base64 to Vercel Blob
+      var blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+      if (!blobToken) {
+        return res.status(400).json({
+          error: platform + ' requires BLOB_READ_WRITE_TOKEN in Vercel env vars to upload images.',
+          platform: platform
+        });
+      }
+
+      var cleanB64 = imageBase64;
+      var imgContentType = mimeType || 'image/png';
+      if (cleanB64.indexOf('data:') === 0) {
+        var cIdx = cleanB64.indexOf(',');
+        if (cIdx > -1) {
+          var pfx = cleanB64.substring(0, cIdx);
+          if (pfx.indexOf('image/jpeg') > -1 || pfx.indexOf('image/jpg') > -1) imgContentType = 'image/jpeg';
+          else if (pfx.indexOf('image/webp') > -1) imgContentType = 'image/webp';
+          else if (pfx.indexOf('image/gif') > -1) imgContentType = 'image/gif';
+          else if (pfx.indexOf('image/png') > -1) imgContentType = 'image/png';
+          cleanB64 = cleanB64.substring(cIdx + 1);
+        }
+      }
+
+      var imgBuffer = Buffer.from(cleanB64, 'base64');
+      var imgExt = imgContentType === 'image/jpeg' ? '.jpg' : imgContentType === 'image/webp' ? '.webp' : '.png';
+      var imgFilename = 'roweos-media-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8) + imgExt;
+
+      try {
+        var blobResp = await fetch('https://blob.vercel-storage.com/' + imgFilename, {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'Bearer ' + blobToken,
+            'Content-Type': imgContentType,
+            'x-api-version': '7'
+          },
+          body: imgBuffer
+        });
+        var blobData = await blobResp.json();
+        if (blobData.url) {
+          console.log('[Social Media] Image uploaded to Vercel Blob:', blobData.url);
+          return res.status(200).json({
+            success: true,
+            mediaUrl: blobData.url,
+            platform: platform
+          });
+        }
+        console.error('[Social Media] Blob upload failed:', blobData);
+        return res.status(400).json({ error: 'Image upload failed', detail: blobData });
+      } catch (blobErr) {
+        console.error('[Social Media] Blob upload error:', blobErr.message);
+        return res.status(500).json({ error: 'Image upload failed: ' + blobErr.message });
+      }
     }
 
     return res.status(400).json({ error: 'Unhandled platform' });

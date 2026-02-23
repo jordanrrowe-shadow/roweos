@@ -1,6 +1,56 @@
 // v17.0: Social Media Posting Proxy
 // Vercel serverless function — posts content to X, Threads, Instagram APIs
 // Handles platform-specific posting flows (X direct, Threads/Instagram two-step container)
+// v18.5: Added imageBase64 → Vercel Blob upload for Threads/Instagram image posting
+
+// Upload base64 image to Vercel Blob and return public URL
+async function uploadImageToBlob(base64Data) {
+  var token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) {
+    console.warn('[Social Post] BLOB_READ_WRITE_TOKEN not configured — cannot upload image for Threads/Instagram');
+    return null;
+  }
+
+  // Strip data URI prefix if present
+  var cleanBase64 = base64Data;
+  var contentType = 'image/png';
+  if (base64Data.indexOf('data:') === 0) {
+    var commaIdx = base64Data.indexOf(',');
+    if (commaIdx > -1) {
+      var prefix = base64Data.substring(0, commaIdx);
+      if (prefix.indexOf('image/jpeg') > -1 || prefix.indexOf('image/jpg') > -1) contentType = 'image/jpeg';
+      else if (prefix.indexOf('image/webp') > -1) contentType = 'image/webp';
+      else if (prefix.indexOf('image/gif') > -1) contentType = 'image/gif';
+      cleanBase64 = base64Data.substring(commaIdx + 1);
+    }
+  }
+
+  var buffer = Buffer.from(cleanBase64, 'base64');
+  var ext = contentType === 'image/jpeg' ? '.jpg' : contentType === 'image/webp' ? '.webp' : contentType === 'image/gif' ? '.gif' : '.png';
+  var filename = 'roweos-social-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8) + ext;
+
+  try {
+    var resp = await fetch('https://blob.vercel-storage.com/' + filename, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': contentType,
+        'x-api-version': '7'
+      },
+      body: buffer
+    });
+    var data = await resp.json();
+    if (data.url) {
+      console.log('[Social Post] Image uploaded to Vercel Blob:', data.url);
+      return data.url;
+    }
+    console.error('[Social Post] Blob upload response:', data);
+    return null;
+  } catch (err) {
+    console.error('[Social Post] Blob upload error:', err.message);
+    return null;
+  }
+}
 
 export default async function handler(req, res) {
   // CORS headers
@@ -37,6 +87,7 @@ export default async function handler(req, res) {
     var content = body.content || '';
     var mediaIds = body.mediaIds || [];
     var userId = body.userId || '';
+    var imageBase64 = body.imageBase64 || '';
 
     if (!platform || ['x', 'threads', 'instagram'].indexOf(platform) === -1) {
       return res.status(400).json({ error: 'Invalid platform. Must be x, threads, or instagram.' });
@@ -44,8 +95,17 @@ export default async function handler(req, res) {
     if (!accessToken) {
       return res.status(400).json({ error: 'Missing accessToken' });
     }
-    if (!content && mediaIds.length === 0) {
-      return res.status(400).json({ error: 'Must provide content or mediaIds' });
+    if (!content && mediaIds.length === 0 && !imageBase64) {
+      return res.status(400).json({ error: 'Must provide content, mediaIds, or imageBase64' });
+    }
+
+    // v18.5: For Threads/Instagram, upload base64 image to Vercel Blob to get a public URL
+    var uploadedImageUrl = null;
+    if (imageBase64 && (platform === 'threads' || platform === 'instagram')) {
+      uploadedImageUrl = await uploadImageToBlob(imageBase64);
+      if (!uploadedImageUrl) {
+        console.warn('[Social Post] Image upload failed for ' + platform + ' — posting text only');
+      }
     }
 
     // --- X/Twitter Post ---
@@ -90,10 +150,11 @@ export default async function handler(req, res) {
       var tContainerBody = 'media_type=TEXT&text=' + encodeURIComponent(content) +
         '&access_token=' + encodeURIComponent(accessToken);
 
-      // If image is attached, switch to IMAGE type
-      if (mediaIds.length > 0 && mediaIds[0]) {
+      // v18.5: Use uploaded image URL (from Blob) or existing mediaIds
+      var tImageUrl = uploadedImageUrl || (mediaIds.length > 0 ? mediaIds[0] : null);
+      if (tImageUrl) {
         tContainerBody = 'media_type=IMAGE' +
-          '&image_url=' + encodeURIComponent(mediaIds[0]) +
+          '&image_url=' + encodeURIComponent(tImageUrl) +
           '&text=' + encodeURIComponent(content) +
           '&access_token=' + encodeURIComponent(accessToken);
       }
@@ -141,16 +202,19 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing userId for Instagram post' });
       }
 
+      // v18.5: Use uploaded image URL (from Blob) or existing mediaIds
+      var igImageUrl = uploadedImageUrl || (mediaIds.length > 0 ? mediaIds[0] : null);
+
       // Instagram requires an image URL — text-only posts not supported
-      if (mediaIds.length === 0 || !mediaIds[0]) {
-        return res.status(400).json({ error: 'Instagram requires an image URL to post' });
+      if (!igImageUrl) {
+        return res.status(400).json({ error: 'Instagram requires an image to post. Add an image or configure BLOB_READ_WRITE_TOKEN in Vercel for image uploads.' });
       }
 
       // Step 1: Create media container
       var igContainerResp = await fetch('https://graph.instagram.com/v21.0/' + userId + '/media', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'image_url=' + encodeURIComponent(mediaIds[0]) +
+        body: 'image_url=' + encodeURIComponent(igImageUrl) +
               '&caption=' + encodeURIComponent(content) +
               '&access_token=' + encodeURIComponent(accessToken)
       });
