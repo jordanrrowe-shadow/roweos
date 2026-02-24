@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /access_keys/{keyId} {
+      allow get: if true;
+      allow list: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      allow create, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      allow update: if request.auth != null && (
+        request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93' ||
+        (resource.data.usedBy == null && request.resource.data.usedBy == request.auth.uid)
+      );
+    }
+    match /brand_configs/{configId} {
+      allow get: if request.auth != null;
+      allow list, create, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      allow update: if request.auth != null && (
+        request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93' ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usageCount']))
+      );
+    }
+    match /roweos_users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93');
+      allow write: if request.auth != null && request.auth.uid == userId;
+      match /{subcollection}/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

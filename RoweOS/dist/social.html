@@ -329,9 +329,9 @@ featureData.forEach(function(f, i) {
           if (fd.img) {
             var eyebrow = '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:12px;">'+tn+'</div>';
             var icon = '<div style="margin-bottom:16px;">'+featureIcon(fd.tool, m)+'</div>';
-            var modeLabel = '<div style="display:inline-block;padding:5px 16px;border:1px solid var(--c-border);border-radius:20px;font-size:13px;color:var(--c-muted);margin-bottom:20px;">BrandAI</div>';
+            var modeLabel = '<div style="display:inline-block;padding:6px 20px;border:1px solid var(--c-border);border-radius:20px;font-size:16px;color:var(--c-muted);margin-bottom:20px;">BrandAI</div>';
             var title = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;line-height:1.2;max-width:800px;flex:1;display:flex;align-items:center;">'+fd.headline+'</div>';
-            var screenshot = '<div style="margin-top:16px;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 840, radius: 10 })+'</div>';
+            var screenshot = '<div style="margin-top:16px;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 940, radius: 10 })+'</div>';
             var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 72px 80px;">'
               + eyebrow + icon + modeLabel + title + screenshot
               + '</div>';
@@ -526,10 +526,10 @@ showcaseData.forEach(function(s, i) {
         var pillColor = isLife ? '#8aa0b0' : 'var(--c-muted)';
         var pillText = isLife ? 'LifeAI' : 'BrandAI';
         var eyebrow = '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:'+accentColor+';margin-bottom:12px;">'+sd.label+'</div>';
-        var pill = '<div style="display:inline-block;padding:5px 16px;border:1px solid '+pillBorder+';border-radius:20px;font-size:13px;color:'+pillColor+';margin-bottom:20px;">'+pillText+'</div>';
+        var pill = '<div style="display:inline-block;padding:6px 20px;border:1px solid '+pillBorder+';border-radius:20px;font-size:16px;color:'+pillColor+';margin-bottom:20px;">'+pillText+'</div>';
         var headline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;line-height:1.2;flex:1;display:flex;align-items:center;">'+sd.caption+'</div>';
         var frame = '<div style="margin-top:16px;">'
-          + screenshotFrame(IMG_BASE + sd.img, m, { width: 960, radius: 12 })
+          + screenshotFrame(IMG_BASE + sd.img, m, { width: 980, radius: 12 })
           + '</div>';
         var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 60px 80px;">'
           + eyebrow + pill + headline + frame
@@ -861,9 +861,9 @@ lifeFeatureData.forEach(function(f, i) {
           if (fd.img) {
             var eyebrow = '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:'+lifeAccent+';margin-bottom:12px;">'+fd.name+'</div>';
             var icon = '<div style="margin-bottom:16px;">'+lifeIcon(fd.tool, m)+'</div>';
-            var modeLabel = '<div style="display:inline-block;padding:5px 16px;border:1px solid '+borderAccent+';border-radius:20px;font-size:13px;color:'+lifeAccent+';margin-bottom:20px;">LifeAI</div>';
+            var modeLabel = '<div style="display:inline-block;padding:6px 20px;border:1px solid '+borderAccent+';border-radius:20px;font-size:16px;color:'+lifeAccent+';margin-bottom:20px;">LifeAI</div>';
             var title = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;line-height:1.2;max-width:800px;flex:1;display:flex;align-items:center;">'+fd.headline+'</div>';
-            var screenshot = '<div style="margin-top:16px;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 840, radius: 10 })+'</div>';
+            var screenshot = '<div style="margin-top:16px;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 940, radius: 10 })+'</div>';
             var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 72px 80px;">'
               + eyebrow + icon + modeLabel + title + screenshot
               + '</div>';
