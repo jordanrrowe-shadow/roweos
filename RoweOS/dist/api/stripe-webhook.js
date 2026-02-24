@@ -580,28 +580,31 @@ export default async function handler(req, res) {
           // Notify Jordan
           var providerColors2 = { anthropic: '#d4a574', openai: '#10a37f', google: '#4285f4' };
           var pColor2 = providerColors2[apiProvider] || '#a89878';
+          var providerCompany = { anthropic: 'Anthropic', openai: 'OpenAI', google: 'Google' };
+          var providerModel = { anthropic: 'Claude', openai: 'ChatGPT', google: 'Gemini' };
           var notifyHtml2 = [
-            '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 520px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
-            '  <div style="padding: 32px 32px 20px; border-bottom: 1px solid #222;">',
-            '    <h1 style="color: #a89878; margin: 0; font-size: 20px; font-weight: 300; letter-spacing: 2px;">RoweOS</h1>',
-            '    <p style="color: #666; margin: 6px 0 0; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">API Key Sold</p>',
+            '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
+            '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
+            '  <div style="margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;">',
+            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+            '    <p style="color: #a89878; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6;">API Key Sold</p>',
             '  </div>',
-            '  <div style="padding: 28px 32px;">',
-            '    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">',
-            '      <div style="width: 40px; height: 40px; border-radius: 10px; background: ' + pColor2 + '22; border: 1px solid ' + pColor2 + '44; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: ' + pColor2 + ';">$' + creditAmount + '</div>',
-            '      <div>',
-            '        <div style="font-size: 16px; font-weight: 600; color: #fff;">' + (providerLabel || apiProvider) + '</div>',
-            '        <div style="font-size: 12px; color: #888;">' + (customerEmail || 'N/A') + '</div>',
-            '      </div>',
+            '  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">',
+            '    <div style="width: 48px; height: 48px; border-radius: 12px; background: ' + pColor2 + '18; border: 1px solid ' + pColor2 + '33; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: ' + pColor2 + ';">$' + creditAmount + '</div>',
+            '    <div>',
+            '      <div style="font-size: 16px; font-weight: 600; color: #fff;">' + (providerCompany[apiProvider] || apiProvider) + '</div>',
+            '      <div style="font-size: 13px; color: ' + pColor2 + ';">' + (providerModel[apiProvider] || '') + '</div>',
             '    </div>',
-            '    <table style="width: 100%; border-collapse: collapse;">',
-            '      <tr><td style="padding: 10px 0; font-size: 12px; color: #888; border-bottom: 1px solid #1a1a1a;">Key (masked)</td><td style="padding: 10px 0; font-size: 13px; color: ' + pColor2 + '; text-align: right; font-family: monospace; border-bottom: 1px solid #1a1a1a;">' + (assignedApiKey ? assignedApiKey.substring(0, 10) + '...' : 'N/A') + '</td></tr>',
-            '      <tr><td style="padding: 10px 0; font-size: 12px; color: #888;">Credit</td><td style="padding: 10px 0; font-size: 13px; color: #fff; text-align: right;">$' + creditAmount + '</td></tr>',
-            '    </table>',
             '  </div>',
+            '  <table style="width: 100%; border-collapse: collapse;">',
+            '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878; border-bottom: 1px solid #1a1a1a;">Customer</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; border-bottom: 1px solid #1a1a1a;">' + (customerEmail || 'N/A') + '</td></tr>',
+            '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878; border-bottom: 1px solid #1a1a1a;">Key (masked)</td><td style="padding: 12px 0; font-size: 13px; color: ' + pColor2 + '; text-align: right; font-family: monospace; border-bottom: 1px solid #1a1a1a;">' + (assignedApiKey ? assignedApiKey.substring(0, 10) + '...' : 'N/A') + '</td></tr>',
+            '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878;">Credit</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; font-weight: 600;">$' + creditAmount + '</td></tr>',
+            '  </table>',
+            '</div>',
             '</div>'
           ].join('\n');
-          await sendEmail('jordan@therowecollection.com', 'API Key Sold \u2014 ' + apiProvider + ' $' + creditAmount + ' to ' + (customerEmail || 'unknown'), notifyHtml2);
+          await sendEmail('jordan@therowecollection.com', 'API Key Sold \u2014 ' + (providerCompany[apiProvider] || apiProvider) + ' $' + creditAmount + ' to ' + (customerEmail || 'unknown'), notifyHtml2);
 
           return res.status(200).json({ received: true, type: 'api_key_purchase', provider: apiProvider, assigned: true });
 
@@ -891,24 +894,26 @@ export default async function handler(req, res) {
       // --- Notify Jordan ---
       var tierLabel2 = tier.charAt(0).toUpperCase() + tier.slice(1);
       var notifyHtml = [
-        '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 520px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
-        '  <div style="padding: 32px 32px 20px; border-bottom: 1px solid #222;">',
-        '    <h1 style="color: #a89878; margin: 0; font-size: 20px; font-weight: 300; letter-spacing: 2px;">RoweOS</h1>',
-        '    <p style="color: #666; margin: 6px 0 0; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">New Purchase</p>',
+        '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
+        '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
+        '  <div style="margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;">',
+        '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+        '    <p style="color: #a89878; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6;">New Purchase</p>',
         '  </div>',
-        '  <div style="padding: 28px 32px;">',
-        '    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">',
-        '      <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #a89878, #c4a882); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #0a0a0a;">' + tierLabel2.charAt(0) + '</div>',
-        '      <div>',
-        '        <div style="font-size: 16px; font-weight: 600; color: #fff;">' + tierLabel2 + ' Plan</div>',
-        '        <div style="font-size: 12px; color: #888;">' + (amountTotal > 0 ? '$' + (amountTotal / 100).toFixed(2) + ' ' + currency.toUpperCase() : 'Beta (free)') + '</div>',
-        '      </div>',
+        '  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">',
+        '    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #a89878, #c4a882); display: flex; align-items: center; justify-content: center;">',
+        '      <span style="font-family: Georgia, \'Times New Roman\', serif; font-size: 24px; font-weight: 400; font-style: italic; color: #0a0a0a;">' + tierLabel2.charAt(0) + '</span>',
         '    </div>',
-        '    <table style="width: 100%; border-collapse: collapse;">',
-        '      <tr><td style="padding: 10px 0; font-size: 12px; color: #888; border-bottom: 1px solid #1a1a1a;">Email</td><td style="padding: 10px 0; font-size: 13px; color: #fff; text-align: right; border-bottom: 1px solid #1a1a1a;">' + (customerEmail || 'N/A') + '</td></tr>',
-        '      <tr><td style="padding: 10px 0; font-size: 12px; color: #888;">Access Key</td><td style="padding: 10px 0; font-size: 13px; color: #a89878; text-align: right; font-family: monospace; letter-spacing: 1px;">' + accessKey + '</td></tr>',
-        '    </table>',
+        '    <div>',
+        '      <div style="font-size: 18px; font-weight: 600; color: #fff;">' + tierLabel2 + ' Plan</div>',
+        '      <div style="font-size: 12px; color: #a89878;">' + (amountTotal > 0 ? '$' + (amountTotal / 100).toFixed(2) + ' ' + currency.toUpperCase() : 'Beta (free)') + '</div>',
+        '    </div>',
         '  </div>',
+        '  <table style="width: 100%; border-collapse: collapse;">',
+        '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878; border-bottom: 1px solid #1a1a1a;">Email</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; border-bottom: 1px solid #1a1a1a;">' + (customerEmail || 'N/A') + '</td></tr>',
+        '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878;">Access Key</td><td style="padding: 12px 0; font-size: 15px; color: #a89878; text-align: right; font-family: monospace; letter-spacing: 2px; font-weight: 600;">' + accessKey + '</td></tr>',
+        '  </table>',
+        '</div>',
         '</div>'
       ].join('\n');
 
