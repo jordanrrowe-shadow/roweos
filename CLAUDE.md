@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v20.2
-File:     RoweOS/dist/index.html (131412 lines)
+Version:  v20.3
+File:     RoweOS/dist/index.html (131763 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -191,11 +191,16 @@ Key patterns to remember without looking up:
 
 ### Enterprise / Access Key System
 - `isAdmin()` — checks `firebaseUser.uid === ADMIN_UID`
-- `getUserTier()` — cached (5min TTL), returns `'free'|'basic'|'pro'|'enterprise'`
-- `hasFeatureAccess(feature)` — tier-based gate (sync, export, whiteLabel, multiUser)
+- `getUserTier()` — cached (5min TTL), returns `'free'|'basic'|'founder'|'premium'` (v20.3: `'pro'`/`'enterprise'` still work as aliases)
+- `hasFeatureAccess(feature)` — tier-based gate: sync/export (basic), brandConfig/automations/social/focus/analytics/identity (founder), whiteLabel/multiUser/privateOnboarding (premium)
 - `generateAccessKey(tier, note)` / `revokeAccessKey(key)` — admin-only
 - `validateAccessKey(key)` / `linkAccessKeyToUser(key)` / `checkUserAccessKey()` — user flow
-- Firestore collections: `access_keys`, `roweos_users`
+- `claimBrandConfig(code)` — loads shared brand config from Firestore `brand_configs/{code}`. Replace if no existing brands, merge if existing
+- `adminGenerateBrandConfig()` — admin-only, snapshots current brands/settings/memory/customOps to Firestore
+- `adminLoadBrandConfigs()` — lists all shared configs with usage counts
+- URL join: `?join=CODE` → stored in `roweos_pending_join` → claimed after auth in `showStartupScreen()`
+- Settings: "Join Brand Config" input in settings view calls `joinBrandConfigFromSettings()`
+- Firestore collections: `access_keys`, `roweos_users`, `brand_configs`
 
 ---
 

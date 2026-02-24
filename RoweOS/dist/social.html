@@ -304,7 +304,7 @@ var templates = [];
 var featureData = [
   { tool: 'chat', headline: 'Your AI agents, ready when you are.', img: 'chat_brandAI.png' },
   { tool: 'studio', headline: 'Run operations. Generate content. Build deliverables.', img: 'studi_brandAI.png' },
-  { tool: 'signal', headline: 'Real-time intelligence. Zero noise.', img: null },
+  { tool: 'focus', headline: 'Your command center. Your daily brief.', img: 'focus_brandAI.png' },
   { tool: 'pulse', headline: 'Track momentum. Not just metrics.', img: 'pulse_brandAI.png' },
   { tool: 'rhythm', headline: 'Intelligent scheduling. Effortless structure.', img: null },
   { tool: 'library', headline: 'Every conversation. Every asset. Organized.', img: 'library_brandAI.png' },
@@ -312,8 +312,7 @@ var featureData = [
   { tool: 'identity', headline: 'Your brand, precisely defined.', img: 'idenitity_brandAI.png' },
   { tool: 'memory', headline: 'Context that grows with every interaction.', img: null },
   { tool: 'inventory', headline: 'Products. Services. Offerings. All tracked.', img: null },
-  { tool: 'analytics', headline: 'Know exactly where your intelligence goes.', img: 'analytics_brandAI.png' },
-  { tool: 'focus', headline: 'Your command center. Your daily brief.', img: 'focus_brandAI.png' }
+  { tool: 'analytics', headline: 'Know exactly where your intelligence goes.', img: 'analytics_brandAI.png' }
 ];
 
 featureData.forEach(function(f, i) {
@@ -325,16 +324,16 @@ featureData.forEach(function(f, i) {
       category: 'features',
       mode: mode,
       label: toolName + ' — ' + mode,
-      render: (function(fd, m) {
+      render: (function(fd, m, tn) {
         return function() {
           if (fd.img) {
-            var eyebrow = '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:16px;">RoweOS</div>';
-            var icon = '<div style="margin-bottom:24px;">'+featureIcon(fd.tool, m)+'</div>';
-            var title = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;line-height:1.15;margin-bottom:16px;max-width:800px;">'+fd.headline+'</div>';
-            var toolLabel = '<div style="display:inline-block;padding:6px 18px;border:1px solid var(--c-border);border-radius:20px;font-size:14px;color:var(--c-muted);margin-bottom:40px;">'+toolName+'</div>';
-            var screenshot = '<div style="margin-top:auto;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 840, radius: 10 })+'</div>';
-            var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:80px 72px 80px;">'
-              + eyebrow + icon + title + toolLabel + screenshot
+            var eyebrow = '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:12px;">'+tn+'</div>';
+            var icon = '<div style="margin-bottom:16px;">'+featureIcon(fd.tool, m)+'</div>';
+            var modeLabel = '<div style="display:inline-block;padding:5px 16px;border:1px solid var(--c-border);border-radius:20px;font-size:13px;color:var(--c-muted);margin-bottom:20px;">BrandAI</div>';
+            var title = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;line-height:1.2;max-width:800px;flex:1;display:flex;align-items:center;">'+fd.headline+'</div>';
+            var screenshot = '<div style="margin-top:16px;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 840, radius: 10 })+'</div>';
+            var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 72px 80px;">'
+              + eyebrow + icon + modeLabel + title + screenshot
               + '</div>';
             return cardWrap(m, inner);
           } else {
@@ -343,12 +342,12 @@ featureData.forEach(function(f, i) {
               + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:48px;">RoweOS BrandAI</div>'
               + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;line-height:1.15;margin-bottom:28px;max-width:800px;">'+fd.headline+'</div>'
               + '<div style="width:60px;height:1px;background:var(--c-g4);margin-bottom:28px;"></div>'
-              + '<div style="display:inline-block;padding:8px 24px;border:1px solid var(--c-border);border-radius:20px;font-size:15px;color:var(--c-muted);">'+toolName+'</div>'
+              + '<div style="display:inline-block;padding:8px 24px;border:1px solid var(--c-border);border-radius:20px;font-size:15px;color:var(--c-muted);">'+tn+'</div>'
               + '</div>';
             return cardWrap(m, inner);
           }
         };
-      })(f, mode)
+      })(f, mode, toolName)
     });
   });
 });
@@ -357,7 +356,7 @@ featureData.forEach(function(f, i) {
 var betaData = [
   { headline: 'Private beta. Public ambition.', sub: 'RoweOS is invite-only. Request access at roweos.com' },
   { headline: 'The waitlist is open.', sub: 'Limited spots for founders who refuse to settle.' },
-  { headline: 'Early access. Permanent advantage.', sub: 'Beta testers get Premium free. No credit card required.' },
+  { headline: 'Early access. Permanent advantage.', sub: 'Beta testers get Founder free. No credit card required.' },
   { headline: 'Not another chatbot wrapper.', sub: 'An operating system for brand intelligence.' },
   { headline: 'Something is coming.', sub: 'RoweOS. The brand &amp; life intelligence platform.' }
 ];
@@ -461,10 +460,10 @@ statsData.forEach(function(s, i) {
 // ── 4. BRAND PORTFOLIO (5) — dark only ──
 var portfolioData = [
   { brand: 'The Rowe Collection', quote: 'RoweOS replaced five separate tools with one intelligent platform that actually understands our brand voice.' },
-  { brand: 'Rowe Solo Training', quote: 'Tracking certifications, managing client relationships, generating personalized training content — all from one command center.' },
+  { brand: 'Rowe Solo Training', quote: 'Tracking certifications, managing client relationships, and generating personalized training content, all from one command center.' },
   { brand: 'Rowe Retreats', quote: 'From property descriptions to guest communication templates, the platform captures the exact tone every property demands.' },
   { brand: 'Rowe Reserve', quote: 'The concierge workflow needs precision. RoweOS delivers that with operations built specifically for hospitality.' },
-  { brand: 'Rowe & Co.', quote: 'Inventory tracking plus brand voice consistency — two things that used to require entirely different systems.' }
+  { brand: 'Rowe & Co.', quote: 'Inventory tracking plus brand voice consistency. Two things that used to require entirely different systems.' }
 ];
 
 portfolioData.forEach(function(p, i) {
@@ -495,21 +494,21 @@ portfolioData.forEach(function(p, i) {
 
 // ── 5. SCREENSHOT SHOWCASES (15) ──
 var showcaseData = [
-  { img: 'chat_brandAI.png', label: 'BrandAI Chat' },
-  { img: 'full_screen_brandAI.png', label: 'Full Screen Mode' },
-  { img: 'focus_brandAI.png', label: 'Focus Dashboard' },
-  { img: 'studi_brandAI.png', label: 'Agent Studio' },
-  { img: 'idenitity_brandAI.png', label: 'Brand Identity' },
-  { img: 'pulse_brandAI.png', label: 'Pulse Tracking' },
-  { img: 'adaptive_brandAI.png', label: 'Adaptive Operations' },
-  { img: 'library_brandAI.png', label: 'Brand Library' },
-  { img: 'analytics_brandAI.png', label: 'Analytics Dashboard' },
-  { img: 'light_brandAI.png', label: 'Light Mode' },
-  { img: 'LifeAI_example_chat.png', label: 'LifeAI Chat' },
-  { img: 'lifeAI_Identity.png', label: 'Life Identity' },
-  { img: 'lifeAI_Pulse.png', label: 'Life Pulse' },
-  { img: 'studio_lifeAI.png', label: 'Life Studio' },
-  { img: 'choice_onboarding.png', label: 'Onboarding' }
+  { img: 'chat_brandAI.png', label: 'Chat', caption: 'Specialized AI agents that know your brand voice, strategy, and goals.', aiMode: 'brand' },
+  { img: 'full_screen_brandAI.png', label: 'Full Screen', caption: 'Distraction-free workspace for focused conversations and deep work.', aiMode: 'brand' },
+  { img: 'focus_brandAI.png', label: 'Focus', caption: 'Your command center. Your daily brief.', aiMode: 'brand' },
+  { img: 'studi_brandAI.png', label: 'Studio', caption: '250+ operations. Generate content, run analysis, build deliverables.', aiMode: 'brand' },
+  { img: 'idenitity_brandAI.png', label: 'Identity', caption: 'Define your voice, tone, values, and visual identity with precision.', aiMode: 'brand' },
+  { img: 'pulse_brandAI.png', label: 'Pulse', caption: 'Track goals, measure momentum, and visualize brand progress.', aiMode: 'brand' },
+  { img: 'adaptive_brandAI.png', label: 'Adaptive Ops', caption: 'AI-generated operations that evolve with your brand needs.', aiMode: 'brand' },
+  { img: 'library_brandAI.png', label: 'Library', caption: 'Every conversation, asset, and deliverable organized and searchable.', aiMode: 'brand' },
+  { img: 'analytics_brandAI.png', label: 'Analytics', caption: 'API usage, cost tracking, and performance insights per provider.', aiMode: 'brand' },
+  { img: 'light_brandAI.png', label: 'Light Mode', caption: 'Full light theme for daytime work. Every view, every detail.', aiMode: 'brand' },
+  { img: 'LifeAI_example_chat.png', label: 'Chat', caption: 'Personal AI coaches for wellness, finance, and daily life.', aiMode: 'life' },
+  { img: 'lifeAI_Identity.png', label: 'Identity', caption: 'Define who you are. Values, goals, and personal direction.', aiMode: 'life' },
+  { img: 'lifeAI_Pulse.png', label: 'Pulse', caption: 'Personal goal tracking with momentum indicators and milestones.', aiMode: 'life' },
+  { img: 'studio_lifeAI.png', label: 'Studio', caption: 'Personal operations for life planning, journaling, and growth.', aiMode: 'life' },
+  { img: 'choice_onboarding.png', label: 'Onboarding', caption: 'Choose your mode. Set up your brand or life profile in minutes.', aiMode: 'brand' }
 ];
 
 showcaseData.forEach(function(s, i) {
@@ -517,17 +516,23 @@ showcaseData.forEach(function(s, i) {
     id: 48 + i,
     category: 'screenshots',
     mode: 'dark',
-    label: s.label,
+    label: s.label + (s.aiMode === 'life' ? ' (LifeAI)' : ''),
     render: (function(sd) {
       return function() {
         var m = 'dark';
-        var eyebrow = '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:8px;">RoweOS</div>';
-        var label = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;margin-bottom:36px;">'+sd.label+'</div>';
-        var frame = '<div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;">'
+        var isLife = sd.aiMode === 'life';
+        var accentColor = isLife ? '#8aa0b0' : 'var(--c-g4)';
+        var pillBorder = isLife ? 'rgba(138,160,176,0.2)' : 'var(--c-border)';
+        var pillColor = isLife ? '#8aa0b0' : 'var(--c-muted)';
+        var pillText = isLife ? 'LifeAI' : 'BrandAI';
+        var eyebrow = '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:'+accentColor+';margin-bottom:12px;">'+sd.label+'</div>';
+        var pill = '<div style="display:inline-block;padding:5px 16px;border:1px solid '+pillBorder+';border-radius:20px;font-size:13px;color:'+pillColor+';margin-bottom:20px;">'+pillText+'</div>';
+        var headline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;line-height:1.2;flex:1;display:flex;align-items:center;">'+sd.caption+'</div>';
+        var frame = '<div style="margin-top:16px;">'
           + screenshotFrame(IMG_BASE + sd.img, m, { width: 960, radius: 12 })
           + '</div>';
         var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 60px 80px;">'
-          + eyebrow + label + frame
+          + eyebrow + pill + headline + frame
           + '</div>';
         return cardWrap(m, inner);
       };
@@ -650,17 +655,18 @@ showcaseData.forEach(function(s, i) {
     label: 'Your Models, Your Choice — ' + mode,
     render: (function(m) {
       return function() {
+        var iconColor = m === 'dark' ? '#b2997b' : '#8b7b67';
         var providers = [
-          { name: 'Anthropic', sub: 'Claude 4 / Opus / Sonnet / Haiku' },
-          { name: 'OpenAI', sub: 'GPT-4o / o1 / o3 / GPT-4.1' },
-          { name: 'Google', sub: 'Gemini 2.5 Pro / Flash / Ultra' },
-          { name: 'xAI', sub: 'Grok 3 / Grok 3 Mini' }
+          { name: 'Anthropic', sub: 'Opus 4.6 / Sonnet 4.6 / Haiku 4.5', icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="'+iconColor+'"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>' },
+          { name: 'Google', sub: 'Gemini 3.1 Pro / 3.0 Flash / Nano Banana 3.0 Pro / Nano Banana 3.0', icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="'+iconColor+'"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>' },
+          { name: 'OpenAI', sub: 'GPT-5.2 / GPT-5.0 Mini', icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="'+iconColor+'"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>' }
         ];
-        var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:740px;">';
+        var grid = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;max-width:840px;">';
         providers.forEach(function(p) {
-          grid += '<div style="padding:32px;border:1px solid var(--c-border);border-radius:12px;background:var(--c-surface);text-align:center;">'
-            + '<div style="font-size:24px;font-weight:500;color:var(--c-g2);margin-bottom:8px;">'+p.name+'</div>'
-            + '<div style="font-size:13px;color:var(--c-dim);line-height:1.5;">'+p.sub+'</div>'
+          grid += '<div style="padding:28px 20px;border:1px solid var(--c-border);border-radius:12px;background:var(--c-surface);text-align:center;">'
+            + '<div style="margin-bottom:12px;">'+p.icon+'</div>'
+            + '<div style="font-size:20px;font-weight:500;color:var(--c-g2);margin-bottom:8px;">'+p.name+'</div>'
+            + '<div style="font-size:12px;color:var(--c-dim);line-height:1.5;">'+p.sub+'</div>'
             + '</div>';
         });
         grid += '</div>';
@@ -733,7 +739,7 @@ showcaseData.forEach(function(s, i) {
         var logo = '<img src="/images/logo-full.png" style="width:320px;margin-bottom:40px;opacity:0.9;" crossorigin="anonymous">';
         var tagline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;font-weight:300;font-style:italic;color:var(--c-muted);margin-bottom:24px;">Brand &amp; Life Intelligence Platform</div>';
         var divider = '<div style="width:60px;height:1px;background:var(--c-g4);margin-bottom:24px;"></div>';
-        var sub = '<div style="font-size:14px;color:var(--c-dim);letter-spacing:0.15em;text-transform:uppercase;">Private Beta — 2025</div>';
+        var sub = '<div style="font-size:14px;color:var(--c-dim);letter-spacing:0.15em;text-transform:uppercase;">Private Beta — 2026</div>';
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px;">'
           + glow + logo + tagline + divider + sub
           + '</div>';
@@ -853,13 +859,13 @@ lifeFeatureData.forEach(function(f, i) {
           var lifeAccent = m === 'dark' ? '#8aa0b0' : '#5a7a8a';
           var borderAccent = m === 'dark' ? 'rgba(138,160,176,0.2)' : 'rgba(90,122,138,0.2)';
           if (fd.img) {
-            var eyebrow = '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:'+lifeAccent+';margin-bottom:16px;">LifeAI</div>';
-            var icon = '<div style="margin-bottom:24px;">'+lifeIcon(fd.tool, m)+'</div>';
-            var title = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;line-height:1.15;margin-bottom:16px;max-width:800px;">'+fd.headline+'</div>';
-            var toolLabel = '<div style="display:inline-block;padding:6px 18px;border:1px solid '+borderAccent+';border-radius:20px;font-size:14px;color:'+lifeAccent+';margin-bottom:40px;">'+fd.name+'</div>';
-            var screenshot = '<div style="margin-top:auto;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 840, radius: 10 })+'</div>';
-            var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:80px 72px 80px;">'
-              + eyebrow + icon + title + toolLabel + screenshot
+            var eyebrow = '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:'+lifeAccent+';margin-bottom:12px;">'+fd.name+'</div>';
+            var icon = '<div style="margin-bottom:16px;">'+lifeIcon(fd.tool, m)+'</div>';
+            var modeLabel = '<div style="display:inline-block;padding:5px 16px;border:1px solid '+borderAccent+';border-radius:20px;font-size:13px;color:'+lifeAccent+';margin-bottom:20px;">LifeAI</div>';
+            var title = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;line-height:1.2;max-width:800px;flex:1;display:flex;align-items:center;">'+fd.headline+'</div>';
+            var screenshot = '<div style="margin-top:16px;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 840, radius: 10 })+'</div>';
+            var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 72px 80px;">'
+              + eyebrow + icon + modeLabel + title + screenshot
               + '</div>';
             return cardWrap(m, inner);
           } else {
@@ -896,7 +902,7 @@ lifeFeatureData.forEach(function(f, i) {
         var logo = '<div style="margin-bottom:20px;">'+logoMark(m, 36)+'</div>';
         var badge = '<div style="display:inline-block;padding:6px 18px;border:1px solid '+(m==='dark'?'rgba(138,160,176,0.25)':'rgba(90,122,138,0.25)')+';border-radius:20px;font-size:13px;color:'+lifeAccent+';margin-bottom:40px;letter-spacing:0.08em;">LifeAI Mode</div>';
         var headline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:58px;font-weight:300;line-height:1.12;margin-bottom:28px;">Life Intelligence<br>Platform</div>';
-        var sub = '<div style="font-size:18px;color:var(--c-muted);line-height:1.7;max-width:640px;">Your personal AI coaches, wellness tracking, financial tools, and daily routines — all in one intelligent system.</div>';
+        var sub = '<div style="font-size:18px;color:var(--c-muted);line-height:1.7;max-width:640px;">Your personal AI coaches, wellness tracking, financial tools, and daily routines, all in one intelligent system.</div>';
         var features = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:40px;justify-content:center;">';
         ['Coaching','Wellness','Finance','Routines','Goals','Identity'].forEach(function(f) {
           features += '<div style="padding:6px 16px;border:1px solid '+(m==='dark'?'rgba(138,160,176,0.15)':'rgba(90,122,138,0.15)')+';border-radius:16px;font-size:13px;color:'+lifeAccent+';">'+f+'</div>';
@@ -926,9 +932,9 @@ lifeFeatureData.forEach(function(f, i) {
         var logo = '<div style="margin-bottom:20px;">'+logoMark(m, 36)+'</div>';
         var badge = '<div style="display:inline-block;padding:6px 18px;border:1px solid var(--c-g4);border-radius:20px;font-size:13px;color:var(--c-g3);margin-bottom:40px;letter-spacing:0.08em;">BrandAI Mode</div>';
         var headline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:58px;font-weight:300;line-height:1.12;margin-bottom:28px;">Brand Intelligence<br>Platform</div>';
-        var sub = '<div style="font-size:18px;color:var(--c-muted);line-height:1.7;max-width:640px;">AI agents, content studio, social publishing, competitive intel, and brand voice — built for professionals who refuse to compromise.</div>';
+        var sub = '<div style="font-size:18px;color:var(--c-muted);line-height:1.7;max-width:640px;">AI agents, content studio, social publishing, competitive intel, and brand voice. Built for professionals who refuse to compromise.</div>';
         var features = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:40px;justify-content:center;">';
-        ['Chat','Studio','Signal','Pulse','Library','Identity','Analytics'].forEach(function(f) {
+        ['Chat','Studio','Focus','Pulse','Library','Identity','Analytics'].forEach(function(f) {
           features += '<div style="padding:6px 16px;border:1px solid var(--c-border);border-radius:16px;font-size:13px;color:var(--c-g3);">'+f+'</div>';
         });
         features += '</div>';
