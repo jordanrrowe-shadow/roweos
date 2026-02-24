@@ -101,9 +101,10 @@ export default async function handler(req, res) {
 
     var emailSent = false;
     var emailError = null;
+    var welcomeEmailSent = false;
 
-    // Attempt to send email via Resend
     if (process.env.RESEND_API_KEY) {
+      // --- Send admin notification email ---
       try {
         var resendResp = await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -112,7 +113,7 @@ export default async function handler(req, res) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'RoweOS <onboarding@resend.dev>',
+            from: 'RoweOS <noreply@roweos.com>',
             to: ['jordan@therowecollection.com'],
             subject: 'New RoweOS Signup: ' + email,
             html: emailHtml
@@ -121,7 +122,7 @@ export default async function handler(req, res) {
 
         if (resendResp.ok) {
           emailSent = true;
-          console.log('[notify-signup] Email sent for:', email);
+          console.log('[notify-signup] Admin email sent for:', email);
         } else {
           var resendErr = await resendResp.text();
           emailError = 'Resend API error: ' + resendResp.status + ' ' + resendErr;
@@ -131,8 +132,73 @@ export default async function handler(req, res) {
         emailError = 'Resend fetch error: ' + err.message;
         console.error('[notify-signup]', emailError);
       }
+
+      // --- Send welcome email to new user ---
+      if (email && email !== 'unknown') {
+        try {
+          var firstName = displayName ? displayName.split(' ')[0] : '';
+          var greeting = firstName ? 'Hi ' + escapeHtml(firstName) + ',' : 'Welcome,';
+
+          var welcomeHtml = [
+            '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
+            '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
+            '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+            '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands</p>',
+            '  </div>',
+            '  <div style="padding: 36px 40px 40px; background: #111;">',
+            '    <p style="color: #ccc; font-size: 15px; margin: 0 0 20px; line-height: 1.6;">' + greeting + '</p>',
+            '    <p style="color: #ccc; font-size: 15px; margin: 0 0 20px; line-height: 1.6;">Thanks for creating your RoweOS account. To unlock the full platform, you\'ll need an access key.</p>',
+            '    <div style="background: #1a1a1a; border: 1px solid #a8987844; border-radius: 10px; padding: 24px; margin: 24px 0;">',
+            '      <p style="color: #fff; font-size: 15px; font-weight: 500; margin: 0 0 12px;">What you get with a plan:</p>',
+            '      <ul style="color: #bbb; font-size: 13px; line-height: 2; margin: 0; padding-left: 20px;">',
+            '        <li><strong style="color: #fff;">BrandAI</strong> \u2014 4 AI agents for strategy, marketing, operations & documents</li>',
+            '        <li><strong style="color: #fff;">LifeAI</strong> \u2014 Personal life management with coach archetypes</li>',
+            '        <li><strong style="color: #fff;">Cloud Sync</strong> \u2014 Your data synced across all devices</li>',
+            '        <li><strong style="color: #fff;">Studio, Focus, Automations</strong> \u2014 The full toolkit</li>',
+            '      </ul>',
+            '    </div>',
+            '    <div style="text-align: center; margin: 32px 0;">',
+            '      <a href="https://roweos.com/info#pricing" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #a89878, #c4a882); color: #0a0a0a; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 8px; letter-spacing: 0.5px;">View Plans & Get Your Access Key</a>',
+            '    </div>',
+            '    <p style="color: #888; font-size: 13px; margin: 0 0 8px; text-align: center;">Plans start at $4.99/month</p>',
+            '    <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #222;">',
+            '      <p style="color: #888; font-size: 13px; margin: 0 0 12px;">Already have an access key? Just sign back in at <a href="https://roweos.com" style="color: #a89878; text-decoration: none;">roweos.com</a> and it will activate automatically.</p>',
+            '      <p style="color: #888; font-size: 13px; margin: 0 0 12px;">Want a pre-loaded API key so you don\'t need your own? You can purchase one during checkout or in Settings after signing in.</p>',
+            '    </div>',
+            '    <p style="color: #555; font-size: 12px; margin: 24px 0 0; padding-top: 16px; border-top: 1px solid #222;">',
+            '      Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color: #a89878; text-decoration: none;">jordan@therowecollection.com</a>',
+            '    </p>',
+            '  </div>',
+            '</div>'
+          ].join('\n');
+
+          var welcomeResp = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              from: 'RoweOS <noreply@roweos.com>',
+              to: [email],
+              subject: 'Welcome to RoweOS \u2014 Get Your Access Key',
+              html: welcomeHtml
+            })
+          });
+
+          if (welcomeResp.ok) {
+            welcomeEmailSent = true;
+            console.log('[notify-signup] Welcome email sent to:', email);
+          } else {
+            var wErr = await welcomeResp.text();
+            console.error('[notify-signup] Welcome email error:', wErr);
+          }
+        } catch (wErr2) {
+          console.error('[notify-signup] Welcome email error:', wErr2.message);
+        }
+      }
     } else {
-      console.log('[notify-signup] RESEND_API_KEY not set, skipping email. Signup:', email, displayName, method);
+      console.log('[notify-signup] RESEND_API_KEY not set, skipping emails. Signup:', email, displayName, method);
     }
 
     // Write to Firestore via REST API
@@ -192,6 +258,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       emailSent: emailSent,
+      welcomeEmailSent: welcomeEmailSent,
       firestoreWritten: firestoreWritten,
       emailError: emailError,
       firestoreError: firestoreError
