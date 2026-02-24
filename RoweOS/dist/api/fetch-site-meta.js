@@ -73,14 +73,20 @@ export default async function handler(req, res) {
     // v20.6: Content mode — return stripped text for AI context injection
     var mode = body.mode || 'meta';
     if (mode === 'content') {
-      // Strip script, style, nav, header, footer tags and their contents
+      // Strip non-content elements entirely
       var text = html
         .replace(/<script[\s\S]*?<\/script>/gi, '')
         .replace(/<style[\s\S]*?<\/style>/gi, '')
-        .replace(/<nav[\s\S]*?<\/nav>/gi, '')
-        .replace(/<header[\s\S]*?<\/header>/gi, '')
-        .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+        .replace(/<svg[\s\S]*?<\/svg>/gi, '')
+        .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
+        .replace(/<img[^>]*>/gi, '')
+        .replace(/<picture[\s\S]*?<\/picture>/gi, '')
+        .replace(/<video[\s\S]*?<\/video>/gi, '')
+        .replace(/<audio[\s\S]*?<\/audio>/gi, '')
+        .replace(/<canvas[\s\S]*?<\/canvas>/gi, '')
+        .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
         .replace(/<[^>]+>/g, ' ')
+        .replace(/data:[a-zA-Z0-9\/+;,=]+/g, '')
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/&lt;/g, '<')
