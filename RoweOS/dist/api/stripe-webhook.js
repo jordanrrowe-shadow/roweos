@@ -337,7 +337,7 @@ async function sendEmail(to, subject, htmlBody) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'RoweOS <noreply@roweos.com>',
+        from: 'RoweOS <roweos@therowecollection.com>',
         to: [to],
         subject: subject,
         html: htmlBody

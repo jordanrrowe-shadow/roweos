@@ -113,7 +113,7 @@ export default async function handler(req, res) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'RoweOS <noreply@roweos.com>',
+            from: 'RoweOS <roweos@therowecollection.com>',
             to: ['jordan@therowecollection.com'],
             subject: 'New RoweOS Signup: ' + email,
             html: emailHtml
@@ -179,7 +179,7 @@ export default async function handler(req, res) {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              from: 'RoweOS <noreply@roweos.com>',
+              from: 'RoweOS <roweos@therowecollection.com>',
               to: [email],
               subject: 'Welcome to RoweOS \u2014 Get Your Access Key',
               html: welcomeHtml
