@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v20.4
-File:     RoweOS/dist/index.html (132102 lines)
+Version:  v20.5
+File:     RoweOS/dist/index.html (132295 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -197,9 +197,11 @@ Key patterns to remember without looking up:
 - `validateAccessKey(key)` / `linkAccessKeyToUser(key)` / `checkUserAccessKey()` — user flow
 - `claimBrandConfig(code)` — loads shared brand config from Firestore `brand_configs/{code}`. Replace if no existing brands, merge if existing
 - `adminGenerateBrandConfig()` — admin-only, snapshots current brands/settings/memory/customOps to Firestore
+- `openShareBrandModal()` / `generateShareBrandLink()` — any signed-in user can share current brand (v20.4). Snapshots single brand to `brand_configs/{code}`
 - `adminLoadBrandConfigs()` — lists all shared configs with usage counts
-- URL join: `?join=CODE` → stored in `roweos_pending_join` → claimed after auth in `showStartupScreen()`
-- Settings: "Join Brand Config" input in settings view calls `joinBrandConfigFromSettings()`
+- URL join: `?join=CODE` → stored in `roweos_pending_join` → claimed **synchronously before routing** in `showStartupScreen()` (v20.4 timing fix — no more setTimeout race with onboarding)
+- Settings: "Join Brand Config" input calls `joinBrandConfigFromSettings()`. "Share This Brand" row (v20.4) calls `openShareBrandModal()`
+- Identity header: "Share" button (v20.4) visible when `firebaseUser` exists, brand mode only
 - Firestore collections: `access_keys`, `roweos_users`, `brand_configs`
 
 ---
