@@ -501,35 +501,80 @@ export default async function handler(req, res) {
             }
           }
 
-          // Email customer with their API key
+          // Check if this customer also has an access key (from a subscription purchase)
+          var existingAccessKey = '';
+          var existingTier = '';
+          if (customerEmail) {
+            try {
+              var akDoc = await firestoreQuery(projectId2, at2, 'access_keys', 'email', customerEmail);
+              if (akDoc && akDoc.fields) {
+                existingAccessKey = akDoc.fields.key ? akDoc.fields.key.stringValue : '';
+                existingTier = akDoc.fields.tier ? akDoc.fields.tier.stringValue : '';
+              }
+            } catch(akErr) {
+              console.log('[Stripe Webhook] Could not check for existing access key:', akErr.message);
+            }
+          }
+
+          // Email customer with their API key (and access key if they have one)
           if (customerEmail) {
             var providerLabel = { anthropic: 'Anthropic (Claude)', openai: 'OpenAI (GPT)', google: 'Google (Gemini)' }[apiProvider] || apiProvider;
-            var maskedKey = assignedApiKey.substring(0, 10) + '...' + assignedApiKey.substring(assignedApiKey.length - 4);
+
             var apiKeyHtml = [
-              '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #1a1a1a; color: #e0e0e0; padding: 40px; border-radius: 12px;">',
-              '  <div style="text-align: center; margin-bottom: 30px;">',
-              '    <h1 style="color: #a89878; margin: 0; font-size: 28px;">RoweOS</h1>',
-              '    <p style="color: #888; margin: 4px 0 0;">Operating intelligence, built for brands.</p>',
+              '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
+              '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
+              '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+              '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands</p>',
               '  </div>',
-              '  <h2 style="color: #fff; margin-bottom: 16px;">Your ' + providerLabel + ' API Key</h2>',
-              '  <p>Your pre-loaded API key is ready with <strong>$' + creditAmount + '</strong> in credit:</p>',
-              '  <div style="background: #2a2a2a; border: 1px solid #a89878; border-radius: 8px; padding: 20px; text-align: center; margin: 24px 0;">',
-              '    <code style="font-size: 16px; color: #a89878; letter-spacing: 1px; word-break: break-all;">' + assignedApiKey + '</code>',
+              '  <div style="padding: 36px 40px 40px; background: #111;">',
+            ].join('\n');
+
+            // If they also have an access key, show it first
+            if (existingAccessKey) {
+              var tierLabel2 = existingTier ? existingTier.charAt(0).toUpperCase() + existingTier.slice(1) : '';
+              apiKeyHtml += [
+                '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Welcome to RoweOS' + (tierLabel2 ? ' ' + tierLabel2 : '') + '</h2>',
+                '    <p style="color: #999; margin: 0 0 24px; font-size: 14px;">Your account is ready. Here\u2019s everything you need to get started.</p>',
+                '    <div style="margin-bottom: 28px;">',
+                '      <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Your Access Key</p>',
+                '      <div style="background: #1a1a1a; border: 1px solid #a8987844; border-radius: 8px; padding: 18px; text-align: center;">',
+                '        <code style="font-size: 22px; color: #a89878; letter-spacing: 3px; font-weight: 600;">' + existingAccessKey + '</code>',
+                '      </div>',
+                '    </div>',
+              ].join('\n');
+            } else {
+              apiKeyHtml += [
+                '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Your API Key is Ready</h2>',
+                '    <p style="color: #999; margin: 0 0 24px; font-size: 14px;">Your ' + providerLabel + ' key has been loaded with credit and is ready to use.</p>',
+              ].join('\n');
+            }
+
+            apiKeyHtml += [
+              '    <div style="margin-bottom: 28px;">',
+              '      <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">' + providerLabel + ' API Key &mdash; $' + creditAmount + ' Credit</p>',
+              '      <div style="background: #1a1a1a; border: 1px solid #a8987844; border-radius: 8px; padding: 18px; text-align: center;">',
+              '        <code style="font-size: 14px; color: #a89878; letter-spacing: 0.5px; word-break: break-all;">' + assignedApiKey + '</code>',
+              '      </div>',
+              '    </div>',
+              '    <div style="background: #1a1a1a; border-radius: 8px; padding: 20px; margin-bottom: 28px;">',
+              '      <p style="color: #fff; font-size: 14px; font-weight: 500; margin: 0 0 12px;">Getting Started</p>',
+              '      <ol style="line-height: 2; color: #ccc; margin: 0; padding-left: 20px; font-size: 13px;">',
+              '        <li>Go to <a href="https://roweos.com" style="color: #a89878; text-decoration: none;">roweos.com</a></li>',
+              '        <li>Sign in with <strong style="color: #fff;">' + customerEmail + '</strong></li>',
+              '        <li>Your keys will activate automatically</li>',
+              '      </ol>',
+              '    </div>',
+              '    <p style="color: #555; font-size: 12px; margin: 28px 0 0; padding-top: 20px; border-top: 1px solid #222;">',
+              '      Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color: #a89878; text-decoration: none;">jordan@therowecollection.com</a>',
+              '    </p>',
               '  </div>',
-              '  <h3 style="color: #fff; margin-top: 24px;">How to use:</h3>',
-              '  <ol style="line-height: 1.8; color: #ccc;">',
-              '    <li>Sign in at <a href="https://roweos.com" style="color: #a89878;">roweos.com</a></li>',
-              '    <li>Your key will be auto-configured on login</li>',
-              '    <li>Or go to Settings &rarr; AI Integration and paste it manually</li>',
-              '  </ol>',
-              '  <p style="color: #999; font-size: 12px; margin-top: 8px;">Key: <code style="color: #a89878;">' + maskedKey + '</code></p>',
-              '  <p style="color: #888; font-size: 13px; margin-top: 30px; border-top: 1px solid #333; padding-top: 16px;">',
-              '    If you have any questions, reply to this email or contact jordan@therowecollection.com',
-              '  </p>',
               '</div>'
             ].join('\n');
 
-            await sendEmail(customerEmail, 'Your ' + providerLabel + ' API Key — RoweOS', apiKeyHtml);
+            var emailSubject = existingAccessKey
+              ? 'Welcome to RoweOS \u2014 Your Access Key & ' + providerLabel + ' API Key'
+              : 'Your ' + providerLabel + ' API Key \u2014 RoweOS';
+            await sendEmail(customerEmail, emailSubject, apiKeyHtml);
           }
 
           // Notify Jordan
@@ -674,34 +719,109 @@ export default async function handler(req, res) {
         }
       }
 
+      // --- Check if this customer also purchased an API key ---
+      var purchasedApiKeys = [];
+      if (customerEmail) {
+        try {
+          var poolUrl = firestoreBaseUrl(projectId) + ':runQuery';
+          var poolQuery = {
+            structuredQuery: {
+              from: [{ collectionId: 'api_key_pool' }],
+              where: {
+                compositeFilter: {
+                  op: 'AND',
+                  filters: [
+                    { fieldFilter: { field: { fieldPath: 'assignedToEmail' }, op: 'EQUAL', value: { stringValue: customerEmail } } },
+                    { fieldFilter: { field: { fieldPath: 'status' }, op: 'EQUAL', value: { stringValue: 'assigned' } } }
+                  ]
+                }
+              },
+              limit: 5
+            }
+          };
+          var poolResp = await fetch(poolUrl, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify(poolQuery)
+          });
+          if (poolResp.ok) {
+            var poolResults = await poolResp.json();
+            if (poolResults) {
+              poolResults.forEach(function(r) {
+                if (r.document && r.document.fields) {
+                  var f = r.document.fields;
+                  purchasedApiKeys.push({
+                    provider: f.provider ? f.provider.stringValue : '',
+                    apiKey: f.apiKey ? f.apiKey.stringValue : '',
+                    creditAmount: f.creditTier ? f.creditTier.stringValue : (f.creditAmount ? (f.creditAmount.integerValue || '0') : '0')
+                  });
+                }
+              });
+            }
+          }
+        } catch(poolErr) {
+          console.log('[Stripe Webhook] Could not check for purchased API keys:', poolErr.message);
+        }
+      }
+
       // --- Send confirmation email to customer ---
       if (customerEmail) {
         var tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
+        var providerLabels = { anthropic: 'Anthropic (Claude)', openai: 'OpenAI (ChatGPT)', google: 'Google (Gemini)' };
+
         var customerHtml = [
-          '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #1a1a1a; color: #e0e0e0; padding: 40px; border-radius: 12px;">',
-          '  <div style="text-align: center; margin-bottom: 30px;">',
-          '    <h1 style="color: #a89878; margin: 0; font-size: 28px;">RoweOS</h1>',
-          '    <p style="color: #888; margin: 4px 0 0;">Operating intelligence, built for brands.</p>',
+          '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
+          '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
+          '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+          '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands</p>',
           '  </div>',
-          '  <h2 style="color: #fff; margin-bottom: 16px;">Welcome to RoweOS ' + tierLabel + '</h2>',
-          '  <p>Thank you for your purchase. Your access key is ready:</p>',
-          '  <div style="background: #2a2a2a; border: 1px solid #a89878; border-radius: 8px; padding: 20px; text-align: center; margin: 24px 0;">',
-          '    <code style="font-size: 24px; color: #a89878; letter-spacing: 2px;">' + accessKey + '</code>',
+          '  <div style="padding: 36px 40px 40px; background: #111;">',
+          '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Welcome to RoweOS ' + tierLabel + '</h2>',
+          '    <p style="color: #999; margin: 0 0 24px; font-size: 14px;">Your account is ready. Here\u2019s everything you need to get started.</p>',
+          '    <div style="margin-bottom: 28px;">',
+          '      <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Your Access Key</p>',
+          '      <div style="background: #1a1a1a; border: 1px solid #a8987844; border-radius: 8px; padding: 18px; text-align: center;">',
+          '        <code style="font-size: 22px; color: #a89878; letter-spacing: 3px; font-weight: 600;">' + accessKey + '</code>',
+          '      </div>',
+          '    </div>',
+        ].join('\n');
+
+        // Include any purchased API keys
+        if (purchasedApiKeys.length > 0) {
+          purchasedApiKeys.forEach(function(pk) {
+            var pLabel = providerLabels[pk.provider] || pk.provider;
+            customerHtml += [
+              '    <div style="margin-bottom: 28px;">',
+              '      <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">' + pLabel + ' API Key &mdash; $' + pk.creditAmount + ' Credit</p>',
+              '      <div style="background: #1a1a1a; border: 1px solid #a8987844; border-radius: 8px; padding: 18px; text-align: center;">',
+              '        <code style="font-size: 14px; color: #a89878; letter-spacing: 0.5px; word-break: break-all;">' + pk.apiKey + '</code>',
+              '      </div>',
+              '    </div>',
+            ].join('\n');
+          });
+        }
+
+        customerHtml += [
+          '    <div style="background: #1a1a1a; border-radius: 8px; padding: 20px; margin-bottom: 28px;">',
+          '      <p style="color: #fff; font-size: 14px; font-weight: 500; margin: 0 0 12px;">Getting Started</p>',
+          '      <ol style="line-height: 2; color: #ccc; margin: 0; padding-left: 20px; font-size: 13px;">',
+          '        <li>Go to <a href="https://roweos.com" style="color: #a89878; text-decoration: none;">roweos.com</a></li>',
+          '        <li>Sign in with <strong style="color: #fff;">' + customerEmail + '</strong></li>',
+          '        <li>Your ' + (purchasedApiKeys.length > 0 ? 'keys will activate' : 'key will activate') + ' automatically</li>',
+          '      </ol>',
+          '    </div>',
+          '    <p style="color: #666; font-size: 11px; margin: 0 0 8px;">If auto-activation doesn\u2019t work, go to Settings \u2192 Access Key and enter: <strong style="color: #a89878;">' + accessKey + '</strong></p>',
+          '    <p style="color: #555; font-size: 12px; margin: 28px 0 0; padding-top: 20px; border-top: 1px solid #222;">',
+          '      Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color: #a89878; text-decoration: none;">jordan@therowecollection.com</a>',
+          '    </p>',
           '  </div>',
-          '  <h3 style="color: #fff; margin-top: 24px;">How to activate:</h3>',
-          '  <ol style="line-height: 1.8; color: #ccc;">',
-          '    <li>Go to <a href="https://roweos.com" style="color: #a89878;">roweos.com</a></li>',
-          '    <li>Sign in with this email address (<strong>' + customerEmail + '</strong>)</li>',
-          '    <li>Your key will activate automatically</li>',
-          '  </ol>',
-          '  <p style="color: #999; font-size: 12px; margin-top: 8px;">If auto-activation doesn\'t work, go to Settings &rarr; Access Key and enter: <strong style="color: #a89878;">' + accessKey + '</strong></p>',
-          '  <p style="color: #888; font-size: 13px; margin-top: 30px; border-top: 1px solid #333; padding-top: 16px;">',
-          '    If you have any questions, reply to this email or contact jordan@therowecollection.com',
-          '  </p>',
           '</div>'
         ].join('\n');
 
-        await sendEmail(customerEmail, 'Your RoweOS ' + tierLabel + ' Access Key', customerHtml);
+        var subjectLine = purchasedApiKeys.length > 0
+          ? 'Welcome to RoweOS ' + tierLabel + ' \u2014 Your Keys Are Ready'
+          : 'Welcome to RoweOS ' + tierLabel + ' \u2014 Your Access Key';
+        await sendEmail(customerEmail, subjectLine, customerHtml);
       }
 
       // --- Notify Jordan ---
