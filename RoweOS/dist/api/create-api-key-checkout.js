@@ -28,18 +28,35 @@ export default async function handler(req, res) {
 
   var body = req.body || {};
   var provider = body.provider; // 'anthropic', 'openai', 'google'
+  var amount = parseInt(body.amount) || 0; // 5, 10, or 20
   var email = body.email || null;
 
-  // Map provider to Stripe price ID (set these in Vercel env vars)
+  // Hardcoded Stripe price IDs for API key tiers (provider → amount → priceId)
   var priceMap = {
-    anthropic: process.env.STRIPE_PRICE_APIKEY_ANTHROPIC,
-    openai: process.env.STRIPE_PRICE_APIKEY_OPENAI,
-    google: process.env.STRIPE_PRICE_APIKEY_GOOGLE
+    google: {
+      5: 'price_1T4SF40XfMh3c11xcycUdSNl',
+      10: 'price_1T4S950XfMh3c11xUV4rwuWp',
+      20: 'price_1T4SEq0XfMh3c11xjOPXw3qa'
+    },
+    anthropic: {
+      5: 'price_1T4SFS0XfMh3c11xzxo2N4KA',
+      10: 'price_1T4SDN0XfMh3c11xUqVxITWV',
+      20: 'price_1T4SEX0XfMh3c11x4SCn0BXi'
+    },
+    openai: {
+      5: 'price_1T4SIX0XfMh3c11xfyWdchMr',
+      10: 'price_1T4SJ10XfMh3c11xPJVagSax',
+      20: 'price_1T4SJ10XfMh3c11xY5xQ1jaQ'
+    }
   };
 
-  var priceId = priceMap[provider];
+  if (!priceMap[provider]) {
+    return res.status(400).json({ error: 'Invalid provider: ' + (provider || 'unknown') });
+  }
+
+  var priceId = priceMap[provider][amount];
   if (!priceId) {
-    return res.status(400).json({ error: 'API key pricing not configured for: ' + (provider || 'unknown') });
+    return res.status(400).json({ error: 'Invalid amount: $' + amount + '. Use 5, 10, or 20.' });
   }
 
   // One-time payment, not subscription
@@ -48,7 +65,7 @@ export default async function handler(req, res) {
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: 'https://roweos.com/?api_key_purchase=success&provider=' + provider + '&session_id={CHECKOUT_SESSION_ID}',
     cancel_url: 'https://roweos.com/',
-    metadata: { type: 'api_key_purchase', provider: provider },
+    metadata: { type: 'api_key_purchase', provider: provider, creditTier: String(amount) },
     allow_promotion_codes: true
   };
 

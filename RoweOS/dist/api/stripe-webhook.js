@@ -437,7 +437,8 @@ export default async function handler(req, res) {
     // --- v20.9: Check if this is an API key purchase (not a subscription) ---
     if (session.metadata && session.metadata.type === 'api_key_purchase') {
       var apiProvider = session.metadata.provider || 'unknown';
-      console.log('[Stripe Webhook] API key purchase detected:', apiProvider, 'for', customerEmail);
+      var creditTier = session.metadata.creditTier || '';
+      console.log('[Stripe Webhook] API key purchase detected:', apiProvider, '$' + creditTier, 'for', customerEmail);
 
       var projectId2 = process.env.FIREBASE_PROJECT_ID;
       var serviceAccountJson2 = process.env.FIREBASE_SERVICE_ACCOUNT;
@@ -457,11 +458,15 @@ export default async function handler(req, res) {
       try {
         var at2 = await getGoogleAccessToken(sa2);
 
-        // Find an available key from the pool matching provider
-        var poolDoc = await firestoreCompoundQuery(projectId2, at2, 'api_key_pool', [
+        // Find an available key from the pool matching provider + credit tier
+        var poolConditions = [
           { field: 'provider', value: apiProvider },
           { field: 'status', value: 'available' }
-        ], 1);
+        ];
+        if (creditTier) {
+          poolConditions.push({ field: 'creditTier', value: creditTier });
+        }
+        var poolDoc = await firestoreCompoundQuery(projectId2, at2, 'api_key_pool', poolConditions, 1);
 
         if (poolDoc) {
           // Extract the document path and data
