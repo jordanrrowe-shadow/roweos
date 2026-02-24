@@ -103,21 +103,33 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       return;
     }
 
+    // v20.6: Parse embedded PKCE data from state before platform detection
+    // State format for X: "x_scopeCode_random~codeVerifier~clientId"
+    var _embeddedVerifier = '';
+    var _embeddedClientId = '';
+    var stateBase = state; // original state for platform matching
+    if (state && state.indexOf('~') !== -1) {
+      var stateParts = state.split('~');
+      stateBase = stateParts[0]; // "x_b2_abc123" (without embedded data)
+      if (stateParts.length >= 2) _embeddedVerifier = stateParts[1];
+      if (stateParts.length >= 3) _embeddedClientId = stateParts[2];
+    }
+
     // Determine platform from stored state (localStorage, shared with opener)
     var xState = localStorage.getItem('roweos_x_state');
     var tState = localStorage.getItem('roweos_threads_state');
     var igState = localStorage.getItem('roweos_ig_state');
     var platform = null;
 
-    if (state === xState) platform = 'x';
+    if (stateBase === xState) platform = 'x';
     else if (state === tState) platform = 'threads';
     else if (state === igState) platform = 'instagram';
 
     // v17.3: Fallback — detect platform from state prefix (iOS Safari partitions localStorage between popup/redirect contexts)
-    if (!platform && state) {
-      if (state.indexOf('x_') === 0) platform = 'x';
-      else if (state.indexOf('threads_') === 0) platform = 'threads';
-      else if (state.indexOf('ig_') === 0) platform = 'instagram';
+    if (!platform && stateBase) {
+      if (stateBase.indexOf('x_') === 0) platform = 'x';
+      else if (stateBase.indexOf('threads_') === 0) platform = 'threads';
+      else if (stateBase.indexOf('ig_') === 0) platform = 'instagram';
     }
 
     if (!platform) {
@@ -130,7 +142,8 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     _detectedPlatform = platform;
 
     // v18.0: Determine brand/life scope for this connection
-    var scope = getScopeFromContext(state);
+    // v20.6: Use stateBase (without embedded data) for scope parsing
+    var scope = getScopeFromContext(stateBase);
 
     var platformNames = { x: 'X', threads: 'Threads', instagram: 'Instagram' };
     setStatus('Connecting ' + platformNames[platform] + '...');
@@ -143,8 +156,10 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
 
     if (platform === 'x') {
       body.action = 'exchange';
-      body.codeVerifier = localStorage.getItem('roweos_x_code_verifier') || '';
-      body.clientId = localStorage.getItem('roweos_x_client_id') || '';
+      // v20.6: Try localStorage first, fall back to embedded values from state parameter
+      // (iOS Safari / mobile redirect partitions localStorage — embedded values survive the redirect)
+      body.codeVerifier = localStorage.getItem('roweos_x_code_verifier') || _embeddedVerifier || '';
+      body.clientId = localStorage.getItem('roweos_x_client_id') || _embeddedClientId || '';
       localStorage.removeItem('roweos_x_code_verifier');
       localStorage.removeItem('roweos_x_state');
       localStorage.removeItem('roweos_x_client_id');
