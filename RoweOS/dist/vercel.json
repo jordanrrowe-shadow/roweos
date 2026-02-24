@@ -5,6 +5,7 @@
     "api/social-media.js": { "maxDuration": 30 },
     "api/blob-proxy.js": { "maxDuration": 30 },
     "api/stripe-webhook.js": { "maxDuration": 30 },
+    "api/create-api-key-checkout.js": { "maxDuration": 15 },
     "api/fetch-site-meta.js": { "maxDuration": 15 }
   },
   "routes": [

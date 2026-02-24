@@ -207,6 +207,61 @@ function verifyStripeSignature(rawBody, sigHeader, secret) {
   }
 }
 
+// --- Compound Firestore query (multiple field conditions) ---
+
+async function firestoreCompoundQuery(projectId, accessToken, collection, conditions, limit) {
+  var url = firestoreBaseUrl(projectId) + ':runQuery';
+  var filters = conditions.map(function(c) {
+    return {
+      fieldFilter: {
+        field: { fieldPath: c.field },
+        op: 'EQUAL',
+        value: { stringValue: c.value }
+      }
+    };
+  });
+
+  var where;
+  if (filters.length === 1) {
+    where = filters[0];
+  } else {
+    where = {
+      compositeFilter: {
+        op: 'AND',
+        filters: filters
+      }
+    };
+  }
+
+  var body = {
+    structuredQuery: {
+      from: [{ collectionId: collection }],
+      where: where,
+      limit: limit || 1
+    }
+  };
+
+  var resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!resp.ok) {
+    var errText = await resp.text();
+    throw new Error('Firestore compound query failed: ' + resp.status + ' ' + errText);
+  }
+
+  var results = await resp.json();
+  if (results && results.length > 0 && results[0].document) {
+    return results[0].document;
+  }
+  return null;
+}
+
 // --- Access key generation ---
 
 function generateAccessKey() {
@@ -378,6 +433,157 @@ export default async function handler(req, res) {
     }
 
     var customerEmail = session.customer_email || (session.customer_details && session.customer_details.email) || null;
+
+    // --- v20.9: Check if this is an API key purchase (not a subscription) ---
+    if (session.metadata && session.metadata.type === 'api_key_purchase') {
+      var apiProvider = session.metadata.provider || 'unknown';
+      console.log('[Stripe Webhook] API key purchase detected:', apiProvider, 'for', customerEmail);
+
+      var projectId2 = process.env.FIREBASE_PROJECT_ID;
+      var serviceAccountJson2 = process.env.FIREBASE_SERVICE_ACCOUNT;
+      if (!projectId2 || !serviceAccountJson2) {
+        console.error('[Stripe Webhook] Firebase not configured for API key purchase');
+        // Notify Jordan even if Firebase fails
+        await sendEmail('jordan@therowecollection.com', 'API Key Purchase — MANUAL ACTION NEEDED',
+          '<p>Customer ' + (customerEmail || 'unknown') + ' purchased a ' + apiProvider + ' API key but Firebase is not configured. Assign manually.</p>');
+        return res.status(200).json({ received: true, warning: 'Firebase not configured' });
+      }
+
+      var sa2;
+      try { sa2 = JSON.parse(serviceAccountJson2); } catch(e) {
+        return res.status(200).json({ received: true, warning: 'Invalid service account' });
+      }
+
+      try {
+        var at2 = await getGoogleAccessToken(sa2);
+
+        // Find an available key from the pool matching provider
+        var poolDoc = await firestoreCompoundQuery(projectId2, at2, 'api_key_pool', [
+          { field: 'provider', value: apiProvider },
+          { field: 'status', value: 'available' }
+        ], 1);
+
+        if (poolDoc) {
+          // Extract the document path and data
+          var poolDocPath = poolDoc.name;
+          var poolFields = poolDoc.fields || {};
+          var assignedApiKey = poolFields.apiKey ? poolFields.apiKey.stringValue : '';
+          var creditAmount = poolFields.creditAmount ? (poolFields.creditAmount.integerValue || poolFields.creditAmount.doubleValue || '0') : '0';
+
+          // Mark as assigned
+          await firestoreUpdate(projectId2, at2, poolDocPath, {
+            status: 'assigned',
+            assignedToEmail: customerEmail || '',
+            assignedAt: new Date().toISOString(),
+            stripeSessionId: session.id || ''
+          });
+          console.log('[Stripe Webhook] Pool key assigned to', customerEmail);
+
+          // Try to write purchased key to user doc
+          if (customerEmail) {
+            try {
+              var userDoc2 = await firestoreQuery(projectId2, at2, 'roweos_users', 'email', customerEmail);
+              if (userDoc2) {
+                var purchaseField = {};
+                purchaseField['purchasedApiKey_' + apiProvider] = assignedApiKey;
+                purchaseField['purchasedApiKey_' + apiProvider + '_credit'] = String(creditAmount);
+                purchaseField['purchasedApiKey_' + apiProvider + '_at'] = new Date().toISOString();
+                await firestoreUpdate(projectId2, at2, userDoc2.name, purchaseField);
+                console.log('[Stripe Webhook] Wrote purchased key to user doc for', customerEmail);
+              }
+            } catch(linkErr2) {
+              console.error('[Stripe Webhook] Failed to write purchased key to user doc:', linkErr2.message);
+            }
+          }
+
+          // Email customer with their API key
+          if (customerEmail) {
+            var providerLabel = { anthropic: 'Anthropic (Claude)', openai: 'OpenAI (GPT)', google: 'Google (Gemini)' }[apiProvider] || apiProvider;
+            var maskedKey = assignedApiKey.substring(0, 10) + '...' + assignedApiKey.substring(assignedApiKey.length - 4);
+            var apiKeyHtml = [
+              '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #1a1a1a; color: #e0e0e0; padding: 40px; border-radius: 12px;">',
+              '  <div style="text-align: center; margin-bottom: 30px;">',
+              '    <h1 style="color: #a89878; margin: 0; font-size: 28px;">RoweOS</h1>',
+              '    <p style="color: #888; margin: 4px 0 0;">Operating intelligence, built for brands.</p>',
+              '  </div>',
+              '  <h2 style="color: #fff; margin-bottom: 16px;">Your ' + providerLabel + ' API Key</h2>',
+              '  <p>Your pre-loaded API key is ready with <strong>$' + creditAmount + '</strong> in credit:</p>',
+              '  <div style="background: #2a2a2a; border: 1px solid #a89878; border-radius: 8px; padding: 20px; text-align: center; margin: 24px 0;">',
+              '    <code style="font-size: 16px; color: #a89878; letter-spacing: 1px; word-break: break-all;">' + assignedApiKey + '</code>',
+              '  </div>',
+              '  <h3 style="color: #fff; margin-top: 24px;">How to use:</h3>',
+              '  <ol style="line-height: 1.8; color: #ccc;">',
+              '    <li>Sign in at <a href="https://roweos.com" style="color: #a89878;">roweos.com</a></li>',
+              '    <li>Your key will be auto-configured on login</li>',
+              '    <li>Or go to Settings &rarr; AI Integration and paste it manually</li>',
+              '  </ol>',
+              '  <p style="color: #999; font-size: 12px; margin-top: 8px;">Key: <code style="color: #a89878;">' + maskedKey + '</code></p>',
+              '  <p style="color: #888; font-size: 13px; margin-top: 30px; border-top: 1px solid #333; padding-top: 16px;">',
+              '    If you have any questions, reply to this email or contact jordan@therowecollection.com',
+              '  </p>',
+              '</div>'
+            ].join('\n');
+
+            await sendEmail(customerEmail, 'Your ' + providerLabel + ' API Key — RoweOS', apiKeyHtml);
+          }
+
+          // Notify Jordan
+          var notifyHtml2 = [
+            '<div style="font-family: monospace; padding: 20px;">',
+            '  <h2>API Key Purchase — Assigned</h2>',
+            '  <table style="border-collapse: collapse;">',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Provider:</td><td>' + apiProvider + '</td></tr>',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Email:</td><td>' + (customerEmail || 'N/A') + '</td></tr>',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Key (masked):</td><td>' + (assignedApiKey ? assignedApiKey.substring(0, 10) + '...' : 'N/A') + '</td></tr>',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Credit:</td><td>$' + creditAmount + '</td></tr>',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Time:</td><td>' + new Date().toISOString() + '</td></tr>',
+            '  </table>',
+            '</div>'
+          ].join('\n');
+          await sendEmail('jordan@therowecollection.com', 'API Key Sold — ' + apiProvider + ' to ' + (customerEmail || 'unknown'), notifyHtml2);
+
+          return res.status(200).json({ received: true, type: 'api_key_purchase', provider: apiProvider, assigned: true });
+
+        } else {
+          // No keys available in pool! Notify Jordan for manual handling
+          console.error('[Stripe Webhook] No available ' + apiProvider + ' keys in pool!');
+          var outOfStockHtml = [
+            '<div style="font-family: monospace; padding: 20px; border: 2px solid red;">',
+            '  <h2 style="color: red;">OUT OF STOCK — Manual Action Needed</h2>',
+            '  <p>Customer purchased a <strong>' + apiProvider + '</strong> API key but the pool is empty.</p>',
+            '  <table style="border-collapse: collapse;">',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Email:</td><td>' + (customerEmail || 'N/A') + '</td></tr>',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Provider:</td><td>' + apiProvider + '</td></tr>',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Session:</td><td>' + (session.id || '') + '</td></tr>',
+            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Time:</td><td>' + new Date().toISOString() + '</td></tr>',
+            '  </table>',
+            '  <p>Add a key to the pool in RoweOS Admin and send it to the customer manually.</p>',
+            '</div>'
+          ].join('\n');
+          await sendEmail('jordan@therowecollection.com', 'URGENT: API Key Out of Stock — ' + apiProvider, outOfStockHtml);
+
+          // Still email customer to let them know it's being processed
+          if (customerEmail) {
+            await sendEmail(customerEmail, 'Your RoweOS API Key is Being Prepared', [
+              '<div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #1a1a1a; color: #e0e0e0; padding: 40px; border-radius: 12px;">',
+              '  <h1 style="color: #a89878;">RoweOS</h1>',
+              '  <h2 style="color: #fff;">Your API Key is Being Prepared</h2>',
+              '  <p>Thank you for your purchase. Your ' + apiProvider + ' API key is being prepared and will be delivered to this email shortly.</p>',
+              '  <p style="color: #888; font-size: 13px; margin-top: 30px; border-top: 1px solid #333; padding-top: 16px;">Questions? Contact jordan@therowecollection.com</p>',
+              '</div>'
+            ].join('\n'));
+          }
+
+          return res.status(200).json({ received: true, type: 'api_key_purchase', provider: apiProvider, assigned: false, reason: 'pool_empty' });
+        }
+      } catch (apiKeyErr) {
+        console.error('[Stripe Webhook] API key purchase error:', apiKeyErr.message, apiKeyErr.stack);
+        await sendEmail('jordan@therowecollection.com', 'API Key Purchase ERROR', '<p>Error processing API key purchase for ' + (customerEmail || 'unknown') + ': ' + apiKeyErr.message + '</p>');
+        return res.status(200).json({ received: true, error: apiKeyErr.message });
+      }
+    }
+
+    // --- Normal subscription purchase flow ---
     var tier = mapSessionToTier(session);
     var accessKey = generateAccessKey();
     var stripeSessionId = session.id || '';
