@@ -338,6 +338,7 @@ async function sendEmail(to, subject, htmlBody) {
       },
       body: JSON.stringify({
         from: 'RoweOS <roweos@therowecollection.com>',
+        reply_to: 'jordan@therowecollection.com',
         to: [to],
         subject: subject,
         html: htmlBody
@@ -445,8 +446,18 @@ export default async function handler(req, res) {
       if (!projectId2 || !serviceAccountJson2) {
         console.error('[Stripe Webhook] Firebase not configured for API key purchase');
         // Notify Jordan even if Firebase fails
-        await sendEmail('jordan@therowecollection.com', 'API Key Purchase — MANUAL ACTION NEEDED',
-          '<p>Customer ' + (customerEmail || 'unknown') + ' purchased a ' + apiProvider + ' API key but Firebase is not configured. Assign manually.</p>');
+        var fbErrHtml = [
+          '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
+          '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
+          '  <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #1a1a1a;">',
+          '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+          '    <p style="color: #e05555; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;">Firebase Not Configured</p>',
+          '  </div>',
+          '  <p style="color: #ccc; font-size: 14px;">Customer <strong style="color: #fff;">' + (customerEmail || 'unknown') + '</strong> purchased a <strong style="color: #a89878;">' + apiProvider + '</strong> API key but Firebase is not configured. Assign manually.</p>',
+          '</div>',
+          '</div>'
+        ].join('\n');
+        await sendEmail('jordan@therowecollection.com', 'API Key Purchase - Firebase Not Configured - ' + (customerEmail || 'unknown'), fbErrHtml);
         return res.status(200).json({ received: true, warning: 'Firebase not configured' });
       }
 
@@ -611,31 +622,66 @@ export default async function handler(req, res) {
         } else {
           // No keys available in pool! Notify Jordan for manual handling
           console.error('[Stripe Webhook] No available ' + apiProvider + ' keys in pool!');
+          var providerCompanyOos = { anthropic: 'Anthropic', openai: 'OpenAI', google: 'Google' };
+          var providerModelOos = { anthropic: 'Claude', openai: 'ChatGPT', google: 'Gemini' };
+          var providerColorsOos = { anthropic: '#d4a574', openai: '#10a37f', google: '#4285f4' };
+          var pColorOos = providerColorsOos[apiProvider] || '#a89878';
           var outOfStockHtml = [
-            '<div style="font-family: monospace; padding: 20px; border: 2px solid red;">',
-            '  <h2 style="color: red;">OUT OF STOCK — Manual Action Needed</h2>',
-            '  <p>Customer purchased a <strong>' + apiProvider + '</strong> API key but the pool is empty.</p>',
-            '  <table style="border-collapse: collapse;">',
-            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Email:</td><td>' + (customerEmail || 'N/A') + '</td></tr>',
-            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Provider:</td><td>' + apiProvider + '</td></tr>',
-            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Session:</td><td>' + (session.id || '') + '</td></tr>',
-            '    <tr><td style="padding: 4px 12px 4px 0; font-weight: bold;">Time:</td><td>' + new Date().toISOString() + '</td></tr>',
+            '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
+            '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
+            '  <div style="margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;">',
+            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+            '    <p style="color: #e05555; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;">Pool Empty - Action Needed</p>',
+            '  </div>',
+            '  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">',
+            '    <div style="width: 48px; height: 48px; border-radius: 12px; background: ' + pColorOos + '18; border: 1px solid ' + pColorOos + '33; display: flex; align-items: center; justify-content: center;">',
+            '      <span style="font-size: 20px; font-weight: 700; color: ' + pColorOos + ';">!</span>',
+            '    </div>',
+            '    <div>',
+            '      <div style="font-size: 16px; font-weight: 600; color: #fff;">' + (providerCompanyOos[apiProvider] || apiProvider) + '</div>',
+            '      <div style="font-size: 13px; color: ' + pColorOos + ';">' + (providerModelOos[apiProvider] || '') + ' - No keys available</div>',
+            '    </div>',
+            '  </div>',
+            '  <table style="width: 100%; border-collapse: collapse;">',
+            '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878; border-bottom: 1px solid #1a1a1a;">Customer</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; border-bottom: 1px solid #1a1a1a;">' + (customerEmail || 'N/A') + '</td></tr>',
+            '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878; border-bottom: 1px solid #1a1a1a;">Provider</td><td style="padding: 12px 0; font-size: 14px; color: ' + pColorOos + '; text-align: right; border-bottom: 1px solid #1a1a1a;">' + (providerCompanyOos[apiProvider] || apiProvider) + '</td></tr>',
+            '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878;">Credit Tier</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; font-weight: 600;">' + (creditTier ? '$' + creditTier : 'N/A') + '</td></tr>',
             '  </table>',
-            '  <p>Add a key to the pool in RoweOS Admin and send it to the customer manually.</p>',
+            '  <div style="background: #1a1a1a; border-radius: 8px; padding: 16px; margin-top: 24px;">',
+            '    <p style="color: #ccc; font-size: 13px; margin: 0;">Add a <strong style="color: ' + pColorOos + ';">' + (providerCompanyOos[apiProvider] || apiProvider) + '</strong> key to the pool in RoweOS Admin and send it to the customer manually.</p>',
+            '  </div>',
+            '</div>',
             '</div>'
           ].join('\n');
-          await sendEmail('jordan@therowecollection.com', 'URGENT: API Key Out of Stock — ' + apiProvider, outOfStockHtml);
+          await sendEmail('jordan@therowecollection.com', 'API Key Pool Empty - ' + (providerCompanyOos[apiProvider] || apiProvider) + ' - ' + (customerEmail || 'unknown'), outOfStockHtml);
 
           // Still email customer to let them know it's being processed
           if (customerEmail) {
-            await sendEmail(customerEmail, 'Your RoweOS API Key is Being Prepared', [
-              '<div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; background: #1a1a1a; color: #e0e0e0; padding: 40px; border-radius: 12px;">',
-              '  <h1 style="color: #a89878;">RoweOS</h1>',
-              '  <h2 style="color: #fff;">Your API Key is Being Prepared</h2>',
-              '  <p>Thank you for your purchase. Your ' + apiProvider + ' API key is being prepared and will be delivered to this email shortly.</p>',
-              '  <p style="color: #888; font-size: 13px; margin-top: 30px; border-top: 1px solid #333; padding-top: 16px;">Questions? Contact jordan@therowecollection.com</p>',
+            var providerLabelOos = { anthropic: 'Anthropic (Claude)', openai: 'OpenAI (ChatGPT)', google: 'Google (Gemini)' }[apiProvider] || apiProvider;
+            var customerOosHtml = [
+              '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
+              '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
+              '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+              '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands &amp; life</p>',
+              '  </div>',
+              '  <div style="padding: 36px 40px 40px; background: #111;">',
+              '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Your API Key is Being Prepared</h2>',
+              '    <p style="color: #999; margin: 0 0 24px; font-size: 14px;">Thank you for your purchase. Your ' + providerLabelOos + ' API key is being personally configured and will be delivered to this email shortly.</p>',
+              '    <div style="background: #1a1a1a; border: 1px solid #a8987844; border-radius: 8px; padding: 24px; margin-bottom: 28px; text-align: center;">',
+              '      <p style="color: #a89878; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px;">What happens next</p>',
+              '      <ol style="line-height: 2.2; color: #ccc; margin: 0; padding-left: 20px; font-size: 13px; text-align: left;">',
+              '        <li>Your ' + providerLabelOos + ' key is being set up with your purchased credit</li>',
+              '        <li>You will receive a follow-up email with your key within 24 hours</li>',
+              '        <li>Once received, sign in at <a href="https://roweos.com" style="color: #a89878; text-decoration: none;">roweos.com</a> and your key will activate automatically</li>',
+              '      </ol>',
+              '    </div>',
+              '    <p style="color: #555; font-size: 12px; margin: 28px 0 0; padding-top: 20px; border-top: 1px solid #222;">',
+              '      Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color: #a89878; text-decoration: none;">jordan@therowecollection.com</a>',
+              '    </p>',
+              '  </div>',
               '</div>'
-            ].join('\n'));
+            ].join('\n');
+            await sendEmail(customerEmail, 'Your ' + providerLabelOos + ' API Key - RoweOS', customerOosHtml);
           }
 
           return res.status(200).json({ received: true, type: 'api_key_purchase', provider: apiProvider, assigned: false, reason: 'pool_empty' });
@@ -776,13 +822,56 @@ export default async function handler(req, res) {
             }
           } else {
             console.error('[Stripe Webhook] No available ' + addonProvider + ' $' + addonAmount + ' keys for add-on!');
-            await sendEmail('jordan@therowecollection.com', 'URGENT: API Key Add-On Out of Stock',
-              '<p>Subscription checkout for ' + customerEmail + ' included a ' + addonProvider + ' $' + addonAmount + ' API key add-on but the pool is empty. Assign manually.</p>');
+            var addonProviderCompany = { anthropic: 'Anthropic', openai: 'OpenAI', google: 'Google' };
+            var addonProviderModel = { anthropic: 'Claude', openai: 'ChatGPT', google: 'Gemini' };
+            var addonProviderColors = { anthropic: '#d4a574', openai: '#10a37f', google: '#4285f4' };
+            var addonPColor = addonProviderColors[addonProvider] || '#a89878';
+            var addonOosHtml = [
+              '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
+              '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
+              '  <div style="margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;">',
+              '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+              '    <p style="color: #e05555; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;">Add-On Pool Empty - Action Needed</p>',
+              '  </div>',
+              '  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">',
+              '    <div style="width: 48px; height: 48px; border-radius: 12px; background: ' + addonPColor + '18; border: 1px solid ' + addonPColor + '33; display: flex; align-items: center; justify-content: center;">',
+              '      <span style="font-size: 20px; font-weight: 700; color: ' + addonPColor + ';">!</span>',
+              '    </div>',
+              '    <div>',
+              '      <div style="font-size: 16px; font-weight: 600; color: #fff;">' + (addonProviderCompany[addonProvider] || addonProvider) + '</div>',
+              '      <div style="font-size: 13px; color: ' + addonPColor + ';">' + (addonProviderModel[addonProvider] || '') + ' - No keys available</div>',
+              '    </div>',
+              '  </div>',
+              '  <table style="width: 100%; border-collapse: collapse;">',
+              '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878; border-bottom: 1px solid #1a1a1a;">Customer</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; border-bottom: 1px solid #1a1a1a;">' + (customerEmail || 'N/A') + '</td></tr>',
+              '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878; border-bottom: 1px solid #1a1a1a;">Context</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; border-bottom: 1px solid #1a1a1a;">Subscription add-on (' + tier + ' plan)</td></tr>',
+              '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878;">Credit Tier</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; font-weight: 600;">$' + (addonAmount || 'N/A') + '</td></tr>',
+              '  </table>',
+              '  <div style="background: #1a1a1a; border-radius: 8px; padding: 16px; margin-top: 24px;">',
+              '    <p style="color: #ccc; font-size: 13px; margin: 0;">This customer purchased a subscription with a <strong style="color: ' + addonPColor + ';">' + (addonProviderCompany[addonProvider] || addonProvider) + '</strong> add-on. Their subscription key was sent but the API key is pending. Add a key to the pool and send manually.</p>',
+              '  </div>',
+              '</div>',
+              '</div>'
+            ].join('\n');
+            await sendEmail('jordan@therowecollection.com', 'API Key Add-On Pool Empty - ' + (addonProviderCompany[addonProvider] || addonProvider) + ' - ' + (customerEmail || 'unknown'), addonOosHtml);
           }
         } catch(addonErr) {
           console.error('[Stripe Webhook] Add-on API key error:', addonErr.message);
-          await sendEmail('jordan@therowecollection.com', 'API Key Add-On Error',
-            '<p>Error assigning add-on API key for ' + customerEmail + ': ' + addonErr.message + '</p>');
+          var addonErrHtml = [
+            '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
+            '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
+            '  <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #1a1a1a;">',
+            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+            '    <p style="color: #e05555; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;">Add-On Assignment Error</p>',
+            '  </div>',
+            '  <p style="color: #ccc; font-size: 14px;">Error assigning add-on API key for <strong style="color: #fff;">' + (customerEmail || 'unknown') + '</strong>:</p>',
+            '  <div style="background: #1a1a1a; border-radius: 8px; padding: 16px; margin-top: 16px;">',
+            '    <code style="color: #e05555; font-size: 12px; word-break: break-all;">' + addonErr.message + '</code>',
+            '  </div>',
+            '</div>',
+            '</div>'
+          ].join('\n');
+          await sendEmail('jordan@therowecollection.com', 'API Key Add-On Error - ' + (customerEmail || 'unknown'), addonErrHtml);
         }
       }
 

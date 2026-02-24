@@ -114,6 +114,7 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             from: 'RoweOS <roweos@therowecollection.com>',
+            reply_to: 'jordan@therowecollection.com',
             to: ['jordan@therowecollection.com'],
             subject: 'New RoweOS Signup: ' + email,
             html: emailHtml
@@ -180,8 +181,9 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
               from: 'RoweOS <roweos@therowecollection.com>',
+              reply_to: 'jordan@therowecollection.com',
               to: [email],
-              subject: 'Welcome to RoweOS  - Get Your Access Key',
+              subject: 'Welcome to RoweOS - Get Your Access Key',
               html: welcomeHtml
             })
           });
