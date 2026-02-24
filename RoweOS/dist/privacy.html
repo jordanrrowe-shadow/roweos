@@ -72,7 +72,7 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
 
 <div class="hero">
   <h1>Privacy <span class="accent">Policy</span></h1>
-  <p class="subtitle">Last updated: February 21, 2026</p>
+  <p class="subtitle">Last updated: February 23, 2026</p>
 </div>
 
 <div class="content">
@@ -110,6 +110,11 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
     </div>
 
     <div class="card">
+      <h3>Automations &amp; Pipelines</h3>
+      <p>If you create scheduled workflows or multi-step pipelines, RoweOS stores their configuration (name, schedule, action type, steps, and associated brand) in your browser's local storage and optionally in Firebase if cloud sync is enabled. Execution history and results are stored locally. Automations that involve social posting or AI calls use your own connected accounts and API keys — we do not execute actions on external services without a configuration you created.</p>
+    </div>
+
+    <div class="card">
       <h3>Usage Analytics</h3>
       <p>We track basic API usage metrics (provider, model, token count, estimated cost) locally in your browser to power the Analytics dashboard. This data is not sent to our servers unless you enable cloud sync.</p>
     </div>
@@ -123,7 +128,8 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
     <ul>
       <li>To authenticate your identity and maintain your session</li>
       <li>To sync your application data across devices (when cloud sync is enabled)</li>
-      <li>To post content to social media platforms on your explicit request</li>
+      <li>To post content to social media platforms on your explicit request or via automations you configure</li>
+      <li>To execute scheduled automations and multi-step pipelines you create, using your connected accounts and API keys</li>
       <li>To provide AI-powered features by routing your prompts to third-party AI providers using your own API keys</li>
     </ul>
     <p>We do not sell, rent, or share your personal data with third parties for marketing purposes. We do not use your data to train AI models.</p>
