@@ -10,6 +10,8 @@
     { "src": "/info", "dest": "https://roweoswebsite.vercel.app/" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/privacy", "dest": "/privacy.html" },
+    { "src": "/social", "dest": "/social.html" },
+    { "src": "/images/(.*)", "dest": "/images/$1" },
     { "src": "/social-callback", "dest": "/social-callback.html" },
     { "src": "/login.html", "dest": "/login.html" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
