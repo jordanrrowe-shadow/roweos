@@ -239,7 +239,6 @@ function cardWrap(mode, inner) {
   return '<div style="width:'+CARD_W+'px;height:'+CARD_H+'px;background:'+bg+';color:'+text+';font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;'
     + '--c-bg:'+bg+';--c-text:'+text+';--c-muted:'+muted+';--c-dim:'+dim+';--c-border:'+border+';--c-surface:'+surface
     + ';--c-g1:'+g1+';--c-g2:'+g2+';--c-g3:'+g3+';--c-g4:'+g4+';--c-g5:'+g5+';">'
-    + '<img src="'+ROWEOS_LOGO+'" style="position:absolute;top:40px;right:40px;width:48px;height:48px;opacity:0.5;" />'
     + inner + watermark(mode) + '</div>';
 }
 
@@ -330,13 +329,16 @@ featureData.forEach(function(f, i) {
       render: (function(fd, m, tn) {
         return function() {
           if (fd.img) {
-            var eyebrow = '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:12px;">'+tn+'</div>';
-            var icon = '<div style="margin-bottom:16px;">'+featureIcon(fd.tool, m)+'</div>';
-            var modeLabel = '<div style="display:inline-block;padding:6px 20px;border:1px solid var(--c-border);border-radius:20px;font-size:16px;color:var(--c-muted);margin-bottom:20px;">BrandAI</div>';
+            var eyebrow = '<div style="font-size:18px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:16px;">'+tn+'</div>';
+            var brandRow = '<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">'
+              + '<div>'+featureIcon(fd.tool, m)+'</div>'
+              + '<div style="padding:6px 24px;border:1px solid var(--c-border);border-radius:20px;font-size:18px;color:var(--c-muted);">BrandAI</div>'
+              + '<img src="'+ROWEOS_LOGO+'" style="width:40px;height:40px;opacity:0.45;" />'
+              + '</div>';
             var title = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;line-height:1.2;max-width:800px;flex:1;display:flex;align-items:center;">'+fd.headline+'</div>';
             var screenshot = '<div style="margin-top:16px;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 940, radius: 10 })+'</div>';
             var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 72px 80px;">'
-              + eyebrow + icon + modeLabel + title + screenshot
+              + eyebrow + brandRow + title + screenshot
               + '</div>';
             return cardWrap(m, inner);
           } else {
@@ -528,14 +530,17 @@ showcaseData.forEach(function(s, i) {
         var pillBorder = isLife ? 'rgba(138,160,176,0.2)' : 'var(--c-border)';
         var pillColor = isLife ? '#8aa0b0' : 'var(--c-muted)';
         var pillText = isLife ? 'LifeAI' : 'BrandAI';
-        var eyebrow = '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:'+accentColor+';margin-bottom:12px;">'+sd.label+'</div>';
-        var pill = '<div style="display:inline-block;padding:6px 20px;border:1px solid '+pillBorder+';border-radius:20px;font-size:16px;color:'+pillColor+';margin-bottom:20px;">'+pillText+'</div>';
+        var eyebrow = '<div style="font-size:18px;letter-spacing:0.3em;text-transform:uppercase;color:'+accentColor+';margin-bottom:16px;">'+sd.label+'</div>';
+        var brandRow = '<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">'
+          + '<div style="padding:6px 24px;border:1px solid '+pillBorder+';border-radius:20px;font-size:18px;color:'+pillColor+';">'+pillText+'</div>'
+          + '<img src="'+ROWEOS_LOGO+'" style="width:40px;height:40px;opacity:0.45;" />'
+          + '</div>';
         var headline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;line-height:1.2;flex:1;display:flex;align-items:center;">'+sd.caption+'</div>';
         var frame = '<div style="margin-top:16px;">'
           + screenshotFrame(IMG_BASE + sd.img, m, { width: 980, radius: 12 })
           + '</div>';
         var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 60px 80px;">'
-          + eyebrow + pill + headline + frame
+          + eyebrow + brandRow + headline + frame
           + '</div>';
         return cardWrap(m, inner);
       };
@@ -862,13 +867,16 @@ lifeFeatureData.forEach(function(f, i) {
           var lifeAccent = m === 'dark' ? '#8aa0b0' : '#5a7a8a';
           var borderAccent = m === 'dark' ? 'rgba(138,160,176,0.2)' : 'rgba(90,122,138,0.2)';
           if (fd.img) {
-            var eyebrow = '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:'+lifeAccent+';margin-bottom:12px;">'+fd.name+'</div>';
-            var icon = '<div style="margin-bottom:16px;">'+lifeIcon(fd.tool, m)+'</div>';
-            var modeLabel = '<div style="display:inline-block;padding:6px 20px;border:1px solid '+borderAccent+';border-radius:20px;font-size:16px;color:'+lifeAccent+';margin-bottom:20px;">LifeAI</div>';
+            var eyebrow = '<div style="font-size:18px;letter-spacing:0.3em;text-transform:uppercase;color:'+lifeAccent+';margin-bottom:16px;">'+fd.name+'</div>';
+            var brandRow = '<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">'
+              + '<div>'+lifeIcon(fd.tool, m)+'</div>'
+              + '<div style="padding:6px 24px;border:1px solid '+borderAccent+';border-radius:20px;font-size:18px;color:'+lifeAccent+';">LifeAI</div>'
+              + '<img src="'+ROWEOS_LOGO+'" style="width:40px;height:40px;opacity:0.45;" />'
+              + '</div>';
             var title = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;line-height:1.2;max-width:800px;flex:1;display:flex;align-items:center;">'+fd.headline+'</div>';
             var screenshot = '<div style="margin-top:16px;">'+screenshotFrame(IMG_BASE + fd.img, m, { width: 940, radius: 10 })+'</div>';
             var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:60px 72px 80px;">'
-              + eyebrow + icon + modeLabel + title + screenshot
+              + eyebrow + brandRow + title + screenshot
               + '</div>';
             return cardWrap(m, inner);
           } else {
