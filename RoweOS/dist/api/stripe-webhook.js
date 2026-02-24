@@ -450,6 +450,7 @@ export default async function handler(req, res) {
             await firestoreUpdate(projectId, accessToken, docPath, {
               accessKey: accessKey,
               tier: tier,
+              stripeCustomerId: stripeCustomerId,
               accessKeyLinkedAt: new Date().toISOString()
             });
             console.log('[Stripe Webhook] Linked access key to user:', customerEmail);
@@ -479,10 +480,10 @@ export default async function handler(req, res) {
           '  <h3 style="color: #fff; margin-top: 24px;">How to activate:</h3>',
           '  <ol style="line-height: 1.8; color: #ccc;">',
           '    <li>Go to <a href="https://roweos.com" style="color: #a89878;">roweos.com</a></li>',
-          '    <li>Sign in or create an account</li>',
-          '    <li>Open Settings and find "Access Key"</li>',
-          '    <li>Enter your key: <strong style="color: #a89878;">' + accessKey + '</strong></li>',
+          '    <li>Sign in with this email address (<strong>' + customerEmail + '</strong>)</li>',
+          '    <li>Your key will activate automatically</li>',
           '  </ol>',
+          '  <p style="color: #999; font-size: 12px; margin-top: 8px;">If auto-activation doesn\'t work, go to Settings &rarr; Access Key and enter: <strong style="color: #a89878;">' + accessKey + '</strong></p>',
           '  <p style="color: #888; font-size: 13px; margin-top: 30px; border-top: 1px solid #333; padding-top: 16px;">',
           '    If you have any questions, reply to this email or contact jordan@therowecollection.com',
           '  </p>',
