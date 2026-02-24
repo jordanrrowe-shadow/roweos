@@ -70,6 +70,35 @@ export default async function handler(req, res) {
     var html = await response.text();
     html = html.substring(0, 100000);
 
+    // v20.6: Content mode — return stripped text for AI context injection
+    var mode = body.mode || 'meta';
+    if (mode === 'content') {
+      // Strip script, style, nav, header, footer tags and their contents
+      var text = html
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+        .replace(/<header[\s\S]*?<\/header>/gi, '')
+        .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+      // Cap at 12000 chars for AI context
+      if (text.length > 12000) text = text.substring(0, 12000) + '...';
+      var titleMatch2 = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+      return res.status(200).json({
+        url: parsed.href,
+        title: titleMatch2 ? titleMatch2[1].trim() : '',
+        content: text
+      });
+    }
+
     var result = {
       url: parsed.href,
       domain: parsed.hostname,
