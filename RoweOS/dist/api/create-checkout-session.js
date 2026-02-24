@@ -30,6 +30,8 @@ export default async function handler(req, res) {
   var body = req.body || {};
   var tier = body.tier; // 'solo', 'founder', or 'premium'
   var email = body.email || null;
+  var apiKeyProvider = body.apiKeyProvider || null; // 'anthropic', 'openai', 'google'
+  var apiKeyAmount = parseInt(body.apiKeyAmount) || 0; // 5, 10, or 20
 
   // Map tier to price ID
   var priceMap = {
@@ -43,13 +45,36 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid tier. Use: solo, founder, or premium' });
   }
 
+  // API key one-time price IDs (same as create-api-key-checkout.js)
+  var apiKeyPriceMap = {
+    google: { 5: 'price_1T4SF40XfMh3c11xcycUdSNl', 10: 'price_1T4S950XfMh3c11xUV4rwuWp', 20: 'price_1T4SEq0XfMh3c11xjOPXw3qa' },
+    anthropic: { 5: 'price_1T4SFS0XfMh3c11xzxo2N4KA', 10: 'price_1T4SDN0XfMh3c11xUqVxITWV', 20: 'price_1T4SEX0XfMh3c11x4SCn0BXi' },
+    openai: { 5: 'price_1T4SIX0XfMh3c11xfyWdchMr', 10: 'price_1T4SJ10XfMh3c11xPJVagSax', 20: 'price_1T4SJ10XfMh3c11xY5xQ1jaQ' }
+  };
+
+  // Build line items
+  var lineItems = [{ price: priceId, quantity: 1 }];
+  var metadata = { tier: tier };
+
+  // Add API key as one-time add-on if selected
+  if (apiKeyProvider && apiKeyAmount && apiKeyPriceMap[apiKeyProvider] && apiKeyPriceMap[apiKeyProvider][apiKeyAmount]) {
+    lineItems.push({ price: apiKeyPriceMap[apiKeyProvider][apiKeyAmount], quantity: 1 });
+    metadata.api_key_provider = apiKeyProvider;
+    metadata.api_key_amount = String(apiKeyAmount);
+  }
+
   // Build Checkout Session params
+  var successParams = 'subscription=success&tier=' + tier;
+  if (apiKeyProvider && apiKeyAmount) {
+    successParams += '&api_key_provider=' + apiKeyProvider + '&api_key_amount=' + apiKeyAmount;
+  }
+
   var sessionParams = {
     mode: 'subscription',
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: 'https://roweos.com/?subscription=success&tier=' + tier + '&session_id={CHECKOUT_SESSION_ID}',
+    line_items: lineItems,
+    success_url: 'https://roweos.com/?' + successParams + '&session_id={CHECKOUT_SESSION_ID}',
     cancel_url: 'https://roweos.com/info#pricing',
-    metadata: { tier: tier },
+    metadata: metadata,
     subscription_data: { metadata: { tier: tier } },
     allow_promotion_codes: true
   };

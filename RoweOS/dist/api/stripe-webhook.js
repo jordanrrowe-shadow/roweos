@@ -719,7 +719,60 @@ export default async function handler(req, res) {
         }
       }
 
-      // --- Check if this customer also purchased an API key ---
+      // --- Check if subscription checkout included an API key add-on ---
+      if (session.metadata && session.metadata.api_key_provider && customerEmail) {
+        var addonProvider = session.metadata.api_key_provider;
+        var addonAmount = session.metadata.api_key_amount || '';
+        console.log('[Stripe Webhook] Subscription includes API key add-on:', addonProvider, '$' + addonAmount);
+
+        try {
+          var addonConditions = [
+            { field: 'provider', value: addonProvider },
+            { field: 'status', value: 'available' }
+          ];
+          if (addonAmount) {
+            addonConditions.push({ field: 'creditTier', value: addonAmount });
+          }
+          var addonDoc = await firestoreCompoundQuery(projectId, accessToken, 'api_key_pool', addonConditions, 1);
+
+          if (addonDoc) {
+            var addonPath = addonDoc.name;
+            var addonFields = addonDoc.fields || {};
+            var addonApiKey = addonFields.apiKey ? addonFields.apiKey.stringValue : '';
+
+            await firestoreUpdate(projectId, accessToken, addonPath, {
+              status: 'assigned',
+              assignedToEmail: customerEmail,
+              assignedAt: new Date().toISOString(),
+              stripeSessionId: session.id || ''
+            });
+            console.log('[Stripe Webhook] Add-on API key assigned to', customerEmail);
+
+            // Write to user doc if exists
+            if (userDoc) {
+              try {
+                var addonField = {};
+                addonField['purchasedApiKey_' + addonProvider] = addonApiKey;
+                addonField['purchasedApiKey_' + addonProvider + '_credit'] = addonAmount;
+                addonField['purchasedApiKey_' + addonProvider + '_at'] = new Date().toISOString();
+                await firestoreUpdate(projectId, accessToken, userDoc.name, addonField);
+              } catch(af) {
+                console.error('[Stripe Webhook] Failed to write add-on key to user doc:', af.message);
+              }
+            }
+          } else {
+            console.error('[Stripe Webhook] No available ' + addonProvider + ' $' + addonAmount + ' keys for add-on!');
+            await sendEmail('jordan@therowecollection.com', 'URGENT: API Key Add-On Out of Stock',
+              '<p>Subscription checkout for ' + customerEmail + ' included a ' + addonProvider + ' $' + addonAmount + ' API key add-on but the pool is empty. Assign manually.</p>');
+          }
+        } catch(addonErr) {
+          console.error('[Stripe Webhook] Add-on API key error:', addonErr.message);
+          await sendEmail('jordan@therowecollection.com', 'API Key Add-On Error',
+            '<p>Error assigning add-on API key for ' + customerEmail + ': ' + addonErr.message + '</p>');
+        }
+      }
+
+      // --- Check if this customer also purchased an API key (separate checkout) ---
       var purchasedApiKeys = [];
       if (customerEmail) {
         try {
