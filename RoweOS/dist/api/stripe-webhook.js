@@ -524,7 +524,7 @@ export default async function handler(req, res) {
               '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
               '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
               '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
-              '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands</p>',
+              '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands &amp; life</p>',
               '  </div>',
               '  <div style="padding: 36px 40px 40px; background: #111;">',
             ].join('\n');
@@ -572,8 +572,8 @@ export default async function handler(req, res) {
             ].join('\n');
 
             var emailSubject = existingAccessKey
-              ? 'Welcome to RoweOS \u2014 Your Access Key & ' + providerLabel + ' API Key'
-              : 'Your ' + providerLabel + ' API Key \u2014 RoweOS';
+              ? 'Welcome to RoweOS  - Your Access Key & ' + providerLabel + ' API Key'
+              : 'Your ' + providerLabel + ' API Key  - RoweOS';
             await sendEmail(customerEmail, emailSubject, apiKeyHtml);
           }
 
@@ -604,7 +604,7 @@ export default async function handler(req, res) {
             '</div>',
             '</div>'
           ].join('\n');
-          await sendEmail('jordan@therowecollection.com', 'API Key Sold \u2014 ' + (providerCompany[apiProvider] || apiProvider) + ' $' + creditAmount + ' to ' + (customerEmail || 'unknown'), notifyHtml2);
+          await sendEmail('jordan@therowecollection.com', 'API Key Sold  - ' + (providerCompany[apiProvider] || apiProvider) + ' $' + creditAmount + ' to ' + (customerEmail || 'unknown'), notifyHtml2);
 
           return res.status(200).json({ received: true, type: 'api_key_purchase', provider: apiProvider, assigned: true });
 
@@ -840,7 +840,7 @@ export default async function handler(req, res) {
           '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
           '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
           '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
-          '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands</p>',
+          '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands &amp; life</p>',
           '  </div>',
           '  <div style="padding: 36px 40px 40px; background: #111;">',
           '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Welcome to RoweOS ' + tierLabel + '</h2>',
@@ -886,8 +886,8 @@ export default async function handler(req, res) {
         ].join('\n');
 
         var subjectLine = purchasedApiKeys.length > 0
-          ? 'Welcome to RoweOS ' + tierLabel + ' \u2014 Your Keys Are Ready'
-          : 'Welcome to RoweOS ' + tierLabel + ' \u2014 Your Access Key';
+          ? 'Welcome to RoweOS ' + tierLabel + '  - Your Keys Are Ready'
+          : 'Welcome to RoweOS ' + tierLabel + '  - Your Access Key';
         await sendEmail(customerEmail, subjectLine, customerHtml);
       }
 
@@ -917,7 +917,7 @@ export default async function handler(req, res) {
         '</div>'
       ].join('\n');
 
-      await sendEmail('jordan@therowecollection.com', 'New ' + tierLabel2 + ' Purchase \u2014 ' + (customerEmail || 'unknown'), notifyHtml);
+      await sendEmail('jordan@therowecollection.com', 'New ' + tierLabel2 + ' Purchase  - ' + (customerEmail || 'unknown'), notifyHtml);
 
       return res.status(200).json({
         received: true,

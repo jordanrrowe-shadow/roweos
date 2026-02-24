@@ -143,7 +143,7 @@ export default async function handler(req, res) {
             '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
             '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
             '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
-            '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands</p>',
+            '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands &amp; life</p>',
             '  </div>',
             '  <div style="padding: 36px 40px 40px; background: #111;">',
             '    <p style="color: #ccc; font-size: 15px; margin: 0 0 20px; line-height: 1.6;">' + greeting + '</p>',
@@ -151,10 +151,10 @@ export default async function handler(req, res) {
             '    <div style="background: #1a1a1a; border: 1px solid #a8987844; border-radius: 10px; padding: 24px; margin: 24px 0;">',
             '      <p style="color: #fff; font-size: 15px; font-weight: 500; margin: 0 0 12px;">What you get with a plan:</p>',
             '      <ul style="color: #bbb; font-size: 13px; line-height: 2; margin: 0; padding-left: 20px;">',
-            '        <li><strong style="color: #fff;">BrandAI</strong> \u2014 4 AI agents for strategy, marketing, operations & documents</li>',
-            '        <li><strong style="color: #fff;">LifeAI</strong> \u2014 Personal life management with coach archetypes</li>',
-            '        <li><strong style="color: #fff;">Cloud Sync</strong> \u2014 Your data synced across all devices</li>',
-            '        <li><strong style="color: #fff;">Studio, Focus, Automations</strong> \u2014 The full toolkit</li>',
+            '        <li><strong style="color: #fff;">BrandAI</strong>  - 4 AI agents for strategy, marketing, operations & documents</li>',
+            '        <li><strong style="color: #fff;">LifeAI</strong>  - Personal life management with coach archetypes</li>',
+            '        <li><strong style="color: #fff;">Cloud Sync</strong>  - Your data synced across all devices</li>',
+            '        <li><strong style="color: #fff;">Studio, Focus, Automations</strong>  - The full toolkit</li>',
             '      </ul>',
             '    </div>',
             '    <div style="text-align: center; margin: 32px 0;">',
@@ -181,7 +181,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
               from: 'RoweOS <roweos@therowecollection.com>',
               to: [email],
-              subject: 'Welcome to RoweOS \u2014 Get Your Access Key',
+              subject: 'Welcome to RoweOS  - Get Your Access Key',
               html: welcomeHtml
             })
           });
