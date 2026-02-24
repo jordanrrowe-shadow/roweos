@@ -218,7 +218,9 @@ var CATEGORIES = [
   { id: 'portfolio', label: 'Brand Portfolio' },
   { id: 'screenshots', label: 'Screenshot Showcase' },
   { id: 'value', label: 'Value Propositions' },
-  { id: 'mood', label: 'Mood & Atmosphere' }
+  { id: 'mood', label: 'Mood & Atmosphere' },
+  { id: 'pricing', label: 'Pricing Tiers' },
+  { id: 'brandai', label: 'BrandAI' }
 ];
 
 var ROWEOS_LOGO = 'data:image/png;base64,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';
@@ -294,7 +296,8 @@ function featureIcon(name, mode) {
     memory: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01M6 6V4M10 6V4M14 6V4M18 6V4M6 18v2M10 18v2M14 18v2M18 18v2"/></svg>',
     inventory: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
     analytics: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
-    focus: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>'
+    focus: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    'roweos-ai': '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
   };
   return icons[name] || '';
 }
@@ -314,7 +317,8 @@ var featureData = [
   { tool: 'identity', headline: 'Your brand, precisely defined.', img: 'idenitity_brandAI.png' },
   { tool: 'memory', headline: 'Context that grows with every interaction.', img: null },
   { tool: 'inventory', headline: 'Products. Services. Offerings. All tracked.', img: null },
-  { tool: 'analytics', headline: 'Know exactly where your intelligence goes.', img: 'analytics_brandAI.png' }
+  { tool: 'analytics', headline: 'Know exactly where your intelligence goes.', img: 'analytics_brandAI.png' },
+  { tool: 'roweos-ai', headline: 'Don\'t pick a model. Let RoweOS pick for you.', img: null }
 ];
 
 featureData.forEach(function(f, i) {
@@ -690,6 +694,46 @@ showcaseData.forEach(function(s, i) {
   });
 });
 
+// 103-104: RoweOS AI Smart Routing
+['dark','light'].forEach(function(mode) {
+  templates.push({
+    id: mode === 'dark' ? 103 : 104,
+    category: 'value',
+    mode: mode,
+    label: 'RoweOS AI — ' + mode,
+    render: (function(m) {
+      return function() {
+        var iconColor = m === 'dark' ? '#b2997b' : '#8b7b67';
+        var routeIcon = '<svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="'+iconColor+'" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>';
+        var routes = [
+          { task: 'Creative Writing', model: 'Claude', color: '#d4a574' },
+          { task: 'Deep Research', model: 'Gemini', color: '#7ba3c9' },
+          { task: 'Strategic Planning', model: 'Opus', color: '#c9a87b' },
+          { task: 'Quick Tasks', model: 'Flash', color: '#9bb898' },
+          { task: 'Code & Technical', model: 'Sonnet', color: '#b89bc4' }
+        ];
+        var routeHtml = '<div style="display:flex;flex-direction:column;gap:12px;max-width:560px;width:100%;">';
+        routes.forEach(function(r) {
+          routeHtml += '<div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border:1px solid var(--c-border);border-radius:10px;background:var(--c-surface);">'
+            + '<div style="font-size:14px;color:var(--c-muted);flex:1;">'+r.task+'</div>'
+            + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-dim)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
+            + '<div style="font-size:14px;font-weight:500;color:'+r.color+';">'+r.model+'</div>'
+            + '</div>';
+        });
+        routeHtml += '</div>';
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 60px;">'
+          + '<div style="margin-bottom:24px;">'+routeIcon+'</div>'
+          + '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:12px;">Intelligent Routing</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;margin-bottom:16px;">RoweOS AI</div>'
+          + '<div style="font-size:18px;color:var(--c-muted);margin-bottom:40px;max-width:580px;">Don\'t pick a model. Let RoweOS route every request to the optimal AI based on the task.</div>'
+          + routeHtml
+          + '</div>';
+        return cardWrap(m, inner);
+      };
+    })(mode)
+  });
+});
+
 // 71-72: Create. Publish. Repeat.
 ['dark','light'].forEach(function(mode) {
   templates.push({
@@ -987,6 +1031,329 @@ lifeFeatureData.forEach(function(f, i) {
           + '</div>';
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 60px;">'
           + glow + logo + headline + desc + cols
+          + '</div>';
+        return cardWrap(m, inner);
+      };
+    })(mode)
+  });
+});
+
+// ── 10. PRICING TIERS (6) ──
+var pricingTiers = [
+  {
+    tier: 'Solo',
+    stage: 'Essentials',
+    price: '$29',
+    desc: 'For solo operators ready to master their brand and life intelligence.',
+    features: [
+      '1 Brand profile',
+      '1 LifeAI profile',
+      'Chat with all AI agents',
+      'RoweOS AI smart routing',
+      'Library & Memory',
+      'Pulse goal tracking',
+      'Rhythm scheduling',
+      'Community support'
+    ],
+    accent: false,
+    badge: null
+  },
+  {
+    tier: 'Founder',
+    stage: 'Limited-Time Beta Reward',
+    price: '$59',
+    desc: 'Our thank-you to the people who built with us from the start.',
+    features: [
+      'Everything in Solo',
+      'Up to 5 Brand profiles',
+      'Up to 5 LifeAI profiles',
+      'Studio operations & pipelines',
+      'Automations & scheduling',
+      'Social publishing',
+      'Focus monitoring',
+      'Analytics dashboard',
+      'Identity & voice tuning',
+      'Cloud sync across devices',
+      'Priority support'
+    ],
+    accent: true,
+    badge: 'Currently $0 during beta'
+  },
+  {
+    tier: 'Premium',
+    stage: 'Full Price',
+    price: '$79',
+    desc: 'Professional infrastructure for portfolios and growing teams.',
+    features: [
+      'Everything in Founder',
+      'Up to 15 Brand profiles',
+      'Up to 15 LifeAI profiles',
+      'Studio operations & pipelines',
+      'Automations & scheduling',
+      'Social publishing',
+      'Focus monitoring',
+      'Analytics dashboard',
+      'Identity & voice tuning',
+      'Cloud sync across devices',
+      'Private onboarding session',
+      '24/7 Priority support'
+    ],
+    accent: false,
+    badge: null
+  }
+];
+
+pricingTiers.forEach(function(p, idx) {
+  ['dark','light'].forEach(function(mode) {
+    templates.push({
+      id: 105 + (idx * 2) + (mode === 'dark' ? 0 : 1),
+      category: 'pricing',
+      mode: mode,
+      label: p.tier + ' Tier — ' + mode,
+      render: (function(pd, m) {
+        return function() {
+          var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
+          var dimColor = m === 'dark' ? '#655e54' : '#8a857e';
+          var borderColor = m === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+          var surfaceColor = m === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+
+          var cardBorder = pd.accent
+            ? 'border:1px solid ' + goldAccent + ';'
+            : 'border:1px solid ' + borderColor + ';';
+          var topBar = pd.accent
+            ? '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,' + goldAccent + ',transparent);"></div>'
+            : '';
+
+          var logo = '<div style="margin-bottom:32px;">' + logoMark(m, 28) + '</div>';
+
+          var stage = '<div style="font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:' + dimColor + ';margin-bottom:8px;">' + pd.stage + '</div>';
+
+          var tierName = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;margin-bottom:4px;">' + pd.tier + '</div>';
+
+          var price = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;line-height:1;margin-bottom:4px;">'
+            + pd.price + '<span style="font-size:24px;color:' + dimColor + ';"> /mo</span></div>';
+
+          var badgeHtml = '';
+          if (pd.badge) {
+            badgeHtml = '<div style="display:inline-block;padding:5px 16px;border:1px solid ' + goldAccent + ';border-radius:20px;font-size:12px;color:' + goldAccent + ';margin-bottom:16px;letter-spacing:0.04em;">' + pd.badge + '</div>';
+          } else {
+            badgeHtml = '<div style="height:12px;"></div>';
+          }
+
+          var desc = '<div style="font-size:15px;color:var(--c-muted);margin-bottom:32px;max-width:500px;line-height:1.6;">' + pd.desc + '</div>';
+
+          var divider = '<div style="width:60px;height:1px;background:' + goldAccent + ';opacity:0.3;margin:0 auto 28px;"></div>';
+
+          var featList = '<div style="text-align:left;max-width:420px;width:100%;">';
+          pd.features.forEach(function(f) {
+            featList += '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid ' + borderColor + ';">'
+              + checkIcon(m)
+              + '<span style="font-size:14px;color:var(--c-muted);">' + f + '</span>'
+              + '</div>';
+          });
+          featList += '</div>';
+
+          var lockNote = '';
+          if (pd.tier === 'Founder') {
+            lockNote = '<div style="margin-top:24px;display:flex;align-items:center;gap:10px;padding:12px 20px;border:1px solid ' + goldAccent + '33;border-radius:10px;background:' + goldAccent + '0a;">'
+              + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + goldAccent + '" stroke-width="1.5" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+              + '<span style="font-size:12px;color:' + goldAccent + ';">$59/mo locked in permanently as long as your subscription stays active.</span>'
+              + '</div>';
+          }
+
+          var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:60px 72px;' + cardBorder + '">'
+            + topBar + logo + stage + tierName + price + badgeHtml + desc + divider + featList + lockNote
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(p, mode)
+    });
+  });
+});
+
+// ── 11. BRANDAI (10) ──
+
+// 111-112: BrandAI Hero
+['dark','light'].forEach(function(mode) {
+  templates.push({
+    id: mode === 'dark' ? 111 : 112,
+    category: 'brandai',
+    mode: mode,
+    label: 'BrandAI Hero — ' + mode,
+    render: (function(m) {
+      return function() {
+        var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
+        var glow = m === 'dark'
+          ? '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(178,153,123,0.07) 0%,transparent 60%);pointer-events:none;"></div>'
+          : '';
+        var logo = '<div style="margin-bottom:20px;">' + logoMark(m, 36) + '</div>';
+        var badge = '<div style="display:inline-block;padding:6px 18px;border:1px solid ' + goldAccent + ';border-radius:20px;font-size:13px;color:' + goldAccent + ';margin-bottom:40px;letter-spacing:0.08em;">BrandAI</div>';
+        var headline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;line-height:1.12;margin-bottom:28px;">Your brand.<br>Intelligently operated.</div>';
+        var sub = '<div style="font-size:18px;color:var(--c-muted);line-height:1.7;max-width:640px;">AI agents that know your voice. Studio operations that build your content. Automations that run your business while you sleep.</div>';
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
+          + glow + logo + badge + headline + sub
+          + '</div>';
+        return cardWrap(m, inner);
+      };
+    })(mode)
+  });
+});
+
+// 113-114: BrandAI 4 Agents
+['dark','light'].forEach(function(mode) {
+  templates.push({
+    id: mode === 'dark' ? 113 : 114,
+    category: 'brandai',
+    mode: mode,
+    label: 'BrandAI 4 Agents — ' + mode,
+    render: (function(m) {
+      return function() {
+        var agents = [
+          { name: 'Strategy', color: '#a78bfa', desc: 'Market positioning, competitive intel, business planning' },
+          { name: 'Marketing', color: '#f472b6', desc: 'Content strategy, campaigns, audience growth' },
+          { name: 'Operations', color: '#4ade80', desc: 'Workflows, automations, process optimization' },
+          { name: 'Documents', color: '#fbbf24', desc: 'Proposals, reports, deliverables, copy' }
+        ];
+        var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px;width:100%;">';
+        agents.forEach(function(a) {
+          grid += '<div style="padding:28px 24px;border:1px solid var(--c-border);border-radius:12px;background:var(--c-surface);text-align:left;">'
+            + '<div style="width:10px;height:10px;border-radius:50%;background:' + a.color + ';margin-bottom:14px;"></div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;font-weight:400;margin-bottom:6px;">' + a.name + '</div>'
+            + '<div style="font-size:13px;color:var(--c-muted);line-height:1.5;">' + a.desc + '</div>'
+            + '</div>';
+        });
+        grid += '</div>';
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 60px;">'
+          + '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:12px;">BrandAI Agents</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;margin-bottom:16px;">Four agents. One brand voice.</div>'
+          + '<div style="font-size:16px;color:var(--c-muted);margin-bottom:44px;max-width:560px;">Each agent specializes in a different domain but shares your brand identity, tone, and strategic context.</div>'
+          + grid
+          + '</div>';
+        return cardWrap(m, inner);
+      };
+    })(mode)
+  });
+});
+
+// 115-116: BrandAI Tools Stack
+['dark','light'].forEach(function(mode) {
+  templates.push({
+    id: mode === 'dark' ? 115 : 116,
+    category: 'brandai',
+    mode: mode,
+    label: 'BrandAI Tools — ' + mode,
+    render: (function(m) {
+      return function() {
+        var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
+        var tools = [
+          { name: 'Agent Chat', desc: 'Conversations with brand-aware AI' },
+          { name: 'Agent Studio', desc: 'Operations, pipelines, deliverables' },
+          { name: 'Social Publishing', desc: 'Create and post to all platforms' },
+          { name: 'Automations', desc: 'Scheduled tasks and workflows' },
+          { name: 'Focus', desc: 'Daily command center and briefs' },
+          { name: 'Pulse', desc: 'Goal tracking and momentum' },
+          { name: 'Analytics', desc: 'API spend and usage insights' },
+          { name: 'Identity', desc: 'Brand voice and personality tuning' },
+          { name: 'Library', desc: 'All conversations and assets saved' },
+          { name: 'Memory', desc: 'Persistent context across sessions' }
+        ];
+        var list = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:640px;width:100%;">';
+        tools.forEach(function(t) {
+          list += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--c-border);border-radius:8px;">'
+            + '<div style="width:6px;height:6px;border-radius:50%;background:' + goldAccent + ';flex-shrink:0;"></div>'
+            + '<div><div style="font-size:14px;font-weight:500;color:var(--c-text);">' + t.name + '</div>'
+            + '<div style="font-size:11px;color:var(--c-dim);">' + t.desc + '</div></div>'
+            + '</div>';
+        });
+        list += '</div>';
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:60px;">'
+          + '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:12px;">Brand Operating System</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;margin-bottom:16px;">Everything your brand needs.</div>'
+          + '<div style="font-size:16px;color:var(--c-muted);margin-bottom:36px;max-width:520px;">Ten integrated tools. One unified intelligence.</div>'
+          + list
+          + '</div>';
+        return cardWrap(m, inner);
+      };
+    })(mode)
+  });
+});
+
+// 117-118: BrandAI Multi-Brand
+['dark','light'].forEach(function(mode) {
+  templates.push({
+    id: mode === 'dark' ? 117 : 118,
+    category: 'brandai',
+    mode: mode,
+    label: 'Multi-Brand — ' + mode,
+    render: (function(m) {
+      return function() {
+        var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
+        var brands = ['Brand 1', 'Brand 2', 'Brand 3', 'Brand 4', 'Brand 5'];
+        var pills = '<div style="display:flex;gap:10px;margin-bottom:48px;flex-wrap:wrap;justify-content:center;">';
+        brands.forEach(function(b, i) {
+          var opacity = 1 - (i * 0.15);
+          pills += '<div style="padding:8px 20px;border:1px solid ' + goldAccent + ';border-radius:20px;font-size:14px;color:' + goldAccent + ';opacity:' + opacity + ';">' + b + '</div>';
+        });
+        pills += '</div>';
+        var steps = '<div style="display:flex;gap:16px;max-width:700px;width:100%;">';
+        var stepData = [
+          { num: '01', title: 'Build', desc: 'Configure brand identity, voice, and agents' },
+          { num: '02', title: 'Share', desc: 'Generate setup links for team members' },
+          { num: '03', title: 'Operate', desc: 'Everyone gets brand tools + private LifeAI' }
+        ];
+        stepData.forEach(function(s) {
+          steps += '<div style="flex:1;padding:20px;border:1px solid var(--c-border);border-radius:10px;background:var(--c-surface);text-align:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;color:' + goldAccent + ';margin-bottom:8px;">' + s.num + '</div>'
+            + '<div style="font-size:15px;font-weight:500;color:var(--c-text);margin-bottom:4px;">' + s.title + '</div>'
+            + '<div style="font-size:12px;color:var(--c-dim);line-height:1.5;">' + s.desc + '</div>'
+            + '</div>';
+        });
+        steps += '</div>';
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 60px;">'
+          + '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:12px;">Multi-Brand Portfolio</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;margin-bottom:16px;">One platform. Every brand.</div>'
+          + '<div style="font-size:16px;color:var(--c-muted);margin-bottom:36px;max-width:560px;">Manage up to 15 brands with independent identities, agents, and team access.</div>'
+          + pills + steps
+          + '</div>';
+        return cardWrap(m, inner);
+      };
+    })(mode)
+  });
+});
+
+// 119-120: BrandAI RoweOS AI Smart Routing
+['dark','light'].forEach(function(mode) {
+  templates.push({
+    id: mode === 'dark' ? 119 : 120,
+    category: 'brandai',
+    mode: mode,
+    label: 'RoweOS AI Routing — ' + mode,
+    render: (function(m) {
+      return function() {
+        var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
+        var routeIcon = '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="' + goldAccent + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>';
+        var routes = [
+          { task: 'Creative Writing', model: 'Claude', color: '#d4a574' },
+          { task: 'Deep Research', model: 'Gemini', color: '#7ba3c9' },
+          { task: 'Strategic Planning', model: 'Opus', color: '#c9a87b' },
+          { task: 'Quick Tasks', model: 'Flash', color: '#9bb898' },
+          { task: 'Code & Technical', model: 'Sonnet', color: '#b89bc4' }
+        ];
+        var routeHtml = '<div style="display:flex;flex-direction:column;gap:10px;max-width:500px;width:100%;">';
+        routes.forEach(function(r) {
+          routeHtml += '<div style="display:flex;align-items:center;gap:14px;padding:12px 18px;border:1px solid var(--c-border);border-radius:10px;background:var(--c-surface);">'
+            + '<div style="font-size:14px;color:var(--c-muted);flex:1;">' + r.task + '</div>'
+            + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-dim)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
+            + '<div style="font-size:14px;font-weight:500;color:' + r.color + ';">' + r.model + '</div>'
+            + '</div>';
+        });
+        routeHtml += '</div>';
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 60px;">'
+          + '<div style="margin-bottom:20px;">' + routeIcon + '</div>'
+          + '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:12px;">Intelligent Routing</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;margin-bottom:16px;">RoweOS AI</div>'
+          + '<div style="font-size:16px;color:var(--c-muted);margin-bottom:36px;max-width:520px;">Don\'t pick a model. RoweOS routes every request to the optimal AI based on the task.</div>'
+          + routeHtml
           + '</div>';
         return cardWrap(m, inner);
       };

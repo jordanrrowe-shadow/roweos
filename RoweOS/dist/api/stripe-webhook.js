@@ -247,7 +247,7 @@ function mapSessionToTier(session) {
   // 3. Fallback: check price ID against known prices (configure in Stripe dashboard metadata instead)
   // Add price_xxx -> tier mappings here if needed
   var priceMap = {};
-  if (process.env.STRIPE_PRICE_BASIC) priceMap[process.env.STRIPE_PRICE_BASIC] = 'basic';
+  if (process.env.STRIPE_PRICE_SOLO || process.env.STRIPE_PRICE_BASIC) priceMap[process.env.STRIPE_PRICE_SOLO || process.env.STRIPE_PRICE_BASIC] = 'solo';
   if (process.env.STRIPE_PRICE_FOUNDER) priceMap[process.env.STRIPE_PRICE_FOUNDER] = 'founder';
   if (process.env.STRIPE_PRICE_PREMIUM) priceMap[process.env.STRIPE_PRICE_PREMIUM] = 'premium';
 
@@ -261,8 +261,8 @@ function mapSessionToTier(session) {
   }
 
   // Default
-  console.warn('[Stripe Webhook] Could not determine tier from session, defaulting to basic');
-  return 'basic';
+  console.warn('[Stripe Webhook] Could not determine tier from session, defaulting to solo');
+  return 'solo';
 }
 
 // --- Email via Resend ---

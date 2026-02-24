@@ -66,27 +66,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'URL did not return HTML content' });
     }
 
-    // Read first 100KB only
-    var html = await response.text();
-    html = html.substring(0, 100000);
+    // v20.6: Read full HTML for content extraction
+    // Strip heavy binary elements BEFORE truncating (base64 img tags can be 100KB+ each)
+    var fullHtml = await response.text();
 
-    // v20.6: Content mode — return stripped text for AI context injection
-    var mode = body.mode || 'meta';
+    var mode = body && body.mode || 'meta';
     if (mode === 'content') {
-      // Strip non-content elements entirely
-      var text = html
+      // Step 1: Strip img tags first (biggest payload — base64 data URLs)
+      // Use regex that handles both closed <img .../> and unclosed truncation
+      var text = fullHtml
+        .replace(/<img\b[^>]*(?:>|$)/gi, '')
         .replace(/<script[\s\S]*?<\/script>/gi, '')
         .replace(/<style[\s\S]*?<\/style>/gi, '')
         .replace(/<svg[\s\S]*?<\/svg>/gi, '')
         .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
-        .replace(/<img[^>]*>/gi, '')
         .replace(/<picture[\s\S]*?<\/picture>/gi, '')
         .replace(/<video[\s\S]*?<\/video>/gi, '')
         .replace(/<audio[\s\S]*?<\/audio>/gi, '')
         .replace(/<canvas[\s\S]*?<\/canvas>/gi, '')
         .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
         .replace(/<[^>]+>/g, ' ')
-        .replace(/data:[a-zA-Z0-9\/+;,=]+/g, '')
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/&lt;/g, '<')
@@ -97,13 +96,16 @@ export default async function handler(req, res) {
         .trim();
       // Cap at 12000 chars for AI context
       if (text.length > 12000) text = text.substring(0, 12000) + '...';
-      var titleMatch2 = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+      var titleMatch2 = fullHtml.substring(0, 50000).match(/<title[^>]*>([^<]*)<\/title>/i);
       return res.status(200).json({
         url: parsed.href,
         title: titleMatch2 ? titleMatch2[1].trim() : '',
         content: text
       });
     }
+
+    // For meta mode, truncate to 100KB (no base64 img issue since we only parse meta tags)
+    var html = fullHtml.substring(0, 100000);
 
     var result = {
       url: parsed.href,
