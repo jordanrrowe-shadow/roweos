@@ -322,12 +322,19 @@ function mapSessionToTier(session) {
 
 // --- Email via Resend ---
 
+// v20.9: Returns { sent: true } or { sent: false, error: '...' }
+var _lastEmailError = '';
 async function sendEmail(to, subject, htmlBody) {
+  _lastEmailError = '';
   var apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
+    _lastEmailError = 'RESEND_API_KEY not set';
     console.log('[Stripe Webhook] RESEND_API_KEY not set, skipping email to:', to);
     return false;
   }
+
+  // Small delay to respect Resend rate limits (1/sec)
+  await new Promise(function(r) { setTimeout(r, 1100); });
 
   try {
     var resp = await fetch('https://api.resend.com/emails', {
@@ -347,6 +354,7 @@ async function sendEmail(to, subject, htmlBody) {
 
     if (!resp.ok) {
       var errText = await resp.text();
+      _lastEmailError = 'Resend ' + resp.status + ': ' + errText;
       console.error('[Stripe Webhook] Resend API error:', resp.status, errText);
       return false;
     }
@@ -354,6 +362,7 @@ async function sendEmail(to, subject, htmlBody) {
     console.log('[Stripe Webhook] Email sent to:', to);
     return true;
   } catch (e) {
+    _lastEmailError = e.message;
     console.error('[Stripe Webhook] Email send error:', e.message);
     return false;
   }
@@ -1016,7 +1025,7 @@ export default async function handler(req, res) {
         accessKey: accessKey,
         tier: tier,
         email: customerEmail,
-        emailSent: { customer: !!custEmailSent, admin: !!adminEmailSent },
+        emailSent: { customer: !!custEmailSent, admin: !!adminEmailSent, lastError: _lastEmailError || null },
         apiKeyAddon: session.metadata && session.metadata.api_key_provider ? { provider: session.metadata.api_key_provider, amount: session.metadata.api_key_amount } : null,
         purchasedApiKeys: purchasedApiKeys.length
       });

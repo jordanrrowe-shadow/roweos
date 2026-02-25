@@ -1,6 +1,10 @@
 {
   "version": 2,
+  "crons": [
+    { "path": "/api/scheduler", "schedule": "*/5 * * * *" }
+  ],
   "functions": {
+    "api/scheduler.js": { "maxDuration": 300 },
     "api/social-post.js": { "maxDuration": 60 },
     "api/social-media.js": { "maxDuration": 30 },
     "api/blob-proxy.js": { "maxDuration": 30 },

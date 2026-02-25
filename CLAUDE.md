@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Version:  v20.11
-File:     RoweOS/dist/index.html (134546 lines)
+File:     RoweOS/dist/index.html (134614 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -55,7 +55,7 @@ A private AI platform with two modes:
 - Single-file HTML app — no build tools, no bundler, no framework
 - Pure vanilla HTML/CSS/JS, CDN deps: Firebase SDK, Marked.js
 - Direct browser API calls to Anthropic/OpenAI/Google (keys in localStorage)
-- Optional Firebase sync — syncs all data EXCEPT API keys
+- Optional Firebase sync — syncs all data; API keys sync to secure subcollection when Cloud Scheduler enabled
 
 ### Design Philosophy
 - "Quiet competence" — professional elegance, Apple-like restraint
