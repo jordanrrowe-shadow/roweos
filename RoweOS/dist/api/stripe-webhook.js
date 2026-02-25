@@ -921,6 +921,7 @@ export default async function handler(req, res) {
       }
 
       // --- Send confirmation email to customer ---
+      var custEmailSent = false;
       if (customerEmail) {
         var tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
         var providerLabels = { anthropic: 'Anthropic (Claude)', openai: 'OpenAI (ChatGPT)', google: 'Google (Gemini)' };
@@ -977,7 +978,8 @@ export default async function handler(req, res) {
         var subjectLine = purchasedApiKeys.length > 0
           ? 'Welcome to RoweOS ' + tierLabel + '  - Your Keys Are Ready'
           : 'Welcome to RoweOS ' + tierLabel + '  - Your Access Key';
-        await sendEmail(customerEmail, subjectLine, customerHtml);
+        var custEmailSent = await sendEmail(customerEmail, subjectLine, customerHtml);
+        console.log('[Stripe Webhook] Customer email sent:', custEmailSent, 'to:', customerEmail);
       }
 
       // --- Notify Jordan ---
@@ -1006,13 +1008,17 @@ export default async function handler(req, res) {
         '</div>'
       ].join('\n');
 
-      await sendEmail('jordan@therowecollection.com', 'New ' + tierLabel2 + ' Purchase  - ' + (customerEmail || 'unknown'), notifyHtml);
+      var adminEmailSent = await sendEmail('jordan@therowecollection.com', 'New ' + tierLabel2 + ' Purchase  - ' + (customerEmail || 'unknown'), notifyHtml);
+      console.log('[Stripe Webhook] Admin email sent:', adminEmailSent);
 
       return res.status(200).json({
         received: true,
         accessKey: accessKey,
         tier: tier,
-        email: customerEmail
+        email: customerEmail,
+        emailSent: { customer: !!custEmailSent, admin: !!adminEmailSent },
+        apiKeyAddon: session.metadata && session.metadata.api_key_provider ? { provider: session.metadata.api_key_provider, amount: session.metadata.api_key_amount } : null,
+        purchasedApiKeys: purchasedApiKeys.length
       });
 
     } catch (err) {
