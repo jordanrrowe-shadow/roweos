@@ -184,10 +184,12 @@ Key patterns to remember without looking up:
 ### Social Connections (v18.0)
 - Per-brand/per-life-profile: `getSocialKeyScope()` returns `_brand_N` or `_life_N`, appended to all social localStorage keys
 - Key pattern: `roweos_social_{platform}_connected_brand_2`, `roweos_social_token_x_life_0`, etc.
-- OAuth state encodes scope: `x_b2_abc123` (brand 2), `threads_l1_xyz` (life 1)
+- OAuth state encodes scope: `x_b2_abc123` (brand 2), `threads_l1_xyz` (life 1). v20.12: UID appended as `~u:firebaseUid` for Firestore token storage on mobile
 - `social-callback.html` is a SEPARATE file that writes scoped keys independently — must be updated alongside `index.html` for any social key changes
 - `roweos_social_pending_context` — stores scope before OAuth popup, read by callback
 - Migration flag: `roweos_social_migration_v18` — one-time copy of global keys to `_brand_0`
+- **Dual posting paths (v20.12)**: Client `postToSocial()` reads tokens via `getSocialToken()` (Firestore `social_tokens` → localStorage). Server `executeSocialPost()` in `scheduler.js` reads from `socialConnections` → Firestore `social_tokens` subcollection → legacy settings. When changing token storage format, update BOTH paths.
+- `social-auth.js` writes tokens to Firestore `social_tokens` subcollection during exchange (v20.12) — enables mobile PWA access despite localStorage partitioning
 
 ### Enterprise / Access Key System
 - `isAdmin()` — checks `firebaseUser.uid === ADMIN_UID`

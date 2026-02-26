@@ -48,9 +48,12 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile && success) {
         spinnerEl.style.display = 'none';
+        var returnUrl = '/' + (_detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
+        // v20.12: Always show "Back to RoweOS" button — user may be in-browser (not PWA)
         statusEl.innerHTML = '<span style="color:#22c55e;font-weight:600;">Connected!</span><br><br>' +
-          '<span style="font-size:15px;">Switch back to RoweOS<br>on your Home Screen</span>';
-        return; // Stay on this page — user manually returns to PWA
+          '<a href="' + returnUrl + '" style="display:inline-block;background:#a89878;color:#fff;padding:12px 32px;font-size:15px;font-weight:600;border-radius:10px;text-decoration:none;margin-bottom:12px;">Back to RoweOS</a><br>' +
+          '<span style="font-size:13px;color:rgba(255,255,255,0.4);">Or switch to RoweOS on your Home Screen</span>';
+        return;
       }
       // Desktop fallback: redirect with query param
       var returnUrl = '/' + (success && _detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
