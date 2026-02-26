@@ -2,7 +2,12 @@
 // Uses web-push library for reliable VAPID JWT + payload encryption
 
 var crypto = require('crypto');
-var webpush = require('web-push');
+var webpush;
+try {
+  webpush = require('web-push');
+} catch(importErr) {
+  console.error('[Push] CRITICAL: web-push import failed:', importErr.message);
+}
 
 // --- Firestore REST helpers ---
 
@@ -67,6 +72,10 @@ export default async function handler(req, res) {
 
   if (!vapidPublic || !vapidPrivate) {
     return res.status(500).json({ error: 'Push notifications not configured (missing VAPID keys)' });
+  }
+
+  if (!webpush) {
+    return res.status(500).json({ error: 'web-push library not available' });
   }
 
   // Configure web-push with VAPID details
