@@ -1094,13 +1094,16 @@ async function processUser(uid, projectId, accessToken, reqHost) {
         if (execResult.success) {
           tasksExecuted++;
           console.log('[Scheduler] Task "' + (task.name || docId) + '" completed successfully');
-          // v20.13: Send push notification on success
-          try { await sendPushToUser(uid, 'Automation Complete', (task.name || 'Task') + ' ran successfully', projectId, accessToken, reqHost); } catch(pe) {}
+          // v20.14: Push notification on success with result preview
+          var successMsg = (task.name || 'Task') + ' completed successfully';
+          if (execResult.result) successMsg += ': ' + (execResult.result || '').substring(0, 100);
+          try { await sendPushToUser(uid, 'Automation Complete', successMsg, projectId, accessToken, reqHost); } catch(pe) {}
         } else {
           tasksFailed++;
           console.log('[Scheduler] Task "' + (task.name || docId) + '" completed with error: ' + (execResult.result || '').substring(0, 200));
-          // v20.13: Send push notification on failure
-          try { await sendPushToUser(uid, 'Automation Failed', (task.name || 'Task') + ' encountered an error', projectId, accessToken, reqHost); } catch(pe) {}
+          // v20.14: Push notification on failure with error detail
+          var failMsg = (task.name || 'Task') + ' failed: ' + ((execResult.result || '').substring(0, 100) || 'unknown error');
+          try { await sendPushToUser(uid, 'Automation Failed', failMsg, projectId, accessToken, reqHost); } catch(pe) {}
         }
 
       } catch (taskErr) {
@@ -1128,6 +1131,9 @@ async function processUser(uid, projectId, accessToken, reqHost) {
             lastRun: new Date().toISOString(),
             lastExecutor: 'cloud'
           });
+
+          // v20.14: Push notification on thrown error
+          try { await sendPushToUser(uid, 'Automation Failed', (task.name || 'Task') + ' error: ' + taskErr.message.substring(0, 100), projectId, accessToken, reqHost); } catch(pe2) {}
         } catch (writeErr) {
           console.error('[Scheduler] Failed to write error result for task:', writeErr.message);
         }
