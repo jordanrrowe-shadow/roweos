@@ -45,7 +45,7 @@ async function storeTokenInFirestore(uid, platform, scope, tokenData) {
     var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     var googleToken = await getGoogleAccessToken(sa);
     var projectId = process.env.FIREBASE_PROJECT_ID;
-    var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/social_tokens/' + platform + scope;
+    var docPath = 'projects/' + projectId + '/databases/(default)/documents/users/' + uid + '/social_tokens/' + platform + scope;
     var fields = {
       accessToken: { stringValue: tokenData.accessToken || '' },
       refreshToken: { stringValue: tokenData.refreshToken || '' },
@@ -311,11 +311,16 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Threads token refresh failed', detail: tRefreshData });
       }
 
-      return res.status(200).json({
+      var tRefResult = {
         accessToken: tRefreshData.access_token,
         expiresIn: tRefreshData.expires_in,
         expiresAt: Date.now() + (tRefreshData.expires_in * 1000)
-      });
+      };
+      // v20.13: Update Firestore with refreshed Threads token
+      if (body.uid && body.scope) {
+        await storeTokenInFirestore(body.uid, 'threads', body.scope, tRefResult);
+      }
+      return res.status(200).json(tRefResult);
     }
 
     // --- Instagram Token Exchange ---
@@ -407,11 +412,16 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Instagram token refresh failed', detail: igRefreshData });
       }
 
-      return res.status(200).json({
+      var igRefResult = {
         accessToken: igRefreshData.access_token,
         expiresIn: igRefreshData.expires_in,
         expiresAt: Date.now() + (igRefreshData.expires_in * 1000)
-      });
+      };
+      // v20.13: Update Firestore with refreshed Instagram token
+      if (body.uid && body.scope) {
+        await storeTokenInFirestore(body.uid, 'instagram', body.scope, igRefResult);
+      }
+      return res.status(200).json(igRefResult);
     }
 
     return res.status(400).json({ error: 'Unhandled platform/action combination' });
