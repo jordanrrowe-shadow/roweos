@@ -104,15 +104,23 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     }
 
     // v20.6: Parse embedded PKCE data from state before platform detection
-    // State format for X: "x_scopeCode_random~codeVerifier~clientId"
+    // v20.12: UID embedded as last part with 'u:' prefix for Firestore token storage
+    // State format for X: "x_scopeCode_random~codeVerifier~clientId~u:firebaseUid"
+    // State format for Threads/IG: "threads_scopeCode_random~u:firebaseUid"
     var _embeddedVerifier = '';
     var _embeddedClientId = '';
+    var _embeddedUid = '';
     var stateBase = state; // original state for platform matching
     if (state && state.indexOf('~') !== -1) {
       var stateParts = state.split('~');
       stateBase = stateParts[0]; // "x_b2_abc123" (without embedded data)
       if (stateParts.length >= 2) _embeddedVerifier = stateParts[1];
       if (stateParts.length >= 3) _embeddedClientId = stateParts[2];
+      // v20.12: Extract UID from last part (prefixed with 'u:')
+      var lastPart = stateParts[stateParts.length - 1];
+      if (lastPart && lastPart.indexOf('u:') === 0) {
+        _embeddedUid = lastPart.substring(2);
+      }
     }
 
     // Determine platform from stored state (localStorage, shared with opener)
@@ -153,6 +161,8 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
 
     // Build request body
     var body = { platform: platform, code: code, redirectUri: redirectUri };
+    // v20.12: Pass UID and scope for Firestore token storage (cross-device)
+    if (_embeddedUid) { body.uid = _embeddedUid; body.scope = scope; }
 
     if (platform === 'x') {
       body.action = 'exchange';

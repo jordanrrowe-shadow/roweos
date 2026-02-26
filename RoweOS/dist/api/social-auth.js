@@ -1,6 +1,68 @@
 // v17.0: Social Media OAuth token exchange + refresh
 // Vercel serverless function — handles Threads/Instagram token exchange (requires client_secret)
 // and X/Twitter token refresh. Supports dual-mode: RoweOS keys (env vars) + user-provided keys.
+// v20.12: Stores tokens in Firestore social_tokens subcollection for cross-device access (mobile PWA)
+
+// --- Firestore REST helpers (same pattern as scheduler.js) ---
+
+function base64url(str) {
+  return Buffer.from(str).toString('base64')
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+async function signJwt(header, payload, privateKeyPem) {
+  var crypto = require('crypto');
+  var headerB64 = base64url(JSON.stringify(header));
+  var payloadB64 = base64url(JSON.stringify(payload));
+  var unsigned = headerB64 + '.' + payloadB64;
+  var sign = crypto.createSign('RSA-SHA256');
+  sign.update(unsigned);
+  var signature = sign.sign(privateKeyPem, 'base64')
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  return unsigned + '.' + signature;
+}
+
+async function getGoogleAccessToken(serviceAccount) {
+  var now = Math.floor(Date.now() / 1000);
+  var jwt = await signJwt(
+    { alg: 'RS256', typ: 'JWT' },
+    { iss: serviceAccount.client_email, scope: 'https://www.googleapis.com/auth/datastore', aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 },
+    serviceAccount.private_key
+  );
+  var resp = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=' + jwt
+  });
+  var data = await resp.json();
+  return data.access_token;
+}
+
+// v20.12: Store social token in Firestore for cross-device access
+async function storeTokenInFirestore(uid, platform, scope, tokenData) {
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT || !process.env.FIREBASE_PROJECT_ID) return;
+  try {
+    var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    var googleToken = await getGoogleAccessToken(sa);
+    var projectId = process.env.FIREBASE_PROJECT_ID;
+    var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/social_tokens/' + platform + scope;
+    var fields = {
+      accessToken: { stringValue: tokenData.accessToken || '' },
+      refreshToken: { stringValue: tokenData.refreshToken || '' },
+      expiresAt: { integerValue: String(tokenData.expiresAt || 0) },
+      userId: { stringValue: String(tokenData.userId || '') },
+      updatedAt: { stringValue: new Date().toISOString() }
+    };
+    await fetch('https://firestore.googleapis.com/v1/' + docPath, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: fields })
+    });
+    console.log('[Social Auth] Token stored in Firestore for ' + platform + scope + ' (user: ' + uid + ')');
+  } catch (e) {
+    console.log('[Social Auth] Firestore store failed (non-fatal):', e.message);
+  }
+}
 
 export default async function handler(req, res) {
   // CORS headers
@@ -103,12 +165,17 @@ export default async function handler(req, res) {
         return res.status(xRefreshResp.status).json({ error: 'X token refresh failed', detail: xRefreshData });
       }
 
-      return res.status(200).json({
+      var xRefResult = {
         accessToken: xRefreshData.access_token,
         refreshToken: xRefreshData.refresh_token || xRefreshToken,
         expiresIn: xRefreshData.expires_in,
         expiresAt: Date.now() + (xRefreshData.expires_in * 1000)
-      });
+      };
+      // v20.12: Update Firestore with refreshed token
+      if (body.uid && body.scope) {
+        await storeTokenInFirestore(body.uid, 'x', body.scope, xRefResult);
+      }
+      return res.status(200).json(xRefResult);
     }
 
     // --- X/Twitter Code Exchange (PKCE) ---
@@ -137,12 +204,17 @@ export default async function handler(req, res) {
         return res.status(xExchResp.status).json({ error: 'X token exchange failed', detail: xExchData });
       }
 
-      return res.status(200).json({
+      var xResult = {
         accessToken: xExchData.access_token,
         refreshToken: xExchData.refresh_token,
         expiresIn: xExchData.expires_in,
         expiresAt: Date.now() + (xExchData.expires_in * 1000)
-      });
+      };
+      // v20.12: Store in Firestore for cross-device access (mobile PWA)
+      if (body.uid && body.scope) {
+        await storeTokenInFirestore(body.uid, 'x', body.scope, xResult);
+      }
+      return res.status(200).json(xResult);
     }
 
     // --- Threads Token Exchange ---
@@ -196,22 +268,31 @@ export default async function handler(req, res) {
       if (!tLongResp.ok || !tLongData.access_token) {
         console.error('[Social Auth] Threads long token failed:', tLongData);
         // Fall back to short-lived token
-        return res.status(200).json({
+        var tShortResult = {
           accessToken: tShortData.access_token,
           userId: tUserId,
           expiresIn: 3600,
           expiresAt: Date.now() + 3600000,
           longLived: false
-        });
+        };
+        if (body.uid && body.scope) {
+          await storeTokenInFirestore(body.uid, 'threads', body.scope, tShortResult);
+        }
+        return res.status(200).json(tShortResult);
       }
 
-      return res.status(200).json({
+      var tResult = {
         accessToken: tLongData.access_token,
         userId: tUserId,
         expiresIn: tLongData.expires_in || 5184000,
         expiresAt: Date.now() + ((tLongData.expires_in || 5184000) * 1000),
         longLived: true
-      });
+      };
+      // v20.12: Store in Firestore for cross-device access
+      if (body.uid && body.scope) {
+        await storeTokenInFirestore(body.uid, 'threads', body.scope, tResult);
+      }
+      return res.status(200).json(tResult);
     }
 
     // --- Threads Token Refresh ---
@@ -284,22 +365,30 @@ export default async function handler(req, res) {
       var igLongData = await igLongResp.json();
 
       if (!igLongResp.ok || !igLongData.access_token) {
-        return res.status(200).json({
+        var igShortResult = {
           accessToken: igShortData.access_token,
           userId: igUserId,
           expiresIn: 3600,
           expiresAt: Date.now() + 3600000,
           longLived: false
-        });
+        };
+        if (body.uid && body.scope) {
+          await storeTokenInFirestore(body.uid, 'instagram', body.scope, igShortResult);
+        }
+        return res.status(200).json(igShortResult);
       }
 
-      return res.status(200).json({
+      var igResult = {
         accessToken: igLongData.access_token,
         userId: igUserId,
         expiresIn: igLongData.expires_in || 5184000,
         expiresAt: Date.now() + ((igLongData.expires_in || 5184000) * 1000),
         longLived: true
-      });
+      };
+      if (body.uid && body.scope) {
+        await storeTokenInFirestore(body.uid, 'instagram', body.scope, igResult);
+      }
+      return res.status(200).json(igResult);
     }
 
     // --- Instagram Token Refresh ---

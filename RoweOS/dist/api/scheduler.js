@@ -574,15 +574,15 @@ function resolveProviderAndModel(task, brandSettings, apiKeys) {
 
 // --- Social post helper ---
 
-async function executeSocialPost(task, profileData, reqHost) {
+async function executeSocialPost(task, profileData, reqHost, projectId, googleAccessToken, uid) {
   var postContent = (task.target && task.target.text) ? task.target.text : (task.description || '');
   var postPlatforms = (task.target && task.target.platforms) ? task.target.platforms : [];
 
   if (!postContent) throw new Error('No content for social post');
   if (postPlatforms.length === 0) throw new Error('No platforms selected for post');
 
-  // Read social tokens from profile settings
-  var settings = (profileData && profileData.settings) || {};
+  // v20.12: Read social tokens from socialConnections (correct location) AND Firestore social_tokens subcollection
+  var socialConns = (profileData && profileData.socialConnections) || {};
   var results = [];
 
   for (var p = 0; p < postPlatforms.length; p++) {
@@ -594,21 +594,43 @@ async function executeSocialPost(task, profileData, reqHost) {
       continue;
     }
 
-    // Look for social token in profile settings
-    // Social tokens are stored with scoped keys — try multiple patterns
     var brandIdx = task.brandIdx !== undefined ? parseInt(task.brandIdx) : 0;
-    var tokenKey = 'social_token_' + platform + '_brand_' + brandIdx;
-    var tokenData = settings[tokenKey] || null;
+    var scKey = platform + '_brand_' + brandIdx;
+    var tokenData = null;
 
-    // Fallback: try unscoped key
-    if (!tokenData) {
-      tokenKey = 'social_token_' + platform;
-      tokenData = settings[tokenKey] || null;
+    // v20.12: Try 1 — socialConnections in profile (synced from client)
+    if (socialConns[scKey] && socialConns[scKey].token) {
+      var rawToken = socialConns[scKey].token;
+      if (typeof rawToken === 'string') {
+        try { tokenData = JSON.parse(rawToken); } catch(e) { tokenData = null; }
+      } else if (typeof rawToken === 'object') {
+        tokenData = rawToken;
+      }
     }
 
-    // Also check for tokens stored as JSON strings
-    if (tokenData && typeof tokenData === 'string') {
-      try { tokenData = JSON.parse(tokenData); } catch (e) { tokenData = { accessToken: tokenData }; }
+    // v20.12: Try 2 — Firestore social_tokens subcollection (written by social-auth endpoint)
+    if ((!tokenData || !tokenData.accessToken) && projectId && googleAccessToken && uid) {
+      try {
+        var tokenDoc = await firestoreGet(projectId, googleAccessToken, 'roweos_users/' + uid + '/social_tokens/' + scKey);
+        if (tokenDoc && tokenDoc.fields) {
+          tokenData = parseFirestoreDoc(tokenDoc.fields);
+        }
+      } catch(e) {
+        console.log('[Scheduler] social_tokens read failed for ' + scKey + ':', e.message);
+      }
+    }
+
+    // v20.12: Try 3 — legacy settings keys (old format)
+    if (!tokenData || !tokenData.accessToken) {
+      var settings = (profileData && profileData.settings) || {};
+      var legacyToken = settings['social_token_' + platform + '_brand_' + brandIdx] || settings['social_token_' + platform] || null;
+      if (legacyToken) {
+        if (typeof legacyToken === 'string') {
+          try { tokenData = JSON.parse(legacyToken); } catch(e) { tokenData = { accessToken: legacyToken }; }
+        } else {
+          tokenData = legacyToken;
+        }
+      }
     }
 
     if (!tokenData || !tokenData.accessToken) {
@@ -616,9 +638,34 @@ async function executeSocialPost(task, profileData, reqHost) {
       continue;
     }
 
+    // v20.12: Refresh X tokens if expired (X tokens last 2 hours)
+    var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.vercel.app';
+    if (platform === 'x' && tokenData.expiresAt) {
+      var now = Date.now();
+      var expAt = typeof tokenData.expiresAt === 'string' ? parseInt(tokenData.expiresAt) : tokenData.expiresAt;
+      if (expAt < now + 300000 && tokenData.refreshToken) {
+        try {
+          console.log('[Scheduler] Refreshing expired X token for user ' + uid);
+          var refreshResp = await fetch(baseUrl + '/api/social-auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platform: 'x', action: 'refresh', refreshToken: tokenData.refreshToken, uid: uid, scope: '_brand_' + brandIdx })
+          });
+          var refreshData = await refreshResp.json();
+          if (refreshData && refreshData.accessToken) {
+            tokenData = refreshData;
+            console.log('[Scheduler] X token refreshed successfully');
+          } else {
+            console.log('[Scheduler] X refresh returned no token:', JSON.stringify(refreshData).substring(0, 200));
+          }
+        } catch(refreshErr) {
+          console.log('[Scheduler] X token refresh failed:', refreshErr.message);
+        }
+      }
+    }
+
     try {
       // Call our own social-post endpoint
-      var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.vercel.app';
       var postBody = {
         platform: platform,
         accessToken: tokenData.accessToken,
@@ -800,8 +847,9 @@ async function executeTask(task, uid, apiKeys, brands, brandSettingsArr, profile
     }
 
     // --- Social post ---
+    // v20.12: Pass projectId, accessToken, uid for Firestore token lookup + X token refresh
     else if (action === 'post') {
-      var postResult = await executeSocialPost(task, profileData, reqHost);
+      var postResult = await executeSocialPost(task, profileData, reqHost, projectId, accessToken, uid);
       success = postResult.success;
       result = postResult.result;
     }
