@@ -1,4 +1,4 @@
-// v20.13: Push Notification API — subscribe, unsubscribe, send
+// v20.14: Push Notification API — subscribe, unsubscribe, send
 // Vercel serverless function — uses Node crypto (no npm deps)
 
 var crypto = require('crypto');
@@ -209,12 +209,19 @@ export default async function handler(req, res) {
         enabled: true
       });
 
-      await fetch('https://firestore.googleapis.com/v1/' + docPath, {
+      var patchResp = await fetch('https://firestore.googleapis.com/v1/' + docPath, {
         method: 'PATCH',
         headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: fields })
       });
 
+      if (!patchResp.ok) {
+        var patchErr = await patchResp.text().catch(function() { return ''; });
+        console.error('[Push] Firestore PATCH failed:', patchResp.status, patchErr.substring(0, 300));
+        return res.status(500).json({ error: 'Failed to store subscription: ' + patchResp.status });
+      }
+
+      console.log('[Push] Subscription stored for uid:', uid, 'subId:', subId);
       return res.status(200).json({ success: true, subscriptionId: subId });
     }
 
