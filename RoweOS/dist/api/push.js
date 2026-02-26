@@ -1,111 +1,8 @@
-// v20.14: Push Notification API — subscribe, unsubscribe, send
-// Vercel serverless function — uses Node crypto (no npm deps)
+// v20.15: Push Notification API — subscribe, unsubscribe, send
+// Uses web-push library for reliable VAPID JWT + payload encryption
 
 var crypto = require('crypto');
-
-// --- Web Push implementation (RFC 8291 / RFC 8188) ---
-
-function base64urlEncode(buf) {
-  return Buffer.from(buf).toString('base64')
-    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-}
-
-function base64urlDecode(str) {
-  str = str.replace(/-/g, '+').replace(/_/g, '/');
-  while (str.length % 4) str += '=';
-  return Buffer.from(str, 'base64');
-}
-
-function createVapidJwt(audience, subject, vapidPublicKey, vapidPrivateKey, expiration) {
-  var header = { typ: 'JWT', alg: 'ES256' };
-  var payload = {
-    aud: audience,
-    exp: expiration || Math.floor(Date.now() / 1000) + 86400,
-    sub: subject
-  };
-  var unsignedToken = base64urlEncode(JSON.stringify(header)) + '.' + base64urlEncode(JSON.stringify(payload));
-
-  var privateKeyDer = base64urlDecode(vapidPrivateKey);
-  var jwk = {
-    kty: 'EC', crv: 'P-256',
-    d: base64urlEncode(privateKeyDer),
-    x: base64urlEncode(base64urlDecode(vapidPublicKey).slice(1, 33)),
-    y: base64urlEncode(base64urlDecode(vapidPublicKey).slice(33, 65))
-  };
-  var keyObj = crypto.createPrivateKey({ key: jwk, format: 'jwk' });
-  var sig = crypto.sign('SHA256', Buffer.from(unsignedToken), { key: keyObj, dsaEncoding: 'ieee-p1363' });
-  return unsignedToken + '.' + base64urlEncode(sig);
-}
-
-function encryptPayload(payload, subscriptionKeys) {
-  var clientPublicKey = base64urlDecode(subscriptionKeys.p256dh);
-  var authSecret = base64urlDecode(subscriptionKeys.auth);
-  var salt = crypto.randomBytes(16);
-
-  var serverKeys = crypto.createECDH('prime256v1');
-  serverKeys.generateKeys();
-  var serverPublicKey = serverKeys.getPublicKey();
-  var sharedSecret = serverKeys.computeSecret(clientPublicKey);
-
-  // HKDF
-  function hkdf(ikm, salt, info, length) {
-    var prk = crypto.createHmac('sha256', salt).update(ikm).digest();
-    var infoBuffer = Buffer.concat([info, Buffer.from([1])]);
-    return crypto.createHmac('sha256', prk).update(infoBuffer).digest().slice(0, length);
-  }
-
-  // IKM
-  var authInfo = Buffer.from('WebPush: info\0');
-  var ikm_info = Buffer.concat([authInfo, clientPublicKey, serverPublicKey]);
-  var ikm = hkdf(sharedSecret, authSecret, ikm_info, 32);
-
-  // Content encryption key and nonce
-  var contentEncryptionKeyInfo = Buffer.from('Content-Encoding: aes128gcm\0');
-  var nonceInfo = Buffer.from('Content-Encoding: nonce\0');
-  var cek = hkdf(ikm, salt, contentEncryptionKeyInfo, 16);
-  var nonce = hkdf(ikm, salt, nonceInfo, 12);
-
-  // Encrypt with AES-128-GCM
-  var paddedPayload = Buffer.concat([Buffer.from(payload, 'utf8'), Buffer.from([2])]);
-  var cipher = crypto.createCipheriv('aes-128-gcm', cek, nonce);
-  var encrypted = Buffer.concat([cipher.update(paddedPayload), cipher.final(), cipher.getAuthTag()]);
-
-  // Build aes128gcm body: salt (16) + rs (4) + idlen (1) + keyid (65) + encrypted
-  var rs = Buffer.alloc(4);
-  rs.writeUInt32BE(4096, 0);
-  var idlen = Buffer.from([65]);
-  return Buffer.concat([salt, rs, idlen, serverPublicKey, encrypted]);
-}
-
-async function sendWebPush(subscription, payload, vapidPublicKey, vapidPrivateKey, vapidSubject) {
-  var endpoint = subscription.endpoint;
-  var url = new URL(endpoint);
-  var audience = url.origin;
-
-  var jwt = createVapidJwt(audience, vapidSubject, vapidPublicKey, vapidPrivateKey);
-  var vapidKeyBase64 = vapidPublicKey;
-
-  var body = encryptPayload(payload, subscription.keys);
-
-  var resp = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Authorization': 'vapid t=' + jwt + ', k=' + vapidKeyBase64,
-      'Content-Encoding': 'aes128gcm',
-      'Content-Type': 'application/octet-stream',
-      'TTL': '86400'
-    },
-    body: body
-  });
-
-  if (!resp.ok) {
-    var errText = await resp.text().catch(function() { return ''; });
-    var err = new Error('Push send failed: ' + resp.status + ' ' + errText.substring(0, 200));
-    err.statusCode = resp.status;
-    throw err;
-  }
-  return true;
-}
+var webpush = require('web-push');
 
 // --- Firestore REST helpers ---
 
@@ -172,6 +69,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Push notifications not configured (missing VAPID keys)' });
   }
 
+  // Configure web-push with VAPID details
+  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+
   try {
     var body = req.body;
     if (typeof body === 'string') {
@@ -202,7 +102,6 @@ export default async function handler(req, res) {
       }
 
       console.log('[Push] Subscribe: uid=' + uid + ' endpoint=' + (subscription.endpoint || '').substring(0, 60) + '...');
-      console.log('[Push] Subscribe: keys present:', !!(subscription.keys && subscription.keys.p256dh && subscription.keys.auth));
 
       var subId = crypto.createHash('sha256').update(subscription.endpoint).digest('hex').substring(0, 20);
       var docPath = 'projects/' + projectId + '/databases/(default)/documents/users/' + uid + '/push_subscriptions/' + subId;
@@ -213,7 +112,6 @@ export default async function handler(req, res) {
         enabled: true
       });
 
-      console.log('[Push] Firestore PATCH to:', docPath);
       var patchResp = await fetch('https://firestore.googleapis.com/v1/' + docPath, {
         method: 'PATCH',
         headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'application/json' },
@@ -223,11 +121,10 @@ export default async function handler(req, res) {
       if (!patchResp.ok) {
         var patchErr = await patchResp.text().catch(function() { return ''; });
         console.error('[Push] Firestore PATCH failed:', patchResp.status, patchErr.substring(0, 500));
-        return res.status(500).json({ error: 'Failed to store subscription: ' + patchResp.status, detail: patchErr.substring(0, 200) });
+        return res.status(500).json({ error: 'Failed to store subscription: ' + patchResp.status });
       }
 
-      var patchResult = await patchResp.json().catch(function() { return {}; });
-      console.log('[Push] Subscription stored OK for uid:', uid, 'subId:', subId, 'docName:', (patchResult.name || 'unknown'));
+      console.log('[Push] Subscription stored for uid:', uid, 'subId:', subId);
       return res.status(200).json({ success: true, subscriptionId: subId });
     }
 
@@ -256,14 +153,13 @@ export default async function handler(req, res) {
         type: body.type || (action === 'test' ? 'test' : 'general')
       });
 
-      // Read subscriptions
+      // Read subscriptions from Firestore
       var listUrl = 'https://firestore.googleapis.com/v1/projects/' + projectId +
         '/databases/(default)/documents/users/' + uid + '/push_subscriptions';
-      console.log('[Push] Listing subscriptions at:', listUrl);
       var listResp = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + googleToken } });
       var listData = await listResp.json();
       var docs = listData.documents || [];
-      console.log('[Push] Found', docs.length, 'subscription doc(s) for uid:', uid);
+      console.log('[Push] Found', docs.length, 'subscription(s) for uid:', uid);
 
       var sent = 0;
       var failed = 0;
@@ -279,13 +175,17 @@ export default async function handler(req, res) {
           keys: {}
         };
         try { sub.keys = JSON.parse((f.keys && f.keys.stringValue) || '{}'); } catch(e) {}
-        if (!sub.endpoint || !sub.keys.p256dh || !sub.keys.auth) continue;
+        if (!sub.endpoint || !sub.keys.p256dh || !sub.keys.auth) {
+          console.log('[Push] Skipping doc with missing endpoint or keys');
+          continue;
+        }
 
         try {
-          await sendWebPush(sub, payload, vapidPublic, vapidPrivate, vapidSubject);
+          await webpush.sendNotification(sub, payload);
           sent++;
+          console.log('[Push] Sent to:', sub.endpoint.substring(0, 50) + '...');
         } catch(err) {
-          console.log('[Push] Send failed:', err.statusCode, err.message);
+          console.log('[Push] Send failed:', err.statusCode, err.body || err.message);
           if (err.statusCode === 404 || err.statusCode === 410) {
             stale.push(doc.name);
           }
@@ -299,6 +199,7 @@ export default async function handler(req, res) {
           await fetch('https://firestore.googleapis.com/v1/' + stale[j], {
             method: 'DELETE', headers: { 'Authorization': 'Bearer ' + googleToken }
           });
+          console.log('[Push] Cleaned stale subscription');
         } catch(e) {}
       }
 
