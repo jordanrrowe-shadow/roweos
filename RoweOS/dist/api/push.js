@@ -197,18 +197,23 @@ export default async function handler(req, res) {
     if (action === 'subscribe') {
       var subscription = body.subscription;
       if (!subscription || !subscription.endpoint) {
+        console.log('[Push] Subscribe: missing subscription data');
         return res.status(400).json({ error: 'Missing subscription data' });
       }
+
+      console.log('[Push] Subscribe: uid=' + uid + ' endpoint=' + (subscription.endpoint || '').substring(0, 60) + '...');
+      console.log('[Push] Subscribe: keys present:', !!(subscription.keys && subscription.keys.p256dh && subscription.keys.auth));
 
       var subId = crypto.createHash('sha256').update(subscription.endpoint).digest('hex').substring(0, 20);
       var docPath = 'projects/' + projectId + '/databases/(default)/documents/users/' + uid + '/push_subscriptions/' + subId;
       var fields = firestoreDocToFields({
         endpoint: subscription.endpoint,
-        keys: JSON.stringify(subscription.keys || {}),
+        keys: subscription.keys ? JSON.stringify(subscription.keys) : '{}',
         createdAt: new Date().toISOString(),
         enabled: true
       });
 
+      console.log('[Push] Firestore PATCH to:', docPath);
       var patchResp = await fetch('https://firestore.googleapis.com/v1/' + docPath, {
         method: 'PATCH',
         headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'application/json' },
@@ -217,11 +222,12 @@ export default async function handler(req, res) {
 
       if (!patchResp.ok) {
         var patchErr = await patchResp.text().catch(function() { return ''; });
-        console.error('[Push] Firestore PATCH failed:', patchResp.status, patchErr.substring(0, 300));
-        return res.status(500).json({ error: 'Failed to store subscription: ' + patchResp.status });
+        console.error('[Push] Firestore PATCH failed:', patchResp.status, patchErr.substring(0, 500));
+        return res.status(500).json({ error: 'Failed to store subscription: ' + patchResp.status, detail: patchErr.substring(0, 200) });
       }
 
-      console.log('[Push] Subscription stored for uid:', uid, 'subId:', subId);
+      var patchResult = await patchResp.json().catch(function() { return {}; });
+      console.log('[Push] Subscription stored OK for uid:', uid, 'subId:', subId, 'docName:', (patchResult.name || 'unknown'));
       return res.status(200).json({ success: true, subscriptionId: subId });
     }
 
@@ -253,9 +259,11 @@ export default async function handler(req, res) {
       // Read subscriptions
       var listUrl = 'https://firestore.googleapis.com/v1/projects/' + projectId +
         '/databases/(default)/documents/users/' + uid + '/push_subscriptions';
+      console.log('[Push] Listing subscriptions at:', listUrl);
       var listResp = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + googleToken } });
       var listData = await listResp.json();
       var docs = listData.documents || [];
+      console.log('[Push] Found', docs.length, 'subscription doc(s) for uid:', uid);
 
       var sent = 0;
       var failed = 0;
