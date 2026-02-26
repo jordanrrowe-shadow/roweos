@@ -1,7 +1,7 @@
 {
   "version": 2,
   "crons": [
-    { "path": "/api/scheduler", "schedule": "*/5 * * * *" }
+    { "path": "/api/scheduler", "schedule": "* * * * *" }
   ],
   "functions": {
     "api/scheduler.js": { "maxDuration": 300 },
