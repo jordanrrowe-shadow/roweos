@@ -6,7 +6,7 @@
 
 // --- Config ---
 var MAX_RESULT_LENGTH = 5000;
-var TIME_WINDOW_MINUTES = 7; // cron runs every 5 min, allow 2 min buffer
+var TIME_WINDOW_MINUTES = 10; // cron runs every 5 min, allow 5 min buffer
 var DEFAULT_TIMEZONE = 'America/Chicago';
 
 // v20.13: Push notifications after task execution (calls /api/push endpoint)
@@ -294,6 +294,11 @@ function isTaskDue(task, userTimezone) {
   // Time window check: 0 to TIME_WINDOW_MINUTES minutes forward
   var timeDiff = timeToMinutes(currentTime) - timeToMinutes(taskTime);
 
+  console.log('[Scheduler] isTaskDue check: name="' + (task.name || '?') + '" freq=' + freq +
+    ' taskTime=' + taskTime + ' currentTime=' + currentTime + ' timeDiff=' + timeDiff +
+    ' lastRun=' + (lastRun ? lastRun.toISOString() : 'never') +
+    ' window=0-' + TIME_WINDOW_MINUTES + 'min');
+
   // Custom recurrence uses pure interval math
   if (freq === 'custom') {
     var cInterval = task.recurInterval || 1;
@@ -331,6 +336,15 @@ function isTaskDue(task, userTimezone) {
         isDue = !lastRun;
       }
     }
+  }
+
+  if (!isDue) {
+    var reason = '';
+    if (freq === 'custom') reason = lastRun ? 'interval not elapsed' : 'outside time window';
+    else if (timeDiff < 0 || timeDiff > TIME_WINDOW_MINUTES) reason = 'outside time window (diff=' + timeDiff + 'min)';
+    else if (lastRun) reason = 'already ran today (' + lastRun.toISOString() + ')';
+    else reason = 'unknown';
+    console.log('[Scheduler] Task NOT due: "' + (task.name || '?') + '" reason: ' + reason);
   }
 
   return isDue;
