@@ -9,34 +9,15 @@ var MAX_RESULT_LENGTH = 5000;
 var TIME_WINDOW_MINUTES = 7; // cron runs every 5 min, allow 2 min buffer
 var DEFAULT_TIMEZONE = 'America/Chicago';
 
-// v20.13: Push notifications after task execution
-var webpush = null;
-try { webpush = require('web-push'); } catch(e) {}
-
-async function sendPushToUser(uid, title, message, projectId, accessToken) {
-  if (!webpush || !process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return;
+// v20.13: Push notifications after task execution (calls /api/push endpoint)
+async function sendPushToUser(uid, title, message, projectId, accessToken, reqHost) {
   try {
-    webpush.setVapidDetails(
-      process.env.VAPID_SUBJECT || 'mailto:jordan@therowecollection.com',
-      process.env.VAPID_PUBLIC_KEY,
-      process.env.VAPID_PRIVATE_KEY
-    );
-    // Read push subscriptions for user
-    var subDocs = await firestoreList(projectId, accessToken, 'users/' + uid + '/push_subscriptions', 10);
-    if (!subDocs || subDocs.length === 0) return;
-    var payload = JSON.stringify({ title: title, body: message, tag: 'roweos-scheduler', type: 'automation' });
-    for (var i = 0; i < subDocs.length; i++) {
-      var f = subDocs[i].fields || {};
-      if (f.enabled && f.enabled.booleanValue === false) continue;
-      var sub = { endpoint: (f.endpoint && f.endpoint.stringValue) || '', keys: {} };
-      try { sub.keys = JSON.parse((f.keys && f.keys.stringValue) || '{}'); } catch(e) {}
-      if (!sub.endpoint) continue;
-      try { await webpush.sendNotification(sub, payload); } catch(e) {
-        if (e.statusCode === 404 || e.statusCode === 410) {
-          try { await fetch('https://firestore.googleapis.com/v1/' + subDocs[i].name, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + accessToken } }); } catch(de) {}
-        }
-      }
-    }
+    var pushUrl = 'https://' + (reqHost || 'roweos.vercel.app') + '/api/push';
+    await fetch(pushUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'send', uid: uid, title: title, message: message, tag: 'roweos-scheduler', type: 'automation' })
+    });
   } catch(e) { console.log('[Scheduler] Push send failed (non-fatal):', e.message); }
 }
 
@@ -1100,12 +1081,12 @@ async function processUser(uid, projectId, accessToken, reqHost) {
           tasksExecuted++;
           console.log('[Scheduler] Task "' + (task.name || docId) + '" completed successfully');
           // v20.13: Send push notification on success
-          try { await sendPushToUser(uid, 'Automation Complete', (task.name || 'Task') + ' ran successfully', projectId, accessToken); } catch(pe) {}
+          try { await sendPushToUser(uid, 'Automation Complete', (task.name || 'Task') + ' ran successfully', projectId, accessToken, reqHost); } catch(pe) {}
         } else {
           tasksFailed++;
           console.log('[Scheduler] Task "' + (task.name || docId) + '" completed with error: ' + (execResult.result || '').substring(0, 200));
           // v20.13: Send push notification on failure
-          try { await sendPushToUser(uid, 'Automation Failed', (task.name || 'Task') + ' encountered an error', projectId, accessToken); } catch(pe) {}
+          try { await sendPushToUser(uid, 'Automation Failed', (task.name || 'Task') + ' encountered an error', projectId, accessToken, reqHost); } catch(pe) {}
         }
 
       } catch (taskErr) {
