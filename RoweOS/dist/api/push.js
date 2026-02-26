@@ -1,6 +1,7 @@
 // v20.13: Push Notification API — subscribe, unsubscribe, send
 // Vercel serverless function
-import webpush from 'web-push';
+var webpush;
+try { webpush = require('web-push'); } catch(e) { console.error('[Push] web-push module not available:', e.message); }
 
 // --- Firestore REST helpers (same pattern as scheduler.js) ---
 
@@ -59,6 +60,10 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  if (!webpush) {
+    return res.status(500).json({ error: 'Push notifications not available (web-push module failed to load)' });
+  }
 
   var vapidPublic = process.env.VAPID_PUBLIC_KEY;
   var vapidPrivate = process.env.VAPID_PRIVATE_KEY;
