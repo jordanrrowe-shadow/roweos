@@ -1,15 +1,19 @@
-// v20.15: Push Notification API — subscribe, unsubscribe, send
-// Uses web-push library for reliable VAPID JWT + payload encryption
+// v20.17: Push Notification API — subscribe, unsubscribe, send
+// Derives VAPID public key from private key to guarantee pair match
 
 var crypto = require('crypto');
-var webpush;
-try {
-  webpush = require('web-push');
-} catch(importErr) {
-  console.error('[Push] CRITICAL: web-push import failed:', importErr.message);
+var webpush = require('web-push');
+
+// --- Helpers ---
+
+function toBase64Url(buffer) {
+  return buffer.toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
-// --- Firestore REST helpers ---
+function fromBase64Url(str) {
+  var padded = str + '='.repeat((4 - str.length % 4) % 4);
+  return Buffer.from(padded.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+}
 
 function base64url_jwt(str) {
   return Buffer.from(str).toString('base64')
@@ -66,20 +70,43 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  var vapidPublic = process.env.VAPID_PUBLIC_KEY;
-  var vapidPrivate = process.env.VAPID_PRIVATE_KEY;
-  var vapidSubject = process.env.VAPID_SUBJECT || 'mailto:jordan@therowecollection.com';
+  // v20.16: Read private key, DERIVE public key from it (guarantees pair match)
+  var vapidPrivate = (process.env.VAPID_PRIVATE_KEY || '').trim().replace(/=+$/, '');
+  var vapidSubject = (process.env.VAPID_SUBJECT || 'mailto:jordan@therowecollection.com').trim();
 
-  if (!vapidPublic || !vapidPrivate) {
-    return res.status(500).json({ error: 'Push notifications not configured (missing VAPID keys)' });
+  if (!vapidPrivate) {
+    return res.status(500).json({ error: 'Push not configured (missing VAPID private key)' });
   }
 
-  if (!webpush) {
-    return res.status(500).json({ error: 'web-push library not available' });
+  // Derive public key from private key — eliminates any key pair mismatch
+  var vapidPublic;
+  try {
+    var ec = crypto.createECDH('prime256v1');
+    ec.setPrivateKey(fromBase64Url(vapidPrivate));
+    vapidPublic = toBase64Url(ec.getPublicKey());
+    console.log('[Push] VAPID: private len=' + vapidPrivate.length + ' derived public len=' + vapidPublic.length);
+
+    // Diagnostic: check if env var public key matches derived
+    var envPublic = (process.env.VAPID_PUBLIC_KEY || '').trim().replace(/=+$/, '');
+    if (envPublic && envPublic !== vapidPublic) {
+      console.log('[Push] KEY MISMATCH DETECTED! Env public key does NOT match private key');
+      console.log('[Push] Env public:     ' + envPublic.substring(0, 30) + '...');
+      console.log('[Push] Derived public: ' + vapidPublic.substring(0, 30) + '...');
+    } else if (envPublic) {
+      console.log('[Push] Key pair verified: env public matches derived');
+    }
+  } catch(deriveErr) {
+    console.error('[Push] Failed to derive public key:', deriveErr.message);
+    return res.status(500).json({ error: 'VAPID key derivation error: ' + deriveErr.message });
   }
 
-  // Configure web-push with VAPID details
-  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+  // Configure web-push with derived public key (guaranteed to match private)
+  try {
+    webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
+  } catch(vapidErr) {
+    console.error('[Push] VAPID setup failed:', vapidErr.message);
+    return res.status(500).json({ error: 'VAPID config error: ' + vapidErr.message });
+  }
 
   try {
     var body = req.body;
@@ -90,8 +117,37 @@ export default async function handler(req, res) {
     }
 
     var action = body.action;
+
+    // v20.17: Return derived VAPID public key (client fetches this before subscribing)
+    if (action === 'vapidkey') {
+      return res.status(200).json({ vapidKey: vapidPublic });
+    }
+
+    // v20.17: Extract uid early — needed by reset and all other actions
     var uid = body.uid;
-    if (!uid) return res.status(400).json({ error: 'Missing uid' });
+    if (!uid && action !== 'vapidkey') return res.status(400).json({ error: 'Missing uid' });
+
+    // v20.17: Reset — delete ALL push subscriptions for this user (clean slate)
+    if (action === 'reset') {
+      var projectId = process.env.FIREBASE_PROJECT_ID;
+      var saJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+      if (!projectId || !saJson) return res.status(500).json({ error: 'Firebase not configured' });
+      var sa = JSON.parse(saJson);
+      var googleToken = await getGoogleAccessToken(sa);
+
+      var listUrl = 'https://firestore.googleapis.com/v1/projects/' + projectId +
+        '/databases/(default)/documents/users/' + uid + '/push_subscriptions';
+      var listResp = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + googleToken } });
+      var listData = await listResp.json();
+      var docs = listData.documents || [];
+      console.log('[Push] Reset: deleting', docs.length, 'subscription(s) for uid:', uid);
+      for (var d = 0; d < docs.length; d++) {
+        await fetch('https://firestore.googleapis.com/v1/' + docs[d].name, {
+          method: 'DELETE', headers: { 'Authorization': 'Bearer ' + googleToken }
+        });
+      }
+      return res.status(200).json({ success: true, deleted: docs.length, vapidKey: vapidPublic });
+    }
 
     var projectId = process.env.FIREBASE_PROJECT_ID;
     var saJson = process.env.FIREBASE_SERVICE_ACCOUNT;
@@ -185,17 +241,57 @@ export default async function handler(req, res) {
         };
         try { sub.keys = JSON.parse((f.keys && f.keys.stringValue) || '{}'); } catch(e) {}
         if (!sub.endpoint || !sub.keys.p256dh || !sub.keys.auth) {
-          console.log('[Push] Skipping doc with missing endpoint or keys');
+          console.log('[Push] Skipping doc ' + (i+1) + ': missing keys');
           continue;
         }
 
         try {
-          await webpush.sendNotification(sub, payload);
-          sent++;
-          console.log('[Push] Sent to:', sub.endpoint.substring(0, 50) + '...');
+          console.log('[Push] Sending to doc ' + (i+1) + '/' + docs.length + ': ' + sub.endpoint.substring(0, 60) + '...');
+
+          // v20.17: Use generateRequestDetails to get full request, then send manually for diagnostics
+          var reqDetails = webpush.generateRequestDetails(sub, payload);
+          console.log('[Push] Request method:', reqDetails.method);
+          console.log('[Push] Request headers:', JSON.stringify(reqDetails.headers));
+          console.log('[Push] Endpoint:', reqDetails.endpoint);
+
+          // Extract Authorization header to check JWT
+          var authHeader = reqDetails.headers && reqDetails.headers.Authorization;
+          if (authHeader) {
+            // Parse JWT from "vapid t=<jwt>, k=<key>" or "WebPush <jwt>"
+            var jwtMatch = authHeader.match(/t=([^,]+)/) || authHeader.match(/WebPush\s+(\S+)/);
+            if (jwtMatch) {
+              var jwtParts = jwtMatch[1].split('.');
+              if (jwtParts.length === 3) {
+                try {
+                  var jwtPayload = JSON.parse(Buffer.from(jwtParts[1].replace(/-/g,'+').replace(/_/g,'/'), 'base64').toString());
+                  console.log('[Push] JWT payload:', JSON.stringify(jwtPayload));
+                } catch(e) { console.log('[Push] JWT decode err:', e.message); }
+              }
+            }
+          }
+
+          // Send using fetch for full control
+          var pushResp = await fetch(reqDetails.endpoint, {
+            method: reqDetails.method || 'POST',
+            headers: reqDetails.headers,
+            body: reqDetails.body
+          });
+
+          if (pushResp.ok || pushResp.status === 201) {
+            sent++;
+            console.log('[Push] Sent OK to doc ' + (i+1) + ' status:', pushResp.status);
+          } else {
+            var respBody = await pushResp.text().catch(function() { return ''; });
+            console.log('[Push] Send failed doc ' + (i+1) + ': HTTP', pushResp.status, respBody);
+            console.log('[Push] Response headers:', JSON.stringify(Object.fromEntries(pushResp.headers.entries())));
+            if (pushResp.status === 403 || pushResp.status === 404 || pushResp.status === 410) {
+              stale.push(doc.name);
+            }
+            failed++;
+          }
         } catch(err) {
-          console.log('[Push] Send failed:', err.statusCode, err.body || err.message);
-          if (err.statusCode === 404 || err.statusCode === 410) {
+          console.log('[Push] Send error doc ' + (i+1) + ':', err.statusCode || err.status, err.body || err.message);
+          if (err.statusCode === 403 || err.statusCode === 404 || err.statusCode === 410) {
             stale.push(doc.name);
           }
           failed++;
@@ -212,10 +308,11 @@ export default async function handler(req, res) {
         } catch(e) {}
       }
 
+      console.log('[Push] Result: sent=' + sent + ' failed=' + failed + ' cleaned=' + stale.length);
       return res.status(200).json({ success: true, sent: sent, failed: failed, cleaned: stale.length });
     }
 
-    return res.status(400).json({ error: 'Invalid action. Use: subscribe, unsubscribe, send, test' });
+    return res.status(400).json({ error: 'Invalid action. Use: subscribe, unsubscribe, send, test, vapidkey' });
 
   } catch(err) {
     console.error('[Push] Error:', err);

@@ -13,6 +13,7 @@
     "api/fetch-site-meta.js": { "maxDuration": 15 }
   },
   "routes": [
+    { "src": "/newsletter", "dest": "/newsletter.html" },
     { "src": "/info/api/(.*)", "dest": "https://roweoswebsite.vercel.app/api/$1" },
     { "src": "/info", "dest": "https://roweoswebsite.vercel.app/" },
     { "src": "/api/(.*)", "dest": "/api/$1" },

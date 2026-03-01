@@ -300,6 +300,8 @@ function isTaskDue(task, userTimezone) {
     ' window=0-' + TIME_WINDOW_MINUTES + 'min');
 
   // Custom recurrence uses pure interval math
+  // v20.17: Use Date.now() for elapsed-time calc, NOT getNowInTimezone().getTime()
+  // getNowInTimezone() shifts epoch by tz offset — breaks interval math on UTC servers
   if (freq === 'custom') {
     var cInterval = task.recurInterval || 1;
     var cUnit = task.recurUnit || 'days';
@@ -307,19 +309,25 @@ function isTaskDue(task, userTimezone) {
       // First run: use time window like other types
       if (timeDiff >= 0 && timeDiff <= TIME_WINDOW_MINUTES) isDue = true;
     } else {
-      var msSince = now.getTime() - lastRun.getTime();
+      var msSince = Date.now() - lastRun.getTime();
+      var requiredMs = 0;
       if (cUnit === 'minutes') {
-        isDue = msSince >= cInterval * 60 * 1000;
+        requiredMs = cInterval * 60 * 1000;
+        isDue = msSince >= requiredMs;
       } else if (cUnit === 'hours') {
-        isDue = msSince >= cInterval * 60 * 60 * 1000;
+        requiredMs = cInterval * 60 * 60 * 1000;
+        isDue = msSince >= requiredMs;
       } else if (cUnit === 'days') {
-        isDue = msSince >= cInterval * 24 * 60 * 60 * 1000;
+        requiredMs = cInterval * 24 * 60 * 60 * 1000;
+        isDue = msSince >= requiredMs;
       } else if (cUnit === 'weeks') {
-        isDue = msSince >= cInterval * 7 * 24 * 60 * 60 * 1000;
+        requiredMs = cInterval * 7 * 24 * 60 * 60 * 1000;
+        isDue = msSince >= requiredMs;
       } else if (cUnit === 'months') {
         var monthsDiff = (now.getFullYear() - lastRun.getFullYear()) * 12 + (now.getMonth() - lastRun.getMonth());
         isDue = monthsDiff >= cInterval;
       }
+      console.log('[Scheduler] Custom interval: ' + cInterval + ' ' + cUnit + ' elapsed=' + Math.round(msSince/1000) + 's required=' + Math.round(requiredMs/1000) + 's isDue=' + isDue);
     }
   } else if (timeDiff >= 0 && timeDiff <= TIME_WINDOW_MINUTES) {
     if (freq === 'daily') {
@@ -791,9 +799,11 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
         if (!postTask.target) postTask.target = { text: stepText, platforms: [] };
         if (!postTask.target.text) postTask.target.text = stepText;
 
-        // Inject previous step output as post content if template referenced
-        var postResult = await executeSocialPost(postTask, profileData, reqHost);
+        // v20.17: Pass projectId, accessToken, uid for Firestore token lookup
+        var postResult = await executeSocialPost(postTask, profileData, reqHost, projectId, accessToken, uid);
         stepResult = postResult.result;
+        // v20.17: Treat post failure as step failure
+        if (!postResult.success) throw new Error(postResult.result || 'Social post failed');
 
       } else if (stepAction === 'notify') {
         stepResult = 'Notification: ' + stepText;
@@ -1261,7 +1271,9 @@ export default async function handler(req, res) {
     var totalExecuted = 0;
     var totalFailed = 0;
     var userResults = [];
-    var reqHost = req.headers.host || 'roweos.vercel.app';
+    // v20.17: Always use production URL for internal API calls (social-post, push)
+    // req.headers.host is the deployment-specific URL which has deployment protection → 401
+    var reqHost = 'roweos.com';
 
     for (var u = 0; u < userUids.length; u++) {
       var userResult = await processUser(userUids[u], projectId, accessToken, reqHost);
