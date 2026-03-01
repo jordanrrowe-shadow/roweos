@@ -1,5 +1,5 @@
-// v20.19: User Feedback API — stores feedback in Firestore, emails admin, sends push
-// POST { category, description, rating, screenshots[], deviceInfo } → Firestore feedback collection
+// v20.20: User Feedback API — stores feedback in Firestore, emails admin, sends push
+// POST { category, description, rating, screenshots[], deviceInfo, featureAreas[], platform, os } → Firestore feedback collection
 
 var crypto = require('crypto');
 
@@ -194,8 +194,21 @@ export default async function handler(req, res) {
       brand: { stringValue: body.brand || '' },
       mode: { stringValue: body.mode || '' },
       status: { stringValue: 'new' },
-      createdAt: { stringValue: new Date().toISOString() }
+      createdAt: { stringValue: new Date().toISOString() },
+      platform: { stringValue: body.platform || '' },
+      os: { stringValue: body.os || '' }
     };
+
+    // v20.20: Feature areas (array of strings)
+    if (Array.isArray(body.featureAreas) && body.featureAreas.length > 0) {
+      fields.featureAreas = {
+        arrayValue: {
+          values: body.featureAreas.slice(0, 12).map(function(a) { return { stringValue: String(a) }; })
+        }
+      };
+    } else {
+      fields.featureAreas = { arrayValue: { values: [] } };
+    }
 
     // Store screenshots as array
     if (screenshots.length > 0) {
