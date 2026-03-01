@@ -239,10 +239,8 @@ export default async function handler(req, res) {
 
     console.log('[Feedback] New feedback:', feedbackId, category, 'from:', body.email || 'anonymous');
 
-    // v21.5: Respond immediately after Firestore write — email/push are best-effort with 5s timeout
-    res.status(200).json({ success: true, feedbackId: feedbackId });
-
-    // Helper: fetch with timeout (5s default)
+    // v21.7: Email + push run BEFORE response (Vercel kills function after res.json)
+    // Both run in parallel with 5s timeouts so client waits max ~5s
     function fetchWithTimeout(url, opts, ms) {
       ms = ms || 5000;
       var ctrl = new AbortController();
@@ -251,71 +249,66 @@ export default async function handler(req, res) {
       return fetch(url, opts).then(function(r) { clearTimeout(timer); return r; }).catch(function(e) { clearTimeout(timer); throw e; });
     }
 
-    // Send admin email via Resend (best-effort, 5s timeout)
+    var sideEffects = [];
+
+    // Email via Resend
     var resendKey = (process.env.RESEND_API_KEY || '').trim();
     if (resendKey) {
-      try {
-        var emailHtml = buildFeedbackEmail({
-          category: category,
-          description: description,
-          rating: rating,
-          email: body.email,
-          tier: body.tier,
-          brand: body.brand,
-          mode: body.mode,
-          deviceInfo: body.deviceInfo,
-          screenshots: screenshots
-        });
-        var categoryLabels = { bug: 'Bug Report', feature: 'Feature Request', general: 'General Feedback', ui_ux: 'UI/UX Issue' };
-        var emailResp = await fetchWithTimeout('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + resendKey,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            from: 'RoweOS <roweos@therowecollection.com>',
-            to: ['jordan@therowecollection.com'],
-            subject: 'RoweOS Feedback: ' + (categoryLabels[category] || category) + ' — ' + description.substring(0, 60),
-            html: emailHtml
-          })
-        }, 5000);
-        if (emailResp.ok) {
-          console.log('[Feedback] Admin email sent');
-        } else {
-          var emailErr = await emailResp.text().catch(function() { return ''; });
-          console.warn('[Feedback] Resend failed:', emailResp.status, emailErr.substring(0, 200));
-        }
-      } catch(emailErr) {
-        console.warn('[Feedback] Email send error (non-fatal):', emailErr.message);
-      }
+      sideEffects.push(
+        (async function() {
+          try {
+            var emailHtml = buildFeedbackEmail({
+              category: category, description: description, rating: rating,
+              email: body.email, tier: body.tier, brand: body.brand,
+              mode: body.mode, deviceInfo: body.deviceInfo, screenshots: screenshots
+            });
+            var categoryLabels = { bug: 'Bug Report', feature: 'Feature Request', general: 'General Feedback', ui_ux: 'UI/UX Issue' };
+            var emailResp = await fetchWithTimeout('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + resendKey, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                from: 'RoweOS <roweos@therowecollection.com>',
+                to: ['jordan@therowecollection.com'],
+                subject: 'RoweOS Feedback: ' + (categoryLabels[category] || category) + ' — ' + description.substring(0, 60),
+                html: emailHtml
+              })
+            }, 5000);
+            if (emailResp.ok) { console.log('[Feedback] Admin email sent'); }
+            else { console.warn('[Feedback] Resend failed:', emailResp.status); }
+          } catch(e) { console.warn('[Feedback] Email error:', e.message); }
+        })()
+      );
     }
 
-    // Send push notification to admin (best-effort, 5s timeout)
+    // Push notification to admin
     var adminUid = (process.env.ADMIN_UID || '').trim();
     if (adminUid) {
-      try {
-        var pushHost = 'roweos.com';
-        var categoryLabels2 = { bug: 'Bug', feature: 'Feature', general: 'Feedback', ui_ux: 'UI/UX' };
-        var pushResp = await fetchWithTimeout('https://' + pushHost + '/api/push', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'send',
-            uid: adminUid,
-            title: 'New ' + (categoryLabels2[category] || 'Feedback') + ' from ' + (body.email || 'user'),
-            message: description.substring(0, 100)
-          })
-        }, 5000);
-        if (pushResp.ok) {
-          console.log('[Feedback] Push notification sent to admin');
-        }
-      } catch(pushErr) {
-        console.warn('[Feedback] Push send error (non-fatal):', pushErr.message);
-      }
+      sideEffects.push(
+        (async function() {
+          try {
+            var categoryLabels2 = { bug: 'Bug', feature: 'Feature', general: 'Feedback', ui_ux: 'UI/UX' };
+            var pushResp = await fetchWithTimeout('https://roweos.com/api/push', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'send', uid: adminUid,
+                title: 'New ' + (categoryLabels2[category] || 'Feedback') + ' from ' + (body.email || 'user'),
+                message: description.substring(0, 100)
+              })
+            }, 5000);
+            if (pushResp.ok) { console.log('[Feedback] Push sent to admin'); }
+            else { console.warn('[Feedback] Push failed:', pushResp.status); }
+          } catch(e) { console.warn('[Feedback] Push error:', e.message); }
+        })()
+      );
     }
 
-    return;
+    // Wait for all side effects (max 5s each, parallel) then respond
+    if (sideEffects.length > 0) {
+      await Promise.allSettled(sideEffects);
+    }
+
+    return res.status(200).json({ success: true, feedbackId: feedbackId });
 
   } catch(err) {
     console.error('[Feedback] Error:', err);
