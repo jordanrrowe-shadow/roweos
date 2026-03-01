@@ -1367,62 +1367,68 @@ pricingTiers.forEach(function(p, idx) {
 
 // ── 12. BEFORE & AFTER (20) — IDs 121–140 ──
 
-function beforeAfterCard(mode, feature, beforeItems, afterItems) {
-  var bg = mode === 'dark' ? '#0a0a0a' : '#ffffff';
+function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
   var goldAccent = mode === 'dark' ? '#b2997b' : '#8b7b67';
   var redColor = mode === 'dark' ? '#e05252' : '#c03030';
   var redBg = mode === 'dark' ? 'rgba(255,60,60,0.04)' : 'rgba(200,0,0,0.03)';
   var greenBg = mode === 'dark' ? 'rgba(178,153,123,0.03)' : 'rgba(139,123,103,0.02)';
   var mutedText = mode === 'dark' ? '#7a7168' : '#8a857e';
   var strongText = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
-
-  var logo = '<div style="text-align:center;margin-bottom:40px;"><img src="'+ROWEOS_LOGO+'" style="width:48px;height:48px;opacity:0.5;" /></div>';
+  var isLife = aiMode === 'life';
+  var badgeColor = isLife ? (mode === 'dark' ? '#8aa0b0' : '#5a7a8a') : goldAccent;
+  var badgeLabel = isLife ? 'LifeAI' : 'BrandAI';
 
   // BEFORE section
-  var beforeSection = '<div style="padding:36px 72px 32px;background:'+redBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
-    + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+redColor+';margin-bottom:24px;font-weight:500;">Before</div>';
+  var beforeSection = '<div style="padding:32px 72px 24px;background:'+redBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
+    + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+redColor+';margin-bottom:22px;font-weight:500;">Before</div>';
   beforeItems.forEach(function(item) {
     beforeSection += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">'
-      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+redColor+'" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
-      + '<span style="font-size:18px;color:'+mutedText+';line-height:1.4;text-decoration:line-through;text-decoration-color:'+redColor+'44;">'+item+'</span>'
+      + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+redColor+'" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+      + '<span style="font-size:20px;color:'+mutedText+';line-height:1.4;text-decoration:line-through;text-decoration-color:'+redColor+'44;">'+item+'</span>'
       + '</div>';
   });
   beforeSection += '</div>';
 
-  // Gold divider
-  var divider = '<div style="height:2px;background:linear-gradient(90deg,transparent,'+goldAccent+',transparent);"></div>';
+  // Center band: RoweOS big + gold divider + Feature big
+  var centerBand = '<div style="text-align:center;padding:28px 72px;">'
+    + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;letter-spacing:0.02em;color:'+goldAccent+';line-height:1;margin-bottom:16px;">RoweOS</div>'
+    + '<div style="width:100%;height:2px;background:linear-gradient(90deg,transparent,'+goldAccent+',transparent);margin-bottom:16px;"></div>'
+    + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;color:var(--c-text);line-height:1;">'+feature+'</div>'
+    + '</div>';
 
   // AFTER section
-  var afterSection = '<div style="padding:32px 72px 36px;background:'+greenBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
-    + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+goldAccent+';margin-bottom:24px;font-weight:500;">After RoweOS</div>';
+  var afterSection = '<div style="padding:24px 72px 32px;background:'+greenBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
+    + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+goldAccent+';margin-bottom:22px;font-weight:500;">After RoweOS</div>';
   afterItems.forEach(function(item) {
     afterSection += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">'
-      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+goldAccent+'" stroke-width="2.5" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>'
-      + '<span style="font-size:18px;color:'+strongText+';line-height:1.4;">'+item+'</span>'
+      + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+goldAccent+'" stroke-width="2.5" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>'
+      + '<span style="font-size:20px;color:'+strongText+';line-height:1.4;">'+item+'</span>'
       + '</div>';
   });
   afterSection += '</div>';
 
-  // Feature pill
-  var pill = '<div style="position:absolute;bottom:72px;left:50%;transform:translateX(-50%);padding:6px 20px;border:1px solid '+goldAccent+'44;border-radius:16px;font-size:12px;color:'+goldAccent+';letter-spacing:0.08em;">'+feature+'</div>';
+  // Bottom badge circle — BrandAI or LifeAI
+  var badge = '<div style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);width:72px;height:72px;border-radius:50%;border:1.5px solid '+badgeColor+'55;display:flex;align-items:center;justify-content:center;background:'+badgeColor+'0a;">'
+    + '<span style="font-size:11px;font-weight:500;color:'+badgeColor+';letter-spacing:0.06em;">'+badgeLabel+'</span>'
+    + '</div>';
 
-  var inner = '<div style="display:flex;flex-direction:column;height:100%;padding-top:48px;">'
-    + logo + beforeSection + divider + afterSection + pill
+  var inner = '<div style="display:flex;flex-direction:column;height:100%;padding-top:24px;">'
+    + beforeSection + centerBand + afterSection + badge
     + '</div>';
   return cardWrap(mode, inner);
 }
 
 var beforeAfterData = [
-  { feature: 'Chat', before: ['4 AI tabs open at once.','Copy-pasting context between them.','Re-explaining your brand every time.'], after: ['One chat. Every model.','Brand context built in.','Switch agents in one click.'] },
-  { feature: 'Studio', before: ['Writing prompts from scratch.','Every. Single. Time.','No way to save or reuse.'], after: ['250+ curated operations.','One click. Done.','Save and iterate on outputs.'] },
-  { feature: 'Automations', before: ['Manually running the same AI tasks.','Every morning. Every evening.','Nothing runs when you close your laptop.'], after: ['Schedule it once.','It runs forever.','Cloud execution while you sleep.'] },
-  { feature: 'Analytics', before: ['No idea what AI costs you.','Spread across 4 provider dashboards.','Zero visibility into usage.'], after: ['Real-time cost tracking.','By provider, model, and brand.','One unified dashboard.'] },
-  { feature: 'Identity', before: ['Re-explaining your brand to every AI.','Pasting brand guidelines into prompts.','Generic outputs that miss your voice.'], after: ['AI that already knows your voice.','Your values, tone, and goals built in.','Every output sounds like you.'] },
-  { feature: 'Social', before: ['Generate in one app. Copy.','Open another app. Paste. Post.','Repeat 5 times per platform.'], after: ['Generate. Review. Publish.','One screen. All platforms.','Connected accounts post directly.'] },
-  { feature: 'Multi-Brand', before: ['Logging in and out.','Separate accounts per brand.','Context lost between switches.'], after: ['Switch brands in one click.','Everything follows instantly.','Up to 15 independent brands.'] },
-  { feature: 'RoweOS AI', before: ['Guessing which AI model works best.','Overpaying for simple tasks.','Underpowered for complex ones.'], after: ['Automatic routing to the optimal model.','Cost-efficient by default.','Claude, Gemini, GPT, your rules.'] },
-  { feature: 'Library', before: ['AI outputs lost in chat scrollback.','No way to search old conversations.','Starting from scratch every session.'], after: ['Save, organize, search everything.','Every output you have ever created.','Folders, favorites, cross-brand.'] },
-  { feature: 'Cloud Sync', before: ['Stuck on your laptop.','Start over on your phone.','No continuity between devices.'], after: ['Seamless sync across devices.','Pick up anywhere.','Encrypted and selective.'] }
+  { feature: 'Chat', ai: 'brand', before: ['4 AI tabs open at once.','Copy-pasting context between them.','Re-explaining your brand every time.'], after: ['One chat. Every model.','Brand context built in.','Switch agents in one click.'] },
+  { feature: 'Studio', ai: 'brand', before: ['Writing prompts from scratch.','Every. Single. Time.','No way to save or reuse.'], after: ['250+ curated operations.','One click. Done.','Save and iterate on outputs.'] },
+  { feature: 'Automations', ai: 'brand', before: ['Manually running the same AI tasks.','Every morning. Every evening.','Nothing runs when you close your laptop.'], after: ['Schedule it once.','It runs forever.','Cloud execution while you sleep.'] },
+  { feature: 'Analytics', ai: 'brand', before: ['No idea what AI costs you.','Spread across 4 provider dashboards.','Zero visibility into usage.'], after: ['Real-time cost tracking.','By provider, model, and brand.','One unified dashboard.'] },
+  { feature: 'Identity', ai: 'brand', before: ['Re-explaining your brand to every AI.','Pasting brand guidelines into prompts.','Generic outputs that miss your voice.'], after: ['AI that already knows your voice.','Your values, tone, and goals built in.','Every output sounds like you.'] },
+  { feature: 'Social', ai: 'brand', before: ['Generate in one app. Copy.','Open another app. Paste. Post.','Repeat 5 times per platform.'], after: ['Generate. Review. Publish.','One screen. All platforms.','Connected accounts post directly.'] },
+  { feature: 'Multi-Brand', ai: 'brand', before: ['Logging in and out.','Separate accounts per brand.','Context lost between switches.'], after: ['Switch brands in one click.','Everything follows instantly.','Up to 15 independent brands.'] },
+  { feature: 'RoweOS AI', ai: 'brand', before: ['Guessing which AI model works best.','Overpaying for simple tasks.','Underpowered for complex ones.'], after: ['Automatic routing to the optimal model.','Cost-efficient by default.','Claude, Gemini, GPT, your rules.'] },
+  { feature: 'Library', ai: 'brand', before: ['AI outputs lost in chat scrollback.','No way to search old conversations.','Starting from scratch every session.'], after: ['Save, organize, search everything.','Every output you have ever created.','Folders, favorites, cross-brand.'] },
+  { feature: 'Cloud Sync', ai: 'brand', before: ['Stuck on your laptop.','Start over on your phone.','No continuity between devices.'], after: ['Seamless sync across devices.','Pick up anywhere.','Encrypted and selective.'] }
 ];
 
 beforeAfterData.forEach(function(ba, i) {
@@ -1433,7 +1439,7 @@ beforeAfterData.forEach(function(ba, i) {
       mode: m,
       label: ba.feature + ' Before/After — ' + m,
       render: (function(data, mode) {
-        return function() { return beforeAfterCard(mode, data.feature, data.before, data.after); };
+        return function() { return beforeAfterCard(mode, data.feature, data.before, data.after, data.ai === 'life' ? 'life' : 'brand'); };
       })(ba, m)
     });
   });
