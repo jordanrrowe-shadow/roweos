@@ -112,151 +112,39 @@ function buildFeedbackEmail(feedback) {
 }
 
 export default async function handler(req, res) {
-  // CORS
+  // v21.9: Permissive CORS — echo back origin (feedback endpoint has no security concern)
   var origin = (req.headers.origin || '').trim();
-  var allowed = ['https://roweos.vercel.app', 'https://roweos.com', 'https://www.roweos.com'];
-  res.setHeader('Access-Control-Allow-Origin', allowed.indexOf(origin) !== -1 ? origin : allowed[0]);
+  res.setHeader('Access-Control-Allow-Origin', origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Max-Age', '86400');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  try {
-    var body = req.body;
-    if (typeof body === 'string') {
-      try { body = JSON.parse(body); } catch(e) {
-        return res.status(400).json({ error: 'Invalid JSON' });
-      }
-    }
+  function fetchWithTimeout(url, opts, ms) {
+    ms = ms || 5000;
+    var ctrl = new AbortController();
+    var timer = setTimeout(function() { ctrl.abort(); }, ms);
+    opts.signal = ctrl.signal;
+    return fetch(url, opts).then(function(r) { clearTimeout(timer); return r; }).catch(function(e) { clearTimeout(timer); throw e; });
+  }
 
-    // Validate required fields
-    var description = (body.description || '').trim();
-    if (!description) {
-      return res.status(400).json({ error: 'Description is required' });
-    }
-    if (description.length > 5000) {
-      return res.status(400).json({ error: 'Description too long (max 5000 chars)' });
-    }
-
-    var category = body.category || 'general';
-    var validCategories = ['bug', 'feature', 'general', 'ui_ux'];
-    if (validCategories.indexOf(category) === -1) category = 'general';
-
-    var rating = parseInt(body.rating) || 0;
-    if (rating < 0 || rating > 5) rating = 0;
-
-    // Validate screenshots (max 3, must be data:image, total < 900KB)
-    var screenshots = [];
-    if (Array.isArray(body.screenshots)) {
-      var totalSize = 0;
-      for (var i = 0; i < Math.min(body.screenshots.length, 3); i++) {
-        var ss = body.screenshots[i];
-        if (typeof ss === 'string' && ss.indexOf('data:image') === 0) {
-          totalSize += ss.length;
-          if (totalSize < 900000) {
-            screenshots.push(ss);
-          }
-        }
-      }
-    }
-
-    // Firebase setup
-    var projectId = (process.env.FIREBASE_PROJECT_ID || '').trim();
-    var saJson = (process.env.FIREBASE_SERVICE_ACCOUNT || '').trim();
-    if (!projectId || !saJson) {
-      return res.status(500).json({ error: 'Server not configured' });
-    }
-
-    var sa = JSON.parse(saJson);
-    var accessToken = await getGoogleAccessToken(sa);
-
-    // Generate feedback ID
-    var feedbackId = 'fb_' + Date.now().toString(36) + '_' + crypto.randomBytes(4).toString('hex');
-    var baseUrl = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents';
-    var docPath = baseUrl + '/feedback/' + feedbackId;
-
-    // Build Firestore fields
-    var fields = {
-      uid: { stringValue: body.uid || '' },
-      email: { stringValue: body.email || '' },
-      category: { stringValue: category },
-      description: { stringValue: description },
-      rating: { integerValue: String(rating) },
-      deviceInfo: { stringValue: typeof body.deviceInfo === 'string' ? body.deviceInfo : JSON.stringify(body.deviceInfo || {}) },
-      tier: { stringValue: body.tier || 'unknown' },
-      brand: { stringValue: body.brand || '' },
-      mode: { stringValue: body.mode || '' },
-      status: { stringValue: 'new' },
-      createdAt: { stringValue: new Date().toISOString() },
-      platform: { stringValue: body.platform || '' },
-      os: { stringValue: body.os || '' }
-    };
-
-    // v20.20: Feature areas (array of strings)
-    if (Array.isArray(body.featureAreas) && body.featureAreas.length > 0) {
-      fields.featureAreas = {
-        arrayValue: {
-          values: body.featureAreas.slice(0, 12).map(function(a) { return { stringValue: String(a) }; })
-        }
-      };
-    } else {
-      fields.featureAreas = { arrayValue: { values: [] } };
-    }
-
-    // Store screenshots as array
-    if (screenshots.length > 0) {
-      fields.screenshots = {
-        arrayValue: {
-          values: screenshots.map(function(s) { return { stringValue: s }; })
-        }
-      };
-    } else {
-      fields.screenshots = { arrayValue: { values: [] } };
-    }
-
-    // Write to Firestore
-    var writeResp = await fetch(docPath, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': 'Bearer ' + accessToken,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ fields: fields })
-    });
-
-    if (!writeResp.ok) {
-      var errText = await writeResp.text().catch(function() { return ''; });
-      console.error('[Feedback] Firestore write failed:', writeResp.status, errText.substring(0, 300));
-      return res.status(500).json({ error: 'Failed to save feedback' });
-    }
-
-    console.log('[Feedback] New feedback:', feedbackId, category, 'from:', body.email || 'anonymous');
-
-    // v21.7: Email + push run BEFORE response (Vercel kills function after res.json)
-    // Both run in parallel with 5s timeouts so client waits max ~5s
-    function fetchWithTimeout(url, opts, ms) {
-      ms = ms || 5000;
-      var ctrl = new AbortController();
-      var timer = setTimeout(function() { ctrl.abort(); }, ms);
-      opts.signal = ctrl.signal;
-      return fetch(url, opts).then(function(r) { clearTimeout(timer); return r; }).catch(function(e) { clearTimeout(timer); throw e; });
-    }
-
+  // v21.9: Shared email + push logic
+  async function sendNotifications(category, description, email, tier, brand, mode, deviceInfo, screenshots) {
     var sideEffects = [];
+    var categoryLabels = { bug: 'Bug Report', feature: 'Feature Request', general: 'General Feedback', ui_ux: 'UI/UX Issue' };
 
-    // Email via Resend
     var resendKey = (process.env.RESEND_API_KEY || '').trim();
     if (resendKey) {
       sideEffects.push(
         (async function() {
           try {
             var emailHtml = buildFeedbackEmail({
-              category: category, description: description, rating: rating,
-              email: body.email, tier: body.tier, brand: body.brand,
-              mode: body.mode, deviceInfo: body.deviceInfo, screenshots: screenshots
+              category: category, description: description, rating: 0,
+              email: email, tier: tier, brand: brand,
+              mode: mode, deviceInfo: deviceInfo, screenshots: screenshots
             });
-            var categoryLabels = { bug: 'Bug Report', feature: 'Feature Request', general: 'General Feedback', ui_ux: 'UI/UX Issue' };
             var emailResp = await fetchWithTimeout('https://api.resend.com/emails', {
               method: 'POST',
               headers: { 'Authorization': 'Bearer ' + resendKey, 'Content-Type': 'application/json' },
@@ -274,7 +162,6 @@ export default async function handler(req, res) {
       );
     }
 
-    // Push notification to admin
     var adminUid = (process.env.ADMIN_UID || '').trim();
     if (adminUid) {
       sideEffects.push(
@@ -297,10 +184,120 @@ export default async function handler(req, res) {
       );
     }
 
-    // Wait for all side effects (max 5s each, parallel) then respond
     if (sideEffects.length > 0) {
       await Promise.allSettled(sideEffects);
     }
+  }
+
+  try {
+    var body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch(e) {
+        return res.status(400).json({ error: 'Invalid JSON' });
+      }
+    }
+
+    var description = (body.description || '').trim();
+    var category = body.category || 'general';
+    var validCategories = ['bug', 'feature', 'general', 'ui_ux'];
+    if (validCategories.indexOf(category) === -1) category = 'general';
+
+    // v21.9: notifyOnly — client already wrote to Firestore, just send email + push
+    if (body.notifyOnly) {
+      console.log('[Feedback] notifyOnly for:', body.feedbackId || 'unknown', category);
+      await sendNotifications(category, description, body.email || '', body.tier || '', body.brand || '', body.mode || '', body.deviceInfo || '', body.screenshots || []);
+      return res.status(200).json({ success: true, notified: true });
+    }
+
+    // Full mode: validate, write to Firestore, then notify
+    if (!description) {
+      return res.status(400).json({ error: 'Description is required' });
+    }
+    if (description.length > 5000) {
+      return res.status(400).json({ error: 'Description too long (max 5000 chars)' });
+    }
+
+    var screenshots = [];
+    if (Array.isArray(body.screenshots)) {
+      var totalSize = 0;
+      for (var i = 0; i < Math.min(body.screenshots.length, 3); i++) {
+        var ss = body.screenshots[i];
+        if (typeof ss === 'string' && ss.indexOf('data:image') === 0) {
+          totalSize += ss.length;
+          if (totalSize < 900000) {
+            screenshots.push(ss);
+          }
+        }
+      }
+    }
+
+    var projectId = (process.env.FIREBASE_PROJECT_ID || '').trim();
+    var saJson = (process.env.FIREBASE_SERVICE_ACCOUNT || '').trim();
+    if (!projectId || !saJson) {
+      return res.status(500).json({ error: 'Server not configured' });
+    }
+
+    var sa = JSON.parse(saJson);
+    var accessToken = await getGoogleAccessToken(sa);
+
+    var feedbackId = 'fb_' + Date.now().toString(36) + '_' + crypto.randomBytes(4).toString('hex');
+    var baseUrl = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents';
+    var docPath = baseUrl + '/feedback/' + feedbackId;
+
+    var fields = {
+      uid: { stringValue: body.uid || '' },
+      email: { stringValue: body.email || '' },
+      category: { stringValue: category },
+      description: { stringValue: description },
+      rating: { integerValue: '0' },
+      deviceInfo: { stringValue: typeof body.deviceInfo === 'string' ? body.deviceInfo : JSON.stringify(body.deviceInfo || {}) },
+      tier: { stringValue: body.tier || 'unknown' },
+      brand: { stringValue: body.brand || '' },
+      mode: { stringValue: body.mode || '' },
+      status: { stringValue: 'new' },
+      createdAt: { stringValue: new Date().toISOString() },
+      platform: { stringValue: body.platform || '' },
+      os: { stringValue: body.os || '' }
+    };
+
+    if (Array.isArray(body.featureAreas) && body.featureAreas.length > 0) {
+      fields.featureAreas = {
+        arrayValue: {
+          values: body.featureAreas.slice(0, 12).map(function(a) { return { stringValue: String(a) }; })
+        }
+      };
+    } else {
+      fields.featureAreas = { arrayValue: { values: [] } };
+    }
+
+    if (screenshots.length > 0) {
+      fields.screenshots = {
+        arrayValue: {
+          values: screenshots.map(function(s) { return { stringValue: s }; })
+        }
+      };
+    } else {
+      fields.screenshots = { arrayValue: { values: [] } };
+    }
+
+    var writeResp = await fetch(docPath, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': 'Bearer ' + accessToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ fields: fields })
+    });
+
+    if (!writeResp.ok) {
+      var errText = await writeResp.text().catch(function() { return ''; });
+      console.error('[Feedback] Firestore write failed:', writeResp.status, errText.substring(0, 300));
+      return res.status(500).json({ error: 'Failed to save feedback' });
+    }
+
+    console.log('[Feedback] New feedback:', feedbackId, category, 'from:', body.email || 'anonymous');
+
+    await sendNotifications(category, description, body.email || '', body.tier || '', body.brand || '', body.mode || '', body.deviceInfo || '', screenshots);
 
     return res.status(200).json({ success: true, feedbackId: feedbackId });
 
