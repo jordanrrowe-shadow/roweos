@@ -38,6 +38,10 @@ service cloud.firestore {
     match /feedback/{feedbackId} {
       allow create: if request.auth != null;
       allow read, update, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      match /screenshots/{screenshotId} {
+        allow create: if request.auth != null;
+        allow read, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      }
     }
   }
 }

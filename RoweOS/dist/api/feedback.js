@@ -98,10 +98,20 @@ function buildFeedbackEmail(feedback) {
     // Device info
     + deviceInfo
 
-    // Screenshot note
-    + (feedback.screenshots && feedback.screenshots.length > 0
-      ? '<tr><td style="padding:12px 0;"><p style="margin:0;font-size:12px;color:' + dimText + ';">' + feedback.screenshots.length + ' screenshot(s) attached — view in admin panel.</p></td></tr>'
-      : '')
+    // v21.12: Inline screenshot images in email
+    + (function() {
+      if (!feedback.screenshots || feedback.screenshots.length === 0) return '';
+      var ssHtml = '<tr><td style="padding:12px 0;border-top:1px solid ' + borderColor + ';">'
+        + '<p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:' + gold + ';">Screenshots (' + feedback.screenshots.length + ')</p>';
+      for (var si = 0; si < feedback.screenshots.length; si++) {
+        var src = feedback.screenshots[si];
+        if (typeof src === 'string' && src.indexOf('data:image') === 0) {
+          ssHtml += '<img src="' + src + '" style="max-width:100%;height:auto;border-radius:8px;border:1px solid ' + borderColor + ';margin-bottom:8px;display:block;" alt="Screenshot ' + (si + 1) + '">';
+        }
+      }
+      ssHtml += '</td></tr>';
+      return ssHtml;
+    })()
 
     // Footer
     + '<tr><td style="padding:24px 0 0;text-align:center;border-top:1px solid ' + borderColor + ';">'
