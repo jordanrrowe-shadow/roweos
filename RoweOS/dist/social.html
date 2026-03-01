@@ -220,7 +220,11 @@ var CATEGORIES = [
   { id: 'value', label: 'Value Propositions' },
   { id: 'mood', label: 'Mood & Atmosphere' },
   { id: 'pricing', label: 'Pricing Tiers' },
-  { id: 'brandai', label: 'BrandAI' }
+  { id: 'brandai', label: 'BrandAI' },
+  { id: 'beforeafter', label: 'Before & After' },
+  { id: 'usecases', label: 'Use Cases' },
+  { id: 'hooks', label: 'Social Hooks' },
+  { id: 'spotlights', label: 'Feature Spotlights' }
 ];
 
 var ROWEOS_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAVdklEQVR42s1beXxURbY+VXVvr0knhCQEEHBHEtxe0HFEJomCgstTGG+PAk8UsCMIIoIyrLcvuKAYMWyasO9wrzOAsg2InSCgIAiCCTg8MIgiIZCt0+u9VfX+6DQGDDEh0Xn1++Wf/Lqr6jvnO+d8daoaQQsMzjlCCPGmfk+WZSE2FuJvbNOm9Q23dEo0qG7CDFchxH+67c+Pl16yhscjQGYmQwix5uwVNee7siwjRVEYAIDL5RLt9gph5kwtBACsCXOQP92YYEtu1yEJW4VrzCK+ERN8s4BQayKQczQc+rLodKnniSeGemuNiwEArhY4ujqPyhihCNDly3Mdwary5MqKGnq2svRcTs4KPwDw5rJmX+G6Dq0d5gxCyKMY8c6M6gf9Xl9+ao+nvgQA4KpKQJJYU5mFmkpdt9uNFEVh29XpcWGwpfuD4WB5wPvv7GzlfHPDIrIfDQFcCmTf9pXXx8fbXhAwego4O+GtqpZvf+DZnVHgyOmkLQ6Yc46jNPriX0v6hHXW0e8PFvRxDv8OfofBOUegaRgkAIQigObPlxPuS+0y0SwK2dQw/nXw66MvOkcoZzlXSfQzLTI8HlkAANizdX7CwZ1r3/y6cNUgj8cjXOqZ329wzlF0PQCATavfvfm73as+/37vmur92/KdUYfU7qWZi9Uu9HXBmruO7FHXFe396C8QCVLUIgs0A/iBbQvG/fCVyosLl75fm8hAlmXcbLCH96h9j+39x+6iLz66KeLxXxb9TwxZljHnKgEA2LomJ+v47uWhYzuXbZKkVBNC0CBodGUae4SsrCzjcOHKASazaaLP0Hum39f/jMcjC1lZihG1uKY5cVJRKoLMhjeZWZbGNdCgqCiVuxWFoxbI5Jx7BISyjJWzxt+SfsctX3LOj0xftLjXkiUFoVqP8ybF7N7NC/sWf77i7P7tSzteLAVRCzczbjmXsccjCx6PLNR6BDUnv8x76+XrjxYuqSz6bMEOAMBcVUl9Iferf6iqRJxOjW5b9V635CRHoWHQHt36ZH9d17MXP/vBhPY2jLogjG8RRdRBEEUHY8iMEeKCIAQwgepQmFUghM4ZnJWFdaOUAz67//tvyhRFC9e3+bKyNO50OllTanl0b8tzx6fefWfnI96awMpuDw97pr49o8tjw+0GWPJ+paPL9TecFEziK936DFuyP88ldsvO12vrMOloK++e6LD3FkUhHQNqjzCyI4QJwkgkAjGLRLCJJsEUa7eC1WIBs1kEBghCYR0qvX6KED4FGB/jlB+hmB8I+MKHMp98+fjlIDIz3bSxtIyCW79wWs+777x5+/c/lI7q/sRLsy6v05cA9siykKUohmf129vMZiFwb78xj+/PyxO7ZWfrdY3S0VTe2oLtxoDx070AYFw218UN/iNvQluLKHYxi6abRJN4kygKXQWB3BoTY2+XmBAHRBDA5w9CeVVNCAAfAUCfBYPBjfc8Nnx3VJ42pcZG97pz3XuvdWyb/PZ3Jadu7f30xG/Xro2w9hLAqqoSp9NJ1+dNGtzKYfuwtLoqSXJZvABu3pCVEQAMHiIl3N4poUNyrD2FiEJHi8mcJAq4mphIYa+BU47U/XzO6NHWrumtO8faHX8yW8QHCCE94hwxKTarBQzKocrrAw5wKBg0lh87Ubp4wPDxFXUV3m8JKe7xEJSVZRzcOu9zQkj8bb2yb42G6UXA0QnjocTR9brrzhqMj+gzWFkQ9XgD2f1XhpgxY6D9WluHG0QBP2yzmAaaRcEUNui72q4Ni/PzD+iXf35lnpx4XUpiltVqlgRBfCjOEeMAQMABIBAMna4Jht/u1vO5uXWd0mAylGUMbjfX8t0d7ujS6dT58uph9z7x8oeXMEWtzb7a7LFztyyYdCKavJqWdX+dAHv3vtH88QcTZh3emMt3rn5zx9LpL3WMxhvnKomuGx1bl+XcuG9L3vRvC5adL9n/ET/+xVr+0zcf82NfrN2+ccWMTnX32ihluOH9aYe3feDNy5NtnHPEOVxUJmiOPCjl4w/+ztfNevWJxk7coCKSZQGhiA2WvPPy2MObcrln5evfqTkT2iP4RRxwzhFXVcLrrKcund7x0KdLF53c9xE/vvcj42zRFn5y/7ofd23Mv6MxzoiAk3FOzmjroS2zvXs35Iy5aIioNVbMGJGzbtbYEgBonjy7zOv79+eJAABr3n91TtGWOXzrYnmnLMuCqkqE11Ml6qq4nRs+ePr4vn/4Sg5+rP/07RZecvDjs/u2L7w+Wscb4+WCNdPl/RveO6eqEuGcI5yZpdCRI3ubBYSfD+v6ewAAmQAtAhgh4J98coZyzvGBw9+NL/mxtKRtYqse6e3ZS06nRkFVL1lHURSWlZVlRKSjR/jL48NWf3fyx0cBYZ1SFrbbrG1iY+NW5+W5RAB3g0qxoAAY54BOnTw9JxwOJ7Rht/e8mHznK67H1JxRxnx5SMKV4rFZpy05Yu21uWNf/Oqf7/JtS6aWqbnjkzhv+ADyraqaAAB2bVk0tOzfO/jJA+uDFSd28CM7Vw9rjKaP6u0dy+T1hSunaQC1njSLZKBh0M+fVxaWq6pEEGq+zr1ER7sVyjmg4vKylefKq0oTW8UkOhymIQgBLyhwXzEeuzqdYY/HI9zXZ/CCc2UX9lmtFrPPF+CiQEZ6ZFnIzMxsMGNrWuRU5w0E51ND756bO9KM09PTRQSQSSnVAAAlFaW2+JEPIeCgqVhRllbqYX19bTl7Njd3pDkzS6G/paMRQhAIBpcIGEEoGGQmkXS2dL/mJoQQbyiWnU4nQwD8xLGTn+m6Tm+yOO7CT/dM7QrAW+kG2w4AvKDxDbgmDQ00AABU4QusqaiqQTazufO1ppi/IACuXhbLdUdZWRnnnIPP6y/y+/3AOeMmkWALETtEJk5DDbNaJWNmagFdNw4yHnoA20xCD8ZY2SmaciKaOH4PwE6nRjnn8MXxXbtr/IGjdpuZY4H8DQBAasT3GQ2Fqa4DZxSAUU4QFxuzbkFREQIA0HWjkBv0DoFwdA9l7DtFUVhdCdbo0gOANFXCl4dCWVoxlySN1c0HBQVukp9/QO856/5VhmFMwwCPzJRHxYPkrOIcUH25Q6qtq7vWz0sSCAJdp1zXdeT3+/0R5vwG4FrGGoa+j2PcVwDEuyDgewAAmhq/qioR5NQoNGAkVZUIaABOTaOZmW7KuYLmuC8sspqFsa3jHSkdE/UnEYIFkVKT/yvpWZCUhLIQ4vs2zetFMACjBvGFQ76Anx8FAJAkqUFGuhWFKwBQU8WOO+LAEAB4e2awk7XWaNJNg9OpUXm4FNOpXevuZpHcQRlLQYDDIsE/Ggh/c6Hm/CGnc2V1tNRFuiMyGqkoZ1bPHP1GSmL8O1arOEZ2PboqOzvfn5fnEl2uPAMQAgTAuSxjyMyk82aMSbaaxYHVXi+1mk2kojLwWZZzxFlVVQlCiP5GW5YDAJRA0fk0I/WMgDjYGYfSiwRoRD+ptl2LFk51vWIxkZGiIHYSRQKEYCAYA+cAId2AtnGJp9T3Xt4WDoVXIDRvJ0CECd+qskmbWzCT9Eu/p/O17fvdnX77KoCNf83Oztezs/MvrgPuNIQQYrvWzZwbazO38voDoTAAqfGH3rmKqyBj+RudSwTKmEgI9gIApKUl898CqygKe2OklNS+TcKaWJvl/rBuAMYIKGPg84eAcx4EhESbxUQcdmsngeDnq334ee29UYWMQV7xkcp1XZ1KEABg5G3W/gIm7yTEx7y0Zf6k48FQ+G0DsS/Kz4UrsxXlB0UB2KnNmJnS2vFkZVV1oHUrh/Wn0vL5Pfq9vCuSbxp3Tna73QgAONXpaYEzjigGHX4jA8iyjKdOrQWb3GqHzSze6guEACGAYFhfxzhbVe3T96/49Ntzve7pYL0+OTHV6wv2FETc2yKKdyfE2TOCISPjtjsTij+6Y/SKUJh+NGDcrOOzYeuod2XXtC7tE58UBKEzN6heEajcu+r9sbd1bJf4Ruv4mEcrK6uDCfGx1p/Ple88Wl7xkqqqJBK7TZMM3kDwLJrz2oCQIKAnX3hzxSeqJBGnVm8CQqok4U9bncTpKbftiLNbe4R1Axjjp70BfUjxqbL9qdel3B5rFboKhKRggo+V+0rXj1C0GgCABYrrAYuJvGAyCU8kxMUKlHOo8Qd9wGE3wshjMDhQ4a05aTYTe7wt5larzdLHbDb1jbVbbCGdQqu4GKjw+rd8dfj0U6OU2dVNva2MVgBlRL/uAuPM0A2wX6wBWr2ZFjudGp09bsBkh9XcIxgKM8rYqR9+vnC/krehZNmYgfbSYKjY0MOlVotwj0U0jUqwJS1b9fbw1V6/b9pQOX8HAOzIU56/y6B8pCiSfnExVrsoCA9ygAcNysBhN4NACFgtJiACAcYYGGEdqEEvnD1XMT1r4OScSDg2/Wq29pQKR0/99L8Co6wGYZQEAFBUdA7VR2WnU2EzRkjXmUVxXCAUZgAQulDh7afkbSjJc7nEZ3LyfQDgA4BzAHAUABbPnThoZErruFkkJvaJhW7XlCHu/Jxsef5XAPBMnux6k1L6NMakj4BRF5NJiDGJIjDGoLrGD5yDFxF0FDBZX1FWsbT/uLlnolc6V3MPHe3MrPlkb6lAKftJwLhTA6UbA4BhsQgjLSbBAgDg9QXffS1XO5SX5xKzs3+pnVERElFWS2e/PkI62TElYUNiK9u7i6Y+3/kUbffCY+1+Jt2y848BgAwA8gdy9rUOm6mTzU7tAABUZzW+EC8Z9PdZP1yctxHlp7FDoIwexgZ0vhIbFKXQcLketSGMn6SU8VBYr2Q1KFeWZXzmjEJ/VfNqRUitMTa9NepvT2MMaxIctuex94zYLXv+c/vzXKL35rb8/izFGKbklQBASX00/GyKLGS63bSlwAIA4LDB9jDGbo7o6MJLJlaliLc6CMJ/CQR1QMCRrtPNI+cuv5CWVowU5coHjezsfD0vzyWOz12rna/0TQ3rBsTaLM8ucA99q1t2vg4FEUbIsoxVVSKRP5WoqkQiDQCALEUxrpLCV/ZwTU2owBxvfTNntNR+zEztp2itBQAoSo3EtAnhdIFg0A0KBqOfAACqL97rAW3Udj6nfjjxmV6tHDH3Omymvy+QB3+TpShrIrW0Lks0+L0Hnr58y78pZWXMoPdHWFnwq6MawehmjBAEQmF/0BfcGwnXzMacqngBAEMA/OeqmqGBkB6kjDGr2ZQ/Xx5yo9Op0ZbqnzUaMACAbtBtjDIJAHh9aotgnEAwAs75ia/LTaebcoxUFIVNkWVBmfPPY15/YBrBBBOCYkUBL5MkiaSlFf/uF+q/AhwK6EsYY92nu3rGOZ0ajXYT04oj4DlwggCAUnZc0zSqSk3rWSuKQlVVIke2H323qsZ/hFHGY6zmPz/cNX5irZfJHwZYlmX8+vKtBw3KfuTYNhAAwC1nXLIBziKXeYyyM3Vju0l1UAPIP3BAr6oJDmccUCAYMswmMmXehEH3KIpiNLXx3wwPR2I2FKI5wPlLtW03BnVaEQZllDMOjLHKq+54aBqV5Qxh7Hurd1V6/blWs0ngwFGs1bxcHjnAUVSUyv+IeMaKUmhwDujzU/5VOmWmN4Y+5lQUhamSRKKZOBTWz3HOQTeo3pzF3EohVVWJnDhxfHyV1/8tAoTNZuHG6xKtixVFYZkAzb5o/62XDRgAQHNKuLCw0AgF9UkcsenyZY14RvlhxjgnGGzN3AUvKkrlM7UvA5XeUH/DoIFw2NBj7ZZ+C91DZmQpilEgy6Q5oGslKG8QsLM2Eb2xYttKw2Dl4tBHXnVqGoXiZAwAUEPZV/5gGAFHbZtr+mjvbMzMVUcuVHuHiCIR/cFQKM5uGbtIHjw1S1EMkGV0NfSO9NQRnyNLMbPGDby9vkuFi5MWpaZyDoC8Pv+znPMJ0wY/3Mmtarosy9hTVHa0uiZwDoDfGTlQF9LmdjA9siyMnrFmdVll9Xir2WQOBEMhR4x18tKpQ3ORojBFUZhHloXGPI2K3EnJgtOp0eWvu9omxya9mtg24SznHF3OFXSZlCROTaPjB/aaZDWLj09ZuPmu3JG9zaNmbw1NHdJnrt1qzq6+YKQoqzeev1KXsalXMFmKYsyb8IycHB/jDobCutViFoO6vj1khF8cPGXJ8ajnkopSUVlaMZeKUrlWXIxAijQdMwEYqtUEn8we9RCldLxuGKOlsR8erKsarxTcSM7IIEphoTFl0EOfiQL5ZvLCzaMlSSLXoPNdO6W0OuQNhp+alL9RdcsZRFEKDWj+mytBURRj7rgBo+Id9pkYISQIBChjVZTx2SGK8wdP/uB0g1Se+ULnRLt9Slhn9wbCob59R887dKVmBqqvz+yWZXT64HZ7hwTHEQHhaZMXb14IAMj9XJ/dJpHwCfkbu9dnvasd0X74+68OeKC1wzbPbjXdzBgHUSQQChvlHFABAOzinBWLJlImAkAYQZKIyO2CiB+LsZjuCwT13eWV1X/tP3FhaUP9dVS/1QErCrCX+913vcNh30OQMExevGnd2P69uic5rLtCIXrH5MWbDjslCWuaRlsS9KuD/zu263VtRosCcllFsb3ZLIJJFAAQAKUMOHAwiQLYrWYgGEFZZc2ZYNCQ+74ye0H0yQNqwBFXTAiSJBFN0+gYZ0ZXu826jRAySl64SZs86CHNLJBOkxZuvluWM4SWoPXlOQQA4K1h/Vu1a2d/VCS4N8LoVoJwG0FAZoRQABN8hiC0XzfYxtdX7tl64MABPZrcmnWclGo18yv9Mm6Z/OyD3yuDHx4OAOB+rnfFtCG9hwEA5LnSRWjBwQFQPTIT5YwekrBsxgvJC14dHFvv7UZLvZeOWn1M3z8n22NjN4oi+exsjXdRG1vsV5SjPsqSzXtcrnSxvhc6zX0u4XZnkLS0ZF5fPHJVJRpo4HRqTXq1hxrr6WisTvqfhxYRgmIMSr8UBDycGvSx15d/ejTPlS5mtzDoS95f8WgvDkFzyiFqfPkA7FaAIwA+cUDPpwkhTspZV4soJIYZf3Dakq1fcQ5Ic0rY2UKJ7Hc7DzdOEkY6F3JGhvDGyk9Xl13wDQbgywEAOaymfVMH9x6HEPAoWFWSSEu/FYHf81TRWIo/88g97a9tHf+SScQvIoR+YMCnGQs2r1XqvCSIJr/UVI0rCvCW+NXLf+R3S6r0C337P3Jfq5sSbYMIIRJwThGgjZzDllt8McX/nyiOWqKMaNKlcfvaU1lpZpOYRRDqxIHrjLEfgOMTYcbOEkTOi4B8JT8Gwv7kZF37g42BWrJ+ujMyiLug4JI3zq5H020J9vhrAENrhLgFEewNBPXKsspwdWV5uGbjgQP+P9LF/wdwSTJQ3XF0ogAAAABJRU5ErkJggg==';
@@ -1358,6 +1362,266 @@ pricingTiers.forEach(function(p, idx) {
         return cardWrap(m, inner);
       };
     })(mode)
+  });
+});
+
+// ── 12. BEFORE & AFTER (20) — IDs 121–140 ──
+
+function beforeAfterCard(mode, feature, beforeItems, afterItems) {
+  var bg = mode === 'dark' ? '#0a0a0a' : '#ffffff';
+  var goldAccent = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  var redColor = mode === 'dark' ? '#e05252' : '#c03030';
+  var redBg = mode === 'dark' ? 'rgba(255,60,60,0.04)' : 'rgba(200,0,0,0.03)';
+  var greenBg = mode === 'dark' ? 'rgba(178,153,123,0.03)' : 'rgba(139,123,103,0.02)';
+  var mutedText = mode === 'dark' ? '#7a7168' : '#8a857e';
+  var strongText = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+
+  var logo = '<div style="text-align:center;margin-bottom:40px;"><img src="'+ROWEOS_LOGO+'" style="width:48px;height:48px;opacity:0.5;" /></div>';
+
+  // BEFORE section
+  var beforeSection = '<div style="padding:36px 72px 32px;background:'+redBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
+    + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+redColor+';margin-bottom:24px;font-weight:500;">Before</div>';
+  beforeItems.forEach(function(item) {
+    beforeSection += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+redColor+'" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+      + '<span style="font-size:18px;color:'+mutedText+';line-height:1.4;text-decoration:line-through;text-decoration-color:'+redColor+'44;">'+item+'</span>'
+      + '</div>';
+  });
+  beforeSection += '</div>';
+
+  // Gold divider
+  var divider = '<div style="height:2px;background:linear-gradient(90deg,transparent,'+goldAccent+',transparent);"></div>';
+
+  // AFTER section
+  var afterSection = '<div style="padding:32px 72px 36px;background:'+greenBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
+    + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+goldAccent+';margin-bottom:24px;font-weight:500;">After RoweOS</div>';
+  afterItems.forEach(function(item) {
+    afterSection += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+goldAccent+'" stroke-width="2.5" style="flex-shrink:0;margin-top:2px;"><polyline points="20 6 9 17 4 12"/></svg>'
+      + '<span style="font-size:18px;color:'+strongText+';line-height:1.4;">'+item+'</span>'
+      + '</div>';
+  });
+  afterSection += '</div>';
+
+  // Feature pill
+  var pill = '<div style="position:absolute;bottom:72px;left:50%;transform:translateX(-50%);padding:6px 20px;border:1px solid '+goldAccent+'44;border-radius:16px;font-size:12px;color:'+goldAccent+';letter-spacing:0.08em;">'+feature+'</div>';
+
+  var inner = '<div style="display:flex;flex-direction:column;height:100%;padding-top:48px;">'
+    + logo + beforeSection + divider + afterSection + pill
+    + '</div>';
+  return cardWrap(mode, inner);
+}
+
+var beforeAfterData = [
+  { feature: 'Chat', before: ['4 AI tabs open at once.','Copy-pasting context between them.','Re-explaining your brand every time.'], after: ['One chat. Every model.','Brand context built in.','Switch agents in one click.'] },
+  { feature: 'Studio', before: ['Writing prompts from scratch.','Every. Single. Time.','No way to save or reuse.'], after: ['250+ curated operations.','One click. Done.','Save and iterate on outputs.'] },
+  { feature: 'Automations', before: ['Manually running the same AI tasks.','Every morning. Every evening.','Nothing runs when you close your laptop.'], after: ['Schedule it once.','It runs forever.','Cloud execution while you sleep.'] },
+  { feature: 'Analytics', before: ['No idea what AI costs you.','Spread across 4 provider dashboards.','Zero visibility into usage.'], after: ['Real-time cost tracking.','By provider, model, and brand.','One unified dashboard.'] },
+  { feature: 'Identity', before: ['Re-explaining your brand to every AI.','Pasting brand guidelines into prompts.','Generic outputs that miss your voice.'], after: ['AI that already knows your voice.','Your values, tone, and goals built in.','Every output sounds like you.'] },
+  { feature: 'Social', before: ['Generate in one app. Copy.','Open another app. Paste. Post.','Repeat 5 times per platform.'], after: ['Generate. Review. Publish.','One screen. All platforms.','Connected accounts post directly.'] },
+  { feature: 'Multi-Brand', before: ['Logging in and out.','Separate accounts per brand.','Context lost between switches.'], after: ['Switch brands in one click.','Everything follows instantly.','Up to 15 independent brands.'] },
+  { feature: 'RoweOS AI', before: ['Guessing which AI model works best.','Overpaying for simple tasks.','Underpowered for complex ones.'], after: ['Automatic routing to the optimal model.','Cost-efficient by default.','Claude, Gemini, GPT, your rules.'] },
+  { feature: 'Library', before: ['AI outputs lost in chat scrollback.','No way to search old conversations.','Starting from scratch every session.'], after: ['Save, organize, search everything.','Every output you have ever created.','Folders, favorites, cross-brand.'] },
+  { feature: 'Cloud Sync', before: ['Stuck on your laptop.','Start over on your phone.','No continuity between devices.'], after: ['Seamless sync across devices.','Pick up anywhere.','Encrypted and selective.'] }
+];
+
+beforeAfterData.forEach(function(ba, i) {
+  ['dark','light'].forEach(function(m, mi) {
+    templates.push({
+      id: 121 + i * 2 + mi,
+      category: 'beforeafter',
+      mode: m,
+      label: ba.feature + ' Before/After — ' + m,
+      render: (function(data, mode) {
+        return function() { return beforeAfterCard(mode, data.feature, data.before, data.after); };
+      })(ba, m)
+    });
+  });
+});
+
+// ── 13. USE CASES (10) — IDs 141–150 ──
+
+function useCaseIcon(name, mode) {
+  var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  var icons = {
+    entrepreneur: '<svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>',
+    creator: '<svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+    consultant: '<svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
+    sidehustler: '<svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
+    builder: '<svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>'
+  };
+  return icons[name] || '';
+}
+
+function useCaseCard(mode, persona, iconName, headline, details) {
+  var goldAccent = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  var mutedText = mode === 'dark' ? '#9e9487' : '#5a5550';
+  var dimText = mode === 'dark' ? '#655e54' : '#8a857e';
+  var borderColor = mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  var surfaceColor = mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+
+  var glow = mode === 'dark'
+    ? '<div style="position:absolute;top:25%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.05) 0%,transparent 60%);pointer-events:none;"></div>'
+    : '';
+
+  var logo = '<div style="margin-bottom:48px;"><img src="'+ROWEOS_LOGO+'" style="width:40px;height:40px;opacity:0.4;" /></div>';
+  var icon = '<div style="margin-bottom:36px;">'+useCaseIcon(iconName, mode)+'</div>';
+  var quote = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;font-style:italic;line-height:1.2;margin-bottom:16px;max-width:800px;">&ldquo;'+headline+'&rdquo;</div>';
+  var attribution = '<div style="font-size:16px;color:'+dimText+';margin-bottom:44px;letter-spacing:0.04em;">&mdash; The '+persona+'</div>';
+
+  var detailCards = '<div style="display:flex;flex-direction:column;gap:10px;max-width:640px;width:100%;">';
+  details.forEach(function(d) {
+    detailCards += '<div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border:1px solid '+borderColor+';border-radius:10px;background:'+surfaceColor+';">'
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="'+goldAccent+'" stroke-width="2" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>'
+      + '<span style="font-size:14px;color:'+mutedText+';">'+d+'</span>'
+      + '</div>';
+  });
+  detailCards += '</div>';
+
+  var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:60px 72px;">'
+    + glow + logo + icon + quote + attribution + detailCards
+    + '</div>';
+  return cardWrap(mode, inner);
+}
+
+var useCaseData = [
+  { persona: 'Solo Entrepreneur', icon: 'entrepreneur', headline: '3 brands. 1 dashboard. 0 chaos.', details: ['Multi-brand management with instant switching','Each brand has its own AI memory and voice','Studio operations run across all brands'] },
+  { persona: 'Content Creator', icon: 'creator', headline: 'From idea to published in 4 minutes.', details: ['Studio generates platform-specific content','Library saves every draft and output','Social Publishing posts directly to accounts'] },
+  { persona: 'Consultant', icon: 'consultant', headline: 'Every client brief, instantly recalled.', details: ['Brand memory retains every client detail','Identity tuning nails each client\'s voice','Switch between client brands in one click'] },
+  { persona: 'Side Hustler', icon: 'sidehustler', headline: 'Brand mode at 9am. Life mode at 9pm.', details: ['Work and life separated but connected','Tax Copilot knows your business entities','Personal coaching that understands your schedule'] },
+  { persona: 'Builder', icon: 'builder', headline: 'I didn\'t hire an ops team. I built one.', details: ['Automations run daily tasks on schedule','Pulse tracks goals with real momentum data','Analytics monitors spend across all providers'] }
+];
+
+useCaseData.forEach(function(uc, i) {
+  ['dark','light'].forEach(function(m, mi) {
+    templates.push({
+      id: 141 + i * 2 + mi,
+      category: 'usecases',
+      mode: m,
+      label: uc.persona + ' — ' + m,
+      render: (function(data, mode) {
+        return function() { return useCaseCard(mode, data.persona, data.icon, data.headline, data.details); };
+      })(uc, m)
+    });
+  });
+});
+
+// ── 14. SOCIAL HOOKS (16) — IDs 151–166 ──
+
+function hookCard(mode, hookText, subtitle) {
+  var goldAccent = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  var mutedText = mode === 'dark' ? '#9e9487' : '#5a5550';
+
+  var glow = mode === 'dark'
+    ? '<div style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+    : '<div style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(139,123,103,0.04) 0%,transparent 55%);pointer-events:none;"></div>';
+
+  var text = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:54px;font-weight:300;line-height:1.2;max-width:860px;text-align:center;">'+hookText+'</div>';
+  var divider = '<div style="width:60px;height:2px;background:'+goldAccent+';margin:40px auto;"></div>';
+  var sub = '<div style="font-size:16px;color:'+mutedText+';letter-spacing:0.04em;text-align:center;max-width:600px;">'+subtitle+'</div>';
+  var logo = '<div style="position:absolute;bottom:72px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;">'
+    + '<img src="'+ROWEOS_LOGO+'" style="width:36px;height:36px;opacity:0.35;" />'
+    + '</div>';
+
+  var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;padding:100px 80px;">'
+    + glow + text + divider + sub + logo
+    + '</div>';
+  return cardWrap(mode, inner);
+}
+
+var hookData = [
+  { hook: 'I replaced 7 AI subscriptions with one.', sub: 'RoweOS. Brand &amp; Life Intelligence.' },
+  { hook: 'Your AI doesn\'t remember you. Mine does.', sub: 'Brand memory that compounds over time.' },
+  { hook: 'Stop paying for tools that don\'t know your brand.', sub: 'Intelligence that learns who you are.' },
+  { hook: 'One platform. Every model. Your rules.', sub: 'Anthropic. OpenAI. Google. You choose.' },
+  { hook: 'I automated my entire morning routine in 3 minutes.', sub: 'Automations that actually run.' },
+  { hook: 'ChatGPT for your brand. Claude for your strategy. Gemini for research. One app.', sub: 'RoweOS AI routes automatically.' },
+  { hook: 'My AI knows my brand voice, my competitors, and my Q2 goals. Does yours?', sub: 'Brand Intelligence Platform.' },
+  { hook: '250 operations. 5 AI agents. Zero learning curve.', sub: 'Built for operators, not developers.' }
+];
+
+hookData.forEach(function(h, i) {
+  ['dark','light'].forEach(function(m, mi) {
+    templates.push({
+      id: 151 + i * 2 + mi,
+      category: 'hooks',
+      mode: m,
+      label: h.hook.substring(0, 35) + '… — ' + m,
+      render: (function(data, mode) {
+        return function() { return hookCard(mode, data.hook, data.sub); };
+      })(h, m)
+    });
+  });
+});
+
+// ── 15. FEATURE SPOTLIGHTS (14) — IDs 167–180 ──
+
+function spotlightIcon(name, mode) {
+  var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  var icons = {
+    signal: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></svg>',
+    clients: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>',
+    cloudsync: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>',
+    focus: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    push: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
+    feedback: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="15" r="0.5" fill="'+color+'"/></svg>',
+    crossmode: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
+  };
+  return icons[name] || '';
+}
+
+function spotlightCard(mode, feature, iconName, capabilities) {
+  var goldAccent = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  var mutedText = mode === 'dark' ? '#9e9487' : '#5a5550';
+  var dimText = mode === 'dark' ? '#655e54' : '#8a857e';
+  var borderColor = mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  var surfaceColor = mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+
+  var glow = mode === 'dark'
+    ? '<div style="position:absolute;top:20%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(178,153,123,0.05) 0%,transparent 60%);pointer-events:none;"></div>'
+    : '';
+
+  var eyebrow = '<div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:'+dimText+';margin-bottom:40px;">RoweOS Feature</div>';
+  var icon = '<div style="margin-bottom:32px;">'+spotlightIcon(iconName, mode)+'</div>';
+  var name = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;color:'+goldAccent+';margin-bottom:16px;">'+feature+'</div>';
+  var divider = '<div style="width:60px;height:1px;background:'+goldAccent+';margin-bottom:48px;"></div>';
+
+  var capList = '<div style="display:flex;flex-direction:column;gap:16px;max-width:600px;width:100%;">';
+  capabilities.forEach(function(cap) {
+    capList += '<div style="display:flex;align-items:center;gap:16px;padding:16px 24px;border:1px solid '+borderColor+';border-radius:10px;background:'+surfaceColor+';">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+goldAccent+'" stroke-width="2" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>'
+      + '<span style="font-size:16px;color:'+mutedText+';">'+cap+'</span>'
+      + '</div>';
+  });
+  capList += '</div>';
+
+  var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:60px 72px;">'
+    + glow + eyebrow + icon + name + divider + capList
+    + '</div>';
+  return cardWrap(mode, inner);
+}
+
+var spotlightData = [
+  { feature: 'Signal', icon: 'signal', caps: ['Real-time brand intelligence','Competitive monitoring','Market pulse indicators','AI-curated insights'] },
+  { feature: 'Clients', icon: 'clients', caps: ['Client profiles with interaction history','Brand-specific notes and tags','Quick-access contact directory','CRM built for brand operators'] },
+  { feature: 'Cloud Sync', icon: 'cloudsync', caps: ['Cross-device seamless sync','Encrypted data transfer','Selective category sync','Sync Hub dashboard'] },
+  { feature: 'Focus', icon: 'focus', caps: ['Priority task dashboard','AI-suggested daily tasks','Completed automation results','Morning command center'] },
+  { feature: 'Push Notifications', icon: 'push', caps: ['Task completion alerts','Background execution updates','Mobile-first design','Cross-device delivery'] },
+  { feature: 'Feedback', icon: 'feedback', caps: ['In-app bug reports','Feature request submissions','Screenshot capture','Admin review dashboard'] },
+  { feature: 'Cross-Mode Intelligence', icon: 'crossmode', caps: ['Brand context informs life coaching','Tax Copilot knows your businesses','Unified memory across modes','Seamless brand-life data bridge'] }
+];
+
+spotlightData.forEach(function(sp, i) {
+  ['dark','light'].forEach(function(m, mi) {
+    templates.push({
+      id: 167 + i * 2 + mi,
+      category: 'spotlights',
+      mode: m,
+      label: sp.feature + ' Spotlight — ' + m,
+      render: (function(data, mode) {
+        return function() { return spotlightCard(mode, data.feature, data.icon, data.caps); };
+      })(sp, m)
+    });
   });
 });
 
