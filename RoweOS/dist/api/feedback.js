@@ -292,7 +292,7 @@ export default async function handler(req, res) {
             action: 'send',
             uid: adminUid,
             title: 'New ' + (categoryLabels2[category] || 'Feedback') + ' from ' + (body.email || 'user'),
-            body: description.substring(0, 100)
+            message: description.substring(0, 100)
           })
         });
         if (pushResp.ok) {
