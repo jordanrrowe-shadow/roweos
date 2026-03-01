@@ -1388,15 +1388,15 @@ function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
   });
   beforeSection += '</div>';
 
-  // Center band: RoweOS big + gold divider + Feature big
-  var centerBand = '<div style="text-align:center;padding:28px 72px;">'
-    + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;letter-spacing:0.02em;color:'+goldAccent+';line-height:1;margin-bottom:16px;">RoweOS</div>'
-    + '<div style="width:100%;height:2px;background:linear-gradient(90deg,transparent,'+goldAccent+',transparent);margin-bottom:16px;"></div>'
-    + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;color:var(--c-text);line-height:1;">'+feature+'</div>'
+  // RoweOS title — sits on clean background
+  var roweosTitle = '<div style="text-align:center;padding:28px 72px 0;">'
+    + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;letter-spacing:0.02em;color:'+goldAccent+';line-height:1;">RoweOS</div>'
     + '</div>';
 
-  // AFTER section — subtle gold-tinted background
-  var afterSection = '<div style="padding:24px 72px 32px;background:'+afterBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
+  // AFTER section — gold bg starts at the divider line, includes feature title
+  var afterSection = '<div style="padding:0 72px 32px;background:'+afterBg+';flex:1;display:flex;flex-direction:column;">'
+    + '<div style="width:100%;height:2px;background:linear-gradient(90deg,transparent,'+goldAccent+',transparent);margin:16px 0;"></div>'
+    + '<div style="text-align:center;margin-bottom:24px;"><div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;color:var(--c-text);line-height:1;">'+feature+'</div></div>'
     + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+goldAccent+';margin-bottom:22px;font-weight:500;">After RoweOS</div>';
   afterItems.forEach(function(item) {
     afterSection += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">'
@@ -1412,7 +1412,7 @@ function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
     + '</div>';
 
   var inner = '<div style="display:flex;flex-direction:column;height:100%;padding-top:24px;">'
-    + beforeSection + centerBand + afterSection + badge
+    + beforeSection + roweosTitle + afterSection + badge
     + '</div>';
   return cardWrap(mode, inner);
 }
