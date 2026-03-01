@@ -1370,16 +1370,15 @@ pricingTiers.forEach(function(p, idx) {
 function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
   var goldAccent = mode === 'dark' ? '#b2997b' : '#8b7b67';
   var redColor = mode === 'dark' ? '#e05252' : '#c03030';
-  var redBg = mode === 'dark' ? 'rgba(255,60,60,0.04)' : 'rgba(200,0,0,0.03)';
-  var greenBg = mode === 'dark' ? 'rgba(178,153,123,0.03)' : 'rgba(139,123,103,0.02)';
   var mutedText = mode === 'dark' ? '#7a7168' : '#8a857e';
   var strongText = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+  var afterBg = mode === 'dark' ? 'rgba(178,153,123,0.06)' : 'rgba(139,123,103,0.04)';
   var isLife = aiMode === 'life';
   var badgeColor = isLife ? (mode === 'dark' ? '#8aa0b0' : '#5a7a8a') : goldAccent;
   var badgeLabel = isLife ? 'LifeAI' : 'BrandAI';
 
-  // BEFORE section
-  var beforeSection = '<div style="padding:32px 72px 24px;background:'+redBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
+  // BEFORE section — clean, no tinted background
+  var beforeSection = '<div style="padding:32px 72px 24px;flex:1;display:flex;flex-direction:column;justify-content:center;">'
     + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+redColor+';margin-bottom:22px;font-weight:500;">Before</div>';
   beforeItems.forEach(function(item) {
     beforeSection += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">'
@@ -1396,8 +1395,8 @@ function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;color:var(--c-text);line-height:1;">'+feature+'</div>'
     + '</div>';
 
-  // AFTER section
-  var afterSection = '<div style="padding:24px 72px 32px;background:'+greenBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
+  // AFTER section — subtle gold-tinted background
+  var afterSection = '<div style="padding:24px 72px 32px;background:'+afterBg+';flex:1;display:flex;flex-direction:column;justify-content:center;">'
     + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+goldAccent+';margin-bottom:22px;font-weight:500;">After RoweOS</div>';
   afterItems.forEach(function(item) {
     afterSection += '<div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">'
