@@ -1883,7 +1883,7 @@ function wpCenteredLogo(mode) {
   var mutedText = mode === 'dark' ? '#655e54' : '#a09890';
   var inner = wpGlow(mode, '45%', 1000)
     + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;">'
-    + '<div style="margin-bottom:40px;">'+wpLogo(72)+'</div>'
+    + '<div style="margin-bottom:40px;">'+wpLogo(180)+'</div>'
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:88px;font-weight:300;letter-spacing:0.04em;color:'+goldAccent+';">RoweOS</div>'
     + '<div style="width:80px;height:1px;background:'+goldAccent+';margin:32px 0;"></div>'
     + '<div style="font-size:14px;letter-spacing:0.35em;text-transform:uppercase;color:'+mutedText+';">Brand &amp; Life Intelligence</div>'
@@ -1908,7 +1908,7 @@ function wpFeatureStack(mode) {
 
   var inner = wpGlow(mode, '50%', 800)
     + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;">'
-    + '<div style="margin-bottom:16px;">'+wpLogo(48, 0.5)+'</div>'
+    + '<div style="margin-bottom:16px;">'+wpLogo(120, 0.5)+'</div>'
     + '<div style="font-size:12px;letter-spacing:0.4em;text-transform:uppercase;color:'+mutedText+';margin-bottom:60px;">20 Integrated Views</div>'
     + stack
     + '<div style="width:60px;height:1px;background:'+goldAccent+';margin-top:60px;margin-bottom:24px;"></div>'
@@ -1925,7 +1925,7 @@ function wpQuote(mode, quote, attribution) {
 
   var inner = wpGlow(mode, '42%', 1100, mode === 'dark' ? 0.06 : 0.04)
     + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 120px;">'
-    + '<div style="margin-bottom:48px;">'+wpLogo(52, 0.45)+'</div>'
+    + '<div style="margin-bottom:48px;">'+wpLogo(130, 0.45)+'</div>'
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;color:'+goldAccent+';margin-bottom:48px;line-height:1;">&ldquo;</div>'
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;line-height:1.35;text-align:center;color:'+goldAccent+';">'+quote+'</div>'
     + '<div style="width:48px;height:1px;background:'+goldAccent+';margin:48px 0 24px;"></div>'
@@ -1952,7 +1952,7 @@ function wpGradient(mode, variant) {
 
   var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:'+gradients[variant]+';"></div>'
     + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;">'
-    + '<div style="margin-bottom:32px;">'+wpLogo(64)+'</div>'
+    + '<div style="margin-bottom:32px;">'+wpLogo(160)+'</div>'
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;letter-spacing:0.04em;color:'+goldAccent+';">RoweOS</div>'
     + '</div>'
     + wpLogoWatermark(mode);
@@ -1974,7 +1974,7 @@ function wpMinimalLines(mode) {
   var inner = lines
     + wpGlow(mode, '50%', 600, mode === 'dark' ? 0.05 : 0.03)
     + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;">'
-    + '<div style="margin-bottom:28px;">'+wpLogo(60)+'</div>'
+    + '<div style="margin-bottom:28px;">'+wpLogo(150)+'</div>'
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:80px;font-weight:300;letter-spacing:0.04em;color:'+goldAccent+';margin-bottom:20px;">RoweOS</div>'
     + '<div style="font-size:12px;letter-spacing:0.4em;text-transform:uppercase;color:'+mutedText+';">Operating Intelligence</div>'
     + '</div>'
@@ -1999,7 +1999,7 @@ function wpModeSplit(mode) {
     // Divider
     + '<div style="display:flex;align-items:center;gap:28px;padding:0 100px;">'
     + '<div style="flex:1;height:1px;background:'+divColor+';"></div>'
-    + wpLogo(44, 0.6)
+    + wpLogo(110, 0.6)
     + '<div style="flex:1;height:1px;background:'+divColor+';"></div>'
     + '</div>'
     // Bottom half - LifeAI
@@ -2031,7 +2031,7 @@ function wpDotGrid(mode) {
   var inner = dots
     + wpGlow(mode, '48%', 700, mode === 'dark' ? 0.05 : 0.03)
     + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:center;">'
-    + '<div style="margin-bottom:28px;">'+wpLogo(56)+'</div>'
+    + '<div style="margin-bottom:28px;">'+wpLogo(140)+'</div>'
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:76px;font-weight:300;letter-spacing:0.04em;color:'+goldAccent+';margin-bottom:16px;">RoweOS</div>'
     + '<div style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:'+mutedText+';">Built for Brands</div>'
     + '</div>'
@@ -2051,7 +2051,7 @@ function wpMonogram(mode) {
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:480px;font-weight:300;color:'+faintGold+';line-height:1;position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);">R</div>'
     // Overlay text
     + '<div style="position:relative;display:flex;flex-direction:column;align-items:center;margin-top:120px;">'
-    + '<div style="margin-bottom:24px;">'+wpLogo(56)+'</div>'
+    + '<div style="margin-bottom:24px;">'+wpLogo(140)+'</div>'
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:60px;font-weight:300;letter-spacing:0.04em;color:'+goldAccent+';">RoweOS</div>'
     + '<div style="width:48px;height:1px;background:'+goldAccent+';margin:24px 0;"></div>'
     + '<div style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:'+mutedText+';">The Rowe Collection</div>'
