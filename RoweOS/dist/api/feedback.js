@@ -239,7 +239,19 @@ export default async function handler(req, res) {
 
     console.log('[Feedback] New feedback:', feedbackId, category, 'from:', body.email || 'anonymous');
 
-    // Send admin email via Resend (text summary only, no inline images)
+    // v21.5: Respond immediately after Firestore write — email/push are best-effort with 5s timeout
+    res.status(200).json({ success: true, feedbackId: feedbackId });
+
+    // Helper: fetch with timeout (5s default)
+    function fetchWithTimeout(url, opts, ms) {
+      ms = ms || 5000;
+      var ctrl = new AbortController();
+      var timer = setTimeout(function() { ctrl.abort(); }, ms);
+      opts.signal = ctrl.signal;
+      return fetch(url, opts).then(function(r) { clearTimeout(timer); return r; }).catch(function(e) { clearTimeout(timer); throw e; });
+    }
+
+    // Send admin email via Resend (best-effort, 5s timeout)
     var resendKey = (process.env.RESEND_API_KEY || '').trim();
     if (resendKey) {
       try {
@@ -255,7 +267,7 @@ export default async function handler(req, res) {
           screenshots: screenshots
         });
         var categoryLabels = { bug: 'Bug Report', feature: 'Feature Request', general: 'General Feedback', ui_ux: 'UI/UX Issue' };
-        var emailResp = await fetch('https://api.resend.com/emails', {
+        var emailResp = await fetchWithTimeout('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': 'Bearer ' + resendKey,
@@ -267,7 +279,7 @@ export default async function handler(req, res) {
             subject: 'RoweOS Feedback: ' + (categoryLabels[category] || category) + ' — ' + description.substring(0, 60),
             html: emailHtml
           })
-        });
+        }, 5000);
         if (emailResp.ok) {
           console.log('[Feedback] Admin email sent');
         } else {
@@ -279,13 +291,13 @@ export default async function handler(req, res) {
       }
     }
 
-    // Send push notification to admin
+    // Send push notification to admin (best-effort, 5s timeout)
     var adminUid = (process.env.ADMIN_UID || '').trim();
     if (adminUid) {
       try {
         var pushHost = 'roweos.com';
         var categoryLabels2 = { bug: 'Bug', feature: 'Feature', general: 'Feedback', ui_ux: 'UI/UX' };
-        var pushResp = await fetch('https://' + pushHost + '/api/push', {
+        var pushResp = await fetchWithTimeout('https://' + pushHost + '/api/push', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -294,7 +306,7 @@ export default async function handler(req, res) {
             title: 'New ' + (categoryLabels2[category] || 'Feedback') + ' from ' + (body.email || 'user'),
             message: description.substring(0, 100)
           })
-        });
+        }, 5000);
         if (pushResp.ok) {
           console.log('[Feedback] Push notification sent to admin');
         }
@@ -303,7 +315,7 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({ success: true, feedbackId: feedbackId });
+    return;
 
   } catch(err) {
     console.error('[Feedback] Error:', err);
