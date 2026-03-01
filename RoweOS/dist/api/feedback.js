@@ -48,11 +48,6 @@ function buildFeedbackEmail(feedback) {
   var catColor = categoryColors[feedback.category] || gold;
   var catLabel = categoryLabels[feedback.category] || feedback.category;
 
-  var stars = '';
-  for (var i = 1; i <= 5; i++) {
-    stars += i <= feedback.rating ? '\u2605 ' : '\u2606 ';
-  }
-
   var deviceInfo = '';
   if (feedback.deviceInfo) {
     try {
@@ -81,17 +76,16 @@ function buildFeedbackEmail(feedback) {
     + '<span style="font-family:Georgia,\'Times New Roman\',serif;font-size:22px;letter-spacing:3px;color:' + gold + ';">ROWEOS</span>'
     + '</td></tr>'
 
-    // Category badge + rating
+    // Category badge
     + '<tr><td style="padding:0 0 20px;">'
-    + '<div style="display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;background:' + catColor + ';color:#000;margin-bottom:12px;">' + catLabel + '</div>'
-    + (feedback.rating ? '<div style="font-size:20px;color:' + gold + ';margin-top:8px;">' + stars + '</div>' : '')
+    + '<div style="display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;background:' + catColor + ';color:#000;">' + catLabel + '</div>'
     + '</td></tr>'
 
     // User info
     + '<tr><td style="padding:0 0 16px;">'
     + '<p style="margin:0;font-size:12px;color:' + dimText + ';">'
     + (feedback.email ? 'From: ' + feedback.email : 'Anonymous')
-    + (feedback.tier ? ' &middot; ' + feedback.tier : '')
+    + (feedback.tier && feedback.tier !== 'unknown' ? ' &middot; ' + feedback.tier : '')
     + (feedback.brand ? ' &middot; ' + feedback.brand : '')
     + (feedback.mode ? ' &middot; ' + feedback.mode : '')
     + '</p></td></tr>'
@@ -286,14 +280,14 @@ export default async function handler(req, res) {
       sideEffects.push(
         (async function() {
           try {
-            var categoryLabels2 = { bug: 'Bug', feature: 'Feature', general: 'Feedback', ui_ux: 'UI/UX' };
+            var categoryLabels2 = { bug: 'Bug Report', feature: 'Feature Request', general: 'Feedback', ui_ux: 'UI/UX Issue' };
             var pushResp = await fetchWithTimeout('https://roweos.com/api/push', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 action: 'send', uid: adminUid,
-                title: 'New ' + (categoryLabels2[category] || 'Feedback') + ' from ' + (body.email || 'user'),
-                message: description.substring(0, 100)
+                title: 'New ' + (categoryLabels2[category] || 'Feedback'),
+                message: description.substring(0, 120)
               })
             }, 5000);
             if (pushResp.ok) { console.log('[Feedback] Push sent to admin'); }
