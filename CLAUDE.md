@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Version:  v22.0
-File:     RoweOS/dist/index.html (138196 lines)
+File:     RoweOS/dist/index.html (138199 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -170,7 +170,8 @@ Key patterns to remember without looking up:
 - `ROWEOS_DEBUG` — `console.log` gated by `localStorage.getItem('roweos_debug') === 'true'`
 - `findOperationById(id)` — unified operation lookup across ops, generatedBrandOps, custom ops, lifeOps, generatedLifeOps
 - Automations dual storage: `roweos_automations` (localStorage) AND `getScheduledTasks()`/`saveScheduledTasks()` — both must be updated on save
-- `executeWorkflow(workflow)` — runs multi-step pipelines; `executeWorkflowStep()` handles: post, studio, image, library, notify
+- `executeWorkflow(workflow)` — runs multi-step pipelines; `executeWorkflowStep()` handles: post, studio, image, video, library, notify
+- `generateVideoWithVeo(prompt, options)` — async Veo video gen (same API key as Nano Banana). `runVideoOperation()` for Studio. Video Lab tab: `videolab`. Ops IDs 49-52 (`isVideoOp: true`). Pipeline operations (image/video) must stay in sync across 4 locations: `renderPipelineStepConfig()`, `collectPipelineStepData()`, `executeWorkflowStep()`, pipeline step actions array
 - `WORKFLOW_PRESETS` — predefined multi-step workflow templates; `resolveTemplateVars()` resolves `{{stepN_output}}` between steps
 
 ### Automation History (3 stores — all must be written on execution)
