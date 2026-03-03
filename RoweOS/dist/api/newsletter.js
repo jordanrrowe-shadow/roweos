@@ -340,7 +340,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
 export default async function handler(req, res) {
   // CORS
   var origin = req.headers.origin || '';
-  var allowed = ['https://roweos.vercel.app', 'https://roweos.com', 'https://www.roweos.com'];
+  var allowed = ['https://roweos.vercel.app', 'https://roweos.com', 'https://www.roweos.com', 'https://roweoswebsite.vercel.app', 'https://roweos.website', 'https://www.roweos.website'];
   res.setHeader('Access-Control-Allow-Origin', allowed.indexOf(origin) !== -1 ? origin : allowed[0]);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

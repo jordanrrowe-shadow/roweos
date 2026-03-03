@@ -14,7 +14,8 @@
   },
   "routes": [
     { "src": "/newsletter", "dest": "/newsletter.html" },
-    { "src": "/info", "dest": "/info.html" },
+    { "src": "/info/api/(.*)", "dest": "https://roweoswebsite.vercel.app/api/$1" },
+    { "src": "/info", "dest": "https://roweoswebsite.vercel.app/" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/privacy", "dest": "/privacy.html" },
     { "src": "/terms", "dest": "/terms.html" },
