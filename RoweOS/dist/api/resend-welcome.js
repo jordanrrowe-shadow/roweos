@@ -86,6 +86,8 @@ export default async function handler(req, res) {
     var subject = (body.subject || '').trim();
     var fromAddr = (body.from || 'roweos@therowecollection.com').trim();
     var htmlBody = body.html || '';
+    var cc = Array.isArray(body.cc) ? body.cc : [];
+    var bcc = Array.isArray(body.bcc) ? body.bcc : [];
     var uid = (body.uid || body.adminUid || '').trim();
 
     // Validate required fields
@@ -148,13 +150,13 @@ export default async function handler(req, res) {
         'Authorization': 'Bearer ' + (process.env.RESEND_API_KEY || '').trim(),
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
+      body: JSON.stringify(Object.assign({
         from: fromDisplay,
         reply_to: 'jordan@therowecollection.com',
         to: [email],
         subject: subject,
         html: htmlBody
-      })
+      }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}))
     });
 
     if (resendResp.ok) {
