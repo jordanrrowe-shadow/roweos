@@ -77,7 +77,7 @@ function buildWelcomeEmail(greeting) {
     // Hero
     + '<tr><td style="padding:0 0 40px;text-align:center;">'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,\'Times New Roman\',serif;font-size:32px;font-weight:normal;color:' + textColor + ';line-height:1.3;">' + greeting + '</h1>'
-    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'re now on the list for early access to RoweOS &mdash; a private AI platform for managing your brands and your life from a single, elegant interface.</p>'
+    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'re now on the list for early access to RoweOS, a private AI platform for managing your brands and your life from a single, elegant interface.</p>'
     + '</td></tr>'
 
     // Divider
@@ -87,7 +87,7 @@ function buildWelcomeEmail(greeting) {
     + '<tr><td style="padding:0 0 32px;">'
     + '<p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">What is RoweOS</p>'
     + '<h2 style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;font-weight:normal;color:' + textColor + ';">Operating Intelligence, Built for Brands</h2>'
-    + '<p style="margin:0;font-size:15px;line-height:1.7;color:' + dimText + ';">RoweOS is not a chatbot. It\'s a unified intelligence platform that thinks in terms of brands, coaches, workflows, and outcomes. Every AI agent embodies your brand\'s identity, voice, and strategy &mdash; responding as an on-brand concierge that deeply understands who you are.</p>'
+    + '<p style="margin:0;font-size:15px;line-height:1.7;color:' + dimText + ';">RoweOS is not a chatbot. It\'s a unified intelligence platform that thinks in terms of brands, coaches, workflows, and outcomes. Every AI agent embodies your brand\'s identity, voice, and strategy, responding as an on-brand concierge that deeply understands who you are.</p>'
     + '</td></tr>'
 
     // Two Mode Cards
@@ -99,7 +99,7 @@ function buildWelcomeEmail(greeting) {
     + '<div style="background:' + cardBg + ';border:1px solid ' + borderColor + ';border-radius:12px;padding:24px 20px;">'
     + '<div style="width:36px;height:36px;border-radius:8px;background:' + gold + ';color:' + bg + ';font-family:Georgia,serif;font-size:18px;line-height:36px;text-align:center;margin-bottom:16px;">B</div>'
     + '<p style="margin:0 0 8px;font-size:14px;font-weight:600;color:' + textColor + ';">BrandAI Mode</p>'
-    + '<p style="margin:0;font-size:13px;line-height:1.6;color:' + dimText + ';">4 specialized agents &mdash; Strategy, Marketing, Operations, Documents &mdash; working in concert across your entire brand portfolio.</p>'
+    + '<p style="margin:0;font-size:13px;line-height:1.6;color:' + dimText + ';">4 specialized agents: Strategy, Marketing, Operations, Documents, working in concert across your entire brand portfolio.</p>'
     + '</div></td>'
 
     // LifeAI Card
@@ -122,7 +122,7 @@ function buildWelcomeEmail(greeting) {
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
     + buildFeatureRow('150+ Operations', 'Pre-built brand-specific templates for every vertical, from client intake to content strategy.', gold, textColor, dimText, borderColor)
     + buildFeatureRow('Multi-Brand Portfolio', 'Run five businesses from one interface. Each brand gets its own identity, voice, agents, and memory.', gold, textColor, dimText, borderColor)
-    + buildFeatureRow('Automated Workflows', 'Schedule AI-powered automations &mdash; content generation, social posting, reports &mdash; that run on your timeline.', gold, textColor, dimText, borderColor)
+    + buildFeatureRow('Automated Workflows', 'Schedule AI-powered automations: content, social posts, reports, that run on your timeline.', gold, textColor, dimText, borderColor)
     + buildFeatureRow('Social Publishing', 'Generate and publish to X, Threads, and Instagram directly from your brand\'s voice.', gold, textColor, dimText, borderColor)
     + buildFeatureRow('Your Data, Your Keys', 'API keys never leave your device. Optional cloud sync with full data sovereignty.', gold, textColor, dimText, borderColor)
     + '</table>'
@@ -186,7 +186,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     // Hero
     + '<tr><td style="padding:0 0 32px;text-align:center;">'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,\'Times New Roman\',serif;font-size:32px;font-weight:normal;color:' + textColor + ';line-height:1.3;">' + greeting + '</h1>'
-    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted access to RoweOS Solo &mdash; your personal AI operating system for managing brands and life from a single, elegant interface.</p>'
+    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted access to RoweOS Solo, your personal AI operating system for managing brands and life from a single, elegant interface.</p>'
     + '</td></tr>'
 
     // Divider
@@ -197,7 +197,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     + '<div style="background:' + cardBg + ';border:1px solid rgba(168,152,120,0.25);border-radius:12px;padding:24px;text-align:center;">'
     + '<p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">Your Access Key</p>'
     + '<code style="font-size:24px;color:' + gold + ';letter-spacing:3px;font-weight:600;font-family:\'SF Mono\',Monaco,\'Courier New\',monospace;">' + accessKey + '</code>'
-    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Solo Tier &mdash; Full platform access</p>'
+    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Solo Tier: Full platform access</p>'
     + '</div>'
     + '</td></tr>'
 
@@ -224,7 +224,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     + buildFeatureRow('AI Agents', '4 specialized agents (Strategy, Marketing, Operations, Documents) that embody your brand\'s voice.', gold, textColor, dimText, borderColor)
     + buildFeatureRow('150+ Operations', 'Pre-built templates for content, strategy, client intake, and more.', gold, textColor, dimText, borderColor)
     + buildFeatureRow('Cloud Sync', 'Secure cross-device sync for all your data, conversations, and settings.', gold, textColor, dimText, borderColor)
-    + buildFeatureRow('Automations', 'Schedule AI workflows that run on your timeline — content, social posts, reports.', gold, textColor, dimText, borderColor)
+    + buildFeatureRow('Automations', 'Schedule AI workflows that run on your timeline: content, social posts, reports.', gold, textColor, dimText, borderColor)
     + '</table>'
     + '</td></tr>'
 
@@ -253,7 +253,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
 
   return '<!DOCTYPE html>'
     + '<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">'
-    + '<title>Welcome to RoweOS &mdash; ' + coName + '</title></head>'
+    + '<title>Welcome to RoweOS: ' + coName + '</title></head>'
     + '<body style="margin:0;padding:0;background-color:' + bg + ';font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:' + bg + ';">'
     + '<tr><td align="center" style="padding:40px 16px 0;">'
@@ -274,7 +274,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
     // Hero
     + '<tr><td style="padding:0 0 32px;text-align:center;">'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,\'Times New Roman\',serif;font-size:32px;font-weight:normal;color:' + textColor + ';line-height:1.3;">' + greeting + '</h1>'
-    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted Founder access to RoweOS for <strong style="color:' + textColor + ';">' + coName + '</strong> &mdash; a private AI operating system for managing your brands, team, and operations from a single platform.</p>'
+    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted Founder access to RoweOS for <strong style="color:' + textColor + ';">' + coName + '</strong> , a private AI operating system for managing your brands, team, and operations from a single platform.</p>'
     + '</td></tr>'
 
     // Divider
@@ -285,7 +285,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
     + '<div style="background:' + cardBg + ';border:1px solid rgba(168,152,120,0.25);border-radius:12px;padding:24px;text-align:center;">'
     + '<p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">Your Access Key</p>'
     + '<code style="font-size:24px;color:' + gold + ';letter-spacing:3px;font-weight:600;font-family:\'SF Mono\',Monaco,\'Courier New\',monospace;">' + accessKey + '</code>'
-    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder Tier &mdash; Full platform + advanced features</p>'
+    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder Tier: Full platform + advanced features</p>'
     + '</div>'
     + '</td></tr>'
 
@@ -411,7 +411,7 @@ export default async function handler(req, res) {
       usedBy: { nullValue: null },
       usedAt: { nullValue: null },
       email: { stringValue: email },
-      note: { stringValue: signupType === 'company' ? ('Newsletter signup — ' + companyName) : 'Newsletter signup' },
+      note: { stringValue: signupType === 'company' ? ((source === 'info_page' ? 'Info Page' : 'Newsletter') + ' signup: ' + companyName) : ((source === 'info_page' ? 'Info Page' : 'Newsletter') + ' signup') },
       source: { stringValue: 'newsletter_auto' }
     };
 
@@ -466,10 +466,10 @@ export default async function handler(req, res) {
 
         if (signupType === 'company') {
           emailHtml = buildCompanyWelcomeEmail(firstName, accessKeyString, companyName);
-          emailSubject = 'Welcome to RoweOS Founder — ' + companyName + ' Access Key';
+          emailSubject = 'Welcome to RoweOS Founder: ' + companyName + ' Access Key';
         } else {
           emailHtml = buildIndividualWelcomeEmail(firstName, accessKeyString);
-          emailSubject = 'Welcome to RoweOS Solo — Your Access Key';
+          emailSubject = 'Welcome to RoweOS Solo: Your Access Key';
         }
 
         var emailResp = await fetch('https://api.resend.com/emails', {
@@ -499,8 +499,9 @@ export default async function handler(req, res) {
     // v22.4: Admin push notification (non-fatal)
     var adminUid = 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
     try {
-      var pushTitle = 'New Signup: ' + (signupType === 'company' ? companyName : (name || email));
-      var pushBody = (signupType === 'company' ? 'Company' : 'Individual') + ' — ' + email + ' — ' + tier + ' key: ' + accessKeyString;
+      var sourceLabel = source === 'info_page' ? 'Info' : 'Newsletter';
+      var pushTitle = 'New Signup (' + sourceLabel + '): ' + (signupType === 'company' ? companyName : (name || email));
+      var pushBody = (signupType === 'company' ? 'Company' : 'Individual') + ' | ' + email + ' | ' + tier + ' key: ' + accessKeyString;
       await fetch('https://roweos.com/api/push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -531,6 +532,7 @@ export default async function handler(req, res) {
             companyName: { stringValue: companyName },
             tier: { stringValue: tier },
             accessKey: { stringValue: accessKeyString },
+            source: { stringValue: source },
             createdAt: { stringValue: new Date().toISOString() },
             read: { booleanValue: false }
           }
