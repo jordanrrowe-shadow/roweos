@@ -1,5 +1,65 @@
-// v22.2: Admin email composer — sends arbitrary HTML email via Resend
-// POST { email, subject, from, html, adminUid }
+// v22.7: Email composer — sends HTML email via Resend
+// POST { email, subject, from, html, uid, adminUid }
+// Admin: unrestricted. Non-admin: verified via Firestore, rate-limited 10/hr.
+
+var crypto = require('crypto');
+
+// --- Firebase auth helpers (copied from push.js) ---
+function base64url_jwt(str) {
+  return Buffer.from(str).toString('base64')
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+async function signJwt(header, payload, privateKeyPem) {
+  var headerB64 = base64url_jwt(JSON.stringify(header));
+  var payloadB64 = base64url_jwt(JSON.stringify(payload));
+  var unsigned = headerB64 + '.' + payloadB64;
+  var sign = crypto.createSign('RSA-SHA256');
+  sign.update(unsigned);
+  var signature = sign.sign(privateKeyPem, 'base64')
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  return unsigned + '.' + signature;
+}
+
+async function getGoogleAccessToken(serviceAccount) {
+  var now = Math.floor(Date.now() / 1000);
+  var jwt = await signJwt(
+    { alg: 'RS256', typ: 'JWT' },
+    { iss: serviceAccount.client_email, scope: 'https://www.googleapis.com/auth/datastore', aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 },
+    serviceAccount.private_key
+  );
+  var resp = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=' + jwt
+  });
+  var data = await resp.json();
+  return data.access_token;
+}
+
+// --- Rate limiting (in-memory, per-serverless instance) ---
+var rateLimitMap = {};
+var RATE_LIMIT_MAX = 10;
+var RATE_LIMIT_WINDOW = 3600000; // 1 hour
+
+function checkRateLimit(uid) {
+  var now = Date.now();
+  if (!rateLimitMap[uid]) rateLimitMap[uid] = [];
+  // Purge old entries
+  rateLimitMap[uid] = rateLimitMap[uid].filter(function(t) { return now - t < RATE_LIMIT_WINDOW; });
+  if (rateLimitMap[uid].length >= RATE_LIMIT_MAX) return false;
+  rateLimitMap[uid].push(now);
+  return true;
+}
+
+// --- Verify user exists in Firestore ---
+async function verifyFirebaseUser(uid, projectId, accessToken) {
+  var url = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents/users/' + uid;
+  var resp = await fetch(url, {
+    headers: { 'Authorization': 'Bearer ' + accessToken }
+  });
+  return resp.ok;
+}
 
 export default async function handler(req, res) {
   // CORS headers
@@ -26,7 +86,7 @@ export default async function handler(req, res) {
     var subject = (body.subject || '').trim();
     var fromAddr = (body.from || 'roweos@therowecollection.com').trim();
     var htmlBody = body.html || '';
-    var adminUid = (body.adminUid || '').trim();
+    var uid = (body.uid || body.adminUid || '').trim();
 
     // Validate required fields
     if (!email) {
@@ -38,11 +98,34 @@ export default async function handler(req, res) {
     if (!htmlBody) {
       return res.status(400).json({ error: 'Email body is required' });
     }
+    if (!uid) {
+      return res.status(403).json({ error: 'Authentication required' });
+    }
 
-    // Verify admin UID
+    // v22.7: Auth — admin passes through, non-admin verified via Firestore
     var ADMIN_UID = 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
-    if (adminUid !== ADMIN_UID) {
-      return res.status(403).json({ error: 'Admin access required' });
+    var isAdmin = (uid === ADMIN_UID);
+
+    if (!isAdmin) {
+      // Verify user via Firestore if env vars available
+      var projectId = (process.env.FIREBASE_PROJECT_ID || '').trim();
+      var saRaw = (process.env.FIREBASE_SERVICE_ACCOUNT || '').trim();
+      if (!projectId || !saRaw) {
+        return res.status(403).json({ error: 'Email sending requires admin access (Firebase not configured)' });
+      }
+      var serviceAccount;
+      try { serviceAccount = JSON.parse(saRaw); } catch(e) {
+        return res.status(500).json({ error: 'Invalid service account configuration' });
+      }
+      var accessToken = await getGoogleAccessToken(serviceAccount);
+      var userExists = await verifyFirebaseUser(uid, projectId, accessToken);
+      if (!userExists) {
+        return res.status(403).json({ error: 'User not found' });
+      }
+      // Rate limit non-admin
+      if (!checkRateLimit(uid)) {
+        return res.status(429).json({ error: 'Rate limit exceeded (10 emails/hour)' });
+      }
     }
 
     if (!process.env.RESEND_API_KEY) {
@@ -62,7 +145,7 @@ export default async function handler(req, res) {
     var resendResp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + process.env.RESEND_API_KEY.trim(),
+        'Authorization': 'Bearer ' + (process.env.RESEND_API_KEY || '').trim(),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -76,7 +159,7 @@ export default async function handler(req, res) {
 
     if (resendResp.ok) {
       var resendData = await resendResp.json();
-      console.log('[resend-welcome] Email sent to:', email, 'from:', fromAddr, 'id:', resendData.id);
+      console.log('[resend-welcome] Email sent to:', email, 'from:', fromAddr, 'uid:', uid, 'id:', resendData.id);
       return res.status(200).json({ success: true, emailId: resendData.id });
     } else {
       var errText = await resendResp.text();
