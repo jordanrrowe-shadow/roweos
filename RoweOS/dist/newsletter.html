@@ -150,6 +150,55 @@
             margin-bottom: 24px;
         }
 
+        /* v22.4: Segmented toggle */
+        .signup-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 3px;
+            margin-bottom: 16px;
+        }
+
+        .signup-toggle-btn {
+            flex: 1;
+            padding: 10px 16px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(232, 228, 223, 0.4);
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+        }
+
+        .signup-toggle-btn.active {
+            background: rgba(242, 223, 197, 0.1);
+            color: #f2dfc5;
+            font-weight: 500;
+        }
+
+        .signup-toggle-btn:hover:not(.active) {
+            color: rgba(232, 228, 223, 0.6);
+        }
+
+        .company-field {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
+            margin-bottom: 0;
+        }
+
+        .company-field.visible {
+            max-height: 80px;
+            opacity: 1;
+            margin-bottom: 16px;
+        }
+
         .form-label {
             display: block;
             font-size: 11px;
@@ -527,6 +576,23 @@
                         >
                     </div>
 
+                    <!-- v22.4: Individual / Company toggle -->
+                    <div class="signup-toggle" id="signupToggle">
+                        <button type="button" class="signup-toggle-btn active" data-type="individual" onclick="setSignupType('individual')">Individual</button>
+                        <button type="button" class="signup-toggle-btn" data-type="company" onclick="setSignupType('company')">Company</button>
+                    </div>
+
+                    <div class="company-field" id="companyField">
+                        <label class="form-label" for="companyInput">Company Name</label>
+                        <input
+                            type="text"
+                            id="companyInput"
+                            class="form-input"
+                            placeholder="Your company name"
+                            autocomplete="organization"
+                        >
+                    </div>
+
                     <button type="submit" class="submit-btn" id="submitBtn">
                         <span class="btn-text">Get Early Access</span>
                         <span class="btn-spinner"></span>
@@ -560,14 +626,38 @@
     </div>
 
     <script>
+    // v22.4: Signup type state
+    var _signupType = 'individual';
+
+    function setSignupType(type) {
+        _signupType = type;
+        var btns = document.querySelectorAll('.signup-toggle-btn');
+        for (var i = 0; i < btns.length; i++) {
+            if (btns[i].getAttribute('data-type') === type) {
+                btns[i].classList.add('active');
+            } else {
+                btns[i].classList.remove('active');
+            }
+        }
+        var companyField = document.getElementById('companyField');
+        if (type === 'company') {
+            companyField.classList.add('visible');
+        } else {
+            companyField.classList.remove('visible');
+        }
+    }
+
     (function() {
         var form = document.getElementById('newsletterForm');
         var emailInput = document.getElementById('emailInput');
         var nameInput = document.getElementById('nameInput');
+        var companyInput = document.getElementById('companyInput');
         var submitBtn = document.getElementById('submitBtn');
         var errorMessage = document.getElementById('errorMessage');
         var formWrapper = document.getElementById('formWrapper');
         var successState = document.getElementById('successState');
+        var successHeading = document.querySelector('.success-heading');
+        var successText = document.querySelector('.success-text');
 
         function isValidEmail(email) {
             var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -595,7 +685,15 @@
             }
         }
 
-        function showSuccess() {
+        function showSuccess(type) {
+            // v22.4: Update success message based on type
+            if (type === 'company') {
+                if (successHeading) successHeading.textContent = "You're on the list";
+                if (successText) successText.textContent = "Check your email for your Founder access key and admin setup instructions.";
+            } else {
+                if (successHeading) successHeading.textContent = "You're on the list";
+                if (successText) successText.textContent = "Check your email for your access key and getting started guide.";
+            }
             formWrapper.classList.add('hidden');
             setTimeout(function() {
                 successState.classList.add('visible');
@@ -616,6 +714,7 @@
 
             var email = emailInput.value.trim();
             var name = nameInput.value.trim();
+            var companyName = companyInput ? companyInput.value.trim() : '';
 
             // Validation
             if (!email) {
@@ -630,13 +729,22 @@
                 return;
             }
 
+            // v22.4: Validate company name for company signups
+            if (_signupType === 'company' && !companyName) {
+                showError('Please enter your company name.');
+                if (companyInput) companyInput.focus();
+                return;
+            }
+
             // Send request
             setLoading(true);
 
             var payload = JSON.stringify({
                 email: email,
                 name: name || '',
-                source: 'newsletter_page'
+                source: 'newsletter_page',
+                type: _signupType,
+                companyName: companyName
             });
 
             var xhr = new XMLHttpRequest();
@@ -649,7 +757,7 @@
                 setLoading(false);
 
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    showSuccess();
+                    showSuccess(_signupType);
                 } else {
                     var errorText = 'Something went wrong. Please try again.';
                     try {

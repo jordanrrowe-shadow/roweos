@@ -43,5 +43,13 @@ service cloud.firestore {
         allow read, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
       }
     }
+    // v22.4: Newsletter subscribers — admin read only (server writes via service account)
+    match /newsletter_subscribers/{docId} {
+      allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+    }
+    // v22.4: Admin notifications — admin read/update (server writes via service account)
+    match /admin_notifications/{notifId} {
+      allow read, update: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+    }
   }
 }
