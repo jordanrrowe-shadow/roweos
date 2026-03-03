@@ -186,7 +186,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     // Hero
     + '<tr><td style="padding:0 0 32px;text-align:center;">'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,\'Times New Roman\',serif;font-size:32px;font-weight:normal;color:' + textColor + ';line-height:1.3;">' + greeting + '</h1>'
-    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted access to RoweOS Solo, your personal AI operating system for managing brands and life from a single, elegant interface.</p>'
+    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted access to RoweOS Founder (Beta), your personal AI operating system for managing brands and life from a single, elegant interface.</p>'
     + '</td></tr>'
 
     // Divider
@@ -197,7 +197,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     + '<div style="background:' + cardBg + ';border:1px solid rgba(168,152,120,0.25);border-radius:12px;padding:24px;text-align:center;">'
     + '<p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">Your Access Key</p>'
     + '<code style="font-size:24px;color:' + gold + ';letter-spacing:3px;font-weight:600;font-family:\'SF Mono\',Monaco,\'Courier New\',monospace;">' + accessKey + '</code>'
-    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Solo Tier: Full platform access</p>'
+    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder (Beta): Full platform access</p>'
     + '</div>'
     + '</td></tr>'
 
@@ -285,7 +285,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
     + '<div style="background:' + cardBg + ';border:1px solid rgba(168,152,120,0.25);border-radius:12px;padding:24px;text-align:center;">'
     + '<p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">Your Access Key</p>'
     + '<code style="font-size:24px;color:' + gold + ';letter-spacing:3px;font-weight:600;font-family:\'SF Mono\',Monaco,\'Courier New\',monospace;">' + accessKey + '</code>'
-    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder Tier: Full platform + advanced features</p>'
+    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder (Beta): Full platform + advanced features</p>'
     + '</div>'
     + '</td></tr>'
 
@@ -399,7 +399,7 @@ export default async function handler(req, res) {
     }
 
     // v22.4: Generate access key
-    var tier = signupType === 'company' ? 'founder' : 'solo';
+    var tier = 'founder';
     var accessKeyString = generateAccessKeyString();
 
     // Write access key to Firestore
@@ -466,10 +466,10 @@ export default async function handler(req, res) {
 
         if (signupType === 'company') {
           emailHtml = buildCompanyWelcomeEmail(firstName, accessKeyString, companyName);
-          emailSubject = 'Welcome to RoweOS Founder: ' + companyName + ' Access Key';
+          emailSubject = 'Welcome to RoweOS Founder (Beta): ' + companyName + ' Access Key';
         } else {
           emailHtml = buildIndividualWelcomeEmail(firstName, accessKeyString);
-          emailSubject = 'Welcome to RoweOS Solo: Your Access Key';
+          emailSubject = 'Welcome to RoweOS Founder (Beta): Your Access Key';
         }
 
         var emailResp = await fetch('https://api.resend.com/emails', {
