@@ -134,14 +134,25 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'RESEND_API_KEY not configured' });
     }
 
-    // Validate from address — only allow known addresses
+    // v22.8: Validate from address — known addresses get display names, custom addresses validated
     var allowedFrom = {
       'roweos@therowecollection.com': 'RoweOS <roweos@therowecollection.com>',
       'jordan@therowecollection.com': 'Jordan Rowe <jordan@therowecollection.com>'
     };
     var fromDisplay = allowedFrom[fromAddr];
     if (!fromDisplay) {
-      return res.status(400).json({ error: 'Invalid from address. Allowed: roweos@ or jordan@therowecollection.com' });
+      // Allow custom from if it looks like a valid email (basic validation)
+      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(fromAddr)) {
+        return res.status(400).json({ error: 'Invalid from email address' });
+      }
+      // Extract name part if provided as "Name <email>" format, otherwise use email as-is
+      if (fromAddr.indexOf('<') !== -1 && fromAddr.indexOf('>') !== -1) {
+        fromDisplay = fromAddr;
+      } else {
+        var namePart = fromAddr.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+        fromDisplay = namePart + ' <' + fromAddr + '>';
+      }
     }
 
     var resendResp = await fetch('https://api.resend.com/emails', {
