@@ -411,6 +411,44 @@ betaData.forEach(function(b, i) {
   });
 });
 
+// ── 2b. FREE BETA CAMPAIGN (12) ──
+var freeBetaData = [
+  { headline: 'One month free.<br>Full access.', sub: 'Try Founder with every feature unlocked. No credit card. No strings.', cta: 'Start Free at roweos.com' },
+  { headline: 'Your brand deserves<br>better than guesswork.', sub: 'AI-powered strategy, content, and automation. Free for 30 days.', cta: 'Try RoweOS Free' },
+  { headline: '150+ operations.<br>Zero cost to start.', sub: 'Studio, Automations, Social Publishing, Deep Research, and more. One month on us.', cta: 'Claim Your Free Month' },
+  { headline: 'Stop paying for<br>five separate tools.', sub: 'RoweOS replaces your content stack with one intelligent platform. Try it free.', cta: 'Start Free at roweos.com' },
+  { headline: 'Built for founders<br>who move fast.', sub: 'From strategy to publication in one platform. Free for 30 days, then $59/mo locked in for life.', cta: 'Get Started Free' },
+  { headline: 'Brand intelligence,<br>not another chatbot.', sub: 'AI agents that think, write, and operate as your brand. Try Founder free for a month.', cta: 'Start Your Free Month' }
+];
+
+freeBetaData.forEach(function(b, i) {
+  ['dark','light'].forEach(function(mode) {
+    var num = 300 + (i * 2) + (mode === 'dark' ? 0 : 1);
+    templates.push({
+      id: num,
+      category: 'beta',
+      mode: mode,
+      label: b.headline.replace(/<br>/g,' ').substring(0, 30) + '... ' + mode,
+      render: (function(bd, m) {
+        return function() {
+          var glow = m === 'dark'
+            ? '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.08) 0%,transparent 70%);pointer-events:none;"></div>'
+            : '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(139,123,103,0.06) 0%,transparent 70%);pointer-events:none;"></div>';
+          var logo = '<div style="margin-bottom:48px;">'+logoMark(m, 32)+'</div>';
+          var badge = '<div style="display:inline-block;padding:6px 18px;border:1px solid var(--c-g4);border-radius:6px;font-size:11px;color:var(--c-g3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:40px;">Free Beta</div>';
+          var headline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:60px;font-weight:300;line-height:1.15;margin-bottom:28px;max-width:800px;">'+bd.headline+'</div>';
+          var sub = '<div style="font-size:17px;color:var(--c-muted);line-height:1.7;max-width:680px;margin-bottom:40px;">'+bd.sub+'</div>';
+          var cta = '<div style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,var(--c-g3),var(--c-g5));border-radius:8px;font-size:14px;color:'+(m==='dark'?'#0a0a0a':'#ffffff')+';font-weight:600;letter-spacing:0.04em;">'+bd.cta+'</div>';
+          var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
+            + glow + logo + badge + headline + sub + cta
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(b, mode)
+    });
+  });
+});
+
 // ── 3. STATS / NUMBERS (8) ──
 var statsData = [
   { big: '20', label: 'Integrated Views', desc: 'Every dimension of your brand, unified.' },
