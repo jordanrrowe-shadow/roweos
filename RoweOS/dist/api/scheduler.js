@@ -805,6 +805,54 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
         // v20.17: Treat post failure as step failure
         if (!postResult.success) throw new Error(postResult.result || 'Social post failed');
 
+      } else if (stepAction === 'research') {
+        // v22.9: Deep Research via Google Interactions API (server-side)
+        if (!apiKeys.google) throw new Error('No Google API key for Deep Research');
+        var researchQuery = (step.target && step.target.researchQuery) ? step.target.researchQuery : stepText;
+        // Enrich with brand context
+        if (brand && brand.name) {
+          var bName = brand.shortName || brand.name;
+          researchQuery = 'Business context: ' + bName + (brand.tagline ? ' - ' + brand.tagline : '') + '.\n\nResearch request: ' + researchQuery;
+        }
+        // Start interaction
+        var drUrl = 'https://generativelanguage.googleapis.com/v1beta/interactions?key=' + apiKeys.google;
+        var drResp = await fetch(drUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agent: 'deep-research-pro-preview-12-2025', input: researchQuery, background: true })
+        });
+        if (!drResp.ok) {
+          var drErr = await drResp.json().catch(function() { return {}; });
+          throw new Error('Deep Research API error: ' + (drErr.error ? drErr.error.message : 'HTTP ' + drResp.status));
+        }
+        var drData = await drResp.json();
+        var drId = drData.name || drData.interactionId || drData.id;
+        if (!drId) throw new Error('No interaction ID from Deep Research');
+        // Poll (server-side, max 4 min to stay under Vercel maxDuration)
+        var drStart = Date.now();
+        var drMaxMs = 240000; // 4 minutes
+        var drPollMs = 10000; // 10 seconds
+        while (Date.now() - drStart < drMaxMs) {
+          await new Promise(function(r) { setTimeout(r, drPollMs); });
+          var pollResp = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions/' + drId + '?key=' + apiKeys.google);
+          var pollData = await pollResp.json();
+          var drStatus = (pollData.status || '').toLowerCase();
+          if (drStatus === 'completed') {
+            var drText = '';
+            if (pollData.outputs && pollData.outputs.length > 0) {
+              pollData.outputs.forEach(function(o) { if (o.text) drText += o.text + '\n\n'; });
+            } else if (pollData.output && pollData.output.text) {
+              drText = pollData.output.text;
+            }
+            stepResult = drText.trim();
+            break;
+          } else if (drStatus === 'failed') {
+            throw new Error('Deep Research failed: ' + (pollData.error || 'Unknown error'));
+          }
+          // Still in progress, continue polling
+        }
+        if (!stepResult) throw new Error('Deep Research did not complete within server time limit (4 min). Try running from the app for longer research.');
+
       } else if (stepAction === 'notify') {
         stepResult = 'Notification: ' + stepText;
 
