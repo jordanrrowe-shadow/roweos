@@ -1,786 +1,430 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RoweOS: Stay in the Loop</title>
-    <meta name="description" content="Operating intelligence, built for brands. Sign up for early access, updates, and exclusive insights from RoweOS.">
-    <meta property="og:title" content="RoweOS: Stay in the Loop">
-    <meta property="og:description" content="Operating intelligence, built for brands. Sign up for early access, updates, and exclusive insights.">
-    <meta property="og:type" content="website">
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS</title>
+<meta name="description" content="Operating intelligence, built for brands & life. AI agents for strategy, marketing, operations, and personal growth.">
+<meta property="og:title" content="RoweOS — Operating Intelligence">
+<meta property="og:description" content="AI agents for strategy, marketing, operations, and personal growth. Built for brands & life.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://roweos.com/newsletter">
+<meta property="og:image" content="https://roweos.com/logo.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RoweOS — Operating Intelligence">
+<meta name="twitter:description" content="AI agents for strategy, marketing, operations, and personal growth.">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+body {
+  background:#0a0a0a;
+  color:#e8e4df;
+  font-family:'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight:300;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
 
-        html, body {
-            height: 100%;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+/* Ambient glows */
+body::before {
+  content:'';
+  position:fixed;
+  top:-30%;
+  left:50%;
+  transform:translateX(-50%);
+  width:700px;
+  height:700px;
+  background:radial-gradient(ellipse at center, rgba(242,223,197,0.04) 0%, rgba(139,123,103,0.02) 40%, transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+body::after {
+  content:'';
+  position:fixed;
+  bottom:-20%;
+  right:10%;
+  width:500px;
+  height:500px;
+  background:radial-gradient(ellipse at center, rgba(139,123,103,0.025) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
 
-        body {
-            background-color: #0a0a0a;
-            color: #e8e4df;
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            font-weight: 300;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
+.page { position:relative; z-index:1; width:100%; max-width:440px; padding:48px 24px 40px; display:flex; flex-direction:column; align-items:center; }
 
-        /* Ambient background glow — top */
-        body::before {
-            content: '';
-            position: fixed;
-            top: -40%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(ellipse at center,
-                rgba(242, 223, 197, 0.04) 0%,
-                rgba(139, 123, 103, 0.02) 40%,
-                transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
+/* Logo */
+.logo {
+  width:72px; height:72px; border-radius:18px; margin-bottom:20px;
+  box-shadow:0 2px 24px rgba(0,0,0,0.4);
+  opacity:0; transform:scale(0.95);
+  animation:fadeScale 0.6s ease-out 0.1s forwards;
+}
 
-        /* Ambient background glow — bottom */
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: -30%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(ellipse at center,
-                rgba(139, 123, 103, 0.03) 0%,
-                transparent 60%);
-            pointer-events: none;
-            z-index: 0;
-        }
+/* Wordmark */
+.wordmark {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:32px; font-weight:300; letter-spacing:0.12em; text-transform:uppercase;
+  background:linear-gradient(135deg, #f2dfc5 0%, #c4b59e 50%, #8b7b67 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  margin-bottom:8px;
+  opacity:0; transform:translateY(-6px);
+  animation:fadeInDown 0.7s ease-out 0.2s forwards;
+}
 
-        /* ---- Layout ---- */
-        .newsletter-container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 480px;
-            padding: 40px 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
+.tagline {
+  font-size:14px; font-weight:300; color:rgba(232,228,223,0.45); letter-spacing:0.02em;
+  margin-bottom:36px;
+  opacity:0; transform:translateY(6px);
+  animation:fadeInUp 0.7s ease-out 0.35s forwards;
+}
 
-        /* ---- Wordmark ---- */
-        .wordmark {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 28px;
-            font-weight: 300;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #f2dfc5 0%, #c4b59e 50%, #8b7b67 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 64px;
-            opacity: 0;
-            transform: translateY(-8px);
-            animation: fadeInDown 0.8s ease-out 0.2s forwards;
-        }
+/* Feature pills */
+.features {
+  display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
+  margin-bottom:36px;
+  opacity:0; transform:translateY(8px);
+  animation:fadeInUp 0.7s ease-out 0.45s forwards;
+}
+.feature-pill {
+  padding:6px 14px;
+  font-size:11px; font-weight:400; letter-spacing:0.04em; color:rgba(232,228,223,0.5);
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;
+  white-space:nowrap;
+}
 
-        /* ---- Headline ---- */
-        .headline {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 48px;
-            font-weight: 300;
-            line-height: 1.15;
-            letter-spacing: -0.01em;
-            color: #f5f2ee;
-            margin-bottom: 20px;
-            opacity: 0;
-            transform: translateY(12px);
-            animation: fadeInUp 0.8s ease-out 0.4s forwards;
-        }
+/* Link cards */
+.links {
+  width:100%;
+  display:flex; flex-direction:column; gap:10px;
+  margin-bottom:40px;
+  opacity:0; transform:translateY(10px);
+  animation:fadeInUp 0.7s ease-out 0.55s forwards;
+}
 
-        /* ---- Tagline ---- */
-        .tagline {
-            font-size: 16px;
-            font-weight: 300;
-            line-height: 1.7;
-            color: rgba(232, 228, 223, 0.55);
-            max-width: 380px;
-            margin-bottom: 48px;
-            opacity: 0;
-            transform: translateY(12px);
-            animation: fadeInUp 0.8s ease-out 0.55s forwards;
-        }
+.link-card {
+  display:flex; align-items:center; gap:14px;
+  padding:16px 20px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;
+  text-decoration:none;
+  color:#e8e4df;
+  transition:all 0.3s ease;
+  cursor:pointer;
+}
+.link-card:hover {
+  background:rgba(255,255,255,0.06);
+  border-color:rgba(178,153,123,0.25);
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);
+}
 
-        /* ---- Glass form card ---- */
-        .form-card {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 20px;
-            padding: 32px 28px;
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            opacity: 0;
-            transform: translateY(16px);
-            animation: fadeInUp 0.8s ease-out 0.7s forwards;
-        }
+.link-icon {
+  width:40px; height:40px; border-radius:10px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.link-icon svg { width:18px; height:18px; }
 
-        .form-group {
-            margin-bottom: 16px;
-        }
+.link-text { flex:1; min-width:0; }
+.link-title { font-size:14px; font-weight:500; color:#f5f2ee; margin-bottom:2px; }
+.link-desc { font-size:12px; font-weight:300; color:rgba(232,228,223,0.4); }
 
-        .form-group:last-of-type {
-            margin-bottom: 24px;
-        }
+.link-arrow {
+  color:rgba(232,228,223,0.2); font-size:16px;
+  transition:color 0.3s, transform 0.3s;
+}
+.link-card:hover .link-arrow { color:rgba(242,223,197,0.6); transform:translateX(2px); }
 
-        /* v22.4: Segmented toggle */
-        .signup-toggle {
-            display: flex;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 3px;
-            margin-bottom: 16px;
-        }
+/* Highlight card (newsletter CTA) */
+.link-card.highlight {
+  background:rgba(178,153,123,0.08);
+  border-color:rgba(178,153,123,0.2);
+}
+.link-card.highlight:hover {
+  background:rgba(178,153,123,0.14);
+  border-color:rgba(178,153,123,0.35);
+}
 
-        .signup-toggle-btn {
-            flex: 1;
-            padding: 10px 16px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 13px;
-            font-weight: 400;
-            color: rgba(232, 228, 223, 0.4);
-            background: transparent;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            text-align: center;
-        }
+/* Newsletter inline form */
+.newsletter-section {
+  width:100%;
+  opacity:0; transform:translateY(10px);
+  animation:fadeInUp 0.7s ease-out 0.65s forwards;
+}
 
-        .signup-toggle-btn.active {
-            background: rgba(242, 223, 197, 0.1);
-            color: #f2dfc5;
-            font-weight: 500;
-        }
+.newsletter-card {
+  width:100%;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+  padding:28px 24px;
+  text-align:center;
+}
 
-        .signup-toggle-btn:hover:not(.active) {
-            color: rgba(232, 228, 223, 0.6);
-        }
+.newsletter-heading {
+  font-family:'Cormorant Garamond', Georgia, serif;
+  font-size:24px; font-weight:300; color:#f5f2ee;
+  margin-bottom:8px;
+}
 
-        .company-field {
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
-            margin-bottom: 0;
-        }
+.newsletter-sub {
+  font-size:13px; font-weight:300; color:rgba(232,228,223,0.4); line-height:1.6;
+  margin-bottom:20px;
+}
 
-        .company-field.visible {
-            max-height: 80px;
-            opacity: 1;
-            margin-bottom: 16px;
-        }
+.newsletter-form { display:flex; gap:8px; }
 
-        .form-label {
-            display: block;
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(232, 228, 223, 0.4);
-            margin-bottom: 8px;
-            text-align: left;
-        }
+.newsletter-input {
+  flex:1;
+  padding:13px 16px;
+  font-family:'DM Sans', sans-serif;
+  font-size:15px; font-weight:300;
+  color:#e8e4df;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+  outline:none;
+  transition:border-color 0.3s, background 0.3s, box-shadow 0.3s;
+  -webkit-appearance:none;
+}
+.newsletter-input::placeholder { color:rgba(232,228,223,0.2); font-weight:300; }
+.newsletter-input:focus {
+  border-color:rgba(242,223,197,0.25);
+  background:rgba(255,255,255,0.06);
+  box-shadow:0 0 0 3px rgba(242,223,197,0.06);
+}
 
-        .form-label .optional {
-            font-weight: 300;
-            letter-spacing: 0.04em;
-            text-transform: none;
-            color: rgba(232, 228, 223, 0.25);
-        }
+.newsletter-btn {
+  padding:13px 24px;
+  font-family:'DM Sans', sans-serif;
+  font-size:13px; font-weight:500; letter-spacing:0.04em;
+  color:#0a0a0a;
+  background:linear-gradient(135deg, #f2dfc5 0%, #c4b59e 50%, #8b7b67 100%);
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  transition:transform 0.25s, box-shadow 0.25s, opacity 0.25s;
+  white-space:nowrap;
+}
+.newsletter-btn:hover {
+  transform:translateY(-1px);
+  box-shadow:0 6px 24px rgba(242,223,197,0.15);
+}
+.newsletter-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none; }
 
-        .form-input {
-            width: 100%;
-            padding: 14px 18px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 15px;
-            font-weight: 300;
-            color: #e8e4df;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            outline: none;
-            transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-            -webkit-appearance: none;
-        }
+.newsletter-success {
+  display:none;
+  padding:16px 0 4px;
+  font-size:14px; font-weight:400; color:rgba(242,223,197,0.8);
+}
 
-        .form-input::placeholder {
-            color: rgba(232, 228, 223, 0.2);
-            font-weight: 300;
-        }
+.newsletter-error {
+  display:none;
+  padding:8px 0 0;
+  font-size:13px; color:#dc6464;
+  text-align:left;
+}
 
-        .form-input:focus {
-            border-color: rgba(242, 223, 197, 0.25);
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow: 0 0 0 3px rgba(242, 223, 197, 0.06);
-        }
+/* Footer */
+.footer {
+  margin-top:auto;
+  padding:24px;
+  display:flex; align-items:center; gap:20px;
+  opacity:0;
+  animation:fadeInUp 0.7s ease-out 0.8s forwards;
+}
+.footer-link {
+  font-size:12px; font-weight:400; color:rgba(232,228,223,0.25); text-decoration:none;
+  letter-spacing:0.02em; transition:color 0.3s;
+}
+.footer-link:hover { color:rgba(242,223,197,0.6); }
+.footer-dot { width:3px; height:3px; border-radius:50%; background:rgba(255,255,255,0.1); }
 
-        .form-input.input-error {
-            border-color: rgba(220, 100, 100, 0.5);
-            box-shadow: 0 0 0 3px rgba(220, 100, 100, 0.08);
-        }
+/* Keyframes */
+@keyframes fadeInDown { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeScale { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
 
-        /* ---- Inline error ---- */
-        .error-message {
-            font-size: 13px;
-            font-weight: 400;
-            color: #dc6464;
-            margin-top: 8px;
-            text-align: left;
-            min-height: 0;
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            transition: opacity 0.25s ease, max-height 0.25s ease, margin-top 0.25s ease;
-        }
+/* Mobile */
+@media (max-width:480px) {
+  .page { padding:36px 20px 32px; }
+  .logo { width:60px; height:60px; border-radius:15px; }
+  .wordmark { font-size:26px; }
+  .newsletter-form { flex-direction:column; }
+  .newsletter-btn { padding:14px 24px; }
+  .newsletter-input { font-size:16px; /* prevents iOS zoom */ }
+}
 
-        .error-message.visible {
-            opacity: 1;
-            max-height: 40px;
-            margin-top: 8px;
-        }
-
-        /* ---- Submit button ---- */
-        .submit-btn {
-            width: 100%;
-            padding: 16px 24px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: #0a0a0a;
-            background: linear-gradient(135deg, #f2dfc5 0%, #c4b59e 50%, #8b7b67 100%);
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 32px rgba(242, 223, 197, 0.15);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 16px rgba(242, 223, 197, 0.1);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .submit-btn .btn-text {
-            display: inline-block;
-            transition: opacity 0.2s ease;
-        }
-
-        .submit-btn .btn-spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(10, 10, 10, 0.2);
-            border-top-color: #0a0a0a;
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-
-        .submit-btn.loading .btn-text {
-            opacity: 0;
-        }
-
-        .submit-btn.loading .btn-spinner {
-            opacity: 1;
-            animation: spin 0.7s linear infinite;
-        }
-
-        /* ---- Form wrapper fade ---- */
-        .form-wrapper {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: opacity 0.4s ease;
-        }
-
-        .form-wrapper.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* ---- Success state ---- */
-        .success-state {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 40px 24px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.6s ease;
-            z-index: 2;
-        }
-
-        .success-state.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .success-icon {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 32px;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
-        }
-
-        .success-state.visible .success-icon {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .success-heading {
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 36px;
-            font-weight: 300;
-            color: #f5f2ee;
-            margin-bottom: 16px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.5s ease 0.35s, transform 0.5s ease 0.35s;
-        }
-
-        .success-state.visible .success-heading {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .success-text {
-            font-size: 15px;
-            font-weight: 300;
-            line-height: 1.6;
-            color: rgba(232, 228, 223, 0.5);
-            max-width: 320px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s;
-        }
-
-        .success-state.visible .success-text {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ---- Footer ---- */
-        .footer {
-            position: relative;
-            z-index: 1;
-            margin-top: 64px;
-            padding-bottom: 40px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            opacity: 0;
-            animation: fadeInUp 0.8s ease-out 0.9s forwards;
-        }
-
-        .footer-link {
-            font-size: 13px;
-            font-weight: 400;
-            color: rgba(232, 228, 223, 0.3);
-            text-decoration: none;
-            letter-spacing: 0.02em;
-            transition: color 0.3s ease;
-        }
-
-        .footer-link:hover {
-            color: rgba(242, 223, 197, 0.7);
-        }
-
-        .footer-divider {
-            width: 1px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* ---- Keyframes ---- */
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes spin {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to   { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* ---- Responsive ---- */
-        @media (max-width: 768px) {
-            .newsletter-container {
-                padding: 32px 20px;
-            }
-
-            .wordmark {
-                font-size: 24px;
-                margin-bottom: 48px;
-            }
-
-            .headline {
-                font-size: 36px;
-            }
-
-            .tagline {
-                font-size: 15px;
-                margin-bottom: 36px;
-            }
-
-            .form-card {
-                padding: 24px 20px;
-                border-radius: 16px;
-            }
-
-            .form-input {
-                padding: 13px 16px;
-                font-size: 16px; /* Prevents iOS zoom on focus */
-            }
-
-            .success-heading {
-                font-size: 30px;
-            }
-
-            .footer {
-                margin-top: 48px;
-            }
-        }
-
-        @media (max-width: 380px) {
-            .headline {
-                font-size: 30px;
-            }
-
-            .tagline {
-                font-size: 14px;
-            }
-        }
-
-        /* ---- Reduced motion ---- */
-        @media (prefers-reduced-motion: reduce) {
-            .wordmark,
-            .headline,
-            .tagline,
-            .form-card,
-            .footer {
-                opacity: 1;
-                transform: none;
-                animation: none;
-            }
-
-            .success-icon,
-            .success-heading,
-            .success-text {
-                transition: none;
-                opacity: 1;
-                transform: none;
-            }
-        }
-    </style>
+@media (prefers-reduced-motion:reduce) {
+  .logo, .wordmark, .tagline, .features, .links, .newsletter-section, .footer {
+    opacity:1; transform:none; animation:none;
+  }
+}
+</style>
 </head>
 <body>
 
-    <div class="newsletter-container">
+<div class="page">
+  <img src="/logo.png" alt="RoweOS" class="logo">
+  <div class="wordmark">RoweOS</div>
+  <p class="tagline">Operating intelligence, built for brands & life</p>
 
-        <!-- Form state -->
-        <div class="form-wrapper" id="formWrapper">
-            <div class="wordmark">RoweOS</div>
+  <div class="features">
+    <span class="feature-pill">AI Agents</span>
+    <span class="feature-pill">Brand Strategy</span>
+    <span class="feature-pill">Content Studio</span>
+    <span class="feature-pill">Social Scheduling</span>
+    <span class="feature-pill">Image & Video</span>
+    <span class="feature-pill">Life Coaching</span>
+  </div>
 
-            <h1 class="headline">Stay in the Loop</h1>
+  <div class="links">
 
-            <p class="tagline">Operating intelligence, built for brands. Sign up for early access, updates, and exclusive insights.</p>
+    <!-- Launch RoweOS -->
+    <a href="https://roweos.com" class="link-card highlight">
+      <div class="link-icon" style="background:rgba(242,223,197,0.12);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c4a882" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div class="link-text">
+        <div class="link-title">Launch RoweOS</div>
+        <div class="link-desc">Sign in or start your free trial</div>
+      </div>
+      <span class="link-arrow">&rsaquo;</span>
+    </a>
 
-            <div class="form-card">
-                <form id="newsletterForm" novalidate>
-                    <div class="form-group">
-                        <label class="form-label" for="emailInput">Email Address</label>
-                        <input
-                            type="email"
-                            id="emailInput"
-                            class="form-input"
-                            placeholder="you@example.com"
-                            required
-                            autocomplete="email"
-                            spellcheck="false"
-                        >
-                        <div class="error-message" id="errorMessage"></div>
-                    </div>
+    <!-- Newsletter -->
+    <a href="https://roweos.com/newsletter" class="link-card highlight">
+      <div class="link-icon" style="background:rgba(242,223,197,0.12);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c4a882" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+      </div>
+      <div class="link-text">
+        <div class="link-title">Join the Newsletter</div>
+        <div class="link-desc">Updates, early access, and insights</div>
+      </div>
+      <span class="link-arrow">&rsaquo;</span>
+    </a>
 
-                    <div class="form-group">
-                        <label class="form-label" for="nameInput">
-                            Name <span class="optional">(optional)</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="nameInput"
-                            class="form-input"
-                            placeholder="First name"
-                            autocomplete="given-name"
-                        >
-                    </div>
+    <!-- GitHub -->
+    <a href="https://github.com/jordanrrowe-shadow/roweos" class="link-card" target="_blank" rel="noopener">
+      <div class="link-icon" style="background:rgba(255,255,255,0.05);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(232,228,223,0.6)" stroke-width="1.5"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+      </div>
+      <div class="link-text">
+        <div class="link-title">Source Code</div>
+        <div class="link-desc">Open source on GitHub</div>
+      </div>
+      <span class="link-arrow">&rsaquo;</span>
+    </a>
 
-                    <!-- v22.4: Individual / Company toggle -->
-                    <div class="signup-toggle" id="signupToggle">
-                        <button type="button" class="signup-toggle-btn active" data-type="individual" onclick="setSignupType('individual')">Individual</button>
-                        <button type="button" class="signup-toggle-btn" data-type="company" onclick="setSignupType('company')">Company</button>
-                    </div>
+    <!-- The Rowe Collection -->
+    <a href="https://therowecollection.com" class="link-card" target="_blank" rel="noopener">
+      <div class="link-icon" style="background:rgba(255,255,255,0.05);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(232,228,223,0.6)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div class="link-text">
+        <div class="link-title">The Rowe Collection</div>
+        <div class="link-desc">Luxury brand portfolio</div>
+      </div>
+      <span class="link-arrow">&rsaquo;</span>
+    </a>
 
-                    <div class="company-field" id="companyField">
-                        <label class="form-label" for="companyInput">Company Name</label>
-                        <input
-                            type="text"
-                            id="companyInput"
-                            class="form-input"
-                            placeholder="Your company name"
-                            autocomplete="organization"
-                        >
-                    </div>
+  </div>
 
-                    <button type="submit" class="submit-btn" id="submitBtn">
-                        <span class="btn-text">Get Early Access</span>
-                        <span class="btn-spinner"></span>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Success state -->
-        <div class="success-state" id="successState">
-            <svg class="success-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="32" cy="32" r="30" stroke="url(#goldGrad)" stroke-width="1.5"/>
-                <path d="M20 33L28 41L44 25" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <defs>
-                    <linearGradient id="goldGrad" x1="0" y1="0" x2="64" y2="64">
-                        <stop offset="0%" stop-color="#f2dfc5"/>
-                        <stop offset="100%" stop-color="#8b7b67"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-            <h2 class="success-heading">You're on the list</h2>
-            <p class="success-text">We'll be in touch with updates, early access, and insights worth your time.</p>
-        </div>
-
+  <!-- Inline newsletter signup -->
+  <div class="newsletter-section">
+    <div class="newsletter-card">
+      <div class="newsletter-heading">Stay in the Loop</div>
+      <p class="newsletter-sub">Get updates on new features, AI insights, and early access to what's next.</p>
+      <div id="nlFormWrap">
+        <form class="newsletter-form" id="nlForm" novalidate>
+          <input type="email" class="newsletter-input" id="nlEmail" placeholder="you@example.com" required autocomplete="email" spellcheck="false">
+          <button type="submit" class="newsletter-btn" id="nlBtn">Subscribe</button>
+        </form>
+        <div class="newsletter-error" id="nlError"></div>
+      </div>
+      <div class="newsletter-success" id="nlSuccess">You're on the list. Welcome.</div>
     </div>
+  </div>
+</div>
 
-    <div class="footer">
-        <a href="/" class="footer-link">Back to RoweOS</a>
-        <div class="footer-divider"></div>
-        <a href="/info" class="footer-link">Learn More</a>
-    </div>
+<div class="footer">
+  <a href="/" class="footer-link">roweos.com</a>
+  <div class="footer-dot"></div>
+  <a href="/privacy" class="footer-link">Privacy</a>
+  <div class="footer-dot"></div>
+  <a href="/terms" class="footer-link">Terms</a>
+</div>
 
-    <script>
-    // v22.4: Signup type state
-    var _signupType = 'individual';
+<script>
+(function() {
+  var form = document.getElementById('nlForm');
+  var emailInput = document.getElementById('nlEmail');
+  var btn = document.getElementById('nlBtn');
+  var errorEl = document.getElementById('nlError');
+  var successEl = document.getElementById('nlSuccess');
+  var formWrap = document.getElementById('nlFormWrap');
 
-    function setSignupType(type) {
-        _signupType = type;
-        var btns = document.querySelectorAll('.signup-toggle-btn');
-        for (var i = 0; i < btns.length; i++) {
-            if (btns[i].getAttribute('data-type') === type) {
-                btns[i].classList.add('active');
-            } else {
-                btns[i].classList.remove('active');
-            }
-        }
-        var companyField = document.getElementById('companyField');
-        if (type === 'company') {
-            companyField.classList.add('visible');
-        } else {
-            companyField.classList.remove('visible');
-        }
+  function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    errorEl.style.display = 'none';
+    var email = emailInput.value.trim();
+
+    if (!email) {
+      errorEl.textContent = 'Enter your email address.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (!isValidEmail(email)) {
+      errorEl.textContent = 'Enter a valid email address.';
+      errorEl.style.display = 'block';
+      return;
     }
 
-    (function() {
-        var form = document.getElementById('newsletterForm');
-        var emailInput = document.getElementById('emailInput');
-        var nameInput = document.getElementById('nameInput');
-        var companyInput = document.getElementById('companyInput');
-        var submitBtn = document.getElementById('submitBtn');
-        var errorMessage = document.getElementById('errorMessage');
-        var formWrapper = document.getElementById('formWrapper');
-        var successState = document.getElementById('successState');
-        var successHeading = document.querySelector('.success-heading');
-        var successText = document.querySelector('.success-text');
+    btn.disabled = true;
+    btn.textContent = '...';
 
-        function isValidEmail(email) {
-            var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/newsletter', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
-        function showError(msg) {
-            errorMessage.textContent = msg;
-            errorMessage.classList.add('visible');
-            emailInput.classList.add('input-error');
-        }
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState !== 4) return;
+      btn.disabled = false;
+      btn.textContent = 'Subscribe';
 
-        function clearError() {
-            errorMessage.classList.remove('visible');
-            emailInput.classList.remove('input-error');
-        }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        formWrap.style.display = 'none';
+        successEl.style.display = 'block';
+      } else {
+        var msg = 'Something went wrong. Try again.';
+        try { var r = JSON.parse(xhr.responseText); if (r && r.error) msg = r.error; } catch(x) {}
+        errorEl.textContent = msg;
+        errorEl.style.display = 'block';
+      }
+    };
 
-        function setLoading(loading) {
-            if (loading) {
-                submitBtn.classList.add('loading');
-                submitBtn.disabled = true;
-            } else {
-                submitBtn.classList.remove('loading');
-                submitBtn.disabled = false;
-            }
-        }
+    xhr.onerror = function() {
+      btn.disabled = false;
+      btn.textContent = 'Subscribe';
+      errorEl.textContent = 'Connection error. Try again.';
+      errorEl.style.display = 'block';
+    };
 
-        function showSuccess(type) {
-            // v22.4: Update success message based on type
-            if (type === 'company') {
-                if (successHeading) successHeading.textContent = "You're on the list";
-                if (successText) successText.textContent = "Check your email for your Founder access key and admin setup instructions.";
-            } else {
-                if (successHeading) successHeading.textContent = "You're on the list";
-                if (successText) successText.textContent = "Check your email for your access key and getting started guide.";
-            }
-            formWrapper.classList.add('hidden');
-            setTimeout(function() {
-                successState.classList.add('visible');
-            }, 400);
-        }
-
-        // Clear error when user starts typing
-        emailInput.addEventListener('input', function() {
-            if (emailInput.classList.contains('input-error')) {
-                clearError();
-            }
-        });
-
-        // Form submission
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            clearError();
-
-            var email = emailInput.value.trim();
-            var name = nameInput.value.trim();
-            var companyName = companyInput ? companyInput.value.trim() : '';
-
-            // Validation
-            if (!email) {
-                showError('Please enter your email address.');
-                emailInput.focus();
-                return;
-            }
-
-            if (!isValidEmail(email)) {
-                showError('Please enter a valid email address.');
-                emailInput.focus();
-                return;
-            }
-
-            // v22.4: Validate company name for company signups
-            if (_signupType === 'company' && !companyName) {
-                showError('Please enter your company name.');
-                if (companyInput) companyInput.focus();
-                return;
-            }
-
-            // Send request
-            setLoading(true);
-
-            var payload = JSON.stringify({
-                email: email,
-                name: name || '',
-                source: 'newsletter_page',
-                type: _signupType,
-                companyName: companyName
-            });
-
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/newsletter', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState !== 4) return;
-
-                setLoading(false);
-
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    showSuccess(_signupType);
-                } else {
-                    var errorText = 'Something went wrong. Please try again.';
-                    try {
-                        var resp = JSON.parse(xhr.responseText);
-                        if (resp && resp.error) {
-                            errorText = resp.error;
-                        }
-                    } catch (parseErr) {
-                        // Use default error text
-                    }
-                    showError(errorText);
-                }
-            };
-
-            xhr.onerror = function() {
-                setLoading(false);
-                showError('Unable to connect. Please check your connection and try again.');
-            };
-
-            xhr.send(payload);
-        });
-    })();
-    </script>
+    xhr.send(JSON.stringify({ email: email, name: '', source: 'newsletter_page', type: 'individual' }));
+  });
+})();
+</script>
 
 </body>
 </html>
