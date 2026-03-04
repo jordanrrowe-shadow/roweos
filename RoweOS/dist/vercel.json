@@ -20,6 +20,7 @@
     { "src": "/privacy", "dest": "/privacy.html" },
     { "src": "/terms", "dest": "/terms.html" },
     { "src": "/social", "dest": "/social.html" },
+    { "src": "/demos", "dest": "/demos.html" },
     { "src": "/images/(.*)", "dest": "/images/$1" },
     { "src": "/social-callback", "dest": "/social-callback.html" },
     { "src": "/login.html", "dest": "/login.html" },
