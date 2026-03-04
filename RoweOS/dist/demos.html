@@ -23,52 +23,31 @@
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;min-height:100vh}
-
-/* Top bar */
 .top-bar{padding:14px 0;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
 .top-bar-inner{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:0 24px}
 .top-bar-left{display:flex;align-items:center;gap:16px}
 .top-bar-logo{height:26px;opacity:0.85}
 .top-bar-divider{width:1px;height:18px;background:var(--border-strong)}
-.top-bar-title{font-family:var(--sans);font-size:13px;color:var(--text-muted);letter-spacing:0.06em;font-weight:400}
+.top-bar-title{font-size:13px;color:var(--text-muted);letter-spacing:0.06em}
 .top-bar-right{display:flex;align-items:center;gap:12px}
 .top-bar-link{font-size:12px;color:var(--text-muted);text-decoration:none;letter-spacing:0.04em;transition:color 0.3s;padding:8px 16px;border:1px solid var(--border);border-radius:6px}
 .top-bar-link:hover{color:var(--gold-2);border-color:var(--gold-4)}
-
-/* Hero */
 .hero{padding:64px 24px 48px;text-align:center;position:relative}
 .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(178,153,123,0.05) 0%,transparent 65%);pointer-events:none}
 .hero-label{font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-4);margin-bottom:12px;position:relative}
 .hero h1{font-family:var(--serif);font-size:clamp(32px,5vw,52px);font-weight:300;margin-bottom:14px;position:relative}
 .hero p{font-size:15px;color:var(--text-muted);max-width:520px;margin:0 auto;line-height:1.7;position:relative}
-
-/* Filter tabs */
 .filters{display:flex;justify-content:center;gap:6px;padding:0 24px 40px;flex-wrap:wrap}
 .filter-btn{padding:8px 18px;border:1px solid var(--border);background:transparent;color:var(--text-dim);border-radius:20px;font-family:var(--sans);font-size:12px;cursor:pointer;transition:all 0.25s;letter-spacing:0.02em}
 .filter-btn:hover{border-color:var(--gold-4);color:var(--text-muted)}
 .filter-btn.active{background:rgba(178,153,123,0.12);border-color:var(--gold-4);color:var(--gold-2)}
-
-/* Grid */
 .grid{max-width:1200px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
-
-/* Video card */
-.video-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all 0.35s;cursor:pointer}
+.video-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all 0.35s}
 .video-card:hover{border-color:rgba(178,153,123,0.25);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.2)}
-.video-card.hidden{display:none}
-
-.video-thumb{position:relative;aspect-ratio:16/9;background:var(--surface-2);overflow:hidden}
+.video-thumb{position:relative;aspect-ratio:16/9;background:var(--surface-2);overflow:hidden;cursor:pointer}
 .video-thumb img{width:100%;height:100%;object-fit:cover;opacity:0.85;transition:opacity 0.3s}
 .video-card:hover .video-thumb img{opacity:1}
-
-/* Play button overlay */
-.play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,0.6);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;transition:all 0.3s;backdrop-filter:blur(8px)}
-.video-card:hover .play-btn{background:rgba(178,153,123,0.3);border-color:rgba(178,153,123,0.4);transform:translate(-50%,-50%) scale(1.08)}
-.play-btn svg{width:20px;height:20px;fill:#fff;margin-left:3px}
-
-/* Duration badge */
 .duration{position:absolute;bottom:10px;right:10px;padding:3px 10px;background:rgba(0,0,0,0.7);border-radius:4px;font-size:11px;color:#fff;font-weight:500;letter-spacing:0.04em;backdrop-filter:blur(4px)}
-
-/* Category badge */
 .cat-badge{position:absolute;top:10px;left:10px;padding:4px 12px;border-radius:16px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:500;backdrop-filter:blur(8px)}
 .cat-badge.core{background:rgba(178,153,123,0.2);color:var(--gold-1);border:1px solid rgba(178,153,123,0.2)}
 .cat-badge.studio{background:rgba(164,130,246,0.15);color:#a78bfa;border:1px solid rgba(164,130,246,0.2)}
@@ -77,18 +56,33 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 .cat-badge.automation{background:rgba(251,191,36,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.2)}
 .cat-badge.media{background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.2)}
 .cat-badge.settings{background:rgba(255,255,255,0.08);color:var(--text-muted);border:1px solid var(--border)}
-
 .video-info{padding:18px 20px 20px}
 .video-title{font-family:var(--serif);font-size:18px;font-weight:400;margin-bottom:6px}
 .video-desc{font-size:13px;color:var(--text-muted);line-height:1.6}
-.video-status{display:inline-block;margin-top:10px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);padding:4px 10px;border:1px solid var(--border);border-radius:4px}
 
-/* Coming soon overlay */
-.coming-soon .video-thumb::after{content:'Coming Soon';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-2);z-index:3}
-.coming-soon .play-btn{display:none}
-.coming-soon .video-thumb img{opacity:0.3}
+/* Action row */
+.card-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.card-action-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:1px solid var(--border);background:transparent;color:var(--text-dim);border-radius:6px;font-family:var(--sans);font-size:11px;cursor:pointer;transition:all 0.25s;letter-spacing:0.02em}
+.card-action-btn:hover{border-color:var(--gold-4);color:var(--gold-2)}
+.card-action-btn.primary{background:rgba(178,153,123,0.1);border-color:rgba(178,153,123,0.2);color:var(--gold-2)}
+.card-action-btn.primary:hover{background:rgba(178,153,123,0.18)}
+.card-action-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
 
-/* Modal for video playback */
+/* Prompt panel (hidden by default) */
+.prompt-panel{display:none;padding:0 20px 20px}
+.prompt-panel.open{display:block}
+.prompt-section{margin-bottom:16px}
+.prompt-label{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-4);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.prompt-copy{font-size:10px;color:var(--text-dim);cursor:pointer;text-transform:none;letter-spacing:0.02em;transition:color 0.2s}
+.prompt-copy:hover{color:var(--gold-2)}
+.prompt-copy.copied{color:var(--gold-2)}
+.prompt-text{font-size:12px;color:var(--text-muted);line-height:1.7;padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;white-space:pre-wrap;word-break:break-word;font-family:var(--sans);cursor:text;user-select:all}
+.prompt-divider{height:1px;background:var(--border);margin:16px 0}
+
+/* Recording script */
+.script-text{font-size:12px;color:var(--text-dim);line-height:1.7;padding:12px 14px;background:rgba(178,153,123,0.04);border:1px solid rgba(178,153,123,0.1);border-radius:8px;font-style:italic}
+
+/* Video modal */
 .video-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);justify-content:center;align-items:center;padding:24px}
 .video-modal.open{display:flex}
 .video-modal-inner{position:relative;max-width:900px;width:100%;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
@@ -96,24 +90,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 .video-modal-close{position:absolute;top:-44px;right:0;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all 0.2s}
 .video-modal-close:hover{background:rgba(255,255,255,0.1)}
 .video-modal-title{color:#fff;font-family:var(--serif);font-size:20px;font-weight:300;text-align:center;margin-top:16px}
-
-/* Footer */
 .footer{padding:40px 24px;border-top:1px solid var(--border);text-align:center}
 .footer-links{display:flex;justify-content:center;gap:20px;margin-bottom:12px}
 .footer a{font-size:12px;color:var(--text-dim);text-decoration:none;transition:color 0.3s}
 .footer a:hover{color:var(--gold-2)}
 .footer-copy{font-size:11px;color:var(--text-dim)}
-
-/* Responsive */
 @media(max-width:768px){
   .grid{grid-template-columns:1fr;gap:14px}
   .filters{gap:4px;padding:0 16px 24px}
   .filter-btn{padding:6px 12px;font-size:11px}
   .top-bar-link{display:none}
   .top-bar-divider{display:none}
-}
-@media(max-width:480px){
-  .grid{grid-template-columns:1fr}
+  .card-actions{gap:6px}
+  .card-action-btn{padding:6px 10px;font-size:10px}
 }
 </style>
 </head>
@@ -136,7 +125,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 <div class="hero">
 <div class="hero-label">Feature Demos</div>
 <h1>See RoweOS in action</h1>
-<p>Short walkthroughs of every feature. From AI agents to branded emails, social publishing to video generation.</p>
+<p>Short walkthroughs of every feature. Download screenshots, copy AI prompts for narration, social captions, and video generation.</p>
 </div>
 
 <div class="filters">
@@ -152,7 +141,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 
 <div class="grid" id="demoGrid"></div>
 
-<!-- Video playback modal -->
 <div class="video-modal" id="videoModal" onclick="if(event.target===this)closeVideo()">
 <div class="video-modal-inner">
 <button class="video-modal-close" onclick="closeVideo()">&times;</button>
@@ -174,40 +162,131 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:
 
 <script>
 var demos = [
-  // Core Experience
-  { id: 1, title: 'Login & Mode Selection', desc: 'Welcome screen with BrandAI and LifeAI mode cards, brand portfolio at a glance.', cat: 'core', duration: '0:20', img: '/images/desktop/login_dark.png', video: '' },
-  { id: 2, title: 'BrandAI Chat', desc: 'Conversational AI with specialized agents. Strategy, Marketing, Operations, Documents.', cat: 'core', duration: '0:30', img: '/images/desktop/chat_brandAI.png', video: '' },
-  { id: 3, title: 'LifeAI Chat', desc: 'Personal coaching with Life Coach, Wellness, Tax Copilot, and more.', cat: 'core', duration: '0:30', img: '/images/desktop/LifeAI_example_chat.png', video: '' },
-  { id: 4, title: 'Dark & Light Mode', desc: 'Full theme system. One toggle, every view transforms.', cat: 'core', duration: '0:10', img: '/images/desktop/light_brandAI.png', video: '' },
+  { id:1, title:'Login & Mode Selection', desc:'Welcome screen with BrandAI and LifeAI mode cards, brand portfolio at a glance.', cat:'core', duration:'0:20', img:'/images/desktop/login_dark.png',video:'',
+    script:'Open roweos.com > welcome screen loads > hover over BrandAI card > click it > brands appear at bottom > click back > hover over LifeAI > click it > profile loads',
+    narration:'Write a 20-second voiceover script for a product demo showing a login screen with two mode cards: BrandAI (business intelligence) and LifeAI (personal coaching). The tone is calm, confident, premium. End with "One platform. Two intelligences." Keep it under 50 words.',
+    social:'Write a social media caption (under 200 characters) for a short video showing RoweOS\'s dual-mode login screen \u2014 BrandAI for business, LifeAI for personal life. Include a CTA to roweos.com. No hashtags.',
+    veo:'Cinematic reveal of a dark luxury interface. Two glowing cards appear side by side \u2014 one warm gold, one cool blue. Camera slowly pushes in. Minimal, elegant, tech product aesthetic. 8 seconds.' },
 
-  // Studio & Output
-  { id: 5, title: 'Studio Operations', desc: 'Run any of 50+ operations. Content, strategy, social, documents \u2014 all AI-powered.', cat: 'studio', duration: '0:30', img: '/images/desktop/studi_brandAI.png', video: '' },
-  { id: 6, title: 'Studio Output Actions', desc: 'Copy, export to PDF/DOCX, email with branded template, or edit inline.', cat: 'studio', duration: '0:40', img: '/images/desktop/studi_brandAI.png', video: '' },
-  { id: 7, title: 'Email Composer', desc: 'Send branded emails directly from Studio. 4 templates, WYSIWYG editor, CC/BCC.', cat: 'studio', duration: '0:45', img: '/images/desktop/studi_brandAI.png', video: '' },
+  { id:2, title:'BrandAI Chat', desc:'Conversational AI with specialized agents. Strategy, Marketing, Operations, Documents.', cat:'core', duration:'0:30', img:'/images/desktop/chat_brandAI.png',video:'',
+    script:'Open Chat > Strategy agent selected > type "What should our Q2 focus be?" > streaming response appears > mid-response, switch to Marketing agent dropdown > show different agent colors',
+    narration:'Write a 30-second voiceover for a demo showing an AI chat interface with specialized brand agents \u2014 Strategy (purple), Marketing (pink), Operations (green), Documents (gold). The user asks a strategy question and gets a streaming response. Tone: professional, impressive. Under 70 words.',
+    social:'Write a social media caption for a video showing AI agents having a real brand strategy conversation in RoweOS. Mention the 4 specialized agents. CTA to try it. Under 200 characters.',
+    veo:'Close-up of a sleek dark chat interface with text appearing word by word in real-time, gold accent highlights, professional AI assistant responding. Warm ambient lighting, premium tech feel. 8 seconds.' },
 
-  // Brand & Identity
-  { id: 8, title: 'Brand Identity', desc: 'Define voice, audience, strategy, tagline, and visual identity with precision.', cat: 'brand', duration: '0:30', img: '/images/desktop/idenitity_brandAI.png', video: '' },
-  { id: 9, title: 'Multi-Brand Switching', desc: 'Switch brands instantly. Colors, logo, and agent context all update.', cat: 'brand', duration: '0:20', img: '/images/desktop/idenitity_brandAI.png', video: '' },
-  { id: 10, title: 'Share Brand Config', desc: 'Generate a join link to share your brand setup with team members.', cat: 'brand', duration: '0:20', img: '/images/desktop/idenitity_brandAI.png', video: '' },
+  { id:3, title:'LifeAI Chat', desc:'Personal coaching with Life Coach, Wellness, Tax Copilot, and more.', cat:'core', duration:'0:30', img:'/images/desktop/LifeAI_example_chat.png',video:'',
+    script:'Switch to LifeAI mode > open Chat > Life Coach agent > type "Help me build a morning routine" > response streams > show the different coaching tone vs BrandAI',
+    narration:'Write a 30-second voiceover for a demo showing LifeAI \u2014 the personal intelligence side of RoweOS. A Life Coach agent responds to a personal growth question with warmth and structure. Contrast it with the business focus of BrandAI. Under 70 words.',
+    social:'Write a caption for a video showing LifeAI\'s personal coaching in RoweOS. Life Coach, Wellness, Tax Copilot \u2014 AI that knows your goals. Under 200 characters with CTA.',
+    veo:'Soft blue-tinted interface showing a thoughtful AI conversation about personal growth. Calm, meditative visual tone. Text flows gently on screen. Minimal, peaceful tech aesthetic. 8 seconds.' },
 
-  // Productivity
-  { id: 11, title: 'Focus Dashboard', desc: 'Daily command center. Tasks, categories, drag-to-reorder, and completion tracking.', cat: 'productivity', duration: '0:25', img: '/images/desktop/focus_brandAI.png', video: '' },
-  { id: 12, title: 'Pulse Goal Tracking', desc: 'Set goals, track milestones, and visualize momentum across brand and life.', cat: 'productivity', duration: '0:25', img: '/images/desktop/pulse_brandAI.png', video: '' },
-  { id: 13, title: 'Rhythm Planner', desc: 'Intelligent daily scheduling with routine blocks and time management.', cat: 'productivity', duration: '0:30', img: '/images/desktop/focus_brandAI.png', video: '' },
+  { id:4, title:'Dark & Light Mode', desc:'Full theme system. One toggle, every view transforms.', cat:'core', duration:'0:10', img:'/images/desktop/light_brandAI.png',video:'',
+    script:'Click theme toggle in top-right > entire app smoothly transitions from dark to light > pause 2 seconds > toggle back to dark',
+    narration:'Write a 10-second voiceover for a quick theme toggle demo. Dark mode (default, luxury feel) to light mode (clean, daytime) and back. One sentence, punchy. Under 20 words.',
+    social:'Write a short caption for a satisfying dark-to-light mode toggle video. Emphasize the design quality. Under 150 characters.',
+    veo:'Split-screen transition from dark mode to light mode on a premium app interface. Smooth, satisfying color shift. Gold accents on both sides. Elegant motion design. 6 seconds.' },
 
-  // Automation & Publishing
-  { id: 14, title: 'Create Automation', desc: 'Build scheduled workflows. Pick action, set recurrence, assign brand.', cat: 'automation', duration: '0:40', img: '/images/desktop/adaptive_brandAI.png', video: '' },
-  { id: 15, title: 'Pipeline Builder', desc: 'Chain multi-step operations. Generate \u2192 refine \u2192 post, all automated.', cat: 'automation', duration: '0:45', img: '/images/desktop/adaptive_brandAI.png', video: '' },
-  { id: 16, title: 'Social Posting', desc: 'Post to X, Instagram, and Threads with AI content and generated images.', cat: 'automation', duration: '0:30', img: '/images/desktop/adaptive_brandAI.png', video: '' },
+  { id:5, title:'Studio Operations', desc:'Run any of 50+ operations. Content, strategy, social, documents \u2014 all AI-powered.', cat:'studio', duration:'0:30', img:'/images/desktop/studi_brandAI.png',video:'',
+    script:'Open Studio > scroll through operation list > pick "Brand Strategy Brief" > hit Run Agent > output streams in with markdown formatting > scroll through the result',
+    narration:'Write a 30-second voiceover for a demo of RoweOS Studio. 50+ built-in operations across content, strategy, social media, and documents. User picks an operation, hits Run, and gets a full deliverable in seconds. Tone: capable, efficient. Under 70 words.',
+    social:'Write a caption for a video showing RoweOS Studio running an AI operation and generating a full brand strategy brief in seconds. 50+ operations. Under 200 characters.',
+    veo:'Fast-paced montage of a content creation interface \u2014 text generating rapidly, formatted documents appearing, charts and lists populating. Dark interface with gold highlights. Professional, energetic. 8 seconds.' },
 
-  // Media Generation
-  { id: 17, title: 'Image Generation', desc: 'Generate images with Nano Banana (Gemini Imagen) and DALL-E, right inside RoweOS.', cat: 'media', duration: '0:30', img: '/images/desktop/studi_brandAI.png', video: '' },
-  { id: 18, title: 'Video Generation', desc: 'AI video with Google Veo. Multiple models, custom duration, text-to-video.', cat: 'media', duration: '0:45', img: '/images/desktop/studi_brandAI.png', video: '' },
+  { id:6, title:'Studio Output Actions', desc:'Copy, export to PDF/DOCX, email with branded template, or edit inline.', cat:'studio', duration:'0:40', img:'/images/desktop/studi_brandAI.png',video:'',
+    script:'From a completed Studio output > click Copy > click Export dropdown > select PDF > show download > click Email button > composer opens with branded template > show the template preview',
+    narration:'Write a 40-second voiceover showing what you can do after Studio generates content: Copy to clipboard, export as PDF/DOCX/HTML/Markdown, print, edit inline, or email with a branded template \u2014 all without leaving RoweOS. Under 90 words.',
+    social:'Write a caption for a video showing RoweOS Studio output actions \u2014 copy, export to PDF, email with branded templates. From AI output to delivered in 30 seconds. Under 200 characters.',
+    veo:'Sequence of action icons appearing and activating \u2014 copy, download, email envelope, print \u2014 each lighting up with a gold pulse on a dark interface. Quick, satisfying micro-interactions. 6 seconds.' },
 
-  // Data & Settings
-  { id: 19, title: 'Library', desc: 'Organized storage with folders, favorites, cross-brand search, and export.', cat: 'settings', duration: '0:25', img: '/images/desktop/library_brandAI.png', video: '' },
-  { id: 20, title: 'Analytics & API Costs', desc: 'Provider breakdown, model comparison, cost tracking, and cache hit rates.', cat: 'settings', duration: '0:25', img: '/images/desktop/analytics_brandAI.png', video: '' },
-  { id: 21, title: 'Settings & Customization', desc: 'API providers, response caching, web search, auto-pilot, and theme controls.', cat: 'settings', duration: '0:30', img: '/images/desktop/settings_brandAI.png', video: '' }
+  { id:7, title:'Email Composer', desc:'Send branded emails directly from Studio. 4 templates, WYSIWYG editor, CC/BCC.', cat:'studio', duration:'0:45', img:'/images/desktop/studi_brandAI.png',video:'',
+    script:'Click Email in Studio action bar > composer opens > show Professional template with brand logo > switch to Bold template > switch to Newsletter > fill in To field > add CC > click Send > success toast',
+    narration:'Write a 45-second voiceover for the RoweOS email composer. Run any Studio operation, click Email, and the output is wrapped in a branded template with your logo and colors. Four templates: Professional, Minimal, Bold, Newsletter. Full WYSIWYG editor, CC/BCC, send via Resend. Under 100 words.',
+    social:'Write a caption for a video showing branded email sending directly from RoweOS. 4 templates, brand logo, one click. Stop copying into Gmail. Under 200 characters.',
+    veo:'Elegant email template assembling itself \u2014 logo dropping into header, accent color sweeping across, text content flowing in, send button pulsing gold. Dark background, premium motion graphics. 8 seconds.' },
+
+  { id:8, title:'Brand Identity', desc:'Define voice, audience, strategy, tagline, and visual identity with precision.', cat:'brand', duration:'0:30', img:'/images/desktop/idenitity_brandAI.png',video:'',
+    script:'Open Identity view > scroll through brand voice section > show audience profile > show strategy fields > show tagline > show brand color picker > show logo',
+    narration:'Write a 30-second voiceover for RoweOS Brand Identity. Define your brand\'s voice, audience, strategy, tagline, and visual identity. Every AI interaction is informed by this context \u2014 so agents sound like your brand, not a generic chatbot. Under 70 words.',
+    social:'Write a caption for a video showing brand identity configuration in RoweOS. Voice, audience, strategy, colors, logo \u2014 all feeding into AI context. Under 200 characters.',
+    veo:'Abstract visualization of brand elements coalescing \u2014 typography, color swatches, voice waveforms, audience icons \u2014 merging into a unified brand profile. Gold and dark aesthetic. 8 seconds.' },
+
+  { id:9, title:'Multi-Brand Switching', desc:'Switch brands instantly. Colors, logo, and agent context all update.', cat:'brand', duration:'0:20', img:'/images/desktop/idenitity_brandAI.png',video:'',
+    script:'Click brand selector dropdown > show 5 brands listed > switch from TRC to Solo > watch accent color change > logo updates > sidebar updates > switch to Retreats',
+    narration:'Write a 20-second voiceover showing instant brand switching in RoweOS. One click switches the entire platform \u2014 colors, logo, agent context, memory \u2014 to a different brand. Manage a portfolio, not just a profile. Under 45 words.',
+    social:'Write a caption for a video showing multi-brand switching in RoweOS. 5 brands, one platform, instant context switch. Under 180 characters.',
+    veo:'Color palette morphing smoothly from warm gold to cool blue to forest green as interface elements transition \u2014 logo swapping, accent colors shifting. Fluid, satisfying brand switch. 6 seconds.' },
+
+  { id:10, title:'Share Brand Config', desc:'Generate a join link to share your brand setup with team members.', cat:'brand', duration:'0:20', img:'/images/desktop/idenitity_brandAI.png',video:'',
+    script:'Click Share button in Identity header > modal opens > generate link > show the join code > copy link',
+    narration:'Write a 20-second voiceover for sharing brand configurations. Generate a join link that shares your entire brand setup \u2014 voice, strategy, agents, colors \u2014 with team members. They join with one click. Under 45 words.',
+    social:'Write a caption about sharing brand configs via join link in RoweOS. One link, entire brand setup transferred. Under 180 characters.',
+    veo:'A share icon expanding into a link that connects two devices, brand elements flowing through the connection. Collaborative, connected feel. Gold on dark. 6 seconds.' },
+
+  { id:11, title:'Focus Dashboard', desc:'Daily command center. Tasks, categories, drag-to-reorder, and completion tracking.', cat:'productivity', duration:'0:25', img:'/images/desktop/focus_brandAI.png',video:'',
+    script:'Open Focus > show task cards > drag a task to reorder > check off a completed task > show categories widget > show the unified daily view',
+    narration:'Write a 25-second voiceover for the Focus Dashboard \u2014 RoweOS\'s daily command center. Tasks, categories, drag-to-reorder, completion tracking. Everything you need to see at a glance, nothing you don\'t. Under 55 words.',
+    social:'Write a caption for a video showing the Focus Dashboard in RoweOS. Daily command center with tasks, priorities, and drag-to-reorder. Under 180 characters.',
+    veo:'Task cards neatly arranging themselves on a dark grid, checkmarks appearing with subtle gold pulse animations, progress bars filling. Organized, calm, productive aesthetic. 6 seconds.' },
+
+  { id:12, title:'Pulse Goal Tracking', desc:'Set goals, track milestones, and visualize momentum across brand and life.', cat:'productivity', duration:'0:25', img:'/images/desktop/pulse_brandAI.png',video:'',
+    script:'Open Pulse > show active goals with progress bars > check off a milestone > watch progress bar advance > show AI-suggested tasks > toggle between brand and life goals',
+    narration:'Write a 25-second voiceover for Pulse \u2014 goal tracking that measures momentum, not just metrics. Set goals, track milestones, get AI-suggested next steps. Works across both brand and personal life modes. Under 55 words.',
+    social:'Write a caption for a Pulse goal tracking video. Goals, milestones, AI-suggested tasks. Track momentum across brand and life. Under 180 characters.',
+    veo:'Progress bars filling with golden light, milestone markers appearing, momentum graph climbing upward. Achievement-focused, satisfying progression visual. Dark premium aesthetic. 6 seconds.' },
+
+  { id:13, title:'Rhythm Planner', desc:'Intelligent daily scheduling with routine blocks and time management.', cat:'productivity', duration:'0:30', img:'/images/desktop/focus_brandAI.png',video:'',
+    script:'Open Rhythm > show week view > tap into a day > show routine blocks (morning, afternoon, evening) > show a scheduled automation task > show the day panel with time slots',
+    narration:'Write a 30-second voiceover for Rhythm \u2014 intelligent daily scheduling. Morning routines, afternoon blocks, evening wind-down. Automated tasks integrate seamlessly. Structure without rigidity. Under 65 words.',
+    social:'Write a caption for Rhythm planner demo. Intelligent scheduling with routine blocks, automated tasks, and daily structure. Under 180 characters.',
+    veo:'Calendar blocks smoothly sliding into a daily timeline, color-coded time slots filling in, clock hands turning. Organized, rhythmic motion. Dark interface with warm accents. 6 seconds.' },
+
+  { id:14, title:'Create Automation', desc:'Build scheduled workflows. Pick action, set recurrence, assign brand.', cat:'automation', duration:'0:40', img:'/images/desktop/adaptive_brandAI.png',video:'',
+    script:'Open Automations > click New Workflow > pick action type (Content Generation) > set prompt > choose brand > set recurrence (Daily) > set time > Save > show it appear in the automation list',
+    narration:'Write a 40-second voiceover for creating automations in RoweOS. Pick an action \u2014 content generation, social post, image creation, notification \u2014 set a schedule, assign a brand, and let it run. Cloud scheduler executes even when your browser is closed. Under 90 words.',
+    social:'Write a caption for an automation creation demo. Set it, schedule it, forget it. Content, posts, images \u2014 all automated. Under 200 characters.',
+    veo:'Gears and cogs assembling into a workflow diagram, connections lighting up between nodes, a clock ticking in the background. Gold mechanical aesthetic on dark canvas. Automation visualization. 8 seconds.' },
+
+  { id:15, title:'Pipeline Builder', desc:'Chain multi-step operations. Generate > refine > post, all automated.', cat:'automation', duration:'0:45', img:'/images/desktop/adaptive_brandAI.png',video:'',
+    script:'Open Pipeline Builder > add Step 1 (Generate Content) > add Step 2 (Refine with Marketing agent) > add Step 3 (Post to X) > configure each step > Save pipeline',
+    narration:'Write a 45-second voiceover for the Pipeline Builder. Chain multiple operations into automated workflows: generate content, refine it with a specific agent, then post to social \u2014 all in sequence. Each step is independently configurable with its own model, provider, and brand. Under 100 words.',
+    social:'Write a caption for a pipeline builder demo. Multi-step AI workflows: generate, refine, post \u2014 all chained and automated. Under 200 characters.',
+    veo:'Three connected nodes lighting up in sequence on a dark interface \u2014 content appearing at node one, transforming at node two, publishing at node three. Data flowing between them as golden light trails. 8 seconds.' },
+
+  { id:16, title:'Social Posting', desc:'Post to X, Instagram, and Threads with AI content and generated images.', cat:'automation', duration:'0:30', img:'/images/desktop/adaptive_brandAI.png',video:'',
+    script:'Open Automations > New Post > type or paste content > click generate image > image appears > select X/Twitter > click Post > success confirmation',
+    narration:'Write a 30-second voiceover for social posting in RoweOS. Compose posts, generate images with AI, and publish directly to X, Instagram, and Threads. Per-brand connected accounts with OAuth. Under 65 words.',
+    social:'Write a caption for a social posting demo. AI content + image generation + direct posting to X, Instagram, Threads. All from one interface. Under 200 characters.',
+    veo:'Social media icons appearing and connecting to a central content hub, posts flying outward to each platform. Dynamic, connected feel. Gold accents on dark. 6 seconds.' },
+
+  { id:17, title:'Image Generation', desc:'Generate images with Nano Banana (Gemini Imagen) and DALL-E, right inside RoweOS.', cat:'media', duration:'0:30', img:'/images/desktop/studi_brandAI.png',video:'',
+    script:'Open Image Lab > type a prompt ("Luxury product photography, gold tones, dark background") > select Nano Banana Pro 3 > Generate > loading spinner > image renders and appears',
+    narration:'Write a 30-second voiceover for image generation in RoweOS. Type a prompt, pick a model (Nano Banana powered by Gemini Imagen, or DALL-E), and generate brand-aligned imagery in seconds. Integrated into Studio, automations, and social posting. Under 65 words.',
+    social:'Write a caption for an image generation demo. Text to image with Gemini Imagen and DALL-E, right inside RoweOS. Under 180 characters.',
+    veo:'A text prompt materializing into a photorealistic image \u2014 words dissolving into pixels that form a stunning photograph. Creative, magical transformation. Gold sparkle effects on dark canvas. 8 seconds.' },
+
+  { id:18, title:'Video Generation', desc:'AI video with Google Veo. Multiple models, custom duration, text-to-video.', cat:'media', duration:'0:45', img:'/images/desktop/studi_brandAI.png',video:'',
+    script:'Open Video Lab > type prompt > select Veo 3.1 Fast > set duration 8s > Generate > show polling progress > video renders > click play > video plays inline',
+    narration:'Write a 45-second voiceover for video generation with Google Veo in RoweOS. Type a prompt, choose from 5 Veo models, set duration and aspect ratio. AI generates video from text. Integrated into Studio operations and automated pipelines. Under 100 words.',
+    social:'Write a caption for a video generation demo. Text to video with Google Veo, 5 models, directly in RoweOS. Under 200 characters.',
+    veo:'A film clapboard snapping, then a cinematic video clip rendering frame by frame from a dark void. Professional filmmaking meets AI generation. Gold film grain aesthetic. 8 seconds.' },
+
+  { id:19, title:'Library', desc:'Organized storage with folders, favorites, cross-brand search, and export.', cat:'settings', duration:'0:25', img:'/images/desktop/library_brandAI.png',video:'',
+    script:'Open Library > show folder tree > click into a folder > search for a file > open a saved Studio output > click Favorites tab > show cross-brand files',
+    narration:'Write a 25-second voiceover for the RoweOS Library. Every conversation, deliverable, and asset organized in folders. Search, favorites, cross-brand access. Export anything to Markdown, HTML, PDF, or DOCX. Under 55 words.',
+    social:'Write a caption for a Library demo. Every output saved, organized in folders, searchable, exportable. Under 180 characters.',
+    veo:'File folders opening and organizing themselves, documents sorting into categories, a search beam scanning across content. Elegant digital library. Gold accents on dark. 6 seconds.' },
+
+  { id:20, title:'Analytics & API Costs', desc:'Provider breakdown, model comparison, cost tracking, and cache hit rates.', cat:'settings', duration:'0:25', img:'/images/desktop/analytics_brandAI.png',video:'',
+    script:'Open Analytics > show Overview tab (total spend, requests, tokens) > switch to API Costs tab > show 4 connected providers > show provider breakdown chart > scroll to model breakdown table',
+    narration:'Write a 25-second voiceover for RoweOS Analytics. See exactly where your AI spend goes \u2014 broken down by provider, model, input/output tokens, and cache hit rates. 4 providers connected: Anthropic, OpenAI, Google, Nano Banana. Full cost transparency. Under 55 words.',
+    social:'Write a caption for an analytics demo. See every API dollar \u2014 by provider, by model, by request. Full AI cost transparency. Under 180 characters.',
+    veo:'Data visualization dashboard coming alive \u2014 bar charts growing, pie charts spinning into place, numbers counting up. Gold data points on dark interface. Clean, informative motion graphics. 6 seconds.' },
+
+  { id:21, title:'Settings & Customization', desc:'API providers, response caching, web search, auto-pilot, and theme controls.', cat:'settings', duration:'0:30', img:'/images/desktop/settings_brandAI.png',video:'',
+    script:'Open Settings > show 4 API provider cards (all green/connected) > scroll to Settings toggles (caching, web search, auto-pilot) > show API Usage section > toggle theme > show version info',
+    narration:'Write a 30-second voiceover for RoweOS Settings. Connect 4 AI providers with your own API keys. Toggle response caching, web search (Claude + Gemini), and auto-pilot mode. Monitor real-time API usage and costs. Full control over your intelligence stack. Under 65 words.',
+    social:'Write a caption for a settings demo. 4 AI providers, response caching, web search, auto-pilot, real-time cost tracking. Your AI, your way. Under 200 characters.',
+    veo:'Settings panel with toggle switches flipping on one by one, status indicators turning green, configuration sliders adjusting. Satisfying control interface. Premium dark aesthetic with gold accents. 6 seconds.' }
 ];
 
 function renderDemos(filter) {
@@ -217,23 +296,87 @@ function renderDemos(filter) {
     if (filter !== 'all' && d.cat !== filter) return;
     var hasVideo = d.video && d.video.length > 0;
     var card = document.createElement('div');
-    card.className = 'video-card' + (hasVideo ? '' : ' coming-soon');
-    if (hasVideo) {
-      card.onclick = function() { playVideo(d.video, d.title); };
-    }
-    card.innerHTML = '<div class="video-thumb">'
+    card.className = 'video-card';
+    card.id = 'demo-' + d.id;
+
+    card.innerHTML = '<div class="video-thumb" onclick="' + (hasVideo ? 'playVideo(\'' + d.video + '\',\'' + d.title.replace(/'/g,"\\'") + '\')' : '') + '">'
       + '<img src="' + d.img + '" alt="' + d.title + '" loading="lazy">'
-      + (hasVideo ? '<div class="play-btn"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>' : '')
       + '<span class="duration">' + d.duration + '</span>'
       + '<span class="cat-badge ' + d.cat + '">' + d.cat + '</span>'
       + '</div>'
       + '<div class="video-info">'
       + '<div class="video-title">' + d.title + '</div>'
       + '<div class="video-desc">' + d.desc + '</div>'
-      + (hasVideo ? '' : '<span class="video-status">Coming Soon</span>')
+      + '<div class="card-actions">'
+      + '<button class="card-action-btn primary" onclick="downloadImg(' + d.id + ')">'
+      + '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+      + 'Download Image</button>'
+      + '<button class="card-action-btn" onclick="togglePrompts(' + d.id + ')">'
+      + '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+      + 'Prompts</button>'
+      + '</div>'
+      + '</div>'
+      + '<div class="prompt-panel" id="prompts-' + d.id + '">'
+      + '<div class="prompt-section">'
+      + '<div class="prompt-label">Recording Script <span class="prompt-copy" onclick="copyPrompt(this,\'script-' + d.id + '\')">Copy</span></div>'
+      + '<div class="script-text" id="script-' + d.id + '">' + escHtml(d.script) + '</div>'
+      + '</div>'
+      + '<div class="prompt-divider"></div>'
+      + '<div class="prompt-section">'
+      + '<div class="prompt-label">Narration Prompt <span class="prompt-copy" onclick="copyPrompt(this,\'narration-' + d.id + '\')">Copy</span></div>'
+      + '<div class="prompt-text" id="narration-' + d.id + '">' + escHtml(d.narration) + '</div>'
+      + '</div>'
+      + '<div class="prompt-section">'
+      + '<div class="prompt-label">Social Caption Prompt <span class="prompt-copy" onclick="copyPrompt(this,\'social-' + d.id + '\')">Copy</span></div>'
+      + '<div class="prompt-text" id="social-' + d.id + '">' + escHtml(d.social) + '</div>'
+      + '</div>'
+      + '<div class="prompt-section">'
+      + '<div class="prompt-label">Veo Video Prompt <span class="prompt-copy" onclick="copyPrompt(this,\'veo-' + d.id + '\')">Copy</span></div>'
+      + '<div class="prompt-text" id="veo-' + d.id + '">' + escHtml(d.veo) + '</div>'
+      + '</div>'
       + '</div>';
     grid.appendChild(card);
   });
+}
+
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function togglePrompts(id) {
+  var panel = document.getElementById('prompts-' + id);
+  if (!panel) return;
+  panel.classList.toggle('open');
+  var card = document.getElementById('demo-' + id);
+  if (panel.classList.contains('open') && card) {
+    setTimeout(function() { card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+  }
+}
+
+function copyPrompt(btn, elId) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  var text = el.textContent || el.innerText;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = 'Copied';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+}
+
+function downloadImg(id) {
+  var demo = demos.find(function(d) { return d.id === id; });
+  if (!demo) return;
+  var a = document.createElement('a');
+  a.href = demo.img;
+  a.download = 'roweos-' + demo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function filterDemos(cat) {
