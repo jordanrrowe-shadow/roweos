@@ -3046,6 +3046,894 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 })();
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── NEW TEMPLATES v22.14 — 100+ Gold-Hue Bloom & Platform Templates ────────
+// ═══════════════════════════════════════════════════════════════════════════════
+
+(function() {
+
+  // ── SHARED PALETTE ──
+  function gp(m) {
+    var d = m === 'dark';
+    return {
+      ac: d ? '#b2997b' : '#8b7b67',
+      ac2: d ? '#c4a882' : '#6b5d4d',
+      mt: d ? '#9e9487' : '#6b6560',
+      dm: d ? '#655e54' : '#a09890',
+      sf: d ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+      bd: d ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+      gRgb: d ? '178,153,123' : '139,123,103',
+      rd: d ? '#ef4444' : '#dc2626',
+      cyan: d ? '#06b6d4' : '#0891b2',
+      cyanRgb: d ? '6,182,212' : '8,145,178',
+      green: d ? '#22c55e' : '#16a34a'
+    };
+  }
+  function glow(rgb, top, size, opa) { return '<div style="position:absolute;top:'+(top||'35%')+';left:50%;transform:translate(-50%,-50%);width:'+(size||700)+'px;height:'+(size||700)+'px;background:radial-gradient(circle,rgba('+rgb+','+(opa||0.08)+') 0%,transparent 55%);pointer-events:none;"></div>'; }
+  function pill(label, color, bd) { return '<div style="display:inline-flex;align-items:center;gap:8px;padding:6px 18px;border-radius:20px;border:1px solid '+(bd||color)+';font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:'+color+';">'+label+'</div>'; }
+  function serif(text, size, extra) { return '<div style="font-family:\'Cormorant Garamond\',serif;font-size:'+(size||48)+'px;font-weight:300;line-height:1.12;color:var(--c-text);'+(extra||'')+'">'+text+'</div>'; }
+  function sans(text, color, size, extra) { return '<div style="font-family:\'DM Sans\',sans-serif;font-size:'+(size||15)+'px;color:'+color+';line-height:1.6;'+(extra||'')+'">'+text+'</div>'; }
+  function divider(color, w) { return '<div style="width:'+(w||60)+'px;height:1px;background:'+color+';margin:32px auto;"></div>'; }
+  function numCircle(num, color, bd) { return '<div style="flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid '+(bd||color)+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:'+color+';">'+num+'</div>'; }
+  function chk(m) { return checkIcon(m); }
+  function xIcon(color) { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="2" style="flex-shrink:0;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'; }
+  function surface(content, p, extra) { return '<div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;padding:'+(p||'24px')+';'+(extra||'')+'">'+content+'</div>'; }
+
+  var nextId = 401;
+  function pushPair(cat, label, renderFn) {
+    ['dark','light'].forEach(function(m) {
+      var id = nextId++;
+      templates.push({ id: id, category: cat, mode: m, label: label + ' — ' + m, render: (function(mode) { return function() { return renderFn(mode, gp(mode)); }; })(m) });
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 1: BLOOM EXPANDED (20 templates = 10 pairs)
+  // ═══════════════════════════════════════════════════════
+
+  // 1. Bloom - Content Calendar
+  pushPair('bloom', 'Bloom Content Calendar', function(m, p) {
+    var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var types = ['Strategy','Social Post','Blog Idea','Image','Newsletter','Video','Recap'];
+    var grid = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:36px;">';
+    days.forEach(function(d, i) {
+      grid += '<div style="text-align:center;">'+
+        '<div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:'+p.dm+';margin-bottom:10px;">'+d+'</div>'+
+        '<div style="background:'+p.sf+';border:1px solid '+p.bd+';border-radius:10px;padding:14px 6px;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;">'+
+        bloomFlowerSvg(16, p.ac, '0.06')+
+        '<div style="font-size:10px;color:'+p.mt+';text-align:center;line-height:1.3;">'+types[i]+'</div>'+
+        '</div></div>';
+    });
+    grid += '</div>';
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:60px 48px;">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">'+bloomFlowerSvg(24, p.ac, '0.08')+'<span style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:'+p.mt+';">Bloom</span></div>'+
+      serif('A Week of Content.<br>Zero Effort.', 44)+
+      '<div style="margin-top:16px;">'+sans('Bloom fills your calendar with brand-native content, automatically.', p.mt)+'</div>'+
+      grid+'</div>';
+    return cardWrap(m, inner);
+  });
+
+  // 2. Bloom - Agent Collaboration
+  pushPair('bloom', 'Bloom Agent Collab', function(m, p) {
+    var agents = [
+      { name: 'Strategy Agent', color: '#22c55e', desc: 'Maps your content roadmap' },
+      { name: 'Marketing Agent', color: '#f59e0b', desc: 'Writes persuasive copy' },
+      { name: 'Operations Agent', color: '#3b82f6', desc: 'Optimizes timing and channels' },
+      { name: 'Video Agent', color: '#06b6d4', desc: 'Creates cinematic short-form' }
+    ];
+    var cards = '';
+    agents.forEach(function(a) {
+      cards += '<div style="display:flex;align-items:center;gap:16px;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:12px;padding:18px 22px;">'+
+        '<div style="width:8px;height:40px;border-radius:4px;background:'+a.color+';flex-shrink:0;"></div>'+
+        '<div><div style="font-size:15px;font-weight:600;color:var(--c-text);margin-bottom:4px;">'+a.name+'</div>'+
+        '<div style="font-size:13px;color:'+p.mt+';">'+a.desc+'</div></div></div>';
+    });
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.gRgb, '30%', 500, 0.06)+
+      '<div style="position:relative;">'+
+      pill('Multi-Agent System', p.ac, p.bd)+'<div style="margin-top:28px;">'+
+      serif('Four Agents.<br>One Feed.', 52)+'</div>'+
+      '<div style="margin-top:16px;margin-bottom:36px;">'+sans('Bloom coordinates specialized AI agents that collaborate to produce your content strategy.', p.mt)+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:12px;">'+cards+'</div></div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 3. Bloom - Personalization
+  pushPair('bloom', 'Bloom Personalization', function(m, p) {
+    var traits = ['Brand Voice', 'Target Audience', 'Industry Context', 'Visual Identity', 'Content Goals', 'Competitor Landscape'];
+    var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:32px;">';
+    traits.forEach(function(t) {
+      grid += '<div style="display:flex;align-items:center;gap:10px;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:10px;padding:14px 18px;">'+
+        chk(m)+'<span style="font-size:14px;color:var(--c-text);">'+t+'</span></div>';
+    });
+    grid += '</div>';
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.gRgb, '25%', 600, 0.07)+
+      '<div style="position:relative;">'+bloomFlowerSvg(48, p.ac, '0.08')+'<div style="margin-top:24px;">'+
+      serif('It Learns You.', 56)+'</div>'+
+      '<div style="margin-top:16px;">'+sans('Bloom absorbs your brand identity, audience, and positioning to create content that actually sounds like you.', p.mt, 16)+'</div>'+
+      grid+'</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 4. Bloom - Stats Dashboard
+  pushPair('bloom', 'Bloom Stats', function(m, p) {
+    var stats = [
+      { num: '12', label: 'Posts per batch' },
+      { num: '4', label: 'AI Agents' },
+      { num: '6', label: 'Content categories' },
+      { num: '< 30s', label: 'Generation time' }
+    ];
+    var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px;">';
+    stats.forEach(function(s) {
+      grid += '<div style="text-align:center;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:14px;padding:32px 20px;">'+
+        '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:'+p.ac+';line-height:1;">'+s.num+'</div>'+
+        '<div style="font-size:13px;color:'+p.mt+';margin-top:10px;">'+s.label+'</div></div>';
+    });
+    grid += '</div>';
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">'+bloomFlowerSvg(22, p.ac, '0.08')+'<span style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:'+p.mt+';">Bloom by the Numbers</span></div>'+
+      serif('Built for<br>Brand Velocity', 48)+
+      grid+'</div>';
+    return cardWrap(m, inner);
+  });
+
+  // 5. Bloom - Feed Preview (Mock)
+  pushPair('bloom', 'Bloom Feed Preview', function(m, p) {
+    var posts = [
+      { agent: 'Strategy', color: '#22c55e', title: 'Q2 Content Roadmap', snip: 'Focus on thought leadership and product education...' },
+      { agent: 'Marketing', color: '#f59e0b', title: '3 Hooks for Your Next Launch', snip: 'Lead with the transformation, not the feature...' },
+      { agent: 'Video', color: '#06b6d4', title: 'Brand Story - 6s Vertical', snip: 'Cinematic product showcase with motion...' }
+    ];
+    var feed = '';
+    posts.forEach(function(post) {
+      feed += '<div style="background:'+p.sf+';border:1px solid '+p.bd+';border-radius:12px;padding:20px 22px;margin-bottom:12px;">'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+
+        '<div style="width:6px;height:6px;border-radius:50%;background:'+post.color+';"></div>'+
+        '<span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:'+post.color+';">'+post.agent+' Agent</span></div>'+
+        '<div style="font-size:16px;font-weight:600;color:var(--c-text);margin-bottom:6px;">'+post.title+'</div>'+
+        '<div style="font-size:13px;color:'+p.mt+';line-height:1.5;">'+post.snip+'</div></div>';
+    });
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:60px 64px;">'+
+      glow(p.gRgb, '20%', 500, 0.06)+
+      '<div style="position:relative;">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;">'+bloomFlowerSvg(28, p.ac, '0.08')+'<span style="font-family:\'Cormorant Garamond\',serif;font-size:28px;font-weight:300;color:var(--c-text);">Your Feed</span></div>'+
+      feed+
+      '<div style="text-align:center;margin-top:16px;">'+sans('+ 9 more posts in this batch', p.dm, 13)+'</div></div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 6. Bloom - Quote / Testimonial Style
+  pushPair('bloom', 'Bloom Quote', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 80px;">'+
+      glow(p.gRgb, '40%', 800, 0.1)+
+      '<div style="position:relative;">'+bloomFlowerSvg(60, p.ac, '0.06')+'<div style="margin-top:36px;">'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:26px;font-weight:300;font-style:italic;color:var(--c-text);line-height:1.4;">"I used to spend 3 hours a week on content.<br>Now Bloom does it in 30 seconds.<br>And it sounds more like me than I do."</div>'+
+      divider(p.ac, 40)+
+      '<div style="font-size:13px;color:'+p.dm+';letter-spacing:0.1em;text-transform:uppercase;">The Future of Brand Content</div>'+
+      '</div></div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 7. Bloom - Video Feature
+  pushPair('bloom', 'Bloom Video Feature', function(m, p) {
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.cyanRgb, '30%', 500, 0.06)+
+      '<div style="position:relative;">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;">'+
+      '<div style="width:32px;height:32px;border-radius:50%;background:rgba('+p.cyanRgb+',0.12);display:flex;align-items:center;justify-content:center;">'+
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="'+p.cyan+'" stroke="none"><polygon points="5,3 19,12 5,21"/></svg></div>'+
+      '<span style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:'+p.cyan+';">Video Agent</span></div>'+
+      serif('Video in<br>Your Feed', 56)+
+      '<div style="margin-top:16px;margin-bottom:36px;">'+sans('Bloom now generates 6-second vertical videos with Google Veo. Cinematic brand content, automatically mixed into your feed.', p.mt, 16)+'</div>'+
+      '<div style="display:flex;gap:20px;">'+
+      '<div style="text-align:center;"><div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;color:'+p.cyan+';">6s</div><div style="font-size:11px;color:'+p.dm+';">Duration</div></div>'+
+      '<div style="text-align:center;"><div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;color:'+p.cyan+';">9:16</div><div style="font-size:11px;color:'+p.dm+';">Vertical</div></div>'+
+      '<div style="text-align:center;"><div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;color:'+p.cyan+';">Veo 3</div><div style="font-size:11px;color:'+p.dm+';">Powered by</div></div>'+
+      '</div></div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 8. Bloom - Learning Loop
+  pushPair('bloom', 'Bloom Learning Loop', function(m, p) {
+    var steps = [
+      { icon: '&#9829;', label: 'You like a post' },
+      { icon: '&#9733;', label: 'Bloom learns your taste' },
+      { icon: '&#9998;', label: 'Next batch adapts' },
+      { icon: '&#10003;', label: 'Content gets smarter' }
+    ];
+    var loop = '<div style="display:flex;flex-direction:column;gap:0;margin-top:36px;">';
+    steps.forEach(function(s, i) {
+      var connector = i < steps.length - 1 ? '<div style="width:1px;height:24px;background:'+p.bd+';margin:0 auto;"></div>' : '';
+      loop += '<div style="display:flex;align-items:center;gap:20px;padding:16px 22px;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:12px;">'+
+        '<div style="font-size:22px;width:40px;text-align:center;">'+s.icon+'</div>'+
+        '<div style="font-size:15px;color:var(--c-text);">'+s.label+'</div></div>'+connector;
+    });
+    loop += '</div>';
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.gRgb, '50%', 600, 0.06)+
+      '<div style="position:relative;">'+pill('Adaptive AI', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('It Gets Better<br>Every Time', 48)+'</div>'+
+      '<div style="margin-top:12px;">'+sans('Bloom\'s algorithm learns from your interactions. Like, save, or dwell on posts and your next batch improves.', p.mt)+'</div>'+
+      loop+'</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 9. Bloom - Platform Comparison
+  pushPair('bloom', 'Bloom vs Others', function(m, p) {
+    var rows = [
+      { feat: 'Brand-native voice', bloom: true, others: false },
+      { feat: 'Multi-agent system', bloom: true, others: false },
+      { feat: 'Video generation', bloom: true, others: false },
+      { feat: 'Portfolio support', bloom: true, others: false },
+      { feat: 'Algorithmic learning', bloom: true, others: false },
+      { feat: 'One-click publish', bloom: true, others: true }
+    ];
+    var table = '<div style="margin-top:36px;">';
+    table += '<div style="display:flex;padding:0 0 12px;border-bottom:1px solid '+p.bd+';margin-bottom:8px;">'+
+      '<div style="flex:1;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:'+p.dm+';">Feature</div>'+
+      '<div style="width:80px;text-align:center;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:'+p.ac+';">Bloom</div>'+
+      '<div style="width:80px;text-align:center;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:'+p.dm+';">Others</div></div>';
+    rows.forEach(function(r) {
+      table += '<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid '+p.bd+';">'+
+        '<div style="flex:1;font-size:14px;color:var(--c-text);">'+r.feat+'</div>'+
+        '<div style="width:80px;text-align:center;">'+(r.bloom ? chk(m) : xIcon(p.rd))+'</div>'+
+        '<div style="width:80px;text-align:center;">'+(r.others ? chk(m) : xIcon(p.rd))+'</div></div>';
+    });
+    table += '</div>';
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:60px 64px;">'+
+      bloomFlowerSvg(28, p.ac, '0.08')+
+      '<div style="margin-top:20px;">'+serif('Not Another<br>Content Tool', 48)+'</div>'+
+      table+'</div>';
+    return cardWrap(m, inner);
+  });
+
+  // 10. Bloom - CTA Minimal
+  pushPair('bloom', 'Bloom CTA Minimal', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '45%', 900, 0.12)+
+      '<div style="position:relative;">'+bloomFlowerSvg(100, p.ac, '0.06')+
+      '<div style="margin-top:40px;">'+serif('Bloom', 96, 'letter-spacing:0.06em;')+'</div>'+
+      divider(p.ac, 48)+
+      sans('AI content that grows with your brand', p.mt, 18, 'letter-spacing:0.04em;')+
+      '<div style="margin-top:44px;padding:14px 40px;border:1px solid '+p.ac+';border-radius:28px;font-size:13px;letter-spacing:0.15em;text-transform:uppercase;color:'+p.ac+';">Try It Free</div>'+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 2: PLATFORM FEATURES - GOLD REFRESH (20 pairs = 40 templates)
+  // ═══════════════════════════════════════════════════════
+
+  // 11. Studio Hero
+  pushPair('features', 'Studio Gold Hero', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '35%', 700, 0.08)+
+      '<div style="position:relative;">'+logoMark(m, 36)+'<div style="margin-top:32px;">'+
+      serif('Content Studio', 64)+'</div>'+
+      divider(p.ac, 60)+
+      sans('40+ AI operations. Image generation. Video creation.<br>All in one workspace.', p.mt, 17)+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 12. Chat Intelligence
+  pushPair('features', 'Chat Intelligence Gold', function(m, p) {
+    var features = ['Multi-model support', 'File attachments', 'Deep Research mode', 'Conversation history', 'System prompts'];
+    var list = '';
+    features.forEach(function(f) {
+      list += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'+chk(m)+'<span style="font-size:15px;color:var(--c-text);">'+f+'</span></div>';
+    });
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.gRgb, '25%', 500, 0.06)+
+      '<div style="position:relative;">'+pill('Chat', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Talk to Any AI.<br>One Interface.', 48)+'</div>'+
+      '<div style="margin-top:12px;margin-bottom:32px;">'+sans('Claude, GPT, Gemini, Grok, DeepSeek, and more. Switch models mid-conversation.', p.mt)+'</div>'+
+      list+'</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 13. Focus Mode
+  pushPair('features', 'Focus Mode Gold', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '40%', 700, 0.1)+
+      '<div style="position:relative;">'+
+      '<div style="font-size:72px;margin-bottom:28px;opacity:0.8;">&#9673;</div>'+
+      serif('Focus Mode', 64)+
+      divider(p.ac, 48)+
+      sans('Distraction-free writing with AI assistance.<br>Full-screen. Markdown. Beautiful.', p.mt, 17)+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 14. Identity System
+  pushPair('features', 'Identity System Gold', function(m, p) {
+    var fields = ['Brand Voice', 'Visual Style', 'Target Audience', 'Positioning', 'Competitors', 'Products & Services'];
+    var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:32px;">';
+    fields.forEach(function(f) {
+      grid += '<div style="background:'+p.sf+';border:1px solid '+p.bd+';border-radius:10px;padding:16px 18px;font-size:14px;color:var(--c-text);">'+f+'</div>';
+    });
+    grid += '</div>';
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      pill('Identity', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Your Brand DNA,<br>Encoded in AI', 48)+'</div>'+
+      '<div style="margin-top:12px;">'+sans('Every piece of content Bloom and Studio generate is filtered through your brand identity.', p.mt)+'</div>'+
+      grid+'</div>';
+    return cardWrap(m, inner);
+  });
+
+  // 15. Pulse Analytics
+  pushPair('features', 'Pulse Analytics Gold', function(m, p) {
+    var metrics = [
+      { label: 'Sessions', value: '2.4K', change: '+18%' },
+      { label: 'Engagement', value: '67%', change: '+12%' },
+      { label: 'Content Score', value: '94', change: '+5' }
+    ];
+    var cards = '<div style="display:flex;gap:14px;margin-top:36px;">';
+    metrics.forEach(function(met) {
+      cards += '<div style="flex:1;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:12px;padding:22px 18px;text-align:center;">'+
+        '<div style="font-size:12px;color:'+p.dm+';margin-bottom:8px;">'+met.label+'</div>'+
+        '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;color:var(--c-text);">'+met.value+'</div>'+
+        '<div style="font-size:12px;color:'+p.green+';margin-top:6px;">'+met.change+'</div></div>';
+    });
+    cards += '</div>';
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.gRgb, '30%', 500, 0.06)+
+      '<div style="position:relative;">'+pill('Pulse', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Know What\'s<br>Working', 48)+'</div>'+
+      '<div style="margin-top:12px;">'+sans('Real-time analytics on your AI-generated content performance.', p.mt)+'</div>'+
+      cards+'</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 16. Video Lab
+  pushPair('features', 'Video Lab Gold', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.cyanRgb, '35%', 600, 0.06)+
+      '<div style="position:relative;">'+
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">'+
+      '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="'+p.cyan+'" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10,8 16,12 10,16" fill="'+p.cyan+'" fill-opacity="0.3"/></svg>'+
+      '<span style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:'+p.cyan+';">Video Lab</span></div>'+
+      serif('AI Video<br>Generation', 56)+
+      '<div style="margin-top:16px;margin-bottom:36px;">'+sans('Create stunning videos from text prompts. Google Veo and Imagen Video power professional-quality results in minutes.', p.mt, 16)+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+      surface('<div style="font-size:14px;font-weight:600;color:var(--c-text);margin-bottom:4px;">Text to Video</div><div style="font-size:12px;color:'+p.mt+';">Describe it, watch it come to life</div>', '18px')+
+      surface('<div style="font-size:14px;font-weight:600;color:var(--c-text);margin-bottom:4px;">Image to Video</div><div style="font-size:12px;color:'+p.mt+';">Animate any still image</div>', '18px')+
+      '</div></div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 17. Guardrails
+  pushPair('features', 'Guardrails Gold', function(m, p) {
+    var rules = ['Brand voice consistency', 'Competitor mention blocking', 'Tone and sentiment filters', 'Custom word lists'];
+    var list = '';
+    rules.forEach(function(r) {
+      list += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
+        '<div style="width:6px;height:6px;border-radius:50%;background:'+p.ac+';flex-shrink:0;"></div>'+
+        '<span style="font-size:15px;color:var(--c-text);">'+r+'</span></div>';
+    });
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      pill('Guardrails', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('AI With<br>Boundaries', 52)+'</div>'+
+      '<div style="margin-top:12px;margin-bottom:32px;">'+sans('Set rules for what your AI can and cannot say. Every output is filtered through your guardrails.', p.mt)+'</div>'+
+      list+'</div>';
+    return cardWrap(m, inner);
+  });
+
+  // 18. Notification Center
+  pushPair('features', 'Notifications Gold', function(m, p) {
+    var notifs = [
+      { icon: '&#128276;', text: 'Bloom batch ready - 12 new posts', time: '2m ago' },
+      { icon: '&#9989;', text: 'Scheduled post published to X', time: '1h ago' },
+      { icon: '&#128200;', text: 'Weekly analytics report available', time: '3h ago' }
+    ];
+    var list = '';
+    notifs.forEach(function(n) {
+      list += '<div style="display:flex;align-items:center;gap:16px;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:12px;padding:18px 20px;margin-bottom:10px;">'+
+        '<div style="font-size:20px;flex-shrink:0;">'+n.icon+'</div>'+
+        '<div style="flex:1;"><div style="font-size:14px;color:var(--c-text);">'+n.text+'</div>'+
+        '<div style="font-size:11px;color:'+p.dm+';margin-top:4px;">'+n.time+'</div></div></div>';
+    });
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      pill('Notifications', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Never Miss<br>a Beat', 48)+'</div>'+
+      '<div style="margin-top:12px;margin-bottom:32px;">'+sans('Push notifications, automation alerts, and content updates in one unified center.', p.mt)+'</div>'+
+      list+'</div>';
+    return cardWrap(m, inner);
+  });
+
+  // 19. Social Publishing
+  pushPair('features', 'Social Publishing Gold', function(m, p) {
+    var platforms = [
+      { name: 'X (Twitter)', icon: '&#120143;' },
+      { name: 'Instagram', icon: '&#128247;' },
+      { name: 'LinkedIn', icon: '&#128279;' },
+      { name: 'Threads', icon: '&#9901;' }
+    ];
+    var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:32px;">';
+    platforms.forEach(function(pl) {
+      grid += '<div style="display:flex;align-items:center;gap:12px;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:12px;padding:18px 20px;">'+
+        '<span style="font-size:22px;">'+pl.icon+'</span>'+
+        '<span style="font-size:14px;color:var(--c-text);">'+pl.name+'</span></div>';
+    });
+    grid += '</div>';
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      pill('Social Publishing', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Publish<br>Everywhere', 52)+'</div>'+
+      '<div style="margin-top:12px;">'+sans('Connect your accounts. Schedule or post instantly from Bloom, Studio, or Chat.', p.mt)+'</div>'+
+      grid+'</div>';
+    return cardWrap(m, inner);
+  });
+
+  // 20. Clients & CRM
+  pushPair('features', 'Clients CRM Gold', function(m, p) {
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.gRgb, '35%', 600, 0.06)+
+      '<div style="position:relative;">'+pill('Clients', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Your Clients.<br>Your Way.', 52)+'</div>'+
+      '<div style="margin-top:16px;margin-bottom:32px;">'+sans('Lightweight CRM built into your AI workspace. Notes, tags, follow-ups, and relationship tracking.', p.mt, 16)+'</div>'+
+      '<div style="display:flex;gap:12px;">'+
+      surface('<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;color:'+p.ac+';">50+</div><div style="font-size:12px;color:'+p.dm+';margin-top:4px;">Client profiles</div>', '22px', 'text-align:center;flex:1;')+
+      surface('<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;color:'+p.ac+';">&#8734;</div><div style="font-size:12px;color:'+p.dm+';margin-top:4px;">Notes & tags</div>', '22px', 'text-align:center;flex:1;')+
+      surface('<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;color:'+p.ac+';">AI</div><div style="font-size:12px;color:'+p.dm+';margin-top:4px;">Smart follow-ups</div>', '22px', 'text-align:center;flex:1;')+
+      '</div></div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 3: SOCIAL HOOKS - GOLD (10 pairs = 20 templates)
+  // ═══════════════════════════════════════════════════════
+
+  var goldHooks = [
+    { headline: 'Your brand is talking.<br>Is anyone listening?', sub: 'Bloom makes sure they hear you.' },
+    { headline: 'Content shouldn\'t<br>feel like homework.', sub: 'Let AI do the heavy lifting.' },
+    { headline: 'One brand.<br>Four AI agents.<br>Infinite content.', sub: 'Welcome to Bloom.' },
+    { headline: 'What if your content<br>strategy ran itself?', sub: 'It can. It does. It\'s Bloom.' },
+    { headline: 'The best content<br>sounds like you wrote it.', sub: 'Because your AI learned your voice.' },
+    { headline: 'Stop scrolling<br>for inspiration.', sub: 'Start generating it.' },
+    { headline: 'Your competitors<br>are using AI.', sub: 'Are you?' },
+    { headline: '12 posts.<br>30 seconds.<br>Your voice.', sub: 'That\'s Bloom.' },
+    { headline: 'AI that adapts<br>to your brand.', sub: 'Not the other way around.' },
+    { headline: 'Content creation<br>is dead.', sub: 'Content cultivation is here.' }
+  ];
+  goldHooks.forEach(function(h, i) {
+    pushPair('hooks', 'Gold Hook ' + (i+1), function(m, p) {
+      var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+        glow(p.gRgb, '42%', 800, 0.1)+
+        '<div style="position:relative;">'+
+        serif(h.headline, 56)+
+        divider(p.ac, 48)+
+        sans(h.sub, p.mt, 18, 'letter-spacing:0.02em;')+
+        '</div></div>';
+      return cardWrap(m, inner);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 4: VALUE PROPOSITIONS - GOLD (5 pairs = 10 templates)
+  // ═══════════════════════════════════════════════════════
+
+  var goldValues = [
+    { title: 'Multi-Model Intelligence', desc: 'Claude, GPT, Gemini, Grok, DeepSeek. Choose your AI or let RoweOS pick the best for each task.', icon: '&#9670;' },
+    { title: 'Brand-First Architecture', desc: 'Every feature is built around your brand identity. Your voice, audience, and goals shape every output.', icon: '&#9733;' },
+    { title: 'Privacy by Design', desc: 'Your API keys. Your data. Nothing stored on our servers. Enterprise-grade privacy without the enterprise price.', icon: '&#128274;' },
+    { title: 'All-in-One Platform', desc: 'Chat, Studio, Bloom, Focus, Video Lab, Analytics, CRM, Publishing, Scheduling. One subscription.', icon: '&#9632;' },
+    { title: 'Grows With You', desc: 'From solo creator to agency. RoweOS scales with your brand portfolio and team needs.', icon: '&#8679;' }
+  ];
+  goldValues.forEach(function(v, i) {
+    pushPair('value', 'Gold Value ' + (i+1), function(m, p) {
+      var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 80px;">'+
+        glow(p.gRgb, '35%', 600, 0.07)+
+        '<div style="position:relative;">'+
+        '<div style="font-size:48px;margin-bottom:28px;opacity:0.7;">'+v.icon+'</div>'+
+        serif(v.title, 48)+
+        divider(p.ac, 40)+
+        sans(v.desc, p.mt, 17, 'max-width:520px;')+
+        '</div></div>';
+      return cardWrap(m, inner);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 5: BEFORE/AFTER - NEW SCENARIOS (5 pairs = 10 templates)
+  // ═══════════════════════════════════════════════════════
+
+  var goldBA = [
+    { title: 'Content Strategy', before: ['Ad hoc posting','No content calendar','Random topics','Zero analytics','Burnout'], after: ['AI-planned roadmap','Automated scheduling','Data-driven topics','Real-time insights','Sustainable flow'] },
+    { title: 'Brand Voice', before: ['Inconsistent tone','Generic AI output','Off-brand messaging','Manual rewrites','Voice drift'], after: ['Locked-in voice','Brand-native content','On-message always','Zero editing needed','Voice amplified'] },
+    { title: 'Social Media', before: ['One post a week','Same content everywhere','No engagement strategy','Manual cross-posting','Missed trends'], after: ['Daily content stream','Platform-native formats','AI engagement hooks','One-click publishing','Trend-aware content'] },
+    { title: 'Video Content', before: ['Expensive production','Weeks of turnaround','Limited formats','No brand consistency','Complex tools'], after: ['AI-generated in minutes','Same-day delivery','Multiple aspect ratios','Brand-matched visuals','Text prompt to video'] },
+    { title: 'Client Work', before: ['Manual proposals','No content pipeline','Slow turnaround','Generic templates','Hours per client'], after: ['AI-drafted proposals','Automated content flow','Minutes per deliverable','Brand-matched output','Scale infinitely'] }
+  ];
+  goldBA.forEach(function(ba, i) {
+    pushPair('beforeafter', 'Gold BA ' + ba.title, function(m, p) {
+      var beforeList = '';
+      ba.before.forEach(function(b) {
+        beforeList += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+xIcon(p.rd)+'<span style="font-size:13px;color:'+p.dm+';">'+b+'</span></div>';
+      });
+      var afterList = '';
+      ba.after.forEach(function(a) {
+        afterList += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+chk(m)+'<span style="font-size:13px;color:var(--c-text);">'+a+'</span></div>';
+      });
+      var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:60px 64px;">'+
+        '<div style="margin-bottom:24px;">'+serif(ba.title, 36)+'</div>'+
+        '<div style="display:flex;gap:16px;">'+
+        '<div style="flex:1;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:12px;padding:22px;">'+
+        '<div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:'+p.rd+';margin-bottom:14px;">Before</div>'+beforeList+'</div>'+
+        '<div style="flex:1;background:'+p.sf+';border:1px solid rgba('+p.gRgb+',0.15);border-radius:12px;padding:22px;">'+
+        '<div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:'+p.ac+';margin-bottom:14px;">With RoweOS</div>'+afterList+'</div>'+
+        '</div></div>';
+      return cardWrap(m, inner);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 6: WALLPAPERS - BLOOM THEMED (5 pairs = 10 templates)
+  // ═══════════════════════════════════════════════════════
+
+  // Wallpaper 1: Bloom Flower centered
+  ['dark','light'].forEach(function(m) {
+    var p = gp(m);
+    var id = nextId++;
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'wallpapers', mode: m, label: 'Bloom Wallpaper Flower — ' + m,
+      render: (function(mode, pal) { return function() {
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
+          wpGlow(mode, '45%', 1000, 0.12)+
+          '<div style="position:relative;">'+bloomFlowerSvg(200, pal.ac, '0.08')+
+          '<div style="margin-top:48px;font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;color:var(--c-text);letter-spacing:0.08em;">Bloom</div>'+
+          '<div style="margin-top:16px;font-size:16px;color:'+pal.dm+';letter-spacing:0.2em;text-transform:uppercase;">RoweOS</div>'+
+          '</div></div>';
+        return wallpaperWrap(mode, inner);
+      }; })(m, p)
+    });
+  });
+
+  // Wallpaper 2: Gold gradient minimal
+  ['dark','light'].forEach(function(m) {
+    var p = gp(m);
+    var id = nextId++;
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'wallpapers', mode: m, label: 'Bloom Wallpaper Gradient — ' + m,
+      render: (function(mode, pal) { return function() {
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
+          '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba('+pal.gRgb+',0.06) 50%,transparent 100%);pointer-events:none;"></div>'+
+          '<div style="position:relative;">'+wpLogo(120, 0.5)+
+          '<div style="margin-top:32px;font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:var(--c-text);">RoweOS</div>'+
+          '<div style="width:60px;height:1px;background:'+pal.ac+';margin:28px auto;"></div>'+
+          '<div style="font-size:14px;color:'+pal.dm+';letter-spacing:0.15em;text-transform:uppercase;">Brand Intelligence</div>'+
+          '</div></div>';
+        return wallpaperWrap(mode, inner);
+      }; })(m, p)
+    });
+  });
+
+  // Wallpaper 3: Feature stack with Bloom
+  ['dark','light'].forEach(function(m) {
+    var p = gp(m);
+    var id = nextId++;
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'wallpapers', mode: m, label: 'Bloom Wallpaper Stack — ' + m,
+      render: (function(mode, pal) { return function() {
+        var features = ['Bloom','Studio','Chat','Focus','Video Lab','Pulse','Identity'];
+        var stack = '';
+        features.forEach(function(f, i) {
+          var opa = 1 - (i * 0.12);
+          stack += '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:'+pal.ac+';opacity:'+opa+';margin-bottom:12px;">'+f+'</div>';
+        });
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
+          wpGlow(mode, '40%', 800, 0.08)+
+          '<div style="position:relative;">'+wpLogo(80, 0.4)+
+          '<div style="margin-top:48px;">'+stack+'</div>'+
+          '<div style="margin-top:32px;font-size:14px;color:'+pal.dm+';letter-spacing:0.15em;text-transform:uppercase;">Your AI Operating System</div>'+
+          '</div></div>';
+        return wallpaperWrap(mode, inner);
+      }; })(m, p)
+    });
+  });
+
+  // Wallpaper 4: Bloom quote
+  ['dark','light'].forEach(function(m) {
+    var p = gp(m);
+    var id = nextId++;
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'wallpapers', mode: m, label: 'Bloom Wallpaper Quote — ' + m,
+      render: (function(mode, pal) { return function() {
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:0 120px;">'+
+          wpGlow(mode, '45%', 900, 0.1)+
+          '<div style="position:relative;">'+bloomFlowerSvg(80, pal.ac, '0.06')+
+          '<div style="margin-top:48px;font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;font-style:italic;color:var(--c-text);line-height:1.35;">"Grow your brand<br>while you sleep."</div>'+
+          '<div style="width:40px;height:1px;background:'+pal.ac+';margin:40px auto;"></div>'+
+          '<div style="font-size:14px;color:'+pal.dm+';letter-spacing:0.12em;text-transform:uppercase;">Bloom by RoweOS</div>'+
+          '</div></div>';
+        return wallpaperWrap(mode, inner);
+      }; })(m, p)
+    });
+  });
+
+  // Wallpaper 5: Dual bloom + video
+  ['dark','light'].forEach(function(m) {
+    var p = gp(m);
+    var id = nextId++;
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'wallpapers', mode: m, label: 'Bloom Wallpaper Dual — ' + m,
+      render: (function(mode, pal) { return function() {
+        var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
+          '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba('+pal.gRgb+',0.08) 0%,transparent 50%);pointer-events:none;"></div>'+
+          '<div style="position:absolute;bottom:30%;left:50%;transform:translate(-50%,50%);width:800px;height:800px;background:radial-gradient(circle,rgba('+pal.cyanRgb+',0.06) 0%,transparent 50%);pointer-events:none;"></div>'+
+          '<div style="position:relative;">'+
+          bloomFlowerSvg(100, pal.ac, '0.06')+
+          '<div style="margin-top:28px;font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;color:var(--c-text);">Content</div>'+
+          '<div style="width:40px;height:1px;background:'+pal.ac+';margin:24px auto;"></div>'+
+          '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;color:var(--c-text);">Meets Video</div>'+
+          '<div style="margin-top:32px;font-size:13px;color:'+pal.dm+';letter-spacing:0.12em;text-transform:uppercase;">Bloom + Video Lab</div>'+
+          '</div></div>';
+        return wallpaperWrap(mode, inner);
+      }; })(m, p)
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 7: LAUNCH/SIGNUP - GOLD REFRESH (5 pairs = 10 templates)
+  // ═══════════════════════════════════════════════════════
+
+  var launchTemplates = [
+    { headline: 'The AI Platform<br>for Modern Brands', sub: 'RoweOS combines chat, content generation, video, analytics, and publishing into one intelligent workspace.', cta: 'Start Free' },
+    { headline: 'Built for Brands<br>That Think Ahead', sub: 'From solo creator to agency. One platform that scales with your ambition.', cta: 'Get Early Access' },
+    { headline: 'Your Brand.<br>Amplified by AI.', sub: 'Every tool you need to create, publish, and grow. Powered by the world\'s best AI models.', cta: 'Try RoweOS Free' },
+    { headline: 'Create More.<br>Worry Less.', sub: 'Bloom generates. Studio refines. RoweOS delivers. Your content pipeline, automated.', cta: 'Join the Beta' },
+    { headline: 'One Platform.<br>Every AI Model.<br>Your Brand.', sub: 'Claude. GPT. Gemini. Grok. DeepSeek. All in one place, all tuned to your brand.', cta: 'Get Started' }
+  ];
+  launchTemplates.forEach(function(l, i) {
+    pushPair('launch', 'Gold Launch ' + (i+1), function(m, p) {
+      var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+        glow(p.gRgb, '38%', 700, 0.09)+
+        '<div style="position:relative;">'+logoMark(m, 32)+
+        '<div style="margin-top:36px;">'+serif(l.headline, 52)+'</div>'+
+        '<div style="margin-top:20px;max-width:480px;">'+sans(l.sub, p.mt, 16)+'</div>'+
+        '<div style="margin-top:36px;padding:14px 40px;background:linear-gradient(135deg,'+p.ac+','+p.ac2+');border-radius:28px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:'+(m==='dark'?'#0a0a0a':'#ffffff')+';">'+l.cta+'</div>'+
+        '</div></div>';
+      return cardWrap(m, inner);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 8: STATS - GOLD (3 pairs = 6 templates)
+  // ═══════════════════════════════════════════════════════
+
+  // Big stat: Models
+  pushPair('stats', 'Gold Stat Models', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '40%', 600, 0.1)+
+      '<div style="position:relative;">'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:180px;font-weight:300;color:'+p.ac+';line-height:1;">7+</div>'+
+      '<div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:'+p.mt+';margin-top:8px;">AI Models Supported</div>'+
+      divider(p.ac, 40)+
+      sans('Claude, GPT, Gemini, Grok, DeepSeek, Llama, Imagen, Veo', p.dm, 14)+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // Big stat: Operations
+  pushPair('stats', 'Gold Stat Operations', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '40%', 600, 0.1)+
+      '<div style="position:relative;">'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:180px;font-weight:300;color:'+p.ac+';line-height:1;">40+</div>'+
+      '<div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:'+p.mt+';margin-top:8px;">Studio Operations</div>'+
+      divider(p.ac, 40)+
+      sans('Text, image, video, strategy, social, email, and more', p.dm, 14)+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // Big stat: Features
+  pushPair('stats', 'Gold Stat Features', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '40%', 600, 0.1)+
+      '<div style="position:relative;">'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:180px;font-weight:300;color:'+p.ac+';line-height:1;">22</div>'+
+      '<div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:'+p.mt+';margin-top:8px;">Platform Features</div>'+
+      divider(p.ac, 40)+
+      sans('Chat, Studio, Bloom, Focus, Video Lab, Pulse, Identity, and more', p.dm, 14)+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 9: USE CASES - GOLD (5 pairs = 10 templates)
+  // ═══════════════════════════════════════════════════════
+
+  var goldUseCases = [
+    { persona: 'The Agency Owner', quote: 'I manage 12 brands. Bloom generates content for all of them, each in their own voice.', details: ['Multi-brand portfolios','Team collaboration','White-label ready'] },
+    { persona: 'The Solo Creator', quote: 'RoweOS replaced 5 different tools. Now I create, schedule, and publish from one place.', details: ['All-in-one workspace','Affordable pricing','No learning curve'] },
+    { persona: 'The Startup Founder', quote: 'We went from zero content to a full pipeline in one afternoon with Bloom.', details: ['Rapid content scaling','Brand consistency','Time savings'] },
+    { persona: 'The Marketing Director', quote: 'The multi-model approach means we always get the best output for each task.', details: ['Best-in-class AI','Strategy intelligence','Analytics built in'] },
+    { persona: 'The Freelancer', quote: 'I deliver 10x more content to clients with the same effort. My margins have doubled.', details: ['Client management','Batch generation','Professional output'] }
+  ];
+  goldUseCases.forEach(function(uc, i) {
+    pushPair('usecases', 'Gold UseCase ' + uc.persona, function(m, p) {
+      var detailCards = '';
+      uc.details.forEach(function(d) {
+        detailCards += '<div style="display:flex;align-items:center;gap:10px;">'+chk(m)+'<span style="font-size:13px;color:var(--c-text);">'+d+'</span></div>';
+      });
+      var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+        glow(p.gRgb, '30%', 500, 0.06)+
+        '<div style="position:relative;">'+logoMark(m, 28)+
+        '<div style="margin-top:28px;font-family:\'Cormorant Garamond\',serif;font-size:32px;font-weight:300;font-style:italic;color:var(--c-text);line-height:1.35;">"'+uc.quote+'"</div>'+
+        '<div style="margin-top:20px;font-size:14px;color:'+p.ac+';font-weight:500;">'+uc.persona+'</div>'+
+        divider(p.ac, 40)+
+        '<div style="display:flex;flex-direction:column;gap:10px;">'+detailCards+'</div>'+
+        '</div></div>';
+      return cardWrap(m, inner);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 10: PRICING - GOLD (2 pairs = 4 templates)
+  // ═══════════════════════════════════════════════════════
+
+  // Pricing simple
+  pushPair('pricing', 'Gold Pricing Simple', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '35%', 600, 0.08)+
+      '<div style="position:relative;">'+logoMark(m, 32)+
+      '<div style="margin-top:32px;">'+serif('Simple Pricing.<br>Powerful AI.', 52)+'</div>'+
+      '<div style="margin-top:24px;background:'+p.sf+';border:1px solid '+p.bd+';border-radius:16px;padding:36px 48px;">'+
+      '<div style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:'+p.dm+';margin-bottom:12px;">Pro Plan</div>'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:var(--c-text);">$19<span style="font-size:20px;color:'+p.dm+';">/mo</span></div>'+
+      '<div style="font-size:14px;color:'+p.mt+';margin-top:12px;">All features. All models. Unlimited brands.</div>'+
+      '</div>'+
+      '<div style="margin-top:28px;padding:12px 36px;background:linear-gradient(135deg,'+p.ac+','+p.ac2+');border-radius:28px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:'+(m==='dark'?'#0a0a0a':'#ffffff')+';">Start Free Trial</div>'+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // Pricing BYOK
+  pushPair('pricing', 'Gold Pricing BYOK', function(m, p) {
+    var benefits = ['Bring your own API keys', 'No markup on API costs', 'All platform features included', 'Cancel anytime'];
+    var list = '';
+    benefits.forEach(function(b) {
+      list += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+chk(m)+'<span style="font-size:14px;color:var(--c-text);">'+b+'</span></div>';
+    });
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.gRgb, '30%', 500, 0.06)+
+      '<div style="position:relative;">'+pill('BYOK Model', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Your Keys.<br>Your Costs.<br>Our Platform.', 48)+'</div>'+
+      '<div style="margin-top:16px;margin-bottom:28px;">'+sans('Use your own API keys from OpenAI, Anthropic, Google, or xAI. Pay only what the providers charge.', p.mt)+'</div>'+
+      list+'</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 11: PRIVACY - GOLD (3 pairs = 6 templates)
+  // ═══════════════════════════════════════════════════════
+
+  pushPair('privacy', 'Gold Privacy BYOK', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '40%', 700, 0.08)+
+      '<div style="position:relative;">'+
+      '<div style="font-size:56px;margin-bottom:28px;">&#128274;</div>'+
+      serif('Your Keys.<br>Your Data.<br>Your Control.', 52)+
+      divider(p.ac, 48)+
+      sans('RoweOS never stores your API keys on our servers.<br>They stay in your browser, encrypted and private.', p.mt, 16)+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  pushPair('privacy', 'Gold Privacy Zero', function(m, p) {
+    var points = ['No data collection', 'No server-side storage', 'No third-party tracking', 'No AI training on your data'];
+    var list = '';
+    points.forEach(function(pt) {
+      list += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'+
+        '<div style="width:6px;height:6px;border-radius:50%;background:'+p.ac+';flex-shrink:0;"></div>'+
+        '<span style="font-size:15px;color:var(--c-text);">'+pt+'</span></div>';
+    });
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      pill('Privacy', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Zero-Knowledge<br>Architecture', 52)+'</div>'+
+      '<div style="margin-top:12px;margin-bottom:28px;">'+sans('Enterprise-grade privacy without the enterprise price tag. Your brand data never leaves your device.', p.mt)+'</div>'+
+      list+'</div>';
+    return cardWrap(m, inner);
+  });
+
+  pushPair('privacy', 'Gold Privacy Cloud Sync', function(m, p) {
+    var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+      glow(p.gRgb, '35%', 600, 0.06)+
+      '<div style="position:relative;">'+pill('Cloud Sync', p.ac, p.bd)+
+      '<div style="margin-top:24px;">'+serif('Encrypted.<br>Synced.<br>Yours.', 48)+'</div>'+
+      '<div style="margin-top:16px;margin-bottom:32px;">'+sans('Optional Firebase sync keeps your data available across devices. End-to-end encrypted, always under your control.', p.mt, 16)+'</div>'+
+      '<div style="display:flex;gap:12px;">'+
+      surface('<div style="font-size:13px;font-weight:600;color:var(--c-text);margin-bottom:4px;">AES-256</div><div style="font-size:11px;color:'+p.dm+';">Encryption</div>', '18px', 'text-align:center;flex:1;')+
+      surface('<div style="font-size:13px;font-weight:600;color:var(--c-text);margin-bottom:4px;">Firebase</div><div style="font-size:11px;color:'+p.dm+';">Infrastructure</div>', '18px', 'text-align:center;flex:1;')+
+      surface('<div style="font-size:13px;font-weight:600;color:var(--c-text);margin-bottom:4px;">You Own</div><div style="font-size:11px;color:'+p.dm+';">Your Data</div>', '18px', 'text-align:center;flex:1;')+
+      '</div></div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 12: FEATURE SPOTLIGHTS - GOLD (5 pairs = 10 templates)
+  // ═══════════════════════════════════════════════════════
+
+  var goldSpotlights = [
+    { name: 'Deep Research', desc: 'Multi-step AI research with source verification. Ask complex questions, get comprehensive answers with citations.', icon: '&#128269;' },
+    { name: 'Automations', desc: 'Schedule recurring AI tasks. Content generation, analytics reports, social posting. Set it and forget it.', icon: '&#9881;' },
+    { name: 'Library', desc: 'Every AI output saved and searchable. Templates, conversations, images, videos. Your creative archive.', icon: '&#128218;' },
+    { name: 'Multi-Brand', desc: 'Switch between brands instantly. Each with its own identity, voice, and content strategy. Perfect for agencies.', icon: '&#127984;' },
+    { name: 'Email Composer', desc: 'Draft professional emails with AI. Brand-matched tone, smart templates, one-click send via your email client.', icon: '&#9993;' }
+  ];
+  goldSpotlights.forEach(function(sp, i) {
+    pushPair('spotlights', 'Gold Spotlight ' + sp.name, function(m, p) {
+      var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
+        glow(p.gRgb, '30%', 500, 0.07)+
+        '<div style="position:relative;">'+
+        '<div style="font-size:48px;margin-bottom:24px;">'+sp.icon+'</div>'+
+        '<div style="margin-bottom:24px;">'+serif(sp.name, 52)+'</div>'+
+        divider(p.ac, 40)+
+        sans(sp.desc, p.mt, 17, 'max-width:520px;line-height:1.65;')+
+        '<div style="margin-top:36px;">'+pill('Learn More', p.ac, p.bd)+'</div>'+
+        '</div></div>';
+      return cardWrap(m, inner);
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════
+  // GROUP 13: MOOD/ATMOSPHERE - GOLD (4 pairs = 8 templates)
+  // ═══════════════════════════════════════════════════════
+
+  // Minimal wordmark
+  pushPair('mood', 'Gold Mood Wordmark', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '50%', 900, 0.12)+
+      '<div style="position:relative;font-family:\'Cormorant Garamond\',serif;font-size:120px;font-weight:300;color:var(--c-text);letter-spacing:0.1em;">RoweOS</div>'+
+      '</div>';
+    return cardWrap(m, inner);
+  });
+
+  // Tagline atmosphere
+  pushPair('mood', 'Gold Mood Tagline', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '45%', 800, 0.1)+
+      '<div style="position:relative;">'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;font-weight:300;color:'+p.dm+';letter-spacing:0.3em;text-transform:uppercase;margin-bottom:24px;">Intelligence</div>'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;color:var(--c-text);line-height:1.1;">Meets<br>Intention</div>'+
+      '<div style="margin-top:24px;font-family:\'Cormorant Garamond\',serif;font-size:22px;font-weight:300;color:'+p.dm+';letter-spacing:0.3em;text-transform:uppercase;">RoweOS</div>'+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // Gold dust atmosphere
+  pushPair('mood', 'Gold Mood Dust', function(m, p) {
+    var dots = '';
+    for (var d = 0; d < 30; d++) {
+      var x = 10 + Math.floor((d * 37) % 80);
+      var y = 10 + Math.floor((d * 53) % 80);
+      var size = 2 + (d % 4);
+      var opa = 0.1 + (d % 5) * 0.04;
+      dots += '<div style="position:absolute;left:'+x+'%;top:'+y+'%;width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+p.ac+';opacity:'+opa+';"></div>';
+    }
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      dots+
+      '<div style="position:relative;">'+logoMark(m, 36)+
+      '<div style="margin-top:28px;font-size:14px;color:'+p.dm+';letter-spacing:0.2em;text-transform:uppercase;">AI-Powered Brand Intelligence</div>'+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // Vertical lines mood
+  pushPair('mood', 'Gold Mood Lines', function(m, p) {
+    var lines = '';
+    for (var l = 0; l < 7; l++) {
+      var left = 12 + l * 13;
+      var opa = 0.03 + (l === 3 ? 0.04 : 0);
+      lines += '<div style="position:absolute;left:'+left+'%;top:0;bottom:0;width:1px;background:'+p.ac+';opacity:'+opa+';"></div>';
+    }
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      lines+
+      '<div style="position:relative;">'+
+      serif('Design<br>With Intent', 64)+
+      '<div style="margin-top:20px;">'+sans('roweos.com', p.dm, 14, 'letter-spacing:0.2em;text-transform:uppercase;')+'</div>'+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+})();
+
 // ─── RENDER ENGINE ───
 
 function getVisibleTemplates() {
