@@ -3203,6 +3203,50 @@ function closePreview() {
 
 // ─── DOWNLOAD ───
 
+// v22.12: Pre-rasterize inline SVGs to PNG for html2canvas compatibility
+function rasterizeSvgs(container) {
+  return new Promise(function(resolve) {
+    var svgs = container.querySelectorAll('svg');
+    if (svgs.length === 0) { resolve(); return; }
+    var remaining = svgs.length;
+    function done() { remaining--; if (remaining <= 0) resolve(); }
+    for (var i = 0; i < svgs.length; i++) {
+      (function(svg) {
+        try {
+          var w = parseInt(svg.getAttribute('width')) || 24;
+          var h = parseInt(svg.getAttribute('height')) || 24;
+          var xml = new XMLSerializer().serializeToString(svg);
+          if (xml.indexOf('xmlns') === -1) {
+            xml = xml.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+          }
+          var blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var img = new Image();
+          img.onload = function() {
+            try {
+              var c = document.createElement('canvas');
+              c.width = w * 4; c.height = h * 4;
+              var ctx = c.getContext('2d');
+              ctx.drawImage(img, 0, 0, c.width, c.height);
+              var pngUrl = c.toDataURL('image/png');
+              URL.revokeObjectURL(url);
+              var replacement = document.createElement('img');
+              replacement.src = pngUrl;
+              replacement.setAttribute('width', w);
+              replacement.setAttribute('height', h);
+              if (svg.getAttribute('style')) replacement.setAttribute('style', svg.getAttribute('style'));
+              svg.parentNode.replaceChild(replacement, svg);
+            } catch(e) {}
+            done();
+          };
+          img.onerror = function() { URL.revokeObjectURL(url); done(); };
+          img.src = url;
+        } catch(e) { done(); }
+      })(svgs[i]);
+    }
+  });
+}
+
 function renderToCanvas(idx) {
   return new Promise(function(resolve) {
     var t = templates[idx];
@@ -3217,17 +3261,20 @@ function renderToCanvas(idx) {
     var total = imgs.length;
 
     function onReady() {
-      html2canvas(container.firstChild, {
-        width: tw,
-        height: th,
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
-        logging: false
-      }).then(function(canvas) {
-        container.innerHTML = '';
-        resolve(canvas);
+      // Pre-rasterize SVGs to PNG before html2canvas
+      rasterizeSvgs(container).then(function() {
+        html2canvas(container.firstChild, {
+          width: tw,
+          height: th,
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          logging: false
+        }).then(function(canvas) {
+          container.innerHTML = '';
+          resolve(canvas);
+        });
       });
     }
 
