@@ -3302,6 +3302,67 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     return cardWrap(m, inner);
   });
 
+  // ── 11-14. DOOM SCROLLING → BLOOM SCROLLING campaign ──
+
+  // 11. Bloom - Doom/Bloom Hero (strikethrough)
+  pushPair('bloom', 'Doom to Bloom Hero', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '42%', 800, 0.1)+
+      '<div style="position:relative;">'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;line-height:1.2;color:var(--c-text);">Turn<br>'+
+      '<span style="text-decoration:line-through;opacity:0.35;color:'+p.dm+';">doom scrolling</span><br>'+
+      'into</div>'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;color:'+p.ac+';margin-top:8px;letter-spacing:0.04em;">Bloom scrolling</div>'+
+      divider(p.ac, 48)+
+      sans('AI-powered content that actually grows your brand.', p.mt, 16)+
+      '<div style="margin-top:36px;">'+bloomFlowerSvg(32, p.ac, '0.08')+'</div>'+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 12. Bloom - Doom/Bloom Split
+  pushPair('bloom', 'Doom to Bloom Split', function(m, p) {
+    var inner = '<div style="display:flex;height:100%;">'+
+      '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 36px;opacity:0.5;">'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:42px;font-weight:300;color:'+p.dm+';text-decoration:line-through;line-height:1.15;">Doom<br>Scrolling</div>'+
+      '<div style="margin-top:24px;">'+sans('Mindless. Draining. Unproductive.', p.dm, 13)+'</div>'+
+      '</div>'+
+      '<div style="width:1px;background:linear-gradient(180deg,transparent,'+p.ac+',transparent);"></div>'+
+      '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 36px;position:relative;">'+
+      glow(p.gRgb, '50%', 400, 0.1)+
+      '<div style="position:relative;">'+bloomFlowerSvg(36, p.ac, '0.08')+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:42px;font-weight:300;color:var(--c-text);margin-top:16px;line-height:1.15;">Bloom<br>Scrolling</div>'+
+      '<div style="margin-top:24px;">'+sans('Curated. Brand-native. Yours.', p.mt, 13)+'</div>'+
+      '</div></div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 13. Bloom - Doom/Bloom Minimal (big type)
+  pushPair('bloom', 'Doom to Bloom Minimal', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '50%', 900, 0.12)+
+      '<div style="position:relative;">'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;font-weight:300;letter-spacing:0.15em;text-transform:uppercase;color:'+p.dm+';margin-bottom:32px;">Stop the</div>'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:96px;font-weight:300;color:'+p.dm+';text-decoration:line-through;opacity:0.3;line-height:1;">doom</div>'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;font-weight:300;letter-spacing:0.15em;text-transform:uppercase;color:'+p.dm+';margin:32px 0;">Start the</div>'+
+      '<div style="font-family:\'Cormorant Garamond\',serif;font-size:96px;font-weight:300;color:'+p.ac+';line-height:1;letter-spacing:0.04em;">bloom</div>'+
+      '<div style="margin-top:40px;">'+bloomFlowerSvg(28, p.ac, '0.08')+'</div>'+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
+  // 14. Bloom - Doom/Bloom CTA card
+  pushPair('bloom', 'Doom to Bloom CTA', function(m, p) {
+    var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
+      glow(p.gRgb, '38%', 700, 0.09)+
+      '<div style="position:relative;">'+logoMark(m, 28)+
+      '<div style="margin-top:32px;font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;line-height:1.15;color:var(--c-text);">Turn doom scrolling<br>into <span style="color:'+p.ac+';">Bloom</span> scrolling.</div>'+
+      '<div style="margin-top:20px;max-width:440px;">'+sans('Your feed should work for your brand, not against your attention. Bloom generates content you actually want to post.', p.mt, 15)+'</div>'+
+      '<div style="margin-top:36px;padding:14px 40px;background:linear-gradient(135deg,'+p.ac+','+p.ac2+');border-radius:28px;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:'+(m==='dark'?'#0a0a0a':'#ffffff')+';">Try Bloom Free</div>'+
+      '</div></div>';
+    return cardWrap(m, inner);
+  });
+
   // ═══════════════════════════════════════════════════════
   // GROUP 2: PLATFORM FEATURES - GOLD REFRESH (20 pairs = 40 templates)
   // ═══════════════════════════════════════════════════════
