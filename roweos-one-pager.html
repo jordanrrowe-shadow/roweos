@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS - Operating Intelligence, Built for Brands</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: letter;
+    margin: 0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 8.5in;
+    height: 11in;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+    background: #0c0c0c;
+    color: #e8e4de;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    width: 8.5in;
+    height: 11in;
+    padding: 0.4in 0.55in 0.3in;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle gold gradient border along top */
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #a89878 20%, #d4c5a9 50%, #a89878 80%, transparent);
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.14in;
+    padding-bottom: 0.1in;
+    border-bottom: 1px solid rgba(168, 152, 120, 0.2);
+  }
+
+  .logo-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #a89878, #8a7c62);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { width: 18px; height: 18px; }
+
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: 3px;
+    color: #e8e4de;
+  }
+
+  .tagline {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #a89878;
+    font-weight: 500;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    text-align: center;
+    margin-bottom: 0.16in;
+  }
+
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    color: #e8e4de;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: #a89878;
+  }
+
+  .hero p {
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #9a9590;
+    max-width: 5.8in;
+    margin: 0 auto;
+  }
+
+  /* ─── TWO INTELLIGENCES ─── */
+  .two-intel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 0.18in;
+  }
+
+  .intel-card {
+    background: rgba(168, 152, 120, 0.04);
+    border: 1px solid rgba(168, 152, 120, 0.12);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+
+  .intel-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .intel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .intel-icon.brand { background: rgba(167, 139, 250, 0.12); }
+  .intel-icon.life { background: rgba(34, 197, 94, 0.12); }
+  .intel-icon svg { width: 15px; height: 15px; }
+
+  .intel-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #e8e4de;
+  }
+
+  .intel-card p {
+    font-size: 10.5px;
+    line-height: 1.55;
+    color: #8a8580;
+  }
+
+  .intel-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .intel-tag {
+    font-size: 8.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(168, 152, 120, 0.06);
+    border: 1px solid rgba(168, 152, 120, 0.1);
+    color: #a89878;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ─── CAPABILITIES GRID ─── */
+  .section-label {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #a89878;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .cap-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 0.18in;
+  }
+
+  .cap-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(168, 152, 120, 0.03);
+    border: 1px solid rgba(168, 152, 120, 0.08);
+    border-radius: 8px;
+  }
+
+  .cap-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(168, 152, 120, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .cap-icon svg { width: 14px; height: 14px; }
+
+  .cap-item h4 {
+    font-size: 11px;
+    font-weight: 600;
+    color: #e8e4de;
+    margin-bottom: 2px;
+  }
+
+  .cap-item p {
+    font-size: 9.5px;
+    line-height: 1.45;
+    color: #7a7570;
+  }
+
+  /* ─── WHY ROWEOS ─── */
+  .why-section {
+    margin-bottom: 0.12in;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .why-item {
+    text-align: center;
+    padding: 10px 10px;
+    background: rgba(168, 152, 120, 0.04);
+    border: 1px solid rgba(168, 152, 120, 0.1);
+    border-radius: 8px;
+  }
+
+  .why-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: #a89878;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .why-item h4 {
+    font-size: 10px;
+    font-weight: 600;
+    color: #e8e4de;
+    margin-bottom: 3px;
+    letter-spacing: 0.3px;
+  }
+
+  .why-item p {
+    font-size: 9px;
+    line-height: 1.4;
+    color: #7a7570;
+  }
+
+  /* ─── BUILT FOR ─── */
+  .built-for {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 0.1in;
+  }
+
+  .persona {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(168, 152, 120, 0.1);
+    background: linear-gradient(135deg, rgba(168, 152, 120, 0.04), rgba(168, 152, 120, 0.01));
+  }
+
+  .persona h4 {
+    font-size: 11px;
+    font-weight: 600;
+    color: #a89878;
+    margin-bottom: 4px;
+  }
+
+  .persona p {
+    font-size: 9.5px;
+    line-height: 1.45;
+    color: #8a8580;
+  }
+
+  /* ─── BETA CTA ─── */
+  .beta-cta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, rgba(168, 152, 120, 0.1), rgba(168, 152, 120, 0.04));
+    border: 1px solid rgba(168, 152, 120, 0.25);
+    border-radius: 10px;
+    margin-bottom: 0.1in;
+  }
+
+  .beta-badge {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #a89878, #8a7c62);
+    color: #0c0c0c;
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 4px;
+  }
+
+  .beta-cta h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #e8e4de;
+    margin-bottom: 2px;
+  }
+
+  .beta-cta p {
+    font-size: 9.5px;
+    line-height: 1.45;
+    color: #8a8580;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.14in;
+    border-top: 1px solid rgba(168, 152, 120, 0.15);
+  }
+
+  .footer-left {
+    font-size: 9px;
+    color: #5a5550;
+    letter-spacing: 0.3px;
+  }
+
+  .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .footer-link {
+    font-size: 9.5px;
+    color: #a89878;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  @media print {
+    html, body { width: 8.5in; height: 11in; }
+    .page { break-after: avoid; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-group">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0c0c0c" stroke-width="2" stroke-linecap="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <span class="logo-text">RoweOS</span>
+    </div>
+    <span class="tagline">Operating Intelligence</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>One platform to <em>think</em>, <em>create</em>, and <em>operate</em><br>across your entire brand portfolio</h1>
+    <p>RoweOS replaces fragmented workflows with a single intelligent layer that understands your brand as deeply as you do. Multi-model AI, 150+ pre-built operations, and autonomous scheduling - all in a sovereign architecture where your data never leaves your control.</p>
+  </div>
+
+  <!-- TWO INTELLIGENCES -->
+  <div class="two-intel">
+    <div class="intel-card">
+      <div class="intel-card-header">
+        <div class="intel-icon brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+        <h3>BrandAI</h3>
+      </div>
+      <p>Four specialized agents - Strategy, Marketing, Operations, Documents - that embody your brand identity. Manage content strategy, maintain voice consistency, and run operations across your entire portfolio from one interface.</p>
+      <div class="intel-tags">
+        <span class="intel-tag">Strategy</span>
+        <span class="intel-tag">Marketing</span>
+        <span class="intel-tag">Operations</span>
+        <span class="intel-tag">Documents</span>
+        <span class="intel-tag">Multi-Brand</span>
+      </div>
+    </div>
+    <div class="intel-card">
+      <div class="intel-card-header">
+        <div class="intel-icon life">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </div>
+        <h3>LifeAI</h3>
+      </div>
+      <p>Personal intelligence for every team member. Coaching, wellness, goal tracking, tax preparation, and daily optimization. One brand profile shared across the team - each person gets their own private LifeAI.</p>
+      <div class="intel-tags">
+        <span class="intel-tag">Coaching</span>
+        <span class="intel-tag">Wellness</span>
+        <span class="intel-tag">Goals</span>
+        <span class="intel-tag">Tax Copilot</span>
+        <span class="intel-tag">Planning</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPABILITIES -->
+  <div class="section-label">Platform Capabilities</div>
+  <div class="cap-grid">
+    <div class="cap-item">
+      <div class="cap-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <p>150+ pre-built operations across strategy, marketing, content, research, and brand-specific workflows</p>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round">
+          <polyline points="16 3 21 3 21 8"/>
+          <line x1="4" y1="20" x2="21" y2="3"/>
+          <polyline points="21 16 21 21 16 21"/>
+          <line x1="15" y1="15" x2="21" y2="21"/>
+          <line x1="4" y1="4" x2="9" y2="9"/>
+        </svg>
+      </div>
+      <div>
+        <h4>Automations</h4>
+        <p>Scheduled workflows and multi-step pipelines that run autonomously on your cadence</p>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </div>
+      <div>
+        <h4>Publishing + Email</h4>
+        <p>Post to X, Instagram, and Threads. Build branded email templates and send natively, all from one interface.</p>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+          <path d="M11 8v6"/>
+          <path d="M8 11h6"/>
+        </svg>
+      </div>
+      <div>
+        <h4>Deep Research</h4>
+        <p>Comprehensive multi-step analysis powered by Gemini for market research, competitive intelligence, and more</p>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round">
+          <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"/>
+          <path d="M17 4a2 2 0 0 1 2 2"/>
+          <path d="M21 8a2 2 0 0 1-2 2"/>
+        </svg>
+      </div>
+      <div>
+        <h4>Multi-Model AI</h4>
+        <p>Claude, GPT, and Gemini. Choose the best model per task, switch anytime. No lock-in.</p>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <line x1="12" y1="18" x2="12" y2="18"/>
+        </svg>
+      </div>
+      <div>
+        <h4>Cross-Device Sync</h4>
+        <p>Firebase-powered sync across desktop, tablet, and mobile. Your workspace travels with you.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY ROWEOS -->
+  <div class="why-section">
+    <div class="section-label">Why RoweOS</div>
+    <div class="why-grid">
+      <div class="why-item">
+        <div class="why-num">1</div>
+        <h4>Sovereign Architecture</h4>
+        <p>Browser-native. API keys never leave your device. No vendor lock-in, no data harvesting.</p>
+      </div>
+      <div class="why-item">
+        <div class="why-num">2</div>
+        <h4>Brand-Embodied AI</h4>
+        <p>Agents don't just know about your brand. They think, write, and operate as your brand.</p>
+      </div>
+      <div class="why-item">
+        <div class="why-num">3</div>
+        <h4>Full Portfolio Control</h4>
+        <p>Manage up to 15 brands from a single dashboard. Each with its own voice, strategy, and identity.</p>
+      </div>
+      <div class="why-item">
+        <div class="why-num">4</div>
+        <h4>Creation to Publication</h4>
+        <p>Strategy, content, images, video, email, social posting, and scheduling. One platform, end to end.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILT FOR -->
+  <div class="section-label">Built For</div>
+  <div class="built-for">
+    <div class="persona">
+      <h4>Brand Strategists</h4>
+      <p>Unified brand intelligence across your entire portfolio. Strategy, voice, and identity management that scales with you.</p>
+    </div>
+    <div class="persona">
+      <h4>Small Business</h4>
+      <p>Content creation, social publishing, email campaigns, and marketing automation. Enterprise-grade AI without the complexity.</p>
+    </div>
+    <div class="persona">
+      <h4>Enterprise</h4>
+      <p>Multi-brand management with shared profiles, private onboarding, and sovereign data architecture.</p>
+    </div>
+  </div>
+
+  <!-- BETA CTA -->
+  <div class="beta-cta">
+    <span class="beta-badge">Limited Beta</span>
+    <div>
+      <h4>Try Founder Free for One Month</h4>
+      <p>Full access to BrandAI, LifeAI, Studio, Automations, Social Publishing, and all 150+ operations. No credit card required. Early adopters lock in Founder pricing permanently.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span class="footer-left">&copy; 2026 The Rowe Collection, LLC &middot; Austin, TX</span>
+    <div class="footer-right">
+      <span class="footer-link">roweos.com</span>
+      <span class="footer-link">&middot;</span>
+      <span class="footer-link">therowecollection.com</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
