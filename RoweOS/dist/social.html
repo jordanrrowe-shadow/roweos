@@ -252,7 +252,19 @@ var CATEGORIES = [
   { id: 'logo', label: 'Logo Showcase' },
   { id: 'demos', label: 'Demo Thumbnails' },
   { id: 'bloom', label: 'Bloom' },
-  { id: 'bloom-gold', label: 'Bloom Gold' }
+  { id: 'bloom-expanded', label: 'Bloom Expanded' },
+  { id: 'bloom-features-gold', label: 'Features Gold' },
+  { id: 'bloom-hooks-gold', label: 'Social Hooks Gold' },
+  { id: 'bloom-value-gold', label: 'Value Props Gold' },
+  { id: 'bloom-ba-gold', label: 'Before & After Gold' },
+  { id: 'bloom-wallpapers-gold', label: 'Wallpapers Gold' },
+  { id: 'bloom-launch-gold', label: 'Launch Gold' },
+  { id: 'bloom-stats-gold', label: 'Stats Gold' },
+  { id: 'bloom-usecases-gold', label: 'Use Cases Gold' },
+  { id: 'bloom-pricing-gold', label: 'Pricing Gold' },
+  { id: 'bloom-privacy-gold', label: 'Privacy Gold' },
+  { id: 'bloom-spotlights-gold', label: 'Spotlights Gold' },
+  { id: 'bloom-mood-gold', label: 'Mood Gold' }
 ];
 
 var ROWEOS_LOGO = 'data:image/png;base64,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';
@@ -3084,7 +3096,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   function pushPair(cat, label, renderFn) {
     ['dark','light'].forEach(function(m) {
       var id = nextId++;
-      templates.push({ id: id, category: 'bloom-gold', mode: m, label: label + ' — ' + m, render: (function(mode) { return function() { return renderFn(mode, gp(mode)); }; })(m) });
+      templates.push({ id: id, category: cat, mode: m, label: label + ' — ' + m, render: (function(mode) { return function() { return renderFn(mode, gp(mode)); }; })(m) });
     });
   }
 
@@ -3093,7 +3105,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   // ═══════════════════════════════════════════════════════
 
   // 1. Bloom - Content Calendar
-  pushPair('bloom', 'Bloom Content Calendar', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom Content Calendar', function(m, p) {
     var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
     var types = ['Strategy','Social Post','Blog Idea','Image','Newsletter','Video','Recap'];
     var grid = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:36px;">';
@@ -3115,7 +3127,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 2. Bloom - Agent Collaboration
-  pushPair('bloom', 'Bloom Agent Collab', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom Agent Collab', function(m, p) {
     var agents = [
       { name: 'Strategy Agent', color: '#22c55e', desc: 'Maps your content roadmap' },
       { name: 'Marketing Agent', color: '#f59e0b', desc: 'Writes persuasive copy' },
@@ -3140,7 +3152,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 3. Bloom - Personalization
-  pushPair('bloom', 'Bloom Personalization', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom Personalization', function(m, p) {
     var traits = ['Brand Voice', 'Target Audience', 'Industry Context', 'Visual Identity', 'Content Goals', 'Competitor Landscape'];
     var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:32px;">';
     traits.forEach(function(t) {
@@ -3158,7 +3170,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 4. Bloom - Stats Dashboard
-  pushPair('bloom', 'Bloom Stats', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom Stats', function(m, p) {
     var stats = [
       { num: '12', label: 'Posts per batch' },
       { num: '4', label: 'AI Agents' },
@@ -3180,7 +3192,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 5. Bloom - Feed Preview (Mock)
-  pushPair('bloom', 'Bloom Feed Preview', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom Feed Preview', function(m, p) {
     var posts = [
       { agent: 'Strategy', color: '#22c55e', title: 'Q2 Content Roadmap', snip: 'Focus on thought leadership and product education...' },
       { agent: 'Marketing', color: '#f59e0b', title: '3 Hooks for Your Next Launch', snip: 'Lead with the transformation, not the feature...' },
@@ -3205,7 +3217,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 6. Bloom - Quote / Testimonial Style
-  pushPair('bloom', 'Bloom Quote', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom Quote', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 80px;">'+
       glow(p.gRgb, '40%', 800, 0.1)+
       '<div style="position:relative;">'+bloomFlowerSvg(60, p.ac, '0.06')+'<div style="margin-top:36px;">'+
@@ -3217,7 +3229,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 7. Bloom - Video Feature
-  pushPair('bloom', 'Bloom Video Feature', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom Video Feature', function(m, p) {
     var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
       glow(p.cyanRgb, '30%', 500, 0.06)+
       '<div style="position:relative;">'+
@@ -3236,7 +3248,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 8. Bloom - Learning Loop
-  pushPair('bloom', 'Bloom Learning Loop', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom Learning Loop', function(m, p) {
     var steps = [
       { icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>', label: 'You like a post' },
       { icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z"/></svg>', label: 'Bloom learns your taste' },
@@ -3261,7 +3273,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 9. Bloom - Platform Comparison
-  pushPair('bloom', 'Bloom vs Others', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom vs Others', function(m, p) {
     var rows = [
       { feat: 'Brand-native voice', bloom: true, others: false },
       { feat: 'Multi-agent system', bloom: true, others: false },
@@ -3290,7 +3302,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 10. Bloom - CTA Minimal
-  pushPair('bloom', 'Bloom CTA Minimal', function(m, p) {
+  pushPair('bloom-expanded', 'Bloom CTA Minimal', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '45%', 900, 0.12)+
       '<div style="position:relative;">'+bloomFlowerSvg(100, p.ac, '0.06')+
@@ -3305,7 +3317,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   // ── 11-14. DOOM SCROLLING → BLOOM SCROLLING campaign ──
 
   // 11. Bloom - Doom/Bloom Hero (strikethrough)
-  pushPair('bloom', 'Doom to Bloom Hero', function(m, p) {
+  pushPair('bloom-expanded', 'Doom to Bloom Hero', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '42%', 800, 0.1)+
       '<div style="position:relative;">'+
@@ -3321,7 +3333,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 12. Bloom - Doom/Bloom Split
-  pushPair('bloom', 'Doom to Bloom Split', function(m, p) {
+  pushPair('bloom-expanded', 'Doom to Bloom Split', function(m, p) {
     var inner = '<div style="display:flex;height:100%;">'+
       '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 36px;opacity:0.5;">'+
       '<div style="font-family:\'Cormorant Garamond\',serif;font-size:42px;font-weight:300;color:'+p.dm+';text-decoration:line-through;line-height:1.15;">Doom<br>Scrolling</div>'+
@@ -3338,7 +3350,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 13. Bloom - Doom/Bloom Minimal (big type)
-  pushPair('bloom', 'Doom to Bloom Minimal', function(m, p) {
+  pushPair('bloom-expanded', 'Doom to Bloom Minimal', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '50%', 900, 0.12)+
       '<div style="position:relative;">'+
@@ -3352,7 +3364,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 14. Bloom - Doom/Bloom CTA card
-  pushPair('bloom', 'Doom to Bloom CTA', function(m, p) {
+  pushPair('bloom-expanded', 'Doom to Bloom CTA', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '38%', 700, 0.09)+
       '<div style="position:relative;">'+logoMark(m, 28)+
@@ -3368,7 +3380,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   // ═══════════════════════════════════════════════════════
 
   // 11. Studio Hero
-  pushPair('features', 'Studio Gold Hero', function(m, p) {
+  pushPair('bloom-features-gold', 'Studio Gold Hero', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '35%', 700, 0.08)+
       '<div style="position:relative;">'+logoMark(m, 36)+'<div style="margin-top:32px;">'+
@@ -3380,7 +3392,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 12. Chat Intelligence
-  pushPair('features', 'Chat Intelligence Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Chat Intelligence Gold', function(m, p) {
     var features = ['Multi-model support', 'File attachments', 'Deep Research mode', 'Conversation history', 'System prompts'];
     var list = '';
     features.forEach(function(f) {
@@ -3396,7 +3408,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 13. Focus Mode
-  pushPair('features', 'Focus Mode Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Focus Mode Gold', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '40%', 700, 0.1)+
       '<div style="position:relative;">'+
@@ -3409,7 +3421,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 14. Identity System
-  pushPair('features', 'Identity System Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Identity System Gold', function(m, p) {
     var fields = ['Brand Voice', 'Visual Style', 'Target Audience', 'Positioning', 'Competitors', 'Products & Services'];
     var grid = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:32px;">';
     fields.forEach(function(f) {
@@ -3425,7 +3437,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 15. Pulse Analytics
-  pushPair('features', 'Pulse Analytics Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Pulse Analytics Gold', function(m, p) {
     var metrics = [
       { label: 'Sessions', value: '2.4K', change: '+18%' },
       { label: 'Engagement', value: '67%', change: '+12%' },
@@ -3449,7 +3461,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 16. Video Lab
-  pushPair('features', 'Video Lab Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Video Lab Gold', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
       glow(p.cyanRgb, '35%', 600, 0.06)+
       '<div style="position:relative;">'+
@@ -3466,7 +3478,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 17. Guardrails
-  pushPair('features', 'Guardrails Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Guardrails Gold', function(m, p) {
     var rules = ['Brand voice consistency', 'Competitor mention blocking', 'Tone and sentiment filters', 'Custom word lists'];
     var list = '';
     rules.forEach(function(r) {
@@ -3483,7 +3495,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 18. Notification Center
-  pushPair('features', 'Notifications Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Notifications Gold', function(m, p) {
     var notifs = [
       { icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>', text: 'Bloom batch ready - 12 new posts', time: '2m ago' },
       { icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+p.green+'" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>', text: 'Scheduled post published to X', time: '1h ago' },
@@ -3505,7 +3517,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 19. Social Publishing
-  pushPair('features', 'Social Publishing Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Social Publishing Gold', function(m, p) {
     var platforms = [
       { name: 'X (Twitter)', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="'+p.mt+'" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' },
       { name: 'Instagram', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+p.mt+'" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="'+p.mt+'" stroke="none"/></svg>' },
@@ -3528,7 +3540,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // 20. Clients & CRM
-  pushPair('features', 'Clients CRM Gold', function(m, p) {
+  pushPair('bloom-features-gold', 'Clients CRM Gold', function(m, p) {
     var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
       glow(p.gRgb, '35%', 600, 0.06)+
       '<div style="position:relative;">'+pill('Clients', p.ac, p.bd)+
@@ -3559,7 +3571,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     { headline: 'Content creation<br>is dead.', sub: 'Content cultivation is here.' }
   ];
   goldHooks.forEach(function(h, i) {
-    pushPair('hooks', 'Gold Hook ' + (i+1), function(m, p) {
+    pushPair('bloom-hooks-gold', 'Gold Hook ' + (i+1), function(m, p) {
       var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
         glow(p.gRgb, '42%', 800, 0.1)+
         '<div style="position:relative;">'+
@@ -3583,7 +3595,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     { title: 'Grows With You', desc: 'From solo creator to agency. RoweOS scales with your brand portfolio and team needs.', icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>' }
   ];
   goldValues.forEach(function(v, i) {
-    pushPair('value', 'Gold Value ' + (i+1), function(m, p) {
+    pushPair('bloom-value-gold', 'Gold Value ' + (i+1), function(m, p) {
       var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 80px;">'+
         glow(p.gRgb, '35%', 600, 0.07)+
         '<div style="position:relative;">'+
@@ -3608,7 +3620,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     { title: 'Client Work', before: ['Manual proposals','No content pipeline','Slow turnaround','Generic templates','Hours per client'], after: ['AI-drafted proposals','Automated content flow','Minutes per deliverable','Brand-matched output','Scale infinitely'] }
   ];
   goldBA.forEach(function(ba, i) {
-    pushPair('beforeafter', 'Gold BA ' + ba.title, function(m, p) {
+    pushPair('bloom-ba-gold', 'Gold BA ' + ba.title, function(m, p) {
       var beforeList = '';
       ba.before.forEach(function(b) {
         beforeList += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+xIcon(p.rd)+'<span style="font-size:13px;color:'+p.dm+';">'+b+'</span></div>';
@@ -3637,7 +3649,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-gold', mode: m, label: 'Bloom Wallpaper Flower — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Flower — ' + m,
       render: (function(mode, pal) { return function() {
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
           wpGlow(mode, '45%', 1000, 0.12)+
@@ -3654,7 +3666,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-gold', mode: m, label: 'Bloom Wallpaper Gradient — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Gradient — ' + m,
       render: (function(mode, pal) { return function() {
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
           '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba('+pal.gRgb+',0.06) 50%,transparent 100%);pointer-events:none;"></div>'+
@@ -3672,7 +3684,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-gold', mode: m, label: 'Bloom Wallpaper Stack — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Stack — ' + m,
       render: (function(mode, pal) { return function() {
         var features = ['Bloom','Studio','Chat','Focus','Video Lab','Pulse','Identity'];
         var stack = '';
@@ -3695,7 +3707,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-gold', mode: m, label: 'Bloom Wallpaper Quote — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Quote — ' + m,
       render: (function(mode, pal) { return function() {
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:0 120px;">'+
           wpGlow(mode, '45%', 900, 0.1)+
@@ -3713,7 +3725,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-gold', mode: m, label: 'Bloom Wallpaper Dual — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Dual — ' + m,
       render: (function(mode, pal) { return function() {
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
           '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba('+pal.gRgb+',0.08) 0%,transparent 50%);pointer-events:none;"></div>'+
@@ -3742,7 +3754,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     { headline: 'One Platform.<br>Every AI Model.<br>Your Brand.', sub: 'Claude. GPT. Gemini. All in one place, all tuned to your brand.', cta: 'Get Started' }
   ];
   launchTemplates.forEach(function(l, i) {
-    pushPair('launch', 'Gold Launch ' + (i+1), function(m, p) {
+    pushPair('bloom-launch-gold', 'Gold Launch ' + (i+1), function(m, p) {
       var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
         glow(p.gRgb, '38%', 700, 0.09)+
         '<div style="position:relative;">'+logoMark(m, 32)+
@@ -3759,7 +3771,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   // ═══════════════════════════════════════════════════════
 
   // Big stat: Models
-  pushPair('stats', 'Gold Stat Models', function(m, p) {
+  pushPair('bloom-stats-gold', 'Gold Stat Models', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '40%', 600, 0.1)+
       '<div style="position:relative;">'+
@@ -3772,7 +3784,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // Big stat: Operations
-  pushPair('stats', 'Gold Stat Operations', function(m, p) {
+  pushPair('bloom-stats-gold', 'Gold Stat Operations', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '40%', 600, 0.1)+
       '<div style="position:relative;">'+
@@ -3785,7 +3797,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // Big stat: Features
-  pushPair('stats', 'Gold Stat Features', function(m, p) {
+  pushPair('bloom-stats-gold', 'Gold Stat Features', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '40%', 600, 0.1)+
       '<div style="position:relative;">'+
@@ -3809,7 +3821,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     { persona: 'The Freelancer', quote: 'I deliver 10x more content to clients with the same effort. My margins have doubled.', details: ['Client management','Batch generation','Professional output'] }
   ];
   goldUseCases.forEach(function(uc, i) {
-    pushPair('usecases', 'Gold UseCase ' + uc.persona, function(m, p) {
+    pushPair('bloom-usecases-gold', 'Gold UseCase ' + uc.persona, function(m, p) {
       var detailCards = '';
       uc.details.forEach(function(d) {
         detailCards += '<div style="display:flex;align-items:center;gap:10px;">'+chk(m)+'<span style="font-size:13px;color:var(--c-text);">'+d+'</span></div>';
@@ -3831,7 +3843,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   // ═══════════════════════════════════════════════════════
 
   // Pricing tiers
-  pushPair('pricing', 'Gold Pricing Tiers', function(m, p) {
+  pushPair('bloom-pricing-gold', 'Gold Pricing Tiers', function(m, p) {
     var tiers = [
       { name: 'Solo', price: '$29', desc: '1 brand, AI agents, chat' },
       { name: 'Founder', price: '$59', desc: '5 brands, automations, social', highlight: true },
@@ -3856,7 +3868,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // Pricing BYOK
-  pushPair('pricing', 'Gold Pricing BYOK', function(m, p) {
+  pushPair('bloom-pricing-gold', 'Gold Pricing BYOK', function(m, p) {
     var benefits = ['Bring your own API keys', 'No markup on API costs', 'All platform features included', 'Cancel anytime'];
     var list = '';
     benefits.forEach(function(b) {
@@ -3875,7 +3887,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   // GROUP 11: PRIVACY - GOLD (3 pairs = 6 templates)
   // ═══════════════════════════════════════════════════════
 
-  pushPair('privacy', 'Gold Privacy BYOK', function(m, p) {
+  pushPair('bloom-privacy-gold', 'Gold Privacy BYOK', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '40%', 700, 0.08)+
       '<div style="position:relative;">'+
@@ -3887,7 +3899,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     return cardWrap(m, inner);
   });
 
-  pushPair('privacy', 'Gold Privacy Zero', function(m, p) {
+  pushPair('bloom-privacy-gold', 'Gold Privacy Zero', function(m, p) {
     var points = ['No data collection', 'No server-side storage', 'No third-party tracking', 'No AI training on your data'];
     var list = '';
     points.forEach(function(pt) {
@@ -3903,7 +3915,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     return cardWrap(m, inner);
   });
 
-  pushPair('privacy', 'Gold Privacy Cloud Sync', function(m, p) {
+  pushPair('bloom-privacy-gold', 'Gold Privacy Cloud Sync', function(m, p) {
     var inner = '<div style="display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
       glow(p.gRgb, '35%', 600, 0.06)+
       '<div style="position:relative;">'+pill('Cloud Sync', p.ac, p.bd)+
@@ -3929,7 +3941,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     { name: 'Email Composer', desc: 'Draft professional emails with AI. Brand-matched tone, smart templates, one-click send via your email client.', icon: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>' }
   ];
   goldSpotlights.forEach(function(sp, i) {
-    pushPair('spotlights', 'Gold Spotlight ' + sp.name, function(m, p) {
+    pushPair('bloom-spotlights-gold', 'Gold Spotlight ' + sp.name, function(m, p) {
       var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'+
         glow(p.gRgb, '30%', 500, 0.07)+
         '<div style="position:relative;">'+
@@ -3948,7 +3960,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   // ═══════════════════════════════════════════════════════
 
   // Minimal wordmark
-  pushPair('mood', 'Gold Mood Wordmark', function(m, p) {
+  pushPair('bloom-mood-gold', 'Gold Mood Wordmark', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '50%', 900, 0.12)+
       '<div style="position:relative;font-family:\'Cormorant Garamond\',serif;font-size:120px;font-weight:300;color:var(--c-text);letter-spacing:0.1em;">RoweOS</div>'+
@@ -3957,7 +3969,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // Tagline atmosphere
-  pushPair('mood', 'Gold Mood Tagline', function(m, p) {
+  pushPair('bloom-mood-gold', 'Gold Mood Tagline', function(m, p) {
     var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'+
       glow(p.gRgb, '45%', 800, 0.1)+
       '<div style="position:relative;">'+
@@ -3969,7 +3981,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // Gold dust atmosphere
-  pushPair('mood', 'Gold Mood Dust', function(m, p) {
+  pushPair('bloom-mood-gold', 'Gold Mood Dust', function(m, p) {
     var dots = '';
     for (var d = 0; d < 30; d++) {
       var x = 10 + Math.floor((d * 37) % 80);
@@ -3987,7 +3999,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   });
 
   // Vertical lines mood
-  pushPair('mood', 'Gold Mood Lines', function(m, p) {
+  pushPair('bloom-mood-gold', 'Gold Mood Lines', function(m, p) {
     var lines = '';
     for (var l = 0; l < 7; l++) {
       var left = 12 + l * 13;
@@ -4207,12 +4219,29 @@ function rasterizeSvgs(container) {
 }
 
 function renderToCanvas(idx) {
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     var t = templates[idx];
+    if (!t) { reject(new Error('Template not found: ' + idx)); return; }
     var tw = t.w || CARD_W;
     var th = t.h || CARD_H;
     var container = document.getElementById('renderContainer');
-    container.innerHTML = t.render();
+    var timedOut = false;
+
+    // v22.22: 15s timeout to prevent chain stalling on failed renders
+    var timeout = setTimeout(function() {
+      timedOut = true;
+      container.innerHTML = '';
+      reject(new Error('Render timeout for template ' + idx));
+    }, 15000);
+
+    try {
+      container.innerHTML = t.render();
+    } catch(e) {
+      clearTimeout(timeout);
+      container.innerHTML = '';
+      reject(e);
+      return;
+    }
 
     // Wait for images to load
     var imgs = container.querySelectorAll('img');
@@ -4220,8 +4249,10 @@ function renderToCanvas(idx) {
     var total = imgs.length;
 
     function onReady() {
+      if (timedOut) return;
       // Pre-rasterize SVGs to PNG before html2canvas
       rasterizeSvgs(container).then(function() {
+        if (timedOut) return;
         html2canvas(container.firstChild, {
           width: tw,
           height: th,
@@ -4231,9 +4262,19 @@ function renderToCanvas(idx) {
           backgroundColor: null,
           logging: false
         }).then(function(canvas) {
+          if (timedOut) return;
+          clearTimeout(timeout);
           container.innerHTML = '';
           resolve(canvas);
+        }).catch(function(e) {
+          clearTimeout(timeout);
+          container.innerHTML = '';
+          reject(e);
         });
+      }).catch(function(e) {
+        clearTimeout(timeout);
+        container.innerHTML = '';
+        reject(e);
       });
     }
 
@@ -4265,6 +4306,9 @@ function downloadTemplate(idx) {
       a.click();
       URL.revokeObjectURL(a.href);
     }, 'image/png');
+  }).catch(function(e) {
+    console.error('[social] Download failed for template ' + idx + ':', e.message);
+    alert('Download failed for this template. Try again or use a different browser.');
   });
 }
 
@@ -4315,6 +4359,11 @@ function downloadAll() {
         completed++;
         setTimeout(function() { processNext(i + 1); }, 100);
       }, 'image/png');
+    }).catch(function(e) {
+      // v22.22: Skip failed renders instead of stalling the chain
+      console.warn('[social] Skipped template ' + (i+1) + ' (' + t.label + '):', e.message);
+      completed++;
+      setTimeout(function() { processNext(i + 1); }, 100);
     });
   }
 
