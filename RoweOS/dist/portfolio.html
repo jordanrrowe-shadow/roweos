@@ -2315,41 +2315,29 @@ function _buildPDF(orientation) {
   chapterDivider('VI', 'AI Agents', 'Specialized intelligence, calibrated to your context.');
   newPage();
   drawLabel('BrandAI Agents');
-  // Custom agent table with color dots
-  var agentColors = [C.strategy, C.marketing, C.ops, C.docs, C.intel];
-  var agentData = [
-    ['Strategy', 'High-level brand positioning, competitive analysis, market strategy, and growth planning. The strategic mind of your brand.'],
-    ['Marketing', 'Campaign development, content creation, audience targeting, and messaging. Generates brand-voice-aligned marketing assets.'],
-    ['Operations', 'Process optimization, financial analysis, operational planning, and workflow efficiency. The practical backbone of brand management.'],
-    ['Documents', 'Long-form content, technical writing, documentation, and structured output. Produces polished, brand-consistent documents.'],
-    ['Intelligence', 'Real-time web search, trend analysis, competitive monitoring, and research synthesis. Powered by GPT-5.4 with live web search capability.']
-  ];
-  for (var a = 0; a < agentData.length; a++) {
-    checkSpace(50);
-    // Color dot
-    setFill(agentColors[a]);
-    pdf.circle(M + 5, y + 1, 4, 'F');
-    // Name
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(12);
-    setColor(C.text);
-    pdf.text(agentData[a][0], M + 18, y + 5);
-    y += 18;
-    drawPara(agentData[a][1], 18);
-    y += 4;
-  }
+  drawTable(
+    ['Agent', 'Description'],
+    [
+      ['Strategy', 'High-level brand positioning, competitive analysis, market strategy, and growth planning. The strategic mind of your brand.'],
+      ['Marketing', 'Campaign development, content creation, audience targeting, and messaging. Generates brand-voice-aligned marketing assets.'],
+      ['Operations', 'Process optimization, financial analysis, operational planning, and workflow efficiency. The practical backbone of brand management.'],
+      ['Documents', 'Long-form content, technical writing, documentation, and structured output. Produces polished, brand-consistent documents.'],
+      ['Intelligence', 'Real-time web search, trend analysis, competitive monitoring, and research synthesis. Powered by GPT-5.4 with live web search capability.']
+    ],
+    [CW * 0.2, CW * 0.8]
+  );
 
   drawLabel('LifeAI Coaches');
   drawTable(
     ['Coach', 'Description'],
     [
-      ['Life Coach', 'Goal setting, personal development planning, habit tracking, and accountability.'],
-      ['Wellness Coach', 'Health and wellness guidance based on your health profile, fitness goals, and lifestyle.'],
-      ['Tax Copilot', 'Tax planning and financial strategy based on income, deductions, and business structure.'],
-      ['Personal AI', 'General-purpose personal assistant with full context of your life profile.'],
-      ['Standard AI', 'Unrestricted general intelligence without life-profile injection.']
+      ['Personal AI', 'General-purpose personal assistant with full context of your life profile. Handles any personal query with awareness of your complete situation.'],
+      ['Life Coach', 'Goal setting, personal development planning, habit tracking, and accountability. Informed by your stated life goals, values, and priorities.'],
+      ['Wellness Coach', 'Health and wellness guidance based on your health profile, fitness goals, and lifestyle preferences. Holistic approach to physical and mental wellbeing.'],
+      ['Tax Copilot', 'Tax planning and financial strategy based on your income, deductions, business structure, and financial goals. Year-round tax optimization, not just filing season.'],
+      ['Standard AI', 'Unrestricted general intelligence without life-profile injection. Clean AI interaction for tasks that do not require personal context.']
     ],
-    [CW * 0.25, CW * 0.75]
+    [CW * 0.2, CW * 0.8]
   );
   drawFooter('RoweOS v22.35 - The Rowe Collection LLC', '8');
 
