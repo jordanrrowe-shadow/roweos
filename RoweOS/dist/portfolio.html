@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS Portfolio - v22.30</title>
+<style>
+/* ========================================
+   RoweOS Portfolio Document v22.30
+   The Rowe Collection LLC
+   ======================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0a0a0a;
+  --bg-elevated: #141414;
+  --bg-card: #1a1a1a;
+  --gold: #a89878;
+  --gold-dim: rgba(168, 152, 120, 0.3);
+  --gold-subtle: rgba(168, 152, 120, 0.08);
+  --text: #e8e8e8;
+  --text-secondary: #999;
+  --text-muted: #666;
+  --border: rgba(255,255,255,0.06);
+  --strategy: #a78bfa;
+  --marketing: #f472b6;
+  --operations: #4ade80;
+  --documents: #fbbf24;
+  --intelligence: #22d3ee;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* Download Button */
+.download-btn {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 10px 20px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.download-btn:hover {
+  background: var(--gold);
+  color: var(--bg);
+}
+.download-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Page Structure */
+.page {
+  min-height: 100vh;
+  padding: 80px 60px;
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.page-footer {
+  position: absolute;
+  bottom: 30px;
+  left: 60px;
+  right: 60px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Cover Page */
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  padding: 60px;
+}
+
+.cover-frame {
+  position: absolute;
+  inset: 40px;
+  border: 1px solid var(--gold-dim);
+  pointer-events: none;
+}
+
+.cover-logo {
+  width: 200px;
+  height: auto;
+  mix-blend-mode: lighten;
+  margin-bottom: 48px;
+}
+
+.cover-subtitle {
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+
+.cover-title {
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--text);
+  letter-spacing: 1px;
+  margin-bottom: 48px;
+}
+
+.cover-version {
+  font-size: 13px;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.cover-company {
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 48px;
+}
+
+.cover-tagline {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 300;
+  margin-bottom: 80px;
+}
+
+.cover-confidential {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Divider */
+.divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold-dim);
+  margin: 24px auto;
+}
+
+/* Chapter Divider Pages */
+.chapter-divider {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.chapter-numeral {
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 24px;
+  font-weight: 400;
+}
+
+.chapter-title {
+  font-size: 36px;
+  font-weight: 200;
+  color: var(--text);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.chapter-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 300;
+  max-width: 400px;
+}
+
+/* Content Typography */
+h2 {
+  font-size: 28px;
+  font-weight: 200;
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+  color: var(--text);
+}
+
+h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+h4 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+p {
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.section {
+  margin-bottom: 48px;
+}
+
+.section-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+/* Tables */
+.table-wrap {
+  overflow-x: auto;
+  margin-bottom: 32px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+thead th {
+  background: var(--gold);
+  color: var(--bg);
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+tbody tr:hover {
+  background: var(--gold-subtle);
+}
+
+/* Feature Cards */
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 28px;
+  position: relative;
+}
+
+.feature-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feature-card-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.feature-accent {
+  width: 3px;
+  height: 24px;
+  position: absolute;
+  top: 28px;
+  left: 0;
+  background: var(--gold);
+}
+
+/* Agent Colors */
+.agent-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Blockquote */
+blockquote {
+  border-left: 2px solid var(--gold-dim);
+  padding: 16px 24px;
+  margin: 24px 0;
+  background: var(--gold-subtle);
+}
+
+blockquote p {
+  font-style: italic;
+  color: var(--gold);
+  margin: 0;
+  font-size: 15px;
+}
+
+/* List */
+.clean-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 24px;
+}
+
+.clean-list li {
+  padding: 8px 0;
+  padding-left: 20px;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.clean-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--gold);
+  transform: rotate(45deg);
+}
+
+/* Contents Page */
+.toc {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.toc-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+}
+
+.toc-numeral {
+  color: var(--gold);
+  font-size: 13px;
+  letter-spacing: 1px;
+  min-width: 60px;
+}
+
+.toc-label {
+  flex: 1;
+  color: var(--text);
+  font-weight: 300;
+}
+
+/* Pipeline Flow */
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+.pipeline-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 10px 18px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.pipeline-arrow {
+  color: var(--gold);
+  font-size: 16px;
+}
+
+/* Advantage Section */
+.advantage-item {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.advantage-item:last-child {
+  border-bottom: none;
+}
+
+.advantage-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.advantage-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Tier Table Colors */
+.tier-free { color: var(--text-secondary); }
+.tier-basic { color: #60a5fa; }
+.tier-founder { color: var(--gold); }
+.tier-premium { color: #c084fc; }
+
+/* ========================================
+   Print Styles
+   ======================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 0.75in;
+  }
+
+  body {
+    background: white;
+    color: #1a1a1a;
+    font-size: 11pt;
+  }
+
+  .download-btn {
+    display: none !important;
+  }
+
+  .page {
+    min-height: auto;
+    padding: 0;
+    page-break-after: always;
+    max-width: none;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+
+  .cover {
+    min-height: auto;
+    height: auto;
+    padding: 2in 1in;
+    page-break-after: always;
+  }
+
+  .cover-frame {
+    border-color: var(--gold);
+    inset: 20px;
+  }
+
+  .cover-logo {
+    filter: none;
+    mix-blend-mode: normal;
+  }
+
+  .chapter-divider {
+    min-height: auto;
+    padding: 3in 1in;
+    page-break-after: always;
+  }
+
+  .page-footer {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    margin-top: 40px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+  }
+
+  h2, h3, h4 { color: #1a1a1a; }
+  p, .clean-list li, tbody td, .feature-card-desc, .advantage-desc, .chapter-desc {
+    color: #444;
+  }
+
+  .section-label, .chapter-numeral, .cover-subtitle, .cover-tagline, blockquote p, .toc-numeral, h4 {
+    color: var(--gold);
+  }
+
+  thead th {
+    background: var(--gold);
+    color: white;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .feature-card {
+    background: #f9f9f9;
+    border-color: #ddd;
+    break-inside: avoid;
+  }
+
+  .feature-accent {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .agent-dot {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  blockquote {
+    background: #f5f3ef;
+  }
+
+  .cover-frame {
+    border-color: #c0b090;
+  }
+
+  tbody tr:hover { background: none; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .page { padding: 40px 24px; }
+  .cover { padding: 40px 24px; }
+  .cover-frame { inset: 16px; }
+  .cover-logo { width: 140px; }
+  .chapter-title { font-size: 28px; }
+  h2 { font-size: 24px; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .page-footer { left: 24px; right: 24px; bottom: 16px; }
+  .download-btn { top: 12px; right: 12px; padding: 8px 14px; font-size: 12px; }
+  .pipeline-flow { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- Download Button -->
+<button class="download-btn" onclick="window.print()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+    <polyline points="7 10 12 15 17 10"/>
+    <line x1="12" y1="15" x2="12" y2="3"/>
+  </svg>
+  Download PDF
+</button>
+
+<!-- ============================================
+     COVER PAGE
+     ============================================ -->
+<div class="cover">
+  <div class="cover-frame"></div>
+  <img src="/images/logo-full.png" alt="RoweOS" class="cover-logo">
+  <div class="cover-subtitle">Comprehensive Brand &amp; Platform Guide</div>
+  <div class="divider"></div>
+  <div class="cover-title">Portfolio Document</div>
+  <div class="cover-version">Version v22.30</div>
+  <div class="cover-company">The Rowe Collection LLC - Austin, Texas</div>
+  <div class="cover-tagline">"Operating intelligence, built for brand and life."</div>
+  <div class="cover-confidential">Confidential - The Rowe Collection LLC</div>
+</div>
+
+<!-- ============================================
+     CONTENTS
+     ============================================ -->
+<div class="page">
+  <h2 style="text-align:center; margin-bottom:48px;">Contents</h2>
+  <div class="toc">
+    <div class="toc-item"><span class="toc-numeral">I</span><span class="toc-label">Brand Essence</span></div>
+    <div class="toc-item"><span class="toc-numeral">II</span><span class="toc-label">Voice &amp; Tone</span></div>
+    <div class="toc-item"><span class="toc-numeral">III</span><span class="toc-label">Target Audience</span></div>
+    <div class="toc-item"><span class="toc-numeral">IV</span><span class="toc-label">Key Messaging</span></div>
+    <div class="toc-item"><span class="toc-numeral">V</span><span class="toc-label">Platform Features</span></div>
+    <div class="toc-item"><span class="toc-numeral">VI</span><span class="toc-label">AI Agents</span></div>
+    <div class="toc-item"><span class="toc-numeral">VII</span><span class="toc-label">Adaptive Operations Engine</span></div>
+    <div class="toc-item"><span class="toc-numeral">VIII</span><span class="toc-label">Visual Identity &amp; Design Language</span></div>
+    <div class="toc-item"><span class="toc-numeral">IX</span><span class="toc-label">Technical Architecture</span></div>
+    <div class="toc-item"><span class="toc-numeral">X</span><span class="toc-label">Enterprise &amp; Access</span></div>
+    <div class="toc-item"><span class="toc-numeral">XI</span><span class="toc-label">Competitive Advantages</span></div>
+  </div>
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>ii</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER I: BRAND ESSENCE
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter I</div>
+  <div class="chapter-title">Brand Essence</div>
+  <div class="chapter-desc">The foundation of what RoweOS is and why it exists.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">What is RoweOS</div>
+    <p>RoweOS is a private, AI-powered operating system built for brand operators and individuals who demand full control over their intelligence infrastructure. It is not a SaaS product. It is not a chatbot wrapper. It is a comprehensive platform that consolidates brand strategy, marketing, operations, content, and personal life management into a single, self-contained application.</p>
+    <p>Designed and built by The Rowe Collection LLC in Austin, Texas, RoweOS operates as a single-file HTML application with zero external dependencies. All data lives in the user's browser via localStorage, with optional Firebase synchronization for cross-device access. Users provide their own API keys - there is no middleman, no data harvesting, no subscription wall for core functionality.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Two Modes of Intelligence</div>
+    <h3>BrandAI Mode</h3>
+    <p>Purpose-built for brand operators managing one or more brands. BrandAI deploys five specialized AI agents - Strategy, Marketing, Operations, Documents, and Intelligence - each calibrated to the user's brand identity, voice, audience, and goals. Over 150 operations span content creation, competitive analysis, financial planning, and more.</p>
+
+    <h3>LifeAI Mode</h3>
+    <p>A personal intelligence layer for the individual behind the brand. LifeAI provides five coaching archetypes - Life Coach, Wellness Coach, Tax Copilot, Personal AI, and Standard AI - each informed by the user's personal context including goals, health data, family details, career trajectory, and financial situation.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Core Philosophy</div>
+    <blockquote>
+      <p>"Quiet competence" - professional elegance with Apple-like restraint. Every pixel, every interaction, every output reflects operational precision without ostentation.</p>
+    </blockquote>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Data Sovereignty</div>
+    <p>Your data. Your keys. Your intelligence. RoweOS never routes data through proprietary servers. API calls go directly from the browser to Anthropic, OpenAI, or Google. There is no analytics tracking, no telemetry, no usage reporting. The application is fully functional offline with cached data, and all synchronization is opt-in.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>1</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER II: VOICE & TONE
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter II</div>
+  <div class="chapter-title">Voice &amp; Tone</div>
+  <div class="chapter-desc">How RoweOS communicates across every touchpoint.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Brand Voice</div>
+    <p>Confident yet approachable. Luxurious without being ostentatious. RoweOS speaks with the quiet authority of a system that simply works - no hype, no exclamation points, no breathless feature announcements. The voice is that of a trusted advisor who respects the operator's intelligence.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Tone Principles</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Principle</th>
+            <th>Description</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Quiet Competence</td>
+            <td>Let the work speak. Avoid superlatives and marketing fluff.</td>
+            <td>"Your brand strategy has been updated." not "Amazing update complete!"</td>
+          </tr>
+          <tr>
+            <td>Operational Precision</td>
+            <td>Be specific. Use concrete terms over vague promises.</td>
+            <td>"150+ operations" not "tons of AI features"</td>
+          </tr>
+          <tr>
+            <td>Brand Protection</td>
+            <td>Every output respects the user's brand constraints and voice.</td>
+            <td>AI outputs conform to brand-defined tone, audience, and vocabulary.</td>
+          </tr>
+          <tr>
+            <td>Consistency</td>
+            <td>Same voice across all agents, views, and interactions.</td>
+            <td>Whether in Chat, Studio, or Signal - the tone never breaks character.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Voice Attributes</div>
+    <ul class="clean-list">
+      <li>Direct and efficient - no filler words or unnecessary preamble</li>
+      <li>Technically precise - uses correct terminology without jargon overload</li>
+      <li>Respectfully minimal - says what needs to be said, nothing more</li>
+      <li>Warm but professional - approachable without being casual</li>
+      <li>Never uses emoji in system-generated content - SVG icons or text only</li>
+      <li>Avoids em-dashes - uses alternative punctuation or restructures</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>2</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER III: TARGET AUDIENCE
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter III</div>
+  <div class="chapter-title">Target Audience</div>
+  <div class="chapter-desc">Who RoweOS serves and how they operate.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">BrandAI Mode</div>
+    <h4>Demographics</h4>
+    <ul class="clean-list">
+      <li>Brand operators and founders managing 1-5 brands</li>
+      <li>Solo entrepreneurs and small business owners</li>
+      <li>Creative directors and marketing professionals</li>
+      <li>Luxury and premium brand managers</li>
+      <li>Service-based business operators (consulting, coaching, concierge)</li>
+      <li>Content creators who treat their personal brand as a business</li>
+    </ul>
+
+    <h4>Psychographics</h4>
+    <ul class="clean-list">
+      <li>Values data ownership and privacy over convenience</li>
+      <li>Prefers tools that adapt to them, not the reverse</li>
+      <li>Appreciates design quality and aesthetic coherence</li>
+      <li>Operates across multiple business verticals simultaneously</li>
+      <li>Skeptical of SaaS subscription models and vendor lock-in</li>
+      <li>Technically literate enough to manage API keys and browser storage</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-label">LifeAI Mode</div>
+    <h4>Target Users</h4>
+    <ul class="clean-list">
+      <li>Individuals seeking structured personal development support</li>
+      <li>Professionals managing complex personal and financial situations</li>
+      <li>People who want AI coaching without surrendering personal data to third parties</li>
+      <li>Those managing health, wellness, tax planning, and life goals holistically</li>
+      <li>Users who value continuity - the AI remembers context across conversations</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>3</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER IV: KEY MESSAGING
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter IV</div>
+  <div class="chapter-title">Key Messaging</div>
+  <div class="chapter-desc">The core messages that define the RoweOS value proposition.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Master Messages</div>
+    <blockquote>
+      <p>"Operating intelligence, built for brand and life."</p>
+    </blockquote>
+    <blockquote>
+      <p>"Your data. Your keys. Your intelligence."</p>
+    </blockquote>
+    <blockquote>
+      <p>"One system. Every brand. Total control."</p>
+    </blockquote>
+  </div>
+
+  <div class="section">
+    <div class="section-label">BrandAI Value Propositions</div>
+    <ul class="clean-list">
+      <li>Five specialized AI agents, each trained on your brand identity and voice</li>
+      <li>Over 150 operations spanning strategy, marketing, content, finance, and competitive analysis</li>
+      <li>Intelligence agent with live web search, powered by GPT-5.4</li>
+      <li>Multi-brand portfolio management with instant brand switching</li>
+      <li>Deep brand identity configuration that improves every AI output</li>
+      <li>Automated workflows with scheduled execution and pipeline chaining</li>
+      <li>Direct social media posting to X, Threads, Instagram, LinkedIn, and TikTok</li>
+      <li>No subscription required for core AI features - bring your own API keys</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-label">LifeAI Value Propositions</div>
+    <ul class="clean-list">
+      <li>Personal AI coaching that remembers your goals, health, finances, and family context</li>
+      <li>Five coaching archetypes from life planning to tax strategy</li>
+      <li>Complete data sovereignty - your personal information never leaves your browser</li>
+      <li>Cross-mode intelligence sharing between your brand and personal contexts</li>
+      <li>Wellness tracking, daily planning, and structured personal development</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>4</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER V: PLATFORM FEATURES
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter V</div>
+  <div class="chapter-title">Platform Features</div>
+  <div class="chapter-desc">A comprehensive overview of every RoweOS capability.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Core Views</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Chat
+        </div>
+        <div class="feature-card-desc">Multi-agent conversations with file attachments, multimodal content support (images, documents), and real-time streaming responses. Switch between agents mid-conversation. Full conversation history with search.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Signal
+        </div>
+        <div class="feature-card-desc">Daily intelligence briefings tailored to your brand. Trend monitoring, competitor activity detection, and market signal aggregation. Automated delivery via scheduled tasks.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Pulse
+        </div>
+        <div class="feature-card-desc">Brand health scoring and performance tracking. Monitors consistency, audience engagement, and operational metrics. Visual dashboards with trend indicators.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          Studio
+        </div>
+        <div class="feature-card-desc">Over 150 AI operations with a custom operation builder. Organized by category - content, strategy, marketing, finance, analysis, and more. Output canvas with table of contents for multi-result sessions.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Rhythm
+        </div>
+        <div class="feature-card-desc">Task management and daily planning with calendar integration. Priority-based organization, due date tracking, and AI-assisted task generation from brand goals.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Focus
+        </div>
+        <div class="feature-card-desc">Automations Lab for scheduled tasks, multi-step pipelines, workflow presets, and execution history. Set recurring AI operations, content generation, and social posting on autopilot.</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>5</span>
+  </div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Knowledge &amp; Context</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          Library
+        </div>
+        <div class="feature-card-desc">Document storage and knowledge base for brand materials. Upload reference documents, style guides, and strategic plans. Content is injected into AI context for informed outputs.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 017 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 017-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          Memory
+        </div>
+        <div class="feature-card-desc">AI conversation history and context preservation. Searchable archive of all interactions, decisions, and outputs. The AI learns from past conversations to deliver increasingly precise results.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Identity
+        </div>
+        <div class="feature-card-desc">Deep brand configuration covering essence, voice, audience, messaging, products, constraints, and knowledge documents. LifeAI identity includes about me, goals, health, family, career, and finances. The depth of configuration directly correlates with output quality.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Bloom
+        </div>
+        <div class="feature-card-desc">Daily content feed with curated insights and brand-relevant articles. AI-powered content discovery tailored to your brand's industry, audience, and strategic goals.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Communication &amp; Outreach</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Mail
+        </div>
+        <div class="feature-card-desc">Email composer with branded templates, Gmail and Outlook integration, outbox queue, signature management, and AI writing tools. Batch pipeline support for automated email campaigns.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          Social
+        </div>
+        <div class="feature-card-desc">Multi-platform posting to X, Threads, Instagram, LinkedIn, and TikTok. OAuth connections per brand, scheduled posts, and AI-generated content. Direct API integration with no third-party scheduling tools required.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>6</span>
+  </div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Business Operations</div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </div>
+        <div class="feature-card-desc">Revenue tracking, performance metrics, and business intelligence dashboards. Monitor key indicators across all brands in your portfolio with visual trend analysis.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          Inventory
+        </div>
+        <div class="feature-card-desc">Product and service catalog management. Track items, pricing, availability, and categorization. Integrates with brand identity for consistent product presentation.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Clients
+        </div>
+        <div class="feature-card-desc">Client relationship management with contact details, interaction history, and project tracking. AI-informed client communication suggestions based on brand voice and relationship context.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Admin
+        </div>
+        <div class="feature-card-desc">Access key management, user tier administration, and brand configuration sharing. Generate and distribute access keys, manage subscription tiers, and monitor platform usage.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>7</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER VI: AI AGENTS
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter VI</div>
+  <div class="chapter-title">AI Agents</div>
+  <div class="chapter-desc">Specialized intelligence, calibrated to your context.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">BrandAI Agents</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px;"></th>
+            <th>Agent</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="agent-dot" style="background: #a78bfa;"></span></td>
+            <td><strong>Strategy</strong></td>
+            <td>High-level brand positioning, competitive analysis, market strategy, and growth planning. The strategic mind of your brand.</td>
+          </tr>
+          <tr>
+            <td><span class="agent-dot" style="background: #f472b6;"></span></td>
+            <td><strong>Marketing</strong></td>
+            <td>Campaign development, content creation, audience targeting, and messaging. Generates brand-voice-aligned marketing assets.</td>
+          </tr>
+          <tr>
+            <td><span class="agent-dot" style="background: #4ade80;"></span></td>
+            <td><strong>Operations</strong></td>
+            <td>Process optimization, financial analysis, operational planning, and workflow efficiency. The practical backbone of brand management.</td>
+          </tr>
+          <tr>
+            <td><span class="agent-dot" style="background: #fbbf24;"></span></td>
+            <td><strong>Documents</strong></td>
+            <td>Long-form content, technical writing, documentation, and structured output. Produces polished, brand-consistent documents.</td>
+          </tr>
+          <tr>
+            <td><span class="agent-dot" style="background: #22d3ee;"></span></td>
+            <td><strong>Intelligence</strong></td>
+            <td>Real-time web search, trend analysis, competitive monitoring, and research synthesis. Powered by GPT-5.4 with live web search capability. 12 specialized operations for market intelligence.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">LifeAI Coaches</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Coach</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Life Coach</strong></td>
+            <td>Goal setting, personal development planning, habit tracking, and accountability. Informed by your stated life goals, values, and priorities.</td>
+          </tr>
+          <tr>
+            <td><strong>Wellness Coach</strong></td>
+            <td>Health and wellness guidance based on your health profile, fitness goals, and lifestyle preferences. Holistic approach to physical and mental wellbeing.</td>
+          </tr>
+          <tr>
+            <td><strong>Tax Copilot</strong></td>
+            <td>Tax planning and financial strategy based on your income, deductions, business structure, and financial goals. Year-round tax optimization, not just filing season.</td>
+          </tr>
+          <tr>
+            <td><strong>Personal AI</strong></td>
+            <td>General-purpose personal assistant with full context of your life profile. Handles any personal query with awareness of your complete situation.</td>
+          </tr>
+          <tr>
+            <td><strong>Standard AI</strong></td>
+            <td>Unrestricted general intelligence without life-profile injection. Clean AI interaction for tasks that do not require personal context.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Cross-Mode Intelligence</div>
+    <p>BrandAI and LifeAI are not isolated silos. When the user operates in BrandAI mode, the system can reference personal context (schedule, energy levels, priorities) to inform business decisions. In LifeAI mode, brand performance data can surface to provide work-life balance insights. This cross-pollination is controlled by the user and never automatic - data sharing between modes is always explicit and intentional.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>8</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER VII: ADAPTIVE OPERATIONS ENGINE
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter VII</div>
+  <div class="chapter-title">Adaptive Operations Engine</div>
+  <div class="chapter-desc">How RoweOS transforms identity into intelligence.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Dynamic Pipeline</div>
+    <p>Every AI operation in RoweOS follows a consistent pipeline that injects brand context at every stage. This is not prompt engineering - it is systematic identity integration that makes every output inherently on-brand.</p>
+    <div class="pipeline-flow">
+      <div class="pipeline-step">Select Operation</div>
+      <span class="pipeline-arrow">&#x2192;</span>
+      <div class="pipeline-step">Load Brand Identity</div>
+      <span class="pipeline-arrow">&#x2192;</span>
+      <div class="pipeline-step">Assign Agent</div>
+      <span class="pipeline-arrow">&#x2192;</span>
+      <div class="pipeline-step">Inject Context</div>
+      <span class="pipeline-arrow">&#x2192;</span>
+      <div class="pipeline-step">Execute</div>
+      <span class="pipeline-arrow">&#x2192;</span>
+      <div class="pipeline-step">Output Canvas</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Custom Operation Builder</div>
+    <p>Users can create custom operations with defined prompts, agent assignments, and category placement. Custom operations integrate seamlessly with the existing operation library and support all pipeline features including scheduled execution and workflow chaining.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Identity Depth and Output Quality</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Identity Level</th>
+            <th>Configuration</th>
+            <th>Output Quality</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Minimal</td>
+            <td>Brand name only</td>
+            <td>Generic AI output with brand name inserted</td>
+          </tr>
+          <tr>
+            <td>Basic</td>
+            <td>Name, industry, audience</td>
+            <td>Industry-appropriate content with audience awareness</td>
+          </tr>
+          <tr>
+            <td>Configured</td>
+            <td>Voice, tone, products, competitors</td>
+            <td>On-brand content that reflects genuine brand personality</td>
+          </tr>
+          <tr>
+            <td>Deep</td>
+            <td>Full identity with knowledge docs and constraints</td>
+            <td>Output indistinguishable from internal brand team production</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">BrandAI Operations Categories</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Examples</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Content Creation</td>
+            <td>Blog posts, social captions, email copy, video scripts</td>
+          </tr>
+          <tr>
+            <td>Strategy</td>
+            <td>Brand audit, competitive analysis, market positioning, SWOT</td>
+          </tr>
+          <tr>
+            <td>Marketing</td>
+            <td>Campaign briefs, ad copy, audience personas, launch plans</td>
+          </tr>
+          <tr>
+            <td>Finance</td>
+            <td>Revenue projections, pricing strategy, budget allocation</td>
+          </tr>
+          <tr>
+            <td>Operations</td>
+            <td>Process documentation, SOP creation, workflow optimization</td>
+          </tr>
+          <tr>
+            <td>Intelligence</td>
+            <td>Web research, trend analysis, competitor monitoring, market signals</td>
+          </tr>
+          <tr>
+            <td>Documents</td>
+            <td>Proposals, reports, presentations, contracts, briefs</td>
+          </tr>
+          <tr>
+            <td>Image &amp; Video</td>
+            <td>AI image generation, video creation via Veo, visual content</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Workflow Presets &amp; Pipelines</div>
+    <p>RoweOS supports multi-step automation chains called pipelines. A pipeline can combine Studio operations, social media posts, image generation, video creation, library storage, email dispatch, and notification steps into a single automated workflow. Predefined workflow presets provide starting templates, and custom pipelines can be saved and scheduled for recurring execution.</p>
+    <p>Template variables allow output from one step to feed into the next using <code>{{stepN_output}}</code> syntax, enabling sophisticated content production chains - for example, generating a blog post, creating a social summary, producing a header image, and posting to multiple platforms in a single execution.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>9</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER VIII: VISUAL IDENTITY & DESIGN LANGUAGE
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter VIII</div>
+  <div class="chapter-title">Visual Identity &amp; Design Language</div>
+  <div class="chapter-desc">The aesthetic system that defines every RoweOS surface.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Design Foundation</div>
+    <p>RoweOS employs a dark-theme-first design language built on <code>#0a0a0a</code> backgrounds with glass morphism effects (<code>backdrop-filter: blur(20px)</code>). The primary accent color is gold (<code>#a89878</code>), which can be overridden per brand through the CSS custom property system. Every UI element - from buttons to borders to hover states - derives its color from these properties, ensuring complete visual consistency when switching between brands.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Color System</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+            <th>Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>--brand-accent</code></td>
+            <td>#a89878 (default gold)</td>
+            <td>Primary accent, buttons, active states</td>
+          </tr>
+          <tr>
+            <td><code>--brand-accent-rgb</code></td>
+            <td>168, 152, 120</td>
+            <td>Used with rgba() for transparency variants</td>
+          </tr>
+          <tr>
+            <td><code>--brand-accent-10</code> to <code>-70</code></td>
+            <td>10% to 70% opacity variants</td>
+            <td>Backgrounds, borders, hover states</td>
+          </tr>
+          <tr>
+            <td>Agent colors</td>
+            <td>Strategy #a78bfa, Marketing #f472b6, Ops #4ade80, Docs #fbbf24, Intel #22d3ee</td>
+            <td>Agent indicators, chat bubbles, operation badges</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Iconography</div>
+    <p>RoweOS uses inline SVG icons exclusively. No emoji characters appear anywhere in the interface. Icons follow a consistent specification: <code>viewBox="0 0 24 24"</code>, <code>stroke-width: 1.5</code> or <code>2</code>, with sizes of 14px (small), 16px (default), and 20px (large). All icons use <code>currentColor</code> for stroke, inheriting from their parent element's text color.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Per-Brand Customization</div>
+    <p>Each brand in a user's portfolio can define its own accent color, which propagates through every CSS custom property in real time. The function <code>applyBrandAccentColor(color)</code> sets both the <code>--brand-accent-*</code> and <code>--accent-*</code> families, ensuring complete visual transformation when switching brands. Light mode is supported via the <code>html.light-mode</code> class, with separate brand color definitions for light backgrounds.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Typography</div>
+    <p>The system font stack prioritizes Apple's SF Pro family for maximum rendering quality on Apple devices, falling back through Helvetica Neue and system defaults. Font weights are deliberately restrained - primarily 300 (light) for headings and 400 (regular) for body text, with 500 and 600 reserved for emphasis and labels.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>10</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER IX: TECHNICAL ARCHITECTURE
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter IX</div>
+  <div class="chapter-title">Technical Architecture</div>
+  <div class="chapter-desc">A single file. Zero dependencies. Maximum capability.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Single-File Architecture</div>
+    <p>RoweOS is a single HTML file exceeding 148,000 lines. It contains all CSS, HTML, and JavaScript inline with no build tools, no bundler, and no framework. The only CDN dependencies are Firebase SDK (for optional sync) and Marked.js (for Markdown rendering). This architecture was a deliberate choice - it eliminates dependency management, build failures, and version conflicts. The entire application can be opened from a local file system.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Browser APIs</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>API</th>
+            <th>Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>localStorage</td>
+            <td>Primary data storage for all user data, brand configs, conversation history, and settings</td>
+          </tr>
+          <tr>
+            <td>IndexedDB</td>
+            <td>Hints for large data storage optimization</td>
+          </tr>
+          <tr>
+            <td>Service Worker</td>
+            <td>PWA support, offline caching, background sync</td>
+          </tr>
+          <tr>
+            <td>Web App Manifest</td>
+            <td>Mobile install, app-like experience, splash screen</td>
+          </tr>
+          <tr>
+            <td>Fetch API</td>
+            <td>Direct API calls to AI providers and social platforms</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Firebase Integration (Optional)</div>
+    <p>Firebase provides optional cloud synchronization via Firestore. All sync is bidirectional and user-initiated or auto-scheduled. API keys are stored in a secure subcollection when Cloud Scheduler is enabled. The sync system uses <code>syncToFirebaseV2()</code> and <code>loadFromFirebaseV2()</code> for comprehensive state synchronization across devices.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">API Key Routing</div>
+    <p>RoweOS supports three AI providers with user-supplied API keys. There is no proxy, no middleman, and no usage tracking. API calls go directly from the browser to the provider.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Models</th>
+            <th>Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Anthropic</td>
+            <td>Claude (Sonnet, Opus, Haiku)</td>
+            <td>Default provider for all BrandAI and LifeAI operations</td>
+          </tr>
+          <tr>
+            <td>OpenAI</td>
+            <td>GPT-4o, GPT-5.4</td>
+            <td>Intelligence agent preferred provider, image generation</td>
+          </tr>
+          <tr>
+            <td>Google</td>
+            <td>Gemini (Pro, Flash)</td>
+            <td>Alternative provider, video generation via Veo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Serverless Infrastructure</div>
+    <p>Vercel serverless functions handle capabilities that require server-side execution: Cloud Scheduler for automated task execution, social media OAuth token exchange, email dispatch, and Stripe webhook processing. The scheduler runs every minute via Vercel Cron, checking for due tasks and executing them with full brand context.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">PWA Support</div>
+    <p>RoweOS installs as a Progressive Web App on mobile and desktop. A service worker provides offline caching, and the web app manifest enables home screen installation with a custom icon and splash screen. On mobile, the app runs in standalone mode with no browser chrome.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>11</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER X: ENTERPRISE & ACCESS
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter X</div>
+  <div class="chapter-title">Enterprise &amp; Access</div>
+  <div class="chapter-desc">Tiers, access control, and distribution.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Tier System</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Access Level</th>
+            <th>Key Features</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tier-free"><strong>Free</strong></td>
+            <td>Core platform access</td>
+            <td>All views, AI operations (with own API keys), local storage</td>
+          </tr>
+          <tr>
+            <td class="tier-basic"><strong>Basic</strong></td>
+            <td>Enhanced features</td>
+            <td>Firebase sync, data export, cross-device access</td>
+          </tr>
+          <tr>
+            <td class="tier-founder"><strong>Founder</strong></td>
+            <td>Full platform</td>
+            <td>Brand config sharing, automations, social connections, analytics, full identity depth</td>
+          </tr>
+          <tr>
+            <td class="tier-premium"><strong>Premium</strong></td>
+            <td>Enterprise capabilities</td>
+            <td>White-label potential, multi-user support, private onboarding, priority infrastructure</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Access Key Distribution</div>
+    <p>Platform access is managed through cryptographic access keys generated by the admin. Each key is tier-specific, can include optional notes, and tracks activation status. Users validate and link keys through the Settings view. Keys are stored in Firestore and associated with the user's Firebase UID upon activation.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Brand Config Sharing</div>
+    <p>Any signed-in user can share their current brand configuration via a share code or join link. The recipient receives a complete snapshot of the brand identity - name, colors, voice, audience, products, and custom operations. Join links use the <code>?join=CODE</code> URL parameter and are processed synchronously before routing to prevent race conditions with onboarding flows.</p>
+    <p>Administrators can generate comprehensive brand configs that include settings, memory, and cross-brand data for team distribution.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">White-Label Potential</div>
+    <p>The architecture supports white-label deployment where the entire RoweOS experience can be rebranded for enterprise clients. Per-brand accent colors, custom logos, and configurable identity fields make each deployment visually and contextually unique while sharing the same underlying platform.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>12</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER XI: COMPETITIVE ADVANTAGES
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter XI</div>
+  <div class="chapter-title">Competitive Advantages</div>
+  <div class="chapter-desc">What makes RoweOS fundamentally different.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="advantage-item">
+      <div class="advantage-title">Data Sovereignty</div>
+      <div class="advantage-desc">Unlike SaaS platforms that store your data on their servers, RoweOS keeps everything in your browser. API calls go directly to providers. There is no intermediary, no data mining, no usage analytics. You own every byte of your data, always.</div>
+    </div>
+    <div class="advantage-item">
+      <div class="advantage-title">Multi-Brand Portfolio Management</div>
+      <div class="advantage-desc">Most AI tools serve a single context. RoweOS supports an entire portfolio of brands with instant switching, per-brand identity configuration, independent social connections, and separated data stores. One platform, every brand, zero context bleed.</div>
+    </div>
+    <div class="advantage-item">
+      <div class="advantage-title">Cross-Mode Intelligence</div>
+      <div class="advantage-desc">The intersection of brand and personal intelligence is unique to RoweOS. Business decisions informed by personal context. Life planning informed by business performance. This dual-mode architecture creates a holistic intelligence layer that no single-purpose tool can replicate.</div>
+    </div>
+    <div class="advantage-item">
+      <div class="advantage-title">Zero Vendor Lock-in</div>
+      <div class="advantage-desc">RoweOS supports Anthropic, OpenAI, and Google AI providers simultaneously. Switch models mid-conversation. Use Claude for strategy and GPT for web research in the same workflow. Your data is in localStorage - export it, back it up, or move it at any time.</div>
+    </div>
+    <div class="advantage-item">
+      <div class="advantage-title">No Subscription for Core Features</div>
+      <div class="advantage-desc">The full AI platform - all 150+ operations, all agents, all views - works with just your own API keys. No monthly fee to access the intelligence layer. Subscriptions unlock enhanced features like cloud sync and social connections, but the core product is free to use.</div>
+    </div>
+    <div class="advantage-item">
+      <div class="advantage-title">Single-File Simplicity</div>
+      <div class="advantage-desc">No build tools. No dependency management. No version conflicts. No CI/CD pipeline failures. One HTML file contains the entire platform. This is not a limitation - it is a architectural decision that eliminates entire categories of operational complexity.</div>
+    </div>
+  </div>
+
+  <div class="divider" style="margin: 48px auto;"></div>
+
+  <div style="text-align: center; padding: 24px 0;">
+    <p style="color: var(--gold); font-style: italic; font-size: 16px; margin-bottom: 8px;">"Operating intelligence, built for brand and life."</p>
+    <p style="color: var(--text-muted); font-size: 12px; letter-spacing: 2px; text-transform: uppercase;">The Rowe Collection LLC - Austin, Texas</p>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>13</span>
+  </div>
+</div>
+
+</body>
+</html>
