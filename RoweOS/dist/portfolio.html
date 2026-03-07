@@ -50,24 +50,29 @@ body {
 }
 
 /* Download Button */
-.download-btn {
+.portfolio-nav {
   position: fixed;
-  top: 24px;
-  right: 24px;
+  top: 16px;
+  right: 16px;
   z-index: 1000;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.download-btn {
   background: transparent;
   border: 1px solid var(--gold);
   color: var(--gold);
-  padding: 10px 20px;
+  padding: 7px 14px;
   font-family: var(--font);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .download-btn:hover {
   background: var(--gold);
@@ -78,21 +83,16 @@ body {
   cursor: wait;
 }
 .download-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
-
 .open-btn {
-  position: fixed;
-  top: 24px;
-  right: 180px;
-  z-index: 1000;
   background: transparent;
   border: 1px solid rgba(255,255,255,0.15);
   color: var(--text-secondary);
-  padding: 10px 20px;
+  padding: 7px 14px;
   font-family: var(--font);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.5px;
   cursor: pointer;
@@ -553,8 +553,9 @@ blockquote p {
   .feature-grid { grid-template-columns: 1fr; }
   .install-steps { grid-template-columns: 1fr; }
   .page-footer { left: 24px; right: 24px; bottom: 16px; }
-  .download-btn { top: 12px; right: 12px; padding: 8px 14px; font-size: 12px; }
-  .open-btn { top: 12px; right: 150px; padding: 8px 14px; font-size: 12px; }
+  .portfolio-nav { top: 10px; right: 10px; gap: 6px; }
+  .download-btn { padding: 6px 10px; font-size: 10px; }
+  .open-btn { padding: 6px 10px; font-size: 10px; }
   .pipeline-flow { flex-direction: column; align-items: flex-start; }
 }
 </style>
@@ -562,6 +563,7 @@ blockquote p {
 <body>
 
 <!-- Navigation Buttons -->
+<div class="portfolio-nav">
 <a href="/" class="open-btn">Open RoweOS</a>
 <button class="download-btn" onclick="showPdfModal()">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -571,6 +573,7 @@ blockquote p {
   </svg>
   Download PDF
 </button>
+</div>
 
 <!-- PDF Orientation Modal -->
 <div id="pdfModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;">
