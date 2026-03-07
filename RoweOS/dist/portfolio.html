@@ -2079,7 +2079,8 @@ function _buildPDF(orientation) {
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(10);
   setColor(C.gold);
-  pdf.text('COMPREHENSIVE BRAND & PLATFORM GUIDE', W / 2, y, { align: 'center', charSpace: 3 });
+  var _coverSub = 'COMPREHENSIVE BRAND & PLATFORM GUIDE'.split('').join('  ');
+  pdf.text(_coverSub, W / 2, y, { align: 'center' });
   y += 20;
   setDraw(C.goldDim);
   pdf.line(W/2 - 30, y, W/2 + 30, y);
@@ -2134,7 +2135,9 @@ function _buildPDF(orientation) {
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(9);
     setColor(C.gold);
-    pdf.text('CHAPTER ' + num, W / 2, y, { align: 'center', charSpace: 4 });
+    // Manual letter-spacing to avoid charSpace centering bug
+    var chapStr = ('CHAPTER ' + num).split('').join('  ');
+    pdf.text(chapStr, W / 2, y, { align: 'center' });
     y += 32;
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(28);
@@ -2519,7 +2522,8 @@ function _buildPDF(orientation) {
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(9);
   setColor(C.muted);
-  pdf.text('THE ROWE COLLECTION LLC - AUSTIN, TEXAS', W / 2, y, { align: 'center', charSpace: 1.5 });
+  var _closingSub = 'THE ROWE COLLECTION LLC - AUSTIN, TEXAS'.split('').join(' ');
+  pdf.text(_closingSub, W / 2, y, { align: 'center' });
   drawFooter('RoweOS v22.35 - The Rowe Collection LLC', '14');
 
   // Save
