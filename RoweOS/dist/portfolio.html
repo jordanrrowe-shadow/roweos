@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RoweOS Portfolio - v22.30</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
 <style>
 /* ========================================
    RoweOS Portfolio Document v22.30
@@ -72,9 +73,35 @@ body {
   background: var(--gold);
   color: var(--bg);
 }
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 .download-btn svg {
   width: 16px;
   height: 16px;
+}
+
+.open-btn {
+  position: fixed;
+  top: 24px;
+  right: 180px;
+  z-index: 1000;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--text-secondary);
+  padding: 10px 20px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.open-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 /* Page Structure */
@@ -456,115 +483,63 @@ blockquote p {
 }
 
 /* Tier Table Colors */
-.tier-free { color: var(--text-secondary); }
-.tier-basic { color: #60a5fa; }
 .tier-founder { color: var(--gold); }
+.tier-basic { color: #60a5fa; }
 .tier-premium { color: #c084fc; }
 
-/* ========================================
-   Print Styles
-   ======================================== */
+/* Install Steps */
+.install-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.install-block h4 {
+  margin-bottom: 16px;
+}
+
+.install-block ol {
+  list-style: none;
+  padding: 0;
+  counter-reset: step;
+}
+
+.install-block ol li {
+  padding: 10px 0 10px 32px;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+  border-bottom: 1px solid var(--border);
+  counter-increment: step;
+}
+
+.install-block ol li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--gold);
+  text-align: center;
+  line-height: 20px;
+}
+
+.install-block ol li:last-child {
+  border-bottom: none;
+}
+
+/* Print - hidden (PDF generated via html2pdf.js) */
 @media print {
-  @page {
-    size: A4;
-    margin: 0.75in;
-  }
-
-  body {
-    background: white;
-    color: #1a1a1a;
-    font-size: 11pt;
-  }
-
-  .download-btn {
-    display: none !important;
-  }
-
-  .page {
-    min-height: auto;
-    padding: 0;
-    page-break-after: always;
-    max-width: none;
-  }
-
-  .page:last-child {
-    page-break-after: auto;
-  }
-
-  .cover {
-    min-height: auto;
-    height: auto;
-    padding: 2in 1in;
-    page-break-after: always;
-  }
-
-  .cover-frame {
-    border-color: var(--gold);
-    inset: 20px;
-  }
-
-  .cover-logo {
-    filter: none;
-    mix-blend-mode: normal;
-  }
-
-  .chapter-divider {
-    min-height: auto;
-    padding: 3in 1in;
-    page-break-after: always;
-  }
-
-  .page-footer {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    margin-top: 40px;
-    padding-top: 10px;
-    border-top: 1px solid #ddd;
-  }
-
-  h2, h3, h4 { color: #1a1a1a; }
-  p, .clean-list li, tbody td, .feature-card-desc, .advantage-desc, .chapter-desc {
-    color: #444;
-  }
-
-  .section-label, .chapter-numeral, .cover-subtitle, .cover-tagline, blockquote p, .toc-numeral, h4 {
-    color: var(--gold);
-  }
-
-  thead th {
-    background: var(--gold);
-    color: white;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .feature-card {
-    background: #f9f9f9;
-    border-color: #ddd;
-    break-inside: avoid;
-  }
-
-  .feature-accent {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .agent-dot {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  blockquote {
-    background: #f5f3ef;
-  }
-
-  .cover-frame {
-    border-color: #c0b090;
-  }
-
-  tbody tr:hover { background: none; }
+  .download-btn, .open-btn { display: none !important; }
 }
 
 /* Mobile */
@@ -576,16 +551,19 @@ blockquote p {
   .chapter-title { font-size: 28px; }
   h2 { font-size: 24px; }
   .feature-grid { grid-template-columns: 1fr; }
+  .install-steps { grid-template-columns: 1fr; }
   .page-footer { left: 24px; right: 24px; bottom: 16px; }
   .download-btn { top: 12px; right: 12px; padding: 8px 14px; font-size: 12px; }
+  .open-btn { top: 12px; right: 150px; padding: 8px 14px; font-size: 12px; }
   .pipeline-flow { flex-direction: column; align-items: flex-start; }
 }
 </style>
 </head>
 <body>
 
-<!-- Download Button -->
-<button class="download-btn" onclick="window.print()">
+<!-- Navigation Buttons -->
+<a href="/" class="open-btn">Open RoweOS</a>
+<button class="download-btn" onclick="downloadPDF()">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
     <polyline points="7 10 12 15 17 10"/>
@@ -597,7 +575,7 @@ blockquote p {
 <!-- ============================================
      COVER PAGE
      ============================================ -->
-<div class="cover">
+<div class="cover" id="pdf-content">
   <div class="cover-frame"></div>
   <img src="/images/logo-full.png" alt="RoweOS" class="cover-logo">
   <div class="cover-subtitle">Comprehensive Brand &amp; Platform Guide</div>
@@ -624,8 +602,9 @@ blockquote p {
     <div class="toc-item"><span class="toc-numeral">VII</span><span class="toc-label">Adaptive Operations Engine</span></div>
     <div class="toc-item"><span class="toc-numeral">VIII</span><span class="toc-label">Visual Identity &amp; Design Language</span></div>
     <div class="toc-item"><span class="toc-numeral">IX</span><span class="toc-label">Technical Architecture</span></div>
-    <div class="toc-item"><span class="toc-numeral">X</span><span class="toc-label">Enterprise &amp; Access</span></div>
-    <div class="toc-item"><span class="toc-numeral">XI</span><span class="toc-label">Competitive Advantages</span></div>
+    <div class="toc-item"><span class="toc-numeral">X</span><span class="toc-label">Install as Web App</span></div>
+    <div class="toc-item"><span class="toc-numeral">XI</span><span class="toc-label">Access &amp; Tiers</span></div>
+    <div class="toc-item"><span class="toc-numeral">XII</span><span class="toc-label">Competitive Advantages</span></div>
   </div>
   <div class="page-footer">
     <span>RoweOS v22.30 - The Rowe Collection LLC</span>
@@ -661,7 +640,7 @@ blockquote p {
   <div class="section">
     <div class="section-label">Core Philosophy</div>
     <blockquote>
-      <p>"Quiet competence" - professional elegance with Apple-like restraint. Every pixel, every interaction, every output reflects operational precision without ostentation.</p>
+      <p>"Quiet competence" - professional elegance with intentional restraint. Every pixel, every interaction, every output reflects operational precision without ostentation.</p>
     </blockquote>
   </div>
 
@@ -721,7 +700,7 @@ blockquote p {
           <tr>
             <td>Consistency</td>
             <td>Same voice across all agents, views, and interactions.</td>
-            <td>Whether in Chat, Studio, or Signal - the tone never breaks character.</td>
+            <td>Whether in Chat, Studio, or Focus - the tone never breaks character.</td>
           </tr>
         </tbody>
       </table>
@@ -867,7 +846,7 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.09 6.26L20.18 9l-5.09 3.74L17.18 19 12 15.27 6.82 19l2.09-6.26L3.82 9l6.09-.74z"/></svg>
           Chat
         </div>
         <div class="feature-card-desc">Multi-agent conversations with file attachments, multimodal content support (images, documents), and real-time streaming responses. Switch between agents mid-conversation. Full conversation history with search.</div>
@@ -875,15 +854,15 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          Signal
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          Focus
         </div>
-        <div class="feature-card-desc">Daily intelligence briefings tailored to your brand. Trend monitoring, competitor activity detection, and market signal aggregation. Automated delivery via scheduled tasks.</div>
+        <div class="feature-card-desc">Full categorical task management and daily planning dashboard. Calendar view, today's schedule, priority-based task tracking, daily notes journal, completion streaks, and integrated automation overview. Stay focused on what matters most.</div>
       </div>
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           Pulse
         </div>
         <div class="feature-card-desc">Brand health scoring and performance tracking. Monitors consistency, audience engagement, and operational metrics. Visual dashboards with trend indicators.</div>
@@ -891,7 +870,7 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z"/><path d="M15 5l4 4"/></svg>
           Studio
         </div>
         <div class="feature-card-desc">Over 150 AI operations with a custom operation builder. Organized by category - content, strategy, marketing, finance, analysis, and more. Output canvas with table of contents for multi-result sessions.</div>
@@ -907,10 +886,10 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          Focus
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><path d="M13 8l3-5M11 16l-3 5"/></svg>
+          Automations
         </div>
-        <div class="feature-card-desc">Automations Lab for scheduled tasks, multi-step pipelines, workflow presets, and execution history. Set recurring AI operations, content generation, and social posting on autopilot.</div>
+        <div class="feature-card-desc">Automations Lab for scheduled tasks, multi-step pipelines, workflow presets, and execution history. Set recurring AI operations, content generation, email campaigns, and social posting on autopilot.</div>
       </div>
     </div>
   </div>
@@ -927,23 +906,7 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-          Library
-        </div>
-        <div class="feature-card-desc">Document storage and knowledge base for brand materials. Upload reference documents, style guides, and strategic plans. Content is injected into AI context for informed outputs.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-accent"></div>
-        <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 017 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 017-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-          Memory
-        </div>
-        <div class="feature-card-desc">AI conversation history and context preservation. Searchable archive of all interactions, decisions, and outputs. The AI learns from past conversations to deliver increasingly precise results.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-accent"></div>
-        <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1"/><path d="M9 3v18"/><circle cx="14.5" cy="12" r="0.5" fill="currentColor"/></svg>
           Identity
         </div>
         <div class="feature-card-desc">Deep brand configuration covering essence, voice, audience, messaging, products, constraints, and knowledge documents. LifeAI identity includes about me, goals, health, family, career, and finances. The depth of configuration directly correlates with output quality.</div>
@@ -951,10 +914,26 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9"/><polyline points="3 3 3 12 9 12"/></svg>
+          Memory
+        </div>
+        <div class="feature-card-desc">AI conversation history and context preservation. Searchable archive of all interactions, decisions, and outputs. The AI learns from past conversations to deliver increasingly precise results.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="6.5" rx="2.8" ry="4.5"/><ellipse cx="17" cy="10" rx="2.8" ry="4.5" transform="rotate(72 17 10)"/><ellipse cx="15.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(144 15.5 15.5)"/><ellipse cx="8.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(-144 8.5 15.5)"/><ellipse cx="7" cy="10" rx="2.8" ry="4.5" transform="rotate(-72 7 10)"/><circle cx="12" cy="11" r="2.2"/><path d="M12 14v8"/><path d="M10 18c-1.5-.5-2.5-1-3-2"/><path d="M14 18c1.5-.5 2.5-1 3-2"/></svg>
           Bloom
         </div>
         <div class="feature-card-desc">Daily content feed with curated insights and brand-relevant articles. AI-powered content discovery tailored to your brand's industry, audience, and strategic goals.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          Library
+        </div>
+        <div class="feature-card-desc">Document storage and knowledge base for brand materials. Upload reference documents, style guides, and strategic plans. Content is injected into AI context for informed outputs.</div>
       </div>
     </div>
   </div>
@@ -965,7 +944,15 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Social
+        </div>
+        <div class="feature-card-desc">Multi-platform posting to X, Threads, Instagram, LinkedIn, and TikTok. OAuth connections per brand, scheduled posts, and AI-generated content. Direct API integration with no third-party scheduling tools required.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-accent"></div>
+        <div class="feature-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
           Mail
         </div>
         <div class="feature-card-desc">Email composer with branded templates, Gmail and Outlook integration, outbox queue, signature management, and AI writing tools. Batch pipeline support for automated email campaigns.</div>
@@ -974,9 +961,9 @@ blockquote p {
         <div class="feature-accent"></div>
         <div class="feature-card-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          Social
+          Push Notifications
         </div>
-        <div class="feature-card-desc">Multi-platform posting to X, Threads, Instagram, LinkedIn, and TikTok. OAuth connections per brand, scheduled posts, and AI-generated content. Direct API integration with no third-party scheduling tools required.</div>
+        <div class="feature-card-desc">Real-time notification center for automation completions, scheduled task results, system alerts, and important updates. Badge indicators and grouped notification history with direct navigation to results.</div>
       </div>
     </div>
   </div>
@@ -994,7 +981,7 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
           Analytics
         </div>
         <div class="feature-card-desc">Revenue tracking, performance metrics, and business intelligence dashboards. Monitor key indicators across all brands in your portfolio with visual trend analysis.</div>
@@ -1002,7 +989,7 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           Inventory
         </div>
         <div class="feature-card-desc">Product and service catalog management. Track items, pricing, availability, and categorization. Integrates with brand identity for consistent product presentation.</div>
@@ -1018,7 +1005,7 @@ blockquote p {
       <div class="feature-card">
         <div class="feature-accent"></div>
         <div class="feature-card-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
           Admin
         </div>
         <div class="feature-card-desc">Access key management, user tier administration, and brand configuration sharing. Generate and distribute access keys, manage subscription tiers, and monitor platform usage.</div>
@@ -1325,7 +1312,7 @@ blockquote p {
 
   <div class="section">
     <div class="section-label">Typography</div>
-    <p>The system font stack prioritizes Apple's SF Pro family for maximum rendering quality on Apple devices, falling back through Helvetica Neue and system defaults. Font weights are deliberately restrained - primarily 300 (light) for headings and 400 (regular) for body text, with 500 and 600 reserved for emphasis and labels.</p>
+    <p>The system font stack prioritizes SF Pro for maximum rendering quality, falling back through Helvetica Neue and system defaults. Font weights are deliberately restrained - primarily 300 (light) for headings and 400 (regular) for body text, with 500 and 600 reserved for emphasis and labels.</p>
   </div>
 
   <div class="page-footer">
@@ -1428,11 +1415,6 @@ blockquote p {
     <p>Vercel serverless functions handle capabilities that require server-side execution: Cloud Scheduler for automated task execution, social media OAuth token exchange, email dispatch, and Stripe webhook processing. The scheduler runs every minute via Vercel Cron, checking for due tasks and executing them with full brand context.</p>
   </div>
 
-  <div class="section">
-    <div class="section-label">PWA Support</div>
-    <p>RoweOS installs as a Progressive Web App on mobile and desktop. A service worker provides offline caching, and the web app manifest enables home screen installation with a custom icon and splash screen. On mobile, the app runs in standalone mode with no browser chrome.</p>
-  </div>
-
   <div class="page-footer">
     <span>RoweOS v22.30 - The Rowe Collection LLC</span>
     <span>11</span>
@@ -1440,11 +1422,69 @@ blockquote p {
 </div>
 
 <!-- ============================================
-     CHAPTER X: ENTERPRISE & ACCESS
+     CHAPTER X: INSTALL AS WEB APP
      ============================================ -->
 <div class="chapter-divider">
   <div class="chapter-numeral">Chapter X</div>
-  <div class="chapter-title">Enterprise &amp; Access</div>
+  <div class="chapter-title">Install as Web App</div>
+  <div class="chapter-desc">Download RoweOS as a native-feeling application on any device.</div>
+</div>
+
+<div class="page">
+  <div class="section">
+    <div class="section-label">Progressive Web App</div>
+    <p>RoweOS is a fully installable Progressive Web App (PWA). Once installed, it runs in its own window with no browser chrome - just like a native application. It supports offline access, push notifications, and automatic updates. Your data persists locally between sessions.</p>
+  </div>
+
+  <div class="section">
+    <div class="install-steps">
+      <div class="install-block">
+        <h4>iPhone / iPad (Safari)</h4>
+        <ol>
+          <li>Open <strong>roweos.com</strong> in Safari</li>
+          <li>Tap the <strong>Share</strong> button (square with arrow) at the bottom of the screen</li>
+          <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+          <li>Tap <strong>"Add"</strong> in the top right corner</li>
+          <li>RoweOS will appear as an app icon on your home screen</li>
+        </ol>
+      </div>
+      <div class="install-block">
+        <h4>Mac / Windows / Linux (Chrome or Edge)</h4>
+        <ol>
+          <li>Open <strong>roweos.com</strong> in Chrome or Edge</li>
+          <li>Click the <strong>install icon</strong> in the address bar (monitor with down arrow), or open the browser menu</li>
+          <li>Select <strong>"Install RoweOS"</strong> or <strong>"Install app"</strong></li>
+          <li>Click <strong>"Install"</strong> in the confirmation dialog</li>
+          <li>RoweOS opens in its own window and appears in your Applications or Start Menu</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">What Changes After Install</div>
+    <ul class="clean-list">
+      <li>Runs in a standalone window without browser navigation bars</li>
+      <li>Launches from your home screen or app dock like a native application</li>
+      <li>Works offline with cached data and previously loaded content</li>
+      <li>Receives background updates automatically when connected</li>
+      <li>All localStorage data persists between sessions</li>
+      <li>Firebase sync keeps data consistent across all your installed devices</li>
+    </ul>
+  </div>
+
+  <div class="page-footer">
+    <span>RoweOS v22.30 - The Rowe Collection LLC</span>
+    <span>12</span>
+  </div>
+</div>
+
+<!-- ============================================
+     CHAPTER XI: ACCESS & TIERS
+     ============================================ -->
+<div class="chapter-divider">
+  <div class="chapter-numeral">Chapter XI</div>
+  <div class="chapter-title">Access &amp; Tiers</div>
   <div class="chapter-desc">Tiers, access control, and distribution.</div>
 </div>
 
@@ -1462,19 +1502,14 @@ blockquote p {
         </thead>
         <tbody>
           <tr>
-            <td class="tier-free"><strong>Free</strong></td>
-            <td>Core platform access</td>
-            <td>All views, AI operations (with own API keys), local storage</td>
+            <td class="tier-founder"><strong>Founder (Beta)</strong></td>
+            <td>Full platform - currently free</td>
+            <td>All views, all agents, brand config sharing, automations, social connections, analytics, full identity depth, Firebase sync</td>
           </tr>
           <tr>
             <td class="tier-basic"><strong>Basic</strong></td>
             <td>Enhanced features</td>
             <td>Firebase sync, data export, cross-device access</td>
-          </tr>
-          <tr>
-            <td class="tier-founder"><strong>Founder</strong></td>
-            <td>Full platform</td>
-            <td>Brand config sharing, automations, social connections, analytics, full identity depth</td>
           </tr>
           <tr>
             <td class="tier-premium"><strong>Premium</strong></td>
@@ -1484,6 +1519,7 @@ blockquote p {
         </tbody>
       </table>
     </div>
+    <p>During the beta period, all users receive Founder-tier access at no cost. Paid tiers will be introduced in a future release.</p>
   </div>
 
   <div class="section">
@@ -1504,15 +1540,15 @@ blockquote p {
 
   <div class="page-footer">
     <span>RoweOS v22.30 - The Rowe Collection LLC</span>
-    <span>12</span>
+    <span>13</span>
   </div>
 </div>
 
 <!-- ============================================
-     CHAPTER XI: COMPETITIVE ADVANTAGES
+     CHAPTER XII: COMPETITIVE ADVANTAGES
      ============================================ -->
 <div class="chapter-divider">
-  <div class="chapter-numeral">Chapter XI</div>
+  <div class="chapter-numeral">Chapter XII</div>
   <div class="chapter-title">Competitive Advantages</div>
   <div class="chapter-desc">What makes RoweOS fundamentally different.</div>
 </div>
@@ -1537,11 +1573,11 @@ blockquote p {
     </div>
     <div class="advantage-item">
       <div class="advantage-title">No Subscription for Core Features</div>
-      <div class="advantage-desc">The full AI platform - all 150+ operations, all agents, all views - works with just your own API keys. No monthly fee to access the intelligence layer. Subscriptions unlock enhanced features like cloud sync and social connections, but the core product is free to use.</div>
+      <div class="advantage-desc">The full AI platform - all 150+ operations, all agents, all views - works with just your own API keys. No monthly fee to access the intelligence layer. Subscriptions unlock enhanced features like cloud sync and social connections, but the core product is accessible to use.</div>
     </div>
     <div class="advantage-item">
       <div class="advantage-title">Single-File Simplicity</div>
-      <div class="advantage-desc">No build tools. No dependency management. No version conflicts. No CI/CD pipeline failures. One HTML file contains the entire platform. This is not a limitation - it is a architectural decision that eliminates entire categories of operational complexity.</div>
+      <div class="advantage-desc">No build tools. No dependency management. No version conflicts. No CI/CD pipeline failures. One HTML file contains the entire platform. This is not a limitation - it is an architectural decision that eliminates entire categories of operational complexity.</div>
     </div>
   </div>
 
@@ -1554,9 +1590,63 @@ blockquote p {
 
   <div class="page-footer">
     <span>RoweOS v22.30 - The Rowe Collection LLC</span>
-    <span>13</span>
+    <span>14</span>
   </div>
 </div>
+
+<script>
+// v22.30: PDF generation using html2pdf.js
+// Generates dark-themed PDF matching the on-screen design exactly
+function downloadPDF() {
+  var btn = document.querySelector('.download-btn');
+  var openBtn = document.querySelector('.open-btn');
+  var originalHTML = btn.innerHTML;
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Generating...';
+  btn.disabled = true;
+
+  // Hide buttons during capture
+  btn.style.visibility = 'hidden';
+  if (openBtn) openBtn.style.visibility = 'hidden';
+
+  var opt = {
+    margin: 0,
+    filename: 'RoweOS-Portfolio-v22.30.pdf',
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: {
+      scale: 2,
+      backgroundColor: '#0a0a0a',
+      useCORS: true,
+      logging: false,
+      letterRendering: true
+    },
+    jsPDF: {
+      unit: 'in',
+      format: 'letter',
+      orientation: 'portrait'
+    },
+    pagebreak: {
+      mode: ['css'],
+      before: '.chapter-divider',
+      after: '.cover',
+      avoid: ['.feature-card', '.advantage-item', 'table', 'blockquote', '.install-block']
+    }
+  };
+
+  html2pdf().set(opt).from(document.body).save().then(function() {
+    btn.style.visibility = '';
+    if (openBtn) openBtn.style.visibility = '';
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+  }).catch(function(err) {
+    console.error('PDF generation error:', err);
+    btn.style.visibility = '';
+    if (openBtn) openBtn.style.visibility = '';
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+    alert('PDF generation failed. Please try again.');
+  });
+}
+</script>
 
 </body>
 </html>
