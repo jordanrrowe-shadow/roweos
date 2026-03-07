@@ -386,6 +386,47 @@ async function callAnthropicAPI(apiKey, model, systemPrompt, userPrompt) {
 }
 
 async function callOpenAIAPI(apiKey, model, systemPrompt, userPrompt) {
+  var actualModel = model || 'gpt-4o';
+  var isThinking = actualModel.indexOf('-thinking') !== -1;
+  if (isThinking) actualModel = actualModel.replace('-thinking', '');
+
+  // v22.27: Use Responses API for GPT-5.4+ models (required for web search + reasoning)
+  var useResponsesAPI = actualModel.indexOf('gpt-5') === 0;
+
+  if (useResponsesAPI) {
+    var reqBody = {
+      model: actualModel,
+      instructions: systemPrompt || undefined,
+      input: [{ role: 'user', content: userPrompt }],
+      max_output_tokens: isThinking ? 16384 : 4096,
+      store: false
+    };
+    if (isThinking) reqBody.reasoning = { effort: 'high', summary: 'auto' };
+    if (actualModel.indexOf('gpt-5.4') === 0) reqBody.tools = [{ type: 'web_search_preview' }];
+
+    var resp = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+      body: JSON.stringify(reqBody)
+    });
+    var data = await resp.json();
+    if (!resp.ok) {
+      var errMsg = (data && data.error && data.error.message) || ('HTTP ' + resp.status);
+      throw new Error('OpenAI API error: ' + errMsg);
+    }
+    // Extract text from Responses API output
+    var text = data.output_text || '';
+    if (!text && data.output && Array.isArray(data.output)) {
+      data.output.forEach(function(o) {
+        if (o.type === 'message' && o.content) {
+          o.content.forEach(function(c) { if (c.type === 'output_text' && c.text) text += c.text; });
+        }
+      });
+    }
+    return text;
+  }
+
+  // Legacy: Chat Completions for older models
   var resp = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -393,7 +434,7 @@ async function callOpenAIAPI(apiKey, model, systemPrompt, userPrompt) {
       'Authorization': 'Bearer ' + apiKey
     },
     body: JSON.stringify({
-      model: model || 'gpt-4o',
+      model: actualModel,
       max_tokens: 4096,
       messages: [
         { role: 'system', content: systemPrompt },
@@ -1115,6 +1156,16 @@ async function processUser(uid, projectId, accessToken, reqHost) {
       return { executed: 0, failed: 0 };
     }
 
+    // v22.26: Read deleted automation IDs to skip zombie automations
+    var deletedAutoIds = {};
+    try {
+      var delDoc = await firestoreGet(projectId, accessToken, 'roweos_users/' + uid + '/profile/deletedAutomationIds');
+      if (delDoc && delDoc.fields && delDoc.fields.data) {
+        var delData = parseFirestoreDoc({ data: delDoc.fields.data });
+        if (delData && typeof delData === 'object') deletedAutoIds = delData;
+      }
+    } catch(e) { /* OK if not found */ }
+
     console.log('[Scheduler] User ' + uid + ': found ' + automationDocs.length + ' automations, timezone: ' + timezone);
 
     // 4. Process each automation
@@ -1129,6 +1180,12 @@ async function processUser(uid, projectId, accessToken, reqHost) {
       var docIdParts = docName.split('/');
       var docId = docIdParts[docIdParts.length - 1];
       if (!task.id) task.id = docId;
+
+      // v22.26: Skip deleted automations (zombie protection)
+      if (deletedAutoIds[docId] || deletedAutoIds[String(task.id)]) {
+        console.log('[Scheduler] Skipping deleted automation: "' + (task.name || docId) + '"');
+        continue;
+      }
 
       // Skip disabled tasks
       if (!task.enabled) continue;

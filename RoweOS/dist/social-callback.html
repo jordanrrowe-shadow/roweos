@@ -148,7 +148,7 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       _detectedPlatform = 'gmail';
       setStatus('Connecting Gmail...');
       localStorage.removeItem('roweos_mail_oauth_state');
-      var gmailRedirectUri = window.location.origin + '/social-callback';
+      var gmailRedirectUri = window.location.origin + '/social-callback.html';
       fetch('/api/gmail-proxy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -183,6 +183,58 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
         done(false);
       });
       return; // Skip social platform flow
+    }
+
+    // v22.24: Outlook Mail OAuth — separate flow via gmail-proxy serverless function
+    if (stateBase && stateBase.indexOf('outlook_mail_') === 0) {
+      _detectedPlatform = 'outlook';
+      setStatus('Connecting Outlook...');
+      localStorage.removeItem('roweos_mail_oauth_state');
+      var outlookRedirectUri = window.location.origin + '/social-callback.html';
+      fetch('/api/gmail-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'outlook_exchange', code: code, redirectUri: outlookRedirectUri, uid: _embeddedUid })
+      })
+      .then(function(r) {
+        console.log('[Outlook callback] Exchange response status:', r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        console.log('[Outlook callback] Exchange result:', data.error || 'success', 'email:', data.email || 'none');
+        if (data.error) {
+          setStatus('Outlook connection failed: ' + data.error, 'error');
+          done(false);
+          return;
+        }
+        if (!data.accessToken) {
+          setStatus('Outlook connection failed: No access token returned', 'error');
+          done(false);
+          return;
+        }
+        try {
+          var configStr = localStorage.getItem('roweos_mail_config');
+          var config = configStr ? JSON.parse(configStr) : {};
+          config.outlookEmail = data.email || '';
+          config.outlookToken = data.accessToken || '';
+          config.outlookRefreshToken = data.refreshToken || '';
+          config.outlookExpiresAt = data.expiresAt || 0;
+          localStorage.setItem('roweos_mail_config', JSON.stringify(config));
+          console.log('[Outlook callback] Config saved to localStorage, email:', config.outlookEmail);
+        } catch(e) {
+          console.error('[Outlook callback] localStorage save error:', e);
+        }
+        if (window.opener) {
+          try { window.opener.postMessage({ type: 'outlook_mail_connected', email: data.email }, '*'); } catch(e) {}
+        }
+        setStatus('Outlook connected' + (data.email ? ' (' + data.email + ')' : ''), 'success');
+        done(true);
+      })
+      .catch(function(err) {
+        setStatus('Outlook connection failed: ' + (err.message || 'Network error'), 'error');
+        done(false);
+      });
+      return;
     }
 
     if (!platform) {

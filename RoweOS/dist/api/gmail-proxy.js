@@ -368,6 +368,7 @@ export default async function handler(req, res) {
               from: fromH,
               subject: subjectH,
               date: dateH,
+              internalDate: msgData.internalDate || '',
               labelIds: msgData.labelIds || [],
               isUnread: (msgData.labelIds || []).indexOf('UNREAD') !== -1
             });
@@ -444,6 +445,143 @@ export default async function handler(req, res) {
         snippet: msgData.snippet || '',
         labelIds: msgData.labelIds || []
       });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ACTION: outlook_exchange — Outlook OAuth code → tokens
+    // ═══════════════════════════════════════════════════════════════
+    if (action === 'outlook_exchange') {
+      var code = (body.code || '').trim();
+      var redirectUri = (body.redirectUri || '').trim();
+      if (!code) return res.status(400).json({ error: 'Missing authorization code' });
+
+      var outlookClientId = (process.env.OUTLOOK_CLIENT_ID || '41b2af7a-e6d9-45f3-a508-b59f055e7043').trim();
+      var outlookClientSecret = (process.env.OUTLOOK_CLIENT_SECRET || '').trim();
+      if (!outlookClientSecret) return res.status(500).json({ error: 'Outlook OAuth not configured (missing OUTLOOK_CLIENT_SECRET)' });
+
+      var tokenResp = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'grant_type=authorization_code' +
+          '&code=' + encodeURIComponent(code) +
+          '&redirect_uri=' + encodeURIComponent(redirectUri) +
+          '&client_id=' + encodeURIComponent(outlookClientId) +
+          '&client_secret=' + encodeURIComponent(outlookClientSecret) +
+          '&scope=' + encodeURIComponent('User.Read Mail.Read Mail.Send Mail.ReadWrite offline_access')
+      });
+      var tokenData = await tokenResp.json();
+
+      if (tokenData.error) {
+        console.error('[gmail-proxy] Outlook token exchange error:', tokenData);
+        return res.status(400).json({ error: 'Token exchange failed: ' + (tokenData.error_description || tokenData.error) });
+      }
+
+      // Get user email via Microsoft Graph
+      var email = '';
+      try {
+        var profileResp = await fetch('https://graph.microsoft.com/v1.0/me', {
+          headers: { 'Authorization': 'Bearer ' + tokenData.access_token }
+        });
+        var profileData = await profileResp.json();
+        email = profileData.mail || profileData.userPrincipalName || '';
+      } catch(e) {
+        console.error('[gmail-proxy] Outlook profile fetch error:', e.message);
+      }
+
+      var expiresAt = Date.now() + ((tokenData.expires_in || 3600) * 1000);
+      var result = {
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token || '',
+        expiresAt: expiresAt,
+        email: email
+      };
+
+      console.log('[gmail-proxy] Outlook token exchange success for:', email, 'uid:', uid);
+      return res.status(200).json(result);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ACTION: outlook_refresh — Refresh Outlook access token
+    // ═══════════════════════════════════════════════════════════════
+    if (action === 'outlook_refresh') {
+      var refreshToken = (body.refreshToken || '').trim();
+      if (!refreshToken) return res.status(400).json({ error: 'Missing refresh token' });
+
+      var outlookClientId = (process.env.OUTLOOK_CLIENT_ID || '41b2af7a-e6d9-45f3-a508-b59f055e7043').trim();
+      var outlookClientSecret = (process.env.OUTLOOK_CLIENT_SECRET || '').trim();
+      if (!outlookClientSecret) return res.status(500).json({ error: 'Outlook OAuth not configured (missing OUTLOOK_CLIENT_SECRET)' });
+
+      var tokenResp = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'grant_type=refresh_token' +
+          '&refresh_token=' + encodeURIComponent(refreshToken) +
+          '&client_id=' + encodeURIComponent(outlookClientId) +
+          '&client_secret=' + encodeURIComponent(outlookClientSecret) +
+          '&scope=' + encodeURIComponent('User.Read Mail.Read Mail.Send Mail.ReadWrite offline_access')
+      });
+      var tokenData = await tokenResp.json();
+
+      if (tokenData.error) {
+        console.error('[gmail-proxy] Outlook token refresh error:', tokenData);
+        return res.status(400).json({ error: 'Token refresh failed: ' + (tokenData.error_description || tokenData.error) });
+      }
+
+      var expiresAt = Date.now() + ((tokenData.expires_in || 3600) * 1000);
+      console.log('[gmail-proxy] Outlook token refresh success, uid:', uid);
+      return res.status(200).json({
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token || refreshToken,
+        expiresAt: expiresAt
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ACTION: outlook_send — Send email via Microsoft Graph
+    // ═══════════════════════════════════════════════════════════════
+    if (action === 'outlook_send') {
+      var accessToken = (body.accessToken || '').trim();
+      if (!accessToken) return res.status(400).json({ error: 'Missing access token' });
+
+      var toRecipients = (body.to || '').split(',').map(function(e) { return e.trim(); }).filter(Boolean);
+      if (toRecipients.length === 0) return res.status(400).json({ error: 'Missing recipient' });
+
+      var ccRecipients = (body.cc || []).filter(Boolean);
+      var bccRecipients = (body.bcc || []).filter(Boolean);
+
+      var message = {
+        subject: body.subject || '(no subject)',
+        body: {
+          contentType: 'HTML',
+          content: body.html || body.body || ''
+        },
+        toRecipients: toRecipients.map(function(e) { return { emailAddress: { address: e } }; })
+      };
+      if (ccRecipients.length > 0) {
+        message.ccRecipients = ccRecipients.map(function(e) { return { emailAddress: { address: e } }; });
+      }
+      if (bccRecipients.length > 0) {
+        message.bccRecipients = bccRecipients.map(function(e) { return { emailAddress: { address: e } }; });
+      }
+
+      var sendResp = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: message, saveToSentItems: true })
+      });
+
+      if (sendResp.status === 202 || sendResp.status === 200) {
+        console.log('[gmail-proxy] Outlook send success to:', toRecipients.join(', '));
+        return res.status(200).json({ success: true, messageId: 'outlook_' + Date.now() });
+      }
+
+      var errBody = '';
+      try { errBody = await sendResp.text(); } catch(e) {}
+      console.error('[gmail-proxy] Outlook send failed:', sendResp.status, errBody);
+      return res.status(sendResp.status || 500).json({ error: 'Outlook send failed: ' + (errBody || sendResp.status) });
     }
 
     return res.status(400).json({ error: 'Unknown action: ' + action });

@@ -24,6 +24,7 @@
     { "src": "/demos", "dest": "/demos.html" },
     { "src": "/images/(.*)", "dest": "/images/$1" },
     { "src": "/social-callback", "dest": "/social-callback.html" },
+    { "src": "/social-callback.html", "dest": "/social-callback.html" },
     { "src": "/login.html", "dest": "/login.html" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
     { "src": "/apple-touch-icon.png", "dest": "/apple-touch-icon.png" },
