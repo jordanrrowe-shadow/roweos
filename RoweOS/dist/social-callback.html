@@ -237,6 +237,48 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       return;
     }
 
+    // v22.33: Outlook Calendar OAuth — separate flow
+    if (stateBase && stateBase.indexOf('outlook_calendar_') === 0) {
+      _detectedPlatform = 'outlook_calendar';
+      setStatus('Connecting Outlook Calendar...');
+      localStorage.removeItem('roweos_outlook_cal_oauth_state');
+      var outlookCalRedirectUri = window.location.origin + '/social-callback.html';
+      fetch('/api/gmail-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'outlook_exchange', code: code, redirectUri: outlookCalRedirectUri, uid: _embeddedUid, scope: 'Calendars.Read' })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          setStatus('Outlook Calendar connection failed: ' + data.error, 'error');
+          done(false);
+          return;
+        }
+        if (!data.accessToken) {
+          setStatus('Outlook Calendar connection failed: No access token', 'error');
+          done(false);
+          return;
+        }
+        try {
+          localStorage.setItem('roweos_outlook_cal_connected', 'true');
+          localStorage.setItem('roweos_outlook_cal_token', data.accessToken || '');
+          localStorage.setItem('roweos_outlook_cal_refresh_token', data.refreshToken || '');
+          localStorage.setItem('roweos_outlook_cal_email', data.email || '');
+        } catch(e) {}
+        if (window.opener) {
+          try { window.opener.postMessage({ type: 'outlook_calendar_connected', email: data.email }, '*'); } catch(e) {}
+        }
+        setStatus('Outlook Calendar connected' + (data.email ? ' (' + data.email + ')' : ''), 'success');
+        done(true);
+      })
+      .catch(function(err) {
+        setStatus('Outlook Calendar connection failed: ' + (err.message || 'Network error'), 'error');
+        done(false);
+      });
+      return;
+    }
+
     if (!platform) {
       setStatus('Unknown authorization state. Please try connecting again.', 'error');
       done(false);
