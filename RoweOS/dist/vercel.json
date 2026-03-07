@@ -14,6 +14,7 @@
     "api/gmail-proxy.js": { "maxDuration": 30 }
   },
   "routes": [
+    { "src": "/overview", "dest": "/overview.html" },
     { "src": "/newsletter", "dest": "/newsletter.html" },
     { "src": "/info/api/(.*)", "dest": "https://roweoswebsite.vercel.app/api/$1" },
     { "src": "/info", "dest": "https://roweoswebsite.vercel.app/" },

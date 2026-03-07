@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS - Operating Intelligence, Built for Brands</title>
+<meta name="description" content="One platform to think, create, and operate across your entire brand portfolio. Multi-model AI, 150+ operations, autonomous scheduling.">
+<meta property="og:title" content="RoweOS - Operating Intelligence">
+<meta property="og:description" content="One platform to think, create, and operate across your entire brand portfolio.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://roweos.com/overview">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --gold: #a89878;
+    --gold-light: #c9a86c;
+    --bg: #0c0c0c;
+    --bg-card: #161616;
+    --bg-card-hover: #1a1a1a;
+    --border: rgba(168,152,120,0.12);
+    --border-light: rgba(168,152,120,0.2);
+    --text: #e8e4de;
+    --text-secondary: #8a857f;
+    --text-dim: #6b6560;
+    --radius: 14px;
+    --strategy: #a78bfa;
+    --marketing: #f472b6;
+    --operations: #4ade80;
+    --documents: #fbbf24;
+    --intelligence: #22d3ee;
+  }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Print / PDF styles */
+  @media print {
+    body { background: #fff; color: #1a1a1a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .download-bar { display: none !important; }
+    .page { max-width: 100%; padding: 0; margin: 0; }
+    .section { break-inside: avoid; }
+    .card { border: 1px solid #ddd; background: #f8f7f5; }
+    .pill { border-color: #ccc; color: #333; }
+    .hero-tagline { color: var(--gold) !important; }
+    .cta-banner { background: #f5f0e8 !important; border-color: #c9a86c !important; }
+    .cta-banner * { color: #1a1a1a !important; }
+    .footer { border-top-color: #ddd; }
+    .footer * { color: #666 !important; }
+  }
+
+  /* Download bar */
+  .download-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(12,12,12,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .download-bar-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; color: var(--text);
+    text-decoration: none;
+  }
+  .download-bar-logo svg { color: var(--gold); }
+  .download-bar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-download {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    border: 1px solid var(--border-light); background: transparent; color: var(--text);
+    cursor: pointer; transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-download:hover { background: rgba(168,152,120,0.1); border-color: var(--gold); }
+  .btn-download.primary { background: var(--gold); color: #0c0c0c; border-color: var(--gold); }
+  .btn-download.primary:hover { background: var(--gold-light); }
+
+  /* Page */
+  .page { max-width: 880px; margin: 0 auto; padding: 80px 32px 48px; }
+
+  /* Header */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 24px; border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-logo svg { color: var(--gold); }
+  .header-logo-text { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; }
+  .header-tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* Hero */
+  .hero { text-align: center; margin-bottom: 56px; }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 42px; font-weight: 400; line-height: 1.25; letter-spacing: -0.5px;
+    margin-bottom: 20px;
+  }
+  .hero-tagline { color: var(--gold); font-style: italic; }
+  .hero p {
+    font-size: 15px; color: var(--text-secondary); line-height: 1.7;
+    max-width: 640px; margin: 0 auto;
+  }
+
+  /* Section titles */
+  .section { margin-bottom: 48px; }
+  .section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 20px;
+  }
+
+  /* Two-col cards */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border-light); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .card-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-icon.brand { background: rgba(168,152,120,0.12); color: var(--gold); }
+  .card-icon.life { background: rgba(168,152,120,0.12); color: var(--gold); }
+  .card-title { font-size: 18px; font-weight: 600; }
+  .card p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .pill {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+  }
+  .pill.strategy { border-color: var(--strategy); color: var(--strategy); }
+  .pill.marketing { border-color: var(--marketing); color: var(--marketing); }
+  .pill.operations { border-color: var(--operations); color: var(--operations); }
+  .pill.documents { border-color: var(--documents); color: var(--documents); }
+  .pill.intelligence { border-color: var(--intelligence); color: var(--intelligence); }
+
+  /* Three-col grid */
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .cap-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; transition: border-color 0.2s;
+  }
+  .cap-card:hover { border-color: var(--border-light); }
+  .cap-icon { color: var(--gold); margin-bottom: 12px; }
+  .cap-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .cap-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
+
+  /* New badge */
+  .new-badge {
+    display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 4px;
+    background: rgba(168,152,120,0.15); color: var(--gold); margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* Why numbered cards */
+  .four-col { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+  .why-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; text-align: center; transition: border-color 0.2s;
+  }
+  .why-card:hover { border-color: var(--border-light); }
+  .why-num {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 32px; font-weight: 400; color: var(--gold); margin-bottom: 8px;
+  }
+  .why-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .why-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* Built for */
+  .built-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; transition: border-color 0.2s;
+  }
+  .built-card:hover { border-color: var(--border-light); }
+  .built-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--gold); }
+  .built-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
+
+  /* CTA */
+  .cta-banner {
+    background: rgba(168,152,120,0.06); border: 1px solid rgba(168,152,120,0.2);
+    border-radius: var(--radius); padding: 32px; text-align: center; margin-bottom: 40px;
+  }
+  .cta-label {
+    display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 4px 12px; border-radius: 6px;
+    background: rgba(168,152,120,0.15); color: var(--gold); margin-bottom: 14px;
+  }
+  .cta-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+  .cta-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 580px; margin: 0 auto; }
+
+  /* Footer */
+  .footer {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--border); padding-top: 24px;
+    font-size: 12px; color: var(--text-dim);
+  }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; }
+  .footer-links a:hover { color: var(--gold); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page { padding: 72px 18px 32px; }
+    .download-bar { padding: 10px 16px; }
+    .header { flex-direction: column; gap: 8px; text-align: center; }
+    .hero h1 { font-size: 30px; }
+    .hero p { font-size: 14px; }
+    .two-col { grid-template-columns: 1fr; }
+    .three-col { grid-template-columns: 1fr; }
+    .four-col { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .four-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Download Bar -->
+<div class="download-bar">
+  <a href="https://roweos.com" class="download-bar-logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>
+    </svg>
+    RoweOS
+  </a>
+  <div class="download-bar-actions">
+    <a href="https://roweos.com" class="btn-download">Open RoweOS</a>
+    <button class="btn-download primary" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download PDF
+    </button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-logo">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>
+      </svg>
+      <span class="header-logo-text">RoweOS</span>
+    </div>
+    <div class="header-tagline">Operating Intelligence</div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>One platform to <span class="hero-tagline">think, create,</span> and <span class="hero-tagline">operate</span><br>across your entire brand portfolio</h1>
+    <p>RoweOS replaces fragmented workflows with a single intelligent layer that understands your brand as deeply as you do. Five AI agents, 150+ pre-built operations, autonomous scheduling, and full email and social publishing - all in a sovereign architecture where your data never leaves your control.</p>
+  </div>
+
+  <!-- BrandAI + LifeAI -->
+  <div class="section">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon brand">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          </div>
+          <span class="card-title">BrandAI</span>
+        </div>
+        <p>Five specialized agents - Strategy, Marketing, Operations, Documents, and Intelligence - that embody your brand identity. Manage content strategy, run deep research, maintain voice consistency, and operate across your entire portfolio from one interface.</p>
+        <div class="pills">
+          <span class="pill strategy">Strategy</span>
+          <span class="pill marketing">Marketing</span>
+          <span class="pill operations">Operations</span>
+          <span class="pill documents">Documents</span>
+          <span class="pill intelligence">Intelligence</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon life">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <span class="card-title">LifeAI</span>
+        </div>
+        <p>Personal intelligence for every team member. Coaching, wellness, goal tracking, tax preparation, and daily optimization. One brand profile shared across the team - each person gets their own private LifeAI.</p>
+        <div class="pills">
+          <span class="pill">Coaching</span>
+          <span class="pill">Wellness</span>
+          <span class="pill">Goals</span>
+          <span class="pill">Tax Copilot</span>
+          <span class="pill">Planning</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Capabilities -->
+  <div class="section">
+    <div class="section-title">Platform Capabilities</div>
+    <div class="three-col">
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div class="cap-title">Studio</div>
+        <div class="cap-desc">150+ pre-built operations across strategy, marketing, content, research, and brand-specific workflows.</div>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <ellipse cx="12" cy="6.5" rx="2.8" ry="4.5"/>
+            <ellipse cx="17" cy="10" rx="2.8" ry="4.5" transform="rotate(72 17 10)"/>
+            <ellipse cx="15.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(144 15.5 15.5)"/>
+            <ellipse cx="8.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(-144 8.5 15.5)"/>
+            <ellipse cx="7" cy="10" rx="2.8" ry="4.5" transform="rotate(-72 7 10)"/>
+            <circle cx="12" cy="11" r="2.2"/>
+          </svg>
+        </div>
+        <div class="cap-title">Bloom<span class="new-badge">New</span></div>
+        <div class="cap-desc">AI-generated content feed tailored to each brand. Swipeable ideas for social posts, images, video, and long-form - ready to edit, save, or publish instantly.</div>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>
+        </div>
+        <div class="cap-title">Mail<span class="new-badge">New</span></div>
+        <div class="cap-desc">Full email client with AI composition, branded templates, batch outreach pipelines, outbox management, and Gmail/Outlook integration - all native.</div>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </div>
+        <div class="cap-title">Social Publishing</div>
+        <div class="cap-desc">Post to X, Instagram, and Threads. Schedule content, manage multiple brand accounts, and publish directly from one interface.</div>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="cap-title">Automations</div>
+        <div class="cap-desc">Scheduled workflows and multi-step pipelines that run autonomously on your cadence. AI content, email campaigns, social posts - hands-free.</div>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+        </div>
+        <div class="cap-title">Deep Research</div>
+        <div class="cap-desc">Comprehensive multi-step analysis powered by the Intelligence agent for market research, competitive intelligence, and strategic insight.</div>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+        </div>
+        <div class="cap-title">Multi-Model AI</div>
+        <div class="cap-desc">Claude, GPT, and Gemini. Choose the best model per task, switch anytime. No lock-in. Intelligence agent defaults to GPT for web-connected research.</div>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </div>
+        <div class="cap-title">Cross-Device Sync</div>
+        <div class="cap-desc">Firebase-powered sync across desktop, tablet, and mobile. Your workspace travels with you.</div>
+      </div>
+
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="cap-title">Sovereign Architecture</div>
+        <div class="cap-desc">Browser-native. API keys never leave your device. No vendor lock-in, no data harvesting. Your intelligence stays yours.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Why RoweOS -->
+  <div class="section">
+    <div class="section-title">Why RoweOS</div>
+    <div class="four-col">
+      <div class="why-card">
+        <div class="why-num">1</div>
+        <div class="why-title">Brand-Embodied AI</div>
+        <div class="why-desc">Agents don't just know about your brand. They think, write, and operate as your brand.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">2</div>
+        <div class="why-title">Full Portfolio Control</div>
+        <div class="why-desc">Manage up to 15 brands from a single dashboard. Each with its own voice, strategy, and identity.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">3</div>
+        <div class="why-title">Creation to Publication</div>
+        <div class="why-desc">Strategy, content, images, video, email campaigns, social posting, and scheduling. One platform, end to end.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">4</div>
+        <div class="why-title">Zero Complexity</div>
+        <div class="why-desc">No installs, no build tools, no configuration. Open a browser, connect your API keys, and start.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Built For -->
+  <div class="section">
+    <div class="section-title">Built For</div>
+    <div class="three-col">
+      <div class="built-card">
+        <div class="built-title">Brand Strategists</div>
+        <div class="built-desc">Unified brand intelligence across your entire portfolio. Strategy, voice, and identity management that scales with you.</div>
+      </div>
+      <div class="built-card">
+        <div class="built-title">Small Business</div>
+        <div class="built-desc">Content creation, social publishing, email campaigns, and marketing automation. Enterprise-grade AI without the complexity.</div>
+      </div>
+      <div class="built-card">
+        <div class="built-title">Enterprise</div>
+        <div class="built-desc">Multi-brand management with shared profiles, private onboarding, and sovereign data architecture.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-banner">
+    <div class="cta-label">Limited Beta</div>
+    <div class="cta-title">Try Founder Free for One Month</div>
+    <div class="cta-desc">Full access to BrandAI, LifeAI, Bloom, Mail, Studio, Automations, Social Publishing, and all 150+ operations. No credit card required. Early adopters lock in Founder pricing permanently.</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>&copy; 2026 The Rowe Collection, LLC &middot; Austin, TX</span>
+    <div class="footer-links">
+      <a href="https://roweos.com">roweos.com</a>
+      <a href="https://therowecollection.com">therowecollection.com</a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
