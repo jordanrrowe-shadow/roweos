@@ -10,7 +10,8 @@
     "api/blob-proxy.js": { "maxDuration": 30 },
     "api/stripe-webhook.js": { "maxDuration": 30 },
     "api/create-api-key-checkout.js": { "maxDuration": 15 },
-    "api/fetch-site-meta.js": { "maxDuration": 15 }
+    "api/fetch-site-meta.js": { "maxDuration": 15 },
+    "api/gmail-proxy.js": { "maxDuration": 30 }
   },
   "routes": [
     { "src": "/newsletter", "dest": "/newsletter.html" },

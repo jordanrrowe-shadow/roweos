@@ -143,6 +143,48 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       else if (stateBase.indexOf('ig_') === 0) platform = 'instagram';
     }
 
+    // v22.24: Gmail Mail OAuth — separate flow via gmail-proxy serverless function
+    if (stateBase && stateBase.indexOf('gmail_mail_') === 0) {
+      _detectedPlatform = 'gmail';
+      setStatus('Connecting Gmail...');
+      localStorage.removeItem('roweos_mail_oauth_state');
+      var gmailRedirectUri = window.location.origin + '/social-callback';
+      fetch('/api/gmail-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'exchange', code: code, redirectUri: gmailRedirectUri, uid: _embeddedUid })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          setStatus('Gmail connection failed: ' + data.error, 'error');
+          done(false);
+          return;
+        }
+        // Store tokens in mail config localStorage
+        try {
+          var configStr = localStorage.getItem('roweos_mail_config');
+          var config = configStr ? JSON.parse(configStr) : {};
+          config.gmailEmail = data.email || '';
+          config.gmailToken = data.accessToken || '';
+          config.gmailRefreshToken = data.refreshToken || '';
+          config.gmailExpiresAt = data.expiresAt || 0;
+          localStorage.setItem('roweos_mail_config', JSON.stringify(config));
+        } catch(e) {}
+        // Notify opener window
+        if (window.opener) {
+          try { window.opener.postMessage({ type: 'gmail_mail_connected', email: data.email }, '*'); } catch(e) {}
+        }
+        setStatus('Gmail connected' + (data.email ? ' (' + data.email + ')' : ''), 'success');
+        done(true);
+      })
+      .catch(function(err) {
+        setStatus('Gmail connection failed: ' + (err.message || 'Network error'), 'error');
+        done(false);
+      });
+      return; // Skip social platform flow
+    }
+
     if (!platform) {
       setStatus('Unknown authorization state. Please try connecting again.', 'error');
       done(false);
