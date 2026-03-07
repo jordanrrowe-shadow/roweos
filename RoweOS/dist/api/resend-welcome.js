@@ -155,19 +155,34 @@ export default async function handler(req, res) {
       }
     }
 
+    // v22.31: Build payload with optional attachments
+    var resendPayload = Object.assign({
+      from: fromDisplay,
+      reply_to: 'jordan@therowecollection.com',
+      to: [email],
+      subject: subject,
+      html: htmlBody
+    }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {});
+
+    // Attachments: array of { filename, content (base64), type }
+    var attachments = Array.isArray(body.attachments) ? body.attachments : [];
+    if (attachments.length > 0) {
+      resendPayload.attachments = attachments.map(function(att) {
+        return {
+          filename: att.filename || 'attachment',
+          content: att.content, // base64 string
+          content_type: att.type || 'application/octet-stream'
+        };
+      });
+    }
+
     var resendResp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + (process.env.RESEND_API_KEY || '').trim(),
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(Object.assign({
-        from: fromDisplay,
-        reply_to: 'jordan@therowecollection.com',
-        to: [email],
-        subject: subject,
-        html: htmlBody
-      }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}))
+      body: JSON.stringify(resendPayload)
     });
 
     if (resendResp.ok) {
