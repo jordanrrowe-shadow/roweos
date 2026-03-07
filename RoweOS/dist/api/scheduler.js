@@ -1166,12 +1166,26 @@ async function processUser(uid, projectId, accessToken, reqHost) {
     try {
       var delDoc = await firestoreGet(projectId, accessToken, 'roweos_users/' + uid + '/profile/deletedAutomationIds');
       if (delDoc && delDoc.fields && delDoc.fields.data) {
-        var delData = parseFirestoreDoc({ data: delDoc.fields.data });
+        // v22.28: Fix — parse the data field value directly, not wrapped in parseFirestoreDoc
+        var delData = parseFirestoreValue(delDoc.fields.data);
         if (delData && typeof delData === 'object') deletedAutoIds = delData;
       }
     } catch(e) { /* OK if not found */ }
+    // v22.28: Also check V1 profile doc for deletedAutomationIds
+    if (Object.keys(deletedAutoIds).length === 0) {
+      try {
+        var v1Profile = await firestoreGet(projectId, accessToken, 'roweos_users/' + uid + '/profile/main');
+        if (v1Profile && v1Profile.fields && v1Profile.fields.deletedAutomationIds) {
+          var v1Deleted = parseFirestoreValue(v1Profile.fields.deletedAutomationIds);
+          if (v1Deleted && typeof v1Deleted === 'object') deletedAutoIds = v1Deleted;
+        }
+      } catch(e) { /* OK if not found */ }
+    }
+    // v22.28: Also match by name for extra safety
+    var deletedAutoNames = {};
+    Object.keys(deletedAutoIds).forEach(function(k) { deletedAutoNames[k] = true; });
 
-    console.log('[Scheduler] User ' + uid + ': found ' + automationDocs.length + ' automations, timezone: ' + timezone);
+    console.log('[Scheduler] User ' + uid + ': found ' + automationDocs.length + ' automations, ' + Object.keys(deletedAutoIds).length + ' deleted IDs, timezone: ' + timezone);
 
     // 4. Process each automation
     for (var a = 0; a < automationDocs.length; a++) {
