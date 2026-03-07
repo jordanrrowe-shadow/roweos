@@ -912,6 +912,11 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
       } else if (stepAction === 'notify') {
         stepResult = 'Notification: ' + stepText;
 
+      } else if (stepAction === 'batch_email' || stepAction === 'outbox') {
+        // v22.27: batch_email and outbox are client-side only (outbox queuing)
+        // Server passes through previous step output for client to parse
+        stepResult = context['step' + s + '_output'] || stepText || 'Batch email step (queued client-side)';
+
       } else {
         // Default: treat as AI call
         var pm2 = resolveProviderAndModel(step, brandSettingsObj, apiKeys);
