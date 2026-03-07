@@ -26,11 +26,6 @@
     --text-secondary: #8a857f;
     --text-dim: #6b6560;
     --radius: 14px;
-    --strategy: #a78bfa;
-    --marketing: #f472b6;
-    --operations: #4ade80;
-    --documents: #fbbf24;
-    --intelligence: #22d3ee;
   }
   html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
   body {
@@ -54,6 +49,7 @@
     .cta-banner * { color: #1a1a1a !important; }
     .footer { border-top-color: #ddd; }
     .footer * { color: #666 !important; }
+    .header-logo img, .download-bar-logo img { mix-blend-mode: multiply; }
   }
 
   /* Download bar */
@@ -65,11 +61,10 @@
     display: flex; align-items: center; justify-content: space-between;
   }
   .download-bar-logo {
-    display: flex; align-items: center; gap: 10px;
-    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; color: var(--text);
+    display: flex; align-items: center;
     text-decoration: none;
   }
-  .download-bar-logo svg { color: var(--gold); }
+  .download-bar-logo img { height: 28px; width: auto; mix-blend-mode: lighten; }
   .download-bar-actions { display: flex; gap: 10px; align-items: center; }
   .btn-download {
     display: inline-flex; align-items: center; gap: 6px;
@@ -92,9 +87,8 @@
     padding-bottom: 24px; border-bottom: 1px solid var(--border);
     margin-bottom: 48px;
   }
-  .header-logo { display: flex; align-items: center; gap: 12px; }
-  .header-logo svg { color: var(--gold); }
-  .header-logo-text { font-size: 24px; font-weight: 600; letter-spacing: -0.5px; }
+  .header-logo { display: flex; align-items: center; }
+  .header-logo img { height: 40px; width: auto; mix-blend-mode: lighten; }
   .header-tagline {
     font-family: 'DM Sans', sans-serif;
     font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
@@ -133,9 +127,8 @@
     width: 36px; height: 36px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    background: rgba(168,152,120,0.12); color: var(--gold);
   }
-  .card-icon.brand { background: rgba(168,152,120,0.12); color: var(--gold); }
-  .card-icon.life { background: rgba(168,152,120,0.12); color: var(--gold); }
   .card-title { font-size: 18px; font-weight: 600; }
   .card p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; }
   .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
@@ -144,11 +137,6 @@
     padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-light);
     color: var(--text-secondary);
   }
-  .pill.strategy { border-color: var(--strategy); color: var(--strategy); }
-  .pill.marketing { border-color: var(--marketing); color: var(--marketing); }
-  .pill.operations { border-color: var(--operations); color: var(--operations); }
-  .pill.documents { border-color: var(--documents); color: var(--documents); }
-  .pill.intelligence { border-color: var(--intelligence); color: var(--intelligence); }
 
   /* Three-col grid */
   .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
@@ -236,10 +224,7 @@
 <!-- Download Bar -->
 <div class="download-bar">
   <a href="https://roweos.com" class="download-bar-logo">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>
-    </svg>
-    RoweOS
+    <img src="/images/logo-full.png" alt="RoweOS">
   </a>
   <div class="download-bar-actions">
     <a href="https://roweos.com" class="btn-download">Open RoweOS</a>
@@ -255,10 +240,7 @@
   <!-- Header -->
   <div class="header">
     <div class="header-logo">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>
-      </svg>
-      <span class="header-logo-text">RoweOS</span>
+      <img src="/images/logo-full.png" alt="RoweOS">
     </div>
     <div class="header-tagline">Operating Intelligence</div>
   </div>
@@ -274,23 +256,23 @@
     <div class="two-col">
       <div class="card">
         <div class="card-header">
-          <div class="card-icon brand">
+          <div class="card-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
           </div>
           <span class="card-title">BrandAI</span>
         </div>
         <p>Five specialized agents - Strategy, Marketing, Operations, Documents, and Intelligence - that embody your brand identity. Manage content strategy, run deep research, maintain voice consistency, and operate across your entire portfolio from one interface.</p>
         <div class="pills">
-          <span class="pill strategy">Strategy</span>
-          <span class="pill marketing">Marketing</span>
-          <span class="pill operations">Operations</span>
-          <span class="pill documents">Documents</span>
-          <span class="pill intelligence">Intelligence</span>
+          <span class="pill">Strategy</span>
+          <span class="pill">Marketing</span>
+          <span class="pill">Operations</span>
+          <span class="pill">Documents</span>
+          <span class="pill">Intelligence</span>
         </div>
       </div>
       <div class="card">
         <div class="card-header">
-          <div class="card-icon life">
+          <div class="card-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
           </div>
           <span class="card-title">LifeAI</span>
