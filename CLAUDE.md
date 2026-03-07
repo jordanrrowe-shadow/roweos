@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v22.22
-File:     RoweOS/dist/index.html (143989 lines)
+Version:  v22.23
+File:     RoweOS/dist/index.html (145101 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -148,9 +148,11 @@ Two-part format (v15.6, not v15.6.0). Version appears in: `ROWEOS_VERSION` const
 | Clients | clients | clientsView |
 | Analytics | commerce | commerceView |
 | Admin | admin | adminView |
+| Mail | mail | mailView |
 
 Analytics was renamed from Commerce in v15.15; internal IDs still `commerce*`.
 Admin view (v22.1) is admin-only — hidden nav item, `showView('admin')` redirects non-admins to Settings.
+Mail view (v22.23) — Outbox, Sent, Compose, Inbox (Gmail/Outlook), Settings tabs. localStorage: `roweos_mail_outbox`, `roweos_mail_sent`, `roweos_mail_config`. Firebase: `profile/mail`.
 
 ### BrandAI Agents: Strategy (#a78bfa), Marketing (#f472b6), Operations (#4ade80), Documents (#fbbf24), Intelligence (#22d3ee)
 ### LifeAI Coaches: Life Coach, Wellness Coach, Tax Copilot, Personal AI, Standard AI
