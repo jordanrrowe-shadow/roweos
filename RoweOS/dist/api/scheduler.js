@@ -607,12 +607,12 @@ function buildTaskPrompt(task, brand) {
   return '[AUTOMATED TASK -- Produce direct, complete output only. No questions or meta-commentary.]\n\n' + basePrompt + '\n\nBegin your output now.';
 }
 
-// Resolve provider and model from brand settings + task config
-function resolveProviderAndModel(task, brandSettings, apiKeys) {
-  var provider = 'anthropic';
-  var model = 'claude-sonnet-4-6';
+// v22.45: Resolve provider and model — respects user's actual selection, auto/roweos uses cheapest available
+function resolveProviderAndModel(task, brandSettings, apiKeys, apiRouting) {
+  var provider = '';
+  var model = '';
 
-  // Start from brand settings
+  // Start from brand settings (user's actual selection)
   if (brandSettings && brandSettings.provider) provider = brandSettings.provider;
   if (brandSettings && brandSettings.model) model = brandSettings.model;
 
@@ -620,30 +620,52 @@ function resolveProviderAndModel(task, brandSettings, apiKeys) {
   if (task.config && task.config.provider) provider = task.config.provider;
   if (task.config && task.config.model) model = task.config.model;
 
-  // Resolve 'auto' / 'roweos' to actual provider
-  if (model === 'auto' || provider === 'roweos') {
-    provider = 'anthropic';
-    model = 'claude-sonnet-4-6';
+  // v22.45: Check per-category API routing (user can set provider per category in Settings)
+  var category = task.action || 'automations';
+  if (apiRouting && apiRouting[category] && apiRouting[category].provider) {
+    provider = apiRouting[category].provider;
+    if (apiRouting[category].model) model = apiRouting[category].model;
+  } else if (apiRouting && apiRouting.automations && apiRouting.automations.provider) {
+    // Fallback to automations category default
+    provider = apiRouting.automations.provider;
+    if (apiRouting.automations.model) model = apiRouting.automations.model;
   }
 
-  // Validate provider has an API key, fall back if not
-  var validProviders = ['anthropic', 'openai', 'google'];
-  if (validProviders.indexOf(provider) === -1) provider = 'anthropic';
+  // v22.45: Resolve 'auto' / 'roweos' — use cheapest available (Google > OpenAI > Anthropic)
+  if (model === 'auto' || provider === 'roweos' || !provider) {
+    // Priority: google (cheapest) > openai > anthropic
+    if (apiKeys.google) { provider = 'google'; model = 'gemini-2.5-flash'; }
+    else if (apiKeys.openai) { provider = 'openai'; model = 'gpt-4o'; }
+    else if (apiKeys.anthropic) { provider = 'anthropic'; model = 'claude-sonnet-4-6'; }
+  }
 
-  if (!apiKeys[provider]) {
-    // Fall back to any available provider
+  // Validate provider has an API key, fall back to any available
+  var validProviders = ['google', 'openai', 'anthropic'];
+  if (validProviders.indexOf(provider) === -1) {
+    // Unknown provider, pick first available
+    provider = '';
+  }
+
+  if (!provider || !apiKeys[provider]) {
     for (var i = 0; i < validProviders.length; i++) {
       if (apiKeys[validProviders[i]]) {
         provider = validProviders[i];
-        // Set a reasonable default model for the fallback provider
-        if (provider === 'anthropic') model = 'claude-sonnet-4-6';
+        if (provider === 'google') model = 'gemini-2.5-flash';
         else if (provider === 'openai') model = 'gpt-4o';
-        else if (provider === 'google') model = 'gemini-2.5-flash';
+        else if (provider === 'anthropic') model = 'claude-sonnet-4-6';
         break;
       }
     }
   }
 
+  // If model is still 'auto' after provider resolution, set a default
+  if (model === 'auto' || !model) {
+    if (provider === 'google') model = 'gemini-2.5-flash';
+    else if (provider === 'openai') model = 'gpt-4o';
+    else if (provider === 'anthropic') model = 'claude-sonnet-4-6';
+  }
+
+  console.log('[Scheduler] resolveProviderAndModel: provider=' + provider + ' model=' + model + ' (category=' + category + ')');
   return { provider: provider, model: model };
 }
 
@@ -786,7 +808,7 @@ async function executeSocialPost(task, profileData, reqHost, projectId, googleAc
 
 // --- Pipeline execution ---
 
-async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileData, projectId, accessToken, uid, reqHost) {
+async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileData, projectId, accessToken, uid, reqHost, apiRouting) {
   var steps = task.steps || [];
   if (steps.length === 0) throw new Error('Pipeline has no steps');
 
@@ -817,7 +839,7 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
 
       if (stepAction === 'studio' || stepAction === 'message' || stepAction === 'run_operation') {
         // AI call
-        var pm = resolveProviderAndModel(step, brandSettingsObj, apiKeys);
+        var pm = resolveProviderAndModel(step, brandSettingsObj, apiKeys, apiRouting);
         if (!apiKeys[pm.provider]) throw new Error('No API key for ' + pm.provider);
 
         var systemPrompt = buildSystemPrompt(brand);
@@ -919,7 +941,7 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
 
       } else {
         // Default: treat as AI call
-        var pm2 = resolveProviderAndModel(step, brandSettingsObj, apiKeys);
+        var pm2 = resolveProviderAndModel(step, brandSettingsObj, apiKeys, apiRouting);
         if (!apiKeys[pm2.provider]) throw new Error('No API key for ' + pm2.provider);
         stepResult = await makeAICall(pm2.provider, pm2.model, apiKeys[pm2.provider], buildSystemPrompt(brand), stepText);
       }
@@ -944,7 +966,7 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
 
 // --- Main task execution ---
 
-async function executeTask(task, uid, apiKeys, brands, brandSettingsArr, profileData, projectId, accessToken, reqHost) {
+async function executeTask(task, uid, apiKeys, brands, brandSettingsArr, profileData, projectId, accessToken, reqHost, apiRouting) {
   var brandIdx = task.brandIdx !== undefined && task.brandIdx !== '' ? parseInt(task.brandIdx) : 0;
   var brand = (brands && brands[brandIdx]) ? brands[brandIdx] : (brands && brands[0]) ? brands[0] : { name: 'Brand' };
   var brandSettingsObj = (brandSettingsArr && brandSettingsArr[brandIdx]) ? brandSettingsArr[brandIdx] : {};
@@ -968,7 +990,7 @@ async function executeTask(task, uid, apiKeys, brands, brandSettingsArr, profile
 
     // --- Pipeline ---
     else if (task.type === 'pipeline' && task.steps && task.steps.length > 0) {
-      var pipeResult = await executePipeline(task, brand, brandSettingsObj, apiKeys, profileData, projectId, accessToken, uid, reqHost);
+      var pipeResult = await executePipeline(task, brand, brandSettingsObj, apiKeys, profileData, projectId, accessToken, uid, reqHost, apiRouting);
       var failCount = pipeResult.failedSteps ? pipeResult.failedSteps.length : 0;
       var okCount = pipeResult.completedSteps ? pipeResult.completedSteps.length : task.steps.length;
       success = failCount === 0;
@@ -1022,7 +1044,7 @@ async function executeTask(task, uid, apiKeys, brands, brandSettingsArr, profile
 
     // --- AI-based actions (message, studio, run_operation, custom, etc.) ---
     else {
-      var pm = resolveProviderAndModel(task, brandSettingsObj, apiKeys);
+      var pm = resolveProviderAndModel(task, brandSettingsObj, apiKeys, apiRouting);
       if (!apiKeys[pm.provider]) throw new Error('No API key for provider: ' + pm.provider);
 
       var systemPrompt = buildSystemPrompt(brand);
@@ -1153,6 +1175,8 @@ async function processUser(uid, projectId, accessToken, reqHost) {
     var brands = profileData.brands || [];
     var brandSettings = profileData.brandSettings || [];
     var timezone = (profileData.settings && profileData.settings.timezone) || DEFAULT_TIMEZONE;
+    // v22.45: Read per-category API routing preferences
+    var apiRouting = (profileData.settings && profileData.settings.apiRouting) || {};
 
     // 3. Read automations subcollection
     var automationDocs = await firestoreList(projectId, accessToken, 'roweos_users/' + uid + '/automations', 200);
@@ -1216,7 +1240,7 @@ async function processUser(uid, projectId, accessToken, reqHost) {
 
       try {
         // 6. Execute the task
-        var execResult = await executeTask(task, uid, apiKeys, brands, brandSettings, profileData, projectId, accessToken, reqHost);
+        var execResult = await executeTask(task, uid, apiKeys, brands, brandSettings, profileData, projectId, accessToken, reqHost, apiRouting);
         var now = new Date().toISOString();
 
         // 7. Write result to cloud_results subcollection
