@@ -158,10 +158,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // v22.44: Only strip large base64 images (>50KB) — keep small ones like logos
-    htmlBody = htmlBody.replace(/<img[^>]+src\s*=\s*["'](data:[^"']+)["'][^>]*>/gi, function(match, dataUri) {
-      return dataUri.length > 50000 ? '' : match;
-    });
+    // v22.44: Base64 image stripping removed — Resend handles them fine, original issue was designMode (fixed v22.43)
 
     // v22.31: Build payload with optional attachments
     var resendPayload = Object.assign({
