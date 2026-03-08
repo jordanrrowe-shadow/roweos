@@ -11,7 +11,7 @@
 <meta property="og:url" content="https://roweos.com/overview">
 <link rel="icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -446,333 +446,186 @@
 
 </div>
 
-<script>
-// Preload logo for PDF
-var _logoBase64 = '';
-(function() {
-  var img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = function() {
-    var c = document.createElement('canvas');
-    c.width = img.naturalWidth;
-    c.height = img.naturalHeight;
-    var ctx = c.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    _logoBase64 = c.toDataURL('image/png');
-  };
-  img.src = '/images/logo-full.png';
-})();
+<!-- Hidden PDF-optimized layout -->
+<div id="pdfContent" style="position:fixed;left:-9999px;top:0;width:1120px;background:#0a0a0a;color:#e8e4de;font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;padding:38px 48px 28px;box-sizing:border-box;">
 
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid rgba(168,152,120,0.15);margin-bottom:28px;">
+    <img id="pdfLogo" src="/images/logo-full.png" style="height:52px;width:auto;" crossorigin="anonymous">
+    <div style="font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#a89878;">Operating Intelligence</div>
+  </div>
+
+  <!-- Hero -->
+  <div style="text-align:center;margin-bottom:24px;">
+    <h1 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:400;line-height:1.25;letter-spacing:-0.5px;margin:0 0 12px;">One platform to <span style="color:#a89878;font-style:italic;">think, create,</span> and <span style="color:#a89878;font-style:italic;">operate</span><br>across your entire brand portfolio</h1>
+    <p style="font-size:11.5px;color:#8a857f;line-height:1.6;max-width:620px;margin:0 auto;">RoweOS replaces fragmented workflows with a single intelligent layer that understands your brand as deeply as you do. Five AI agents, 150+ pre-built operations, autonomous scheduling, and full email and social publishing - all in a sovereign architecture where your data never leaves your control.</p>
+  </div>
+
+  <!-- BrandAI + LifeAI -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">
+    <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:12px;padding:20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:30px;height:30px;border-radius:8px;background:rgba(168,152,120,0.12);display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        </div>
+        <span style="font-size:15px;font-weight:600;">BrandAI</span>
+      </div>
+      <p style="font-size:10.5px;color:#8a857f;line-height:1.55;margin:0 0 10px;">Five specialized agents - Strategy, Marketing, Operations, Documents, and Intelligence - that embody your brand identity and operate across your entire portfolio.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Strategy</span>
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Marketing</span>
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Operations</span>
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Documents</span>
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Intelligence</span>
+      </div>
+    </div>
+    <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:12px;padding:20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:30px;height:30px;border-radius:8px;background:rgba(168,152,120,0.12);display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+        <span style="font-size:15px;font-weight:600;">LifeAI</span>
+      </div>
+      <p style="font-size:10.5px;color:#8a857f;line-height:1.55;margin:0 0 10px;">Five personal coaches - Life Coach, Wellness, Tax Copilot, Personal AI, and Standard AI. Coaching, goal tracking, and daily optimization. Each team member gets their own private LifeAI.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Life Coach</span>
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Wellness</span>
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Tax Copilot</span>
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Personal AI</span>
+        <span style="font-size:8px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid rgba(168,152,120,0.2);color:#8a857f;">Standard AI</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Capabilities -->
+  <div style="margin-bottom:18px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b6560;margin-bottom:12px;">Platform Capabilities</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Studio</div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">150+ pre-built operations across strategy, marketing, content, research, and brand-specific workflows.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="6.5" rx="2.8" ry="4.5"/><ellipse cx="17" cy="10" rx="2.8" ry="4.5" transform="rotate(72 17 10)"/><ellipse cx="15.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(144 15.5 15.5)"/><ellipse cx="8.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(-144 8.5 15.5)"/><ellipse cx="7" cy="10" rx="2.8" ry="4.5" transform="rotate(-72 7 10)"/><circle cx="12" cy="11" r="2.2"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Bloom <span style="font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;padding:2px 5px;border-radius:3px;background:rgba(168,152,120,0.15);color:#a89878;vertical-align:middle;margin-left:4px;">New</span></div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">AI-generated content feed tailored to each brand. Swipeable ideas for social, images, video, and long-form.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Mail <span style="font-size:7px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;padding:2px 5px;border-radius:3px;background:rgba(168,152,120,0.15);color:#a89878;vertical-align:middle;margin-left:4px;">New</span></div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">Full email client with AI composition, branded templates, batch outreach, and Gmail/Outlook integration.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Social Publishing</div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">Post to X, Instagram, and Threads. Schedule content, manage multiple brand accounts from one interface.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Automations</div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">Scheduled workflows and multi-step pipelines. AI content, email campaigns, social posts - hands-free.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Deep Research</div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">Multi-step analysis via the Intelligence agent for market research, competitive intelligence, and strategy.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Multi-Model AI</div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">Claude, GPT, and Gemini. Choose the best model per task, switch anytime. No lock-in.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Cross-Device Sync</div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">Firebase-powered sync across desktop, tablet, and mobile. Your workspace travels with you.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;">
+        <div style="color:#a89878;margin-bottom:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">Sovereign Architecture</div>
+        <div style="font-size:9.5px;color:#8a857f;line-height:1.45;">Browser-native. API keys never leave your device. No vendor lock-in, no data harvesting.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Why RoweOS -->
+  <div style="margin-bottom:18px;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b6560;margin-bottom:10px;">Why RoweOS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;color:#a89878;margin-bottom:4px;">1</div>
+        <div style="font-size:10px;font-weight:600;margin-bottom:3px;">Brand-Embodied AI</div>
+        <div style="font-size:9px;color:#8a857f;line-height:1.4;">Agents think, write, and operate as your brand.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;color:#a89878;margin-bottom:4px;">2</div>
+        <div style="font-size:10px;font-weight:600;margin-bottom:3px;">Full Portfolio Control</div>
+        <div style="font-size:9px;color:#8a857f;line-height:1.4;">Up to 15 brands, each with its own voice and identity.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;color:#a89878;margin-bottom:4px;">3</div>
+        <div style="font-size:10px;font-weight:600;margin-bottom:3px;">Creation to Publication</div>
+        <div style="font-size:9px;color:#8a857f;line-height:1.4;">Strategy to social posting, one platform end to end.</div>
+      </div>
+      <div style="background:#161616;border:1px solid rgba(168,152,120,0.12);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;color:#a89878;margin-bottom:4px;">4</div>
+        <div style="font-size:10px;font-weight:600;margin-bottom:3px;">Zero Complexity</div>
+        <div style="font-size:9px;color:#8a857f;line-height:1.4;">No installs, no build tools. Open a browser and start.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <a href="https://roweos.com/info" style="display:block;text-decoration:none;color:inherit;background:rgba(168,152,120,0.06);border:1px solid rgba(168,152,120,0.2);border-radius:12px;padding:18px;text-align:center;margin-bottom:16px;">
+    <div style="display:inline-block;font-size:8px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:3px 10px;border-radius:5px;background:rgba(168,152,120,0.15);color:#a89878;margin-bottom:8px;">Limited Beta</div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:5px;">Try Founder Free for One Month</div>
+    <div style="font-size:10px;color:#8a857f;line-height:1.5;">Full access to all features. No credit card required. Early adopters lock in Founder pricing permanently.</div>
+    <div style="color:#a89878;font-size:10px;font-weight:600;margin-top:6px;">roweos.com/info</div>
+  </a>
+
+  <!-- Footer -->
+  <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(168,152,120,0.12);padding-top:12px;font-size:9px;color:#6b6560;">
+    <span>&copy; 2026 The Rowe Collection, LLC &middot; Austin, TX</span>
+    <div style="display:flex;gap:16px;">
+      <a href="https://roweos.com" style="color:#8a857f;text-decoration:none;font-weight:500;">roweos.com</a>
+      <a href="https://therowecollection.com" style="color:#8a857f;text-decoration:none;font-weight:500;">therowecollection.com</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
 function generateOverviewPDF() {
   var btn = document.getElementById('downloadBtn');
   btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Generating...';
   btn.disabled = true;
 
-  setTimeout(function() {
-    try {
-      _buildOverviewPDF();
-    } catch(e) {
-      console.error('PDF Error:', e);
-      alert('PDF generation failed: ' + e.message);
-    }
+  var el = document.getElementById('pdfContent');
+  // Temporarily show for rendering
+  el.style.position = 'absolute';
+  el.style.left = '-9999px';
+  el.style.top = '0';
+
+  html2pdf().set({
+    margin: 0,
+    filename: 'RoweOS-Overview.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#0a0a0a', logging: false },
+    jsPDF: { unit: 'px', format: [1120, 816], orientation: 'landscape' },
+    enableLinks: true
+  }).from(el).save().then(function() {
+    el.style.position = 'fixed';
+    el.style.left = '-9999px';
     btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
     btn.disabled = false;
-  }, 50);
-}
-
-function _buildOverviewPDF() {
-  var jsPDF = window.jspdf.jsPDF;
-  var pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' });
-  var W = pdf.internal.pageSize.getWidth(); // 792
-  var H = pdf.internal.pageSize.getHeight(); // 612
-  var M = 40; // margin
-  var CW = W - M * 2; // content width
-  var y = M;
-
-  // Colors
-  var C = {
-    bg: [10,10,10], card: [22,22,22], gold: [168,152,120],
-    goldDim: [80,72,57], text: [232,228,222], sec: [138,133,127],
-    muted: [107,101,96], border: [30,28,26]
-  };
-
-  function setColor(c) { pdf.setTextColor(c[0], c[1], c[2]); }
-  function setFill(c) { pdf.setFillColor(c[0], c[1], c[2]); }
-  function setDraw(c) { pdf.setDrawColor(c[0], c[1], c[2]); }
-
-  // Background
-  setFill(C.bg);
-  pdf.rect(0, 0, W, H, 'F');
-
-  // Thin gold border
-  setDraw(C.goldDim);
-  pdf.setLineWidth(0.5);
-  pdf.rect(20, 20, W - 40, H - 40);
-
-  // Logo
-  if (_logoBase64) {
-    var lw = 100; var lh = lw * 0.35;
-    pdf.addImage(_logoBase64, 'PNG', W / 2 - lw / 2, y, lw, lh);
-    y += lh + 6;
-  }
-
-  // Tagline
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(7);
-  setColor(C.gold);
-  pdf.text('OPERATING INTELLIGENCE', W / 2, y, { align: 'center' });
-  y += 14;
-
-  // Divider
-  setDraw(C.goldDim);
-  pdf.setLineWidth(0.3);
-  pdf.line(W / 2 - 30, y, W / 2 + 30, y);
-  y += 12;
-
-  // Title
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(16);
-  setColor(C.text);
-  pdf.text('One platform to think, create, and operate across your entire brand portfolio', W / 2, y, { align: 'center' });
-  y += 14;
-
-  // Subtitle
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(8);
-  setColor(C.sec);
-  var subLines = pdf.splitTextToSize('Five AI agents, 150+ operations, autonomous scheduling, email and social publishing - sovereign architecture where your data never leaves your control.', CW - 100);
-  pdf.text(subLines, W / 2, y, { align: 'center' });
-  y += subLines.length * 10 + 12;
-
-  // --- BrandAI / LifeAI row ---
-  var colW = (CW - 12) / 2;
-  var cardH = 68;
-
-  // BrandAI card
-  setFill(C.card);
-  pdf.roundedRect(M, y, colW, cardH, 4, 4, 'F');
-  setDraw(C.border);
-  pdf.roundedRect(M, y, colW, cardH, 4, 4, 'S');
-
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(11);
-  setColor(C.gold);
-  pdf.text('BrandAI', M + 14, y + 18);
-
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(7.5);
-  setColor(C.sec);
-  var brandDesc = pdf.splitTextToSize('Five specialized agents - Strategy, Marketing, Operations, Documents, and Intelligence - that embody your brand identity and operate across your entire portfolio.', colW - 28);
-  pdf.text(brandDesc, M + 14, y + 30);
-
-  // BrandAI pills
-  var pills1 = ['Strategy', 'Marketing', 'Operations', 'Documents', 'Intelligence'];
-  var px = M + 14;
-  pdf.setFontSize(5.5);
-  pdf.setFont('helvetica', 'bold');
-  for (var i = 0; i < pills1.length; i++) {
-    var tw = pdf.getTextWidth(pills1[i].toUpperCase()) + 10;
-    setFill(C.bg);
-    setDraw(C.goldDim);
-    pdf.roundedRect(px, y + cardH - 18, tw, 12, 2, 2, 'FD');
-    setColor(C.sec);
-    pdf.text(pills1[i].toUpperCase(), px + 5, y + cardH - 10);
-    px += tw + 4;
-  }
-
-  // LifeAI card
-  var lx = M + colW + 12;
-  setFill(C.card);
-  pdf.roundedRect(lx, y, colW, cardH, 4, 4, 'F');
-  setDraw(C.border);
-  pdf.roundedRect(lx, y, colW, cardH, 4, 4, 'S');
-
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(11);
-  setColor(C.gold);
-  pdf.text('LifeAI', lx + 14, y + 18);
-
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(7.5);
-  setColor(C.sec);
-  var lifeDesc = pdf.splitTextToSize('Five personal coaches - Life Coach, Wellness, Tax Copilot, Personal AI, and Standard AI. Coaching, goal tracking, and daily optimization. Each team member gets their own private LifeAI.', colW - 28);
-  pdf.text(lifeDesc, lx + 14, y + 30);
-
-  // LifeAI pills
-  var pills2 = ['Life Coach', 'Wellness', 'Tax Copilot', 'Personal AI', 'Standard AI'];
-  px = lx + 14;
-  pdf.setFontSize(5.5);
-  pdf.setFont('helvetica', 'bold');
-  for (var j = 0; j < pills2.length; j++) {
-    var tw2 = pdf.getTextWidth(pills2[j].toUpperCase()) + 10;
-    setFill(C.bg);
-    setDraw(C.goldDim);
-    pdf.roundedRect(px, y + cardH - 18, tw2, 12, 2, 2, 'FD');
-    setColor(C.sec);
-    pdf.text(pills2[j].toUpperCase(), px + 5, y + cardH - 10);
-    px += tw2 + 4;
-  }
-
-  y += cardH + 14;
-
-  // --- Platform Capabilities (3x3 grid) ---
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(7);
-  setColor(C.muted);
-  pdf.text('PLATFORM CAPABILITIES', M, y);
-  y += 12;
-
-  var caps = [
-    { title: 'Studio', desc: '150+ pre-built operations across strategy, marketing, content, research, and brand-specific workflows.' },
-    { title: 'Bloom', desc: 'AI-generated content feed tailored to each brand. Swipeable ideas for social, images, video, and long-form.', badge: 'NEW' },
-    { title: 'Mail', desc: 'Full email client with AI composition, branded templates, batch outreach, and Gmail/Outlook integration.', badge: 'NEW' },
-    { title: 'Social Publishing', desc: 'Post to X, Instagram, and Threads. Schedule content, manage multiple brand accounts from one interface.' },
-    { title: 'Automations', desc: 'Scheduled workflows and multi-step pipelines. AI content, email campaigns, social posts - hands-free.' },
-    { title: 'Deep Research', desc: 'Multi-step analysis via the Intelligence agent for market research, competitive intelligence, and strategy.' },
-    { title: 'Multi-Model AI', desc: 'Claude, GPT, and Gemini. Choose the best model per task, switch anytime. No lock-in.' },
-    { title: 'Cross-Device Sync', desc: 'Firebase-powered sync across desktop, tablet, and mobile. Your workspace travels with you.' },
-    { title: 'Sovereign Architecture', desc: 'Browser-native. API keys never leave your device. No vendor lock-in, no data harvesting.' }
-  ];
-
-  var capColW = (CW - 20) / 3;
-  var capH = 52;
-  for (var ci = 0; ci < caps.length; ci++) {
-    var col = ci % 3;
-    var row = Math.floor(ci / 3);
-    var cx = M + col * (capColW + 10);
-    var cy = y + row * (capH + 8);
-
-    setFill(C.card);
-    pdf.roundedRect(cx, cy, capColW, capH, 3, 3, 'F');
-    setDraw(C.border);
-    pdf.roundedRect(cx, cy, capColW, capH, 3, 3, 'S');
-
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(8.5);
-    setColor(C.text);
-    pdf.text(caps[ci].title, cx + 10, cy + 14);
-
-    if (caps[ci].badge) {
-      var bx = cx + 10 + pdf.getTextWidth(caps[ci].title) + 6;
-      setFill([30,28,26]);
-      pdf.roundedRect(bx, cy + 7, 20, 9, 2, 2, 'F');
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(5);
-      setColor(C.gold);
-      pdf.text(caps[ci].badge, bx + 4, cy + 13.5);
-    }
-
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(6.5);
-    setColor(C.sec);
-    var capLines = pdf.splitTextToSize(caps[ci].desc, capColW - 20);
-    pdf.text(capLines, cx + 10, cy + 24);
-  }
-
-  y += 3 * (capH + 8) + 6;
-
-  // --- Why RoweOS (4-col inline) ---
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(7);
-  setColor(C.muted);
-  pdf.text('WHY ROWEOS', M, y);
-  y += 12;
-
-  var whys = [
-    { num: '1', title: 'Brand-Embodied AI', desc: 'Agents think, write, and operate as your brand.' },
-    { num: '2', title: 'Full Portfolio Control', desc: 'Up to 15 brands, each with its own voice and identity.' },
-    { num: '3', title: 'Creation to Publication', desc: 'Strategy to social posting, one platform end to end.' },
-    { num: '4', title: 'Zero Complexity', desc: 'No installs, no build tools. Open a browser and start.' }
-  ];
-
-  var whyW = (CW - 30) / 4;
-  var whyH = 52;
-  for (var wi = 0; wi < whys.length; wi++) {
-    var wx = M + wi * (whyW + 10);
-    setFill(C.card);
-    pdf.roundedRect(wx, y, whyW, whyH, 3, 3, 'F');
-    setDraw(C.border);
-    pdf.roundedRect(wx, y, whyW, whyH, 3, 3, 'S');
-
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(18);
-    setColor(C.gold);
-    pdf.text(whys[wi].num, wx + whyW / 2, y + 18, { align: 'center' });
-
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(7);
-    setColor(C.text);
-    pdf.text(whys[wi].title, wx + whyW / 2, y + 28, { align: 'center' });
-
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(6);
-    setColor(C.sec);
-    var whyLines = pdf.splitTextToSize(whys[wi].desc, whyW - 14);
-    for (var wl = 0; wl < whyLines.length; wl++) {
-      pdf.text(whyLines[wl], wx + whyW / 2, y + 37 + wl * 8, { align: 'center' });
-    }
-  }
-
-  y += whyH + 14;
-
-  // --- CTA Banner with hyperlink ---
-  var ctaH = 44;
-  setFill([20,18,16]);
-  setDraw(C.goldDim);
-  pdf.setLineWidth(0.5);
-  pdf.roundedRect(M, y, CW, ctaH, 4, 4, 'FD');
-
-  // "Limited Beta" badge
-  var badgeW = 62;
-  setFill([30,28,26]);
-  pdf.roundedRect(W / 2 - badgeW / 2, y + 6, badgeW, 10, 2, 2, 'F');
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(5.5);
-  setColor(C.gold);
-  pdf.text('LIMITED BETA', W / 2, y + 13.5, { align: 'center' });
-
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(11);
-  setColor(C.text);
-  pdf.text('Try Founder Free for One Month', W / 2, y + 27, { align: 'center' });
-
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(7);
-  setColor(C.sec);
-  pdf.text('Full access to all features. No credit card required. Early adopters lock in Founder pricing permanently.', W / 2, y + 37, { align: 'center' });
-
-  // Hyperlink over CTA
-  pdf.link(M, y, CW, ctaH, { url: 'https://roweos.com/info' });
-
-  // "roweos.com/info" link text under CTA
-  y += ctaH + 4;
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(7);
-  setColor(C.gold);
-  pdf.textWithLink('roweos.com/info', W / 2 - pdf.getTextWidth('roweos.com/info') / 2, y + 2, { url: 'https://roweos.com/info' });
-
-  // --- Footer ---
-  var footY = H - 32;
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(6.5);
-  setColor(C.muted);
-  pdf.text('\u00A9 2026 The Rowe Collection, LLC \u00B7 Austin, TX', M, footY);
-
-  // Footer links
-  setColor(C.gold);
-  pdf.setFontSize(6.5);
-  var link1 = 'roweos.com';
-  var link2 = 'therowecollection.com';
-  var l2w = pdf.getTextWidth(link2);
-  var l1w = pdf.getTextWidth(link1);
-  pdf.textWithLink(link2, W - M - l2w, footY, { url: 'https://therowecollection.com' });
-  pdf.textWithLink(link1, W - M - l2w - l1w - 16, footY, { url: 'https://roweos.com' });
-
-  // Separator dot
-  setColor(C.muted);
-  pdf.text('\u00B7', W - M - l2w - 8, footY);
-
-  pdf.save('RoweOS-Overview.pdf');
+  }).catch(function(e) {
+    console.error('PDF Error:', e);
+    el.style.position = 'fixed';
+    el.style.left = '-9999px';
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
+    btn.disabled = false;
+  });
 }
 </script>
 
