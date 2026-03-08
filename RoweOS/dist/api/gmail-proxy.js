@@ -106,8 +106,11 @@ function buildMimeMessage(to, from, subject, htmlBody, cc, bcc, replyTo, attachm
   lines.push('MIME-Version: 1.0');
   lines.push('From: ' + from);
   lines.push('To: ' + to);
-  if (cc && cc.length) lines.push('Cc: ' + cc.join(', '));
-  if (bcc && bcc.length) lines.push('Bcc: ' + bcc.join(', '));
+  // v22.42: Filter out empty/invalid entries from cc/bcc
+  var validCc = (cc || []).filter(function(e) { return e && e.trim() && e.indexOf('@') !== -1; });
+  var validBcc = (bcc || []).filter(function(e) { return e && e.trim() && e.indexOf('@') !== -1; });
+  if (validCc.length) lines.push('Cc: ' + validCc.join(', '));
+  if (validBcc.length) lines.push('Bcc: ' + validBcc.join(', '));
   if (replyTo) lines.push('Reply-To: ' + replyTo);
   lines.push('Subject: =?UTF-8?B?' + Buffer.from(subject).toString('base64') + '?=');
 
