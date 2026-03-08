@@ -172,8 +172,8 @@ export default async function handler(req, res) {
 
     // v22.36: Attachments — download URL-based ones, pass base64 directly
     var attachments = Array.isArray(body.attachments) ? body.attachments : [];
+    var resolvedAttachments = [];
     if (attachments.length > 0) {
-      var resolvedAttachments = [];
       for (var ai = 0; ai < attachments.length; ai++) {
         var att = attachments[ai];
         if (att.url) {
