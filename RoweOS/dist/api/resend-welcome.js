@@ -61,6 +61,9 @@ async function verifyFirebaseUser(uid, projectId, accessToken) {
   return resp.ok;
 }
 
+// v22.36: Allow up to 60s for large attachment downloads
+export var config = { maxDuration: 60 };
+
 export default async function handler(req, res) {
   // CORS headers
   var origin = (req.headers.origin || '').trim();
@@ -155,6 +158,9 @@ export default async function handler(req, res) {
       }
     }
 
+    // v22.36: Strip any remaining base64 images from HTML (logo uses Firebase Storage URL)
+    htmlBody = htmlBody.replace(/<img[^>]+src\s*=\s*["']data:[^"']+["'][^>]*>/gi, '');
+
     // v22.31: Build payload with optional attachments
     var resendPayload = Object.assign({
       from: fromDisplay,
@@ -164,31 +170,56 @@ export default async function handler(req, res) {
       html: htmlBody
     }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {});
 
-    // Attachments: array of { filename, content (base64), type }
+    // v22.36: Attachments — download URL-based ones, pass base64 directly
     var attachments = Array.isArray(body.attachments) ? body.attachments : [];
     if (attachments.length > 0) {
-      resendPayload.attachments = attachments.map(function(att) {
-        return {
-          filename: att.filename || 'attachment',
-          content: att.content, // base64 string
-          content_type: att.type || 'application/octet-stream'
-        };
-      });
+      var resolvedAttachments = [];
+      for (var ai = 0; ai < attachments.length; ai++) {
+        var att = attachments[ai];
+        if (att.url) {
+          // Download from Firebase Storage URL, base64 encode for Resend REST API
+          try {
+            var dlResp = await fetch(att.url);
+            if (dlResp.ok) {
+              var dlBuf = Buffer.from(await dlResp.arrayBuffer());
+              resolvedAttachments.push({
+                filename: att.filename || 'attachment',
+                content: dlBuf.toString('base64')
+              });
+              console.log('[resend-welcome] Downloaded attachment:', att.filename, dlBuf.length, 'bytes');
+            } else {
+              console.error('[resend-welcome] Failed to download attachment:', att.url, dlResp.status);
+            }
+          } catch(dlErr) {
+            console.error('[resend-welcome] Attachment download error:', dlErr.message);
+          }
+        } else if (att.content) {
+          resolvedAttachments.push({
+            filename: att.filename || 'attachment',
+            content: att.content
+          });
+        }
+      }
+      if (resolvedAttachments.length > 0) {
+        resendPayload.attachments = resolvedAttachments;
+      }
     }
 
+    var resendBody = JSON.stringify(resendPayload);
+    console.log('[resend-welcome] Payload size:', Math.round(resendBody.length / 1024), 'KB, attachments:', (resendPayload.attachments || []).length);
     var resendResp = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + (process.env.RESEND_API_KEY || '').trim(),
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(resendPayload)
+      body: resendBody
     });
 
     if (resendResp.ok) {
       var resendData = await resendResp.json();
-      console.log('[resend-welcome] Email sent to:', email, 'from:', fromAddr, 'uid:', uid, 'id:', resendData.id);
-      return res.status(200).json({ success: true, emailId: resendData.id });
+      console.log('[resend-welcome] Email sent to:', email, 'from:', fromAddr, 'uid:', uid, 'id:', resendData.id, 'attachments:', resolvedAttachments.length);
+      return res.status(200).json({ success: true, emailId: resendData.id, attachmentCount: resolvedAttachments.length });
     } else {
       var errText = await resendResp.text();
       console.error('[resend-welcome] Resend error:', resendResp.status, errText);

@@ -100,9 +100,8 @@ async function verifyUser(uid) {
   } catch(e) { return false; }
 }
 
-// Build RFC 2822 MIME message for Gmail API
-function buildMimeMessage(to, from, subject, htmlBody, cc, bcc, replyTo) {
-  var boundary = 'boundary_' + Date.now();
+// v22.37: Build RFC 2822 MIME message for Gmail API — supports attachments
+function buildMimeMessage(to, from, subject, htmlBody, cc, bcc, replyTo, attachments) {
   var lines = [];
   lines.push('MIME-Version: 1.0');
   lines.push('From: ' + from);
@@ -111,24 +110,66 @@ function buildMimeMessage(to, from, subject, htmlBody, cc, bcc, replyTo) {
   if (bcc && bcc.length) lines.push('Bcc: ' + bcc.join(', '));
   if (replyTo) lines.push('Reply-To: ' + replyTo);
   lines.push('Subject: =?UTF-8?B?' + Buffer.from(subject).toString('base64') + '?=');
-  lines.push('Content-Type: multipart/alternative; boundary="' + boundary + '"');
-  lines.push('');
-  // Plain text fallback
-  lines.push('--' + boundary);
-  lines.push('Content-Type: text/plain; charset="UTF-8"');
-  lines.push('Content-Transfer-Encoding: base64');
-  lines.push('');
+
   var plainText = htmlBody.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-  lines.push(Buffer.from(plainText).toString('base64'));
-  lines.push('');
-  // HTML part
-  lines.push('--' + boundary);
-  lines.push('Content-Type: text/html; charset="UTF-8"');
-  lines.push('Content-Transfer-Encoding: base64');
-  lines.push('');
-  lines.push(Buffer.from(htmlBody).toString('base64'));
-  lines.push('');
-  lines.push('--' + boundary + '--');
+
+  if (attachments && attachments.length > 0) {
+    // multipart/mixed: body + attachments
+    var mixedBoundary = 'mixed_' + Date.now();
+    var altBoundary = 'alt_' + Date.now();
+    lines.push('Content-Type: multipart/mixed; boundary="' + mixedBoundary + '"');
+    lines.push('');
+    // Body part (nested multipart/alternative for text+html)
+    lines.push('--' + mixedBoundary);
+    lines.push('Content-Type: multipart/alternative; boundary="' + altBoundary + '"');
+    lines.push('');
+    lines.push('--' + altBoundary);
+    lines.push('Content-Type: text/plain; charset="UTF-8"');
+    lines.push('Content-Transfer-Encoding: base64');
+    lines.push('');
+    lines.push(Buffer.from(plainText).toString('base64'));
+    lines.push('');
+    lines.push('--' + altBoundary);
+    lines.push('Content-Type: text/html; charset="UTF-8"');
+    lines.push('Content-Transfer-Encoding: base64');
+    lines.push('');
+    lines.push(Buffer.from(htmlBody).toString('base64'));
+    lines.push('');
+    lines.push('--' + altBoundary + '--');
+    // Attachment parts
+    for (var i = 0; i < attachments.length; i++) {
+      var att = attachments[i];
+      var mimeType = att.type || 'application/octet-stream';
+      var filename = att.filename || 'attachment';
+      lines.push('');
+      lines.push('--' + mixedBoundary);
+      lines.push('Content-Type: ' + mimeType + '; name="' + filename + '"');
+      lines.push('Content-Disposition: attachment; filename="' + filename + '"');
+      lines.push('Content-Transfer-Encoding: base64');
+      lines.push('');
+      lines.push(att.content); // already base64
+    }
+    lines.push('');
+    lines.push('--' + mixedBoundary + '--');
+  } else {
+    // No attachments — simple multipart/alternative
+    var boundary = 'boundary_' + Date.now();
+    lines.push('Content-Type: multipart/alternative; boundary="' + boundary + '"');
+    lines.push('');
+    lines.push('--' + boundary);
+    lines.push('Content-Type: text/plain; charset="UTF-8"');
+    lines.push('Content-Transfer-Encoding: base64');
+    lines.push('');
+    lines.push(Buffer.from(plainText).toString('base64'));
+    lines.push('');
+    lines.push('--' + boundary);
+    lines.push('Content-Type: text/html; charset="UTF-8"');
+    lines.push('Content-Transfer-Encoding: base64');
+    lines.push('');
+    lines.push(Buffer.from(htmlBody).toString('base64'));
+    lines.push('');
+    lines.push('--' + boundary + '--');
+  }
   return lines.join('\r\n');
 }
 
@@ -137,6 +178,9 @@ function base64urlEncode(str) {
   return Buffer.from(str).toString('base64')
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
+
+// v22.37: Allow up to 60s for large attachment downloads
+export var config = { maxDuration: 60 };
 
 export default async function handler(req, res) {
   // CORS
@@ -291,7 +335,26 @@ export default async function handler(req, res) {
       if (!to) return res.status(400).json({ error: 'Missing recipient' });
       if (!subject) return res.status(400).json({ error: 'Missing subject' });
 
-      var mimeMessage = buildMimeMessage(to, from, subject, html, cc, bcc, replyTo);
+      // v22.37: Resolve attachments (download URL-based, pass base64 directly)
+      var rawAttachments = Array.isArray(body.attachments) ? body.attachments : [];
+      var resolvedAtts = [];
+      for (var ai = 0; ai < rawAttachments.length; ai++) {
+        var att = rawAttachments[ai];
+        if (att.url) {
+          try {
+            var dlResp = await fetch(att.url);
+            if (dlResp.ok) {
+              var dlBuf = Buffer.from(await dlResp.arrayBuffer());
+              resolvedAtts.push({ filename: att.filename || 'attachment', type: att.type || 'application/octet-stream', content: dlBuf.toString('base64') });
+              console.log('[gmail-proxy] Downloaded attachment:', att.filename, dlBuf.length, 'bytes');
+            }
+          } catch(e) { console.error('[gmail-proxy] Attachment download error:', e.message); }
+        } else if (att.content) {
+          resolvedAtts.push({ filename: att.filename || 'attachment', type: att.type || 'application/octet-stream', content: att.content });
+        }
+      }
+
+      var mimeMessage = buildMimeMessage(to, from, subject, html, cc, bcc, replyTo, resolvedAtts);
       var encodedMessage = base64urlEncode(mimeMessage);
 
       var sendResp = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
