@@ -602,30 +602,44 @@ function generateOverviewPDF() {
   btn.disabled = true;
 
   var el = document.getElementById('pdfContent');
-  // Temporarily show for rendering
+  // Must be visible and in-flow for html2canvas to render
   el.style.position = 'absolute';
-  el.style.left = '-9999px';
+  el.style.left = '0';
   el.style.top = '0';
+  el.style.zIndex = '9999';
+  el.style.opacity = '0';
+  el.style.pointerEvents = 'none';
 
-  html2pdf().set({
-    margin: 0,
-    filename: 'RoweOS-Overview.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#0a0a0a', logging: false },
-    jsPDF: { unit: 'px', format: [1120, 816], orientation: 'landscape' },
-    enableLinks: true
-  }).from(el).save().then(function() {
-    el.style.position = 'fixed';
-    el.style.left = '-9999px';
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
-    btn.disabled = false;
-  }).catch(function(e) {
-    console.error('PDF Error:', e);
-    el.style.position = 'fixed';
-    el.style.left = '-9999px';
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
-    btn.disabled = false;
-  });
+  // Allow layout to settle
+  setTimeout(function() {
+    el.style.opacity = '1'; // html2canvas needs visible content
+
+    html2pdf().set({
+      margin: 0,
+      filename: 'RoweOS-Overview.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#0a0a0a', logging: false, scrollY: 0, windowWidth: 1120, windowHeight: 816 },
+      jsPDF: { unit: 'px', format: [1120, 816], orientation: 'landscape', hotfixes: ['px_scaling'] },
+      enableLinks: true
+    }).from(el).save().then(function() {
+      el.style.position = 'fixed';
+      el.style.left = '-9999px';
+      el.style.opacity = '';
+      el.style.zIndex = '';
+      el.style.pointerEvents = '';
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
+      btn.disabled = false;
+    }).catch(function(e) {
+      console.error('PDF Error:', e);
+      el.style.position = 'fixed';
+      el.style.left = '-9999px';
+      el.style.opacity = '';
+      el.style.zIndex = '';
+      el.style.pointerEvents = '';
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
+      btn.disabled = false;
+    });
+  }, 100);
 }
 </script>
 
