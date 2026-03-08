@@ -158,8 +158,10 @@ export default async function handler(req, res) {
       }
     }
 
-    // v22.36: Strip any remaining base64 images from HTML (logo uses Firebase Storage URL)
-    htmlBody = htmlBody.replace(/<img[^>]+src\s*=\s*["']data:[^"']+["'][^>]*>/gi, '');
+    // v22.44: Only strip large base64 images (>50KB) — keep small ones like logos
+    htmlBody = htmlBody.replace(/<img[^>]+src\s*=\s*["'](data:[^"']+)["'][^>]*>/gi, function(match, dataUri) {
+      return dataUri.length > 50000 ? '' : match;
+    });
 
     // v22.31: Build payload with optional attachments
     var resendPayload = Object.assign({
