@@ -939,6 +939,58 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
         // Server passes through previous step output for client to parse
         stepResult = context['step' + s + '_output'] || stepText || 'Batch email step (queued client-side)';
 
+      } else if (stepAction === 'email') {
+        // v23.1: Server-side email sending via Resend API
+        var emailTo = (step.target && step.target.emailTo) || '';
+        var emailSubject = (step.target && step.target.emailSubject) || (brand.shortName || brand.name || 'RoweOS') + ' Report';
+        var emailBody = '';
+        // Use previous step output as body if includeStepOutput is set
+        if (step.config && step.config.includeStepOutput) {
+          for (var _ei = s; _ei >= 1; _ei--) {
+            if (context['step' + _ei + '_output']) { emailBody = context['step' + _ei + '_output']; break; }
+          }
+        }
+        if (!emailBody) emailBody = stepText || '';
+        // Resolve template vars
+        emailTo = emailTo.replace(/\{\{step(\d+)_output\}\}/g, function(m, n) { return context['step' + n + '_output'] || ''; });
+        emailSubject = emailSubject.replace(/\{\{step(\d+)_output\}\}/g, function(m, n) { return context['step' + n + '_output'] || ''; });
+        emailBody = emailBody.replace(/\{\{step(\d+)_output\}\}/g, function(m, n) { return context['step' + n + '_output'] || ''; });
+        var emailFrom = (step.config && step.config.emailFrom) || 'roweos@therowecollection.com';
+        // Strip gmail:/outlook: prefix
+        if (emailFrom.indexOf('gmail:') === 0) emailFrom = emailFrom.substring(6);
+        if (emailFrom.indexOf('outlook:') === 0) emailFrom = emailFrom.substring(8);
+        // Send via internal API call to resend-welcome
+        var resendKey = (process.env.RESEND_API_KEY || '').trim();
+        if (!resendKey) throw new Error('RESEND_API_KEY not configured for email step');
+        // Build HTML body
+        var emailHtml = '<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;">' +
+          emailBody.replace(/\n/g, '<br>') + '</div>';
+        // Resolve from display name
+        var fromDisplayMap = {
+          'roweos@therowecollection.com': 'RoweOS <roweos@therowecollection.com>',
+          'jordan@therowecollection.com': 'Jordan Rowe <jordan@therowecollection.com>'
+        };
+        var fromDisplay = fromDisplayMap[emailFrom];
+        if (!fromDisplay) {
+          var namePart = emailFrom.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+          fromDisplay = namePart + ' <' + emailFrom + '>';
+        }
+        var emailCc = (step.target && step.target.emailCc) ? step.target.emailCc.split(',').map(function(e) { return e.trim(); }).filter(Boolean) : [];
+        var emailBcc = (step.target && step.target.emailBcc) ? step.target.emailBcc.split(',').map(function(e) { return e.trim(); }).filter(Boolean) : [];
+        var resendPayload = { from: fromDisplay, to: [emailTo], subject: emailSubject, html: emailHtml };
+        if (emailCc.length) resendPayload.cc = emailCc;
+        if (emailBcc.length) resendPayload.bcc = emailBcc;
+        var resendResp = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + resendKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify(resendPayload)
+        });
+        var resendData = await resendResp.json();
+        if (resendData.statusCode && resendData.statusCode >= 400) {
+          throw new Error('Email failed: ' + JSON.stringify(resendData));
+        }
+        stepResult = 'Email sent to ' + emailTo + ' (Subject: ' + emailSubject + ')';
+
       } else {
         // Default: treat as AI call
         var pm2 = resolveProviderAndModel(step, brandSettingsObj, apiKeys, apiRouting);

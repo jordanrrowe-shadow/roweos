@@ -88,6 +88,9 @@ export default async function handler(req, res) {
     var email = (body.email || '').trim();
     var subject = (body.subject || '').trim();
     var fromAddr = (body.from || 'roweos@therowecollection.com').trim();
+    // v23.1: Strip gmail:/outlook: prefix if client sends it
+    if (fromAddr.indexOf('gmail:') === 0) fromAddr = fromAddr.substring(6);
+    if (fromAddr.indexOf('outlook:') === 0) fromAddr = fromAddr.substring(8);
     var htmlBody = body.html || '';
     var cc = Array.isArray(body.cc) ? body.cc : [];
     var bcc = Array.isArray(body.bcc) ? body.bcc : [];
