@@ -327,7 +327,10 @@ export default async function handler(req, res) {
     if (action === 'send') {
       var accessToken = (body.accessToken || '').trim();
       var to = (body.to || '').trim();
-      var from = (body.from || '').trim();
+      var fromEmail = (body.from || '').trim();
+      var fromName = (body.fromName || '').trim();
+      // v23.10: Format From with display name if provided
+      var from = fromName ? '"' + fromName.replace(/"/g, '\\"') + '" <' + fromEmail + '>' : fromEmail;
       var subject = (body.subject || '').trim();
       var html = body.html || '';
       var cc = Array.isArray(body.cc) ? body.cc : [];

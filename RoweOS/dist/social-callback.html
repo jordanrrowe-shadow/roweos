@@ -174,6 +174,10 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
           }
           // Multi-account array
           if (!config.gmailAccounts) config.gmailAccounts = [];
+          // v23.10: Migrate legacy single-account into array if not already there
+          if (config.gmailEmail && config.gmailAccounts.length === 0) {
+            config.gmailAccounts.push({ email: config.gmailEmail, token: config.gmailToken || '', refreshToken: config.gmailRefreshToken || '', expiresAt: config.gmailExpiresAt || 0, displayName: '' });
+          }
           // Update existing or add new
           var gFound = false;
           for (var gi = 0; gi < config.gmailAccounts.length; gi++) {
@@ -186,7 +190,7 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
             }
           }
           if (!gFound) {
-            config.gmailAccounts.push({ email: data.email || '', token: data.accessToken || '', refreshToken: data.refreshToken || '', expiresAt: data.expiresAt || 0 });
+            config.gmailAccounts.push({ email: data.email || '', token: data.accessToken || '', refreshToken: data.refreshToken || '', expiresAt: data.expiresAt || 0, displayName: '' });
           }
           localStorage.setItem('roweos_mail_config', JSON.stringify(config));
         } catch(e) {}
@@ -244,6 +248,10 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
           }
           // Multi-account array
           if (!config.outlookAccounts) config.outlookAccounts = [];
+          // v23.10: Migrate legacy single-account into array if not already there
+          if (config.outlookEmail && config.outlookAccounts.length === 0) {
+            config.outlookAccounts.push({ email: config.outlookEmail, token: config.outlookToken || '', refreshToken: config.outlookRefreshToken || '', expiresAt: config.outlookExpiresAt || 0, displayName: '' });
+          }
           var oFound = false;
           for (var oi = 0; oi < config.outlookAccounts.length; oi++) {
             if (config.outlookAccounts[oi].email === data.email) {
@@ -255,7 +263,7 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
             }
           }
           if (!oFound) {
-            config.outlookAccounts.push({ email: data.email || '', token: data.accessToken || '', refreshToken: data.refreshToken || '', expiresAt: data.expiresAt || 0 });
+            config.outlookAccounts.push({ email: data.email || '', token: data.accessToken || '', refreshToken: data.refreshToken || '', expiresAt: data.expiresAt || 0, displayName: '' });
           }
           localStorage.setItem('roweos_mail_config', JSON.stringify(config));
           console.log('[Outlook callback] Config saved to localStorage, email:', data.email);
