@@ -45,7 +45,7 @@ async function storeTokenInFirestore(uid, platform, scope, tokenData) {
     var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     var googleToken = await getGoogleAccessToken(sa);
     var projectId = process.env.FIREBASE_PROJECT_ID;
-    var docPath = 'projects/' + projectId + '/databases/(default)/documents/users/' + uid + '/social_tokens/' + platform + scope;
+    var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/social_tokens/' + platform + scope;
     var fields = {
       accessToken: { stringValue: tokenData.accessToken || '' },
       refreshToken: { stringValue: tokenData.refreshToken || '' },

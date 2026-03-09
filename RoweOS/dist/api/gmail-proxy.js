@@ -44,7 +44,7 @@ async function storeGmailTokens(uid, tokenData) {
     var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     var googleToken = await getGoogleAccessToken(sa);
     var projectId = process.env.FIREBASE_PROJECT_ID;
-    var docPath = 'projects/' + projectId + '/databases/(default)/documents/users/' + uid + '/social_tokens/gmail_mail';
+    var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/social_tokens/gmail_mail';
     var fields = {
       accessToken: { stringValue: tokenData.accessToken || '' },
       refreshToken: { stringValue: tokenData.refreshToken || '' },
@@ -70,7 +70,7 @@ async function readGmailTokens(uid) {
     var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     var googleToken = await getGoogleAccessToken(sa);
     var projectId = process.env.FIREBASE_PROJECT_ID;
-    var docPath = 'projects/' + projectId + '/databases/(default)/documents/users/' + uid + '/social_tokens/gmail_mail';
+    var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/social_tokens/gmail_mail';
     var resp = await fetch('https://firestore.googleapis.com/v1/' + docPath, {
       headers: { 'Authorization': 'Bearer ' + googleToken }
     });
@@ -94,7 +94,7 @@ async function verifyUser(uid) {
   try {
     var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     var googleToken = await getGoogleAccessToken(sa);
-    var url = 'https://firestore.googleapis.com/v1/projects/' + process.env.FIREBASE_PROJECT_ID + '/databases/(default)/documents/users/' + uid;
+    var url = 'https://firestore.googleapis.com/v1/projects/' + process.env.FIREBASE_PROJECT_ID + '/databases/(default)/documents/roweos_users/' + uid;
     var resp = await fetch(url, { headers: { 'Authorization': 'Bearer ' + googleToken } });
     return resp.ok;
   } catch(e) { return false; }

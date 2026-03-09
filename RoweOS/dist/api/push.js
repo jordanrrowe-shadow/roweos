@@ -136,7 +136,7 @@ export default async function handler(req, res) {
       var googleToken = await getGoogleAccessToken(sa);
 
       var listUrl = 'https://firestore.googleapis.com/v1/projects/' + projectId +
-        '/databases/(default)/documents/users/' + uid + '/push_subscriptions';
+        '/databases/(default)/documents/roweos_users/' + uid + '/push_subscriptions';
       var listResp = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + googleToken } });
       var listData = await listResp.json();
       var docs = listData.documents || [];
@@ -169,7 +169,7 @@ export default async function handler(req, res) {
       console.log('[Push] Subscribe: uid=' + uid + ' endpoint=' + (subscription.endpoint || '').substring(0, 60) + '...');
 
       var subId = crypto.createHash('sha256').update(subscription.endpoint).digest('hex').substring(0, 20);
-      var docPath = 'projects/' + projectId + '/databases/(default)/documents/users/' + uid + '/push_subscriptions/' + subId;
+      var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/push_subscriptions/' + subId;
       var fields = firestoreDocToFields({
         endpoint: subscription.endpoint,
         keys: subscription.keys ? JSON.stringify(subscription.keys) : '{}',
@@ -198,7 +198,7 @@ export default async function handler(req, res) {
       var endpoint = body.endpoint;
       if (!endpoint) return res.status(400).json({ error: 'Missing endpoint' });
       var subId = crypto.createHash('sha256').update(endpoint).digest('hex').substring(0, 20);
-      var docPath = 'projects/' + projectId + '/databases/(default)/documents/users/' + uid + '/push_subscriptions/' + subId;
+      var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/push_subscriptions/' + subId;
       await fetch('https://firestore.googleapis.com/v1/' + docPath, {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + googleToken }
@@ -220,7 +220,7 @@ export default async function handler(req, res) {
 
       // Read subscriptions from Firestore
       var listUrl = 'https://firestore.googleapis.com/v1/projects/' + projectId +
-        '/databases/(default)/documents/users/' + uid + '/push_subscriptions';
+        '/databases/(default)/documents/roweos_users/' + uid + '/push_subscriptions';
       var listResp = await fetch(listUrl, { headers: { 'Authorization': 'Bearer ' + googleToken } });
       var listData = await listResp.json();
       var docs = listData.documents || [];

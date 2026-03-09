@@ -54,7 +54,7 @@ function checkRateLimit(uid) {
 
 // --- Verify user exists in Firestore ---
 async function verifyFirebaseUser(uid, projectId, accessToken) {
-  var url = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents/users/' + uid;
+  var url = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid;
   var resp = await fetch(url, {
     headers: { 'Authorization': 'Bearer ' + accessToken }
   });
