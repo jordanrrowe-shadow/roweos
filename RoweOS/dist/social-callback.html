@@ -161,14 +161,33 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
           done(false);
           return;
         }
-        // Store tokens in mail config localStorage
+        // v23.9: Store tokens — multi-account (add to gmailAccounts array)
         try {
           var configStr = localStorage.getItem('roweos_mail_config');
           var config = configStr ? JSON.parse(configStr) : {};
-          config.gmailEmail = data.email || '';
-          config.gmailToken = data.accessToken || '';
-          config.gmailRefreshToken = data.refreshToken || '';
-          config.gmailExpiresAt = data.expiresAt || 0;
+          // Legacy fields for backward compat (first account)
+          if (!config.gmailEmail) {
+            config.gmailEmail = data.email || '';
+            config.gmailToken = data.accessToken || '';
+            config.gmailRefreshToken = data.refreshToken || '';
+            config.gmailExpiresAt = data.expiresAt || 0;
+          }
+          // Multi-account array
+          if (!config.gmailAccounts) config.gmailAccounts = [];
+          // Update existing or add new
+          var gFound = false;
+          for (var gi = 0; gi < config.gmailAccounts.length; gi++) {
+            if (config.gmailAccounts[gi].email === data.email) {
+              config.gmailAccounts[gi].token = data.accessToken || '';
+              config.gmailAccounts[gi].refreshToken = data.refreshToken || config.gmailAccounts[gi].refreshToken || '';
+              config.gmailAccounts[gi].expiresAt = data.expiresAt || 0;
+              gFound = true;
+              break;
+            }
+          }
+          if (!gFound) {
+            config.gmailAccounts.push({ email: data.email || '', token: data.accessToken || '', refreshToken: data.refreshToken || '', expiresAt: data.expiresAt || 0 });
+          }
           localStorage.setItem('roweos_mail_config', JSON.stringify(config));
         } catch(e) {}
         // Notify opener window
@@ -212,15 +231,34 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
           done(false);
           return;
         }
+        // v23.9: Multi-account Outlook
         try {
           var configStr = localStorage.getItem('roweos_mail_config');
           var config = configStr ? JSON.parse(configStr) : {};
-          config.outlookEmail = data.email || '';
-          config.outlookToken = data.accessToken || '';
-          config.outlookRefreshToken = data.refreshToken || '';
-          config.outlookExpiresAt = data.expiresAt || 0;
+          // Legacy fields for backward compat (first account)
+          if (!config.outlookEmail) {
+            config.outlookEmail = data.email || '';
+            config.outlookToken = data.accessToken || '';
+            config.outlookRefreshToken = data.refreshToken || '';
+            config.outlookExpiresAt = data.expiresAt || 0;
+          }
+          // Multi-account array
+          if (!config.outlookAccounts) config.outlookAccounts = [];
+          var oFound = false;
+          for (var oi = 0; oi < config.outlookAccounts.length; oi++) {
+            if (config.outlookAccounts[oi].email === data.email) {
+              config.outlookAccounts[oi].token = data.accessToken || '';
+              config.outlookAccounts[oi].refreshToken = data.refreshToken || config.outlookAccounts[oi].refreshToken || '';
+              config.outlookAccounts[oi].expiresAt = data.expiresAt || 0;
+              oFound = true;
+              break;
+            }
+          }
+          if (!oFound) {
+            config.outlookAccounts.push({ email: data.email || '', token: data.accessToken || '', refreshToken: data.refreshToken || '', expiresAt: data.expiresAt || 0 });
+          }
           localStorage.setItem('roweos_mail_config', JSON.stringify(config));
-          console.log('[Outlook callback] Config saved to localStorage, email:', config.outlookEmail);
+          console.log('[Outlook callback] Config saved to localStorage, email:', data.email);
         } catch(e) {
           console.error('[Outlook callback] localStorage save error:', e);
         }
