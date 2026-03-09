@@ -1042,6 +1042,66 @@ async function executeTask(task, uid, apiKeys, brands, brandSettingsArr, profile
       result = 'Pulse goal update: ' + pulseText;
     }
 
+    // --- v22.56: Deep Research (standalone automation) ---
+    else if (action === 'research') {
+      if (!apiKeys.google) throw new Error('No Google API key for Deep Research');
+      var researchQuery = (task.target && task.target.researchQuery) ? task.target.researchQuery : (task.description || task.name || '');
+      if (brand && brand.name) {
+        var rBrand = brand.shortName || brand.name;
+        researchQuery = 'Business context: ' + rBrand + (brand.tagline ? ' - ' + brand.tagline : '') + '.\n\nResearch request: ' + researchQuery;
+      }
+      var drUrl2 = 'https://generativelanguage.googleapis.com/v1beta/interactions';
+      var drMaxRetries2 = 3;
+      var drAttempt2 = 0;
+      while (drAttempt2 < drMaxRetries2) {
+        drAttempt2++;
+        var drResp2 = await fetch(drUrl2, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKeys.google },
+          body: JSON.stringify({ input: researchQuery, agent: 'deep-research-pro-preview-12-2025', background: true })
+        });
+        if (!drResp2.ok) {
+          var drErr2 = await drResp2.json().catch(function() { return {}; });
+          throw new Error('Deep Research API error: ' + (drErr2.error ? drErr2.error.message : 'HTTP ' + drResp2.status));
+        }
+        var drData2 = await drResp2.json();
+        var drId2 = drData2.id || drData2.interactionId || (drData2.name && drData2.name.indexOf('/') !== -1 ? drData2.name.split('/').pop() : drData2.name);
+        if (!drId2) throw new Error('No interaction ID from Deep Research');
+        var drStart2 = Date.now();
+        var drMaxMs2 = 240000;
+        var drCancelled2 = false;
+        while (Date.now() - drStart2 < drMaxMs2) {
+          await new Promise(function(r) { setTimeout(r, 10000); });
+          var pollResp2 = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions/' + drId2, { headers: { 'x-goog-api-key': apiKeys.google } });
+          var pollData2 = await pollResp2.json();
+          var drStatus2 = (pollData2.status || '').toLowerCase();
+          if (drStatus2 === 'completed') {
+            var drText2 = '';
+            if (pollData2.outputs && pollData2.outputs.length > 0) {
+              pollData2.outputs.forEach(function(o) { if (o.text) drText2 += o.text + '\n\n'; });
+            } else if (pollData2.output && pollData2.output.text) {
+              drText2 = pollData2.output.text;
+            }
+            result = drText2.trim();
+            break;
+          } else if (drStatus2 === 'cancelled') {
+            drCancelled2 = true;
+            break;
+          } else if (drStatus2 === 'failed' || drStatus2 === 'incomplete') {
+            throw new Error('Deep Research ' + drStatus2 + ': ' + (pollData2.error || 'No details'));
+          }
+        }
+        if (result) break;
+        if (drCancelled2 && drAttempt2 < drMaxRetries2) {
+          console.log('[Scheduler] Deep Research cancelled, retrying (attempt ' + (drAttempt2 + 1) + '/' + drMaxRetries2 + ')...');
+          await new Promise(function(r) { setTimeout(r, 3000 + drAttempt2 * 2000); });
+          continue;
+        }
+        if (drCancelled2) throw new Error('Deep Research cancelled by Google (capacity limit). Try again later.');
+        if (!result) throw new Error('Deep Research did not complete within server time limit (4 min). Try running from the app.');
+      }
+    }
+
     // --- AI-based actions (message, studio, run_operation, custom, etc.) ---
     else {
       var pm = resolveProviderAndModel(task, brandSettingsObj, apiKeys, apiRouting);
