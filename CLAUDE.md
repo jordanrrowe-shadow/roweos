@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v23.16
+Version:  v23.18
 File:     RoweOS/dist/index.html (164680 lines)
 Live:     roweos.vercel.app
 ```
@@ -168,7 +168,7 @@ Key patterns to remember without looking up:
 - `showView('agent')` to switch views
 - `showToast(msg, type)` for notifications
 - `escapeHtml(str)` for innerHTML sanitization
-- `syncToFirebaseV2()` for full sync, `scheduleAutoSync()` for debounced auto-sync
+- `syncToFirebaseV2()` for full sync, `scheduleAutoSync()` for debounced auto-sync. Deletion tracking keys (e.g. `roweos_deleted_pulse_goals`) must be synced AND merged on pull to prevent deleted items resurrecting from cloud
 - `getAccentFallback()` for accent color with fallback (replaces inline `getComputedStyle` calls)
 - `AGENT_COLORS` global constant for agent color map (strategy, marketing, operations, documents, coach, etc.)
 - `ROWEOS_DEBUG` — `console.log` gated by `localStorage.getItem('roweos_debug') === 'true'`
