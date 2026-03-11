@@ -305,7 +305,7 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + accessToken
         },
-        body: JSON.stringify({ image_url: igImageUrl, caption: content })
+        body: JSON.stringify({ media_type: 'IMAGE', image_url: igImageUrl, caption: content })
       });
       var igContainerData = await igContainerResp.json();
 
