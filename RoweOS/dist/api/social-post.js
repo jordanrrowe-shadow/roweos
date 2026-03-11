@@ -297,18 +297,21 @@ export default async function handler(req, res) {
       }
 
       // Step 1: Create media container
-      var igContainerResp = await fetch('https://graph.instagram.com/v21.0/' + userId + '/media', {
+      // v24.0: New Instagram Business API requires JSON body + Bearer auth header
+      console.log('[Social Post] Instagram container request:', { userId: userId, imageUrl: igImageUrl ? igImageUrl.substring(0, 80) : null, captionLen: content.length });
+      var igContainerResp = await fetch('https://graph.instagram.com/v25.0/' + userId + '/media', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'image_url=' + encodeURIComponent(igImageUrl) +
-              '&caption=' + encodeURIComponent(content) +
-              '&access_token=' + encodeURIComponent(accessToken)
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + accessToken
+        },
+        body: JSON.stringify({ image_url: igImageUrl, caption: content })
       });
       var igContainerData = await igContainerResp.json();
 
       if (!igContainerResp.ok || !igContainerData.id) {
         console.error('[Social Post] Instagram container failed:', igContainerData);
-        return res.status(400).json({ error: 'Instagram container creation failed', detail: igContainerData });
+        return res.status(400).json({ error: 'Instagram container creation failed', detail: igContainerData, debug: { userId: userId, imageUrlPrefix: igImageUrl ? igImageUrl.substring(0, 60) : null, endpoint: 'graph.instagram.com/v25.0/' + userId + '/media' } });
       }
 
       // v18.5: Wait for Instagram container to finish processing
@@ -316,7 +319,9 @@ export default async function handler(req, res) {
       for (var igPoll = 0; igPoll < 15; igPoll++) {
         await new Promise(function(resolve) { setTimeout(resolve, 2000); });
         try {
-          var igStatusResp = await fetch('https://graph.instagram.com/v21.0/' + igContainerData.id + '?fields=status_code&access_token=' + encodeURIComponent(accessToken));
+          var igStatusResp = await fetch('https://graph.instagram.com/v25.0/' + igContainerData.id + '?fields=status_code', {
+            headers: { 'Authorization': 'Bearer ' + accessToken }
+          });
           var igStatusData = await igStatusResp.json();
           console.log('[Social Post] Instagram container status poll ' + igPoll + ':', igStatusData.status_code);
           if (igStatusData.status_code === 'FINISHED') { igReady = true; break; }
@@ -330,11 +335,13 @@ export default async function handler(req, res) {
       }
 
       // Step 2: Publish
-      var igPublishResp = await fetch('https://graph.instagram.com/v21.0/' + userId + '/media_publish', {
+      var igPublishResp = await fetch('https://graph.instagram.com/v25.0/' + userId + '/media_publish', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'creation_id=' + igContainerData.id +
-              '&access_token=' + encodeURIComponent(accessToken)
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + accessToken
+        },
+        body: JSON.stringify({ creation_id: igContainerData.id })
       });
       var igPublishData = await igPublishResp.json();
 
