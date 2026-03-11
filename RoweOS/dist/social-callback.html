@@ -43,20 +43,18 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     if (window.opener) {
       setTimeout(function() { window.close(); }, success ? 1000 : 3000);
     } else {
-      // v19.0: Mobile PWA — don't redirect (loads login screen in Safari, confusing).
-      // Show "go back to RoweOS" message. The PWA's visibilitychange listener detects the connection.
+      // v24.1: Mobile — show "Return to RoweOS" with roweos.com domain
       var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile && success) {
         spinnerEl.style.display = 'none';
-        var returnUrl = '/' + (_detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
-        // v20.12: Always show "Back to RoweOS" button — user may be in-browser (not PWA)
+        var returnUrl = 'https://roweos.com' + (_detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
         statusEl.innerHTML = '<span style="color:#22c55e;font-weight:600;">Connected!</span><br><br>' +
-          '<a href="' + returnUrl + '" style="display:inline-block;background:#a89878;color:#fff;padding:12px 32px;font-size:15px;font-weight:600;border-radius:10px;text-decoration:none;margin-bottom:12px;">Back to RoweOS</a><br>' +
+          '<a href="' + returnUrl + '" style="display:inline-block;background:#a89878;color:#fff;padding:12px 32px;font-size:15px;font-weight:600;border-radius:10px;text-decoration:none;margin-bottom:12px;">Return to RoweOS</a><br>' +
           '<span style="font-size:13px;color:rgba(255,255,255,0.4);">Or switch to RoweOS on your Home Screen</span>';
         return;
       }
       // Desktop fallback: redirect with query param
-      var returnUrl = '/' + (success && _detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
+      var returnUrl = 'https://roweos.com' + (success && _detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
       setTimeout(function() { window.location.href = returnUrl; }, success ? 1000 : 3000);
     }
   }
