@@ -895,9 +895,9 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
           var drData = await drResp.json();
           var drId = drData.id || drData.interactionId || (drData.name && drData.name.indexOf('/') !== -1 ? drData.name.split('/').pop() : drData.name);
           if (!drId) throw new Error('No interaction ID from Deep Research');
-          // Poll (server-side, max 4 min to stay under Vercel maxDuration)
+          // Poll (server-side, max 9 min with maxDuration: 600)
           var drStart = Date.now();
-          var drMaxMs = 240000;
+          var drMaxMs = 540000;
           var drPollMs = 10000;
           var drCancelled = false;
           while (Date.now() - drStart < drMaxMs) {
@@ -928,7 +928,7 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
             continue;
           }
           if (drCancelled) throw new Error('Deep Research cancelled by Google (capacity limit). Try again later.');
-          if (!stepResult) throw new Error('Deep Research did not complete within server time limit (4 min). Try running from the app for longer research.');
+          if (!stepResult) throw new Error('Deep Research did not complete within server time limit (9 min). Try running from the app for longer research.');
         }
 
       } else if (stepAction === 'notify') {
@@ -1434,6 +1434,8 @@ async function processUser(uid, projectId, accessToken, reqHost) {
 }
 
 // --- Main handler ---
+// v24.4: Increase maxDuration for Deep Research polling (up to 10 min on Pro plan)
+export var config = { maxDuration: 600 };
 
 export default async function handler(req, res) {
   var startTime = Date.now();
