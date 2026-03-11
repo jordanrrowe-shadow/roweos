@@ -30,7 +30,7 @@ async function uploadImageToBlob(base64Data, reqHost) {
   var ext = contentType === 'image/jpeg' ? '.jpg' : contentType === 'image/webp' ? '.webp' : contentType === 'image/gif' ? '.gif' : '.png';
   var filename = 'roweos-social-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8) + ext;
   var token = process.env.BLOB_READ_WRITE_TOKEN;
-  var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.vercel.app';
+  var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.com';
 
   console.log('[Social Post] Uploading:', filename, contentType, buffer.length, 'bytes');
 
@@ -114,7 +114,7 @@ export default async function handler(req, res) {
   if (origin === 'https://roweos.vercel.app' || origin === 'https://roweos.com' || origin === 'https://www.roweos.com') {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
-    res.setHeader('Access-Control-Allow-Origin', 'https://roweos.vercel.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://roweos.com');
   }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

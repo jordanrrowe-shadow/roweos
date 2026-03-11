@@ -192,7 +192,7 @@ export default async function handler(req, res) {
   if (allowed.indexOf(origin) !== -1) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
-    res.setHeader('Access-Control-Allow-Origin', 'https://roweos.vercel.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://roweos.com');
   }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');

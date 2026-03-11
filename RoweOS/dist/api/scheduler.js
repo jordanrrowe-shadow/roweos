@@ -12,7 +12,7 @@ var DEFAULT_TIMEZONE = 'America/Chicago';
 // v20.13: Push notifications after task execution (calls /api/push endpoint)
 async function sendPushToUser(uid, title, message, projectId, accessToken, reqHost) {
   try {
-    var pushUrl = 'https://' + (reqHost || 'roweos.vercel.app') + '/api/push';
+    var pushUrl = 'https://' + (reqHost || 'roweos.com') + '/api/push';
     await fetch(pushUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -736,7 +736,7 @@ async function executeSocialPost(task, profileData, reqHost, projectId, googleAc
     }
 
     // v20.12: Refresh X tokens if expired (X tokens last 2 hours)
-    var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.vercel.app';
+    var baseUrl = reqHost ? ('https://' + reqHost) : 'https://roweos.com';
     if (platform === 'x' && tokenData.expiresAt) {
       var now = Date.now();
       var expAt = typeof tokenData.expiresAt === 'string' ? parseInt(tokenData.expiresAt) : tokenData.expiresAt;
@@ -1443,7 +1443,7 @@ export default async function handler(req, res) {
   if (origin === 'https://roweos.vercel.app' || origin === 'https://roweos.com' || origin === 'https://www.roweos.com') {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
-    res.setHeader('Access-Control-Allow-Origin', 'https://roweos.vercel.app');
+    res.setHeader('Access-Control-Allow-Origin', 'https://roweos.com');
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');

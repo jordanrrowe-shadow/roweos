@@ -62,7 +62,7 @@ function firestoreDocToFields(obj) {
 export default async function handler(req, res) {
   // CORS
   var origin = req.headers.origin || '';
-  var allowed = ['https://roweos.vercel.app', 'https://roweos.com', 'https://www.roweos.com'];
+  var allowed = ['https://roweos.com', 'https://roweos.vercel.app', 'https://www.roweos.com'];
   res.setHeader('Access-Control-Allow-Origin', allowed.indexOf(origin) !== -1 ? origin : allowed[0]);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
