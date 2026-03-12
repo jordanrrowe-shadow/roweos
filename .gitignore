@@ -1,2 +1,6 @@
 .DS_Store
 functions/node_modules/
+.env.local
+.env*.local
+**/.env.local
+**/.env*.local
