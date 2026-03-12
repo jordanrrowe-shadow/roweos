@@ -71,12 +71,13 @@ fi
 # 5. Regenerate RoweOS.zip to ensure it matches RoweOS/dist/
 echo "Updating RoweOS.zip..."
 rm -f RoweOS.zip
-zip -r RoweOS.zip RoweOS/dist/ -x "*.DS_Store"
+zip -r RoweOS.zip RoweOS/dist/ -x "*.DS_Store" "*.env.local" "*.env*.local"
 
 # 6. Check for changes and commit
 if ! git diff --quiet CLAUDE.md 2>/dev/null || ! git diff --quiet RoweOS/dist/ 2>/dev/null || ! git diff --quiet RoweOS.zip 2>/dev/null; then
     echo "Staging changes..."
     git add CLAUDE.md RoweOS/dist/ RoweOS.zip .gitignore 2>/dev/null || true
+    git reset -- RoweOS/dist/.env.local RoweOS/dist/.env*.local 2>/dev/null || true
 
     if ! git diff --cached --quiet; then
         echo "Committing..."
