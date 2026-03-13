@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Introducing B.L.A.K.E. | RoweOS</title>
+<meta name="description" content="Introducing B.L.A.K.E. Brand Life AI Knowledge Engine. The adaptive intelligence at the heart of RoweOS.">
+<meta property="og:title" content="Introducing B.L.A.K.E.">
+<meta property="og:description" content="The adaptive AI entity that becomes your brand. And your life.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://roweos.com/blake">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --gold: #a89878;
+  --gold-light: #c9a86c;
+  --gold-glow: rgba(168, 152, 120, 0.15);
+  --bg: #050507;
+  --bg-card: #0e0e12;
+  --bg-card-hover: #141418;
+  --border: rgba(168, 152, 120, 0.1);
+  --border-light: rgba(168, 152, 120, 0.2);
+  --border-glow: rgba(168, 152, 120, 0.35);
+  --text: #f0ece6;
+  --text-secondary: #9a9590;
+  --text-dim: #5e5955;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+::selection { background: rgba(168, 152, 120, 0.3); color: #fff; }
+
+/* ===== NAV BAR ===== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(5, 5, 7, 0.6);
+  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.3s;
+}
+.nav-logo { display: flex; align-items: center; text-decoration: none; }
+.nav-logo img { height: 36px; width: auto; mix-blend-mode: lighten; }
+.nav-links { display: flex; gap: 8px; align-items: center; }
+.nav-link {
+  padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  color: var(--text-secondary); text-decoration: none; transition: all 0.2s;
+  border: 1px solid transparent;
+}
+.nav-link:hover { color: var(--text); background: rgba(255, 255, 255, 0.04); }
+.nav-link.primary {
+  background: var(--gold); color: #0a0a0a; font-weight: 600;
+  border-color: var(--gold);
+}
+.nav-link.primary:hover { background: var(--gold-light); }
+
+/* ===== HELIX BACKGROUND ===== */
+#helixBg {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none; opacity: 0.12;
+}
+
+/* ===== CONTENT WRAPPER ===== */
+.content { position: relative; z-index: 1; }
+
+/* ===== HERO SECTION ===== */
+.hero {
+  min-height: 100vh; min-height: 100svh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 80px 24px 40px; text-align: center;
+  position: relative;
+}
+.hero-blob-wrap {
+  position: relative; width: 240px; height: 240px;
+  margin-bottom: 32px;
+  cursor: pointer;
+  animation: heroFloat 6s ease-in-out infinite;
+}
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.hero-blob-wrap canvas { width: 100%; height: 100%; }
+.hero-blob-glow {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  pointer-events: none; z-index: -1;
+  animation: glowPulse 4s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.15); }
+}
+.hero-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+  opacity: 0; animation: fadeUp 0.8s 0.3s forwards;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 56px; font-weight: 300; line-height: 1.1;
+  letter-spacing: -1px; margin-bottom: 20px;
+  opacity: 0; animation: fadeUp 0.8s 0.5s forwards;
+}
+.hero-title .blake-letter {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold), #d4b880);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 400;
+}
+.hero-title .blake-dot {
+  display: inline-block;
+  font-size: 0.6em; vertical-align: middle;
+  -webkit-text-fill-color: var(--gold);
+  margin: 0 2px;
+  opacity: 0.7;
+}
+.hero-subtitle {
+  font-size: 17px; color: var(--text-secondary); line-height: 1.7;
+  max-width: 520px; margin: 0 auto 32px;
+  opacity: 0; animation: fadeUp 0.8s 0.7s forwards;
+}
+.hero-scroll-hint {
+  opacity: 0; animation: fadeUp 0.8s 1.2s forwards;
+  color: var(--text-dim); font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+}
+.hero-scroll-hint svg {
+  display: block; margin: 8px auto 0; animation: scrollBounce 2s ease-in-out infinite;
+}
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(6px); opacity: 0.8; }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.reveal { opacity: 0; transform: translateY(30px); transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ===== SECTION LAYOUTS ===== */
+.section {
+  padding: 80px 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px; text-align: center;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 40px; font-weight: 300; line-height: 1.2;
+  text-align: center; margin-bottom: 16px;
+}
+.section-desc {
+  font-size: 15px; color: var(--text-secondary); line-height: 1.7;
+  text-align: center; max-width: 600px; margin: 0 auto 48px;
+}
+
+/* ===== ACRONYM SECTION ===== */
+.acronym-section { padding: 60px 24px 80px; }
+.acronym-grid {
+  display: flex; flex-direction: column; gap: 0;
+  max-width: 680px; margin: 0 auto;
+}
+.acronym-row {
+  display: flex; align-items: center; gap: 20px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--border);
+}
+.acronym-row:last-child { border-bottom: none; }
+.acronym-letter {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 64px; font-weight: 300; line-height: 1;
+  min-width: 60px; text-align: center;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.acronym-text { flex: 1; }
+.acronym-word {
+  font-size: 20px; font-weight: 600; margin-bottom: 4px;
+  color: var(--text);
+}
+.acronym-desc {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.55;
+}
+
+/* ===== TWO MINDS SECTION ===== */
+.minds-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  margin-bottom: 32px;
+}
+.mind-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px; transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.mind-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--card-accent, var(--gold)), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.mind-card:hover { border-color: var(--border-light); }
+.mind-card:hover::before { opacity: 1; }
+.mind-card-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.mind-card-title {
+  font-size: 22px; font-weight: 600; margin-bottom: 8px;
+}
+.mind-card-desc {
+  font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 16px;
+}
+.mind-card .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 5px 11px; border-radius: 6px;
+  border: 1px solid var(--border-light); color: var(--text-secondary);
+  transition: all 0.2s;
+}
+.convergence-card {
+  background: linear-gradient(135deg, rgba(168, 152, 120, 0.06), rgba(168, 152, 120, 0.02));
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 32px; text-align: center;
+}
+.convergence-eq {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 28px; font-weight: 300; margin-bottom: 12px;
+  color: var(--text);
+}
+.convergence-eq .eq-gold {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-weight: 400;
+}
+.convergence-desc {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.6;
+  max-width: 480px; margin: 0 auto;
+}
+
+/* ===== INTERACTIVE PLAYGROUND ===== */
+.playground-section {
+  padding: 80px 24px;
+  max-width: 960px; margin: 0 auto;
+}
+.playground-container {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+  align-items: center;
+}
+.playground-blob-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center;
+}
+.playground-blob {
+  width: 280px; height: 280px; cursor: pointer;
+  position: relative;
+}
+.playground-blob canvas { width: 100%; height: 100%; }
+.playground-blob-label {
+  text-align: center; margin-top: 12px;
+  font-size: 12px; color: var(--text-dim); letter-spacing: 1px;
+}
+.playground-controls { display: flex; flex-direction: column; gap: 28px; }
+
+/* Shape selector */
+.control-group-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 12px;
+}
+.shape-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.shape-btn {
+  padding: 10px 0; border-radius: var(--radius-sm);
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  text-align: center;
+}
+.shape-btn:hover { border-color: var(--border-light); color: var(--text); }
+.shape-btn.active {
+  border-color: var(--gold); color: var(--gold);
+  background: rgba(168, 152, 120, 0.08);
+}
+
+/* Color wheel */
+.color-wheel-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 16px;
+}
+.color-wheel-container {
+  position: relative; width: 200px; height: 200px;
+}
+.color-wheel-canvas {
+  width: 200px; height: 200px; border-radius: 50%;
+  cursor: crosshair; touch-action: none;
+  border: 2px solid var(--border);
+  transition: border-color 0.2s;
+}
+.color-wheel-canvas:hover { border-color: var(--border-light); }
+.color-wheel-selector {
+  position: absolute; width: 18px; height: 18px;
+  border: 2px solid #fff; border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0,0,0,0.5), inset 0 0 4px rgba(0,0,0,0.3);
+  pointer-events: none; transform: translate(-50%, -50%);
+  transition: box-shadow 0.2s;
+}
+.color-preset-row {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+}
+.color-preset-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid transparent; cursor: pointer;
+  transition: all 0.2s; position: relative;
+}
+.color-preset-btn:hover { transform: scale(1.15); }
+.color-preset-btn.active { border-color: #fff; box-shadow: 0 0 8px var(--gold-glow); }
+.color-secondary-wrap {
+  display: flex; align-items: center; gap: 12px;
+}
+.color-secondary-label { font-size: 11px; color: var(--text-dim); }
+.color-secondary-input {
+  width: 36px; height: 36px; border: none; border-radius: 8px;
+  cursor: pointer; background: none; padding: 0;
+}
+
+/* ===== FEATURES GRID ===== */
+.features-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+}
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px; transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.feature-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+.feature-icon {
+  color: var(--gold); margin-bottom: 14px;
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(168, 152, 120, 0.08);
+  display: flex; align-items: center; justify-content: center;
+}
+.feature-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.feature-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
+
+/* ===== ADAPTABLE SECTION ===== */
+.adapt-cards {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+}
+.adapt-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px; text-align: center;
+  transition: all 0.3s;
+}
+.adapt-card:hover { border-color: var(--border-light); }
+.adapt-num {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 48px; font-weight: 300;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 8px; line-height: 1;
+}
+.adapt-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.adapt-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ===== CTA ===== */
+.cta-section {
+  padding: 80px 24px 60px;
+  text-align: center; max-width: 640px; margin: 0 auto;
+}
+.cta-blob-mini { width: 80px; height: 80px; margin: 0 auto 24px; }
+.cta-blob-mini canvas { width: 100%; height: 100%; }
+.cta-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 36px; font-weight: 300; margin-bottom: 12px;
+}
+.cta-desc {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.6;
+  margin-bottom: 28px; max-width: 480px; margin-left: auto; margin-right: auto;
+}
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; border-radius: 10px;
+  background: var(--gold); color: #0a0a0a;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.cta-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+.cta-btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; border-radius: 10px;
+  background: transparent; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  text-decoration: none; border: 1px solid var(--border-light);
+  cursor: pointer; transition: all 0.2s; margin-left: 12px;
+}
+.cta-btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ===== FOOTER ===== */
+.footer {
+  padding: 24px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; color: var(--text-dim);
+  max-width: 960px; margin: 0 auto;
+}
+.footer-links { display: flex; gap: 16px; }
+.footer-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+.footer-links a:hover { color: var(--gold); }
+
+/* ===== DIVIDER ===== */
+.section-divider {
+  width: 40px; height: 1px;
+  background: var(--border-light);
+  margin: 0 auto;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .nav { padding: 12px 16px; }
+  .nav-logo img { height: 30px; }
+  .nav-link { padding: 6px 12px; font-size: 12px; }
+
+  .hero { padding: 70px 20px 40px; min-height: 100svh; }
+  .hero-blob-wrap { width: 200px; height: 200px; margin-bottom: 28px; }
+  .hero-blob-glow { width: 260px; height: 260px; }
+  .hero-title { font-size: 40px; }
+  .hero-subtitle { font-size: 15px; margin-bottom: 24px; }
+
+  .section { padding: 60px 20px; }
+  .section-title { font-size: 32px; }
+  .section-desc { font-size: 14px; }
+
+  .acronym-row { gap: 16px; padding: 22px 0; }
+  .acronym-letter { font-size: 48px; min-width: 48px; }
+  .acronym-word { font-size: 17px; }
+  .acronym-desc { font-size: 12px; }
+
+  .minds-grid { grid-template-columns: 1fr; gap: 16px; }
+  .mind-card { padding: 24px; }
+  .mind-card-title { font-size: 19px; }
+
+  .playground-container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .playground-blob { width: 220px; height: 220px; }
+  .color-wheel-container { width: 180px; height: 180px; }
+  .color-wheel-canvas { width: 180px; height: 180px; }
+
+  .features-grid { grid-template-columns: 1fr; gap: 12px; }
+  .feature-card { padding: 22px; }
+
+  .adapt-cards { grid-template-columns: 1fr; gap: 12px; }
+  .adapt-card { padding: 24px; }
+
+  .cta-title { font-size: 28px; }
+  .cta-section .cta-buttons { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .cta-btn-ghost { margin-left: 0; }
+
+  .footer { flex-direction: column; gap: 12px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: 34px; }
+  .hero-blob-wrap { width: 180px; height: 180px; }
+  .shape-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .convergence-eq { font-size: 22px; }
+}
+</style>
+
+<!-- Blob Vertex Shader -->
+<script id="blobVertexShader" type="x-shader/x-vertex">
+uniform float uTime;
+uniform float uNoiseAmp;
+uniform float uNoiseFreq;
+uniform float uSpeed;
+uniform float uDetailMix;
+uniform vec2 uMouse;
+varying vec3 vNormal;
+varying vec3 vPosition;
+varying float vDisplacement;
+varying vec3 vViewDir;
+
+vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x,289.0);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+
+float snoise(vec3 v){
+  const vec2 C=vec2(1.0/6.0,1.0/3.0);
+  const vec4 D=vec4(0.0,0.5,1.0,2.0);
+  vec3 i=floor(v+dot(v,C.yyy));
+  vec3 x0=v-i+dot(i,C.xxx);
+  vec3 g=step(x0.yzx,x0.xyz);
+  vec3 l=1.0-g;
+  vec3 i1=min(g.xyz,l.zxy);
+  vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx;
+  vec3 x2=x0-i2+C.yyy;
+  vec3 x3=x0-D.yyy;
+  i=mod(i,289.0);
+  vec4 p=permute(permute(permute(
+    i.z+vec4(0.0,i1.z,i2.z,1.0))
+    +i.y+vec4(0.0,i1.y,i2.y,1.0))
+    +i.x+vec4(0.0,i1.x,i2.x,1.0));
+  float n_=1.0/7.0;
+  vec3 ns=n_*D.wyz-D.xzx;
+  vec4 j=p-49.0*floor(p*ns.z*ns.z);
+  vec4 x_=floor(j*ns.z);
+  vec4 y_=floor(j-7.0*x_);
+  vec4 x=x_*ns.x+ns.yyyy;
+  vec4 y=y_*ns.x+ns.yyyy;
+  vec4 h=1.0-abs(x)-abs(y);
+  vec4 b0=vec4(x.xy,y.xy);
+  vec4 b1=vec4(x.zw,y.zw);
+  vec4 s0=floor(b0)*2.0+1.0;
+  vec4 s1=floor(b1)*2.0+1.0;
+  vec4 sh=-step(h,vec4(0.0));
+  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;
+  vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x);
+  vec3 p1=vec3(a0.zw,h.y);
+  vec3 p2=vec3(a1.xy,h.z);
+  vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+  p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);
+  m=m*m;
+  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+}
+
+void main(){
+  float t=uTime*uSpeed;
+  vec3 pos=position;
+  float n1=snoise(pos*uNoiseFreq+t);
+  float n2=snoise(pos*uNoiseFreq*2.0+t*1.3)*0.5;
+  float n3=snoise(pos*uNoiseFreq*4.0+t*0.7)*0.25;
+  float displacement=(n1+n2*uDetailMix+n3*uDetailMix*uDetailMix)*uNoiseAmp;
+  vec3 worldPos=(modelMatrix*vec4(pos,1.0)).xyz;
+  float mouseDist=length(worldPos.xy-uMouse);
+  float mouseInfluence=smoothstep(1.5,0.0,mouseDist)*0.15;
+  displacement+=mouseInfluence;
+  vec3 newPos=pos+normal*displacement;
+  vDisplacement=displacement;
+  vNormal=normalize(normalMatrix*normal);
+  vPosition=(modelViewMatrix*vec4(newPos,1.0)).xyz;
+  vViewDir=normalize(-vPosition);
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(newPos,1.0);
+}
+</script>
+
+<!-- Blob Fragment Shader -->
+<script id="blobFragmentShader" type="x-shader/x-fragment">
+uniform vec3 uColor;
+uniform vec3 uColorB;
+uniform float uFresnelPower;
+uniform float uOpacity;
+uniform float uTime;
+varying vec3 vNormal;
+varying vec3 vPosition;
+varying float vDisplacement;
+varying vec3 vViewDir;
+
+void main(){
+  float fresnel=pow(1.0-max(dot(vViewDir,vNormal),0.0),uFresnelPower);
+  float colorMix=vDisplacement*2.0+vNormal.y*0.3+sin(uTime*0.2)*0.1;
+  vec3 baseColor=mix(uColor,uColorB,clamp(colorMix,0.0,1.0));
+  vec3 lightDir=normalize(vec3(0.5,1.0,0.8));
+  float sss=pow(max(dot(vViewDir,-lightDir+vNormal*0.5),0.0),3.0)*0.4;
+  vec3 sssColor=baseColor*1.8+vec3(0.1,0.05,0.02);
+  vec3 halfDir=normalize(lightDir+vViewDir);
+  float spec=pow(max(dot(vNormal,halfDir),0.0),60.0)*0.5;
+  vec3 specColor=mix(baseColor*1.6,vec3(1.0),0.25);
+  vec3 rimColor=baseColor*1.5+vec3(0.1,0.08,0.04);
+  vec3 color=baseColor;
+  color+=sssColor*sss;
+  color+=spec*specColor;
+  color=mix(color,rimColor,fresnel*0.6);
+  float alpha=mix(uOpacity,uOpacity*0.3,fresnel);
+  alpha=clamp(alpha,0.0,1.0);
+  gl_FragColor=vec4(color,alpha);
+}
+</script>
+
+<!-- Helix Vertex Shader -->
+<script id="helixVertexShader" type="x-shader/x-vertex">
+uniform float uTime;
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vPosition;
+void main(){
+  vUv=uv;
+  vNormal=normalize(normalMatrix*normal);
+  vPosition=(modelViewMatrix*vec4(position,1.0)).xyz;
+  vec3 pos=position;
+  pos+=normal*sin(uv.x*6.2832+uTime*0.4)*0.04;
+  gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.0);
+}
+</script>
+
+<!-- Helix Fragment Shader -->
+<script id="helixFragmentShader" type="x-shader/x-fragment">
+uniform float uTime;
+uniform vec3 uColorA;
+uniform vec3 uColorB;
+uniform float uOpacity;
+varying vec2 vUv;
+varying vec3 vNormal;
+varying vec3 vPosition;
+void main(){
+  float t=vUv.x+sin(uTime*0.12)*0.08;
+  vec3 color=mix(uColorA,uColorB,clamp(t,0.0,1.0));
+  vec3 viewDir=normalize(-vPosition);
+  float fresnel=pow(1.0-max(dot(viewDir,vNormal),0.0),1.8);
+  color=mix(color,color*1.6,fresnel*0.5);
+  float radial=abs(vUv.y-0.5)*2.0;
+  float edgeFade=1.0-smoothstep(0.3,1.0,radial);
+  edgeFade=edgeFade*edgeFade;
+  float alpha=uOpacity*edgeFade;
+  gl_FragColor=vec4(color,alpha);
+}
+</script>
+
+</head>
+<body>
+
+<!-- Background Helix -->
+<canvas id="helixBg"></canvas>
+
+<div class="content">
+
+<!-- Nav -->
+<nav class="nav">
+  <a href="https://roweos.com" class="nav-logo">
+    <img src="/images/logo-full.png" alt="RoweOS">
+  </a>
+  <div class="nav-links">
+    <a href="https://roweos.com/info" class="nav-link">Learn More</a>
+    <a href="https://roweos.com" class="nav-link primary">Open RoweOS</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-blob-wrap" id="heroBlobWrap">
+    <div class="hero-blob-glow"></div>
+    <canvas id="heroBlobCanvas" width="480" height="480"></canvas>
+  </div>
+  <div class="hero-label">Introducing</div>
+  <h1 class="hero-title">
+    <span class="blake-letter">B</span><span class="blake-dot">.</span><span class="blake-letter">L</span><span class="blake-dot">.</span><span class="blake-letter">A</span><span class="blake-dot">.</span><span class="blake-letter">K</span><span class="blake-dot">.</span><span class="blake-letter">E</span><span class="blake-dot">.</span>
+  </h1>
+  <p class="hero-subtitle">Brand Life AI Knowledge Engine. The adaptive intelligence at the heart of RoweOS. Not just an assistant. An entity that learns, adapts, and embodies who you are.</p>
+  <div class="hero-scroll-hint">
+    Discover
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- Acronym -->
+<section class="acronym-section section">
+  <div class="section-label reveal">What B.L.A.K.E. Stands For</div>
+  <div class="acronym-grid">
+    <div class="acronym-row reveal">
+      <div class="acronym-letter">B</div>
+      <div class="acronym-text">
+        <div class="acronym-word">Brand</div>
+        <div class="acronym-desc">Five specialized agents that don't just know about your brand. They become it. Strategy, Marketing, Operations, Documents, and Intelligence working as one.</div>
+      </div>
+    </div>
+    <div class="acronym-row reveal">
+      <div class="acronym-letter">L</div>
+      <div class="acronym-text">
+        <div class="acronym-word">Life</div>
+        <div class="acronym-desc">Personal coaching, wellness tracking, goal setting, and daily optimization. BLAKE adapts from business intelligence to personal companion seamlessly.</div>
+      </div>
+    </div>
+    <div class="acronym-row reveal">
+      <div class="acronym-letter">A</div>
+      <div class="acronym-text">
+        <div class="acronym-word">AI</div>
+        <div class="acronym-desc">Multi-model intelligence across Claude, GPT, and Gemini. BLAKE chooses the right mind for every task. Deep reasoning, creative generation, or web-connected research.</div>
+      </div>
+    </div>
+    <div class="acronym-row reveal">
+      <div class="acronym-letter">K</div>
+      <div class="acronym-text">
+        <div class="acronym-word">Knowledge</div>
+        <div class="acronym-desc">Identity memory, conversation history, brand context, and deep research. BLAKE accumulates understanding over time, growing sharper the more you work together.</div>
+      </div>
+    </div>
+    <div class="acronym-row reveal">
+      <div class="acronym-letter">E</div>
+      <div class="acronym-text">
+        <div class="acronym-word">Engine</div>
+        <div class="acronym-desc">150+ operations, autonomous scheduling, multi-step pipelines, social publishing, and email campaigns. The execution layer that turns intelligence into action.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Two Minds, One Intelligence -->
+<section class="section">
+  <div class="section-label reveal">Two Minds, One Intelligence</div>
+  <div class="section-title reveal">BrandAI + LifeAI = <span style="background:linear-gradient(135deg, var(--gold-light), var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:400;">BLAKE</span></div>
+  <div class="section-desc reveal">BLAKE is the overarching intelligence that unifies your professional and personal worlds. Two modes, one adaptive entity that knows when to think like a strategist and when to think like a coach.</div>
+
+  <div class="minds-grid">
+    <div class="mind-card reveal" style="--card-accent: #a89878;">
+      <div class="mind-card-icon" style="background: rgba(168, 152, 120, 0.1);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </div>
+      <div class="mind-card-title">BrandAI</div>
+      <div class="mind-card-desc">Five specialized agents that embody your brand identity. Manage content strategy, run deep research, maintain voice consistency, and operate across your entire portfolio.</div>
+      <div class="pills">
+        <span class="pill">Strategy</span>
+        <span class="pill">Marketing</span>
+        <span class="pill">Operations</span>
+        <span class="pill">Documents</span>
+        <span class="pill">Intelligence</span>
+      </div>
+    </div>
+    <div class="mind-card reveal" style="--card-accent: #22c55e;">
+      <div class="mind-card-icon" style="background: rgba(34, 197, 94, 0.1);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      </div>
+      <div class="mind-card-title">LifeAI</div>
+      <div class="mind-card-desc">Five personal coaches for life management, wellness, finances, and daily optimization. Your private AI companion that adapts to your personal rhythms and goals.</div>
+      <div class="pills">
+        <span class="pill">Life Coach</span>
+        <span class="pill">Wellness</span>
+        <span class="pill">Tax Copilot</span>
+        <span class="pill">Personal AI</span>
+        <span class="pill">Standard AI</span>
+      </div>
+    </div>
+  </div>
+  <div class="convergence-card reveal">
+    <div class="convergence-eq">BrandAI <span style="color:var(--text-dim);margin:0 8px;">+</span> LifeAI <span style="color:var(--text-dim);margin:0 8px;">=</span> <span class="eq-gold">B.L.A.K.E.</span></div>
+    <div class="convergence-desc">One adaptive intelligence that shifts between professional strategy and personal coaching. Your brand knowledge informs your life decisions. Your life context enriches your brand.</div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Interactive Playground -->
+<section class="playground-section">
+  <div class="section-label reveal">Make BLAKE Yours</div>
+  <div class="section-title reveal">Shape & Color</div>
+  <div class="section-desc reveal">BLAKE's visual form is entirely yours to customize. Choose a shape, pick your colors, and watch your intelligence come to life.</div>
+
+  <div class="playground-container reveal">
+    <div class="playground-blob-wrap">
+      <div class="playground-blob" id="playgroundBlobWrap">
+        <canvas id="playgroundBlobCanvas" width="560" height="560"></canvas>
+      </div>
+      <div class="playground-blob-label" id="playgroundShapeLabel">Crystal</div>
+    </div>
+    <div class="playground-controls">
+      <div>
+        <div class="control-group-title">Shape</div>
+        <div class="shape-grid" id="shapeGrid">
+          <button class="shape-btn" data-shape="smooth">Smooth</button>
+          <button class="shape-btn" data-shape="fluid">Fluid</button>
+          <button class="shape-btn" data-shape="organic">Organic</button>
+          <button class="shape-btn active" data-shape="crystal">Crystal</button>
+          <button class="shape-btn" data-shape="sphere">Sphere</button>
+          <button class="shape-btn" data-shape="helix">Helix</button>
+        </div>
+      </div>
+      <div>
+        <div class="control-group-title">Color</div>
+        <div class="color-wheel-wrap">
+          <div class="color-wheel-container" id="colorWheelContainer">
+            <canvas class="color-wheel-canvas" id="colorWheel" width="400" height="400"></canvas>
+            <div class="color-wheel-selector" id="colorWheelSelector"></div>
+          </div>
+          <div class="color-preset-row" id="colorPresets">
+            <button class="color-preset-btn active" data-preset="gold" style="background: linear-gradient(135deg, #a89878, #c0a86e);" title="Gold"></button>
+            <button class="color-preset-btn" data-preset="aurora" style="background: linear-gradient(135deg, #00e676, #00bcd4);" title="Aurora"></button>
+            <button class="color-preset-btn" data-preset="sunset" style="background: linear-gradient(135deg, #ff6b6b, #ffa726);" title="Sunset"></button>
+            <button class="color-preset-btn" data-preset="ocean" style="background: linear-gradient(135deg, #0288d1, #00bcd4);" title="Ocean"></button>
+            <button class="color-preset-btn" data-preset="neon" style="background: linear-gradient(135deg, #ff00ff, #00ffff);" title="Neon"></button>
+            <button class="color-preset-btn" data-preset="ember" style="background: linear-gradient(135deg, #4a1a0a, #e74c3c);" title="Ember"></button>
+            <button class="color-preset-btn" data-preset="midnight" style="background: linear-gradient(135deg, #0d0d2b, #2d1b69);" title="Midnight"></button>
+          </div>
+          <div class="color-secondary-wrap">
+            <span class="color-secondary-label">Secondary</span>
+            <input type="color" class="color-secondary-input" id="colorSecondary" value="#c0a86e">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Features -->
+<section class="section">
+  <div class="section-label reveal">What BLAKE Can Do</div>
+  <div class="section-title reveal">Intelligence in Action</div>
+  <div class="section-desc reveal">From ideation to execution, BLAKE powers every layer of your workflow.</div>
+
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      </div>
+      <div class="feature-title">Contextual Chat</div>
+      <div class="feature-desc">Conversations that remember your brand identity, past interactions, and strategic context across every session.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div class="feature-title">Studio Operations</div>
+      <div class="feature-desc">150+ pre-built operations across strategy, marketing, content, video, and brand-specific workflows.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+      </div>
+      <div class="feature-title">Deep Research</div>
+      <div class="feature-desc">Multi-step analysis with web-connected intelligence for market research, competitive analysis, and strategic insight.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="feature-title">Autonomous Scheduling</div>
+      <div class="feature-desc">Workflows and pipelines that run on your cadence. BLAKE executes while you sleep.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </div>
+      <div class="feature-title">Social & Email</div>
+      <div class="feature-desc">Publish to X, Instagram, and Threads. Full email client with AI composition and branded templates.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <ellipse cx="12" cy="6.5" rx="2.8" ry="4.5"/>
+          <ellipse cx="17" cy="10" rx="2.8" ry="4.5" transform="rotate(72 17 10)"/>
+          <ellipse cx="15.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(144 15.5 15.5)"/>
+          <ellipse cx="8.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(-144 8.5 15.5)"/>
+          <ellipse cx="7" cy="10" rx="2.8" ry="4.5" transform="rotate(-72 7 10)"/>
+          <circle cx="12" cy="11" r="2.2"/>
+        </svg>
+      </div>
+      <div class="feature-title">Bloom Feed</div>
+      <div class="feature-desc">AI-generated content ideas tailored to each brand. Swipeable cards for social, images, video, and long-form.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
+      </div>
+      <div class="feature-title">Multi-Model</div>
+      <div class="feature-desc">Claude, GPT, and Gemini. BLAKE selects the optimal model per task, or lets you choose. No lock-in.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="feature-title">Sovereign Data</div>
+      <div class="feature-desc">Your intelligence stays yours. Browser-native, API keys never leave your device. No vendor lock-in.</div>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+      </div>
+      <div class="feature-title">Cross-Device</div>
+      <div class="feature-desc">Firebase sync across desktop, tablet, and mobile. BLAKE travels with you.</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Adaptable -->
+<section class="section">
+  <div class="section-label reveal">Endlessly Adaptable</div>
+  <div class="section-title reveal">BLAKE Grows With You</div>
+  <div class="section-desc reveal">The more you use BLAKE, the more it understands. Brand identity, personal preferences, and strategic context, all accumulating into deeper intelligence.</div>
+
+  <div class="adapt-cards">
+    <div class="adapt-card reveal">
+      <div class="adapt-num">15</div>
+      <div class="adapt-title">Brand Portfolios</div>
+      <div class="adapt-desc">Each with its own voice, identity, strategy, and agent configuration.</div>
+    </div>
+    <div class="adapt-card reveal">
+      <div class="adapt-num">150+</div>
+      <div class="adapt-title">Operations</div>
+      <div class="adapt-desc">Pre-built workflows spanning strategy, content, research, and execution.</div>
+    </div>
+    <div class="adapt-card reveal">
+      <div class="adapt-num">10</div>
+      <div class="adapt-title">AI Agents</div>
+      <div class="adapt-desc">Five brand agents and five life coaches, each with specialized intelligence.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-blob-mini" id="ctaBlobWrap">
+    <canvas id="ctaBlobCanvas" width="160" height="160"></canvas>
+  </div>
+  <div class="cta-title reveal">Meet Your Intelligence</div>
+  <div class="cta-desc reveal">BLAKE is waiting. Start with a conversation, build your brand identity, and watch your AI entity come to life.</div>
+  <div class="cta-buttons reveal">
+    <a href="https://roweos.com" class="cta-btn">Open RoweOS</a>
+    <a href="https://roweos.com/info" class="cta-btn-ghost">Learn More</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <span>&copy; 2026 The Rowe Collection, LLC &middot; Austin, TX</span>
+  <div class="footer-links">
+    <a href="https://roweos.com">roweos.com</a>
+    <a href="https://therowecollection.com">therowecollection.com</a>
+  </div>
+</footer>
+
+</div><!-- .content -->
+
+<script>
+// ============================================================
+// B.L.A.K.E. PAGE - Three.js Animations & Interactivity
+// ============================================================
+
+// Shape presets
+var BLOB_SHAPES = {
+  smooth:  { amp: 0.18, freq: 0.7, speed: 0.2, detail: 0.0, fresnel: 3.0 },
+  fluid:   { amp: 0.25, freq: 0.9, speed: 0.35, detail: 0.2, fresnel: 2.8 },
+  organic: { amp: 0.22, freq: 1.1, speed: 0.25, detail: 0.5, fresnel: 2.5 },
+  crystal: { amp: 0.35, freq: 1.5, speed: 0.3, detail: 1.0, fresnel: 2.5 },
+  sphere:  { amp: 0.06, freq: 0.4, speed: 0.12, detail: 0.0, fresnel: 3.5 }
+};
+
+// Color presets
+var COLOR_PRESETS = {
+  gold:     { c1: '#a89878', c2: '#c0a86e' },
+  aurora:   { c1: '#00e676', c2: '#00bcd4' },
+  sunset:   { c1: '#ff6b6b', c2: '#ffa726' },
+  ocean:    { c1: '#0288d1', c2: '#00bcd4' },
+  neon:     { c1: '#ff00ff', c2: '#00ffff' },
+  ember:    { c1: '#4a1a0a', c2: '#e74c3c' },
+  midnight: { c1: '#0d0d2b', c2: '#2d1b69' }
+};
+
+// Helix color sets
+var HELIX_COLORS = [
+  { a: '#a89878', b: '#c0a86e' },
+  { a: '#8b7355', b: '#d4b86a' },
+  { a: '#6b5b3e', b: '#b8976a' },
+  { a: '#9c8a6a', b: '#e0c878' }
+];
+
+var _currentShape = 'crystal';
+var _shapeTarget = BLOB_SHAPES.crystal;
+var _currentColor1 = '#a89878';
+var _currentColor2 = '#c0a86e';
+var _currentPreset = 'gold';
+var _isHelixMode = false;
+
+// ============================================================
+// HERO BLOB
+// ============================================================
+var _heroScene, _heroCamera, _heroRenderer, _heroMesh, _heroUniforms, _heroAnimId;
+var _heroMouse = { x: 0, y: 0 };
+
+function initHeroBlob() {
+  if (typeof THREE === 'undefined') { setTimeout(initHeroBlob, 200); return; }
+  var canvas = document.getElementById('heroBlobCanvas');
+  var container = document.getElementById('heroBlobWrap');
+  if (!canvas || !container) return;
+
+  var w = container.offsetWidth || 240;
+  var h = container.offsetHeight || 240;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  _heroScene = new THREE.Scene();
+  _heroCamera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+  _heroCamera.position.z = 4;
+
+  _heroRenderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+  _heroRenderer.setSize(w, h);
+  _heroRenderer.setPixelRatio(dpr);
+  _heroRenderer.setClearColor(0x000000, 0);
+
+  var shape = BLOB_SHAPES.crystal;
+  _heroUniforms = {
+    uTime: { value: 0 },
+    uColor: { value: new THREE.Color(_currentColor1) },
+    uColorB: { value: new THREE.Color(_currentColor2) },
+    uMouse: { value: new THREE.Vector2(0, 0) },
+    uNoiseAmp: { value: shape.amp },
+    uNoiseFreq: { value: shape.freq },
+    uSpeed: { value: shape.speed },
+    uDetailMix: { value: shape.detail },
+    uFresnelPower: { value: shape.fresnel },
+    uOpacity: { value: 0.92 }
+  };
+
+  var vertexShader = document.getElementById('blobVertexShader').textContent;
+  var fragmentShader = document.getElementById('blobFragmentShader').textContent;
+  var geometry = new THREE.IcosahedronGeometry(1, 5);
+  var material = new THREE.ShaderMaterial({
+    uniforms: _heroUniforms,
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+    transparent: true, depthWrite: false, side: THREE.DoubleSide
+  });
+
+  _heroMesh = new THREE.Mesh(geometry, material);
+  _heroScene.add(_heroMesh);
+
+  // Mouse/touch tracking
+  container.addEventListener('mousemove', function(e) {
+    var rect = container.getBoundingClientRect();
+    _heroMouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    _heroMouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  });
+  container.addEventListener('mouseleave', function() { _heroMouse.x = 0; _heroMouse.y = 0; });
+  container.addEventListener('touchmove', function(e) {
+    var rect = container.getBoundingClientRect();
+    var touch = e.touches[0];
+    _heroMouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+    _heroMouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+  }, { passive: true });
+
+  startHeroBlobAnimation();
+}
+
+function startHeroBlobAnimation() {
+  var clock = new THREE.Clock();
+  function animate() {
+    _heroAnimId = requestAnimationFrame(animate);
+    if (!_heroRenderer) return;
+    var dt = clock.getDelta();
+    _heroUniforms.uTime.value += dt;
+    var ux = _heroUniforms.uMouse.value;
+    ux.x += (_heroMouse.x * 1.5 - ux.x) * 0.05;
+    ux.y += (_heroMouse.y * 1.5 - ux.y) * 0.05;
+    _heroMesh.rotation.y += dt * 0.15;
+    _heroMesh.rotation.x += dt * 0.08;
+    // Lerp toward shape target
+    var base = _shapeTarget;
+    _heroUniforms.uNoiseAmp.value += (base.amp - _heroUniforms.uNoiseAmp.value) * 0.02;
+    _heroUniforms.uSpeed.value += (base.speed - _heroUniforms.uSpeed.value) * 0.02;
+    _heroUniforms.uNoiseFreq.value += (base.freq - _heroUniforms.uNoiseFreq.value) * 0.02;
+    _heroUniforms.uDetailMix.value += (base.detail - _heroUniforms.uDetailMix.value) * 0.02;
+    _heroUniforms.uFresnelPower.value += (base.fresnel - _heroUniforms.uFresnelPower.value) * 0.02;
+    _heroRenderer.render(_heroScene, _heroCamera);
+  }
+  animate();
+}
+
+// ============================================================
+// PLAYGROUND BLOB
+// ============================================================
+var _pgScene, _pgCamera, _pgRenderer, _pgMesh, _pgUniforms, _pgAnimId;
+var _pgMouse = { x: 0, y: 0 };
+var _pgHelixGroup, _pgHelixUniforms = [], _pgHelixMeshes = [];
+var _pgHelixMode = false;
+
+function initPlaygroundBlob() {
+  if (typeof THREE === 'undefined') { setTimeout(initPlaygroundBlob, 200); return; }
+  var canvas = document.getElementById('playgroundBlobCanvas');
+  var container = document.getElementById('playgroundBlobWrap');
+  if (!canvas || !container) return;
+
+  var w = container.offsetWidth || 280;
+  var h = container.offsetHeight || 280;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  _pgScene = new THREE.Scene();
+  _pgCamera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+  _pgCamera.position.z = 4;
+
+  _pgRenderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+  _pgRenderer.setSize(w, h);
+  _pgRenderer.setPixelRatio(dpr);
+  _pgRenderer.setClearColor(0x000000, 0);
+
+  var shape = BLOB_SHAPES.crystal;
+  _pgUniforms = {
+    uTime: { value: 0 },
+    uColor: { value: new THREE.Color(_currentColor1) },
+    uColorB: { value: new THREE.Color(_currentColor2) },
+    uMouse: { value: new THREE.Vector2(0, 0) },
+    uNoiseAmp: { value: shape.amp },
+    uNoiseFreq: { value: shape.freq },
+    uSpeed: { value: shape.speed },
+    uDetailMix: { value: shape.detail },
+    uFresnelPower: { value: shape.fresnel },
+    uOpacity: { value: 0.92 }
+  };
+
+  var vertexShader = document.getElementById('blobVertexShader').textContent;
+  var fragmentShader = document.getElementById('blobFragmentShader').textContent;
+  var geometry = new THREE.IcosahedronGeometry(1, 5);
+  var material = new THREE.ShaderMaterial({
+    uniforms: _pgUniforms,
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+    transparent: true, depthWrite: false, side: THREE.DoubleSide
+  });
+
+  _pgMesh = new THREE.Mesh(geometry, material);
+  _pgScene.add(_pgMesh);
+
+  // Build helix meshes (hidden initially)
+  _pgHelixGroup = new THREE.Group();
+  _pgHelixGroup.visible = false;
+  var hVertS = document.getElementById('helixVertexShader').textContent;
+  var hFragS = document.getElementById('helixFragmentShader').textContent;
+  for (var i = 0; i < 4; i++) {
+    var curve = generateHelixCurve(i, true);
+    var geom = new THREE.TubeGeometry(curve, 80, 0.5, 12, false);
+    var hu = {
+      uTime: { value: i * 2.0 },
+      uColorA: { value: new THREE.Color(HELIX_COLORS[i].a) },
+      uColorB: { value: new THREE.Color(HELIX_COLORS[i].b) },
+      uOpacity: { value: 0.85 }
+    };
+    var mat = new THREE.ShaderMaterial({
+      uniforms: hu, vertexShader: hVertS, fragmentShader: hFragS,
+      transparent: true, depthWrite: false, side: THREE.DoubleSide
+    });
+    var mesh = new THREE.Mesh(geom, mat);
+    _pgHelixGroup.add(mesh);
+    _pgHelixMeshes.push(mesh);
+    _pgHelixUniforms.push(hu);
+  }
+  _pgScene.add(_pgHelixGroup);
+
+  // Mouse/touch tracking
+  container.addEventListener('mousemove', function(e) {
+    var rect = container.getBoundingClientRect();
+    _pgMouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    _pgMouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  });
+  container.addEventListener('mouseleave', function() { _pgMouse.x = 0; _pgMouse.y = 0; });
+  container.addEventListener('touchmove', function(e) {
+    var rect = container.getBoundingClientRect();
+    var touch = e.touches[0];
+    _pgMouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+    _pgMouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+  }, { passive: true });
+
+  startPlaygroundAnimation();
+}
+
+function generateHelixCurve(index, small) {
+  var points = [];
+  var segs = small ? 40 : 60;
+  var scale = small ? 0.6 : 1;
+  var configs = [
+    { xStart: 6, yStart: 4, xEnd: -6, yEnd: -4, phase: 0, freq: 1.2, amp: 2.0, zAmp: 1.5, xWave: 1.0 },
+    { xStart: 7, yStart: 3.5, xEnd: -5, yEnd: -4.5, phase: 1.8, freq: 0.9, amp: 2.5, zAmp: 1.2, xWave: 1.2 },
+    { xStart: 5, yStart: 4.5, xEnd: -7, yEnd: -3.5, phase: 3.5, freq: 1.5, amp: 1.5, zAmp: 2.0, xWave: 0.7 },
+    { xStart: 7, yStart: 3, xEnd: -5, yEnd: -5, phase: 5.0, freq: 1.1, amp: 2.2, zAmp: 1.3, xWave: 0.9 }
+  ];
+  var cfg = configs[index] || configs[0];
+  for (var i = 0; i <= segs; i++) {
+    var t = i / segs;
+    var x = (cfg.xStart + (cfg.xEnd - cfg.xStart) * t) * scale;
+    var y = (cfg.yStart + (cfg.yEnd - cfg.yStart) * t) * scale;
+    x += Math.sin(t * Math.PI * cfg.freq + cfg.phase) * cfg.xWave * scale;
+    y += Math.sin(t * Math.PI * cfg.freq * 1.3 + cfg.phase) * cfg.amp * 0.4 * scale;
+    var z = Math.cos(t * Math.PI * 2.0 + cfg.phase) * cfg.zAmp * scale;
+    points.push(new THREE.Vector3(x, y, z));
+  }
+  return new THREE.CatmullRomCurve3(points);
+}
+
+function startPlaygroundAnimation() {
+  var clock = new THREE.Clock();
+  function animate() {
+    _pgAnimId = requestAnimationFrame(animate);
+    if (!_pgRenderer) return;
+    var dt = clock.getDelta();
+    _pgUniforms.uTime.value += dt;
+    var ux = _pgUniforms.uMouse.value;
+    ux.x += (_pgMouse.x * 1.5 - ux.x) * 0.05;
+    ux.y += (_pgMouse.y * 1.5 - ux.y) * 0.05;
+    if (!_pgHelixMode) {
+      _pgMesh.rotation.y += dt * 0.2;
+      _pgMesh.rotation.x += dt * 0.1;
+      var base = _shapeTarget;
+      _pgUniforms.uNoiseAmp.value += (base.amp - _pgUniforms.uNoiseAmp.value) * 0.04;
+      _pgUniforms.uSpeed.value += (base.speed - _pgUniforms.uSpeed.value) * 0.04;
+      _pgUniforms.uNoiseFreq.value += (base.freq - _pgUniforms.uNoiseFreq.value) * 0.04;
+      _pgUniforms.uDetailMix.value += (base.detail - _pgUniforms.uDetailMix.value) * 0.04;
+      _pgUniforms.uFresnelPower.value += (base.fresnel - _pgUniforms.uFresnelPower.value) * 0.04;
+    } else {
+      for (var i = 0; i < _pgHelixUniforms.length; i++) {
+        _pgHelixUniforms[i].uTime.value += dt;
+      }
+      if (_pgHelixGroup) {
+        _pgHelixGroup.rotation.z += dt * 0.025;
+        _pgHelixGroup.rotation.y += dt * 0.012;
+      }
+    }
+    _pgRenderer.render(_pgScene, _pgCamera);
+  }
+  animate();
+}
+
+// ============================================================
+// CTA MINI BLOB
+// ============================================================
+var _ctaScene, _ctaCamera, _ctaRenderer, _ctaMesh, _ctaUniforms, _ctaAnimId;
+
+function initCtaBlob() {
+  if (typeof THREE === 'undefined') { setTimeout(initCtaBlob, 200); return; }
+  var canvas = document.getElementById('ctaBlobCanvas');
+  if (!canvas) return;
+  var w = 80, h = 80;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  _ctaScene = new THREE.Scene();
+  _ctaCamera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  _ctaCamera.position.z = 4;
+  _ctaRenderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+  _ctaRenderer.setSize(w, h);
+  _ctaRenderer.setPixelRatio(dpr);
+  _ctaRenderer.setClearColor(0x000000, 0);
+
+  _ctaUniforms = {
+    uTime: { value: 0 },
+    uColor: { value: new THREE.Color(_currentColor1) },
+    uColorB: { value: new THREE.Color(_currentColor2) },
+    uMouse: { value: new THREE.Vector2(0, 0) },
+    uNoiseAmp: { value: 0.35 },
+    uNoiseFreq: { value: 1.5 },
+    uSpeed: { value: 0.3 },
+    uDetailMix: { value: 1.0 },
+    uFresnelPower: { value: 2.5 },
+    uOpacity: { value: 0.92 }
+  };
+
+  var vertexShader = document.getElementById('blobVertexShader').textContent;
+  var fragmentShader = document.getElementById('blobFragmentShader').textContent;
+  var geometry = new THREE.IcosahedronGeometry(1, 4);
+  var material = new THREE.ShaderMaterial({
+    uniforms: _ctaUniforms, vertexShader: vertexShader, fragmentShader: fragmentShader,
+    transparent: true, depthWrite: false, side: THREE.DoubleSide
+  });
+  _ctaMesh = new THREE.Mesh(geometry, material);
+  _ctaScene.add(_ctaMesh);
+
+  var clock = new THREE.Clock();
+  function animate() {
+    _ctaAnimId = requestAnimationFrame(animate);
+    if (!_ctaRenderer) return;
+    var dt = clock.getDelta();
+    _ctaUniforms.uTime.value += dt;
+    _ctaMesh.rotation.y += dt * 0.25;
+    _ctaMesh.rotation.x += dt * 0.12;
+    _ctaRenderer.render(_ctaScene, _ctaCamera);
+  }
+  animate();
+}
+
+// ============================================================
+// BACKGROUND HELIX
+// ============================================================
+var _bgHelixScene, _bgHelixCamera, _bgHelixRenderer, _bgHelixGroup;
+var _bgHelixUniforms = [], _bgHelixAnimId;
+
+function initBackgroundHelix() {
+  if (typeof THREE === 'undefined') { setTimeout(initBackgroundHelix, 200); return; }
+  var canvas = document.getElementById('helixBg');
+  if (!canvas) return;
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+  var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
+  _bgHelixScene = new THREE.Scene();
+  _bgHelixCamera = new THREE.PerspectiveCamera(65, w / h, 0.1, 100);
+  _bgHelixCamera.position.z = 10;
+
+  _bgHelixRenderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: false });
+  _bgHelixRenderer.setSize(w, h);
+  _bgHelixRenderer.setPixelRatio(dpr);
+  _bgHelixRenderer.setClearColor(0x000000, 0);
+
+  var vertexShader = document.getElementById('helixVertexShader').textContent;
+  var fragmentShader = document.getElementById('helixFragmentShader').textContent;
+
+  _bgHelixGroup = new THREE.Group();
+  var configs = [
+    { xStart: 12, yStart: 8, xEnd: -12, yEnd: -8, phase: 0, freq: 1.2, amp: 3.0, zAmp: 2.5, xWave: 1.5 },
+    { xStart: 13, yStart: 7, xEnd: -11, yEnd: -9, phase: 1.8, freq: 0.9, amp: 3.5, zAmp: 2.0, xWave: 1.8 },
+    { xStart: 11, yStart: 9, xEnd: -13, yEnd: -7, phase: 3.5, freq: 1.5, amp: 2.5, zAmp: 3.0, xWave: 1.0 },
+    { xStart: 14, yStart: 6, xEnd: -10, yEnd: -10, phase: 5.0, freq: 1.1, amp: 3.2, zAmp: 2.2, xWave: 1.3 }
+  ];
+
+  for (var i = 0; i < 4; i++) {
+    var points = [];
+    var segs = 60;
+    var cfg = configs[i];
+    for (var j = 0; j <= segs; j++) {
+      var t = j / segs;
+      var x = cfg.xStart + (cfg.xEnd - cfg.xStart) * t;
+      var y = cfg.yStart + (cfg.yEnd - cfg.yStart) * t;
+      x += Math.sin(t * Math.PI * cfg.freq + cfg.phase) * cfg.xWave;
+      y += Math.sin(t * Math.PI * cfg.freq * 1.3 + cfg.phase) * cfg.amp * 0.4;
+      var z = Math.cos(t * Math.PI * 2.0 + cfg.phase) * cfg.zAmp;
+      points.push(new THREE.Vector3(x, y, z));
+    }
+    var curve = new THREE.CatmullRomCurve3(points);
+    var geometry = new THREE.TubeGeometry(curve, 120, 1.1, 16, false);
+    var uniforms = {
+      uTime: { value: i * 2.0 },
+      uColorA: { value: new THREE.Color(HELIX_COLORS[i].a) },
+      uColorB: { value: new THREE.Color(HELIX_COLORS[i].b) },
+      uOpacity: { value: 0.85 }
+    };
+    var material = new THREE.ShaderMaterial({
+      uniforms: uniforms, vertexShader: vertexShader, fragmentShader: fragmentShader,
+      transparent: true, depthWrite: false, side: THREE.DoubleSide
+    });
+    var mesh = new THREE.Mesh(geometry, material);
+    _bgHelixGroup.add(mesh);
+    _bgHelixUniforms.push(uniforms);
+  }
+  _bgHelixScene.add(_bgHelixGroup);
+
+  var clock = new THREE.Clock();
+  function animate() {
+    _bgHelixAnimId = requestAnimationFrame(animate);
+    if (!_bgHelixRenderer) return;
+    var dt = clock.getDelta();
+    for (var i = 0; i < _bgHelixUniforms.length; i++) {
+      _bgHelixUniforms[i].uTime.value += dt;
+    }
+    if (_bgHelixGroup) {
+      _bgHelixGroup.rotation.z += dt * 0.008;
+      _bgHelixGroup.rotation.y += dt * 0.004;
+    }
+    _bgHelixRenderer.render(_bgHelixScene, _bgHelixCamera);
+  }
+  animate();
+
+  window.addEventListener('resize', function() {
+    var w2 = window.innerWidth;
+    var h2 = window.innerHeight;
+    _bgHelixCamera.aspect = w2 / h2;
+    _bgHelixCamera.updateProjectionMatrix();
+    _bgHelixRenderer.setSize(w2, h2);
+  });
+}
+
+// ============================================================
+// COLOR WHEEL
+// ============================================================
+function initColorWheel() {
+  var canvas = document.getElementById('colorWheel');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var w = canvas.width;
+  var h = canvas.height;
+  var cx = w / 2, cy = h / 2;
+  var radius = w / 2 - 4;
+
+  // Draw HSL wheel
+  function drawWheel() {
+    ctx.clearRect(0, 0, w, h);
+    for (var angle = 0; angle < 360; angle++) {
+      var startAngle = (angle - 1) * Math.PI / 180;
+      var endAngle = (angle + 1) * Math.PI / 180;
+      var gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+      gradient.addColorStop(0, 'hsl(' + angle + ', 10%, 90%)');
+      gradient.addColorStop(0.5, 'hsl(' + angle + ', 80%, 55%)');
+      gradient.addColorStop(1, 'hsl(' + angle + ', 100%, 35%)');
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+    // Center highlight
+    var cGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 0.25);
+    cGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
+    cGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = cGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  drawWheel();
+
+  // Position selector for initial gold color
+  var selector = document.getElementById('colorWheelSelector');
+  positionSelector(38, 0.5, selector, canvas); // ~gold hue
+
+  function positionSelector(hue, satLightMix, sel, cvs) {
+    var angle = hue * Math.PI / 180;
+    var r = radius * satLightMix;
+    var displayW = cvs.offsetWidth || 200;
+    var scale = displayW / cvs.width;
+    var sx = (cx + Math.cos(angle) * r) * scale;
+    var sy = (cy + Math.sin(angle) * r) * scale;
+    sel.style.left = sx + 'px';
+    sel.style.top = sy + 'px';
+  }
+
+  var container = document.getElementById('colorWheelContainer');
+  var isDragging = false;
+
+  function pickColor(e) {
+    var rect = canvas.getBoundingClientRect();
+    var clientX, clientY;
+    if (e.touches) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    var x = clientX - rect.left;
+    var y = clientY - rect.top;
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    var px = Math.round(x * scaleX);
+    var py = Math.round(y * scaleY);
+
+    // Check if within circle
+    var dx = px - cx;
+    var dy = py - cy;
+    if (Math.sqrt(dx * dx + dy * dy) > radius) return;
+
+    var pixel = ctx.getImageData(px, py, 1, 1).data;
+    var hex = '#' + ((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1);
+
+    // Position selector
+    selector.style.left = x + 'px';
+    selector.style.top = y + 'px';
+    selector.style.backgroundColor = hex;
+
+    // Auto-derive secondary color
+    var c2 = deriveSecondaryColor(pixel[0], pixel[1], pixel[2]);
+
+    setColors(hex, c2);
+  }
+
+  container.addEventListener('mousedown', function(e) { isDragging = true; pickColor(e); });
+  document.addEventListener('mousemove', function(e) { if (isDragging) pickColor(e); });
+  document.addEventListener('mouseup', function() { isDragging = false; });
+  container.addEventListener('touchstart', function(e) { isDragging = true; pickColor(e); e.preventDefault(); }, { passive: false });
+  container.addEventListener('touchmove', function(e) { if (isDragging) pickColor(e); e.preventDefault(); }, { passive: false });
+  container.addEventListener('touchend', function() { isDragging = false; });
+}
+
+function deriveSecondaryColor(r, g, b) {
+  // Lighten and shift hue slightly
+  var r2 = Math.min(255, Math.round(r * 1.3 + 30));
+  var g2 = Math.min(255, Math.round(g * 1.2 + 20));
+  var b2 = Math.min(255, Math.round(b * 1.1 + 10));
+  return '#' + ((1 << 24) + (r2 << 16) + (g2 << 8) + b2).toString(16).slice(1);
+}
+
+function setColors(c1, c2) {
+  _currentColor1 = c1;
+  _currentColor2 = c2;
+
+  // Update all blobs
+  if (_heroUniforms) {
+    _heroUniforms.uColor.value.set(c1);
+    _heroUniforms.uColorB.value.set(c2);
+  }
+  if (_pgUniforms) {
+    _pgUniforms.uColor.value.set(c1);
+    _pgUniforms.uColorB.value.set(c2);
+  }
+  if (_ctaUniforms) {
+    _ctaUniforms.uColor.value.set(c1);
+    _ctaUniforms.uColorB.value.set(c2);
+  }
+
+  // Update helix colors based on primary
+  updateHelixFromColor(c1);
+
+  // Update secondary picker
+  var secInput = document.getElementById('colorSecondary');
+  if (secInput) secInput.value = c2;
+
+  // Deselect preset buttons
+  var btns = document.querySelectorAll('.color-preset-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+
+  // Update glow color
+  document.querySelector('.hero-blob-glow').style.background =
+    'radial-gradient(circle, ' + c1 + '22 0%, transparent 70%)';
+}
+
+function updateHelixFromColor(hex) {
+  if (!_bgHelixUniforms || _bgHelixUniforms.length === 0) return;
+  var c = new THREE.Color(hex);
+  var hsl = {};
+  c.getHSL(hsl);
+  var sat = Math.max(hsl.s, 0.6);
+  var lit = Math.max(hsl.l, 0.5);
+  var newColors = [
+    { a: new THREE.Color().setHSL((hsl.h + 0.92) % 1.0, Math.min(sat + 0.35, 0.95), Math.min(lit + 0.12, 0.72)),
+      b: new THREE.Color().setHSL((hsl.h + 0.03) % 1.0, Math.min(sat + 0.3, 0.92), Math.min(lit + 0.18, 0.75)) },
+    { a: new THREE.Color().setHSL(hsl.h, Math.min(sat + 0.3, 0.9), Math.min(lit + 0.08, 0.68)),
+      b: new THREE.Color().setHSL((hsl.h + 0.08) % 1.0, Math.min(sat + 0.4, 0.95), Math.min(lit + 0.15, 0.73)) },
+    { a: new THREE.Color().setHSL((hsl.h + 0.55) % 1.0, Math.min(sat + 0.35, 0.92), Math.min(lit + 0.08, 0.65)),
+      b: new THREE.Color().setHSL((hsl.h + 0.42) % 1.0, Math.min(sat + 0.38, 0.94), Math.min(lit + 0.15, 0.72)) },
+    { a: new THREE.Color().setHSL((hsl.h + 0.78) % 1.0, Math.min(sat + 0.35, 0.92), Math.min(lit + 0.1, 0.68)),
+      b: new THREE.Color().setHSL((hsl.h + 0.65) % 1.0, Math.min(sat + 0.32, 0.9), Math.min(lit + 0.18, 0.75)) }
+  ];
+  for (var i = 0; i < _bgHelixUniforms.length; i++) {
+    _bgHelixUniforms[i].uColorA.value.copy(newColors[i].a);
+    _bgHelixUniforms[i].uColorB.value.copy(newColors[i].b);
+  }
+  // Also update playground helix
+  for (var j = 0; j < _pgHelixUniforms.length; j++) {
+    _pgHelixUniforms[j].uColorA.value.copy(newColors[j].a);
+    _pgHelixUniforms[j].uColorB.value.copy(newColors[j].b);
+  }
+}
+
+// ============================================================
+// SHAPE & COLOR CONTROLS
+// ============================================================
+function initControls() {
+  // Shape buttons
+  var shapeBtns = document.querySelectorAll('#shapeGrid .shape-btn');
+  for (var i = 0; i < shapeBtns.length; i++) {
+    shapeBtns[i].addEventListener('click', function() {
+      var shape = this.getAttribute('data-shape');
+      // Update active state
+      var all = document.querySelectorAll('#shapeGrid .shape-btn');
+      for (var j = 0; j < all.length; j++) all[j].classList.remove('active');
+      this.classList.add('active');
+
+      if (shape === 'helix') {
+        _pgHelixMode = true;
+        _pgMesh.visible = false;
+        _pgHelixGroup.visible = true;
+        _pgCamera.position.z = 8;
+        _pgCamera.fov = 60;
+        _pgCamera.updateProjectionMatrix();
+        document.getElementById('playgroundShapeLabel').textContent = 'Helix';
+      } else {
+        _pgHelixMode = false;
+        _pgMesh.visible = true;
+        _pgHelixGroup.visible = false;
+        _pgCamera.position.z = 4;
+        _pgCamera.fov = 45;
+        _pgCamera.updateProjectionMatrix();
+        _currentShape = shape;
+        _shapeTarget = BLOB_SHAPES[shape];
+        document.getElementById('playgroundShapeLabel').textContent =
+          shape.charAt(0).toUpperCase() + shape.slice(1);
+      }
+    });
+  }
+
+  // Color presets
+  var presetBtns = document.querySelectorAll('.color-preset-btn');
+  for (var k = 0; k < presetBtns.length; k++) {
+    presetBtns[k].addEventListener('click', function() {
+      var preset = this.getAttribute('data-preset');
+      var colors = COLOR_PRESETS[preset];
+      if (!colors) return;
+      // Update active
+      var all = document.querySelectorAll('.color-preset-btn');
+      for (var m = 0; m < all.length; m++) all[m].classList.remove('active');
+      this.classList.add('active');
+      _currentPreset = preset;
+      setColors(colors.c1, colors.c2);
+    });
+  }
+
+  // Secondary color picker
+  var secInput = document.getElementById('colorSecondary');
+  if (secInput) {
+    secInput.addEventListener('input', function() {
+      _currentColor2 = this.value;
+      if (_heroUniforms) _heroUniforms.uColorB.value.set(this.value);
+      if (_pgUniforms) _pgUniforms.uColorB.value.set(this.value);
+      if (_ctaUniforms) _ctaUniforms.uColorB.value.set(this.value);
+    });
+  }
+}
+
+// ============================================================
+// SCROLL REVEAL
+// ============================================================
+function initScrollReveal() {
+  var reveals = document.querySelectorAll('.reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  for (var i = 0; i < reveals.length; i++) {
+    observer.observe(reveals[i]);
+  }
+}
+
+// ============================================================
+// NAV SCROLL EFFECT
+// ============================================================
+function initNavScroll() {
+  var nav = document.querySelector('.nav');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 50) {
+      nav.style.background = 'rgba(5, 5, 7, 0.9)';
+      nav.style.borderBottomColor = 'rgba(255, 255, 255, 0.06)';
+    } else {
+      nav.style.background = 'rgba(5, 5, 7, 0.6)';
+      nav.style.borderBottomColor = 'rgba(255, 255, 255, 0.04)';
+    }
+  }, { passive: true });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+  initHeroBlob();
+  initPlaygroundBlob();
+  initCtaBlob();
+  initBackgroundHelix();
+  initColorWheel();
+  initControls();
+  initScrollReveal();
+  initNavScroll();
+});
+</script>
+
+</body>
+</html>

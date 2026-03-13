@@ -34,6 +34,7 @@
     { "src": "/icons/(.*)", "dest": "/icons/$1" },
     { "src": "/logo.png", "dest": "/logo.png" },
     { "src": "/portfolio", "dest": "/portfolio.html" },
+    { "src": "/blake", "dest": "/blake.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
