@@ -264,7 +264,8 @@ var CATEGORIES = [
   { id: 'bloom-pricing-gold', label: 'Pricing Gold' },
   { id: 'bloom-privacy-gold', label: 'Privacy Gold' },
   { id: 'bloom-spotlights-gold', label: 'Spotlights Gold' },
-  { id: 'bloom-mood-gold', label: 'Mood Gold' }
+  { id: 'bloom-mood-gold', label: 'Mood Gold' },
+  { id: 'blake', label: 'B.L.A.K.E.' }
 ];
 
 var ROWEOS_LOGO = 'data:image/png;base64,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';
@@ -4013,6 +4014,381 @@ function bloomFlowerSvg(size, color, fillOpacity) {
       '<div style="margin-top:20px;">'+sans('roweos.com', p.dm, 14, 'letter-spacing:0.2em;text-transform:uppercase;')+'</div>'+
       '</div></div>';
     return cardWrap(m, inner);
+  });
+
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── B.L.A.K.E. PROMO TEMPLATES ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+
+(function() {
+
+  function bp(m) {
+    var d = m === 'dark';
+    return {
+      bg: d ? '#050507' : '#f8f7f5',
+      text: d ? '#f0ece6' : '#1a1a1a',
+      ac: d ? '#b2997b' : '#8b7b67',
+      ac2: d ? '#c4a882' : '#6b5d4d',
+      acL: d ? '#d4b880' : '#a89060',
+      mt: d ? '#9a9590' : '#6b6560',
+      dm: d ? '#5e5955' : '#a09890',
+      bd: d ? 'rgba(168,152,120,0.12)' : 'rgba(168,152,120,0.15)',
+      gRgb: d ? '168,152,120' : '139,123,103',
+      card: d ? '#0e0e12' : '#f0eee8',
+      green: d ? '#22c55e' : '#16a34a',
+      purple: d ? '#a78bfa' : '#7c3aed',
+      pink: d ? '#f472b6' : '#db2777',
+      cyan: d ? '#22d3ee' : '#0891b2',
+      yellow: d ? '#fbbf24' : '#d97706'
+    };
+  }
+
+  function blakeLetters(p, size, gap) {
+    var letters = ['B','L','A','K','E'];
+    var html = '';
+    for (var i = 0; i < letters.length; i++) {
+      html += '<span style="color:'+p.acL+';font-family:\'Cormorant Garamond\',serif;font-size:'+(size||72)+'px;font-weight:300;">'+letters[i]+'</span>';
+      if (i < 4) html += '<span style="color:'+p.ac+';font-size:'+(Math.round((size||72)*0.45))+'px;opacity:0.6;margin:0 '+(gap||4)+'px;vertical-align:middle;">.</span>';
+    }
+    return html;
+  }
+
+  function blakeGlow(rgb, top) {
+    return '<div style="position:absolute;top:'+(top||'38%')+';left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba('+rgb+',0.1) 0%,transparent 55%);pointer-events:none;"></div>';
+  }
+
+  function blakePill(label, color) {
+    return '<div style="display:inline-flex;padding:6px 18px;border-radius:20px;border:1px solid '+color+';font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:'+color+';">'+label+'</div>';
+  }
+
+  var modes = ['dark','light'];
+  var nextId = 5001;
+
+  // ── 1. HERO — "Introducing B.L.A.K.E." ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Hero — ' + m,
+      render: function() {
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
+          + blakeGlow(p.gRgb)
+          + '<div style="position:relative;">'
+          + '<div style="font-size:13px;letter-spacing:0.35em;text-transform:uppercase;color:'+p.ac+';margin-bottom:40px;">Introducing</div>'
+          + '<div style="margin-bottom:32px;">'+blakeLetters(p, 96, 6)+'</div>'
+          + '<div style="width:60px;height:1px;background:'+p.bd+';margin:0 auto 32px;"></div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;font-weight:300;color:'+p.text+';line-height:1.3;">Brand Life AI<br>Knowledge Engine</div>'
+          + '<div style="margin-top:24px;font-size:14px;color:'+p.mt+';line-height:1.7;max-width:600px;">The adaptive intelligence at the heart of RoweOS.<br>Not just an assistant. An entity.</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 2. ACRONYM BREAKDOWN ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Acronym — ' + m,
+      render: function() {
+        var items = [
+          { letter: 'B', word: 'Brand', desc: 'Five agents that become your brand.' },
+          { letter: 'L', word: 'Life', desc: 'Personal coaching and optimization.' },
+          { letter: 'A', word: 'AI', desc: 'Multi-model intelligence, always adapting.' },
+          { letter: 'K', word: 'Knowledge', desc: 'Context that deepens over time.' },
+          { letter: 'E', word: 'Engine', desc: '150+ operations. Autonomous execution.' }
+        ];
+        var rows = '';
+        for (var i = 0; i < items.length; i++) {
+          var item = items[i];
+          rows += '<div style="display:flex;align-items:center;gap:24px;padding:20px 0;'+(i < 4 ? 'border-bottom:1px solid '+p.bd+';' : '')+'">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:'+p.acL+';min-width:60px;text-align:center;">'+item.letter+'</div>'
+            + '<div><div style="font-size:18px;font-weight:600;color:'+p.text+';margin-bottom:4px;">'+item.word+'</div>'
+            + '<div style="font-size:12px;color:'+p.mt+';line-height:1.5;">'+item.desc+'</div></div></div>';
+        }
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 80px;">'
+          + blakeGlow(p.gRgb, '20%')
+          + '<div style="position:relative;">'
+          + '<div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:'+p.ac+';margin-bottom:28px;">What B.L.A.K.E. Stands For</div>'
+          + rows
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 3. TWO MINDS — BrandAI + LifeAI = BLAKE ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'Two Minds — ' + m,
+      render: function() {
+        function mindCard(title, color, agents) {
+          var pills = '';
+          for (var i = 0; i < agents.length; i++) {
+            pills += '<div style="padding:4px 12px;border-radius:12px;border:1px solid '+p.bd+';font-size:10px;letter-spacing:0.08em;color:'+p.mt+';">'+agents[i]+'</div>';
+          }
+          return '<div style="background:'+p.card+';border:1px solid '+p.bd+';border-radius:14px;padding:28px;flex:1;">'
+            + '<div style="width:36px;height:36px;border-radius:10px;background:rgba('+p.gRgb+',0.08);display:flex;align-items:center;justify-content:center;margin-bottom:14px;">'
+            + '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';"></div></div>'
+            + '<div style="font-size:18px;font-weight:600;color:'+p.text+';margin-bottom:8px;">'+title+'</div>'
+            + '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+pills+'</div></div>';
+        }
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 64px;">'
+          + blakeGlow(p.gRgb)
+          + '<div style="position:relative;">'
+          + '<div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:'+p.ac+';text-align:center;margin-bottom:16px;">Two Minds, One Intelligence</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;text-align:center;color:'+p.text+';margin-bottom:40px;">BrandAI + LifeAI = <span style="color:'+p.acL+';">BLAKE</span></div>'
+          + '<div style="display:flex;gap:16px;margin-bottom:28px;">'
+          + mindCard('BrandAI', p.ac, ['Strategy','Marketing','Operations','Documents','Intelligence'])
+          + mindCard('LifeAI', p.green, ['Life Coach','Wellness','Tax Copilot','Personal AI','Standard AI'])
+          + '</div>'
+          + '<div style="text-align:center;font-size:13px;color:'+p.mt+';line-height:1.6;">One adaptive entity. Two modes of intelligence.</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 4. ENTITY REVEAL — Bold minimalist ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Entity — ' + m,
+      render: function() {
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
+          + blakeGlow(p.gRgb, '45%')
+          + '<div style="position:relative;">'
+          + '<div style="font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:'+p.dm+';margin-bottom:60px;">RoweOS</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:120px;font-weight:300;color:'+p.acL+';letter-spacing:0.06em;margin-bottom:20px;">BLAKE</div>'
+          + '<div style="width:80px;height:1px;background:'+p.bd+';margin:0 auto 28px;"></div>'
+          + '<div style="font-size:16px;color:'+p.mt+';letter-spacing:0.08em;line-height:1.8;">Your intelligence.<br>Embodied.</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 5. FEATURES GRID — What BLAKE Can Do ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Features — ' + m,
+      render: function() {
+        var features = [
+          { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>', title: 'Contextual Chat' },
+          { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>', title: '150+ Operations' },
+          { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>', title: 'Deep Research' },
+          { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>', title: 'Automations' },
+          { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>', title: 'Social & Email' },
+          { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>', title: 'Multi-Model AI' }
+        ];
+        var grid = '';
+        for (var i = 0; i < features.length; i++) {
+          var f = features[i];
+          grid += '<div style="background:'+p.card+';border:1px solid '+p.bd+';border-radius:12px;padding:24px;">'
+            + '<div style="margin-bottom:12px;">'+f.icon+'</div>'
+            + '<div style="font-size:14px;font-weight:600;color:'+p.text+';">'+f.title+'</div></div>';
+        }
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 64px;">'
+          + blakeGlow(p.gRgb, '15%')
+          + '<div style="position:relative;">'
+          + '<div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:'+p.ac+';margin-bottom:12px;">B.L.A.K.E.</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:38px;font-weight:300;color:'+p.text+';margin-bottom:36px;">Intelligence in Action</div>'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">'+grid+'</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 6. STATS — Numbers ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Stats — ' + m,
+      render: function() {
+        var stats = [
+          { num: '10', label: 'AI Agents', sub: '5 brand. 5 life.' },
+          { num: '150+', label: 'Operations', sub: 'Strategy to publishing.' },
+          { num: '15', label: 'Brand Portfolios', sub: 'Each with its own voice.' },
+          { num: '3', label: 'AI Models', sub: 'Claude. GPT. Gemini.' }
+        ];
+        var grid = '';
+        for (var i = 0; i < stats.length; i++) {
+          var s = stats[i];
+          grid += '<div style="background:'+p.card+';border:1px solid '+p.bd+';border-radius:14px;padding:28px;text-align:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;color:'+p.acL+';line-height:1;margin-bottom:8px;">'+s.num+'</div>'
+            + '<div style="font-size:13px;font-weight:600;color:'+p.text+';margin-bottom:4px;">'+s.label+'</div>'
+            + '<div style="font-size:11px;color:'+p.mt+';">'+s.sub+'</div></div>';
+        }
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 64px;">'
+          + blakeGlow(p.gRgb)
+          + '<div style="position:relative;text-align:center;">'
+          + '<div style="margin-bottom:36px;">'+blakeLetters(p, 48, 3)+'</div>'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">'+grid+'</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 7. SOCIAL HOOK — "Not an assistant" ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Hook 1 — ' + m,
+      render: function() {
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 80px;">'
+          + blakeGlow(p.gRgb, '50%')
+          + '<div style="position:relative;">'
+          + '<div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:'+p.ac+';margin-bottom:40px;">B.L.A.K.E.</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:'+p.text+';line-height:1.2;margin-bottom:32px;">Not an assistant.<br>An entity.</div>'
+          + '<div style="width:50px;height:1px;background:'+p.bd+';margin:0 auto 32px;"></div>'
+          + '<div style="font-size:14px;color:'+p.mt+';line-height:1.7;max-width:500px;">BLAKE learns your brand, adapts to your rhythm, and executes autonomously. It doesn\'t just help. It becomes you.</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 8. SOCIAL HOOK — "Your brand has a mind now" ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Hook 2 — ' + m,
+      render: function() {
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 80px;">'
+          + blakeGlow(p.gRgb, '40%')
+          + '<div style="position:relative;">'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:54px;font-weight:300;color:'+p.text+';line-height:1.2;margin-bottom:28px;">Your brand<br>has a mind now.</div>'
+          + '<div style="width:50px;height:1px;background:'+p.bd+';margin:0 auto 28px;"></div>'
+          + '<div style="font-size:14px;color:'+p.mt+';line-height:1.7;max-width:520px;margin-bottom:36px;">Five agents. One identity. BLAKE thinks, writes, and operates as your brand across every channel.</div>'
+          + '<div style="margin-bottom:0;">'+blakeLetters(p, 36, 2)+'</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 9. AGENT COLORS — Five agents visual ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Agents — ' + m,
+      render: function() {
+        var agents = [
+          { name: 'Strategy', color: p.purple },
+          { name: 'Marketing', color: p.pink },
+          { name: 'Operations', color: p.green },
+          { name: 'Documents', color: p.yellow },
+          { name: 'Intelligence', color: p.cyan }
+        ];
+        var rows = '';
+        for (var i = 0; i < agents.length; i++) {
+          var a = agents[i];
+          rows += '<div style="display:flex;align-items:center;gap:20px;padding:18px 24px;background:'+p.card+';border:1px solid '+p.bd+';border-radius:12px;">'
+            + '<div style="width:10px;height:10px;border-radius:50%;background:'+a.color+';flex-shrink:0;"></div>'
+            + '<div style="font-size:16px;font-weight:500;color:'+p.text+';flex:1;">'+a.name+'</div>'
+            + '<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:'+p.dm+';">Agent</div></div>';
+        }
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 72px;">'
+          + blakeGlow(p.gRgb, '20%')
+          + '<div style="position:relative;">'
+          + '<div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:'+p.ac+';margin-bottom:12px;">BrandAI Agents</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;color:'+p.text+';margin-bottom:32px;">Five minds.<br>One brand.</div>'
+          + '<div style="display:flex;flex-direction:column;gap:10px;">'+rows+'</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 10. CTA — "Meet BLAKE" ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'Meet BLAKE CTA — ' + m,
+      render: function() {
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
+          + blakeGlow(p.gRgb, '55%')
+          + '<div style="position:relative;">'
+          + '<div style="margin-bottom:48px;">'+blakeLetters(p, 64, 4)+'</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;font-weight:300;color:'+p.text+';line-height:1.25;margin-bottom:24px;">Meet Your<br>Intelligence</div>'
+          + '<div style="font-size:14px;color:'+p.mt+';line-height:1.7;max-width:480px;margin-bottom:40px;">Start with a conversation. Build your brand identity. Watch your AI entity come to life.</div>'
+          + '<div style="display:inline-flex;padding:14px 40px;background:'+p.ac+';border-radius:10px;font-size:14px;font-weight:600;color:'+(m==='dark'?'#0a0a0a':'#ffffff')+';letter-spacing:0.04em;">roweos.com/blake</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 11. SOVEREIGN — "Your data stays yours" ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Sovereign — ' + m,
+      render: function() {
+        var points = [
+          'Browser-native architecture',
+          'API keys never leave your device',
+          'No vendor lock-in',
+          'No data harvesting',
+          'Your intelligence stays yours'
+        ];
+        var list = '';
+        for (var i = 0; i < points.length; i++) {
+          list += '<div style="display:flex;align-items:center;gap:14px;padding:12px 0;'+(i < points.length-1 ? 'border-bottom:1px solid '+p.bd+';' : '')+'">'
+            + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
+            + '<div style="font-size:14px;color:'+p.text+';">'+points[i]+'</div></div>';
+        }
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;height:100%;padding:72px 80px;">'
+          + blakeGlow(p.gRgb, '25%')
+          + '<div style="position:relative;">'
+          + '<div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:'+p.ac+';margin-bottom:12px;">B.L.A.K.E.</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;font-weight:300;color:'+p.text+';margin-bottom:36px;">Sovereign<br>Intelligence</div>'
+          + list
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
+  });
+
+  // ── 12. ADAPTABLE — "Grows with you" ──
+  modes.forEach(function(m) {
+    var p = bp(m);
+    templates.push({
+      id: nextId++, category: 'blake', mode: m,
+      label: 'BLAKE Adaptable — ' + m,
+      render: function() {
+        var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
+          + blakeGlow(p.gRgb, '35%')
+          + '<div style="position:relative;">'
+          + '<div style="font-size:11px;letter-spacing:0.3em;text-transform:uppercase;color:'+p.ac+';margin-bottom:32px;">B.L.A.K.E.</div>'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;color:'+p.text+';line-height:1.2;margin-bottom:28px;">The more you use it,<br>the sharper it gets.</div>'
+          + '<div style="width:50px;height:1px;background:'+p.bd+';margin:0 auto 28px;"></div>'
+          + '<div style="display:flex;gap:32px;margin-bottom:36px;">'
+          + '<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;color:'+p.acL+';">10</div><div style="font-size:11px;color:'+p.mt+';margin-top:4px;">AI Agents</div></div>'
+          + '<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;color:'+p.acL+';">150+</div><div style="font-size:11px;color:'+p.mt+';margin-top:4px;">Operations</div></div>'
+          + '<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;color:'+p.acL+';">15</div><div style="font-size:11px;color:'+p.mt+';margin-top:4px;">Brands</div></div>'
+          + '</div>'
+          + '<div style="font-size:13px;color:'+p.mt+';line-height:1.6;">Identity memory. Brand context. Deep research.<br>All accumulating into deeper intelligence.</div>'
+          + '</div></div>';
+        return cardWrap(m, inner);
+      }
+    });
   });
 
 })();
