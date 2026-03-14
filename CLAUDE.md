@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Version:  v24.26
-File:     RoweOS/dist/index.html (173434 lines)
+File:     RoweOS/dist/index.html (173312 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -216,6 +216,15 @@ Key patterns to remember without looking up:
 ## TROUBLESHOOTING
 
 Pre-deployment validation, common errors, and known technical debt are in the **`troubleshooting.md`** memory file. Read it when debugging or before deployment.
+
+### Deploy (when deploy.sh git push fails)
+`export PATH="$HOME/.local/share/fnm:$PATH" && eval "$(fnm env)" && vercel --prod --yes`
+
+### Common Bug Patterns
+- **Duplicate function names:** Single-file means later definitions silently overwrite earlier ones. Before adding a function, grep for existing definitions with the same name.
+- **Stale nav heights:** Legacy `mobile-nav` was 80px; current `liquid-nav` pill is ~50px. Use `calc(64px + var(--mobile-safe-bottom))` for content padding, `calc(50px + env(safe-area-inset-bottom, 0px))` for fixed inputs above nav.
+- **PWA icons:** Must be RGB (no alpha channel) or macOS dock adds white border. Use sharp to flatten: `.flatten({ background: { r: 10, g: 10, b: 10 } }).removeAlpha()`
+- **Keyboard handler:** `window.innerHeight` shifts on iOS with `interactive-widget=resizes-content`. Use a captured initial height for keyboard-close detection.
 
 ---
 
