@@ -1130,6 +1130,480 @@ var TIER_DATA = {
   });
 })();
 
+// ─── CLIENT FACING TEMPLATES (16) ───
+
+(function() {
+  var cId = 7000;
+  var modes = ['dark', 'light'];
+
+  modes.forEach(function(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+    var border = mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    var surface = mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+
+    // Design 1: What is RoweOS?
+    templates.push({
+      id: cId++, category: 'client', mode: mode,
+      label: 'Client — What is RoweOS? (' + mode + ')',
+      render: (function(m, g, t, mt, dm) {
+        return function() {
+          var acronym = [
+            { letter: 'B', word: 'Brand', desc: 'Five specialized agents that become your brand voice.' },
+            { letter: 'L', word: 'Life', desc: 'Personal coaching, wellness, and daily optimization.' },
+            { letter: 'A', word: 'AI', desc: 'Multi-model intelligence that adapts to each task.' },
+            { letter: 'K', word: 'Knowledge', desc: 'Identity memory and deep research that grows.' },
+            { letter: 'E', word: 'Engine', desc: '150+ operations and autonomous scheduling.' }
+          ];
+          var rows = '';
+          for (var i = 0; i < acronym.length; i++) {
+            var a = acronym[i];
+            rows += '<div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:28px;">'
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + g + ';line-height:1;min-width:40px;">' + a.letter + '</div>'
+              + '<div style="padding-top:6px;">'
+              + '<div style="font-size:18px;font-weight:600;color:' + t + ';margin-bottom:4px;">' + a.word + '</div>'
+              + '<div style="font-size:14px;color:' + mt + ';line-height:1.5;">' + a.desc + '</div>'
+              + '</div></div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding:80px 72px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';margin-bottom:48px;">What is RoweOS?</div>'
+            + rows
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, dim)
+    });
+
+    // Design 2: Hero Statement
+    templates.push({
+      id: cId++, category: 'client', mode: mode,
+      label: 'Client — Hero Statement (' + mode + ')',
+      render: (function(m, g, t, mt) {
+        return function() {
+          var overlay = m === 'dark' ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.6)';
+          return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + 'helix-ember.png) center/cover no-repeat;">'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlay + ';"></div>'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;padding:80px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';text-align:center;line-height:1.2;margin-bottom:40px;">Operating intelligence, built for brands &amp; life.</div>'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:64px;height:64px;margin-bottom:16px;" />'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;font-weight:300;color:' + g + ';">RoweOS</div>'
+            + '</div>'
+            + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;z-index:2;">roweos.com</div>'
+            + '</div>';
+        };
+      })(mode, gold, text, muted)
+    });
+
+    // Design 3: Two Minds
+    templates.push({
+      id: cId++, category: 'client', mode: mode,
+      label: 'Client — Two Minds (' + mode + ')',
+      render: (function(m, g, t, mt, dm, bd, sf) {
+        return function() {
+          var agentPills = ['Strategy', 'Marketing', 'Operations', 'Documents', 'Intelligence'];
+          var coachPills = ['Life Coach', 'Wellness', 'Tax Copilot', 'Personal AI', 'Standard AI'];
+          var buildPills = function(pills, accent) {
+            var html = '';
+            for (var i = 0; i < pills.length; i++) {
+              html += '<span style="display:inline-block;padding:6px 14px;border:1px solid ' + accent + ';border-radius:20px;font-size:12px;color:' + accent + ';margin:4px;">' + pills[i] + '</span>';
+            }
+            return html;
+          };
+          var leftCard = '<div style="flex:1;border:1px solid ' + bd + ';border-top:3px solid ' + g + ';border-radius:12px;padding:28px;background:' + sf + ';">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;font-weight:400;color:' + g + ';margin-bottom:8px;">BrandAI</div>'
+            + '<div style="font-size:13px;color:' + mt + ';margin-bottom:16px;">Professional brand intelligence</div>'
+            + '<div style="display:flex;flex-wrap:wrap;gap:0;">' + buildPills(agentPills, g) + '</div>'
+            + '</div>';
+          var rightCard = '<div style="flex:1;border:1px solid ' + bd + ';border-top:3px solid #22c55e;border-radius:12px;padding:28px;background:' + sf + ';">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;font-weight:400;color:#22c55e;margin-bottom:8px;">LifeAI</div>'
+            + '<div style="font-size:13px;color:' + mt + ';margin-bottom:16px;">Personal life optimization</div>'
+            + '<div style="display:flex;flex-wrap:wrap;gap:0;">' + buildPills(coachPills, '#22c55e') + '</div>'
+            + '</div>';
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 60px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + t + ';text-align:center;margin-bottom:48px;">Two Minds, One Intelligence</div>'
+            + '<div style="display:flex;gap:20px;width:100%;margin-bottom:40px;">' + leftCard + rightCard + '</div>'
+            + '<div style="font-size:18px;color:' + mt + ';text-align:center;">'
+            + '<span style="color:' + g + ';">BrandAI</span> + <span style="color:#22c55e;">LifeAI</span> = <span style="color:' + g + ';font-weight:600;">B.L.A.K.E.</span>'
+            + '</div></div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, dim, border, surface)
+    });
+
+    // Design 4: Stats
+    templates.push({
+      id: cId++, category: 'client', mode: mode,
+      label: 'Client — Stats (' + mode + ')',
+      render: (function(m, g, t, mt) {
+        return function() {
+          var stats = [
+            { num: '150+', label: 'Operations' },
+            { num: '5', label: 'AI Agents' },
+            { num: '15', label: 'Brand Portfolios' }
+          ];
+          var cols = '';
+          for (var i = 0; i < stats.length; i++) {
+            cols += '<div style="text-align:center;flex:1;">'
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:80px;font-weight:300;color:' + g + ';line-height:1;margin-bottom:12px;">' + stats[i].num + '</div>'
+              + '<div style="font-size:16px;color:' + mt + ';letter-spacing:0.1em;text-transform:uppercase;">' + stats[i].label + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;padding:80px 60px;">'
+            + '<div style="display:flex;gap:40px;width:100%;">' + cols + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted)
+    });
+
+    // Design 5: Onboarding
+    templates.push({
+      id: cId++, category: 'client', mode: mode,
+      label: 'Client — Onboarding (' + mode + ')',
+      render: (function(m, g, t, mt, bd) {
+        return function() {
+          var steps = [
+            { name: 'Sign Up', desc: 'Create your account in seconds.' },
+            { name: 'Choose Mode', desc: 'Brand intelligence or life coaching.' },
+            { name: 'Configure Brand', desc: 'Set up your identity and preferences.' },
+            { name: 'Start', desc: 'Begin operating with B.L.A.K.E.' }
+          ];
+          var rows = '';
+          for (var i = 0; i < steps.length; i++) {
+            rows += '<div style="display:flex;align-items:flex-start;gap:20px;margin-bottom:32px;">'
+              + '<div style="width:44px;height:44px;border-radius:50%;border:1px solid ' + g + ';display:flex;align-items:center;justify-content:center;font-family:\'Cormorant Garamond\',serif;font-size:22px;color:' + g + ';flex-shrink:0;">' + (i + 1) + '</div>'
+              + '<div style="padding-top:4px;">'
+              + '<div style="font-size:18px;font-weight:600;color:' + t + ';margin-bottom:4px;">' + steps[i].name + '</div>'
+              + '<div style="font-size:14px;color:' + mt + ';">' + steps[i].desc + '</div>'
+              + '</div></div>';
+            if (i < steps.length - 1) {
+              rows += '<div style="width:1px;height:16px;background:' + bd + ';margin-left:22px;margin-bottom:8px;"></div>';
+            }
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding:80px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + t + ';margin-bottom:48px;">Set up in 5 minutes</div>'
+            + rows
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border)
+    });
+
+    // Design 6: Multi-model
+    templates.push({
+      id: cId++, category: 'client', mode: mode,
+      label: 'Client — Multi-model (' + mode + ')',
+      render: (function(m, g, t, mt, bd) {
+        return function() {
+          var models = ['Claude', 'GPT', 'Gemini'];
+          var pills = '';
+          for (var i = 0; i < models.length; i++) {
+            pills += '<div style="padding:14px 36px;border:1px solid ' + bd + ';border-radius:28px;font-size:20px;font-weight:500;color:' + t + ';letter-spacing:0.04em;">' + models[i] + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;color:' + t + ';text-align:center;margin-bottom:48px;line-height:1.2;">BLAKE selects the optimal model per task.</div>'
+            + '<div style="display:flex;gap:24px;">' + pills + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border)
+    });
+
+    // Design 7: Brand Portfolio
+    templates.push({
+      id: cId++, category: 'client', mode: mode,
+      label: 'Client — Brand Portfolio (' + mode + ')',
+      render: (function(m, g, t, mt, bd, sf) {
+        return function() {
+          var brandColors = ['#a78bfa', '#f472b6', '#4ade80', '#fbbf24', '#22d3ee'];
+          var brandNames = ['Brand A', 'Brand B', 'Brand C', 'Brand D', 'Brand E'];
+          var slots = '';
+          for (var i = 0; i < 5; i++) {
+            slots += '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;">'
+              + '<div style="width:80px;height:80px;border-radius:50%;background:' + brandColors[i] + ';opacity:0.8;"></div>'
+              + '<div style="font-size:14px;color:' + mt + ';">' + brandNames[i] + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';text-align:center;margin-bottom:56px;">15 brands. One dashboard.</div>'
+            + '<div style="display:flex;gap:32px;flex-wrap:wrap;justify-content:center;">' + slots + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border, surface)
+    });
+
+    // Design 8: Security
+    templates.push({
+      id: cId++, category: 'client', mode: mode,
+      label: 'Client — Security (' + mode + ')',
+      render: (function(m, g, t, mt) {
+        return function() {
+          var shield = '<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="' + g + '" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;text-align:center;">'
+            + shield
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';margin-top:36px;margin-bottom:24px;line-height:1.15;">Your intelligence stays yours.</div>'
+            + '<div style="font-size:18px;color:' + mt + ';line-height:1.6;">Browser-native, API keys never leave your device. No vendor lock-in.</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted)
+    });
+  });
+})();
+
+// ─── B.L.A.K.E. TEMPLATES (12) ───
+
+(function() {
+  var bId = 8000;
+  var modes = ['dark', 'light'];
+
+  modes.forEach(function(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+    var border = mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    var surface = mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+
+    // Design 1: Acronym Vertical
+    templates.push({
+      id: bId++, category: 'blake', mode: mode,
+      label: 'BLAKE — Acronym Vertical (' + mode + ')',
+      render: (function(m, g, t, mt) {
+        return function() {
+          var items = [
+            { letter: 'B', word: 'Brand', desc: 'Five specialized agents that become your brand.' },
+            { letter: 'L', word: 'Life', desc: 'Personal coaching, wellness, and daily optimization.' },
+            { letter: 'A', word: 'AI', desc: 'Multi-model intelligence: Claude, GPT, Gemini.' },
+            { letter: 'K', word: 'Knowledge', desc: 'Identity memory and deep research that grows.' },
+            { letter: 'E', word: 'Engine', desc: '150+ operations and autonomous scheduling.' }
+          ];
+          var rows = '';
+          for (var i = 0; i < items.length; i++) {
+            var it = items[i];
+            rows += '<div style="display:flex;align-items:flex-start;gap:28px;margin-bottom:36px;">'
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;color:' + g + ';line-height:1;min-width:50px;">' + it.letter + '</div>'
+              + '<div style="padding-top:10px;">'
+              + '<div style="font-size:24px;font-weight:600;color:' + t + ';margin-bottom:4px;">' + it.word + '</div>'
+              + '<div style="font-size:14px;color:' + mt + ';line-height:1.5;">' + it.desc + '</div>'
+              + '</div></div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding:80px 80px;">'
+            + rows
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted)
+    });
+
+    // Design 2: Convergence
+    templates.push({
+      id: bId++, category: 'blake', mode: mode,
+      label: 'BLAKE — Convergence (' + mode + ')',
+      render: (function(m, g, t, mt, dm) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;line-height:1.4;margin-bottom:32px;">'
+            + '<span style="color:' + g + ';">BrandAI</span> '
+            + '<span style="color:' + dm + ';">+</span> '
+            + '<span style="color:#22c55e;">LifeAI</span> '
+            + '<span style="color:' + dm + ';">=</span> '
+            + '<span style="color:' + g + ';font-weight:600;">B.L.A.K.E.</span>'
+            + '</div>'
+            + '<div style="font-size:16px;color:' + mt + ';max-width:700px;line-height:1.6;">One adaptive intelligence that shifts between professional strategy and personal coaching.</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, dim)
+    });
+
+    // Design 3: Two Minds Side-by-Side
+    templates.push({
+      id: bId++, category: 'blake', mode: mode,
+      label: 'BLAKE — Two Minds (' + mode + ')',
+      render: (function(m, g, t, mt, bd, sf) {
+        return function() {
+          var agentPills = ['Strategy', 'Marketing', 'Operations', 'Documents', 'Intelligence'];
+          var coachPills = ['Life Coach', 'Wellness', 'Tax Copilot', 'Personal AI', 'Standard AI'];
+          var buildPills = function(pills, accent) {
+            var html = '';
+            for (var i = 0; i < pills.length; i++) {
+              html += '<span style="display:inline-block;padding:5px 12px;border:1px solid ' + accent + ';border-radius:16px;font-size:12px;color:' + accent + ';margin:3px;">' + pills[i] + '</span>';
+            }
+            return html;
+          };
+          var leftCard = '<div style="flex:1;border:1px solid ' + bd + ';border-top:3px solid ' + g + ';border-radius:12px;padding:24px;background:' + sf + ';">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:26px;font-weight:400;color:' + g + ';margin-bottom:8px;">BrandAI</div>'
+            + '<div style="font-size:12px;color:' + mt + ';margin-bottom:14px;">Professional brand strategy &amp; execution</div>'
+            + '<div style="display:flex;flex-wrap:wrap;">' + buildPills(agentPills, g) + '</div>'
+            + '</div>';
+          var rightCard = '<div style="flex:1;border:1px solid ' + bd + ';border-top:3px solid #22c55e;border-radius:12px;padding:24px;background:' + sf + ';">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:26px;font-weight:400;color:#22c55e;margin-bottom:8px;">LifeAI</div>'
+            + '<div style="font-size:12px;color:' + mt + ';margin-bottom:14px;">Personal coaching &amp; life optimization</div>'
+            + '<div style="display:flex;flex-wrap:wrap;">' + buildPills(coachPills, '#22c55e') + '</div>'
+            + '</div>';
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 60px;">'
+            + '<div style="display:flex;gap:20px;width:100%;">' + leftCard + rightCard + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border, surface)
+    });
+
+    // Design 4: Entity Statement
+    templates.push({
+      id: bId++, category: 'blake', mode: mode,
+      label: 'BLAKE — Entity Statement (' + mode + ')',
+      render: (function(m, g, t, mt) {
+        return function() {
+          var overlay = m === 'dark' ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.6)';
+          return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + 'organism-ember.png) center/cover no-repeat;">'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlay + ';"></div>'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;padding:80px 80px;text-align:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;color:' + t + ';margin-bottom:24px;line-height:1.15;">Not just an assistant.</div>'
+            + '<div style="font-size:20px;color:' + mt + ';line-height:1.6;max-width:700px;">An entity that learns, adapts, and embodies who you are.</div>'
+            + '</div>'
+            + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;z-index:2;">roweos.com</div>'
+            + '</div>';
+        };
+      })(mode, gold, text, muted)
+    });
+
+    // Design 5: Shape Showcase
+    templates.push({
+      id: bId++, category: 'blake', mode: mode,
+      label: 'BLAKE — Shape Showcase (' + mode + ')',
+      render: (function(m, g, t, mt, bd, sf) {
+        return function() {
+          var shapes = ['Smooth', 'Fluid', 'Organic', 'Crystal', 'Sphere', 'Helix'];
+          var grid = '';
+          for (var i = 0; i < shapes.length; i++) {
+            grid += '<div style="border:1px solid ' + bd + ';border-radius:12px;padding:28px;text-align:center;background:' + sf + ';">'
+              + '<div style="font-size:18px;font-weight:500;color:' + t + ';letter-spacing:0.04em;">' + shapes[i] + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 80px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + t + ';text-align:center;margin-bottom:48px;">Make BLAKE Yours</div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;width:100%;max-width:700px;">' + grid + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border, surface)
+    });
+
+    // Design 6: Intelligence Grid
+    templates.push({
+      id: bId++, category: 'blake', mode: mode,
+      label: 'BLAKE — Intelligence Grid (' + mode + ')',
+      render: (function(m, g, t, mt, bd, sf) {
+        return function() {
+          var features = [
+            { name: 'Contextual Chat', desc: 'Conversations with memory' },
+            { name: 'Studio Operations', desc: 'Content creation at scale' },
+            { name: 'Deep Research', desc: 'Multi-source intelligence' },
+            { name: 'Auto Scheduling', desc: 'Autonomous task planning' },
+            { name: 'Social &amp; Email', desc: 'Unified communications' },
+            { name: 'Bloom Feed', desc: 'Curated content stream' },
+            { name: 'Multi-Model', desc: 'Claude, GPT, Gemini' },
+            { name: 'Sovereign Data', desc: 'Your data stays yours' },
+            { name: 'Cross-Device', desc: 'Seamless everywhere' }
+          ];
+          var cells = '';
+          for (var i = 0; i < features.length; i++) {
+            cells += '<div style="border:1px solid ' + bd + ';border-radius:10px;padding:20px 16px;background:' + sf + ';text-align:center;">'
+              + '<div style="font-size:14px;font-weight:600;color:' + t + ';margin-bottom:4px;">' + features[i].name + '</div>'
+              + '<div style="font-size:12px;color:' + mt + ';">' + features[i].desc + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 60px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + t + ';text-align:center;margin-bottom:48px;">Intelligence in Action</div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;width:100%;max-width:800px;">' + cells + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border, surface)
+    });
+  });
+})();
+
+// ─── VALUE PROPOSITIONS TEMPLATES (12) ───
+
+(function() {
+  var vId = 9000;
+  var modes = ['dark', 'light'];
+  var headlines = [
+    'Your brand deserves its own operating system.',
+    '150+ operations. Zero learning curve.',
+    'AI that knows your brand by name.',
+    'From strategy to execution in one conversation.',
+    'The platform your brand has been waiting for.',
+    'Intelligence that compounds with every interaction.'
+  ];
+
+  modes.forEach(function(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+
+    for (var h = 0; h < headlines.length; h++) {
+      templates.push({
+        id: vId++, category: 'value', mode: mode,
+        label: 'Value — ' + headlines[h].substring(0, 30) + '... (' + mode + ')',
+        render: (function(m, g, t, dm, headline) {
+          return function() {
+            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
+              + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+              + logoMark(m, 36)
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;margin-bottom:32px;">' + headline + '</div>'
+              + '<div style="width:60px;height:1px;background:' + g + ';margin-bottom:24px;"></div>'
+              + '<div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:' + dm + ';">Brand &amp; Life Intelligence Platform</div>'
+              + '</div>';
+            return cardWrap(m, inner);
+          };
+        })(mode, gold, text, dim, headlines[h])
+      });
+    }
+  });
+})();
+
+// ─── SOCIAL HOOKS TEMPLATES (12) ───
+
+(function() {
+  var hId = 10000;
+  var modes = ['dark', 'light'];
+  var hooks = [
+    'Stop managing. Start operating.',
+    'Your AI team doesn\'t sleep.',
+    'What if your brand could think?',
+    'The future of brand management isn\'t a dashboard.',
+    'Built different. Runs different.',
+    'One platform. Every brand decision.'
+  ];
+
+  modes.forEach(function(mode) {
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+
+    for (var h = 0; h < hooks.length; h++) {
+      templates.push({
+        id: hId++, category: 'hooks', mode: mode,
+        label: 'Hook — ' + hooks[h].substring(0, 30) + '... (' + mode + ')',
+        render: (function(m, t, hook) {
+          return function() {
+            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;padding:80px 100px;text-align:center;">'
+              + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;">' + hook + '</div>'
+              + '</div>';
+            return cardWrap(m, inner);
+          };
+        })(mode, text, hooks[h])
+      });
+    }
+  });
+})();
+
 // ─── RENDERING ENGINE ───
 
 function getVisibleTemplates() {
