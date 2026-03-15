@@ -227,8 +227,15 @@ var CATEGORIES = [
   { id: 'beta', label: 'Private Beta Signup' }
 ];
 
-// ─── LOGO BASE64 ───
-var ROWEOS_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAVdklEQVR42s1beXxURbY+VXVvr0knhCQEEHBHEtxe0HFEJomCgstTGG+PAk8UsCMIIoIyrLcvuKAYMWyasO9wrzOAsg2InSCgIAiCCTg8MIgiIZCt0+u9VfX+6DQGDDEh0Xn1++Wf/Lqr6jvnO+d8daoaQQsMzjlCCPGmfk+WZZFY/I1tWpPzuvtuLnV6SLChJgz5l2Tyuex/Bc+ywzgBgnvYyX17GjyD4hqzVqMRwbkzGhM0GzGkEBBW4eryZ9gxz/Pde1w+tg5ACe1uLT3FSgAZlPaOBz9cduVvPkNEhN8s4BQayKQczQc+rLodKnniSeGemuNiwEArhY4ujqPyhihCNDly3Mdwary5MqKGnq2svRcTs4KPwDw5rJmX+G6Dq0d5gxCyKMY8c6M6gf9Xl9+ao+nvgQA4KpKQJJYU5mFmkpdt9uNFEVh29XpcWGwpfuD4WB5wPvv7GzlfHPDIrIfDQFcCmTf9pXXx8fbXhAwego4O+GtqpZvf+DZnVHgyOmkLQ6Yc46jNPriX0v6hHXW0e8PFvRxDv8OfofBOUegaRgkAIQigObPlxPuS+0y0SwK2dQw/nXw66MvOkcoZzlXSfQzLTI8HlkAANizdX7CwZ1r3/y6cNUgj8cjXOqZ329wzlF0PQCATavfvfm73as+/37vmur92/KdUYfU7qWZi9Uu9HXBmruO7FHXFe396C8QCVLUIgs0A/iBbQvG/fCVyosLl75fm8hAlmXcbLCH96h9j+39x+6iLz66KeLxXxb9TwxZljHnKgEA2LomJ+v47uWhYzuXbZKkVBNC0CBodGUae4SsrCzjcOHKASazaaLP0Hum39f/jMcjC1lZihG1uKY5cVJRKoLMhjeZWZbGNdCgqCiVuxWFoxbI5Jx7BISyjJWzxt+SfsctX3LOj0xftLjXkiUFoVqP8ybF7N7NC/sWf77i7P7tSzteLAVRCzczbjmXsccjCx6PLNR6BDUnv8x76+XrjxYuqSz6bMEOAMBcVUl9Iferf6iqRJxOjW5b9V635CRHoWHQHt36ZH9d17MXP/vBhPY2jLogjG8RRdRBEEUHY8iMEeKCIAQwgepQmFUghM4ZnJWFdaOUAz67//tvyhRFC9e3+bKyNO50OllTanl0b8tzx6fefWfnI96awMpuDw97pr49o8tjw+0GWPJ+paPL9TecFEziK936DFuyP88ldsvO12vrMOloK++e6LD3FkUhHQNqjzCyI4QJwkgkAjGLRLCJJsEUa7eC1WIBs1kEBghCYR0qvX6KED4FGB/jlB+hmB8I+MKHMp98+fjlIDIz3bSxtIyCW79wWs+777x5+/c/lI7q/sRLsy6v05cA9siykKUohmf129vMZiFwb78xj+/PyxO7ZWfrdY3S0VTe2oLtxoDx070AYFw218UN/iNvQluLKHYxi6abRJN4kygKXQWB3BoTY2+XmBAHRBDA5w9CeVVNCAAfAUCfBYPBjfc8Nnx3VJ42pcZG97pz3XuvdWyb/PZ3Jadu7f30xG/Xro2w9hLAqqoSp9NJ1+dNGtzKYfuwtLoqSXJZvABu3pCVEQAMHiIl3N4poUNyrD2FiEJHi8mcJAq4mphIYa+BU47U/XzO6NHWrumtO8faHX8yW8QHCCE94hwxKTarBQzKocrrAw5wKBg0lh87Ubp4wPDxFXUV3m8JKe7xEJSVZRzcOu9zQkj8bb2yb42G6UXA0QnjocTR9brrzhqMj+gzWFkQ9XgD2f1XhpgxY6D9WluHG0QBP2yzmAaaRcEUNui72q4Ni/PzD+iXf35lnpx4XUpiltVqlgRBfCjOEeMAQMABIBAMna4Jht/u1vO5uXWd0mAylGUMbjfX8t0d7ujS6dT58uph9z7x8oeXMEWtzb7a7LFztyyYdCKavJqWdX+dAHv3vtH88QcTZh3emMt3rn5zx9LpL3WMxhvnKomuGx1bl+XcuG9L3vRvC5adL9n/ET/+xVr+0zcf82NfrN2+ccWMTnX32ihluOH9aYe3feDNy5NtnHPEOVxUJmiOPCjl4w/+ztfNevWJxk7coCKSZQGhiA2WvPPy2MObcrln5evfqTkT2iP4RRxwzhFXVcLrrKcund7x0KdLF53c9xE/vvcj42zRFn5y/7ofd23Mv6MxzoiAk3FOzmjroS2zvXs35Iy5aIioNVbMGJGzbtbYEgBonjy7zOv79+eJAABr3n91TtGWOXzrYnmnLMuCqkqE11Ml6qq4nRs+ePr4vn/4Sg5+rP/07RZecvDjs/u2L7w+Wscb4+WCNdPl/RveO6eqEuGcI5yZpdCRI3ubBYSfD+v6ewAAmQAtAhgh4J98coZyzvGBw9+NL/mxtKRtYqse6e3ZS06nRkFVL1lHURSWlZVlRKSjR/jL48NWf3fyx0cBYZ1SFrbbrG1iY+NW5+W5RAB3g0qxoAAY54BOnTw9JxwOJ7Rht/e8mHznK67H1JxRxnx5SMKV4rFZpy05Yu21uWNf/Oqf7/JtS6aWqbnjkzhv+ADyraqaAAB2bVk0tOzfO/jJA+uDFSd28CM7Vw9rjKaP6u0dy+T1hSunaQC1njSLZKBh0M+fVxaWq6pEEGq+zr1ER7sVyjmg4vKylefKq0oTW8UkOhymIQgBLyhwXzEeuzqdYY/HI9zXZ/CCc2UX9lmtFrPPF+CiQEZ6ZFnIzMxsMGNrWuRU5w0E51ND756bO9KM09PTRQSQSSnVAAAlFaW2+JEPIeCgqVhRllbqYX19bTl7Njd3pDkzS6G/paMRQhAIBpcIGEEoGGQmkXS2dL/mJoQQbyiWnU4nQwD8xLGTn+m6Tm+yOO7CT/dM7QrAW+kG2w4AvKDxDbgmDQ00AABU4QusqaiqQTazufO1ppi/IACuXhbLdUdZWRnnnIPP6y/y+/3AOeMmkWALETtEJk5DDbNaJWNmagFdNw4yHnoA20xCD8ZY2SmaciKaOH4PwE6nRjnn8MXxXbtr/IGjdpuZY4H8DQBAasT3GQ2Fqa4DZxSAUU4QFxuzbkFREQIA0HWjkBv0DoFwdA9l7DtFUVhdCdbo0gOANFXCl4dCWVoxlySN1c0HBQVukp9/QO856/5VhmFMwwCPzJRHxYPkrOIcUH25Q6qtq7vWz0sSCAJdp1zXdeT3+/0R5vwG4FrGGoa+j2PcVwDEuyDgewAAmhq/qioR5NQoNGAkVZUIaABOTaOZmW7KuYLmuC8sspqFsa3jHSkdE/UnEYIFkVKT/yvpWZCUhLIQ4vs2zetFMACjBvGFQ76Anx8FAJAkqUFGuhWFKwBQU8WOO+LAEAB4e2awk7XWaNJNg9OpUXm4FNOpXevuZpHcQRlLQYDDIsE/Ggh/c6Hm/CGnc2V1tNRFuiMyGqkoZ1bPHP1GSmL8O1arOEZ2PboqOzvfn5fnEl2uPAMQAgTAuSxjyMyk82aMSbaaxYHVXi+1mk2kojLwWZZzxFlVVQlCiP5GW5YDAJRA0fk0I/WMgDjYGYfSiwRoRD+ptl2LFk51vWIxkZGiIHYSRQKEYCAYA+cAId2AtnGJp9T3Xt4WDoVXIDRvJ0CECd+qskmbWzCT9Eu/p/O17fvdnX77KoCNf83Oztezs/MvrgPuNIQQYrvWzZwbazO38voDoTAAqfGH3rmKqyBj+RudSwTKmEgI9gIApKUl898CqygKe2OklNS+TcKaWJvl/rBuAMYIKGPg84eAcx4EhESbxUQcdmsngeDnq334ee29UYWMQV7xkcp1XZ1KEABg5G3W/gIm7yTEx7y0Zf6k48FQ+G0DsS/Kz4UrsxXlB0UB2KnNmJnS2vFkZVV1oHUrh/Wn0vL5Pfq9vCuSbxp3Tna73QgAONXpaYEzjigGHX4jA8iyjKdOrQWb3GqHzSze6guEACGAYFhfxzhbVe3T96/49Ntzve7pYL0+OTHV6wv2FETc2yKKdyfE2TOCISPjtjsTij+6Y/SKUJh+NGDcrOOzYeuod2XXtC7tE58UBKEzN6heEajcu+r9sbd1bJf4Ruv4mEcrK6uDCfGx1p/Ple88Wl7xkqqqJBK7TZMM3kDwLJrz2oCQIKAnX3hzxSeqJBGnVm8CQqok4U9bncTpKbftiLNbe4R1Axjjp70BfUjxqbL9qdel3B5rFboKhKRggo+V+0rXj1C0GgCABYrrAYuJvGAyCU8kxMUKlHOo8Qd9wGE3wshjMDhQ4a05aTYTe7wt5larzdLHbDb1jbVbbCGdQqu4GKjw+rd8dfj0U6OU2dVNva2MVgBlRL/uAuPM0A2wX6wBWr2ZFjudGp09bsBkh9XcIxgKM8rYqR9+vnC/krehZNmYgfbSYKjY0MOlVotwj0U0jUqwJS1b9fbw1V6/b9pQOX8HAOzIU56/y6B8pCiSfnExVrsoCA9ygAcNysBhN4NACFgtJiACAcYYGGEdqEEvnD1XMT1r4OScSDg2/Wq29pQKR0/99L8Co6wGYZQEAFBUdA7VR2WnU2EzRkjXmUVxXCAUZgAQulDh7afkbSjJc7nEZ3LyfQDgA4BzAHAUABbPnThoZErruFkkJvaJhW7XlCHu/Jxsef5XAPBMnux6k1L6NMakj4BRF5NJiDGJIjDGoLrGD5yDFxF0FDBZX1FWsbT/uLlnolc6V3MPHe3MrPlkb6lAKftJwLhTg2UbA4BhsQgjLSbBAgDg9QXffS1XO5SX5xKzs3+pnVERElFWS2e/PkI62TElYUNiK9u7i6Y+3/kUbffCY+1+Jt2y848BgAwA8gdy9rUOm6mTzU7tAABUZzW+EC8Z9PdZP1yctxHlp7FDoIwexgZ0vhIbFKXQcLketSGMn6SU8VBYr2Q1KFeWZXzmjEJ/VfNqRUitMTa9NepvT2MMaxIctuex94zYLXv+c/vzXKL35rb8/izFGKbklQBASX00/GyKLGS63bSlwAIA4LDB9jDGbo7o6MJLJlaliLc6CMJ/CQR1QMCRrtPNI+cuv5CWVowU5coHjezsfD0vzyWOz12rna/0TQ3rBsTaLM8ucA99q1t2vg4FEUbIsoxVVSKRP5WoqkQiDQCALEUxrpLCV/ZwTU2owBxvfTNntNR+zEztp2itBQAoSo3EtAnhdIFg0A0KBqOfAACqL97rAW3Udj6nfjjxmV6tHDH3Omymvy+QB3+TpShrIrW0Lks0+L0Hnr58y78pZWXMoPdHWFnwq6MawehmjBAEQmF/0BfcGwnXzMacqngBAEMA/OeqmqGBkB6kjDGr2ZQ/Xx5yo9Op0ZbqnzUaMACAbtBtjDIJAHh9aotgnEAwAs75ia/LTaebcoxUFIVNkWVBmfPPY15/YBrBBBOCYkUBL5MkiaSlFf/uF+q/AhwK6EsYY92nu3rGOZ0ajXYT04oj4DlwggCAUnZc0zSqSk3rWSuKQlVVIke2H323qsZ/hFHGY6zmPz/cNX5irZfJHwZYlmX8+vKtBw3KfuTYNhAAwC1nXLIBziKXeYyyM3Vju0l1UAPIP3BAr6oJDmccUCAYMswmMmXehEH3KIpiNLXx3wwPR2I2FKI5wPlLtW03BnVaEQZllDMOjLHKq+54aBqV5Qxh7Hurd1V6/blWs0ngwFGs1bxcHjnAUVSUyv+IeMaKUmhwDujzU/5VOmWmN4Y+5lQUhamSRKKZOBTWz3HOQTeo3pzF3EohVVWJnDhxfHyV1/8tAoTNZuHG6xKtixVFYZkAzb5o/62XDRgAQHNKuLCw0AgF9UkcsenyZY14RvlhxjgnGGzN3AUvKkrlM7UvA5XeUH/DoIFw2NBj7ZZ+C91DZmQpilEgy6Q5oGslKG8QsLM2Eb2xYttKw2Dl4tBHXnVqGoXiZAwAUEPZV/5gGAFHbZtr+mjvbMzMVUcuVHuHiCIR/cFQKM5uGbtIHjw1S1EMkGV0NfSO9NQRnyNLMbPGDby9vkuFi5MWpaZyDoC8Pv+znPMJ0wY/3Mmtarosy9hTVHa0uiZwDoDfGTlQF9LmdjA9siyMnrFmdVll9Xir2WQOBEMhR4x18tKpQ3ORojBFUZhHloXGPI2K3EnJgtOp0eWvu9omxya9mtg24SznHF3OFXSZlCROTaPjB/aaZDWLj09ZuPmu3JG9zaNmbw1NHdJnrt1qzq6+YKQoqzeev1KXsalXMFmKYsyb8IycHB/jDobCutViFoO6vj1khF8cPGXJ8ajnkopSUVlaMZeKUrlWXIxAijQdMwEYqtUEn8we9RCldLxuGKOlsR8erKsarxTcSM7IIEphoTFl0EOfiQL5ZvLCzaMlSSLXoPNdO6W0OuQNhp+alL9RdcsZRFEKDWj+mytBURRj7rgBo+Id9pkYISQIBChjVZTx2SGK8wdP/uB0g1Se+ULnRLt9Slhn9wbCob59R887dKVmBqqvz+yWZXT64HZ7hwTHEQHhaZMXb14IAMj9XJ/dJpHwCfkbu9dnvasd0X74+68OeKC1wzbPbjXdzBgHUSQQChvlHFABAOzinBWLJlImAkAYQZKIyO2CiB+LsZjuCwT13eWV1X/tP3FhaUP9dVS/1QErCrCX+913vcNh30OQMExevGnd2P69uic5rLtCIXrH5MWbDjslCWuaRlsS9KuD/zu263VtRosCcllFsb3ZLIJJFAAQAKUMOHAwiQLYrWYgGEFZZc2ZYNCQ+74ye0H0yQNqwBFXTAiSJBFN0+gYZ0ZXu826jRAySl64SZs86CHNLJBOkxZuvluWM4SWoPXlOQQA4K1h/Vu1a2d/VCS4N8LoVoJwG0FAZoRQABN8hiC0XzfYxtdX7tl64MABPZrcmnWclGo18yv9Mm6Z/OyD3yuDHx4OAOB+rnfFtCG9hwEA5LnSRWjBwQFQPTIT5YwekrBsxgvJC14dHFvv7UZLvZeOWn1M3z8n22NjN4oi+exsjXdRG1vsV5SjPsqSzXtcrnSxvhc6zX0u4XZnkLS0ZF5fPHJVJRpo4HRqTXq1hxrr6WisTvqfhxYRgmIMSr8UBDycGvSx15d/ejTPlS5mtzDoS95f8WgvDkFzyiFqfPkA7FaAIwA+cUDPpwkhTspZV4soJIYZf3Dakq1fcQ5Ic0rY2UKJ7Hc7DzdOEkY6F3JGhvDGyk9Xl12wDQbgywEAOaymfVMH9x6HEPAoWFWSSEu/FYHf81TRWIo/88g97a9tHf+SScQvIoR+YMCnGQs2r1XqvCSIJr/UVI0rCvCW+NXLf+R3S6r0C337P3Jfq5sSbYMIIRJwThGgjZzDllt8McX/nyiOWqKMaNKlcfvaU1lpZpOYRRDqxIHrjLEfgOMTYcbOEkTOi4B8JT8Gwv7kZF37g42BWrJ+ujMyiLug4JI3zq5H020J9vhrAENrhLgFEewNBPXKsspwdWV5uGbjgQP+P9LF/wdwSTJQ3XF0ogAAAABJRU5ErkJggg==';
+// ─── LOGO IMAGE PATHS ───
+var LOGO_ICON_DARK = '/images/promo/logo-icon-dark.png';
+var LOGO_ICON_LIGHT = '/images/promo/logo-icon.png';
+var LOGO_WORDMARK = '/images/promo/logo-wordmark.png';
+
+function logoIcon(mode, size) {
+  var src = mode === 'dark' ? LOGO_ICON_DARK : LOGO_ICON_LIGHT;
+  return '<img src="' + src + '" style="width:' + (size || 80) + 'px;height:' + (size || 80) + 'px;border-radius:18%;object-fit:cover;" crossorigin="anonymous" />';
+}
 
 // ─── HELPER: CARD WRAPPER ───
 function cardWrap(mode, inner) {
@@ -274,10 +281,11 @@ function screenshotFrame(src, mode, opts) {
     + '</div>';
 }
 
-// ─── HELPER: LOGO SVG (text-based for canvas compat) ───
+// ─── HELPER: LOGO WORDMARK (cursive image) ───
 function logoMark(mode, size) {
-  var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
-  return '<div style="font-family:\'Cormorant Garamond\',serif;font-size:'+(size||48)+'px;font-weight:300;letter-spacing:0.03em;color:'+color+';">RoweOS</div>';
+  var height = size || 48;
+  var width = Math.round(height * 3.5);
+  return '<img src="' + LOGO_WORDMARK + '" style="height:' + height + 'px;width:auto;max-width:' + width + 'px;object-fit:contain;" crossorigin="anonymous" />';
 }
 
 // ─── HELPER: CHECK/BULLET ICON ───
@@ -319,7 +327,7 @@ function macWpGlow(top, left, size, opacity) {
 }
 
 function macWpLogo(size, opacity) {
-  return '<img src="'+ROWEOS_LOGO+'" style="width:'+(size||80)+'px;height:'+(size||80)+'px;opacity:'+(opacity||0.9)+';" />';
+  return '<img src="' + LOGO_ICON_DARK + '" style="width:' + (size || 80) + 'px;height:' + (size || 80) + 'px;border-radius:18%;opacity:' + (opacity || 0.9) + ';" crossorigin="anonymous" />';
 }
 
 // ─── TEMPLATES (empty — added by separate template files) ───
@@ -357,8 +365,9 @@ var templates = [];
           + '</div>';
       } else if (d.type === 'logo-wordmark') {
         content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
-          + '<img src="' + ROWEOS_LOGO + '" style="width:120px;height:120px;margin-bottom:28px;" />'
-          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;letter-spacing:0.03em;color:' + gold + ';margin-bottom:20px;">RoweOS</div>'
+          + logoIcon('dark', 120)
+          + '<div style="margin-bottom:20px;"></div>'
+          + logoMark('dark', 48)
           + '<div style="width:60px;height:1px;background:' + gold + ';opacity:0.5;margin-bottom:20px;"></div>'
           + '<div style="font-size:18px;color:' + muted + ';letter-spacing:0.05em;text-align:center;padding:0 100px;">Operating intelligence, built for brands &amp; life.</div>'
           + '</div>';
@@ -412,7 +421,7 @@ var templates = [];
       return '<div style="width:' + WP_W + 'px;height:' + WP_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + 'helix-ember.png) center/cover no-repeat;">'
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);"></div>'
         + '<div style="position:absolute;bottom:80px;left:0;right:0;text-align:center;z-index:1;">'
-        + '<img src="' + ROWEOS_LOGO + '" style="width:48px;height:48px;opacity:0.6;" />'
+        + '<img src="' + LOGO_ICON_DARK + '" style="width:48px;height:48px;border-radius:18%;opacity:0.6;" crossorigin="anonymous" />'
         + '</div></div>';
     }
   });
@@ -425,7 +434,7 @@ var templates = [];
       return '<div style="width:' + WP_W + 'px;height:' + WP_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + 'organism-ember.png) center/cover no-repeat;">'
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);"></div>'
         + '<div style="position:absolute;bottom:80px;left:0;right:0;text-align:center;z-index:1;">'
-        + '<img src="' + ROWEOS_LOGO + '" style="width:48px;height:48px;opacity:0.6;" />'
+        + '<img src="' + LOGO_ICON_DARK + '" style="width:48px;height:48px;border-radius:18%;opacity:0.6;" crossorigin="anonymous" />'
         + '</div></div>';
     }
   });
@@ -438,8 +447,8 @@ var templates = [];
       return macWpWrap(
         macWpGlow('45%', '50%', 1600, 0.06)
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
-        + '<img src="' + ROWEOS_LOGO + '" style="width:160px;height:160px;margin-bottom:32px;" />'
-        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:120px;font-weight:300;letter-spacing:0.03em;color:#b2997b;">RoweOS</div>'
+        + '<img src="' + LOGO_ICON_DARK + '" style="width:160px;height:160px;border-radius:18%;margin-bottom:32px;" crossorigin="anonymous" />'
+        + logoMark('dark', 72)
         + '</div>'
       );
     }
@@ -452,7 +461,7 @@ var templates = [];
     render: function() {
       return macWpWrap(
         macWpGlow('30%', '70%', 1200, 0.04)
-        + '<div style="position:absolute;bottom:200px;left:200px;font-family:\'Cormorant Garamond\',serif;font-size:160px;font-weight:300;letter-spacing:0.03em;color:#b2997b;z-index:1;">RoweOS</div>'
+        + '<div style="position:absolute;bottom:200px;left:200px;z-index:1;">' + logoMark('dark', 100) + '</div>'
       );
     }
   });
@@ -466,9 +475,9 @@ var templates = [];
         + '<div style="width:50%;height:100%;background:#0a0a0a;"></div>'
         + '<div style="width:50%;height:100%;background:#0f0f0f;"></div>'
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
-        + '<img src="' + ROWEOS_LOGO + '" style="width:100px;height:100px;margin-bottom:28px;" />'
+        + '<img src="' + LOGO_ICON_DARK + '" style="width:100px;height:100px;border-radius:18%;margin-bottom:28px;" crossorigin="anonymous" />'
         + '<div style="width:60px;height:1px;background:#b2997b;opacity:0.4;margin-bottom:28px;"></div>'
-        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:80px;font-weight:300;letter-spacing:0.03em;color:#b2997b;">RoweOS</div>'
+        + logoMark('dark', 52)
         + '</div></div>';
     }
   });
@@ -482,7 +491,7 @@ var templates = [];
         + '<div style="position:absolute;top:0;right:0;width:70%;height:100%;background:url(' + IMG_PROMO + 'helix-ember.png) center/cover no-repeat;"></div>'
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to right,#0a0a0a 20%,rgba(10,10,10,0.6) 50%,transparent 80%);"></div>'
         + '<div style="position:absolute;bottom:120px;left:120px;z-index:1;">'
-        + '<img src="' + ROWEOS_LOGO + '" style="width:56px;height:56px;opacity:0.7;" />'
+        + '<img src="' + LOGO_ICON_DARK + '" style="width:56px;height:56px;border-radius:18%;opacity:0.7;" crossorigin="anonymous" />'
         + '</div></div>';
     }
   });
@@ -521,7 +530,7 @@ var templates = [];
         macWpGlow('50%', '30%', 1400, 0.05)
         + '<div style="position:absolute;top:50%;left:70%;transform:translate(-50%,-50%);width:1400px;height:1400px;background:radial-gradient(circle,rgba(100,130,160,0.03) 0%,transparent 55%);pointer-events:none;"></div>'
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:1;">'
-        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:120px;font-weight:300;letter-spacing:0.03em;color:#b2997b;">RoweOS</div>'
+        + logoMark('dark', 72)
         + '</div>'
       );
     }
@@ -604,8 +613,8 @@ var COACH_COLORS = {
           }
           // RoweOS logo cell
           cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:' + sf + ';border-radius:12px;">'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:48px;height:48px;margin-bottom:12px;opacity:0.8;" />'
-            + '<div style="font-size:16px;font-weight:500;color:' + txt + ';">RoweOS</div>'
+            + logoIcon(m, 48)
+            + '<div style="font-size:16px;font-weight:500;color:' + txt + ';margin-top:12px;">RoweOS</div>'
             + '</div>';
 
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
@@ -744,8 +753,8 @@ var COACH_COLORS = {
           }
           // RoweOS logo cell
           cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:' + sf + ';border-radius:12px;">'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:48px;height:48px;margin-bottom:12px;opacity:0.8;" />'
-            + '<div style="font-size:16px;font-weight:500;color:' + txt + ';">RoweOS</div>'
+            + logoIcon(m, 48)
+            + '<div style="font-size:16px;font-weight:500;color:' + txt + ';margin-top:12px;">RoweOS</div>'
             + '</div>';
 
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
@@ -1187,8 +1196,9 @@ var TIER_DATA = {
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlay + ';"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;padding:80px;">'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';text-align:center;line-height:1.2;margin-bottom:40px;">Operating intelligence, built for brands &amp; life.</div>'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:64px;height:64px;margin-bottom:16px;" />'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;font-weight:300;color:' + g + ';">RoweOS</div>'
+            + logoIcon(m, 64)
+            + '<div style="margin-top:16px;"></div>'
+            + logoMark(m, 28)
             + '</div>'
             + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;z-index:2;">roweos.com</div>'
             + '</div>';
@@ -1624,7 +1634,7 @@ var TIER_DATA = {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
             + '<div style="position:absolute;width:800px;height:800px;background:radial-gradient(circle,' + g + ' 0%,transparent 60%);opacity:0.08;pointer-events:none;"></div>'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:160px;height:160px;position:relative;z-index:1;" crossorigin="anonymous">'
+            + '<div style="position:relative;z-index:1;">' + logoIcon(m, 160) + '</div>'
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1639,7 +1649,7 @@ var TIER_DATA = {
         return function() {
           var inner = '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
             + '<div style="position:absolute;bottom:' + Math.round(CARD_H / 3) + 'px;left:0;right:0;text-align:center;">'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:60px;font-weight:300;color:' + g + ';">RoweOS</div>'
+            + logoMark(m, 42)
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1656,7 +1666,7 @@ var TIER_DATA = {
           var rightBg = m === 'dark' ? '#0e0e0e' : '#ffffff';
           var html = '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;position:relative;overflow:hidden;display:flex;">'
             + '<div style="width:50%;height:100%;background:' + leftBg + ';display:flex;align-items:center;justify-content:center;">'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:100px;height:100px;margin-left:40px;" crossorigin="anonymous">'
+            + '<div style="margin-left:40px;">' + logoIcon(m, 100) + '</div>'
             + '</div>'
             + '<div style="width:50%;height:100%;background:' + rightBg + ';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 48px;text-align:center;">'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;color:' + t + ';line-height:1.25;">Your brand deserves its own operating system.</div>'
@@ -1678,7 +1688,7 @@ var TIER_DATA = {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:url(' + IMG_PROMO + 'helix-ember.png);background-size:cover;background-position:center;"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:100px;font-weight:300;color:' + t + ';opacity:0.12;">RoweOS</div>'
+            + '<div style="opacity:0.12;">' + logoMark(m, 64) + '</div>'
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1695,7 +1705,7 @@ var TIER_DATA = {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:url(' + IMG_PROMO + 'organism-ember.png);background-size:cover;background-position:center;"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlay + ';"></div>'
             + '<div style="position:absolute;bottom:80px;left:0;right:0;text-align:center;">'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:40px;height:40px;opacity:0.6;margin-bottom:12px;" crossorigin="anonymous">'
+            + '<div style="margin-bottom:12px;">' + logoIcon(m, 40) + '</div>'
             + '<div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:' + g + ';opacity:0.7;">roweos.com</div>'
             + '</div>';
           return cardWrap(m, inner);
@@ -1712,7 +1722,7 @@ var TIER_DATA = {
           var inner = '<div style="position:absolute;top:50%;left:50%;width:2000px;height:1px;background:' + g + ';opacity:0.25;transform:translate(-50%,-50%) rotate(35deg);"></div>'
             + '<div style="position:absolute;top:50%;left:50%;width:2000px;height:1px;background:' + g + ';opacity:0.25;transform:translate(-50%,-50%) rotate(-35deg);"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + g + ';">RoweOS</div>'
+            + logoMark(m, 36)
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1739,7 +1749,7 @@ var TIER_DATA = {
       render: (function(m) {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:200px;height:200px;" crossorigin="anonymous">'
+            + logoIcon(m, 200)
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1753,7 +1763,7 @@ var TIER_DATA = {
       render: (function(m, g, t, dm) {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;width:50%;height:100%;display:flex;align-items:center;justify-content:center;">'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:120px;height:120px;" crossorigin="anonymous">'
+            + logoIcon(m, 120)
             + '</div>'
             + '<div style="position:absolute;top:0;left:50%;width:1px;height:100%;background:' + g + ';opacity:0.2;"></div>'
             + '<div style="position:absolute;top:0;left:50%;width:50%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 56px;text-align:center;">'
@@ -1772,9 +1782,9 @@ var TIER_DATA = {
       render: (function(m, g, t, dm) {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">'
-            + '<img src="' + ROWEOS_LOGO + '" style="width:120px;height:120px;" crossorigin="anonymous">'
+            + logoIcon(m, 120)
             + '<div style="height:32px;"></div>'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + g + ';">RoweOS</div>'
+            + logoMark(m, 42)
             + '<div style="height:16px;"></div>'
             + '<div style="font-size:18px;color:' + dm + ';max-width:600px;">Operating intelligence, built for brands &amp; life.</div>'
             + '<div style="height:32px;"></div>'
@@ -1798,7 +1808,7 @@ var TIER_DATA = {
             for (var c = 0; c < 3; c++) {
               var s = sizes[r * 3 + c];
               row += '<div style="display:flex;flex-direction:column;align-items:center;">'
-                + '<img src="' + ROWEOS_LOGO + '" style="width:' + s + 'px;height:' + s + 'px;" crossorigin="anonymous">'
+                + logoIcon(m, s)
                 + '<div style="font-size:12px;color:' + dm + ';margin-top:12px;opacity:0.6;">' + s + 'px</div>'
                 + '</div>';
             }
