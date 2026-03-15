@@ -833,6 +833,303 @@ var COACH_COLORS = {
   });
 })();
 
+// ─── PREMIUM FEATURES TEMPLATES (20) ───
+
+(function() {
+  var pfId = 5000;
+  var features = [
+    { icon: 'studio', pill: 'Studio', headline: '150+ pre-built operations across strategy, marketing, content, video, and brand workflows.' },
+    { icon: 'bloom', pill: 'Bloom', headline: 'AI-generated content ideas tailored to each brand.' },
+    { icon: 'automations', pill: 'Automations', headline: 'Workflows and pipelines that run on your cadence. BLAKE executes while you sleep.' },
+    { icon: 'pipelines', pill: 'Pipelines', headline: 'Multi-step workflows. One click.' },
+    { icon: 'focus', pill: 'Focus', headline: 'Your command center. Your daily brief.' },
+    { icon: 'rhythm', pill: 'Rhythm', headline: 'Intelligent scheduling. Effortless structure.' },
+    { icon: 'identity', pill: 'Identity', headline: 'Your brand voice, precisely defined.' },
+    { icon: 'mail', pill: 'Mail', headline: 'Full email client with AI composition and branded templates.' },
+    { icon: 'analytics', pill: 'Analytics', headline: 'Know exactly where your intelligence goes.' },
+    { icon: 'social', pill: 'Social', headline: 'Publish to X, Instagram, and Threads. From one place.' }
+  ];
+
+  function pfIcon(name, mode) {
+    var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var custom = {
+      bloom: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.2"><ellipse cx="12" cy="6.5" rx="2.8" ry="4.5"/><ellipse cx="17" cy="10" rx="2.8" ry="4.5" transform="rotate(72 17 10)"/><ellipse cx="15.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(144 15.5 15.5)"/><ellipse cx="8.5" cy="15.5" rx="2.8" ry="4.5" transform="rotate(-144 8.5 15.5)"/><ellipse cx="7" cy="10" rx="2.8" ry="4.5" transform="rotate(-72 7 10)"/><circle cx="12" cy="11" r="2.2"/></svg>',
+      pipelines: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+      mail: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+      social: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>'
+    };
+    if (custom[name]) return custom[name];
+    return featureIcon(name, mode);
+  }
+
+  ['dark', 'light'].forEach(function(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+    var border = mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+
+    for (var i = 0; i < features.length; i++) {
+      (function(f, m, g, t, mt, bd) {
+        templates.push({
+          id: pfId++, category: 'premium-features', mode: m,
+          label: 'Feature — ' + f.pill + ' (' + m + ')',
+          render: function() {
+            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px 100px;">'
+              + '<div style="margin-bottom:48px;">' + pfIcon(f.icon, m) + '</div>'
+              + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:' + g + ';margin-bottom:32px;">RoweOS</div>'
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';text-align:center;max-width:800px;line-height:1.2;margin-bottom:40px;">' + f.headline + '</div>'
+              + '<div style="width:60px;height:1px;background:' + g + ';margin-bottom:40px;"></div>'
+              + '<div style="padding:8px 24px;border:1px solid ' + bd + ';border-radius:20px;font-size:15px;color:' + mt + ';letter-spacing:0.06em;">' + f.pill + '</div>'
+              + '</div>';
+            return cardWrap(m, inner);
+          }
+        });
+      })(features[i], mode, gold, text, muted, border);
+    }
+  });
+})();
+
+// ─── TIER COMPARISON TEMPLATES (12) ───
+
+var TIER_DATA = {
+  solo: {
+    name: 'Solo', price: '$29/mo', tagline: 'For individuals getting started.',
+    features: ['1 brand profile', '1 life profile', 'AI chat', 'Export', 'Basic automations']
+  },
+  founder: {
+    name: 'Founder', price: '1 month free', tagline: '1 month free. Full access.',
+    features: ['5 brand profiles', '5 life profiles', 'Cloud Sync', 'Studio', 'Automations Agent',
+               'Pipelines', 'Social Publishing', 'Focus', 'Analytics', 'Identity & Memory', 'Mail']
+  },
+  premium: {
+    name: 'Premium', price: '$79/mo', tagline: 'For teams and agencies.',
+    features: ['15 brand profiles', '15 life profiles', 'Bloom', 'Brand Sharing', 'White Label',
+               'Multi-User', 'Private Onboarding', 'Everything in Founder']
+  }
+};
+
+(function() {
+  var tId = 6000;
+
+  function tierCol(tier, mode, isFounder, colWidth) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+    var border = mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+    var founderBorder = isFounder ? ('2px solid ' + gold) : ('1px solid ' + border);
+    var w = colWidth || '300px';
+    var features = '';
+    for (var i = 0; i < tier.features.length; i++) {
+      features += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'
+        + checkIcon(mode)
+        + '<span style="font-size:14px;color:' + text + ';">' + tier.features[i] + '</span>'
+        + '</div>';
+    }
+    var priceColor = isFounder ? gold : gold;
+    return '<div style="width:' + w + ';padding:36px 28px;border:' + founderBorder + ';border-radius:16px;display:flex;flex-direction:column;align-items:center;">'
+      + '<div style="font-size:24px;font-weight:600;color:' + text + ';margin-bottom:8px;">' + tier.name + '</div>'
+      + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;font-weight:400;color:' + priceColor + ';margin-bottom:8px;">' + tier.price + '</div>'
+      + '<div style="font-size:14px;color:' + muted + ';margin-bottom:24px;text-align:center;">' + tier.tagline + '</div>'
+      + '<div style="width:100%;height:1px;background:' + border + ';margin-bottom:24px;"></div>'
+      + '<div style="width:100%;text-align:left;">' + features + '</div>'
+      + '</div>';
+  }
+
+  ['dark', 'light'].forEach(function(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+    var border = mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+
+    // Design 1: 3-column comparison
+    templates.push({
+      id: tId++, category: 'tiers', mode: mode,
+      label: 'Tiers — 3-Column (' + mode + ')',
+      render: (function(m) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:60px 40px 80px;">'
+            + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:' + gold + ';margin-bottom:16px;">RoweOS</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + text + ';margin-bottom:48px;">Choose Your Plan</div>'
+            + '<div style="display:flex;gap:24px;align-items:flex-start;">'
+            + tierCol(TIER_DATA.solo, m, false, '290px')
+            + tierCol(TIER_DATA.founder, m, true, '290px')
+            + tierCol(TIER_DATA.premium, m, false, '290px')
+            + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode)
+    });
+
+    // Design 2: Solo spotlight
+    templates.push({
+      id: tId++, category: 'tiers', mode: mode,
+      label: 'Tiers — Solo Spotlight (' + mode + ')',
+      render: (function(m, g, t, mt, bd) {
+        return function() {
+          var userIcon = '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="' + g + '" stroke-width="1.2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+          var features = '';
+          for (var i = 0; i < TIER_DATA.solo.features.length; i++) {
+            features += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'
+              + checkIcon(m)
+              + '<span style="font-size:18px;color:' + t + ';">' + TIER_DATA.solo.features[i] + '</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 120px 100px;">'
+            + '<div style="margin-bottom:40px;">' + userIcon + '</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';margin-bottom:12px;">Solo</div>'
+            + '<div style="font-size:24px;color:' + g + ';margin-bottom:8px;">$29/mo</div>'
+            + '<div style="font-size:16px;color:' + mt + ';margin-bottom:40px;">' + TIER_DATA.solo.tagline + '</div>'
+            + '<div style="width:60px;height:1px;background:' + g + ';margin-bottom:40px;"></div>'
+            + '<div style="text-align:left;">' + features + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border)
+    });
+
+    // Design 3: Founder spotlight (beta focus)
+    templates.push({
+      id: tId++, category: 'tiers', mode: mode,
+      label: 'Tiers — Founder Spotlight (' + mode + ')',
+      render: (function(m, g, t, mt, bd) {
+        return function() {
+          var features = '';
+          for (var i = 0; i < TIER_DATA.founder.features.length; i++) {
+            features += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+              + checkIcon(m)
+              + '<span style="font-size:16px;color:' + t + ';">' + TIER_DATA.founder.features[i] + '</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 120px 100px;">'
+            + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:' + g + ';margin-bottom:24px;">RoweOS</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';margin-bottom:20px;">Founder</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:400;color:' + g + ';text-align:center;margin-bottom:36px;">1 month free. Full access.</div>'
+            + '<div style="width:60px;height:1px;background:' + g + ';margin-bottom:36px;"></div>'
+            + '<div style="text-align:left;margin-bottom:36px;">' + features + '</div>'
+            + '<div style="padding:12px 36px;border:1px solid ' + g + ';border-radius:28px;font-size:16px;color:' + g + ';letter-spacing:0.06em;">Sign up at roweos.com</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border)
+    });
+
+    // Design 4: Premium spotlight
+    templates.push({
+      id: tId++, category: 'tiers', mode: mode,
+      label: 'Tiers — Premium Spotlight (' + mode + ')',
+      render: (function(m, g, t, mt, bd) {
+        return function() {
+          var features = '';
+          for (var i = 0; i < TIER_DATA.premium.features.length; i++) {
+            features += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'
+              + checkIcon(m)
+              + '<span style="font-size:18px;color:' + t + ';">' + TIER_DATA.premium.features[i] + '</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 120px 100px;">'
+            + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:' + g + ';margin-bottom:24px;">RoweOS</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';margin-bottom:12px;">Premium</div>'
+            + '<div style="font-size:24px;color:' + g + ';margin-bottom:8px;">$79/mo</div>'
+            + '<div style="font-size:16px;color:' + mt + ';margin-bottom:40px;">' + TIER_DATA.premium.tagline + '</div>'
+            + '<div style="width:60px;height:1px;background:' + g + ';margin-bottom:40px;"></div>'
+            + '<div style="text-align:left;">' + features + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border)
+    });
+
+    // Design 5: Feature matrix
+    templates.push({
+      id: tId++, category: 'tiers', mode: mode,
+      label: 'Tiers — Feature Matrix (' + mode + ')',
+      render: (function(m, g, t, mt, dm, bd) {
+        return function() {
+          var matrixFeatures = [
+            { label: 'AI Chat',           solo: true,  founder: true,  premium: true },
+            { label: 'Export',            solo: true,  founder: true,  premium: true },
+            { label: 'Basic Automations', solo: true,  founder: true,  premium: true },
+            { label: 'Cloud Sync',        solo: false, founder: true,  premium: true },
+            { label: 'Studio',            solo: false, founder: true,  premium: true },
+            { label: 'Automations Agent', solo: false, founder: true,  premium: true },
+            { label: 'Pipelines',         solo: false, founder: true,  premium: true },
+            { label: 'Social',            solo: false, founder: true,  premium: true },
+            { label: 'Focus',             solo: false, founder: true,  premium: true },
+            { label: 'Analytics',         solo: false, founder: true,  premium: true },
+            { label: 'Identity',          solo: false, founder: true,  premium: true },
+            { label: 'Mail',              solo: false, founder: true,  premium: true },
+            { label: 'Bloom',             solo: false, founder: false, premium: true },
+            { label: 'Brand Sharing',     solo: false, founder: false, premium: true },
+            { label: 'White Label',       solo: false, founder: false, premium: true },
+            { label: 'Multi-User',        solo: false, founder: false, premium: true },
+            { label: 'Private Onboarding',solo: false, founder: false, premium: true }
+          ];
+          var dash = '<span style="color:' + dm + ';font-size:16px;">&mdash;</span>';
+          var check = checkIcon(m);
+          var rowBg1 = m === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)';
+          var rowBg2 = 'transparent';
+
+          var header = '<div style="display:grid;grid-template-columns:200px 1fr 1fr 1fr;gap:0;padding:12px 16px;border-bottom:1px solid ' + bd + ';">'
+            + '<div style="font-size:13px;color:' + dm + ';letter-spacing:0.08em;text-transform:uppercase;">Feature</div>'
+            + '<div style="font-size:13px;color:' + dm + ';letter-spacing:0.08em;text-transform:uppercase;text-align:center;">Solo</div>'
+            + '<div style="font-size:13px;color:' + g + ';letter-spacing:0.08em;text-transform:uppercase;text-align:center;">Founder</div>'
+            + '<div style="font-size:13px;color:' + dm + ';letter-spacing:0.08em;text-transform:uppercase;text-align:center;">Premium</div>'
+            + '</div>';
+
+          var rows = '';
+          for (var i = 0; i < matrixFeatures.length; i++) {
+            var f = matrixFeatures[i];
+            var bg = i % 2 === 0 ? rowBg1 : rowBg2;
+            rows += '<div style="display:grid;grid-template-columns:200px 1fr 1fr 1fr;gap:0;padding:8px 16px;background:' + bg + ';">'
+              + '<div style="font-size:13px;color:' + t + ';">' + f.label + '</div>'
+              + '<div style="text-align:center;">' + (f.solo ? check : dash) + '</div>'
+              + '<div style="text-align:center;">' + (f.founder ? check : dash) + '</div>'
+              + '<div style="text-align:center;">' + (f.premium ? check : dash) + '</div>'
+              + '</div>';
+          }
+
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:50px 60px 80px;">'
+            + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:' + g + ';margin-bottom:16px;">RoweOS</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;font-weight:300;color:' + t + ';margin-bottom:36px;">Feature Comparison</div>'
+            + '<div style="width:100%;border:1px solid ' + bd + ';border-radius:12px;overflow:hidden;">'
+            + header + rows
+            + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, dim, border)
+    });
+
+    // Design 6: "Start free" CTA
+    templates.push({
+      id: tId++, category: 'tiers', mode: mode,
+      label: 'Tiers — Start Free CTA (' + mode + ')',
+      render: (function(m, g, t, mt, bd) {
+        return function() {
+          var highlights = ['Studio &amp; Automations', 'Social Publishing &amp; Analytics', 'Focus, Identity &amp; Mail'];
+          var items = '';
+          for (var i = 0; i < highlights.length; i++) {
+            items += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'
+              + checkIcon(m)
+              + '<span style="font-size:18px;color:' + t + ';">' + highlights[i] + '</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px 100px;">'
+            + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:' + g + ';margin-bottom:32px;">RoweOS</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;color:' + t + ';text-align:center;margin-bottom:16px;">1 month free.</div>'
+            + '<div style="font-size:20px;color:' + mt + ';margin-bottom:48px;">Full access. No credit card.</div>'
+            + '<div style="text-align:left;margin-bottom:48px;">' + items + '</div>'
+            + '<div style="padding:14px 44px;border:1px solid ' + g + ';border-radius:28px;font-size:18px;color:' + g + ';letter-spacing:0.06em;">Sign up at roweos.com</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, muted, border)
+    });
+  });
+})();
+
 // ─── RENDERING ENGINE ───
 
 function getVisibleTemplates() {
