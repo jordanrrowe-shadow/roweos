@@ -366,10 +366,8 @@ var templates = [];
       } else if (d.type === 'logo-wordmark') {
         content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
           + logoIcon('dark', 120)
-          + '<div style="margin-bottom:20px;"></div>'
-          + logoMark('dark', 48)
-          + '<div style="width:60px;height:1px;background:' + gold + ';opacity:0.5;margin-bottom:20px;"></div>'
-          + '<div style="font-size:18px;color:' + muted + ';letter-spacing:0.05em;text-align:center;padding:0 100px;">Operating intelligence, built for brands &amp; life.</div>'
+          + '<div style="width:60px;height:1px;background:' + gold + ';opacity:0.5;margin:28px 0 20px;"></div>'
+          + '<div style="font-size:18px;color:' + muted + ';letter-spacing:0.05em;text-align:center;padding:0 100px;">Operating intelligence, built for<br>brands &amp; life.</div>'
           + '</div>';
       } else if (d.type === 'blake') {
         content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
@@ -957,7 +955,7 @@ var TIER_DATA = {
       label: 'Tiers — 3-Column (' + mode + ')',
       render: (function(m) {
         return function() {
-          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:60px 40px 80px;">'
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px 80px;">'
             + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:' + gold + ';margin-bottom:16px;">RoweOS</div>'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + text + ';margin-bottom:48px;">Choose Your Plan</div>'
             + '<div style="display:flex;gap:24px;align-items:flex-start;">'
@@ -1099,7 +1097,7 @@ var TIER_DATA = {
               + '</div>';
           }
 
-          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:50px 60px 80px;">'
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 60px 80px;">'
             + '<div style="font-size:14px;letter-spacing:0.3em;text-transform:uppercase;color:' + g + ';margin-bottom:16px;">RoweOS</div>'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;font-weight:300;color:' + t + ';margin-bottom:36px;">Feature Comparison</div>'
             + '<div style="width:100%;border:1px solid ' + bd + ';border-radius:12px;overflow:hidden;">'
@@ -1195,7 +1193,7 @@ var TIER_DATA = {
           return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + 'helix-ember.png) center/cover no-repeat;">'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlay + ';"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;padding:80px;">'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';text-align:center;line-height:1.2;margin-bottom:40px;">Operating intelligence, built for brands &amp; life.</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';text-align:center;line-height:1.2;margin-bottom:40px;">Operating intelligence, built for<br>brands &amp; life.</div>'
             + logoIcon(m, 64)
             + '<div style="margin-top:16px;"></div>'
             + logoMark(m, 28)
@@ -1585,30 +1583,34 @@ var TIER_DATA = {
   var hId = 10000;
   var modes = ['dark', 'light'];
   var hooks = [
-    'Stop managing. Start operating.',
-    'Your AI team doesn\'t sleep.',
-    'What if your brand could think?',
-    'The future of brand management isn\'t a dashboard.',
-    'Built different. Runs different.',
-    'One platform. Every brand decision.'
+    { text: 'Stop managing. Start operating.', answer: 'RoweOS runs your brand while you run your life.' },
+    { text: 'Your AI team doesn\'t sleep.', answer: '5 agents. Autonomous scheduling. Always on.' },
+    { text: 'What if your brand could think?', answer: 'It can. Meet B.L.A.K.E.' },
+    { text: 'The future of brand management isn\'t a dashboard.', answer: 'It\'s an operating system. It\'s RoweOS.' },
+    { text: 'Built different. Runs different.', answer: 'One platform. Every brand decision. Zero busywork.' },
+    { text: 'One platform. Every brand decision.', answer: 'Strategy, content, operations, identity \u2014 unified.' }
   ];
 
   modes.forEach(function(mode) {
     var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
 
     for (var h = 0; h < hooks.length; h++) {
       templates.push({
         id: hId++, category: 'hooks', mode: mode,
-        label: 'Hook — ' + hooks[h].substring(0, 30) + '... (' + mode + ')',
-        render: (function(m, t, hook) {
+        label: 'Hook — ' + hooks[h].text.substring(0, 30) + '... (' + mode + ')',
+        render: (function(m, t, mt, g, hook) {
           return function() {
-            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;padding:80px 100px;text-align:center;">'
+            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;text-align:center;">'
               + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
-              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;">' + hook + '</div>'
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;">' + hook.text + '</div>'
+              + '<div style="width:60px;height:1px;background:' + g + ';margin:32px 0;"></div>'
+              + '<div style="font-size:20px;color:' + mt + ';max-width:700px;">' + hook.answer + '</div>'
               + '</div>';
             return cardWrap(m, inner);
           };
-        })(mode, text, hooks[h])
+        })(mode, text, muted, gold, hooks[h])
       });
     }
   });
@@ -1786,7 +1788,7 @@ var TIER_DATA = {
             + '<div style="height:32px;"></div>'
             + logoMark(m, 42)
             + '<div style="height:16px;"></div>'
-            + '<div style="font-size:18px;color:' + dm + ';max-width:600px;">Operating intelligence, built for brands &amp; life.</div>'
+            + '<div style="font-size:18px;color:' + dm + ';max-width:600px;">Operating intelligence, built for<br>brands &amp; life.</div>'
             + '<div style="height:32px;"></div>'
             + '<div style="width:60px;height:1px;background:' + g + ';"></div>'
             + '</div>';
@@ -1854,7 +1856,8 @@ var TIER_DATA = {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
             + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
-            + logoMark(m, 36)
+            + logoIcon(m, 100)
+            + '<div style="height:24px;"></div>'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">Join the private beta.</div>'
             + divider(m)
             + '<div style="font-size:18px;color:' + dm + ';margin-top:8px;">Request access at roweos.com</div>'
@@ -1873,7 +1876,8 @@ var TIER_DATA = {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
             + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
-            + logoMark(m, 36)
+            + logoIcon(m, 100)
+            + '<div style="height:24px;"></div>'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">One month free. Full access.</div>'
             + '<div style="font-size:18px;color:' + dm + ';margin-top:24px;">Sign up at roweos.com</div>'
             + ctaPill(m, 'Start Free')
@@ -1891,7 +1895,8 @@ var TIER_DATA = {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
             + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
-            + logoMark(m, 36)
+            + logoIcon(m, 80)
+            + '<div style="height:24px;"></div>'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">Early access. Permanent advantage.</div>'
             + '<div style="font-size:18px;color:' + dm + ';margin-top:24px;max-width:600px;">Beta testers get Founder free. No credit card required.</div>'
             + divider(m)
