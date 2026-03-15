@@ -1604,6 +1604,344 @@ var TIER_DATA = {
   });
 })();
 
+// ─── MOOD & ATMOSPHERE TEMPLATES (12) ───
+
+(function() {
+  var mId = 11000;
+  var modes = ['dark', 'light'];
+
+  modes.forEach(function(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+    var bg = mode === 'dark' ? '#0a0a0a' : '#ffffff';
+
+    // Design 1: Logo Glow
+    templates.push({
+      id: mId++, category: 'mood', mode: mode,
+      label: 'Mood — Logo Glow (' + mode + ')',
+      render: (function(m, g) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
+            + '<div style="position:absolute;width:800px;height:800px;background:radial-gradient(circle,' + g + ' 0%,transparent 60%);opacity:0.08;pointer-events:none;"></div>'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:160px;height:160px;position:relative;z-index:1;" crossorigin="anonymous">'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold)
+    });
+
+    // Design 2: Wordmark Bottom-Third
+    templates.push({
+      id: mId++, category: 'mood', mode: mode,
+      label: 'Mood — Wordmark Bottom-Third (' + mode + ')',
+      render: (function(m, g) {
+        return function() {
+          var inner = '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+            + '<div style="position:absolute;bottom:' + Math.round(CARD_H / 3) + 'px;left:0;right:0;text-align:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:60px;font-weight:300;color:' + g + ';">RoweOS</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold)
+    });
+
+    // Design 3: Split Panel
+    templates.push({
+      id: mId++, category: 'mood', mode: mode,
+      label: 'Mood — Split Panel (' + mode + ')',
+      render: (function(m, g, t) {
+        return function() {
+          var leftBg = m === 'dark' ? '#0a0a0a' : '#f5f3f0';
+          var rightBg = m === 'dark' ? '#0e0e0e' : '#ffffff';
+          var html = '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;position:relative;overflow:hidden;display:flex;">'
+            + '<div style="width:50%;height:100%;background:' + leftBg + ';display:flex;align-items:center;justify-content:center;">'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:100px;height:100px;margin-left:40px;" crossorigin="anonymous">'
+            + '</div>'
+            + '<div style="width:50%;height:100%;background:' + rightBg + ';display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 48px;text-align:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:300;color:' + t + ';line-height:1.25;">Your brand deserves its own operating system.</div>'
+            + '<div style="font-size:14px;color:' + g + ';letter-spacing:0.2em;text-transform:uppercase;margin-top:24px;">roweos.com</div>'
+            + '</div>'
+            + watermark(m)
+            + '</div>';
+          return html;
+        };
+      })(mode, gold, text)
+    });
+
+    // Design 4: Helix Ghost Text
+    templates.push({
+      id: mId++, category: 'mood', mode: mode,
+      label: 'Mood — Helix Ghost Text (' + mode + ')',
+      render: (function(m, t) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:url(' + IMG_PROMO + 'helix-ember.png);background-size:cover;background-position:center;"></div>'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);"></div>'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:100px;font-weight:300;color:' + t + ';opacity:0.12;">RoweOS</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, text)
+    });
+
+    // Design 5: Organism Pure Visual
+    templates.push({
+      id: mId++, category: 'mood', mode: mode,
+      label: 'Mood — Organism Pure Visual (' + mode + ')',
+      render: (function(m, g) {
+        return function() {
+          var overlay = m === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)';
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:url(' + IMG_PROMO + 'organism-ember.png);background-size:cover;background-position:center;"></div>'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlay + ';"></div>'
+            + '<div style="position:absolute;bottom:80px;left:0;right:0;text-align:center;">'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:40px;height:40px;opacity:0.6;margin-bottom:12px;" crossorigin="anonymous">'
+            + '<div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:' + g + ';opacity:0.7;">roweos.com</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold)
+    });
+
+    // Design 6: Abstract Lines
+    templates.push({
+      id: mId++, category: 'mood', mode: mode,
+      label: 'Mood — Abstract Lines (' + mode + ')',
+      render: (function(m, g) {
+        return function() {
+          var inner = '<div style="position:absolute;top:50%;left:50%;width:2000px;height:1px;background:' + g + ';opacity:0.25;transform:translate(-50%,-50%) rotate(35deg);"></div>'
+            + '<div style="position:absolute;top:50%;left:50%;width:2000px;height:1px;background:' + g + ';opacity:0.25;transform:translate(-50%,-50%) rotate(-35deg);"></div>'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + g + ';">RoweOS</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold)
+    });
+  });
+})();
+
+// ─── LOGO SHOWCASE TEMPLATES (8) ───
+
+(function() {
+  var lId = 12000;
+  var modes = ['dark', 'light'];
+
+  modes.forEach(function(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+
+    // Design 1: Centered Icon
+    templates.push({
+      id: lId++, category: 'logo', mode: mode,
+      label: 'Logo — Centered Icon (' + mode + ')',
+      render: (function(m) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:200px;height:200px;" crossorigin="anonymous">'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode)
+    });
+
+    // Design 2: Split Panel
+    templates.push({
+      id: lId++, category: 'logo', mode: mode,
+      label: 'Logo — Split Panel (' + mode + ')',
+      render: (function(m, g, t, dm) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;width:50%;height:100%;display:flex;align-items:center;justify-content:center;">'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:120px;height:120px;" crossorigin="anonymous">'
+            + '</div>'
+            + '<div style="position:absolute;top:0;left:50%;width:1px;height:100%;background:' + g + ';opacity:0.2;"></div>'
+            + '<div style="position:absolute;top:0;left:50%;width:50%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 56px;text-align:center;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:38px;font-weight:300;color:' + t + ';line-height:1.25;">Your brand deserves its own operating system.</div>'
+            + '<div style="font-size:14px;color:' + g + ';letter-spacing:0.2em;text-transform:uppercase;margin-top:24px;">roweos.com</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, dim)
+    });
+
+    // Design 3: Vertical Stack
+    templates.push({
+      id: lId++, category: 'logo', mode: mode,
+      label: 'Logo — Vertical Stack (' + mode + ')',
+      render: (function(m, g, t, dm) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:120px;height:120px;" crossorigin="anonymous">'
+            + '<div style="height:32px;"></div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + g + ';">RoweOS</div>'
+            + '<div style="height:16px;"></div>'
+            + '<div style="font-size:18px;color:' + dm + ';max-width:600px;">Operating intelligence, built for brands &amp; life.</div>'
+            + '<div style="height:32px;"></div>'
+            + '<div style="width:60px;height:1px;background:' + g + ';"></div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, dim)
+    });
+
+    // Design 4: Logo Scale Array
+    templates.push({
+      id: lId++, category: 'logo', mode: mode,
+      label: 'Logo — Scale Array (' + mode + ')',
+      render: (function(m, dm) {
+        return function() {
+          var sizes = [200, 120, 80, 56, 40, 28];
+          var rows = '';
+          for (var r = 0; r < 2; r++) {
+            var row = '<div style="display:flex;align-items:flex-end;justify-content:center;gap:60px;margin-bottom:48px;">';
+            for (var c = 0; c < 3; c++) {
+              var s = sizes[r * 3 + c];
+              row += '<div style="display:flex;flex-direction:column;align-items:center;">'
+                + '<img src="' + ROWEOS_LOGO + '" style="width:' + s + 'px;height:' + s + 'px;" crossorigin="anonymous">'
+                + '<div style="font-size:12px;color:' + dm + ';margin-top:12px;opacity:0.6;">' + s + 'px</div>'
+                + '</div>';
+            }
+            row += '</div>';
+            rows += row;
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + rows
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, dim)
+    });
+  });
+})();
+
+// ─── PRIVATE BETA SIGNUP TEMPLATES (12) ───
+
+(function() {
+  var bId = 13000;
+  var modes = ['dark', 'light'];
+
+  function ctaPill(mode, label) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    return '<div style="display:inline-block;padding:16px 40px;border:1px solid ' + gold + ';border-radius:100px;font-size:16px;letter-spacing:0.1em;text-transform:uppercase;color:' + gold + ';margin-top:32px;">' + label + '</div>';
+  }
+
+  function divider(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    return '<div style="width:60px;height:1px;background:' + gold + ';margin:24px auto;"></div>';
+  }
+
+  modes.forEach(function(mode) {
+    var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+
+    // Design 1: Join the private beta
+    templates.push({
+      id: bId++, category: 'beta', mode: mode,
+      label: 'Beta — Join the private beta (' + mode + ')',
+      render: (function(m, g, t, dm) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
+            + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+            + logoMark(m, 36)
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">Join the private beta.</div>'
+            + divider(m)
+            + '<div style="font-size:18px;color:' + dm + ';margin-top:8px;">Request access at roweos.com</div>'
+            + ctaPill(m, 'Request Early Access')
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, dim)
+    });
+
+    // Design 2: One month free
+    templates.push({
+      id: bId++, category: 'beta', mode: mode,
+      label: 'Beta — One month free (' + mode + ')',
+      render: (function(m, g, t, dm) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
+            + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+            + logoMark(m, 36)
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">One month free. Full access.</div>'
+            + '<div style="font-size:18px;color:' + dm + ';margin-top:24px;">Sign up at roweos.com</div>'
+            + ctaPill(m, 'Start Free')
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, dim)
+    });
+
+    // Design 3: Early access
+    templates.push({
+      id: bId++, category: 'beta', mode: mode,
+      label: 'Beta — Early access (' + mode + ')',
+      render: (function(m, g, t, dm) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
+            + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+            + logoMark(m, 36)
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">Early access. Permanent advantage.</div>'
+            + '<div style="font-size:18px;color:' + dm + ';margin-top:24px;max-width:600px;">Beta testers get Founder free. No credit card required.</div>'
+            + divider(m)
+            + ctaPill(m, 'Request Early Access')
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, dim)
+    });
+
+    // Design 4: Waitlist is open
+    templates.push({
+      id: bId++, category: 'beta', mode: mode,
+      label: 'Beta — Waitlist is open (' + mode + ')',
+      render: (function(m, g, t, dm) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
+            + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+            + logoMark(m, 36)
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">The waitlist is open.</div>'
+            + '<div style="font-size:18px;color:' + dm + ';margin-top:24px;max-width:600px;">Limited spots for founders who refuse to settle.</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text, dim)
+    });
+
+    // Design 5: Built for founders
+    templates.push({
+      id: bId++, category: 'beta', mode: mode,
+      label: 'Beta — Built for founders (' + mode + ')',
+      render: (function(m, g, t) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;text-align:center;">'
+            + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;">Built for founders who refuse to settle.</div>'
+            + '<div style="font-size:18px;color:' + g + ';margin-top:32px;">roweos.com</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, gold, text)
+    });
+
+    // Design 6: Private beta. Public ambition.
+    templates.push({
+      id: bId++, category: 'beta', mode: mode,
+      label: 'Beta — Private beta. Public ambition. (' + mode + ')',
+      render: (function(m, t) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;padding:80px 100px;text-align:center;">'
+            + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;">Private beta. Public ambition.</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, text)
+    });
+  });
+})();
+
 // ─── RENDERING ENGINE ───
 
 function getVisibleTemplates() {
