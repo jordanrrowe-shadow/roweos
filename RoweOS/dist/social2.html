@@ -325,6 +325,223 @@ function macWpLogo(size, opacity) {
 // ─── TEMPLATES (empty — added by separate template files) ───
 var templates = [];
 
+// ─── HELIX & ORGANISM TEMPLATES (16) ───
+
+(function() {
+  var designs = [
+    { bg: 'helix-ember.png', title: 'BRAND INTELLIGENCE PLATFORM', type: 'tagline' },
+    { bg: 'organism-ember.png', title: 'BRAND INTELLIGENCE PLATFORM', type: 'tagline' },
+    { bg: 'helix-ember.png', title: 'LIFE INTELLIGENCE PLATFORM', type: 'tagline' },
+    { bg: 'organism-ember.png', title: 'LIFE INTELLIGENCE PLATFORM', type: 'tagline' },
+    { bg: 'helix-ember.png', type: 'logo-wordmark' },
+    { bg: 'organism-ember.png', type: 'logo-wordmark' },
+    { bg: 'helix-ember.png', type: 'blake' },
+    { bg: 'organism-ember.png', type: 'ambient' }
+  ];
+  var modes = ['dark', 'light'];
+  var idCounter = 1000;
+
+  designs.forEach(function(d) {
+    modes.forEach(function(mode) {
+      var overlay = mode === 'dark' ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)';
+      var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+      var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+      var gold = mode === 'dark' ? '#b2997b' : '#8b7b67';
+      var wmColor = 'rgba(178,153,123,0.35)';
+
+      var content = '';
+
+      if (d.type === 'tagline') {
+        content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:1;">'
+          + '<div style="font-size:22px;letter-spacing:0.35em;text-transform:uppercase;color:' + gold + ';font-weight:500;text-align:center;padding:0 80px;">' + d.title + '</div>'
+          + '</div>';
+      } else if (d.type === 'logo-wordmark') {
+        content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
+          + '<img src="' + ROWEOS_LOGO + '" style="width:120px;height:120px;margin-bottom:28px;" />'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;letter-spacing:0.03em;color:' + gold + ';margin-bottom:20px;">RoweOS</div>'
+          + '<div style="width:60px;height:1px;background:' + gold + ';opacity:0.5;margin-bottom:20px;"></div>'
+          + '<div style="font-size:18px;color:' + muted + ';letter-spacing:0.05em;text-align:center;padding:0 100px;">Operating intelligence, built for brands &amp; life.</div>'
+          + '</div>';
+      } else if (d.type === 'blake') {
+        content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;color:' + text + ';margin-bottom:20px;">Meet B.L.A.K.E.</div>'
+          + '<div style="font-size:18px;color:' + muted + ';letter-spacing:0.04em;text-align:center;padding:0 100px;">Brand. Life. AI. Knowledge. Engine.</div>'
+          + '</div>';
+      } else if (d.type === 'ambient') {
+        content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
+          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;color:' + text + ';margin-bottom:20px;text-align:center;padding:0 80px;">Your ambient AI presence</div>'
+          + '<div style="font-size:17px;color:' + muted + ';letter-spacing:0.03em;text-align:center;padding:0 120px;line-height:1.6;">Not just an assistant. An entity that learns, adapts, and embodies who you are.</div>'
+          + '</div>';
+      }
+
+      var label = d.type === 'tagline' ? d.title
+        : d.type === 'logo-wordmark' ? 'Logo + Wordmark'
+        : d.type === 'blake' ? 'Meet B.L.A.K.E.'
+        : 'Ambient AI Presence';
+      var bgName = d.bg.replace('-ember.png', '');
+
+      templates.push({
+        id: idCounter++,
+        category: 'helix-organism',
+        mode: mode,
+        label: bgName.charAt(0).toUpperCase() + bgName.slice(1) + ' — ' + label + ' (' + mode + ')',
+        render: (function(bgFile, overlayColor, contentHtml, wmCol) {
+          return function() {
+            return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + bgFile + ') center/cover no-repeat;">'
+              + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlayColor + ';"></div>'
+              + contentHtml
+              + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:' + wmCol + ';font-weight:500;z-index:2;">roweos.com</div>'
+              + '</div>';
+          };
+        })(d.bg, overlay, content, wmColor)
+      });
+    });
+  });
+})();
+
+// ─── MAC WALLPAPER TEMPLATES (10) ───
+
+(function() {
+  var wpId = 2000;
+
+  // 1. Helix full-bleed
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Helix Full-Bleed',
+    render: function() {
+      return '<div style="width:' + WP_W + 'px;height:' + WP_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + 'helix-ember.png) center/cover no-repeat;">'
+        + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);"></div>'
+        + '<div style="position:absolute;bottom:80px;left:0;right:0;text-align:center;z-index:1;">'
+        + '<img src="' + ROWEOS_LOGO + '" style="width:48px;height:48px;opacity:0.6;" />'
+        + '</div></div>';
+    }
+  });
+
+  // 2. Organism full-bleed
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Organism Full-Bleed',
+    render: function() {
+      return '<div style="width:' + WP_W + 'px;height:' + WP_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + 'organism-ember.png) center/cover no-repeat;">'
+        + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.2);"></div>'
+        + '<div style="position:absolute;bottom:80px;left:0;right:0;text-align:center;z-index:1;">'
+        + '<img src="' + ROWEOS_LOGO + '" style="width:48px;height:48px;opacity:0.6;" />'
+        + '</div></div>';
+    }
+  });
+
+  // 3. Centered logo
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Centered Logo',
+    render: function() {
+      return macWpWrap(
+        macWpGlow('45%', '50%', 1600, 0.06)
+        + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
+        + '<img src="' + ROWEOS_LOGO + '" style="width:160px;height:160px;margin-bottom:32px;" />'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:120px;font-weight:300;letter-spacing:0.03em;color:#b2997b;">RoweOS</div>'
+        + '</div>'
+      );
+    }
+  });
+
+  // 4. Off-center wordmark
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Off-Center Wordmark',
+    render: function() {
+      return macWpWrap(
+        macWpGlow('30%', '70%', 1200, 0.04)
+        + '<div style="position:absolute;bottom:200px;left:200px;font-family:\'Cormorant Garamond\',serif;font-size:160px;font-weight:300;letter-spacing:0.03em;color:#b2997b;z-index:1;">RoweOS</div>'
+      );
+    }
+  });
+
+  // 5. Split panel
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Split Panel',
+    render: function() {
+      return '<div style="width:' + WP_W + 'px;height:' + WP_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;display:flex;">'
+        + '<div style="width:50%;height:100%;background:#0a0a0a;"></div>'
+        + '<div style="width:50%;height:100%;background:#0f0f0f;"></div>'
+        + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
+        + '<img src="' + ROWEOS_LOGO + '" style="width:100px;height:100px;margin-bottom:28px;" />'
+        + '<div style="width:60px;height:1px;background:#b2997b;opacity:0.4;margin-bottom:28px;"></div>'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:80px;font-weight:300;letter-spacing:0.03em;color:#b2997b;">RoweOS</div>'
+        + '</div></div>';
+    }
+  });
+
+  // 6. Helix corner
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Helix Corner',
+    render: function() {
+      return '<div style="width:' + WP_W + 'px;height:' + WP_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:#0a0a0a;">'
+        + '<div style="position:absolute;top:0;right:0;width:70%;height:100%;background:url(' + IMG_PROMO + 'helix-ember.png) center/cover no-repeat;"></div>'
+        + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to right,#0a0a0a 20%,rgba(10,10,10,0.6) 50%,transparent 80%);"></div>'
+        + '<div style="position:absolute;bottom:120px;left:120px;z-index:1;">'
+        + '<img src="' + ROWEOS_LOGO + '" style="width:56px;height:56px;opacity:0.7;" />'
+        + '</div></div>';
+    }
+  });
+
+  // 7. Organism corner
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Organism Corner',
+    render: function() {
+      return '<div style="width:' + WP_W + 'px;height:' + WP_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:#0a0a0a;">'
+        + '<div style="position:absolute;bottom:0;left:0;width:55%;height:100%;background:url(' + IMG_PROMO + 'organism-ember.png) center/cover no-repeat;"></div>'
+        + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to left,#0a0a0a 20%,rgba(10,10,10,0.6) 50%,transparent 80%);"></div>'
+        + '</div>';
+    }
+  });
+
+  // 8. Abstract gold glow
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Abstract Gold Glow',
+    render: function() {
+      return macWpWrap(
+        macWpGlow('30%', '25%', 1400, 0.05)
+        + macWpGlow('60%', '70%', 1100, 0.04)
+        + macWpGlow('50%', '45%', 900, 0.03)
+      );
+    }
+  });
+
+  // 9. Dual glow
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Dual Glow',
+    render: function() {
+      return macWpWrap(
+        macWpGlow('50%', '30%', 1400, 0.05)
+        + '<div style="position:absolute;top:50%;left:70%;transform:translate(-50%,-50%);width:1400px;height:1400px;background:radial-gradient(circle,rgba(100,130,160,0.03) 0%,transparent 55%);pointer-events:none;"></div>'
+        + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:1;">'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:120px;font-weight:300;letter-spacing:0.03em;color:#b2997b;">RoweOS</div>'
+        + '</div>'
+      );
+    }
+  });
+
+  // 10. Typography
+  templates.push({
+    id: wpId++, category: 'mac-wallpapers', mode: 'dark', w: WP_W, h: WP_H,
+    label: 'Typography',
+    render: function() {
+      return macWpWrap(
+        macWpGlow('50%', '50%', 1200, 0.04)
+        + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:1;">'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:80px;font-weight:300;letter-spacing:0.04em;color:#b2997b;text-align:center;">Brand &amp; Life Intelligence</div>'
+        + '</div>'
+      );
+    }
+  });
+})();
+
 // ─── RENDERING ENGINE ───
 
 function getVisibleTemplates() {
