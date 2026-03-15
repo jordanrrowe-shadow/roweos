@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS — Content Studio Series 2</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#0a0a0a;--surface:rgba(255,255,255,0.03);--surface-solid:#111;--surface-2:#151515;--border:rgba(255,255,255,0.08);--border-strong:rgba(255,255,255,0.12);
+--text:#ece4d8;--text-muted:#9e9487;--text-dim:#655e54;
+--gold-1:#f2dfc5;--gold-2:#c4a882;--gold-3:#b2997b;--gold-4:#8b7b67;--gold-5:#6b5d4d;
+--serif:'Cormorant Garamond',serif;--sans:'DM Sans',sans-serif;
+}
+html.light-mode{
+--bg:#ffffff;--surface:rgba(0,0,0,0.02);--surface-solid:#f5f3f0;--surface-2:#edeae6;--border:rgba(0,0,0,0.08);--border-strong:rgba(0,0,0,0.12);
+--text:#1a1a1a;--text-muted:#5a5550;--text-dim:#8a857e;
+--gold-1:#6b5d4d;--gold-2:#7a6a52;--gold-3:#8b7b67;--gold-4:#a89878;--gold-5:#b2997b;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;min-height:100vh}
+
+/* TOP BAR */
+.top-bar{padding:14px 0;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+html.light-mode .top-bar{background:rgba(255,255,255,0.92)}
+.top-bar-inner{display:flex;align-items:center;justify-content:space-between;max-width:1400px;margin:0 auto;padding:0 24px}
+.top-bar-left{display:flex;align-items:center;gap:16px}
+.top-bar-logo{height:26px;opacity:0.85}
+.top-bar-divider{width:1px;height:18px;background:var(--border-strong)}
+.top-bar-title{font-family:var(--sans);font-size:13px;color:var(--text-muted);letter-spacing:0.06em;font-weight:400}
+.top-bar-right{display:flex;align-items:center;gap:12px}
+.theme-toggle{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.25s;font-size:15px}
+.theme-toggle:hover{border-color:var(--gold-4);color:var(--gold-2)}
+
+/* LAYOUT */
+.studio-layout{display:flex;max-width:1400px;margin:0 auto;min-height:calc(100vh - 57px)}
+.sidebar{width:260px;border-right:1px solid var(--border);padding:24px 20px;flex-shrink:0;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto}
+.sidebar-section{margin-bottom:28px}
+.sidebar-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;font-weight:500}
+.sidebar-btn{display:block;width:100%;text-align:left;padding:8px 12px;border:1px solid transparent;background:transparent;color:var(--text-muted);border-radius:6px;font-family:var(--sans);font-size:12px;cursor:pointer;transition:all 0.2s;margin-bottom:2px}
+.sidebar-btn:hover{background:var(--surface);color:var(--text)}
+.sidebar-btn.active{background:rgba(178,153,123,0.1);border-color:rgba(178,153,123,0.2);color:var(--gold-2)}
+.sidebar-count{float:right;font-size:10px;color:var(--text-dim);background:var(--surface);padding:1px 7px;border-radius:8px}
+.sidebar-divider{height:1px;background:var(--border);margin:20px 0}
+.mode-toggle{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:16px}
+.mode-toggle-btn{flex:1;padding:7px 0;text-align:center;font-size:11px;font-family:var(--sans);border:none;background:transparent;color:var(--text-dim);cursor:pointer;transition:all 0.2s;letter-spacing:0.04em}
+.mode-toggle-btn.active{background:rgba(178,153,123,0.12);color:var(--gold-2)}
+.download-all-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;background:linear-gradient(135deg,var(--gold-3),var(--gold-5));color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:0.06em;cursor:pointer;transition:all 0.3s}
+.download-all-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(178,153,123,0.3)}
+.download-all-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+.download-all-btn svg{width:14px;height:14px}
+
+/* GRID */
+.grid-area{flex:1;padding:24px;overflow-y:auto}
+.grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.grid-title{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text)}
+.grid-count{font-size:12px;color:var(--text-dim)}
+.post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.post-card{position:relative;aspect-ratio:4/5;border-radius:10px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:all 0.3s;background:var(--surface-solid)}
+.post-card.mac-wallpaper{aspect-ratio:16/9}
+.post-card:hover{border-color:var(--gold-4);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,0.2)}
+.post-card-inner{width:1080px;height:1350px;transform-origin:top left;pointer-events:none}
+.post-card-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px 12px;background:linear-gradient(transparent,rgba(0,0,0,0.8));display:flex;align-items:flex-end;justify-content:space-between}
+.post-card-label{font-size:11px;color:#fff;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post-card-mode{font-size:9px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em}
+.post-card-dl{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.2s;font-size:12px;z-index:2}
+.post-card:hover .post-card-dl{opacity:1}
+
+/* PREVIEW MODAL */
+.preview-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);justify-content:center;align-items:center;padding:24px}
+.preview-modal.open{display:flex}
+.preview-content{position:relative;max-width:540px;width:100%;max-height:90vh}
+.preview-card-wrap{width:100%;aspect-ratio:4/5;overflow:hidden;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
+.preview-card-inner{width:1080px;height:1350px;transform-origin:top left}
+.preview-actions{display:flex;gap:10px;margin-top:16px;justify-content:center}
+.preview-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:0.06em;cursor:pointer;transition:all 0.3s;border:none}
+.preview-btn.primary{background:linear-gradient(135deg,var(--gold-3),var(--gold-5));color:#fff}
+.preview-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(178,153,123,0.3)}
+.preview-btn.secondary{background:rgba(255,255,255,0.08);color:var(--text-muted);border:1px solid var(--border)}
+.preview-btn.secondary:hover{border-color:var(--gold-4);color:var(--gold-2)}
+.preview-close{position:absolute;top:-40px;right:0;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all 0.2s}
+.preview-close:hover{background:rgba(255,255,255,0.1)}
+
+/* HIDDEN RENDER */
+#renderContainer{position:fixed;top:-9999px;left:-9999px;width:1080px;height:1350px;overflow:hidden;z-index:-1}
+
+/* PROGRESS BAR */
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-3),var(--gold-1));z-index:300;transition:width 0.3s;display:none}
+.progress-bar.active{display:block}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+.sidebar{display:none}
+.grid-area{padding:16px}
+.post-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+}
+@media(max-width:500px){
+.post-grid{grid-template-columns:1fr 1fr;gap:8px}
+}
+
+/* MOBILE CONTROLS */
+.mobile-controls{display:none;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;gap:6px;-webkit-overflow-scrolling:touch}
+.mobile-controls::-webkit-scrollbar{display:none}
+@media(max-width:900px){
+.mobile-controls{display:flex}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+<div class="top-bar-inner">
+<div class="top-bar-left">
+<img class="top-bar-logo" src="/images/logo-full.png" alt="RoweOS">
+<div class="top-bar-divider"></div>
+<span class="top-bar-title">Content Studio — Series 2</span>
+</div>
+<div class="top-bar-right">
+<button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+</button>
+</div>
+</div>
+</div>
+
+<!-- MOBILE FILTER BAR -->
+<div class="mobile-controls" id="mobileControls"></div>
+
+<!-- MAIN LAYOUT -->
+<div class="studio-layout">
+<!-- SIDEBAR -->
+<div class="sidebar">
+<div class="sidebar-section">
+<div class="sidebar-label">Template Mode</div>
+<div class="mode-toggle">
+<button class="mode-toggle-btn active" onclick="setModeFilter('all')">All</button>
+<button class="mode-toggle-btn" onclick="setModeFilter('dark')">Dark</button>
+<button class="mode-toggle-btn" onclick="setModeFilter('light')">Light</button>
+</div>
+</div>
+
+<div class="sidebar-section">
+<div class="sidebar-label">Categories</div>
+<div id="categoryList"></div>
+</div>
+
+<div class="sidebar-divider"></div>
+
+<div class="sidebar-section">
+<button class="download-all-btn" id="downloadAllBtn" onclick="downloadAll()">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+Download All (.zip)
+</button>
+<div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:8px" id="downloadStatus"></div>
+</div>
+</div>
+
+<!-- GRID -->
+<div class="grid-area">
+<div class="grid-header">
+<div>
+<div class="grid-title" id="gridTitle">All Templates</div>
+<div class="grid-count" id="gridCount"></div>
+</div>
+</div>
+<div class="post-grid" id="postGrid"></div>
+</div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="preview-modal" id="previewModal" onclick="if(event.target===this)closePreview()">
+<div class="preview-content">
+<button class="preview-close" onclick="closePreview()">&times;</button>
+<div class="preview-card-wrap">
+<div class="preview-card-inner" id="previewInner"></div>
+</div>
+<div class="preview-actions">
+<button class="preview-btn primary" id="previewDlBtn" onclick="downloadCurrent()">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+Download PNG
+</button>
+<button class="preview-btn secondary" onclick="closePreview()">Close</button>
+</div>
+</div>
+</div>
+
+<!-- HIDDEN RENDER CONTAINER -->
+<div id="renderContainer"></div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar" id="progressBar"></div>
+
+<script>
+/* ============================================
+   ROWEOS CONTENT STUDIO S2 — TEMPLATE ENGINE
+   ============================================ */
+
+// ─── CONFIGURATION ───
+var CARD_W = 1080, CARD_H = 1350;
+var WP_W = 5120, WP_H = 2880;
+var IMG_PROMO = '/images/promo/';
+var currentFilter = 'all';
+var currentMode = 'all';
+var previewIdx = -1;
+
+// ─── CATEGORIES ───
+var CATEGORIES = [
+  { id: 'all', label: 'All Templates' },
+  { id: 'helix-organism', label: 'Helix & Organism' },
+  { id: 'mac-wallpapers', label: 'Mac Wallpapers' },
+  { id: 'brand-intel', label: 'Brand Intelligence' },
+  { id: 'life-intel', label: 'Life Intelligence' },
+  { id: 'premium-features', label: 'Premium Features' },
+  { id: 'tiers', label: 'Tier Comparison' },
+  { id: 'client', label: 'Client Facing' },
+  { id: 'blake', label: 'B.L.A.K.E.' },
+  { id: 'value', label: 'Value Propositions' },
+  { id: 'hooks', label: 'Social Hooks' },
+  { id: 'mood', label: 'Mood & Atmosphere' },
+  { id: 'logo', label: 'Logo Showcase' },
+  { id: 'beta', label: 'Private Beta Signup' }
+];
+
+// ─── LOGO BASE64 ───
+var ROWEOS_LOGO = 'data:image/png;base64,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';
+
+// ─── HELPER: CARD WRAPPER ───
+function cardWrap(mode, inner) {
+  var bg = mode === 'dark' ? '#0a0a0a' : '#ffffff';
+  var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+  var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+  var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+  var border = mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  var surface = mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+  var g1 = mode === 'dark' ? '#f2dfc5' : '#6b5d4d';
+  var g2 = mode === 'dark' ? '#c4a882' : '#7a6a52';
+  var g3 = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  var g4 = mode === 'dark' ? '#8b7b67' : '#a89878';
+  var g5 = mode === 'dark' ? '#6b5d4d' : '#b2997b';
+  return '<div style="width:'+CARD_W+'px;height:'+CARD_H+'px;background:'+bg+';color:'+text+';font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;'
+    + '--c-bg:'+bg+';--c-text:'+text+';--c-muted:'+muted+';--c-dim:'+dim+';--c-border:'+border+';--c-surface:'+surface
+    + ';--c-g1:'+g1+';--c-g2:'+g2+';--c-g3:'+g3+';--c-g4:'+g4+';--c-g5:'+g5+';">'
+    + inner + watermark(mode) + '</div>';
+}
+
+// ─── HELPER: WATERMARK ───
+function watermark(mode) {
+  var color = mode === 'dark' ? 'rgba(178,153,123,0.35)' : 'rgba(107,93,77,0.35)';
+  return '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:'+color+';font-weight:500;">roweos.com</div>';
+}
+
+// ─── HELPER: GOLD TEXT (solid for canvas compat) ───
+function goldText(mode, text, size, weight, extra) {
+  var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  return '<span style="color:'+color+';font-size:'+size+'px;font-weight:'+(weight||400)+';'+(extra||'')+'">'+text+'</span>';
+}
+
+// ─── HELPER: SCREENSHOT FRAME ───
+function screenshotFrame(src, mode, opts) {
+  opts = opts || {};
+  var w = opts.width || 900;
+  var radius = opts.radius || 12;
+  var shadow = mode === 'dark' ? '0 8px 40px rgba(0,0,0,0.5)' : '0 8px 40px rgba(0,0,0,0.15)';
+  var border = mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)';
+  var margin = opts.margin || 'auto';
+  return '<div style="width:'+w+'px;margin:'+margin+';border-radius:'+radius+'px;overflow:hidden;box-shadow:'+shadow+';border:'+border+';">'
+    + '<img src="'+src+'" style="width:100%;display:block;" crossorigin="anonymous">'
+    + '</div>';
+}
+
+// ─── HELPER: LOGO SVG (text-based for canvas compat) ───
+function logoMark(mode, size) {
+  var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  return '<div style="font-family:\'Cormorant Garamond\',serif;font-size:'+(size||48)+'px;font-weight:300;letter-spacing:0.03em;color:'+color+';">RoweOS</div>';
+}
+
+// ─── HELPER: CHECK/BULLET ICON ───
+function checkIcon(mode) {
+  var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="2" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>';
+}
+
+// ─── HELPER: FEATURE ICON ───
+function featureIcon(name, mode) {
+  var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+  var icons = {
+    chat: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
+    studio: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>',
+    signal: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></svg>',
+    pulse: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    rhythm: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    library: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+    automations: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+    identity: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    memory: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h.01M10 12h.01M14 12h.01M18 12h.01M6 6V4M10 6V4M14 6V4M18 6V4M6 18v2M10 18v2M14 18v2M18 18v2"/></svg>',
+    inventory: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+    analytics: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+    focus: '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    'roweos-ai': '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>'
+  };
+  return icons[name] || '';
+}
+
+// ─── MAC WALLPAPER HELPERS ───
+
+function macWpWrap(inner) {
+  return '<div style="width:'+WP_W+'px;height:'+WP_H+'px;background:#0a0a0a;color:#ece4d8;font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;">'
+    + inner + '</div>';
+}
+
+function macWpGlow(top, left, size, opacity) {
+  return '<div style="position:absolute;top:'+top+';left:'+left+';transform:translate(-50%,-50%);width:'+size+'px;height:'+size+'px;background:radial-gradient(circle,rgba(178,153,123,'+(opacity||0.06)+') 0%,transparent 55%);pointer-events:none;"></div>';
+}
+
+function macWpLogo(size, opacity) {
+  return '<img src="'+ROWEOS_LOGO+'" style="width:'+(size||80)+'px;height:'+(size||80)+'px;opacity:'+(opacity||0.9)+';" />';
+}
+
+// ─── TEMPLATES (empty — added by separate template files) ───
+var templates = [];
+
+// ─── RENDERING ENGINE ───
+
+function getVisibleTemplates() {
+  return templates.filter(function(t) {
+    var catMatch = currentFilter === 'all' || t.category === currentFilter;
+    var modeMatch = currentMode === 'all' || t.mode === currentMode;
+    return catMatch && modeMatch;
+  });
+}
+
+function renderGrid() {
+  var grid = document.getElementById('postGrid');
+  var visible = getVisibleTemplates();
+
+  // Update header
+  var cat = CATEGORIES.find(function(c) { return c.id === currentFilter; });
+  document.getElementById('gridTitle').textContent = cat ? cat.label : 'All Templates';
+  document.getElementById('gridCount').textContent = visible.length + ' templates';
+
+  grid.innerHTML = '';
+
+  visible.forEach(function(t, i) {
+    var tw = t.w || CARD_W;
+    var th = t.h || CARD_H;
+    var card = document.createElement('div');
+    card.className = 'post-card' + (t.category === 'mac-wallpapers' ? ' mac-wallpaper' : '');
+    card.onclick = function(e) {
+      if (e.target.closest('.post-card-dl')) return;
+      openPreview(templates.indexOf(t));
+    };
+
+    // Render thumbnail
+    var html = t.render();
+    var inner = document.createElement('div');
+    inner.className = 'post-card-inner';
+    inner.style.width = tw + 'px';
+    inner.style.height = th + 'px';
+    inner.innerHTML = html;
+
+    // Scale to fit
+    var cardEl = card;
+    card.appendChild(inner);
+
+    // Overlay
+    var overlay = document.createElement('div');
+    overlay.className = 'post-card-overlay';
+    overlay.innerHTML = '<span class="post-card-label">' + t.label + '</span><span class="post-card-mode">' + t.mode + '</span>';
+    card.appendChild(overlay);
+
+    // Download button
+    var dlBtn = document.createElement('div');
+    dlBtn.className = 'post-card-dl';
+    dlBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+    dlBtn.onclick = function(e) {
+      e.stopPropagation();
+      downloadTemplate(templates.indexOf(t));
+    };
+    card.appendChild(dlBtn);
+
+    grid.appendChild(card);
+
+    // Apply scale after append
+    (function(el, inn, tWidth, tHeight) {
+      requestAnimationFrame(function() {
+        var cardWidth = el.offsetWidth;
+        var scale = cardWidth / tWidth;
+        inn.style.transform = 'scale(' + scale + ')';
+        el.style.height = (tHeight * scale) + 'px';
+      });
+    })(cardEl, inner, tw, th);
+  });
+}
+
+// ─── SIDEBAR ───
+
+function renderSidebar() {
+  var list = document.getElementById('categoryList');
+  var mobileCtrl = document.getElementById('mobileControls');
+  list.innerHTML = '';
+  mobileCtrl.innerHTML = '';
+
+  CATEGORIES.forEach(function(cat) {
+    var count = templates.filter(function(t) {
+      var modeMatch = currentMode === 'all' || t.mode === currentMode;
+      return (cat.id === 'all' || t.category === cat.id) && modeMatch;
+    }).length;
+    if (cat.id === 'all') count = templates.filter(function(t) { return currentMode === 'all' || t.mode === currentMode; }).length;
+
+    // Desktop sidebar
+    var btn = document.createElement('button');
+    btn.className = 'sidebar-btn' + (currentFilter === cat.id ? ' active' : '');
+    btn.innerHTML = cat.label + '<span class="sidebar-count">' + count + '</span>';
+    btn.onclick = function() { setFilter(cat.id); };
+    list.appendChild(btn);
+
+    // Mobile bar
+    var mbtn = document.createElement('button');
+    mbtn.className = 'sidebar-btn' + (currentFilter === cat.id ? ' active' : '');
+    mbtn.style.cssText = 'flex-shrink:0;padding:6px 14px;font-size:11px;border:1px solid var(--border);border-radius:20px;';
+    if (currentFilter === cat.id) mbtn.style.cssText += 'background:rgba(178,153,123,0.12);border-color:rgba(178,153,123,0.3);color:var(--gold-2);';
+    mbtn.textContent = cat.label;
+    mbtn.onclick = function() { setFilter(cat.id); };
+    mobileCtrl.appendChild(mbtn);
+  });
+}
+
+function setFilter(catId) {
+  currentFilter = catId;
+  renderSidebar();
+  renderGrid();
+}
+
+function setModeFilter(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-toggle-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.textContent.toLowerCase() === mode);
+  });
+  renderSidebar();
+  renderGrid();
+}
+
+// ─── PREVIEW ───
+
+function openPreview(idx) {
+  previewIdx = idx;
+  var t = templates[idx];
+  var tw = t.w || CARD_W;
+  var th = t.h || CARD_H;
+  var container = document.getElementById('previewInner');
+  container.innerHTML = t.render();
+  container.style.width = tw + 'px';
+  container.style.height = th + 'px';
+
+  // Scale preview
+  var wrap = container.parentElement;
+  var maxW = t.category === 'mac-wallpapers' ? 320 : 540;
+  var wrapWidth = Math.min(maxW, window.innerWidth - 48);
+  var scale = wrapWidth / tw;
+  container.style.transform = 'scale(' + scale + ')';
+  wrap.style.height = (th * scale) + 'px';
+
+  document.getElementById('previewModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePreview() {
+  document.getElementById('previewModal').classList.remove('open');
+  document.body.style.overflow = '';
+  previewIdx = -1;
+}
+
+// ─── DOWNLOAD ───
+
+// Pre-rasterize inline SVGs to PNG for html2canvas compatibility
+function rasterizeSvgs(container) {
+  return new Promise(function(resolve) {
+    var svgs = container.querySelectorAll('svg');
+    if (svgs.length === 0) { resolve(); return; }
+    var remaining = svgs.length;
+    function done() { remaining--; if (remaining <= 0) resolve(); }
+    for (var i = 0; i < svgs.length; i++) {
+      (function(svg) {
+        try {
+          var w = parseInt(svg.getAttribute('width')) || 24;
+          var h = parseInt(svg.getAttribute('height')) || 24;
+          var xml = new XMLSerializer().serializeToString(svg);
+          if (xml.indexOf('xmlns') === -1) {
+            xml = xml.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+          }
+          var blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var img = new Image();
+          img.onload = function() {
+            try {
+              var c = document.createElement('canvas');
+              c.width = w * 4; c.height = h * 4;
+              var ctx = c.getContext('2d');
+              ctx.drawImage(img, 0, 0, c.width, c.height);
+              var pngUrl = c.toDataURL('image/png');
+              URL.revokeObjectURL(url);
+              var replacement = document.createElement('img');
+              replacement.src = pngUrl;
+              replacement.setAttribute('width', w);
+              replacement.setAttribute('height', h);
+              if (svg.getAttribute('style')) replacement.setAttribute('style', svg.getAttribute('style'));
+              svg.parentNode.replaceChild(replacement, svg);
+            } catch(e) {}
+            done();
+          };
+          img.onerror = function() { URL.revokeObjectURL(url); done(); };
+          img.src = url;
+        } catch(e) { done(); }
+      })(svgs[i]);
+    }
+  });
+}
+
+function renderToCanvas(idx) {
+  return new Promise(function(resolve, reject) {
+    var t = templates[idx];
+    if (!t) { reject(new Error('Template not found: ' + idx)); return; }
+    var tw = t.w || CARD_W;
+    var th = t.h || CARD_H;
+    var renderScale = t.category === 'mac-wallpapers' ? 1 : 2;
+    var container = document.getElementById('renderContainer');
+    container.style.width = tw + 'px';
+    container.style.height = th + 'px';
+    var timedOut = false;
+
+    // 30s timeout for wallpapers, 15s for social posts
+    var timeoutMs = t.category === 'mac-wallpapers' ? 30000 : 15000;
+    var timeout = setTimeout(function() {
+      timedOut = true;
+      container.innerHTML = '';
+      reject(new Error('Render timeout for template ' + idx));
+    }, timeoutMs);
+
+    try {
+      container.innerHTML = t.render();
+    } catch(e) {
+      clearTimeout(timeout);
+      container.innerHTML = '';
+      reject(e);
+      return;
+    }
+
+    // Wait for images to load
+    var imgs = container.querySelectorAll('img');
+    var loaded = 0;
+    var total = imgs.length;
+
+    function onReady() {
+      if (timedOut) return;
+      // Pre-rasterize SVGs to PNG before html2canvas
+      rasterizeSvgs(container).then(function() {
+        if (timedOut) return;
+        html2canvas(container.firstChild, {
+          width: tw,
+          height: th,
+          scale: renderScale,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          logging: false
+        }).then(function(canvas) {
+          if (timedOut) return;
+          clearTimeout(timeout);
+          container.innerHTML = '';
+          resolve(canvas);
+        }).catch(function(e) {
+          clearTimeout(timeout);
+          container.innerHTML = '';
+          reject(e);
+        });
+      }).catch(function(e) {
+        clearTimeout(timeout);
+        container.innerHTML = '';
+        reject(e);
+      });
+    }
+
+    if (total === 0) {
+      setTimeout(onReady, 50);
+    } else {
+      imgs.forEach(function(img) {
+        if (img.complete) {
+          loaded++;
+          if (loaded >= total) setTimeout(onReady, 50);
+        } else {
+          img.onload = img.onerror = function() {
+            loaded++;
+            if (loaded >= total) setTimeout(onReady, 50);
+          };
+        }
+      });
+    }
+  });
+}
+
+function downloadTemplate(idx) {
+  var t = templates[idx];
+  renderToCanvas(idx).then(function(canvas) {
+    canvas.toBlob(function(blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'RoweOS_S2_' + t.label.replace(/[^a-zA-Z0-9]+/g, '_') + '.png';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, 'image/png');
+  }).catch(function(e) {
+    console.error('[social2] Download failed for template ' + idx + ':', e.message);
+    alert('Download failed for this template. Try again or use a different browser.');
+  });
+}
+
+function downloadCurrent() {
+  if (previewIdx >= 0) downloadTemplate(previewIdx);
+}
+
+function downloadAll() {
+  var visible = getVisibleTemplates();
+  if (visible.length === 0) return;
+
+  var btn = document.getElementById('downloadAllBtn');
+  var status = document.getElementById('downloadStatus');
+  var bar = document.getElementById('progressBar');
+  btn.disabled = true;
+  bar.classList.add('active');
+  bar.style.width = '0%';
+
+  var zip = new JSZip();
+  var completed = 0;
+
+  function processNext(i) {
+    if (i >= visible.length) {
+      status.textContent = 'Creating ZIP\u2026';
+      bar.style.width = '95%';
+      zip.generateAsync({ type: 'blob' }).then(function(content) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = 'RoweOS_Social_S2.zip';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        btn.disabled = false;
+        status.textContent = '';
+        bar.classList.remove('active');
+      });
+      return;
+    }
+
+    var t = visible[i];
+    var globalIdx = templates.indexOf(t);
+    status.textContent = 'Rendering ' + (i + 1) + ' of ' + visible.length + '\u2026';
+    bar.style.width = ((i / visible.length) * 90) + '%';
+
+    renderToCanvas(globalIdx).then(function(canvas) {
+      canvas.toBlob(function(blob) {
+        var filename = (i + 1).toString().padStart(2, '0') + '_' + t.label.replace(/[^a-zA-Z0-9]+/g, '_') + '.png';
+        zip.file(filename, blob);
+        completed++;
+        setTimeout(function() { processNext(i + 1); }, 100);
+      }, 'image/png');
+    }).catch(function(e) {
+      console.warn('[social2] Skipped template ' + (i+1) + ' (' + t.label + '):', e.message);
+      completed++;
+      setTimeout(function() { processNext(i + 1); }, 100);
+    });
+  }
+
+  processNext(0);
+}
+
+// ─── THEME ───
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('light-mode');
+  localStorage.setItem('roweos-social2-theme', document.documentElement.classList.contains('light-mode') ? 'light' : 'dark');
+}
+
+(function initTheme() {
+  var saved = localStorage.getItem('roweos-social2-theme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light-mode');
+  } else if (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    document.documentElement.classList.add('light-mode');
+  }
+})();
+
+// ─── KEYBOARD ───
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePreview();
+});
+
+// ─── INIT ───
+
+renderSidebar();
+renderGrid();
+
+// Handle window resize for grid scaling
+var resizeTimer;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderGrid, 200);
+});
+</script>
+</body>
+</html>
