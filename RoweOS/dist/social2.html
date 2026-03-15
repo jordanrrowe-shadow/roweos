@@ -542,6 +542,297 @@ var templates = [];
   });
 })();
 
+// ─── AGENT & COACH COLORS ───
+
+var AGENT_COLORS = {
+  strategy: '#a78bfa', marketing: '#f472b6', operations: '#4ade80',
+  documents: '#fbbf24', intelligence: '#22d3ee'
+};
+var COACH_COLORS = {
+  'life-coach': '#22c55e', wellness: '#06b6d4', 'tax-copilot': '#f59e0b',
+  'personal-ai': '#a78bfa', 'standard-ai': '#b2997b'
+};
+
+// ─── BRAND INTELLIGENCE TEMPLATES (16) ───
+
+(function() {
+  var biId = 3000;
+
+  var agents = [
+    { key: 'strategy', name: 'Strategy', color: AGENT_COLORS.strategy, headline: 'Strategic intelligence for every decision.', caps: ['Brand positioning', 'Market analysis', 'Competitive research', 'Growth planning', 'Revenue strategy'] },
+    { key: 'marketing', name: 'Marketing', color: AGENT_COLORS.marketing, headline: 'Content that captures and converts.', caps: ['Content strategy', 'Social media', 'Campaign planning', 'Audience targeting', 'Brand voice'] },
+    { key: 'operations', name: 'Operations', color: AGENT_COLORS.operations, headline: 'Streamline everything you do.', caps: ['Process optimization', 'Task automation', 'Resource planning', 'Workflow design', 'Efficiency tracking'] },
+    { key: 'documents', name: 'Documents', color: AGENT_COLORS.documents, headline: 'Generate any document, instantly.', caps: ['Proposals', 'Reports', 'Presentations', 'Contracts', 'Brand guidelines'] },
+    { key: 'intelligence', name: 'Intelligence', color: AGENT_COLORS.intelligence, headline: 'Deep research, real-time insights.', caps: ['Web research', 'Data analysis', 'Trend monitoring', 'Competitor tracking', 'Market intelligence'] }
+  ];
+
+  var views = ['chat', 'studio', 'focus', 'pulse', 'rhythm', 'library', 'automations', 'identity', 'analytics'];
+  var viewLabels = ['Chat', 'Studio', 'Focus', 'Pulse', 'Rhythm', 'Library', 'Automations', 'Identity', 'Analytics'];
+
+  function agentIcon(color, size) {
+    var s = size || 64;
+    return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+  }
+
+  function pill(mode, label) {
+    var border = mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
+    var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    return '<span style="display:inline-block;padding:4px 14px;border:1px solid ' + border + ';border-radius:20px;font-size:14px;color:' + color + ';letter-spacing:0.06em;">' + label + '</span>';
+  }
+
+  ['dark', 'light'].forEach(function(mode) {
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+    var surface = mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+
+    // Design 1: Overview Grid
+    templates.push({
+      id: biId++, category: 'brand-intel', mode: mode,
+      label: 'Brand Intel — Overview Grid (' + mode + ')',
+      render: (function(m, txt, mt, sf) {
+        return function() {
+          var cells = '';
+          for (var i = 0; i < agents.length; i++) {
+            var a = agents[i];
+            cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:' + sf + ';border-radius:12px;">'
+              + '<div style="width:64px;height:64px;border-radius:50%;background:' + a.color + '1a;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">'
+              + agentIcon(a.color, 32) + '</div>'
+              + '<div style="font-size:16px;font-weight:500;color:' + txt + ';margin-bottom:4px;">' + a.name + '</div>'
+              + '<div style="font-size:12px;color:' + mt + ';letter-spacing:0.08em;text-transform:uppercase;">Agent</div>'
+              + '</div>';
+          }
+          // RoweOS logo cell
+          cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:' + sf + ';border-radius:12px;">'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:48px;height:48px;margin-bottom:12px;opacity:0.8;" />'
+            + '<div style="font-size:16px;font-weight:500;color:' + txt + ';">RoweOS</div>'
+            + '</div>';
+
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:400;color:' + txt + ';text-align:center;margin-bottom:60px;">Brand Intelligence Platform</div>'
+            + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;">' + cells + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, text, muted, surface)
+    });
+
+    // Designs 2-6: Individual Agent Spotlights
+    for (var ai = 0; ai < agents.length; ai++) {
+      (function(a, m, txt, mt) {
+        templates.push({
+          id: biId++, category: 'brand-intel', mode: m,
+          label: 'Brand Intel — ' + a.name + ' Agent (' + m + ')',
+          render: function() {
+            var capList = '';
+            for (var c = 0; c < a.caps.length; c++) {
+              capList += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">'
+                + checkIcon(m)
+                + '<span style="font-size:20px;color:' + txt + ';">' + a.caps[c] + '</span>'
+                + '</div>';
+            }
+            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid ' + a.color + ';display:flex;flex-direction:column;padding:80px 80px 60px;">'
+              + '<div style="margin-bottom:32px;">' + agentIcon(a.color, 64) + '</div>'
+              + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">'
+              + '<span style="font-size:28px;font-weight:600;color:' + txt + ';">' + a.name + '</span>'
+              + pill(m, 'BrandAI')
+              + '</div>'
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:400;color:' + txt + ';margin-bottom:48px;line-height:1.15;">' + a.headline + '</div>'
+              + capList
+              + '</div>';
+            return cardWrap(m, inner);
+          }
+        });
+      })(agents[ai], mode, text, muted);
+    }
+
+    // Design 7: Unified Statement
+    templates.push({
+      id: biId++, category: 'brand-intel', mode: mode,
+      label: 'Brand Intel — Unified Statement (' + mode + ')',
+      render: (function(m, txt, mt) {
+        return function() {
+          var dots = '';
+          for (var i = 0; i < agents.length; i++) {
+            dots += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;">'
+              + '<div style="width:16px;height:16px;border-radius:50%;background:' + agents[i].color + ';"></div>'
+              + '<div style="font-size:13px;color:' + mt + ';letter-spacing:0.04em;">' + agents[i].name + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:400;color:' + txt + ';text-align:center;margin-bottom:60px;line-height:1.15;">5 AI agents.<br>One unified platform.</div>'
+            + '<div style="display:flex;align-items:flex-start;gap:40px;margin-bottom:40px;">' + dots + '</div>'
+            + pill(m, 'BrandAI')
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, text, muted)
+    });
+
+    // Design 8: BrandAI View Grid
+    templates.push({
+      id: biId++, category: 'brand-intel', mode: mode,
+      label: 'Brand Intel — View Grid (' + mode + ')',
+      render: (function(m, txt, mt) {
+        return function() {
+          var grid = '';
+          for (var i = 0; i < views.length; i++) {
+            grid += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">'
+              + featureIcon(views[i], m)
+              + '<div style="font-size:14px;color:' + mt + ';letter-spacing:0.04em;">' + viewLabels[i] + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
+            + pill(m, 'BrandAI')
+            + '<div style="margin-top:50px;display:grid;grid-template-columns:repeat(3,1fr);gap:44px;">' + grid + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, text, muted)
+    });
+  });
+})();
+
+// ─── LIFE INTELLIGENCE TEMPLATES (16) ───
+
+(function() {
+  var liId = 4000;
+
+  var coaches = [
+    { key: 'life-coach', name: 'Life Coach', color: COACH_COLORS['life-coach'], headline: 'Guidance for every chapter of your life.', caps: ['Goal setting', 'Habit tracking', 'Daily planning', 'Motivation', 'Life reviews'] },
+    { key: 'wellness', name: 'Wellness', color: COACH_COLORS.wellness, headline: 'Your health, optimized.', caps: ['Fitness guidance', 'Nutrition advice', 'Sleep optimization', 'Stress management', 'Mental health'] },
+    { key: 'tax-copilot', name: 'Tax Copilot', color: COACH_COLORS['tax-copilot'], headline: 'Finances without the headache.', caps: ['Tax planning', 'Deduction tracking', 'Deadline reminders', 'Document organization', 'Quarterly estimates'] },
+    { key: 'personal-ai', name: 'Personal AI', color: COACH_COLORS['personal-ai'], headline: 'Your digital right hand.', caps: ['Personal assistant', 'Reminders', 'Research', 'Recommendations', 'Decision support'] },
+    { key: 'standard-ai', name: 'Standard AI', color: COACH_COLORS['standard-ai'], headline: 'Conversation without limits.', caps: ['General chat', 'Creative writing', 'Analysis', 'Brainstorming', 'Learning'] }
+  ];
+
+  var views = ['chat', 'studio', 'focus', 'pulse', 'rhythm', 'library', 'automations', 'identity', 'analytics'];
+  var viewLabels = ['Chat', 'Studio', 'Focus', 'Pulse', 'Rhythm', 'Library', 'Automations', 'Identity', 'Analytics'];
+
+  function coachIcon(color, size) {
+    var s = size || 64;
+    return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+  }
+
+  function pill(mode, label) {
+    var border = mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)';
+    var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
+    return '<span style="display:inline-block;padding:4px 14px;border:1px solid ' + border + ';border-radius:20px;font-size:14px;color:' + color + ';letter-spacing:0.06em;">' + label + '</span>';
+  }
+
+  ['dark', 'light'].forEach(function(mode) {
+    var text = mode === 'dark' ? '#ece4d8' : '#1a1a1a';
+    var muted = mode === 'dark' ? '#9e9487' : '#5a5550';
+    var dim = mode === 'dark' ? '#655e54' : '#8a857e';
+    var surface = mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)';
+
+    // Design 1: Overview Grid
+    templates.push({
+      id: liId++, category: 'life-intel', mode: mode,
+      label: 'Life Intel — Overview Grid (' + mode + ')',
+      render: (function(m, txt, mt, sf) {
+        return function() {
+          var cells = '';
+          for (var i = 0; i < coaches.length; i++) {
+            var c = coaches[i];
+            cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:' + sf + ';border-radius:12px;">'
+              + '<div style="width:64px;height:64px;border-radius:50%;background:' + c.color + '1a;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">'
+              + coachIcon(c.color, 32) + '</div>'
+              + '<div style="font-size:16px;font-weight:500;color:' + txt + ';margin-bottom:4px;">' + c.name + '</div>'
+              + '<div style="font-size:12px;color:' + mt + ';letter-spacing:0.08em;text-transform:uppercase;">Coach</div>'
+              + '</div>';
+          }
+          // RoweOS logo cell
+          cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:' + sf + ';border-radius:12px;">'
+            + '<img src="' + ROWEOS_LOGO + '" style="width:48px;height:48px;margin-bottom:12px;opacity:0.8;" />'
+            + '<div style="font-size:16px;font-weight:500;color:' + txt + ';">RoweOS</div>'
+            + '</div>';
+
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:400;color:' + txt + ';text-align:center;margin-bottom:60px;">Life Intelligence Platform</div>'
+            + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;">' + cells + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, text, muted, surface)
+    });
+
+    // Designs 2-6: Individual Coach Spotlights
+    for (var ci = 0; ci < coaches.length; ci++) {
+      (function(c, m, txt, mt) {
+        templates.push({
+          id: liId++, category: 'life-intel', mode: m,
+          label: 'Life Intel — ' + c.name + ' Coach (' + m + ')',
+          render: function() {
+            var capList = '';
+            for (var k = 0; k < c.caps.length; k++) {
+              capList += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">'
+                + checkIcon(m)
+                + '<span style="font-size:20px;color:' + txt + ';">' + c.caps[k] + '</span>'
+                + '</div>';
+            }
+            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid ' + c.color + ';display:flex;flex-direction:column;padding:80px 80px 60px;">'
+              + '<div style="margin-bottom:32px;">' + coachIcon(c.color, 64) + '</div>'
+              + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">'
+              + '<span style="font-size:28px;font-weight:600;color:' + txt + ';">' + c.name + '</span>'
+              + pill(m, 'LifeAI')
+              + '</div>'
+              + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:400;color:' + txt + ';margin-bottom:48px;line-height:1.15;">' + c.headline + '</div>'
+              + capList
+              + '</div>';
+            return cardWrap(m, inner);
+          }
+        });
+      })(coaches[ci], mode, text, muted);
+    }
+
+    // Design 7: Unified Statement
+    templates.push({
+      id: liId++, category: 'life-intel', mode: mode,
+      label: 'Life Intel — Unified Statement (' + mode + ')',
+      render: (function(m, txt, mt) {
+        return function() {
+          var dots = '';
+          for (var i = 0; i < coaches.length; i++) {
+            dots += '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;">'
+              + '<div style="width:16px;height:16px;border-radius:50%;background:' + coaches[i].color + ';"></div>'
+              + '<div style="font-size:13px;color:' + mt + ';letter-spacing:0.04em;">' + coaches[i].name + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:400;color:' + txt + ';text-align:center;margin-bottom:60px;line-height:1.15;">5 AI coaches.<br>One unified platform.</div>'
+            + '<div style="display:flex;align-items:flex-start;gap:40px;margin-bottom:40px;">' + dots + '</div>'
+            + pill(m, 'LifeAI')
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, text, muted)
+    });
+
+    // Design 8: LifeAI View Grid
+    templates.push({
+      id: liId++, category: 'life-intel', mode: mode,
+      label: 'Life Intel — View Grid (' + mode + ')',
+      render: (function(m, txt, mt) {
+        return function() {
+          var grid = '';
+          for (var i = 0; i < views.length; i++) {
+            grid += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">'
+              + featureIcon(views[i], m)
+              + '<div style="font-size:14px;color:' + mt + ';letter-spacing:0.04em;">' + viewLabels[i] + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
+            + pill(m, 'LifeAI')
+            + '<div style="margin-top:50px;display:grid;grid-template-columns:repeat(3,1fr);gap:44px;">' + grid + '</div>'
+            + '</div>';
+          return cardWrap(m, inner);
+        };
+      })(mode, text, muted)
+    });
+  });
+})();
+
 // ─── RENDERING ENGINE ───
 
 function getVisibleTemplates() {
