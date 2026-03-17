@@ -283,7 +283,7 @@ function screenshotFrame(src, mode, opts) {
 
 // ─── HELPER: LOGO WORDMARK (cursive image) ───
 function logoMark(mode, size) {
-  var height = size || 48;
+  var height = Math.round((size || 48) * 1.5);
   var width = Math.round(height * 3.5);
   return '<img src="' + LOGO_WORDMARK + '" style="height:' + height + 'px;width:auto;max-width:' + width + 'px;object-fit:contain;" crossorigin="anonymous" />';
 }
@@ -365,9 +365,11 @@ var templates = [];
           + '</div>';
       } else if (d.type === 'logo-wordmark') {
         content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
-          + logoIcon('dark', 120)
+          + logoIcon('dark', 160)
           + '<div style="width:60px;height:1px;background:' + gold + ';opacity:0.5;margin:28px 0 20px;"></div>'
-          + '<div style="font-size:18px;color:' + muted + ';letter-spacing:0.05em;text-align:center;padding:0 100px;">Operating intelligence, built for<br>brands &amp; life.</div>'
+          + logoMark('dark', 100)
+          + '<div style="height:20px;"></div>'
+          + '<div style="font-size:18px;color:' + muted + ';letter-spacing:0.05em;text-align:center;padding:0 100px;">Operating intelligence,<br>built for brands &amp; life.</div>'
           + '</div>';
       } else if (d.type === 'blake') {
         content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
@@ -446,7 +448,7 @@ var templates = [];
         macWpGlow('45%', '50%', 1600, 0.06)
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
         + '<img src="' + LOGO_ICON_DARK + '" style="width:160px;height:160px;border-radius:18%;margin-bottom:32px;" crossorigin="anonymous" />'
-        + logoMark('dark', 72)
+        + logoMark('dark', 100)
         + '</div>'
       );
     }
@@ -459,7 +461,7 @@ var templates = [];
     render: function() {
       return macWpWrap(
         macWpGlow('30%', '70%', 1200, 0.04)
-        + '<div style="position:absolute;bottom:200px;left:200px;z-index:1;">' + logoMark('dark', 100) + '</div>'
+        + '<div style="position:absolute;bottom:200px;left:200px;z-index:1;">' + logoMark('dark', 140) + '</div>'
       );
     }
   });
@@ -475,7 +477,7 @@ var templates = [];
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
         + '<img src="' + LOGO_ICON_DARK + '" style="width:100px;height:100px;border-radius:18%;margin-bottom:28px;" crossorigin="anonymous" />'
         + '<div style="width:60px;height:1px;background:#b2997b;opacity:0.4;margin-bottom:28px;"></div>'
-        + logoMark('dark', 52)
+        + logoMark('dark', 80)
         + '</div></div>';
     }
   });
@@ -528,7 +530,7 @@ var templates = [];
         macWpGlow('50%', '30%', 1400, 0.05)
         + '<div style="position:absolute;top:50%;left:70%;transform:translate(-50%,-50%);width:1400px;height:1400px;background:radial-gradient(circle,rgba(100,130,160,0.03) 0%,transparent 55%);pointer-events:none;"></div>'
         + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:1;">'
-        + logoMark('dark', 72)
+        + logoMark('dark', 100)
         + '</div>'
       );
     }
@@ -603,8 +605,8 @@ var COACH_COLORS = {
           for (var i = 0; i < agents.length; i++) {
             var a = agents[i];
             cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:' + sf + ';border-radius:12px;">'
-              + '<div style="width:64px;height:64px;border-radius:50%;background:' + a.color + '1a;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">'
-              + agentIcon(a.color, 32) + '</div>'
+              + '<div style="width:64px;height:64px;border-radius:50%;background:' + a.color + '1a;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:28px;font-weight:600;color:' + a.color + ';">'
+              + a.name.charAt(0) + '</div>'
               + '<div style="font-size:16px;font-weight:500;color:' + txt + ';margin-bottom:4px;">' + a.name + '</div>'
               + '<div style="font-size:12px;color:' + mt + ';letter-spacing:0.08em;text-transform:uppercase;">Agent</div>'
               + '</div>';
@@ -615,7 +617,7 @@ var COACH_COLORS = {
             + '<div style="font-size:16px;font-weight:500;color:' + txt + ';margin-top:12px;">RoweOS</div>'
             + '</div>';
 
-          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 80px 60px;">'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:400;color:' + txt + ';text-align:center;margin-bottom:60px;">Brand Intelligence Platform</div>'
             + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;">' + cells + '</div>'
             + '</div>';
@@ -638,8 +640,8 @@ var COACH_COLORS = {
                 + '<span style="font-size:20px;color:' + txt + ';">' + a.caps[c] + '</span>'
                 + '</div>';
             }
-            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid ' + a.color + ';display:flex;flex-direction:column;padding:80px 80px 60px;">'
-              + '<div style="margin-bottom:32px;">' + agentIcon(a.color, 64) + '</div>'
+            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid ' + a.color + ';display:flex;flex-direction:column;justify-content:center;padding:80px 80px 60px;">'
+              + '<div style="position:absolute;top:40px;left:40px;">' + logoIcon(m, 56) + '</div>'
               + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">'
               + '<span style="font-size:28px;font-weight:600;color:' + txt + ';">' + a.name + '</span>'
               + pill(m, 'BrandAI')
@@ -689,7 +691,7 @@ var COACH_COLORS = {
               + '<div style="font-size:14px;color:' + mt + ';letter-spacing:0.04em;">' + viewLabels[i] + '</div>'
               + '</div>';
           }
-          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 80px 60px;">'
             + pill(m, 'BrandAI')
             + '<div style="margin-top:50px;display:grid;grid-template-columns:repeat(3,1fr);gap:44px;">' + grid + '</div>'
             + '</div>';
@@ -743,8 +745,8 @@ var COACH_COLORS = {
           for (var i = 0; i < coaches.length; i++) {
             var c = coaches[i];
             cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:' + sf + ';border-radius:12px;">'
-              + '<div style="width:64px;height:64px;border-radius:50%;background:' + c.color + '1a;display:flex;align-items:center;justify-content:center;margin-bottom:12px;">'
-              + coachIcon(c.color, 32) + '</div>'
+              + '<div style="width:64px;height:64px;border-radius:50%;background:' + c.color + '1a;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:28px;font-weight:600;color:' + c.color + ';">'
+              + c.name.charAt(0) + '</div>'
               + '<div style="font-size:16px;font-weight:500;color:' + txt + ';margin-bottom:4px;">' + c.name + '</div>'
               + '<div style="font-size:12px;color:' + mt + ';letter-spacing:0.08em;text-transform:uppercase;">Coach</div>'
               + '</div>';
@@ -755,7 +757,7 @@ var COACH_COLORS = {
             + '<div style="font-size:16px;font-weight:500;color:' + txt + ';margin-top:12px;">RoweOS</div>'
             + '</div>';
 
-          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 80px 60px;">'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:400;color:' + txt + ';text-align:center;margin-bottom:60px;">Life Intelligence Platform</div>'
             + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;">' + cells + '</div>'
             + '</div>';
@@ -778,8 +780,8 @@ var COACH_COLORS = {
                 + '<span style="font-size:20px;color:' + txt + ';">' + c.caps[k] + '</span>'
                 + '</div>';
             }
-            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid ' + c.color + ';display:flex;flex-direction:column;padding:80px 80px 60px;">'
-              + '<div style="margin-bottom:32px;">' + coachIcon(c.color, 64) + '</div>'
+            var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid ' + c.color + ';display:flex;flex-direction:column;justify-content:center;padding:80px 80px 60px;">'
+              + '<div style="position:absolute;top:40px;left:40px;">' + logoIcon(m, 56) + '</div>'
               + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">'
               + '<span style="font-size:28px;font-weight:600;color:' + txt + ';">' + c.name + '</span>'
               + pill(m, 'LifeAI')
@@ -829,7 +831,7 @@ var COACH_COLORS = {
               + '<div style="font-size:14px;color:' + mt + ';letter-spacing:0.04em;">' + viewLabels[i] + '</div>'
               + '</div>';
           }
-          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:80px 80px 60px;">'
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 80px 60px;">'
             + pill(m, 'LifeAI')
             + '<div style="margin-top:50px;display:grid;grid-template-columns:repeat(3,1fr);gap:44px;">' + grid + '</div>'
             + '</div>';
@@ -1193,10 +1195,10 @@ var TIER_DATA = {
           return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;position:relative;overflow:hidden;font-family:\'DM Sans\',sans-serif;background:url(' + IMG_PROMO + 'helix-ember.png) center/cover no-repeat;">'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlay + ';"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;padding:80px;">'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';text-align:center;line-height:1.2;margin-bottom:40px;">Operating intelligence, built for<br>brands &amp; life.</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:' + t + ';text-align:center;line-height:1.2;margin-bottom:40px;">Operating intelligence,<br>built for brands &amp; life.</div>'
             + logoIcon(m, 64)
             + '<div style="margin-top:16px;"></div>'
-            + logoMark(m, 28)
+            + logoMark(m, 72)
             + '</div>'
             + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;z-index:2;">roweos.com</div>'
             + '</div>';
@@ -1527,6 +1529,7 @@ var TIER_DATA = {
               + '</div>';
           }
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 60px;">'
+            + '<div style="margin-bottom:24px;">' + logoIcon(m, 64) + '</div>'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:300;color:' + t + ';text-align:center;margin-bottom:48px;">Intelligence in Action</div>'
             + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;width:100%;max-width:800px;">' + cells + '</div>'
             + '</div>';
@@ -1564,7 +1567,7 @@ var TIER_DATA = {
           return function() {
             var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
               + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
-              + logoMark(m, 36)
+              + logoMark(m, 80)
               + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;margin-bottom:32px;">' + headline + '</div>'
               + '<div style="width:60px;height:1px;background:' + g + ';margin-bottom:24px;"></div>'
               + '<div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:' + dm + ';">Brand &amp; Life Intelligence Platform</div>'
@@ -1651,7 +1654,7 @@ var TIER_DATA = {
         return function() {
           var inner = '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
             + '<div style="position:absolute;bottom:' + Math.round(CARD_H / 3) + 'px;left:0;right:0;text-align:center;">'
-            + logoMark(m, 42)
+            + logoMark(m, 120)
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1690,7 +1693,7 @@ var TIER_DATA = {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:url(' + IMG_PROMO + 'helix-ember.png);background-size:cover;background-position:center;"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
-            + '<div style="opacity:0.12;">' + logoMark(m, 64) + '</div>'
+            + '<div style="opacity:0.12;">' + logoMark(m, 120) + '</div>'
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1706,9 +1709,9 @@ var TIER_DATA = {
           var overlay = m === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)';
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:url(' + IMG_PROMO + 'organism-ember.png);background-size:cover;background-position:center;"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:' + overlay + ';"></div>'
-            + '<div style="position:absolute;bottom:80px;left:0;right:0;text-align:center;">'
-            + '<div style="margin-bottom:12px;">' + logoIcon(m, 40) + '</div>'
-            + '<div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:' + g + ';opacity:0.7;">roweos.com</div>'
+            + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">'
+            + logoIcon(m, 140)
+            + '<div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:' + g + ';opacity:0.7;margin-top:24px;">roweos.com</div>'
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1724,7 +1727,7 @@ var TIER_DATA = {
           var inner = '<div style="position:absolute;top:50%;left:50%;width:2000px;height:1px;background:' + g + ';opacity:0.25;transform:translate(-50%,-50%) rotate(35deg);"></div>'
             + '<div style="position:absolute;top:50%;left:50%;width:2000px;height:1px;background:' + g + ';opacity:0.25;transform:translate(-50%,-50%) rotate(-35deg);"></div>'
             + '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">'
-            + logoMark(m, 36)
+            + logoMark(m, 80)
             + '</div>';
           return cardWrap(m, inner);
         };
@@ -1786,9 +1789,9 @@ var TIER_DATA = {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">'
             + logoIcon(m, 120)
             + '<div style="height:32px;"></div>'
-            + logoMark(m, 42)
+            + logoMark(m, 120)
             + '<div style="height:16px;"></div>'
-            + '<div style="font-size:18px;color:' + dm + ';max-width:600px;">Operating intelligence, built for<br>brands &amp; life.</div>'
+            + '<div style="font-size:18px;color:' + dm + ';max-width:600px;">Operating intelligence,<br>built for brands &amp; life.</div>'
             + '<div style="height:32px;"></div>'
             + '<div style="width:60px;height:1px;background:' + g + ';"></div>'
             + '</div>';
@@ -1895,7 +1898,7 @@ var TIER_DATA = {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
             + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
-            + logoIcon(m, 80)
+            + logoIcon(m, 100)
             + '<div style="height:24px;"></div>'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">Early access. Permanent advantage.</div>'
             + '<div style="font-size:18px;color:' + dm + ';margin-top:24px;max-width:600px;">Beta testers get Founder free. No credit card required.</div>'
@@ -1915,7 +1918,7 @@ var TIER_DATA = {
         return function() {
           var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 72px;text-align:center;">'
             + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.06) 0%,transparent 55%);pointer-events:none;"></div>'
-            + logoMark(m, 36)
+            + logoMark(m, 80)
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:62px;font-weight:300;color:' + t + ';max-width:800px;line-height:1.15;margin-top:32px;">The waitlist is open.</div>'
             + '<div style="font-size:18px;color:' + dm + ';margin-top:24px;max-width:600px;">Limited spots for founders who refuse to settle.</div>'
             + '</div>';
@@ -1981,8 +1984,11 @@ function renderGrid() {
   visible.forEach(function(t, i) {
     var tw = t.w || CARD_W;
     var th = t.h || CARD_H;
+    var isWp = t.category === 'mac-wallpapers';
+    var dispW = isWp ? 1920 : tw;
+    var dispH = isWp ? 1080 : th;
     var card = document.createElement('div');
-    card.className = 'post-card' + (t.category === 'mac-wallpapers' ? ' mac-wallpaper' : '');
+    card.className = 'post-card' + (isWp ? ' mac-wallpaper' : '');
     card.onclick = function(e) {
       if (e.target.closest('.post-card-dl')) return;
       openPreview(templates.indexOf(t));
@@ -1992,9 +1998,13 @@ function renderGrid() {
     var html = t.render();
     var inner = document.createElement('div');
     inner.className = 'post-card-inner';
-    inner.style.width = tw + 'px';
-    inner.style.height = th + 'px';
-    inner.innerHTML = html;
+    inner.style.width = dispW + 'px';
+    inner.style.height = dispH + 'px';
+    if (isWp) {
+      inner.innerHTML = '<div style="width:'+tw+'px;height:'+th+'px;transform:scale('+(dispW/tw)+');transform-origin:top left;">' + html + '</div>';
+    } else {
+      inner.innerHTML = html;
+    }
 
     // Scale to fit
     var cardEl = card;
@@ -2019,14 +2029,14 @@ function renderGrid() {
     grid.appendChild(card);
 
     // Apply scale after append
-    (function(el, inn, tWidth, tHeight) {
+    (function(el, inn, dW, dH) {
       requestAnimationFrame(function() {
         var cardWidth = el.offsetWidth;
-        var scale = cardWidth / tWidth;
+        var scale = cardWidth / dW;
         inn.style.transform = 'scale(' + scale + ')';
-        el.style.height = (tHeight * scale) + 'px';
+        el.style.height = (dH * scale) + 'px';
       });
-    })(cardEl, inner, tw, th);
+    })(cardEl, inner, dispW, dispH);
   });
 }
 
@@ -2085,18 +2095,25 @@ function openPreview(idx) {
   var t = templates[idx];
   var tw = t.w || CARD_W;
   var th = t.h || CARD_H;
+  var isWp = t.category === 'mac-wallpapers';
+  var dispW = isWp ? 1920 : tw;
+  var dispH = isWp ? 1080 : th;
   var container = document.getElementById('previewInner');
-  container.innerHTML = t.render();
-  container.style.width = tw + 'px';
-  container.style.height = th + 'px';
+  if (isWp) {
+    container.innerHTML = '<div style="width:'+tw+'px;height:'+th+'px;transform:scale('+(dispW/tw)+');transform-origin:top left;">' + t.render() + '</div>';
+  } else {
+    container.innerHTML = t.render();
+  }
+  container.style.width = dispW + 'px';
+  container.style.height = dispH + 'px';
 
   // Scale preview
   var wrap = container.parentElement;
-  var maxW = t.category === 'mac-wallpapers' ? 320 : 540;
+  var maxW = isWp ? 640 : 540;
   var wrapWidth = Math.min(maxW, window.innerWidth - 48);
-  var scale = wrapWidth / tw;
+  var scale = wrapWidth / dispW;
   container.style.transform = 'scale(' + scale + ')';
-  wrap.style.height = (th * scale) + 'px';
+  wrap.style.height = (dispH * scale) + 'px';
 
   document.getElementById('previewModal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2294,8 +2311,10 @@ function downloadAll() {
 
     renderToCanvas(globalIdx).then(function(canvas) {
       canvas.toBlob(function(blob) {
-        var filename = (i + 1).toString().padStart(2, '0') + '_' + t.label.replace(/[^a-zA-Z0-9]+/g, '_') + '.png';
-        zip.file(filename, blob);
+        var catObj = CATEGORIES.find(function(c) { return c.id === t.category; });
+        var folderName = catObj ? catObj.label.replace(/[^a-zA-Z0-9 ]+/g, '').replace(/\s+/g, '_') : 'Other';
+        var filename = t.label.replace(/[^a-zA-Z0-9]+/g, '_') + '.png';
+        zip.file(folderName + '/' + filename, blob);
         completed++;
         setTimeout(function() { processNext(i + 1); }, 100);
       }, 'image/png');
