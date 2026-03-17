@@ -333,7 +333,7 @@ function macWpLogo(size, opacity) {
 // ─── TEMPLATES (empty — added by separate template files) ───
 var templates = [];
 
-// ─── HELIX & ORGANISM TEMPLATES (16) ───
+// ─── HELIX & ORGANISM TEMPLATES (24) ───
 
 (function() {
   var designs = [
@@ -344,7 +344,11 @@ var templates = [];
     { bg: 'helix-ember.png', type: 'logo-wordmark' },
     { bg: 'organism-ember.png', type: 'logo-wordmark' },
     { bg: 'helix-ember.png', type: 'blake' },
-    { bg: 'organism-ember.png', type: 'ambient' }
+    { bg: 'organism-ember.png', type: 'ambient' },
+    { bg: 'helix-ember.png', type: 'icon-only' },
+    { bg: 'organism-ember.png', type: 'icon-only' },
+    { bg: 'helix-ember.png', type: 'wordmark-only' },
+    { bg: 'organism-ember.png', type: 'wordmark-only' }
   ];
   var modes = ['dark', 'light'];
   var idCounter = 1000;
@@ -364,11 +368,13 @@ var templates = [];
           + '<div style="font-size:22px;letter-spacing:0.35em;text-transform:uppercase;color:' + gold + ';font-weight:500;text-align:center;padding:0 80px;">' + d.title + '</div>'
           + '</div>';
       } else if (d.type === 'logo-wordmark') {
-        content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;">'
-          + logoIcon('dark', 160)
-          + '<div style="width:60px;height:1px;background:' + gold + ';opacity:0.5;margin:28px 0 20px;"></div>'
-          + logoMark('dark', 100)
+        content = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:1;">'
+          + logoIcon(mode, 160)
+          + '<div style="height:24px;"></div>'
+          + logoMark(mode, 80)
           + '<div style="height:20px;"></div>'
+          + '<div style="width:60px;height:1px;background:' + gold + ';opacity:0.5;"></div>'
+          + '<div style="height:16px;"></div>'
           + '<div style="font-size:18px;color:' + muted + ';letter-spacing:0.05em;text-align:center;padding:0 100px;">Operating intelligence,<br>built for brands &amp; life.</div>'
           + '</div>';
       } else if (d.type === 'blake') {
@@ -381,11 +387,23 @@ var templates = [];
           + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;color:' + text + ';margin-bottom:20px;text-align:center;padding:0 80px;">Your ambient AI presence</div>'
           + '<div style="font-size:17px;color:' + muted + ';letter-spacing:0.03em;text-align:center;padding:0 120px;line-height:1.6;">Not just an assistant. An entity that learns, adapts, and embodies who you are.</div>'
           + '</div>';
+      } else if (d.type === 'icon-only') {
+        content = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.08) 0%,transparent 55%);pointer-events:none;"></div>'
+          + '<div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;">'
+          + logoIcon(mode, 200)
+          + '</div>';
+      } else if (d.type === 'wordmark-only') {
+        content = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.08) 0%,transparent 55%);pointer-events:none;"></div>'
+          + '<div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;height:100%;">'
+          + logoMark(mode, 120)
+          + '</div>';
       }
 
       var label = d.type === 'tagline' ? d.title
         : d.type === 'logo-wordmark' ? 'Logo + Wordmark'
         : d.type === 'blake' ? 'Meet B.L.A.K.E.'
+        : d.type === 'icon-only' ? 'Icon Only'
+        : d.type === 'wordmark-only' ? 'Wordmark Only'
         : 'Ambient AI Presence';
       var bgName = d.bg.replace('-ember.png', '');
 
