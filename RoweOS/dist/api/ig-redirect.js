@@ -46,6 +46,7 @@ export default function handler(req, res) {
     '<li><span class="num">1</span><span>Tap <span class="highlight">Copy Link</span> below</span></li>' +
     '<li><span class="num">2</span><span>Open <span class="highlight">Safari</span> and paste the link in the address bar</span></li>' +
     '<li><span class="num">3</span><span>Sign in with Instagram</span></li>' +
+    '<li><span class="num" style="background:#a89878;">!</span><span style="color:#e8d5b5;"><strong>Make sure both permission toggles are ON</strong> -- especially "Access profile and posts." Publishing will fail if denied.</span></li>' +
     '<li><span class="num">4</span><span>Close this window to return to RoweOS</span></li>' +
     '</ol>' +
     '<button class="btn" id="copyBtn" onclick="copyLink()">Copy Login Link</button>' +
