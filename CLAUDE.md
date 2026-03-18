@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v24.27
+Version:  v25.0
 File:     RoweOS/dist/index.html (173897 lines)
 Live:     roweos.vercel.app
 ```
@@ -222,7 +222,8 @@ Pre-deployment validation, common errors, and known technical debt are in the **
 
 ### Common Bug Patterns
 - **Duplicate function names:** Single-file means later definitions silently overwrite earlier ones. Before adding a function, grep for existing definitions with the same name.
-- **NEVER touch `* { }` margin:** The global reset at ~line 1778 is `* { padding: 0; box-sizing: border-box; }` — do NOT add `margin: 0` to it. It breaks every mobile screen. `body { min-height: 100vh }` and `body { padding-bottom: env(safe-area-inset-bottom) }` are also removed from mobile. Do NOT re-add any of these three properties.
+- **NEVER touch `* { }` margin:** The global reset is `* { padding: 0; box-sizing: border-box; }` — do NOT add `margin: 0` to it. Margin resets are on a separate explicit element list. Do NOT re-add `min-height: 100vh` or `padding-bottom: env(safe-area-inset-bottom)` to body.
+- **iOS box-sizing reflow hacks (CRITICAL — TWO locations):** (1) `DOMContentLoaded` handler toggles `box-sizing` off/on to fix initial render. (2) `visualViewport.resize` handler's keyboard-close branch does the same toggle after keyboard dismisses. BOTH hacks are required. NEVER remove either. Also NEVER remove `interactive-widget=resizes-content` from the viewport meta tag — it works with these hacks. The brief visual flash on load is acceptable.
 - **Mobile CSS debugging:** Connect Safari Web Inspector to the phone (`Develop > iPhone`) before guessing. Make ONE change per deploy to isolate fixes.
 - **Stale nav heights:** Legacy `mobile-nav` was 80px; current `liquid-nav` pill is ~50px. Use `calc(64px + var(--mobile-safe-bottom))` for content padding, `calc(50px + env(safe-area-inset-bottom, 0px))` for fixed inputs above nav.
 - **PWA icons:** Must be RGB (no alpha channel) or macOS dock adds white border. Use sharp to flatten: `.flatten({ background: { r: 10, g: 10, b: 10 } }).removeAlpha()`
