@@ -233,8 +233,8 @@ var LOGO_ICON_LIGHT = '/images/promo/logo-icon.png';
 var LOGO_WORDMARK = '/images/promo/logo-wordmark.png';
 
 function logoIcon(mode, size) {
-  var src = mode === 'dark' ? LOGO_ICON_DARK : LOGO_ICON_LIGHT;
-  return '<img src="' + src + '" style="width:' + (size || 80) + 'px;height:' + (size || 80) + 'px;border-radius:18%;object-fit:cover;" crossorigin="anonymous" />';
+  // Always use dark icon — it has the dark rounded square bg and looks good on both dark and light backgrounds
+  return '<img src="' + LOGO_ICON_DARK + '" style="width:' + (size || 80) + 'px;height:' + (size || 80) + 'px;border-radius:18%;object-fit:cover;" crossorigin="anonymous" />';
 }
 
 // ─── HELPER: CARD WRAPPER ───
@@ -285,7 +285,8 @@ function screenshotFrame(src, mode, opts) {
 function logoMark(mode, size) {
   var height = Math.round((size || 48) * 1.5);
   var width = Math.round(height * 3.5);
-  return '<img src="' + LOGO_WORDMARK + '" style="height:' + height + 'px;width:auto;max-width:' + width + 'px;object-fit:contain;" crossorigin="anonymous" />';
+  var filter = mode === 'light' ? 'filter:brightness(0.5) contrast(1.2);' : '';
+  return '<img src="' + LOGO_WORDMARK + '" style="height:' + height + 'px;width:auto;max-width:' + width + 'px;object-fit:contain;' + filter + '" crossorigin="anonymous" />';
 }
 
 // ─── HELPER: CHECK/BULLET ICON ───
