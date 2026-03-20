@@ -48,14 +48,14 @@ index.html
 Owner: Jordan - The Rowe Collection LLC - Austin, Texas
 
 A private AI platform with two modes:
-- **BrandAI Mode** — Business management with 4 agents (Strategy, Marketing, Operations, Documents)
-- **LifeAI Mode** — Personal life management with coach archetypes
+- **Brand Intelligence (BrandAI)** — Business management with specialized agents (Strategy, Marketing, Operations, Documents, Intelligence, Research)
+- **Life Intelligence (LifeAI)** — Personal life management with coach archetypes
 
 ### Architecture
 - Single-file HTML app — no build tools, no bundler, no framework
 - Pure vanilla HTML/CSS/JS, CDN deps: Firebase SDK, Marked.js
 - Direct browser API calls to Anthropic/OpenAI/Google (keys in localStorage)
-- Optional Firebase sync — syncs all data; API keys sync to secure subcollection when Cloud Scheduler enabled
+- Firebase sync (V3.1 write-through, cloud-authoritative) — every save writes to localStorage AND Firestore immediately. Cloud always wins on pull. `mergeByTimestamp()` handles per-item conflicts with `_modifiedAt` stamps. `safeSyncWrite()` applies cloud data unconditionally (no "skip empty" guard).
 
 ### Design Philosophy
 - "Quiet competence" — professional elegance, Apple-like restraint
@@ -108,6 +108,50 @@ const items = data.filter(d => d.active);
 ### SVG Icons (Never Emoji)
 - ViewBox: `0 0 24 24`, stroke-width: `1.5` or `2`
 - Sizes: 14px small, 16px default, 20px large
+
+---
+
+## KEY FEATURES (v25.2)
+
+### Sync Architecture (V3.1 Cloud-Authoritative)
+- Write-through: every save hits localStorage + Firestore simultaneously
+- Cloud always wins on pull (no "local wins" guards)
+- `mergeByTimestamp()` resolves per-item conflicts using `_modifiedAt`
+- `safeSyncWrite()` applies cloud data unconditionally (empty = deleted)
+- `manualSyncNow()` pulls only (no push phase)
+- Pre-pull backup stored in `roweos_pre_pull_backup` as safety net
+- All data items should have `id` and `_modifiedAt` fields
+
+### Universal Search (Hybrid)
+- **Cmd+K** opens centered Spotlight modal (fast navigation + actions + inline AI)
+- **Magnifying glass icon** opens right side panel (rich AI results + notifications tab)
+- 3 modes: AI (default, uses BrandAI/LifeAI), Navigate (fuzzy match), Actions (command patterns)
+- Tab key cycles modes, arrow keys navigate results, Enter executes
+- Brand scoping: current brand or all brands toggle
+- Key functions: `executeSearch()`, `searchWithAI()`, `searchNavigate()`, `searchActions()`
+
+### Reminders (with Push Notifications)
+- Data model: `{id, title, scheduledAt, status, snoozedUntil, actions, _modifiedAt}`
+- In-app checker runs every 30s (`checkDueReminders()`)
+- Bottom-right popup stack (max 3 visible, rest queued)
+- Action buttons: Talk to AI, Add to Pulse, Add to Focus, Snooze (15m/30m/1h/3h/tomorrow), Complete
+- Can't dismiss until action taken (`enablePopupDismiss()`)
+- Web Push infrastructure: VAPID key, service worker (sw.js), Firestore subscriptions
+
+### Bloom Launch Popup
+- "What would you like to explore?" modal on Bloom launch
+- Content types: Text, Info Graphics, Videos
+- Optional topic input with suggested topics from brand/goals
+- Generates custom 20-post batch via `bloomGenerateWithDirective(type, topic)`
+- Preference: "Ask me each time" or "Remember my choice"
+
+### Calendar (Multi-Platform Write-Back)
+- Horizontal event cards with color-coded left borders per calendar source
+- "Calendars" panel: toggle visibility, custom color picker per calendar
+- +N overflow badge on days with >3 events
+- "Push to" calendar picker on event creation
+- Write-back: Google (existing), Outlook (MS Graph), iCloud (CalDAV via `/api/caldav-proxy`)
+- Colors stored in `roweos_calendar_colors`, synced to Firestore
 
 ---
 
@@ -168,7 +212,7 @@ Key patterns to remember without looking up:
 - `showView('agent')` to switch views
 - `showToast(msg, type)` for notifications
 - `escapeHtml(str)` for innerHTML sanitization
-- `syncToFirebaseV2()` for full sync, `scheduleAutoSync()` for debounced auto-sync. Deletion tracking keys (e.g. `roweos_deleted_pulse_goals`) must be synced AND merged on pull to prevent deleted items resurrecting from cloud
+- `loadFromFirebaseV2()` for cloud pull (cloud-authoritative). `writeDB()` / `writeDBDoc()` / `deleteDBDoc()` for write-through. `syncToFirebaseV2()` is DEPRECATED (no-op). `manualSyncNow()` pulls only (no push). `reconcileOnStartup()` always pulls. `safeSyncWrite()` unconditionally applies cloud data. `mergeByTimestamp(local, cloud, idField)` for per-item conflict resolution. Tombstone tracking keys are REMOVED (v25.0+)
 - `getAccentFallback()` for accent color with fallback (replaces inline `getComputedStyle` calls)
 - `AGENT_COLORS` global constant for agent color map (strategy, marketing, operations, documents, coach, etc.)
 - `ROWEOS_DEBUG` — `console.log` gated by `localStorage.getItem('roweos_debug') === 'true'`
@@ -221,6 +265,8 @@ Pre-deployment validation, common errors, and known technical debt are in the **
 `export PATH="$HOME/.local/share/fnm:$PATH" && eval "$(fnm env)" && vercel --prod --yes`
 
 ### Common Bug Patterns
+- **Sync data resurrection:** If deleted items reappear across devices, check: (1) `safeSyncWrite` is NOT guarding against empty cloud data, (2) `manualSyncNow` is NOT pushing before pulling, (3) real-time listeners handle empty snapshots and `!doc.exists`, (4) `loadFromFirebaseV2` uses `!== undefined` guards not truthy checks. Cloud is always authoritative.
+- **Mail outbox stale on other devices:** Outbox merge in `loadFromFirebaseV2` must be cloud-authoritative (not local-authoritative). Cloud `[]` means all items were sent.
 - **Duplicate function names:** Single-file means later definitions silently overwrite earlier ones. Before adding a function, grep for existing definitions with the same name.
 - **NEVER touch `* { }` margin:** The global reset is `* { padding: 0; box-sizing: border-box; }` — do NOT add `margin: 0` to it. Margin resets are on a separate explicit element list. Do NOT re-add `min-height: 100vh` or `padding-bottom: env(safe-area-inset-bottom)` to body.
 - **iOS box-sizing reflow hacks (CRITICAL — TWO locations):** (1) `DOMContentLoaded` handler toggles `box-sizing` off/on to fix initial render. (2) `visualViewport.resize` handler's keyboard-close branch does the same toggle after keyboard dismisses. BOTH hacks are required. NEVER remove either. Also NEVER remove `interactive-widget=resizes-content` from the viewport meta tag — it works with these hacks. The brief visual flash on load is acceptable.
