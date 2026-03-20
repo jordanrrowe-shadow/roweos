@@ -4394,120 +4394,50 @@ function bloomFlowerSvg(size, color, fillOpacity) {
 
 })();
 
-// ── 23. X / TWITTER PROMO CAMPAIGN (16) — IDs 501–516 ──
+// ── 23. X PROMO CAMPAIGN (4) — IDs 501–504 ──
 
-// Followers free month offer cards
-var xPromoOffers = [
-  { headline: 'Follow us. Get 1 month free.', sub: 'Every new follower gets a free month of RoweOS Founder. Full access to BrandAI, Studio, Automations, and more.', cta: 'Follow @RoweOS_' },
-  { headline: '1 Month Free Founder Access', sub: 'Follow @RoweOS_ on X and DM us "FOUNDER" to claim your free month. No credit card required.', cta: 'DM "FOUNDER"' },
-  { headline: 'Your brand deserves intelligence.', sub: 'Follow + DM us to unlock 1 free month of RoweOS Founder. 5 brands, AI agents, pipelines, and identity architecture.', cta: 'Claim Free Month' },
-  { headline: 'We built an OS for brands. Not another wrapper.', sub: 'Follow us on X to get 1 month of Founder access, free. See what operating intelligence actually feels like.', cta: 'Follow to Claim' }
-];
-
-xPromoOffers.forEach(function(p, i) {
-  ['dark','light'].forEach(function(mode) {
-    templates.push({
-      id: 501 + i * 2 + (mode === 'dark' ? 0 : 1),
-      category: 'x-promo',
-      mode: mode,
-      label: 'X Promo: Free Month #' + (i+1) + ' — ' + mode,
-      render: (function(pd, m) {
-        return function() {
-          var accent = m === 'dark' ? '#c4a882' : '#8b7b67';
-          var bg2 = m === 'dark' ? '#111' : '#f5f3f0';
-          var inner = '<div style="display:flex;flex-direction:column;justify-content:space-between;height:100%;padding:80px 72px;">'
-            + '<div>'
-            + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:48px;">'
-            + '<img src="'+ROWEOS_LOGO+'" style="width:44px;height:44px;opacity:0.6;" />'
-            + '<div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-g4);">RoweOS</div>'
-            + '<div style="margin-left:auto;padding:6px 18px;border:1px solid var(--c-border);border-radius:20px;font-size:14px;color:var(--c-muted);">@RoweOS_</div>'
-            + '</div>'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:58px;font-weight:300;line-height:1.12;margin-bottom:28px;">' + pd.headline + '</div>'
-            + '<div style="font-size:18px;color:var(--c-muted);line-height:1.6;max-width:750px;">' + pd.sub + '</div>'
-            + '</div>'
-            + '<div style="display:flex;align-items:center;gap:16px;margin-top:40px;">'
-            + '<div style="padding:14px 40px;background:' + accent + ';color:#000;border-radius:28px;font-size:16px;font-weight:600;letter-spacing:0.04em;">' + pd.cta + '</div>'
-            + '<div style="font-size:13px;color:var(--c-g4);">Limited time offer</div>'
-            + '</div>'
-            + '</div>';
-          return cardWrap(m, inner);
-        };
-      })(p, mode)
-    });
-  });
-});
-
-// Tagline / brand awareness cards
-var xPromoTaglines = [
-  { line1: 'Operating intelligence,', line2: 'built for brands.', accent: 'The platform that thinks like your brand.' },
-  { line1: 'Not a chatbot.', line2: 'Not a wrapper.', accent: 'A complete operating system for brand intelligence.' },
-  { line1: 'Identity-first AI.', line2: 'Every response, on brand.', accent: '6 specialized agents. 1 unified platform.' },
-  { line1: 'Your data stays yours.', line2: 'Your keys. Your models.', accent: 'Bring your own API keys. No vendor lock-in.' },
-  { line1: 'From strategy to execution.', line2: 'In one platform.', accent: 'Chat. Studio. Automations. Mail. Focus. Identity.' },
-  { line1: 'Stop prompting.', line2: 'Start operating.', accent: 'RoweOS turns your brand identity into an AI advantage.' }
-];
-
-xPromoTaglines.forEach(function(t, i) {
-  ['dark','light'].forEach(function(mode) {
-    templates.push({
-      id: 509 + i * 2 + (mode === 'dark' ? 0 : 1),
-      category: 'x-promo',
-      mode: mode,
-      label: 'X Tagline #' + (i+1) + ' — ' + mode,
-      render: (function(td, m) {
-        return function() {
-          var accent = m === 'dark' ? '#c4a882' : '#7a6a52';
-          var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 60px;">'
-            + '<img src="'+ROWEOS_LOGO+'" style="width:56px;height:56px;opacity:0.5;margin-bottom:48px;" />'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:68px;font-weight:300;line-height:1.1;margin-bottom:8px;">' + td.line1 + '</div>'
-            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:68px;font-weight:300;line-height:1.1;color:' + accent + ';">' + td.line2 + '</div>'
-            + '<div style="width:48px;height:1px;background:' + accent + ';margin:36px 0;"></div>'
-            + '<div style="font-size:17px;color:var(--c-muted);line-height:1.6;max-width:700px;">' + td.accent + '</div>'
-            + '<div style="margin-top:48px;display:flex;align-items:center;gap:12px;">'
-            + '<div style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--c-g4);">roweos.com</div>'
-            + '<div style="width:1px;height:14px;background:var(--c-border);"></div>'
-            + '<div style="font-size:12px;color:var(--c-g4);">@RoweOS_</div>'
-            + '</div>'
-            + '</div>';
-          return cardWrap(m, inner);
-        };
-      })(t, mode)
-    });
-  });
-});
-
-// Feature + CTA combo cards
-var xPromoFeatures = [
-  { feature: 'Deep Research', desc: 'Academic-grade research reports with citations, strategic alignment mapping, and automated outreach drafts.', icon: 'research' },
-  { feature: 'Automations Lab', desc: 'Schedule AI operations, chain multi-step pipelines, and run your brand on autopilot.', icon: 'automations' },
-  { feature: 'Brand Identity Graph', desc: 'Every AI response filtered through your brand voice, values, and visual identity.', icon: 'identity' }
-];
-
-xPromoFeatures.forEach(function(f, i) {
+['dark','light'].forEach(function(mode) {
+  var accent = mode === 'dark' ? '#c4a882' : '#7a6a52';
+  // Card 1: Follow us, get 1 month free
   templates.push({
-    id: 521 + i,
+    id: mode === 'dark' ? 501 : 502,
     category: 'x-promo',
-    mode: 'dark',
-    label: 'X Feature: ' + f.feature,
-    render: (function(fd) {
-      return function() {
-        var inner = '<div style="display:flex;flex-direction:column;height:100%;padding:80px 72px;">'
-          + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:60px;">'
-          + '<img src="'+ROWEOS_LOGO+'" style="width:40px;height:40px;opacity:0.5;" />'
-          + '<div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-g4);">RoweOS</div>'
-          + '</div>'
-          + '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;">'
-          + '<div style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:var(--c-g3);margin-bottom:20px;">' + fd.feature + '</div>'
-          + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;line-height:1.15;margin-bottom:24px;">' + fd.desc + '</div>'
-          + '</div>'
-          + '<div style="display:flex;align-items:center;justify-content:space-between;padding-top:32px;border-top:1px solid var(--c-border);">'
-          + '<div style="font-size:14px;color:var(--c-muted);">Follow @RoweOS_ for 1 month free Founder access</div>'
-          + '<div style="padding:10px 28px;background:var(--c-g3);color:#000;border-radius:24px;font-size:14px;font-weight:600;">Learn More</div>'
-          + '</div>'
-          + '</div>';
-        return cardWrap('dark', inner);
-      };
-    })(f)
+    mode: mode,
+    label: 'Follow + Free Month — ' + mode,
+    render: function() {
+      var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
+        + '<img src="'+ROWEOS_LOGO+'" style="width:52px;height:52px;opacity:0.5;margin-bottom:44px;" />'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;line-height:1.1;margin-bottom:12px;">Follow us.</div>'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;line-height:1.1;color:'+accent+';">Get 1 month free.</div>'
+        + '<div style="width:48px;height:1px;background:'+accent+';margin:36px 0;"></div>'
+        + '<div style="font-size:17px;color:var(--c-muted);line-height:1.6;max-width:700px;">Every new follower gets a free month of RoweOS Founder. Full access to BrandAI, Studio, Automations, and more.</div>'
+        + '<div style="margin-top:40px;padding:12px 36px;background:'+accent+';color:#000;border-radius:24px;font-size:15px;font-weight:600;letter-spacing:0.04em;">Follow @RoweOS_</div>'
+        + '<div style="margin-top:20px;font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--c-g4);">roweos.com</div>'
+        + '</div>';
+      return cardWrap(mode, inner);
+    }
+  });
+  // Card 2: We built an OS for brands
+  templates.push({
+    id: mode === 'dark' ? 503 : 504,
+    category: 'x-promo',
+    mode: mode,
+    label: 'Built an OS for Brands — ' + mode,
+    render: function() {
+      var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
+        + '<img src="'+ROWEOS_LOGO+'" style="width:52px;height:52px;opacity:0.5;margin-bottom:44px;" />'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;line-height:1.1;margin-bottom:12px;">We built an OS for brands.</div>'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;line-height:1.1;color:'+accent+';">Not another wrapper.</div>'
+        + '<div style="width:48px;height:1px;background:'+accent+';margin:36px 0;"></div>'
+        + '<div style="font-size:17px;color:var(--c-muted);line-height:1.6;max-width:700px;">Identity-first AI that thinks like your brand. Strategy, marketing, operations, documents, intelligence, and research - all in one platform.</div>'
+        + '<div style="margin-top:40px;display:flex;align-items:center;gap:12px;">'
+        + '<div style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--c-g4);">roweos.com</div>'
+        + '<div style="width:1px;height:14px;background:var(--c-border);"></div>'
+        + '<div style="font-size:12px;color:var(--c-g4);">@RoweOS_</div>'
+        + '</div>'
+        + '</div>';
+      return cardWrap(mode, inner);
+    }
   });
 });
 
