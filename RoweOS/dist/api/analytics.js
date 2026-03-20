@@ -1,4 +1,5 @@
 // v25.3: Analytics API — fetches Vercel Web Analytics data
+// Uses Vercel's internal web-analytics API with Bearer token auth
 // Env vars: VERCEL_ANALYTICS_TOKEN, VERCEL_PROJECT_ID, VERCEL_TEAM_ID
 
 module.exports = async function handler(req, res) {
@@ -11,104 +12,82 @@ module.exports = async function handler(req, res) {
   const teamId = process.env.VERCEL_TEAM_ID;
 
   if (!token || !projectId) {
-    return res.status(500).json({ error: 'Missing Vercel analytics configuration' });
+    return res.status(500).json({ error: 'Missing Vercel analytics configuration', hasToken: !!token, hasProject: !!projectId });
   }
 
-  const { endpoint, from, to, limit } = req.query;
-  const baseUrl = 'https://vercel.com/api/web/insights';
+  const { endpoint, from, to, limit, days } = req.query;
   const headers = { Authorization: 'Bearer ' + token };
-  const teamParam = teamId ? '&teamId=' + teamId : '';
-
-  // Default: last 30 days
-  const now = new Date();
-  const fromDate = from || new Date(now.getTime() - 30 * 86400000).toISOString();
-  const toDate = to || now.toISOString();
   const resultLimit = limit || 20;
 
+  // Calculate time range in epoch ms
+  const now = Date.now();
+  const daysBack = parseInt(days) || 30;
+  const fromMs = from ? new Date(from).getTime() : (now - daysBack * 86400000);
+  const toMs = to ? new Date(to).getTime() : now;
+  const teamParam = teamId ? '&teamId=' + teamId : '';
+  const env = '&environment=production';
+
+  // Vercel Web Analytics API base
+  const base = 'https://vercel.com/api/web-analytics';
+
   try {
-    if (endpoint === 'pageviews') {
-      // Get page view timeseries
-      const url = baseUrl + '/stats?projectId=' + projectId + '&from=' + fromDate + '&to=' + toDate + '&filter=%7B%7D' + teamParam;
+    if (endpoint === 'timeseries') {
+      const url = base + '/timeseries?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + env + teamParam;
       const resp = await fetch(url, { headers });
-      if (!resp.ok) {
-        const errText = await resp.text();
-        return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: errText });
-      }
-      const data = await resp.json();
-      return res.status(200).json(data);
+      if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
+      return res.status(200).json(await resp.json());
 
     } else if (endpoint === 'pages') {
-      // Top pages
-      const url = baseUrl + '/path?projectId=' + projectId + '&from=' + fromDate + '&to=' + toDate + '&filter=%7B%7D&limit=' + resultLimit + teamParam;
+      const url = base + '/path?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
       const resp = await fetch(url, { headers });
-      if (!resp.ok) {
-        const errText = await resp.text();
-        return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: errText });
-      }
-      const data = await resp.json();
-      return res.status(200).json(data);
+      if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
+      return res.status(200).json(await resp.json());
 
     } else if (endpoint === 'referrers') {
-      // Top referrers
-      const url = baseUrl + '/referrer?projectId=' + projectId + '&from=' + fromDate + '&to=' + toDate + '&filter=%7B%7D&limit=' + resultLimit + teamParam;
+      const url = base + '/referrer?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
       const resp = await fetch(url, { headers });
-      if (!resp.ok) {
-        const errText = await resp.text();
-        return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: errText });
-      }
-      const data = await resp.json();
-      return res.status(200).json(data);
+      if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
+      return res.status(200).json(await resp.json());
 
     } else if (endpoint === 'countries') {
-      // Top countries
-      const url = baseUrl + '/country?projectId=' + projectId + '&from=' + fromDate + '&to=' + toDate + '&filter=%7B%7D&limit=' + resultLimit + teamParam;
+      const url = base + '/country?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
       const resp = await fetch(url, { headers });
-      if (!resp.ok) {
-        const errText = await resp.text();
-        return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: errText });
-      }
-      const data = await resp.json();
-      return res.status(200).json(data);
+      if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
+      return res.status(200).json(await resp.json());
 
     } else if (endpoint === 'devices') {
-      // Device breakdown (os)
-      const url = baseUrl + '/os?projectId=' + projectId + '&from=' + fromDate + '&to=' + toDate + '&filter=%7B%7D&limit=' + resultLimit + teamParam;
+      const url = base + '/os?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
       const resp = await fetch(url, { headers });
-      if (!resp.ok) {
-        const errText = await resp.text();
-        return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: errText });
-      }
-      const data = await resp.json();
-      return res.status(200).json(data);
-
-    } else if (endpoint === 'browsers') {
-      // Browser breakdown
-      const url = baseUrl + '/browser?projectId=' + projectId + '&from=' + fromDate + '&to=' + toDate + '&filter=%7B%7D&limit=' + resultLimit + teamParam;
-      const resp = await fetch(url, { headers });
-      if (!resp.ok) {
-        const errText = await resp.text();
-        return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: errText });
-      }
-      const data = await resp.json();
-      return res.status(200).json(data);
+      if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
+      return res.status(200).json(await resp.json());
 
     } else {
-      // Default: return all summary data in one call
-      const endpoints = ['stats', 'path', 'referrer', 'country', 'os'];
-      const urls = endpoints.map(e => {
-        const lim = e === 'stats' ? '' : '&limit=10';
-        return baseUrl + '/' + e + '?projectId=' + projectId + '&from=' + fromDate + '&to=' + toDate + '&filter=%7B%7D' + lim + teamParam;
-      });
+      // Default: fetch all data in parallel
+      const endpoints = [
+        base + '/timeseries?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + env + teamParam,
+        base + '/path?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=15' + env + teamParam,
+        base + '/referrer?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=10' + env + teamParam,
+        base + '/country?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=10' + env + teamParam,
+        base + '/os?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=10' + env + teamParam
+      ];
 
-      const results = await Promise.allSettled(urls.map(u => fetch(u, { headers }).then(r => r.json())));
+      const results = await Promise.allSettled(
+        endpoints.map(u => fetch(u, { headers }).then(async r => {
+          if (!r.ok) return { error: r.status, detail: await r.text() };
+          return r.json();
+        }))
+      );
+
+      const getData = (idx) => results[idx].status === 'fulfilled' ? results[idx].value : null;
 
       return res.status(200).json({
-        stats: results[0].status === 'fulfilled' ? results[0].value : null,
-        pages: results[1].status === 'fulfilled' ? results[1].value : null,
-        referrers: results[2].status === 'fulfilled' ? results[2].value : null,
-        countries: results[3].status === 'fulfilled' ? results[3].value : null,
-        devices: results[4].status === 'fulfilled' ? results[4].value : null,
-        period: { from: fromDate, to: toDate }
+        timeseries: getData(0),
+        pages: getData(1),
+        referrers: getData(2),
+        countries: getData(3),
+        devices: getData(4),
+        period: { from: new Date(fromMs).toISOString(), to: new Date(toMs).toISOString(), days: daysBack },
+        debug: { projectId, teamId: teamId || 'none', fromMs, toMs }
       });
     }
 
