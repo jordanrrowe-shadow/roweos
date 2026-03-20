@@ -35,6 +35,7 @@
     { "src": "/icons/(.*)", "dest": "/icons/$1" },
     { "src": "/logo.png", "dest": "/logo.png" },
     { "src": "/portfolio", "dest": "/portfolio.html" },
+    { "src": "/executive-summary", "dest": "/executive-summary.html" },
     { "src": "/blake", "dest": "/blake.html" },
     { "src": "/blake-studio", "dest": "/blake-studio.html" },
     { "src": "/(.*)", "dest": "/index.html" }
