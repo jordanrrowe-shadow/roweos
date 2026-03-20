@@ -7,9 +7,9 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const token = process.env.VERCEL_ANALYTICS_TOKEN;
-  const projectId = process.env.VERCEL_PROJECT_ID;
-  const teamId = process.env.VERCEL_TEAM_ID;
+  const token = (process.env.VERCEL_ANALYTICS_TOKEN || '').trim();
+  const projectId = (process.env.VERCEL_PROJECT_ID || '').trim();
+  const teamId = (process.env.VERCEL_TEAM_ID || '').trim();
 
   if (!token || !projectId) {
     return res.status(500).json({ error: 'Missing Vercel analytics configuration', hasToken: !!token, hasProject: !!projectId });
@@ -19,11 +19,15 @@ module.exports = async function handler(req, res) {
   const headers = { Authorization: 'Bearer ' + token };
   const resultLimit = limit || 20;
 
-  // Calculate time range in epoch ms
-  const now = Date.now();
+  // Calculate time range - try both ISO and epoch ms
+  const now = new Date();
   const daysBack = parseInt(days) || 30;
-  const fromMs = from ? new Date(from).getTime() : (now - daysBack * 86400000);
-  const toMs = to ? new Date(to).getTime() : now;
+  const fromDate = from ? new Date(from) : new Date(now.getTime() - daysBack * 86400000);
+  const toDate = to ? new Date(to) : now;
+  const fromIso = fromDate.toISOString();
+  const toIso = toDate.toISOString();
+  const fromMs = fromDate.getTime();
+  const toMs = toDate.getTime();
   const teamParam = teamId ? '&teamId=' + teamId : '';
   const env = '&environment=production';
 
@@ -32,43 +36,46 @@ module.exports = async function handler(req, res) {
 
   try {
     if (endpoint === 'timeseries') {
-      const url = base + '/timeseries?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + env + teamParam;
+      const url = base + '/timeseries?projectId=' + projectId + '&from=' + fromIso + '&to=' + toIso + env + teamParam;
       const resp = await fetch(url, { headers });
       if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
       return res.status(200).json(await resp.json());
 
     } else if (endpoint === 'pages') {
-      const url = base + '/path?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
+      const url = base + '/top-pages?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
       const resp = await fetch(url, { headers });
       if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
       return res.status(200).json(await resp.json());
 
     } else if (endpoint === 'referrers') {
-      const url = base + '/referrer?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
+      const url = base + '/top-referrers?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
       const resp = await fetch(url, { headers });
       if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
       return res.status(200).json(await resp.json());
 
     } else if (endpoint === 'countries') {
-      const url = base + '/country?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
+      const url = base + '/top-countries?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
       const resp = await fetch(url, { headers });
       if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
       return res.status(200).json(await resp.json());
 
     } else if (endpoint === 'devices') {
-      const url = base + '/os?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
+      const url = base + '/top-devices?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=' + resultLimit + env + teamParam;
       const resp = await fetch(url, { headers });
       if (!resp.ok) return res.status(resp.status).json({ error: 'Vercel API error', status: resp.status, detail: await resp.text() });
       return res.status(200).json(await resp.json());
 
     } else {
       // Default: fetch all data in parallel
+      // Timeseries uses ISO dates, breakdown endpoints use epoch ms
+      const tsParams = 'projectId=' + projectId + '&from=' + fromIso + '&to=' + toIso + env + teamParam;
+      const bkParams = 'projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + env + teamParam;
       const endpoints = [
-        base + '/timeseries?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + env + teamParam,
-        base + '/path?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=15' + env + teamParam,
-        base + '/referrer?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=10' + env + teamParam,
-        base + '/country?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=10' + env + teamParam,
-        base + '/os?projectId=' + projectId + '&from=' + fromMs + '&to=' + toMs + '&limit=10' + env + teamParam
+        base + '/timeseries?' + tsParams,
+        base + '/top-pages?limit=15&' + bkParams,
+        base + '/top-referrers?limit=10&' + bkParams,
+        base + '/top-countries?limit=10&' + bkParams,
+        base + '/top-devices?limit=10&' + bkParams
       ];
 
       const results = await Promise.allSettled(
