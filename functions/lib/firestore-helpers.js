@@ -266,6 +266,99 @@ async function getUserSocialConnections(uid) {
   }
 }
 
+// v26.3: Scavenger config helpers
+
+async function getActiveScavengerConfigs(uid) {
+  var db = getDb();
+  var snap = await db.collection('roweos_users/' + uid + '/scavenger_configs')
+    .where('active', '==', true)
+    .get();
+  if (snap.empty) return [];
+  var configs = [];
+  snap.forEach(function(doc) {
+    var data = doc.data();
+    data.id = doc.id;
+    configs.push(data);
+  });
+  return configs;
+}
+
+async function writeScavengerTarget(uid, target) {
+  var db = getDb();
+  var docRef = await db.collection('roweos_users/' + uid + '/scavenger_targets').add(target);
+  return docRef.id;
+}
+
+async function updateScavengerTarget(uid, targetId, updates) {
+  var db = getDb();
+  await db.doc('roweos_users/' + uid + '/scavenger_targets/' + targetId).set(updates, { merge: true });
+}
+
+async function getScavengerTargetsByStatus(uid, status) {
+  var db = getDb();
+  var snap = await db.collection('roweos_users/' + uid + '/scavenger_targets')
+    .where('status', '==', status)
+    .get();
+  var targets = [];
+  snap.forEach(function(doc) {
+    var data = doc.data();
+    data._id = doc.id;
+    targets.push(data);
+  });
+  return targets;
+}
+
+async function scavengerTargetExists(uid, postId) {
+  var db = getDb();
+  var snap = await db.collection('roweos_users/' + uid + '/scavenger_targets')
+    .where('postId', '==', postId)
+    .limit(1)
+    .get();
+  return !snap.empty;
+}
+
+async function countScavengerTargets(uid, configId, status, sinceMs) {
+  var db = getDb();
+  var sinceDate = new Date(sinceMs);
+  var snap = await db.collection('roweos_users/' + uid + '/scavenger_targets')
+    .where('configId', '==', configId)
+    .where('status', '==', status)
+    .where('postedAt', '>=', sinceDate)
+    .get();
+  return snap.size;
+}
+
+async function setScavengerLock(uid, lock) {
+  var db = getDb();
+  var lockRef = db.doc('roweos_users/' + uid + '/scavenger_lock/pipeline');
+  if (lock) {
+    try {
+      var result = await db.runTransaction(async function(transaction) {
+        var lockDoc = await transaction.get(lockRef);
+        if (lockDoc.exists) {
+          var lockData = lockDoc.data();
+          var lockTime = lockData.lockedAt ? lockData.lockedAt.toDate().getTime() : 0;
+          if (Date.now() - lockTime < 5 * 60 * 1000) {
+            return false;
+          }
+        }
+        transaction.set(lockRef, {
+          locked: true,
+          lockedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        return true;
+      });
+      return result;
+    } catch (e) {
+      console.error('[ScavengerLock] Transaction failed:', e);
+      return false;
+    }
+  } else {
+    await lockRef.delete();
+    return true;
+  }
+}
+
 module.exports = {
   getDb: getDb,
   getUserApiKeys: getUserApiKeys,
@@ -279,5 +372,13 @@ module.exports = {
   updateAutomationLastRun: updateAutomationLastRun,
   setCloudLock: setCloudLock,
   getUserSocialToken: getUserSocialToken,
-  getUserSocialConnections: getUserSocialConnections
+  getUserSocialConnections: getUserSocialConnections,
+  // v26.3: Scavenger helpers
+  getActiveScavengerConfigs: getActiveScavengerConfigs,
+  writeScavengerTarget: writeScavengerTarget,
+  updateScavengerTarget: updateScavengerTarget,
+  getScavengerTargetsByStatus: getScavengerTargetsByStatus,
+  scavengerTargetExists: scavengerTargetExists,
+  countScavengerTargets: countScavengerTargets,
+  setScavengerLock: setScavengerLock
 };
