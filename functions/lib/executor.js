@@ -12,6 +12,48 @@ var socialPoster = require('./social-poster');
 var imageGenerator = require('./image-generator');
 var pipelineExecutor = require('./pipeline-executor');
 
+// v26.3: Template variable resolution for automation tasks
+var schedulerLib = require('./scheduler');
+
+/**
+ * Resolve {{variable}} patterns in text
+ * Matches client-side resolveTemplateVars() at index.html:100096
+ */
+function resolveTemplateVars(text, context) {
+  if (!text || typeof text !== 'string') return text;
+  return text.replace(/\{\{(\w+)\}\}/g, function(match, key) {
+    return context[key] !== undefined ? context[key] : match;
+  });
+}
+
+/**
+ * Build template context with current date/time values
+ * @param {string} timezone - User's IANA timezone
+ * @param {Object} brand - Brand object
+ * @param {Object} settings - User settings
+ * @returns {Object} Template context
+ */
+function buildTemplateContext(timezone, brand, settings) {
+  var now = schedulerLib.getUserLocalTime(timezone || 'America/Chicago');
+  var months = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  var hours = now.getHours();
+  var ampm = hours >= 12 ? 'PM' : 'AM';
+  var h12 = hours % 12 || 12;
+  var mins = now.getMinutes();
+  mins = mins < 10 ? '0' + mins : String(mins);
+
+  return {
+    current_date: months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear(),
+    current_time: h12 + ':' + mins + ' ' + ampm,
+    day_of_week: days[now.getDay()],
+    brand_name: (brand && (brand.shortName || brand.name)) || '',
+    user_name: (settings && settings.displayName) || ''
+  };
+}
+
 /**
  * Execute a single task for a user
  * @param {string} uid - Firebase user ID
@@ -37,6 +79,14 @@ async function executeTask(uid, task, apiKeys) {
     var brand = brands[brandIdx] || brands[0];
     // v19.2: Set task.brand for history/logging
     task.brand = brand ? (brand.shortName || brand.name) : '';
+
+    // v26.3: Resolve template variables in task name/description
+    var userSettings = await helpers.getUserSettings(uid);
+    var timezone = userSettings.timezone || 'America/Chicago';
+    var templateCtx = buildTemplateContext(timezone, brand, userSettings);
+    if (task.name) task.name = resolveTemplateVars(task.name, templateCtx);
+    if (task.description) task.description = resolveTemplateVars(task.description, templateCtx);
+    if (task.target && task.target.text) task.target.text = resolveTemplateVars(task.target.text, templateCtx);
 
     if (!brand) {
       await helpers.setCloudLock(uid, String(task.id), false);
