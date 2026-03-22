@@ -399,9 +399,18 @@ export default async function handler(req, res) {
         return res.status(200).json(igShortResult);
       }
 
+      // v25.4: Fetch IG username server-side (avoids CORS in callback)
+      var igUsername = '';
+      try {
+        var igMeResp = await fetch('https://graph.instagram.com/v21.0/me?fields=username&access_token=' + encodeURIComponent(igLongData.access_token));
+        var igMeData = await igMeResp.json();
+        igUsername = igMeData.username || '';
+      } catch(e) {}
+
       var igResult = {
         accessToken: igLongData.access_token,
         userId: igUserId,
+        username: igUsername,
         expiresIn: igLongData.expires_in || 5184000,
         expiresAt: Date.now() + ((igLongData.expires_in || 5184000) * 1000),
         longLived: true

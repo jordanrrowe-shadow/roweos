@@ -427,18 +427,12 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
           setStatus('Threads connected', 'success');
           done(true);
         });
-      } else if (platform === 'instagram' && data.accessToken) {
-        setStatus('Getting your Instagram profile...');
-        fetch('https://graph.instagram.com/v21.0/me?fields=username&access_token=' + encodeURIComponent(data.accessToken))
-        .then(function(r) { return r.json(); }).then(function(user) {
-          var handle = user.username || '';
-          if (handle) localStorage.setItem('roweos_social_instagram_handle' + scope, handle);
-          setStatus(handle ? 'Connected as @' + handle : 'Instagram connected', 'success');
-          done(true);
-        }).catch(function() {
-          setStatus('Instagram connected', 'success');
-          done(true);
-        });
+      } else if (platform === 'instagram') {
+        // v25.4: Use server-returned username (avoids CORS)
+        var igHandle = data.username || '';
+        if (igHandle) localStorage.setItem('roweos_social_instagram_handle' + scope, igHandle);
+        setStatus(igHandle ? 'Connected as @' + igHandle : 'Instagram connected', 'success');
+        done(true);
       } else if (platform === 'tiktok' && data.accessToken) {
         setStatus('Getting your TikTok profile...');
         fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,username', {
