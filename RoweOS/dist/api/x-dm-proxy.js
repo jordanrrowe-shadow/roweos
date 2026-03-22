@@ -35,12 +35,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Missing token' });
     }
 
-    // Whitelist only X DM endpoints
-    if (!/^\/2\/dm_conversations/.test(endpoint)) {
+    // v25.4: Whitelist allowed X API endpoints (DMs, search, tweets, users)
+    var allowedPatterns = [
+      /^\/2\/dm_conversations/,
+      /^\/2\/tweets\/search\/recent/,
+      /^\/2\/tweets\?/,
+      /^\/2\/tweets$/,
+      /^\/2\/users\//
+    ];
+    var isAllowed = false;
+    for (var pi = 0; pi < allowedPatterns.length; pi++) {
+      if (allowedPatterns[pi].test(endpoint)) { isAllowed = true; break; }
+    }
+    if (!isAllowed) {
       return res.status(400).json({ error: 'Endpoint not allowed' });
     }
 
-    var url = 'https://api.twitter.com' + endpoint;
+    var url = 'https://api.x.com' + endpoint;
 
     var fetchOptions = {
       method: method,
