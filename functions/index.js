@@ -12,6 +12,8 @@ var admin = require('firebase-admin');
 var functions = require('firebase-functions/v2');
 var scheduler = require('./lib/scheduler');
 var executor = require('./lib/executor');
+var scavenger = require('./lib/scavenger');
+var helpers = require('./lib/firestore-helpers');
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -41,7 +43,7 @@ exports.runScheduledTasks = functions.scheduler.onSchedule(
         var user = users[i];
         try {
           // Get user's timezone
-          var settings = await require('./lib/firestore-helpers').getUserSettings(user.uid);
+          var settings = await helpers.getUserSettings(user.uid);
           var timezone = settings.timezone || 'America/Chicago';
 
           // Find due tasks
@@ -60,6 +62,17 @@ exports.runScheduledTasks = functions.scheduler.onSchedule(
             } else {
               console.warn('[Cloud Scheduler] Task failed:', dueTasks[j].name, result.error);
             }
+          }
+
+          // v26.3: Run scavenger pipeline for this user
+          try {
+            var scavengerConfigs = await helpers.getActiveScavengerConfigs(user.uid);
+            if (scavengerConfigs.length > 0) {
+              console.log('[Cloud Scheduler] Running scavenger for user', user.uid, '(' + scavengerConfigs.length + ' configs)');
+              await scavenger.runScavengerPipeline(user.uid, user.apiKeys, scavengerConfigs);
+            }
+          } catch (scavErr) {
+            console.error('[Cloud Scheduler] Scavenger error for user', user.uid, ':', scavErr.message);
           }
         } catch (userErr) {
           console.error('[Cloud Scheduler] Error for user', user.uid, ':', userErr.message);
