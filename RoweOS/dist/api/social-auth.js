@@ -88,7 +88,8 @@ export default async function handler(req, res) {
       // Whitelist allowed OAuth domains
       var allowed = ['https://threads.net/', 'https://www.threads.net/',
                      'https://www.threads.com/', 'https://threads.com/',
-                     'https://api.instagram.com/', 'https://x.com/'];
+                     'https://api.instagram.com/', 'https://x.com/',
+                     'https://open.tiktokapis.com/', 'https://www.tiktok.com/'];
       var isAllowed = allowed.some(function(prefix) { return authUrl.indexOf(prefix) === 0; });
       if (isAllowed) {
         // Parse URL into base + query params for form submission
@@ -137,8 +138,8 @@ export default async function handler(req, res) {
     var platform = body.platform;
     var action = body.action || 'exchange'; // 'exchange' or 'refresh'
 
-    if (!platform || ['x', 'threads', 'instagram'].indexOf(platform) === -1) {
-      return res.status(400).json({ error: 'Invalid platform. Must be x, threads, or instagram.' });
+    if (!platform || ['x', 'threads', 'instagram', 'tiktok'].indexOf(platform) === -1) {
+      return res.status(400).json({ error: 'Invalid platform. Must be x, threads, instagram, or tiktok.' });
     }
 
     // --- X/Twitter Token Refresh ---
@@ -422,6 +423,51 @@ export default async function handler(req, res) {
         await storeTokenInFirestore(body.uid, 'instagram', body.scope, igRefResult);
       }
       return res.status(200).json(igRefResult);
+    }
+
+    // --- TikTok Token Exchange ---
+    // v25.4: TikTok uses POST /v2/oauth/token/ with client_key + client_secret
+    if (platform === 'tiktok' && action === 'exchange') {
+      var tkCode = body.code;
+      var tkRedirectUri = body.redirectUri;
+      var tkClientKey = (body.clientKey || process.env.ROWEOS_TIKTOK_CLIENT_KEY || '').trim();
+      var tkClientSecret = (body.clientSecret || process.env.ROWEOS_TIKTOK_CLIENT_SECRET || '').trim();
+
+      if (!tkCode || !tkRedirectUri) {
+        return res.status(400).json({ error: 'Missing code or redirectUri for TikTok exchange' });
+      }
+      if (!tkClientKey || !tkClientSecret) {
+        return res.status(400).json({ error: 'Missing TikTok app credentials' });
+      }
+
+      var tkExchResp = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'client_key=' + encodeURIComponent(tkClientKey) +
+              '&client_secret=' + encodeURIComponent(tkClientSecret) +
+              '&code=' + encodeURIComponent(tkCode) +
+              '&grant_type=authorization_code' +
+              '&redirect_uri=' + encodeURIComponent(tkRedirectUri)
+      });
+      var tkExchData = await tkExchResp.json();
+
+      if (!tkExchResp.ok || tkExchData.error) {
+        console.error('[Social Auth] TikTok exchange failed:', tkExchData);
+        return res.status(tkExchResp.status || 400).json({ error: 'TikTok token exchange failed', detail: tkExchData });
+      }
+
+      var tkResult = {
+        accessToken: tkExchData.access_token,
+        refreshToken: tkExchData.refresh_token || '',
+        expiresIn: tkExchData.expires_in || 86400,
+        expiresAt: Date.now() + ((tkExchData.expires_in || 86400) * 1000),
+        userId: String(tkExchData.open_id || '')
+      };
+      // v25.4: Store in Firestore for cross-device access
+      if (body.uid && body.scope) {
+        await storeTokenInFirestore(body.uid, 'tiktok', body.scope, tkResult);
+      }
+      return res.status(200).json(tkResult);
     }
 
     return res.status(400).json({ error: 'Unhandled platform/action combination' });

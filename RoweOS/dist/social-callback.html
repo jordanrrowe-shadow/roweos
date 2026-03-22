@@ -128,17 +128,20 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     var xState = localStorage.getItem('roweos_x_state');
     var tState = localStorage.getItem('roweos_threads_state');
     var igState = localStorage.getItem('roweos_ig_state');
+    var tkState = localStorage.getItem('roweos_tiktok_state');
     var platform = null;
 
     if (stateBase === xState) platform = 'x';
     else if (state === tState) platform = 'threads';
     else if (state === igState) platform = 'instagram';
+    else if (stateBase === tkState) platform = 'tiktok';
 
     // v17.3: Fallback — detect platform from state prefix (iOS Safari partitions localStorage between popup/redirect contexts)
     if (!platform && stateBase) {
       if (stateBase.indexOf('x_') === 0) platform = 'x';
       else if (stateBase.indexOf('threads_') === 0) platform = 'threads';
       else if (stateBase.indexOf('ig_') === 0) platform = 'instagram';
+      else if (stateBase.indexOf('tiktok') === 0) platform = 'tiktok';
     }
 
     // v22.24: Gmail Mail OAuth — separate flow via gmail-proxy serverless function
@@ -336,8 +339,8 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     // v20.6: Use stateBase (without embedded data) for scope parsing
     var scope = getScopeFromContext(stateBase);
 
-    var platformNames = { x: 'X', threads: 'Threads', instagram: 'Instagram' };
-    setStatus('Connecting ' + platformNames[platform] + '...');
+    var platformNames = { x: 'X', threads: 'Threads', instagram: 'Instagram', tiktok: 'TikTok' };
+    setStatus('Connecting ' + (platformNames[platform] || platform) + '...');
 
     var origin = window.location.origin;
     var redirectUri = origin + '/social-callback';
@@ -360,6 +363,8 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       localStorage.removeItem('roweos_threads_state');
     } else if (platform === 'instagram') {
       localStorage.removeItem('roweos_ig_state');
+    } else if (platform === 'tiktok') {
+      localStorage.removeItem('roweos_tiktok_state');
     }
 
     // Exchange code for tokens via Vercel function
@@ -431,8 +436,21 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
           setStatus('Instagram connected', 'success');
           done(true);
         });
+      } else if (platform === 'tiktok' && data.accessToken) {
+        setStatus('Getting your TikTok profile...');
+        fetch('https://open.tiktokapis.com/v2/user/info/?fields=open_id,display_name,username', {
+          headers: { 'Authorization': 'Bearer ' + data.accessToken }
+        }).then(function(r) { return r.json(); }).then(function(res) {
+          var handle = (res.data && res.data.user && (res.data.user.username || res.data.user.display_name)) || '';
+          if (handle) localStorage.setItem('roweos_social_tiktok_handle' + scope, handle);
+          setStatus(handle ? 'Connected as @' + handle : 'TikTok connected', 'success');
+          done(true);
+        }).catch(function() {
+          setStatus('TikTok connected', 'success');
+          done(true);
+        });
       } else {
-        setStatus(platformNames[platform] + ' connected', 'success');
+        setStatus((platformNames[platform] || platform) + ' connected', 'success');
         done(true);
       }
     })
