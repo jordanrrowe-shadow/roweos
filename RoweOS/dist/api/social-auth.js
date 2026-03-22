@@ -153,9 +153,16 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing X client ID' });
       }
 
+      // v25.4: X now requires Authorization header for token refresh
+      var xRefSecret = (process.env.ROWEOS_X_CLIENT_SECRET || '').trim();
+      var xRefAuth = 'Basic ' + Buffer.from(xClientId + ':' + xRefSecret).toString('base64');
+
       var xRefreshResp = await fetch('https://api.x.com/2/oauth2/token', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': xRefAuth
+        },
         body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(xRefreshToken) +
               '&client_id=' + encodeURIComponent(xClientId)
       });
@@ -190,9 +197,17 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing code, redirectUri, or codeVerifier for X exchange' });
       }
 
+      // v25.4: X now requires Authorization header for token exchange
+      // For public clients (PKCE), use Basic auth with client_id and empty secret
+      var xClientSecret = (process.env.ROWEOS_X_CLIENT_SECRET || '').trim();
+      var xAuthHeader = 'Basic ' + Buffer.from(xClientIdExch + ':' + xClientSecret).toString('base64');
+
       var xExchResp = await fetch('https://api.x.com/2/oauth2/token', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': xAuthHeader
+        },
         body: 'grant_type=authorization_code&code=' + encodeURIComponent(xCode) +
               '&redirect_uri=' + encodeURIComponent(xRedirectUri) +
               '&code_verifier=' + encodeURIComponent(xCodeVerifier) +
