@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://roweos.com", "https://www.roweos.com", "https://roweos.vercel.app", "http://localhost:*"],
+    "method": ["GET", "HEAD"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Content-Length", "Content-Encoding"]
+  }
+]

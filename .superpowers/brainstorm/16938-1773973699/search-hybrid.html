@@ -1,0 +1,164 @@
+<h2>Hybrid Search: Centered + Side Panel</h2>
+<p class="subtitle">Two modes, two triggers. Click to confirm this is the direction.</p>
+
+<!-- How it works -->
+<div class="section" style="margin-bottom:32px;">
+  <div style="background:#141414;border:1px solid #2a2a2a;border-radius:12px;padding:20px 24px;">
+    <h3 style="margin-bottom:12px;color:#e4e4e5;">How the two modes work together</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="background:#a89878;color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;">&#8984;K</span>
+          <span style="color:#e4e4e5;font-size:14px;font-weight:600;">Quick Search</span>
+        </div>
+        <div style="color:#888;font-size:12px;line-height:1.7;">
+          Centered Spotlight modal<br>
+          Fast navigation + actions<br>
+          AI answers inline (compact)<br>
+          Dismiss with ESC or click outside<br>
+          <span style="color:#555;">Keyboard-first, ephemeral</span>
+        </div>
+      </div>
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="background:transparent;color:#a89878;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;border:1px solid #a89878;">&#128269; bar</span>
+          <span style="color:#e4e4e5;font-size:14px;font-weight:600;">Search Panel</span>
+        </div>
+        <div style="color:#888;font-size:12px;line-height:1.7;">
+          Right side panel (slides in)<br>
+          Rich AI responses (cards, charts)<br>
+          Notification center built-in<br>
+          Stays open while you work<br>
+          <span style="color:#555;">Click search bar or notification bell</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Full mockup -->
+<div class="option" data-choice="hybrid-confirmed" onclick="toggleSelect(this)">
+  <div class="letter">&#10003;</div>
+  <div class="content" style="flex:1;">
+    <h3>Full Interface Mockup</h3>
+    <div style="background:#0a0a0a;border-radius:12px;overflow:hidden;border:1px solid #222;margin-top:12px;">
+      <div style="display:flex;height:480px;">
+        <!-- Sidebar -->
+        <div style="width:130px;background:#0d0d0d;border-right:1px solid #1a1a1a;padding:16px 10px;flex-shrink:0;">
+          <div style="text-align:center;margin-bottom:16px;">
+            <div style="font-size:11px;color:#a89878;font-style:italic;">RoweOS</div>
+          </div>
+          <div style="font-size:10px;color:#a89878;padding:5px 8px;background:#1a1a1a;border-radius:5px;margin-bottom:3px;">BrandAI</div>
+          <div style="font-size:10px;color:#555;padding:5px 8px;margin-bottom:1px;">Focus</div>
+          <div style="font-size:10px;color:#555;padding:5px 8px;margin-bottom:1px;">Bloom</div>
+          <div style="font-size:10px;color:#555;padding:5px 8px;margin-bottom:1px;">Pulse</div>
+          <div style="font-size:10px;color:#555;padding:5px 8px;margin-bottom:1px;">Studio</div>
+          <div style="font-size:10px;color:#555;padding:5px 8px;margin-bottom:1px;">Mail</div>
+          <div style="font-size:10px;color:#555;padding:5px 8px;">Rhythm</div>
+        </div>
+
+        <!-- Main content area -->
+        <div style="flex:1;display:flex;flex-direction:column;position:relative;">
+          <!-- Top bar with search + notifications -->
+          <div style="height:44px;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;padding:0 16px;flex-shrink:0;background:#0d0d0d;">
+            <span style="font-size:12px;color:#555;">Home &rsaquo; BrandAI</span>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+              <!-- Search bar trigger -->
+              <div id="searchBarTrigger" style="display:flex;align-items:center;gap:6px;background:#151515;border:1px solid #2a2a2a;border-radius:8px;padding:5px 12px;cursor:pointer;min-width:180px;" onclick="document.getElementById('sidePanel').style.display='flex';document.getElementById('searchBarTrigger').style.borderColor='#a89878';">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <span style="font-size:11px;color:#555;">Search...</span>
+                <span style="margin-left:auto;font-size:9px;color:#444;border:1px solid #333;padding:1px 4px;border-radius:3px;">&#8984;K</span>
+              </div>
+              <!-- Notification bell -->
+              <div style="position:relative;cursor:pointer;" onclick="document.getElementById('sidePanel').style.display='flex';">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <div style="position:absolute;top:-3px;right:-3px;width:8px;height:8px;background:#a89878;border-radius:50%;"></div>
+              </div>
+              <!-- Help -->
+              <span style="color:#444;font-size:14px;cursor:pointer;">?</span>
+            </div>
+          </div>
+
+          <!-- Page content -->
+          <div style="flex:1;padding:20px;overflow-y:auto;">
+            <div style="font-size:16px;color:#f4f4f5;font-weight:500;margin-bottom:4px;">BrandAI</div>
+            <div style="font-size:12px;color:#555;margin-bottom:16px;">Your AI-powered brand intelligence agents</div>
+            <div style="height:80px;background:#151515;border-radius:8px;border:1px solid #1a1a1a;margin-bottom:12px;"></div>
+            <div style="height:60px;background:#151515;border-radius:8px;border:1px solid #1a1a1a;margin-bottom:12px;"></div>
+            <div style="height:100px;background:#151515;border-radius:8px;border:1px solid #1a1a1a;"></div>
+          </div>
+        </div>
+
+        <!-- Right side panel (search + notifications) -->
+        <div id="sidePanel" style="width:300px;background:#111;border-left:1px solid #2a2a2a;display:flex;flex-direction:column;flex-shrink:0;box-shadow:-4px 0 20px rgba(0,0,0,0.4);">
+          <!-- Panel tabs -->
+          <div style="display:flex;border-bottom:1px solid #222;">
+            <div style="flex:1;padding:10px;text-align:center;font-size:11px;color:#a89878;border-bottom:2px solid #a89878;font-weight:600;cursor:pointer;">Search</div>
+            <div style="flex:1;padding:10px;text-align:center;font-size:11px;color:#555;cursor:pointer;position:relative;">
+              Notifications
+              <span style="position:absolute;top:6px;right:20px;background:#a89878;color:#000;font-size:8px;padding:1px 4px;border-radius:6px;font-weight:700;">3</span>
+            </div>
+          </div>
+          <!-- Search input -->
+          <div style="padding:12px;border-bottom:1px solid #1a1a1a;">
+            <div style="display:flex;align-items:center;gap:6px;background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:8px 12px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <span style="color:#ddd;font-size:12px;">show investor outreach</span>
+              <span style="animation:blink 1s infinite;color:#a89878;font-weight:100;">|</span>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:8px;">
+              <span style="font-size:9px;color:#000;background:#a89878;padding:2px 8px;border-radius:8px;font-weight:600;">AI</span>
+              <span style="font-size:9px;color:#555;border:1px solid #333;padding:2px 8px;border-radius:8px;">Navigate</span>
+              <span style="font-size:9px;color:#555;border:1px solid #333;padding:2px 8px;border-radius:8px;">Actions</span>
+            </div>
+          </div>
+          <!-- AI Response -->
+          <div style="flex:1;overflow-y:auto;padding:12px;">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:10px;">
+              <div style="width:16px;height:16px;background:#a89878;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:#000;font-weight:700;">B</div>
+              <span style="font-size:10px;color:#a89878;font-weight:600;">BrandAI</span>
+            </div>
+            <div style="font-size:11px;color:#888;line-height:1.6;margin-bottom:12px;">
+              Found your investor outreach automation and recent emails:
+            </div>
+            <!-- Result cards -->
+            <div style="background:#1a1a1a;border:1px solid #222;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;">
+              <div style="font-size:11px;color:#e4e4e5;">&#9889; Investor Outreach Pipeline</div>
+              <div style="font-size:9px;color:#555;margin-top:2px;">Automation - 3 steps - Last run Mar 18</div>
+            </div>
+            <div style="background:#1a1a1a;border:1px solid #222;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;">
+              <div style="font-size:11px;color:#e4e4e5;">&#9993; Email: Radical Ventures</div>
+              <div style="font-size:9px;color:#555;margin-top:2px;">Sent Mar 19 - Investment thesis pitch</div>
+            </div>
+            <div style="background:#1a1a1a;border:1px solid #222;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;">
+              <div style="font-size:11px;color:#e4e4e5;">&#9993; Email: Spark Capital</div>
+              <div style="font-size:9px;color:#555;margin-top:2px;">Sent Mar 19 - Platform intro</div>
+            </div>
+            <div style="background:#1a1a1a;border:1px solid #222;border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;">
+              <div style="font-size:11px;color:#e4e4e5;">&#128203; Pulse: Investor Outreach</div>
+              <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
+                <div style="flex:1;height:3px;background:#222;border-radius:2px;overflow:hidden;"><div style="width:45%;height:100%;background:#a89878;border-radius:2px;"></div></div>
+                <span style="font-size:9px;color:#a89878;">45%</span>
+              </div>
+            </div>
+            <!-- Follow-up -->
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1a1a1a;">
+              <div style="padding:5px 8px;font-size:10px;color:#a89878;cursor:pointer;">&#8594; Run outreach pipeline again</div>
+              <div style="padding:5px 8px;font-size:10px;color:#666;cursor:pointer;">&#8594; Draft follow-up emails</div>
+              <div style="padding:5px 8px;font-size:10px;color:#666;cursor:pointer;">&#8594; View all sent investor emails</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:12px;color:#888;font-size:13px;">
+      <strong>&#8984;K</strong> opens the centered Spotlight for fast search/actions.
+      <strong>Clicking the search bar</strong> or <strong>notification bell</strong> in the top-right opens the side panel for rich AI responses and notifications.
+      Both share the same search engine underneath.
+    </p>
+  </div>
+</div>
+
+<style>
+@keyframes blink { 0%,50% { opacity:1; } 51%,100% { opacity:0; } }
+</style>

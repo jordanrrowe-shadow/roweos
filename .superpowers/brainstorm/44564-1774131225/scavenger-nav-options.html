@@ -1,0 +1,186 @@
+<h2>Where does the Scavenger live?</h2>
+<p class="subtitle">Three navigation approaches for the X Scavenger Agent</p>
+
+<div class="cards">
+  <!-- Option A: Top-level view -->
+  <div class="card" data-choice="a-toplevel" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111;border-radius:8px;padding:12px;font-family:-apple-system,sans-serif;color:#e0e0e0;min-height:340px;">
+        <!-- Sidebar nav -->
+        <div style="display:flex;gap:12px;">
+          <div style="width:52px;flex-shrink:0;">
+            <div style="display:flex;flex-direction:column;gap:2px;">
+              <div style="padding:8px 4px;text-align:center;font-size:8px;color:#666;border-radius:6px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#666" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><br>Agent
+              </div>
+              <div style="padding:8px 4px;text-align:center;font-size:8px;color:#666;border-radius:6px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#666" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><br>Studio
+              </div>
+              <div style="padding:8px 4px;text-align:center;font-size:8px;color:#666;border-radius:6px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#666" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg><br>Library
+              </div>
+              <div style="padding:8px 4px;text-align:center;font-size:8px;color:#a89878;border-radius:6px;background:rgba(168,152,120,0.1);border:1px solid rgba(168,152,120,0.3);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a89878" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><br><b>Scavenger</b>
+              </div>
+              <div style="padding:8px 4px;text-align:center;font-size:8px;color:#666;border-radius:6px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#666" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg><br>Auto
+              </div>
+              <div style="padding:8px 4px;text-align:center;font-size:8px;color:#666;border-radius:6px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#666" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><br>Pulse
+              </div>
+            </div>
+          </div>
+          <!-- Main content area -->
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:10px;">X Scavenger</div>
+            <!-- Tabs -->
+            <div style="display:flex;gap:0;margin-bottom:10px;border-bottom:1px solid #333;">
+              <div style="padding:5px 10px;font-size:9px;color:#a89878;border-bottom:2px solid #a89878;font-weight:600;">Feed</div>
+              <div style="padding:5px 10px;font-size:9px;color:#555;">Configs</div>
+              <div style="padding:5px 10px;font-size:9px;color:#555;">Activity</div>
+              <div style="padding:5px 10px;font-size:9px;color:#555;">Analytics</div>
+            </div>
+            <!-- Feed items -->
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="padding:8px;background:#1a1a1a;border-radius:6px;border:1px solid #2a2a2a;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:9px;color:#888;">@techfounder</span>
+                  <span style="font-size:8px;padding:2px 6px;background:#22c55e;color:#000;border-radius:3px;font-weight:600;">92%</span>
+                </div>
+                <div style="font-size:10px;color:#ccc;margin-bottom:6px;">Anyone building AI tools for brand management? Looking for...</div>
+                <div style="display:flex;gap:4px;">
+                  <div style="padding:2px 8px;background:#a89878;border-radius:4px;font-size:8px;color:#000;font-weight:600;">Approve</div>
+                  <div style="padding:2px 8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;font-size:8px;color:#888;">Edit</div>
+                  <div style="padding:2px 8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;font-size:8px;color:#888;">Skip</div>
+                </div>
+              </div>
+              <div style="padding:8px;background:#1a1a1a;border-radius:6px;border:1px solid #2a2a2a;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:9px;color:#888;">@marketingpro</span>
+                  <span style="font-size:8px;padding:2px 6px;background:#fbbf24;color:#000;border-radius:3px;font-weight:600;">74%</span>
+                </div>
+                <div style="font-size:10px;color:#ccc;margin-bottom:6px;">The future of social media automation is about...</div>
+                <div style="display:flex;gap:4px;">
+                  <div style="padding:2px 8px;background:#a89878;border-radius:4px;font-size:8px;color:#000;font-weight:600;">Approve</div>
+                  <div style="padding:2px 8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;font-size:8px;color:#888;">Edit</div>
+                  <div style="padding:2px 8px;background:#1a1a1a;border:1px solid #333;border-radius:4px;font-size:8px;color:#888;">Skip</div>
+                </div>
+              </div>
+              <div style="padding:8px;background:#1a1a1a;border-radius:6px;border:1px solid #2a2a2a;opacity:0.6;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:9px;color:#888;">@brandguru</span>
+                  <span style="font-size:8px;padding:2px 6px;background:#666;color:#fff;border-radius:3px;">45%</span>
+                </div>
+                <div style="font-size:10px;color:#888;">Low relevance post about unrelated topic...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A: Own Nav Item</h3>
+      <p>Dedicated "Scavenger" in the sidebar navigation. Full-width view with Feed, Configs, Activity, and Analytics tabs. Most space, cleanest separation.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Inside Social Agent -->
+  <div class="card" data-choice="b-social" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111;border-radius:8px;padding:12px;font-family:-apple-system,sans-serif;color:#e0e0e0;min-height:340px;">
+        <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:6px;">Agent Chat</div>
+        <div style="font-size:10px;color:#888;margin-bottom:10px;">Social Agent selected</div>
+        <!-- Agent sub-tabs -->
+        <div style="display:flex;gap:0;margin-bottom:10px;border-bottom:1px solid #333;">
+          <div style="padding:5px 10px;font-size:9px;color:#555;">Chat</div>
+          <div style="padding:5px 10px;font-size:9px;color:#555;">Publish</div>
+          <div style="padding:5px 10px;font-size:9px;color:#a89878;border-bottom:2px solid #a89878;font-weight:600;">Scavenger</div>
+        </div>
+        <!-- Scavenger content (smaller, constrained) -->
+        <div style="font-size:9px;color:#888;margin-bottom:6px;">Active config: AI Industry Monitor</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div style="padding:6px;background:#1a1a1a;border-radius:5px;border:1px solid #2a2a2a;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:8px;color:#888;">@techfounder</span>
+              <span style="font-size:7px;padding:1px 4px;background:#22c55e;color:#000;border-radius:2px;">92%</span>
+            </div>
+            <div style="font-size:9px;color:#ccc;margin-bottom:4px;">Anyone building AI tools for brand management?</div>
+            <div style="display:flex;gap:3px;">
+              <div style="padding:1px 6px;background:#a89878;border-radius:3px;font-size:7px;color:#000;font-weight:600;">Approve</div>
+              <div style="padding:1px 6px;border:1px solid #333;border-radius:3px;font-size:7px;color:#888;">Skip</div>
+            </div>
+          </div>
+          <div style="padding:6px;background:#1a1a1a;border-radius:5px;border:1px solid #2a2a2a;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:8px;color:#888;">@marketingpro</span>
+              <span style="font-size:7px;padding:1px 4px;background:#fbbf24;color:#000;border-radius:2px;">74%</span>
+            </div>
+            <div style="font-size:9px;color:#ccc;margin-bottom:4px;">The future of social media automation...</div>
+            <div style="display:flex;gap:3px;">
+              <div style="padding:1px 6px;background:#a89878;border-radius:3px;font-size:7px;color:#000;font-weight:600;">Approve</div>
+              <div style="padding:1px 6px;border:1px solid #333;border-radius:3px;font-size:7px;color:#888;">Skip</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px;padding:6px;background:#0a0a0a;border-radius:5px;border:1px dashed #333;text-align:center;">
+          <div style="font-size:8px;color:#555;">No room for configs/analytics here</div>
+          <div style="font-size:7px;color:#444;">Would need separate settings section</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: Inside Social Agent</h3>
+      <p>Tab within the Social agent view. Keeps social features grouped. But the agent chat area is narrow and already has its own tabs. Configs and analytics would need to live elsewhere.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Inside Automations -->
+  <div class="card" data-choice="c-automations" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111;border-radius:8px;padding:12px;font-family:-apple-system,sans-serif;color:#e0e0e0;min-height:340px;">
+        <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:6px;">Automations</div>
+        <!-- Automation tabs -->
+        <div style="display:flex;gap:0;margin-bottom:10px;border-bottom:1px solid #333;">
+          <div style="padding:5px 10px;font-size:9px;color:#555;">Tasks</div>
+          <div style="padding:5px 10px;font-size:9px;color:#555;">Pipelines</div>
+          <div style="padding:5px 10px;font-size:9px;color:#a89878;border-bottom:2px solid #a89878;font-weight:600;">Scavenger</div>
+        </div>
+        <!-- Config selector -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="padding:4px 8px;background:#1a1a1a;border:1px solid #333;border-radius:5px;font-size:9px;color:#a89878;">AI Industry Monitor &#9662;</div>
+          <div style="display:flex;gap:4px;">
+            <div style="padding:3px 8px;background:#a89878;border-radius:4px;font-size:8px;color:#000;font-weight:600;">+ New Config</div>
+          </div>
+        </div>
+        <!-- Feed -->
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div style="padding:7px;background:#1a1a1a;border-radius:5px;border:1px solid #2a2a2a;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:9px;color:#888;">@techfounder <span style="color:#555;">3.2K followers</span></span>
+              <span style="font-size:7px;padding:2px 5px;background:#22c55e;color:#000;border-radius:3px;font-weight:600;">92%</span>
+            </div>
+            <div style="font-size:9px;color:#ccc;margin-bottom:4px;">Anyone building AI tools for brand management? Looking for recommendations...</div>
+            <div style="font-size:8px;color:#555;margin-bottom:4px;font-style:italic;">Draft: "Great question! We've been building exactly this at..."</div>
+            <div style="display:flex;gap:3px;">
+              <div style="padding:2px 7px;background:#a89878;border-radius:3px;font-size:7px;color:#000;font-weight:600;">Approve</div>
+              <div style="padding:2px 7px;border:1px solid #333;border-radius:3px;font-size:7px;color:#888;">Edit</div>
+              <div style="padding:2px 7px;border:1px solid #333;border-radius:3px;font-size:7px;color:#888;">Skip</div>
+            </div>
+          </div>
+          <div style="padding:7px;background:#1a1a1a;border-radius:5px;border:1px solid #2a2a2a;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+              <span style="font-size:9px;color:#888;">@marketingpro</span>
+              <span style="font-size:7px;padding:2px 5px;background:#fbbf24;color:#000;border-radius:3px;font-weight:600;">74%</span>
+            </div>
+            <div style="font-size:9px;color:#ccc;">The future of social media automation is about...</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:8px;color:#555;text-align:center;">Automations context -- feels like "just another automation type"</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C: Inside Automations</h3>
+      <p>Tab alongside Tasks and Pipelines. Conceptually fits (it's automated engagement). Has more room than the agent chat. But may feel buried and disconnected from social context.</p>
+    </div>
+  </div>
+</div>

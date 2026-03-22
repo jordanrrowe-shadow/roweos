@@ -10,13 +10,22 @@
 
 var admin = require('firebase-admin');
 var functions = require('firebase-functions/v2');
-var scheduler = require('./lib/scheduler');
-var executor = require('./lib/executor');
-var scavenger = require('./lib/scavenger');
-var helpers = require('./lib/firestore-helpers');
 
-// Initialize Firebase Admin SDK
-admin.initializeApp();
+// v25.4: Lazy init — avoid timeout during deployment analysis
+var _adminInitialized = false;
+function ensureInit() {
+  if (!_adminInitialized) {
+    admin.initializeApp();
+    _adminInitialized = true;
+  }
+}
+
+// v25.4: Lazy require — modules loaded on first invocation, not at deploy time
+var _scheduler, _executor, _scavenger, _helpers;
+function getScheduler() { if (!_scheduler) _scheduler = require('./lib/scheduler'); return _scheduler; }
+function getExecutor() { if (!_executor) _executor = require('./lib/executor'); return _executor; }
+function getScavenger() { if (!_scavenger) _scavenger = require('./lib/scavenger'); return _scavenger; }
+function getHelpers() { if (!_helpers) _helpers = require('./lib/firestore-helpers'); return _helpers; }
 
 /**
  * Scheduled function: runs every 5 minutes
@@ -30,10 +39,15 @@ exports.runScheduledTasks = functions.scheduler.onSchedule(
     region: 'us-central1'
   },
   async function(event) {
+    ensureInit();
+    var scheduler = getScheduler();
+    var executor = getExecutor();
+    var helpers = getHelpers();
+    var scavenger = getScavenger();
+
     console.log('[Cloud Scheduler] Tick at', new Date().toISOString());
 
     try {
-      // Get all users who have enabled cloud scheduling
       var users = await scheduler.getEnabledUsers();
       console.log('[Cloud Scheduler] Found', users.length, 'enabled users');
 
@@ -42,18 +56,14 @@ exports.runScheduledTasks = functions.scheduler.onSchedule(
       for (var i = 0; i < users.length; i++) {
         var user = users[i];
         try {
-          // Get user's timezone
           var settings = await helpers.getUserSettings(user.uid);
           var timezone = settings.timezone || 'America/Chicago';
-
-          // Find due tasks
           var dueTasks = await scheduler.getDueTasks(user.uid, timezone);
 
           if (dueTasks.length > 0) {
             console.log('[Cloud Scheduler] User', user.uid, 'has', dueTasks.length, 'due tasks');
           }
 
-          // Execute each due task (sequentially per user to avoid rate limits)
           for (var j = 0; j < dueTasks.length; j++) {
             var result = await executor.executeTask(user.uid, dueTasks[j], user.apiKeys);
             if (result.success) {
@@ -64,7 +74,6 @@ exports.runScheduledTasks = functions.scheduler.onSchedule(
             }
           }
 
-          // v26.3: Run scavenger pipeline for this user
           try {
             var scavengerConfigs = await helpers.getActiveScavengerConfigs(user.uid);
             if (scavengerConfigs.length > 0) {
@@ -97,6 +106,7 @@ exports.runTaskNow = functions.https.onCall(
     region: 'us-central1'
   },
   async function(request) {
+    ensureInit();
     // Verify authentication
     if (!request.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Must be signed in');

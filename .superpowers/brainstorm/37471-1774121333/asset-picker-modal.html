@@ -1,0 +1,95 @@
+<h2>Asset Picker Modal</h2>
+<p class="subtitle">Modal that opens from Studio, Automations, Agent chat, etc. when you want to attach a photo</p>
+
+<div class="cards">
+  <div class="card" data-choice="layout-a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111;border-radius:8px;padding:16px;font-family:-apple-system,sans-serif;color:#e0e0e0;min-height:320px;">
+        <!-- Modal mockup -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-weight:600;font-size:14px;color:#fff;">Select Photo</span>
+          <span style="color:#666;cursor:pointer;font-size:18px;">&#10005;</span>
+        </div>
+        <!-- Search + filter bar -->
+        <div style="display:flex;gap:6px;margin-bottom:12px;">
+          <div style="flex:1;padding:6px 10px;background:#1a1a1a;border:1px solid #333;border-radius:6px;font-size:11px;color:#666;">Search tags...</div>
+          <div style="padding:6px 10px;background:#1a1a1a;border:1px solid #333;border-radius:6px;font-size:11px;color:#888;">All Collections ▾</div>
+        </div>
+        <!-- Suggested section -->
+        <div style="font-size:10px;color:#a89878;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">Suggested for this post</div>
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <div style="width:64px;height:64px;background:#2a2a2a;border-radius:6px;border:2px solid #a89878;display:flex;align-items:center;justify-content:center;font-size:9px;color:#888;">★ 92%</div>
+          <div style="width:64px;height:64px;background:#2a2a2a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#888;">★ 78%</div>
+          <div style="width:64px;height:64px;background:#2a2a2a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#888;">★ 65%</div>
+        </div>
+        <!-- All photos grid -->
+        <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600;">All Photos</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">
+          <div style="aspect-ratio:1;background:#1a1a1a;border-radius:4px;"></div>
+          <div style="aspect-ratio:1;background:#222;border-radius:4px;"></div>
+          <div style="aspect-ratio:1;background:#1a1a1a;border-radius:4px;"></div>
+          <div style="aspect-ratio:1;background:#222;border-radius:4px;"></div>
+          <div style="aspect-ratio:1;background:#222;border-radius:4px;"></div>
+          <div style="aspect-ratio:1;background:#1a1a1a;border-radius:4px;"></div>
+          <div style="aspect-ratio:1;background:#222;border-radius:4px;"></div>
+          <div style="aspect-ratio:1;background:#1a1a1a;border-radius:4px;"></div>
+        </div>
+        <!-- Footer -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #2a2a2a;">
+          <span style="font-size:10px;color:#666;">24 photos · 142 MB</span>
+          <div style="padding:6px 16px;background:#a89878;border-radius:6px;font-size:11px;color:#000;font-weight:600;">Attach</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A: Suggested + Grid</h3>
+      <p>Top section shows AI-suggested matches with relevance score. Below is the full scrollable grid. Search and collection filter at top. Storage stats in footer.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="layout-b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111;border-radius:8px;padding:16px;font-family:-apple-system,sans-serif;color:#e0e0e0;min-height:320px;">
+        <!-- Modal mockup B -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-weight:600;font-size:14px;color:#fff;">Select Photo</span>
+          <span style="color:#666;cursor:pointer;font-size:18px;">&#10005;</span>
+        </div>
+        <!-- Tabs -->
+        <div style="display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid #333;">
+          <div style="padding:6px 14px;font-size:11px;color:#a89878;border-bottom:2px solid #a89878;font-weight:600;">Suggested</div>
+          <div style="padding:6px 14px;font-size:11px;color:#666;">Recent</div>
+          <div style="padding:6px 14px;font-size:11px;color:#666;">All</div>
+          <div style="padding:6px 14px;font-size:11px;color:#666;">Collections</div>
+        </div>
+        <!-- Suggested tab content -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+          <div style="aspect-ratio:1;background:#2a2a2a;border-radius:6px;border:2px solid #a89878;position:relative;">
+            <div style="position:absolute;bottom:4px;left:4px;background:#a89878;color:#000;font-size:8px;padding:2px 5px;border-radius:3px;font-weight:700;">BEST</div>
+          </div>
+          <div style="aspect-ratio:1;background:#1a1a1a;border-radius:6px;position:relative;">
+            <div style="position:absolute;bottom:4px;right:4px;font-size:8px;color:#888;">78%</div>
+          </div>
+          <div style="aspect-ratio:1;background:#222;border-radius:6px;position:relative;">
+            <div style="position:absolute;bottom:4px;right:4px;font-size:8px;color:#888;">65%</div>
+          </div>
+          <div style="aspect-ratio:1;background:#222;border-radius:6px;"></div>
+          <div style="aspect-ratio:1;background:#1a1a1a;border-radius:6px;"></div>
+          <div style="aspect-ratio:1;background:#222;border-radius:6px;"></div>
+          <div style="aspect-ratio:1;background:#1a1a1a;border-radius:6px;"></div>
+          <div style="aspect-ratio:1;background:#222;border-radius:6px;"></div>
+          <div style="aspect-ratio:1;background:#1a1a1a;border-radius:6px;"></div>
+        </div>
+        <!-- Footer -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #2a2a2a;">
+          <span style="font-size:10px;color:#666;">24 photos · 142 MB</span>
+          <div style="padding:6px 16px;background:#a89878;border-radius:6px;font-size:11px;color:#000;font-weight:600;">Attach</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: Tabbed View</h3>
+      <p>Tabs for Suggested / Recent / All / Collections. Keeps the modal cleaner -- one view at a time. Suggested tab is default when opened from a post context.</p>
+    </div>
+  </div>
+</div>
