@@ -390,6 +390,23 @@ async function stepPost(uid, config) {
           postedAt: admin.firestore.FieldValue.serverTimestamp()
         });
         console.log('[Scavenger:Post] Posted reply to @' + target.authorHandle);
+        // v25.4: Log to social_activity for Activity tab
+        try {
+          await helpers.getDb().collection('roweos_users/' + uid + '/social_activity').add({
+            type: 'scavenger_reply',
+            platform: 'x',
+            description: 'Auto-replied to @' + target.authorHandle + ': ' + (target.draftText || '').substring(0, 80),
+            details: {
+              postUrl: postResult.postUrl || '',
+              targetAuthor: target.authorHandle,
+              content: (target.draftText || '').substring(0, 200)
+            },
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            automatic: true
+          });
+        } catch (logErr) {
+          console.warn('[Scavenger:Post] Activity log error:', logErr.message);
+        }
       } else {
         await helpers.updateScavengerTarget(uid, target._id, {
           error: postResult.error || 'Post failed',
