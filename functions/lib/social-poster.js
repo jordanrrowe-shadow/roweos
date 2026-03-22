@@ -18,12 +18,14 @@ var fetch = require('node-fetch');
  * @param {string} content - Post text content
  * @param {string} userId - Platform user/page ID (required for Threads/Instagram)
  * @param {string} imageUrl - Optional public image URL for media posts
+ * @param {Object} options - Optional. { replyToPostId } for reply-to support
  * @returns {Object} { success, postId, postUrl, platform, error }
  */
-async function postToSocial(platform, accessToken, content, userId, imageUrl) {
+// v26.3: Added options param (replyToPostId for replies)
+async function postToSocial(platform, accessToken, content, userId, imageUrl, options) {
   try {
     if (platform === 'x') {
-      return await postToX(accessToken, content, imageUrl);
+      return await postToX(accessToken, content, imageUrl, options);
     } else if (platform === 'threads') {
       return await postToThreads(accessToken, content, userId, imageUrl);
     } else if (platform === 'instagram') {
@@ -41,8 +43,13 @@ async function postToSocial(platform, accessToken, content, userId, imageUrl) {
  * Post to X/Twitter
  * Simple POST to tweets endpoint
  */
-async function postToX(accessToken, content, imageUrl) {
+// v26.3: Added options param for reply-to support
+async function postToX(accessToken, content, imageUrl, options) {
   var payload = { text: content };
+  // v26.3: Reply-to support for Scavenger
+  if (options && options.replyToPostId) {
+    payload.reply = { in_reply_to_tweet_id: options.replyToPostId };
+  }
   // Note: X image posting requires media upload API (separate OAuth flow)
   // Cloud functions only support text posts to X for now
 
