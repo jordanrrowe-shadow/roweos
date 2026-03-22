@@ -401,8 +401,11 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
       // v17.5: Fetch @handle for X, Threads, and Instagram — write to scoped handle key
       if (platform === 'x' && data.accessToken) {
         setStatus('Getting your X profile...');
-        fetch('https://api.x.com/2/users/me', {
-          headers: { 'Authorization': 'Bearer ' + data.accessToken }
+        // v25.4: Route through proxy to avoid CORS
+        fetch('/api/x-dm-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ method: 'GET', endpoint: '/2/users/me', token: data.accessToken })
         }).then(function(r) { return r.json(); }).then(function(user) {
           var handle = user.data && user.data.username ? user.data.username : '';
           if (handle) localStorage.setItem('roweos_social_x_handle' + scope, handle);
