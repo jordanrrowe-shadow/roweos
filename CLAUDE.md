@@ -193,6 +193,11 @@ Two-part format (v15.6, not v15.6.0). Version appears in: `ROWEOS_VERSION` const
 | Analytics | commerce | commerceView |
 | Admin | admin | adminView |
 | Mail | mail | mailView |
+| Folio | folio | folioView |
+| Social Hub | social | socialView |
+| Bloom | bloom | bloomView |
+| Automations | automations | automationsView |
+| Section Landing | sectionLanding | sectionLandingView |
 
 Analytics was renamed from Commerce in v15.15; internal IDs still `commerce*`.
 Admin view (v22.1) is admin-only — hidden nav item, `showView('admin')` redirects non-admins to Settings.
@@ -201,6 +206,17 @@ Mail view (v22.23) — Outbox, Sent, Compose, Inbox (Gmail/Outlook), Settings ta
 ### BrandAI Agents: Strategy (#a78bfa), Marketing (#f472b6), Operations (#4ade80), Documents (#fbbf24), Intelligence (#22d3ee)
 ### LifeAI Coaches: Life Coach, Wellness Coach, Tax Copilot, Personal AI, Standard AI
 ### Sidebar: Always Collapsed (64px) | Auto (64px/220px hover) | Always Pinned (220px)
+
+### Navigation System (v26.0)
+- **Sidebar modes:** Grouped (Simplified, 6 groups) and Expanded (Advanced, original 20 items). Toggle in Settings > Preferences. Stored in `localStorage['roweos_sidebar_mode']`.
+- **Two sidebar navs:** `#sidebarNav` (grouped) and `#sidebarNavExpanded` (original). `applySidebarMode()` toggles visibility.
+- **Landing pages:** `_pageLandingConfigs` object defines per-page landing pages for all 16 views. `showPageLanding(viewId)` renders them. `enterPageSubSection(viewId, tabId)` navigates from landing to sub-section.
+- **Pill nav:** `renderPillNav(containerId, items, activeId, onSelect)` replaces all tab bars. `handlePillNavClick()` and `updatePillNavActive()` manage state.
+- **Tab handler wrappers must NOT call showView()** — `enterPageSubSection()` already calls it. Double-calling resets the view and breaks tab switching.
+- **New views added to allViews array:** `sectionLandingView` must be in the `allViews` array in `showView()` or landing pages show blank.
+- **Sidebar CSS selectors:** When adding a new fixed-position view, it MUST be added to ALL THREE sidebar state selectors: `html.sidebar-pinned`, `html.sidebar-hover-expanded`, `html.sidebar-pinned-collapsed`. Missing any = content bleeds behind sidebar.
+- **Breadcrumb:** `updateNavBreadcrumb(['Home', 'Group', 'Section'])` manages nav state. `navigateBreadcrumb(index)` handles clicks.
+- **Favorites:** `toggleFavorite(viewId, label)` adds/removes from sidebar favorites. Stored in `localStorage['roweos_sidebar_favorites']`.
 
 ---
 
@@ -260,6 +276,20 @@ Key patterns to remember without looking up:
 ## TROUBLESHOOTING
 
 Pre-deployment validation, common errors, and known technical debt are in the **`troubleshooting.md`** memory file. Read it when debugging or before deployment.
+
+### Cloud Functions Scheduler
+- `getUserAutomations()` MUST include `doc.id` in returned data — executor needs `task.id` for locking and lastRun
+- `isTaskDue()` uses 30-minute time window — tasks only execute within 0-30min of scheduled time
+- `lastRun` written at START of execution with `lastExecutor: 'cloud_running'` to prevent duplicates
+- Deploy: `FUNCTIONS_DISCOVERY_TIMEOUT=60 firebase deploy --only functions`
+- Logs: `firebase functions:log --only runScheduledTasks`
+- Pipeline email steps use cloud outbox pattern: Cloud Functions write to `cloud_outbox`, client picks up and sends via OAuth
+
+### Social Hub (v25.5)
+- All external API calls MUST go through proxies (CORS blocks direct calls from browser)
+- Anthropic API from browser needs `anthropic-dangerous-direct-browser-access: true` header
+- `getSocialKeyScope()` reads from `localStorage` (source of truth), not `selectedBrand` global (may be uninitialized)
+- `postToSocial(platform, opts)` takes 2 args — set `window._socialPublisherContent` and `window._socialPublisherImage` globals before calling
 
 ### Deploy (when deploy.sh git push fails)
 `export PATH="$HOME/.local/share/fnm:$PATH" && eval "$(fnm env)" && vercel --prod --yes`
