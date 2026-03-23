@@ -41,7 +41,8 @@ export default async function handler(req, res) {
       /^\/2\/tweets\/search\/recent/,
       /^\/2\/tweets\?/,
       /^\/2\/tweets$/,
-      /^\/2\/users/
+      /^\/2\/users/,
+      /^\/2\/likes/
     ];
     var isAllowed = false;
     for (var pi = 0; pi < allowedPatterns.length; pi++) {
