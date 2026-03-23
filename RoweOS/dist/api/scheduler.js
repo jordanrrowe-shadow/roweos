@@ -903,6 +903,12 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
           while (Date.now() - drStart < drMaxMs) {
             await new Promise(function(r) { setTimeout(r, drPollMs); });
             var pollResp = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions/' + drId, { headers: { 'x-goog-api-key': apiKeys.google } });
+            // v25.6: Check HTTP status on polling response
+            if (!pollResp.ok) {
+              var errBody = '';
+              try { errBody = await pollResp.text(); } catch(e) {}
+              throw new Error('Deep Research polling failed: HTTP ' + pollResp.status + ' ' + errBody.substring(0, 200));
+            }
             var pollData = await pollResp.json();
             var drStatus = (pollData.status || '').toLowerCase();
             if (drStatus === 'completed') {
@@ -1125,6 +1131,12 @@ async function executeTask(task, uid, apiKeys, brands, brandSettingsArr, profile
         while (Date.now() - drStart2 < drMaxMs2) {
           await new Promise(function(r) { setTimeout(r, 10000); });
           var pollResp2 = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions/' + drId2, { headers: { 'x-goog-api-key': apiKeys.google } });
+          // v25.6: Check HTTP status on polling response
+          if (!pollResp2.ok) {
+            var errBody2 = '';
+            try { errBody2 = await pollResp2.text(); } catch(e) {}
+            throw new Error('Deep Research polling failed: HTTP ' + pollResp2.status + ' ' + errBody2.substring(0, 200));
+          }
           var pollData2 = await pollResp2.json();
           var drStatus2 = (pollData2.status || '').toLowerCase();
           if (drStatus2 === 'completed') {

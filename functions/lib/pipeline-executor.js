@@ -34,7 +34,7 @@ function resolveTemplateVars(text, context) {
  * @param {Array} allOps - Combined operations arrays
  * @returns {Object} { completedSteps, failedSteps, context }
  */
-async function executePipeline(uid, task, apiKeys, brands, allOps) {
+async function executePipeline(uid, task, apiKeys, brands, allOps, templateContext) {
   var steps = task.steps || [];
   if (steps.length === 0) {
     return { completedSteps: [], failedSteps: [], context: {} };
@@ -46,8 +46,18 @@ async function executePipeline(uid, task, apiKeys, brands, allOps) {
   var context = {
     brandName: brand.shortName || brand.name || '',
     _brandIdx: brandIdx,
-    _uid: uid
+    _uid: uid,
+    _taskId: task.id || '',
+    _taskName: task.name || ''
   };
+
+  // v25.6: Seed with template variables (current_date, current_time, brand_name, etc.)
+  if (templateContext) {
+    var keys = Object.keys(templateContext);
+    for (var k = 0; k < keys.length; k++) {
+      if (!context[keys[k]]) context[keys[k]] = templateContext[keys[k]];
+    }
+  }
 
   var completedSteps = [];
   var failedSteps = [];
@@ -184,6 +194,51 @@ async function executeStep(uid, step, stepIndex, context, apiKeys, brands, allOp
   // --- Notify step (no external action in cloud, just log) ---
   if (action === 'notify') {
     return 'Notification: ' + (stepText || stepPrompt || 'Pipeline step completed');
+  }
+
+  // v25.6: Email step — compose and write to cloud_outbox for client pickup
+  if (action === 'email') {
+    var helpers = require('./firestore-helpers');
+    var emailTo = (step.target && step.target.emailTo) ? step.target.emailTo : '';
+    var emailSubject = (step.target && step.target.emailSubject) ? step.target.emailSubject : (step.name || 'Automation Email');
+    var emailBody = (step.target && step.target.emailBody) ? step.target.emailBody : '';
+
+    // Resolve template variables ({{current_date}}, {{step1_output}}, etc.)
+    emailTo = resolveTemplateVars(emailTo, context);
+    emailSubject = resolveTemplateVars(emailSubject, context);
+    emailBody = resolveTemplateVars(emailBody, context);
+
+    // If body is empty/placeholder, use concatenated outputs from previous steps
+    if (!emailBody || emailBody === step.name || emailBody.length < 20) {
+      var parts = [];
+      for (var ei = 0; ei < stepIndex; ei++) {
+        var prevKey = 'step' + ei + '_output';
+        var prevOutput = context[prevKey];
+        if (prevOutput && prevOutput.length > 10) parts.push(prevOutput);
+      }
+      emailBody = parts.join('\n\n---\n\n');
+    }
+
+    if (!emailTo) {
+      throw new Error('Email step missing recipient (emailTo)');
+    }
+
+    // Write to cloud_outbox for client-side pickup and sending
+    var db = helpers.getDb();
+    await db.collection('roweos_users/' + uid + '/cloud_outbox').add({
+      to: emailTo,
+      subject: emailSubject,
+      bodyMarkdown: emailBody,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      automationId: context._taskId || '',
+      automationName: context._taskName || '',
+      pipelineStepIndex: stepIndex,
+      brandIdx: brandIdx
+    });
+
+    console.log('[Pipeline] Email step: queued to cloud_outbox for ' + emailTo + ', subject: ' + emailSubject.substring(0, 50));
+    return 'Email queued for delivery to ' + emailTo;
   }
 
   // --- Library step (client picks up from cloud_results) ---

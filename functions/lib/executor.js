@@ -114,7 +114,7 @@ async function executeTask(uid, task, apiKeys) {
 
     // Pipeline — multi-step workflow
     if (task.type === 'pipeline' && task.steps) {
-      var pipeResult = await handlePipelineAction(uid, task, apiKeys, brands);
+      var pipeResult = await handlePipelineAction(uid, task, apiKeys, brands, templateCtx);
       await finishTask(uid, task, brand, pipeResult, startTime);
       return pipeResult;
     }
@@ -300,12 +300,12 @@ async function handleImageAction(uid, task, apiKeys) {
 /**
  * Handle pipeline (multi-step workflow)
  */
-async function handlePipelineAction(uid, task, apiKeys, brands) {
+async function handlePipelineAction(uid, task, apiKeys, brands, templateContext) {
   var customOps = await helpers.getUserCustomOps(uid);
   var generatedOps = await helpers.getUserGeneratedBrandOps(uid);
   var allOps = [].concat(customOps, generatedOps);
 
-  var pipeResult = await pipelineExecutor.executePipeline(uid, task, apiKeys, brands, allOps);
+  var pipeResult = await pipelineExecutor.executePipeline(uid, task, apiKeys, brands, allOps, templateContext);
   var stepCount = task.steps.length;
   var failCount = pipeResult.failedSteps.length;
   var summary = failCount === 0
