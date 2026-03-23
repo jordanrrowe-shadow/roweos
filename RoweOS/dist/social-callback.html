@@ -409,6 +409,20 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
         }).then(function(r) { return r.json(); }).then(function(user) {
           var handle = user.data && user.data.username ? user.data.username : '';
           if (handle) localStorage.setItem('roweos_social_x_handle' + scope, handle);
+          // v25.5: Store X numeric userId for API calls (likes, etc.)
+          var xUserId = user.data && user.data.id ? user.data.id : '';
+          if (xUserId) {
+            try {
+              var existingToken = JSON.parse(localStorage.getItem('roweos_social_token_x' + scope) || '{}');
+              existingToken.userId = xUserId;
+              localStorage.setItem('roweos_social_token_x' + scope, JSON.stringify(existingToken));
+              // v25.5: Also persist to Firestore for cross-device PWA access
+              if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
+                var fuid = firebase.auth().currentUser.uid;
+                firebase.firestore().doc('roweos_users/' + fuid + '/social_tokens/x' + scope).set({ userId: xUserId }, { merge: true });
+              }
+            } catch(e) {}
+          }
           setStatus('Connected as @' + handle, 'success');
           done(true);
         }).catch(function() {
