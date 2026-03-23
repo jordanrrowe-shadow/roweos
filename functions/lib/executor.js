@@ -73,6 +73,9 @@ async function executeTask(uid, task, apiKeys) {
       return { success: false, result: null, error: 'Task locked by concurrent execution' };
     }
 
+    // v25.6: Write preliminary lastRun to prevent duplicate pickup by next scheduler tick
+    await helpers.updateAutomationLastRun(uid, String(task.id), new Date().toISOString(), 'cloud_running');
+
     // Get brand data
     var brands = await helpers.getUserBrands(uid);
     var brandIdx = task.brandIdx !== undefined && task.brandIdx !== '' ? parseInt(task.brandIdx) : 0;
@@ -207,6 +210,10 @@ async function executeTask(uid, task, apiKeys) {
     }
   } catch (error) {
     console.error('[Executor] Task failed:', task.name, error.message);
+    // v25.6: Mark as failed (restores previous lastRun for frequency checks)
+    try {
+      await helpers.updateAutomationLastRun(uid, String(task.id), new Date().toISOString(), 'cloud_failed', error.message);
+    } catch (e) {}
     // Release lock on error
     try { await helpers.setCloudLock(uid, String(task.id), false); } catch (e) {}
 

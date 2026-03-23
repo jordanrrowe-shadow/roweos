@@ -152,17 +152,28 @@ async function writeCloudResult(uid, result) {
  * @param {string} taskId - Automation task ID
  * @param {string} timestamp - ISO timestamp
  */
-async function updateAutomationLastRun(uid, taskId, timestamp) {
+async function updateAutomationLastRun(uid, taskId, timestamp, executor, errorMsg) {
   var db = getDb();
   var idStr = String(taskId);
-  // Try to update the individual automation doc directly
   var docRef = db.doc('roweos_users/' + uid + '/automations/' + idStr);
   var doc = await docRef.get();
   if (doc.exists) {
-    await docRef.set({
+    var update = {
       lastRun: timestamp,
-      lastExecutor: 'cloud'
-    }, { merge: true });
+      lastExecutor: executor || 'cloud'
+    };
+    // v25.6: For failed runs, restore previous lastRun
+    // so frequency logic isn't polluted by failures
+    if (executor === 'cloud_failed') {
+      var prevData = doc.data();
+      update = {
+        lastRun: prevData.lastRun || null,
+        lastRunAttempt: timestamp,
+        lastExecutor: 'cloud_failed',
+        lastError: errorMsg || 'Unknown error'
+      };
+    }
+    await docRef.set(update, { merge: true });
   }
 }
 

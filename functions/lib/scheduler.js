@@ -98,6 +98,18 @@ function isTaskDue(task, now, tag) {
     lastRun = task.lastRun ? new Date(task.lastRun) : null;
   }
 
+  // v25.6: Check execution state to prevent duplicates
+  var lastExecutor = task.lastExecutor || '';
+  if (lastRun && lastExecutor === 'cloud_running') {
+    var runningMinutes = (now.getTime() - lastRun.getTime()) / 60000;
+    if (runningMinutes < 15) {
+      if (tag) console.log(tag + ' Task "' + taskName + '": NOT DUE (still running, ' + Math.round(runningMinutes) + 'min ago)');
+      return false;
+    }
+    // Stale cloud_running — previous run died, allow retry
+    if (tag) console.warn(tag + ' Task "' + taskName + '": stale cloud_running (' + Math.round(runningMinutes) + 'min), allowing retry');
+  }
+
   var currentTime = now.getHours().toString().padStart(2, '0') + ':' +
     now.getMinutes().toString().padStart(2, '0');
   var timeDiff = timeToMinutes(currentTime) - timeToMinutes(taskTime);
