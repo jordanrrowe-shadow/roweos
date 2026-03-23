@@ -30,7 +30,12 @@ async function getEnabledUsers() {
         var data = keysDoc.data();
         if (data.cloudSchedulerEnabled) {
           users.push({ uid: uid, apiKeys: data });
+        } else {
+          // v25.6: Log double-gate failure
+          console.warn('[Scheduler] User ' + uid.slice(0,6) + ' has parent flag but api_keys.cloudSchedulerEnabled is ' + data.cloudSchedulerEnabled);
         }
+      } else {
+        console.warn('[Scheduler] User ' + uid.slice(0,6) + ' has parent flag but no api_keys doc');
       }
     } catch (e) {
       // Skip users with permission issues
@@ -74,16 +79,30 @@ function daysSince(date) {
  * @param {Date} now - Current time in user's timezone
  * @returns {boolean} Whether the task is due
  */
-function isTaskDue(task, now) {
+function isTaskDue(task, now, tag) {
   if (!task.enabled) return false;
 
+  var taskName = task.name || task.id;
   var freq = task.frequency || task.recurType || 'none';
   var taskTime = task.time || '09:00';
-  var lastRun = task.lastRun ? new Date(task.lastRun) : null;
+
+  // v25.6: Handle Firestore Timestamp objects
+  var lastRun = null;
+  if (task.lastRun && typeof task.lastRun === 'object' && typeof task.lastRun.toDate === 'function') {
+    lastRun = task.lastRun.toDate();
+    if (tag) console.warn(tag + ' Task "' + taskName + '": lastRun is Firestore Timestamp, converting via toDate()');
+  } else if (task.lastRun && typeof task.lastRun === 'object' && task.lastRun.seconds) {
+    lastRun = new Date(task.lastRun.seconds * 1000);
+    if (tag) console.warn(tag + ' Task "' + taskName + '": lastRun is raw Timestamp, converting via .seconds');
+  } else {
+    lastRun = task.lastRun ? new Date(task.lastRun) : null;
+  }
 
   var currentTime = now.getHours().toString().padStart(2, '0') + ':' +
     now.getMinutes().toString().padStart(2, '0');
   var timeDiff = timeToMinutes(currentTime) - timeToMinutes(taskTime);
+
+  if (tag) console.log(tag + ' Task "' + taskName + '": freq=' + freq + ', time=' + taskTime + ', current=' + currentTime + ', timeDiff=' + timeDiff + 'min, lastRun=' + (lastRun ? lastRun.toISOString() : 'never'));
 
   // Custom recurrence — interval math
   if (freq === 'custom') {
@@ -107,7 +126,10 @@ function isTaskDue(task, now) {
   }
 
   // Standard recurrence — time window check (0-30 min forward)
-  if (timeDiff < 0 || timeDiff > 30) return false;
+  if (timeDiff < 0 || timeDiff > 30) {
+    if (tag) console.log(tag + ' Task "' + taskName + '": NOT DUE (outside 0-30min window, timeDiff=' + timeDiff + ')');
+    return false;
+  }
 
   if (freq === 'daily') {
     return !lastRun || !isSameDay(lastRun, now);
@@ -178,18 +200,27 @@ async function getDueTasks(uid, timezone) {
   var automations = await helpers.getUserAutomations(uid);
   var now = getUserLocalTime(timezone);
   var dueTasks = [];
+  var tag = '[Scheduler:' + uid.slice(0,6) + ']';
+  console.log(tag + ' getDueTasks: ' + automations.length + ' automations found, timezone: ' + timezone + ', local time: ' + now.toISOString());
 
   for (var i = 0; i < automations.length; i++) {
     var task = automations[i];
     // v19.5: Only skip reminder-only tasks (no execution needed)
     if (task.action === 'none') {
+      console.log(tag + ' Task "' + (task.name || task.id) + '": SKIP (action=none)');
       continue;
     }
-    if (isTaskDue(task, now)) {
+    if (!task.enabled) {
+      console.log(tag + ' Task "' + (task.name || task.id) + '": SKIP (disabled)');
+      continue;
+    }
+    var due = isTaskDue(task, now, tag);
+    if (due) {
       dueTasks.push(task);
     }
   }
 
+  console.log(tag + ' getDueTasks: ' + dueTasks.length + ' tasks due');
   return dueTasks;
 }
 

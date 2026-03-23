@@ -86,7 +86,11 @@ async function getUserAutomations(uid) {
   var snap = await db.collection('roweos_users/' + uid + '/automations').get();
   if (snap.empty) return [];
   var automations = [];
-  snap.forEach(function(doc) { automations.push(doc.data()); });
+  snap.forEach(function(doc) {
+    var data = doc.data();
+    data.id = doc.id; // v25.6: Include doc ID for locking and lastRun updates
+    automations.push(data);
+  });
   return automations;
 }
 
