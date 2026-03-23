@@ -77,8 +77,14 @@ exports.runScheduledTasks = functions.scheduler.onSchedule(
           try {
             var scavengerConfigs = await helpers.getActiveScavengerConfigs(user.uid);
             if (scavengerConfigs.length > 0) {
-              console.log('[Cloud Scheduler] Running scavenger for user', user.uid, '(' + scavengerConfigs.length + ' configs)');
-              await scavenger.runScavengerPipeline(user.uid, user.apiKeys, scavengerConfigs);
+              // v25.5: Diagnostic logging for scavenger pipeline
+              if (!settings || !settings.cloudSchedulerEnabled) {
+                console.warn('[Scavenger:' + user.uid.slice(0,6) + '] SKIPPED — cloudSchedulerEnabled is ' + (settings ? settings.cloudSchedulerEnabled : 'missing'));
+              } else {
+                console.log('[Scavenger:' + user.uid.slice(0,6) + '] Pipeline starting — ' + scavengerConfigs.length + ' configs, autoPostThreshold: ' + (scavengerConfigs[0].autoPostThreshold || 'not set'));
+                console.log('[Cloud Scheduler] Running scavenger for user', user.uid, '(' + scavengerConfigs.length + ' configs)');
+                await scavenger.runScavengerPipeline(user.uid, user.apiKeys, scavengerConfigs);
+              }
             }
           } catch (scavErr) {
             console.error('[Cloud Scheduler] Scavenger error for user', user.uid, ':', scavErr.message);
