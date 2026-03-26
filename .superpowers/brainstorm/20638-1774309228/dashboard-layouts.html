@@ -1,0 +1,281 @@
+<h2>Focus Dashboard: Layout Options</h2>
+<p class="subtitle">Compare the curated fixed layout vs the hybrid approach</p>
+
+<div class="cards">
+  <!-- Option B: Curated Fixed Layout -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- Pill Nav -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;">Dashboard</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Today & Upcoming</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Tasks</div>
+        </div>
+
+        <!-- Greeting + Stats Row -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+          <div>
+            <div style="font-size:16px;font-weight:600;color:#fff;">Good morning, Jordan</div>
+            <div style="color:#888;font-size:10px;margin-top:2px;">Sunday, March 23 &middot; TRC</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px 10px;text-align:center;">
+              <div style="font-size:14px;font-weight:600;color:#a89878;">4</div>
+              <div style="font-size:8px;color:#666;">Tasks</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px 10px;text-align:center;">
+              <div style="font-size:14px;font-weight:600;color:#a89878;">2</div>
+              <div style="font-size:8px;color:#666;">Events</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px 10px;text-align:center;">
+              <div style="font-size:14px;font-weight:600;color:#a89878;">1</div>
+              <div style="font-size:8px;color:#666;">Reminder</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <!-- Left: Calendar -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Today's Schedule</div>
+            <div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;">
+              <div style="width:3px;height:24px;background:#4ade80;border-radius:2px;flex-shrink:0;margin-top:1px;"></div>
+              <div><div style="font-size:10px;color:#ccc;">Team standup</div><div style="font-size:8px;color:#666;">9:00 AM</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;">
+              <div style="width:3px;height:24px;background:#a78bfa;border-radius:2px;flex-shrink:0;margin-top:1px;"></div>
+              <div><div style="font-size:10px;color:#ccc;">Strategy review</div><div style="font-size:8px;color:#666;">2:00 PM</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start;">
+              <div style="width:3px;height:24px;background:#f472b6;border-radius:2px;flex-shrink:0;margin-top:1px;"></div>
+              <div><div style="font-size:10px;color:#ccc;">Content deadline</div><div style="font-size:8px;color:#666;">5:00 PM</div></div>
+            </div>
+          </div>
+
+          <!-- Right: Quick Tasks -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Priority Tasks</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:12px;height:12px;border:1.5px solid #a89878;border-radius:3px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;">Update Solo training docs</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:12px;height:12px;border:1.5px solid #a89878;border-radius:3px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;">Review Retreats listing</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:12px;height:12px;border:1.5px solid rgba(255,255,255,0.2);border-radius:3px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;">Finalize R&Co pricing</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:12px;height:12px;border:1.5px solid rgba(255,255,255,0.2);border-radius:3px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;">Draft Reserve invite</div>
+            </div>
+          </div>
+
+          <!-- Bottom Left: Automations -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Automations</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:6px;height:6px;background:#4ade80;border-radius:50%;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;">Weekly report</div>
+              <div style="font-size:8px;color:#4ade80;margin-left:auto;">Completed</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:6px;height:6px;background:#fbbf24;border-radius:50%;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;">Social post batch</div>
+              <div style="font-size:8px;color:#fbbf24;margin-left:auto;">Running</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:6px;height:6px;background:rgba(255,255,255,0.2);border-radius:50%;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;">Evening summary</div>
+              <div style="font-size:8px;color:#666;margin-left:auto;">6:00 PM</div>
+            </div>
+          </div>
+
+          <!-- Bottom Right: Reminders + Notes -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reminders</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="color:#fbbf24;font-size:10px;">&#9679;</div>
+              <div style="font-size:10px;color:#ccc;">Call accountant</div>
+              <div style="font-size:8px;color:#fbbf24;margin-left:auto;">In 2h</div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);margin:8px 0;"></div>
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Quick Note</div>
+            <div style="font-size:10px;color:#666;font-style:italic;">Tap to add a note...</div>
+          </div>
+        </div>
+
+        <!-- AI Insights Strip -->
+        <div style="margin-top:10px;background:linear-gradient(135deg,rgba(168,152,120,0.1),rgba(168,152,120,0.05));border:1px solid rgba(168,152,120,0.2);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;">
+          <div style="color:#a89878;font-size:12px;">&#10024;</div>
+          <div style="font-size:10px;color:#ccc;">Solo's Q1 training enrollments are up 23%. Consider scheduling a marketing push this week.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: Curated Fixed Layout</h3>
+      <p>Designed overview with set sections. Clean, intentional, no drag/resize. Every user sees the same polished layout. AI insight strip at the bottom.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Hybrid -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- Pill Nav -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;">Dashboard</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Today & Upcoming</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Tasks</div>
+        </div>
+
+        <!-- Greeting + Customize Button -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+          <div>
+            <div style="font-size:16px;font-weight:600;color:#fff;">Good morning, Jordan</div>
+            <div style="color:#888;font-size:10px;margin-top:2px;">Sunday, March 23 &middot; TRC</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;gap:8px;">
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px 10px;text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:#a89878;">4</div>
+                <div style="font-size:8px;color:#666;">Tasks</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px 10px;text-align:center;">
+                <div style="font-size:14px;font-weight:600;color:#a89878;">2</div>
+                <div style="font-size:8px;color:#666;">Events</div>
+              </div>
+            </div>
+            <div style="background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.3);color:#a89878;padding:4px 8px;border-radius:6px;font-size:9px;cursor:pointer;">Customize</div>
+          </div>
+        </div>
+
+        <!-- Same curated layout as B but with subtle drag handles -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <!-- Left: Calendar (with handle hint) -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;position:relative;">
+            <div style="position:absolute;top:4px;right:6px;color:rgba(255,255,255,0.15);font-size:8px;">&#8942;&#8942;</div>
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Today's Schedule</div>
+            <div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;">
+              <div style="width:3px;height:24px;background:#4ade80;border-radius:2px;flex-shrink:0;margin-top:1px;"></div>
+              <div><div style="font-size:10px;color:#ccc;">Team standup</div><div style="font-size:8px;color:#666;">9:00 AM</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;">
+              <div style="width:3px;height:24px;background:#a78bfa;border-radius:2px;flex-shrink:0;margin-top:1px;"></div>
+              <div><div style="font-size:10px;color:#ccc;">Strategy review</div><div style="font-size:8px;color:#666;">2:00 PM</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:flex-start;">
+              <div style="width:3px;height:24px;background:#f472b6;border-radius:2px;flex-shrink:0;margin-top:1px;"></div>
+              <div><div style="font-size:10px;color:#ccc;">Content deadline</div><div style="font-size:8px;color:#666;">5:00 PM</div></div>
+            </div>
+          </div>
+
+          <!-- Right: Priority Tasks (with handle hint) -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;position:relative;">
+            <div style="position:absolute;top:4px;right:6px;color:rgba(255,255,255,0.15);font-size:8px;">&#8942;&#8942;</div>
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Priority Tasks</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:12px;height:12px;border:1.5px solid #a89878;border-radius:3px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;">Update Solo training docs</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:12px;height:12px;border:1.5px solid #a89878;border-radius:3px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;">Review Retreats listing</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:12px;height:12px;border:1.5px solid rgba(255,255,255,0.2);border-radius:3px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;">Finalize R&Co pricing</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:12px;height:12px;border:1.5px solid rgba(255,255,255,0.2);border-radius:3px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;">Draft Reserve invite</div>
+            </div>
+          </div>
+
+          <!-- Bottom Left: Automations -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;position:relative;">
+            <div style="position:absolute;top:4px;right:6px;color:rgba(255,255,255,0.15);font-size:8px;">&#8942;&#8942;</div>
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Automations</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:6px;height:6px;background:#4ade80;border-radius:50%;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;">Weekly report</div>
+              <div style="font-size:8px;color:#4ade80;margin-left:auto;">Completed</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="width:6px;height:6px;background:#fbbf24;border-radius:50%;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;">Social post batch</div>
+              <div style="font-size:8px;color:#fbbf24;margin-left:auto;">Running</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:6px;height:6px;background:rgba(255,255,255,0.2);border-radius:50%;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;">Evening summary</div>
+              <div style="font-size:8px;color:#666;margin-left:auto;">6:00 PM</div>
+            </div>
+          </div>
+
+          <!-- Bottom Right: Reminders -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;position:relative;">
+            <div style="position:absolute;top:4px;right:6px;color:rgba(255,255,255,0.15);font-size:8px;">&#8942;&#8942;</div>
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Reminders</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <div style="color:#fbbf24;font-size:10px;">&#9679;</div>
+              <div style="font-size:10px;color:#ccc;">Call accountant</div>
+              <div style="font-size:8px;color:#fbbf24;margin-left:auto;">In 2h</div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);margin:8px 0;"></div>
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Quick Note</div>
+            <div style="font-size:10px;color:#666;font-style:italic;">Tap to add a note...</div>
+          </div>
+        </div>
+
+        <!-- AI Insights Strip -->
+        <div style="margin-top:10px;background:linear-gradient(135deg,rgba(168,152,120,0.1),rgba(168,152,120,0.05));border:1px solid rgba(168,152,120,0.2);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:8px;">
+          <div style="color:#a89878;font-size:12px;">&#10024;</div>
+          <div style="font-size:10px;color:#ccc;">Solo's Q1 training enrollments are up 23%. Consider scheduling a marketing push this week.</div>
+        </div>
+
+        <!-- Customize mode hint -->
+        <div style="margin-top:8px;text-align:center;font-size:9px;color:#555;">Customize mode: drag handles appear on hover, resize and reorder widgets</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C: Hybrid (Curated + Customize)</h3>
+      <p>Same polished default layout as B, but with a "Customize" button. Tap it to reveal drag handles and resize controls. Best of both worlds -- clean by default, flexible when needed.</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+  <h3 style="margin-bottom:8px;">Key Differences</h3>
+  <table style="width:100%;font-size:13px;color:#aaa;border-collapse:collapse;">
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.08);">
+      <td style="padding:6px 0;color:#888;"></td>
+      <td style="padding:6px 8px;font-weight:600;color:#ccc;">B: Curated</td>
+      <td style="padding:6px 8px;font-weight:600;color:#ccc;">C: Hybrid</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+      <td style="padding:6px 0;color:#888;">Default look</td>
+      <td style="padding:6px 8px;">Identical</td>
+      <td style="padding:6px 8px;">Identical</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+      <td style="padding:6px 0;color:#888;">Customizable</td>
+      <td style="padding:6px 8px;">No</td>
+      <td style="padding:6px 8px;">Yes (toggle)</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+      <td style="padding:6px 0;color:#888;">Code complexity</td>
+      <td style="padding:6px 8px;">Lower</td>
+      <td style="padding:6px 8px;">Moderate (reuses existing drag system)</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 0;color:#888;">Widget add/remove</td>
+      <td style="padding:6px 8px;">No</td>
+      <td style="padding:6px 8px;">Could allow hiding widgets</td>
+    </tr>
+  </table>
+</div>

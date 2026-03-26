@@ -815,6 +815,18 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
   var context = {};
   if (brand) context.brandName = brand.shortName || brand.name;
   if (task.brandIdx !== undefined) context._brandIdx = parseInt(task.brandIdx);
+  // v26.3: Build template context (current_date, current_time, etc.) matching Firebase functions
+  var _now = new Date();
+  var _months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var _days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var _h = _now.getHours(); var _h12 = _h % 12 || 12;
+  var _mins = _now.getMinutes().toString().padStart(2, '0');
+  var _ampm = _h >= 12 ? 'PM' : 'AM';
+  context.current_date = _months[_now.getMonth()] + ' ' + _now.getDate() + ', ' + _now.getFullYear();
+  context.current_time = _h12 + ':' + _mins + ' ' + _ampm;
+  context.day_of_week = _days[_now.getDay()];
+  context.brand_name = context.brandName || '';
+  context.user_name = '';
 
   var completedSteps = [];
   var failedSteps = [];
@@ -957,10 +969,21 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
           }
         }
         if (!emailBody) emailBody = stepText || '';
-        // Resolve template vars
-        emailTo = emailTo.replace(/\{\{step(\d+)_output\}\}/g, function(m, n) { return context['step' + n + '_output'] || ''; });
-        emailSubject = emailSubject.replace(/\{\{step(\d+)_output\}\}/g, function(m, n) { return context['step' + n + '_output'] || ''; });
-        emailBody = emailBody.replace(/\{\{step(\d+)_output\}\}/g, function(m, n) { return context['step' + n + '_output'] || ''; });
+        // v26.3: Resolve all template vars (step outputs + current_date, brand_name, etc.)
+        var _resolveVars = function(text) {
+          if (!text || typeof text !== 'string') return text || '';
+          var ctxKeys = Object.keys(context);
+          for (var _k = 0; _k < ctxKeys.length; _k++) {
+            var _ph = '{{' + ctxKeys[_k] + '}}';
+            if (typeof context[ctxKeys[_k]] === 'string' && text.indexOf(_ph) !== -1) {
+              text = text.split(_ph).join(context[ctxKeys[_k]]);
+            }
+          }
+          return text;
+        };
+        emailTo = _resolveVars(emailTo);
+        emailSubject = _resolveVars(emailSubject);
+        emailBody = _resolveVars(emailBody);
         var emailFrom = (step.config && step.config.emailFrom) || 'roweos@therowecollection.com';
         // Strip gmail:/outlook: prefix
         if (emailFrom.indexOf('gmail:') === 0) emailFrom = emailFrom.substring(6);

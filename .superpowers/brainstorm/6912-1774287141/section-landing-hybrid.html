@@ -1,0 +1,212 @@
+<h2>Hybrid: Card Grid Header + List Details</h2>
+<p class="subtitle">Combines the marketing-site elegance with navigable depth</p>
+
+<div class="cards" style="grid-template-columns:1fr;">
+  <div class="card" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:28px 32px;border-radius:8px;font-family:-apple-system,system-ui,sans-serif;color:#e8e0d4;max-width:720px;margin:0 auto;">
+
+        <!-- Breadcrumb -->
+        <div style="font-size:11px;color:#666;margin-bottom:20px;">Home &rsaquo; <span style="color:#a89878;">Automations</span></div>
+
+        <!-- Hero Header (marketing style) -->
+        <div style="text-align:center;margin-bottom:32px;">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:3px;color:#a89878;margin-bottom:8px;">AUTOMATIONS</div>
+          <div style="font-size:26px;font-weight:300;font-family:Georgia,serif;color:#f0ebe4;margin-bottom:8px;">Build Once, Run Forever</div>
+          <div style="font-size:12px;color:#777;max-width:400px;margin:0 auto;">Automated workflows, pipelines, and scheduled intelligence that work while you sleep.</div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div style="display:flex;justify-content:center;gap:32px;margin-bottom:28px;padding:12px 0;border-top:1px solid #1a1815;border-bottom:1px solid #1a1815;">
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;color:#a89878;">12</div>
+            <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;">Active</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;color:#a89878;">847</div>
+            <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;">Executions</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;color:#a89878;">98%</div>
+            <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;">Success Rate</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;color:#a89878;">7:00a</div>
+            <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;">Next Run</div>
+          </div>
+        </div>
+
+        <!-- Feature Cards (2-col grid, but more compact than pure A) -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+
+          <div style="border:1px solid #2a2520;border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor='#a89878';this.style.background='#0f0d0b'" onmouseout="this.style.borderColor='#2a2520';this.style.background='transparent'">
+            <div style="width:34px;height:34px;border-radius:8px;background:#1a1815;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f0ebe4;margin-bottom:3px;">Agent Builder</div>
+              <div style="font-size:11px;color:#777;line-height:1.4;">Create and edit multi-step automated workflows</div>
+            </div>
+          </div>
+
+          <div style="border:1px solid #2a2520;border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor='#a89878';this.style.background='#0f0d0b'" onmouseout="this.style.borderColor='#2a2520';this.style.background='transparent'">
+            <div style="width:34px;height:34px;border-radius:8px;background:#1a1815;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f0ebe4;margin-bottom:3px;">Browse</div>
+              <div style="font-size:11px;color:#777;line-height:1.4;">Explore all automations by category or schedule</div>
+            </div>
+          </div>
+
+          <div style="border:1px solid #2a2520;border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor='#a89878';this.style.background='#0f0d0b'" onmouseout="this.style.borderColor='#2a2520';this.style.background='transparent'">
+            <div style="width:34px;height:34px;border-radius:8px;background:#1a1815;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f0ebe4;margin-bottom:3px;">Executions</div>
+              <div style="font-size:11px;color:#777;line-height:1.4;">Monitor live and past runs with step-by-step results</div>
+            </div>
+          </div>
+
+          <div style="border:1px solid #2a2520;border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor='#a89878';this.style.background='#0f0d0b'" onmouseout="this.style.borderColor='#2a2520';this.style.background='transparent'">
+            <div style="width:34px;height:34px;border-radius:8px;background:#1a1815;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f0ebe4;margin-bottom:3px;">Pending Review</div>
+              <div style="font-size:11px;color:#777;line-height:1.4;">Approve queued outputs before they publish</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Studio Labs Row (secondary features) -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="border:1px solid #1a1815;border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color 0.2s;text-align:center;" onmouseover="this.style.borderColor='#a89878'" onmouseout="this.style.borderColor='#1a1815'">
+            <div style="font-size:11px;color:#999;">Studio Lab</div>
+          </div>
+          <div style="border:1px solid #1a1815;border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color 0.2s;text-align:center;" onmouseover="this.style.borderColor='#a89878'" onmouseout="this.style.borderColor='#1a1815'">
+            <div style="font-size:11px;color:#999;">Image Lab</div>
+          </div>
+          <div style="border:1px solid #1a1815;border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color 0.2s;text-align:center;" onmouseover="this.style.borderColor='#a89878'" onmouseout="this.style.borderColor='#1a1815'">
+            <div style="font-size:11px;color:#999;">Video Lab</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Hybrid: Automations Landing</h3>
+      <p>Marketing-style header with tagline and stats, 2x2 feature cards with icons + descriptions, secondary features as compact pills below. Feels premium but functional.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Second example: Social Hub -->
+<h3 style="margin-top:32px;">Same pattern applied to Social Hub:</h3>
+
+<div class="cards" style="grid-template-columns:1fr;">
+  <div class="card" data-choice="hybrid-social" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:28px 32px;border-radius:8px;font-family:-apple-system,system-ui,sans-serif;color:#e8e0d4;max-width:720px;margin:0 auto;">
+
+        <div style="font-size:11px;color:#666;margin-bottom:20px;">Home &rsaquo; <span style="color:#a89878;">Social Hub</span></div>
+
+        <div style="text-align:center;margin-bottom:32px;">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:3px;color:#a89878;margin-bottom:8px;">SOCIAL HUB</div>
+          <div style="font-size:26px;font-weight:300;font-family:Georgia,serif;color:#f0ebe4;margin-bottom:8px;">Your Social Command Center</div>
+          <div style="font-size:12px;color:#777;max-width:420px;margin:0 auto;">Monitor, engage, and publish across all your platforms from one place.</div>
+        </div>
+
+        <div style="display:flex;justify-content:center;gap:32px;margin-bottom:28px;padding:12px 0;border-top:1px solid #1a1815;border-bottom:1px solid #1a1815;">
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;color:#a89878;">3</div>
+            <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;">Connected</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;color:#a89878;">42</div>
+            <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;">Posts</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:18px;font-weight:600;color:#a89878;">156</div>
+            <div style="font-size:9px;color:#555;text-transform:uppercase;letter-spacing:1px;">Engagements</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+
+          <div style="border:1px solid #2a2520;border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor='#a89878';this.style.background='#0f0d0b'" onmouseout="this.style.borderColor='#2a2520';this.style.background='transparent'">
+            <div style="width:34px;height:34px;border-radius:8px;background:#1a1815;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f0ebe4;margin-bottom:3px;">Engage</div>
+              <div style="font-size:11px;color:#777;line-height:1.4;">Find and reply to relevant posts in your niche</div>
+            </div>
+          </div>
+
+          <div style="border:1px solid #2a2520;border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor='#a89878';this.style.background='#0f0d0b'" onmouseout="this.style.borderColor='#2a2520';this.style.background='transparent'">
+            <div style="width:34px;height:34px;border-radius:8px;background:#1a1815;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f0ebe4;margin-bottom:3px;">Publish</div>
+              <div style="font-size:11px;color:#777;line-height:1.4;">Post content to all your platforms at once</div>
+            </div>
+          </div>
+
+          <div style="border:1px solid #2a2520;border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor='#a89878';this.style.background='#0f0d0b'" onmouseout="this.style.borderColor='#2a2520';this.style.background='transparent'">
+            <div style="width:34px;height:34px;border-radius:8px;background:#1a1815;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f0ebe4;margin-bottom:3px;">Create</div>
+              <div style="font-size:11px;color:#777;line-height:1.4;">AI-powered content drafting and DMs</div>
+            </div>
+          </div>
+
+          <div style="border:1px solid #2a2520;border-radius:10px;padding:16px 14px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start;" onmouseover="this.style.borderColor='#a89878';this.style.background='#0f0d0b'" onmouseout="this.style.borderColor='#2a2520';this.style.background='transparent'">
+            <div style="width:34px;height:34px;border-radius:8px;background:#1a1815;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#f0ebe4;margin-bottom:3px;">Analytics</div>
+              <div style="font-size:11px;color:#777;line-height:1.4;">Track post performance and audience insights</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
+          <div style="border:1px solid #1a1815;border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color 0.2s;text-align:center;" onmouseover="this.style.borderColor='#a89878'" onmouseout="this.style.borderColor='#1a1815'">
+            <div style="font-size:11px;color:#999;">Blog</div>
+          </div>
+          <div style="border:1px solid #1a1815;border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color 0.2s;text-align:center;" onmouseover="this.style.borderColor='#a89878'" onmouseout="this.style.borderColor='#1a1815'">
+            <div style="font-size:11px;color:#999;">Activity</div>
+          </div>
+          <div style="border:1px solid #1a1815;border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color 0.2s;text-align:center;" onmouseover="this.style.borderColor='#a89878'" onmouseout="this.style.borderColor='#1a1815'">
+            <div style="font-size:11px;color:#999;">Settings</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Social Hub Landing</h3>
+      <p>Same hybrid pattern -- marketing header, live stats, 4 primary features as cards, secondary features as compact pills. Consistent across all complex sections.</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;padding:16px;border:1px solid #333;border-radius:8px;">
+  <h3 style="margin-bottom:8px;">The Hybrid Pattern:</h3>
+  <ul style="color:#aaa;font-size:14px;line-height:1.8;">
+    <li><strong>Top:</strong> Marketing-style header with section tagline (Georgia serif, uppercase label)</li>
+    <li><strong>Stats bar:</strong> Live metrics pulled from real data (not static)</li>
+    <li><strong>Primary features:</strong> 2x2 card grid with icon + title + description (clickable)</li>
+    <li><strong>Secondary features:</strong> Compact pill row for less-used tabs</li>
+    <li><strong>Click any card/pill</strong> &rarr; enters that sub-section with breadcrumb + tab bar</li>
+    <li>Consistent template across Automations, Social, Mail, Studio, System</li>
+  </ul>
+</div>

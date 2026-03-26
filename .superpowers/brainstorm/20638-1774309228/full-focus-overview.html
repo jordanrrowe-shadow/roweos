@@ -1,0 +1,390 @@
+<h2>Focus View Redesign: Complete Overview</h2>
+<p class="subtitle">All 3 pills with persistent header. Click each tab to see the full layout.</p>
+
+<div class="cards">
+  <!-- Dashboard Pill -->
+  <div class="card" data-choice="dashboard" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+
+        <!-- PERSISTENT HEADER -->
+        <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:12px;margin-bottom:12px;">
+          <!-- Greeting + Stats -->
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div>
+              <div style="font-size:16px;font-weight:600;color:#fff;">Good morning, Jordan</div>
+              <div style="color:#888;font-size:10px;margin-top:2px;">Sunday, March 23 &middot; TRC</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">4</div>
+                <div style="font-size:7px;color:#666;">Tasks</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">2</div>
+                <div style="font-size:7px;color:#666;">Events</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">1</div>
+                <div style="font-size:7px;color:#666;">Reminder</div>
+              </div>
+            </div>
+          </div>
+          <!-- Pill Nav -->
+          <div style="display:flex;gap:6px;">
+            <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:5px 14px;border-radius:20px;font-size:10px;font-weight:600;">Dashboard</div>
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:5px 14px;border-radius:20px;font-size:10px;">Today & Upcoming</div>
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:5px 14px;border-radius:20px;font-size:10px;">Tasks</div>
+          </div>
+        </div>
+
+        <!-- DASHBOARD CONTENT: Widget Grid -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;">Widget Grid</div>
+          <div style="background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.3);color:#a89878;padding:3px 8px;border-radius:6px;font-size:8px;">Customize</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <!-- Today + Calendar widget (full width) -->
+          <div style="grid-column:1/-1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;display:flex;gap:12px;">
+            <div style="flex-shrink:0;">
+              <div style="font-size:32px;font-weight:700;color:#fff;line-height:1;">23</div>
+              <div style="font-size:10px;color:#888;">March</div>
+              <div style="font-size:9px;color:#666;">Sunday</div>
+            </div>
+            <div style="flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:8px;text-align:center;color:#666;">
+              <div style="color:#555;">S</div><div style="color:#555;">M</div><div style="color:#555;">T</div><div style="color:#555;">W</div><div style="color:#555;">T</div><div style="color:#555;">F</div><div style="color:#555;">S</div>
+              <div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div>
+              <div style="background:rgba(168,152,120,0.3);border-radius:3px;color:#a89878;font-weight:600;">23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div><div>29</div>
+            </div>
+          </div>
+
+          <!-- Day Detail -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;">Day Detail</div>
+              <div style="display:flex;gap:3px;">
+                <div style="font-size:7px;color:#a89878;background:rgba(168,152,120,0.15);padding:2px 5px;border-radius:3px;">Today</div>
+                <div style="font-size:7px;color:#666;background:rgba(255,255,255,0.04);padding:2px 5px;border-radius:3px;">Upcoming</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;"><div style="width:3px;height:16px;background:#4ade80;border-radius:1px;"></div><div style="font-size:9px;color:#ccc;">Team standup <span style="color:#666;">9 AM</span></div></div>
+            <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px;"><div style="width:3px;height:16px;background:#a78bfa;border-radius:1px;"></div><div style="font-size:9px;color:#ccc;">Strategy review <span style="color:#666;">2 PM</span></div></div>
+            <div style="display:flex;gap:4px;align-items:center;"><div style="width:10px;height:10px;border:1px solid #a89878;border-radius:2px;flex-shrink:0;"></div><div style="font-size:9px;color:#ccc;">Update Solo docs</div></div>
+          </div>
+
+          <!-- Automations -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Automations</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;"><div style="width:5px;height:5px;background:#4ade80;border-radius:50%;"></div><div style="font-size:9px;color:#ccc;">Weekly report</div><div style="font-size:7px;color:#4ade80;margin-left:auto;">Done</div></div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;"><div style="width:5px;height:5px;background:rgba(255,255,255,0.2);border-radius:50%;"></div><div style="font-size:9px;color:#888;">Content report</div><div style="font-size:7px;color:#666;margin-left:auto;">11 AM</div></div>
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:5px;height:5px;background:rgba(255,255,255,0.2);border-radius:50%;"></div><div style="font-size:9px;color:#888;">Evening summary</div><div style="font-size:7px;color:#666;margin-left:auto;">6 PM</div></div>
+          </div>
+
+          <!-- Reminders -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Reminders</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px;"><div style="width:5px;height:5px;background:#fbbf24;border-radius:50%;"></div><div style="font-size:9px;color:#ccc;">Call accountant</div><div style="font-size:7px;color:#fbbf24;margin-left:auto;">1 PM</div></div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:5px;margin-top:2px;">
+              <div style="font-size:8px;color:#888;margin-bottom:3px;">Quick Note</div>
+              <div style="font-size:9px;color:#555;font-style:italic;">Tap to add...</div>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>
+            <div style="font-size:9px;color:#555;font-style:italic;">Tap to add a note...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Dashboard</h3>
+      <p>Existing customizable widget grid (drag, resize, reorder). Calendar, day detail, automations, reminders, notes. Customize button reveals handles.</p>
+    </div>
+  </div>
+
+  <!-- Today & Upcoming Pill -->
+  <div class="card" data-choice="today" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+
+        <!-- PERSISTENT HEADER -->
+        <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:12px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div>
+              <div style="font-size:16px;font-weight:600;color:#fff;">Good morning, Jordan</div>
+              <div style="color:#888;font-size:10px;margin-top:2px;">Sunday, March 23 &middot; TRC</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">4</div>
+                <div style="font-size:7px;color:#666;">Tasks</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">2</div>
+                <div style="font-size:7px;color:#666;">Events</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">1</div>
+                <div style="font-size:7px;color:#666;">Reminder</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:5px 14px;border-radius:20px;font-size:10px;">Dashboard</div>
+            <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:5px 14px;border-radius:20px;font-size:10px;font-weight:600;">Today & Upcoming</div>
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:5px 14px;border-radius:20px;font-size:10px;">Tasks</div>
+          </div>
+        </div>
+
+        <!-- AI BRIEFING + CHAT CARD -->
+        <div style="background:linear-gradient(135deg,rgba(168,152,120,0.12),rgba(168,152,120,0.04));border:1px solid rgba(168,152,120,0.2);border-radius:12px;padding:12px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+            <div style="font-size:11px;font-weight:600;color:#a89878;">Daily Briefing</div>
+            <div style="margin-left:auto;font-size:8px;color:#666;">8:00 AM</div>
+          </div>
+          <div style="font-size:10px;color:#ccc;line-height:1.5;margin-bottom:8px;">
+            4 tasks, 2 events, 1 automation today. Strategy review at 2 PM needs prep.
+          </div>
+
+          <!-- Insight items with SVG icons -->
+          <div style="border-top:1px solid rgba(168,152,120,0.15);padding-top:8px;display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+            <div style="display:flex;gap:7px;align-items:flex-start;">
+              <div style="width:16px;height:16px;background:rgba(74,222,128,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+              <div><div style="font-size:9px;color:#ccc;">Solo enrollments up 23%</div><div style="font-size:8px;color:#888;">Consider a marketing push</div></div>
+            </div>
+            <div style="display:flex;gap:7px;align-items:flex-start;">
+              <div style="width:16px;height:16px;background:rgba(251,191,36,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div><div style="font-size:9px;color:#ccc;">Retreats listing stale (5 days)</div><div style="font-size:8px;color:#888;">Photos still need review</div></div>
+            </div>
+            <div style="display:flex;gap:7px;align-items:flex-start;">
+              <div style="width:16px;height:16px;background:rgba(34,211,238,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div><div style="font-size:9px;color:#ccc;">Weekly report completed</div><div style="font-size:8px;color:#888;">Revenue summary -- <span style="color:#a89878;">view result</span></div></div>
+            </div>
+          </div>
+
+          <!-- Inline chat -->
+          <div style="display:flex;gap:5px;align-items:center;border-top:1px solid rgba(168,152,120,0.15);padding-top:8px;">
+            <div style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 9px;">
+              <div style="font-size:9px;color:#555;">Ask about your day...</div>
+            </div>
+            <div style="width:24px;height:24px;background:rgba(168,152,120,0.25);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- SOURCE-GROUPED CARDS -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <!-- Calendar Events -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Calendar Events</div>
+            <div style="display:flex;gap:5px;align-items:flex-start;margin-bottom:6px;">
+              <div style="width:3px;height:22px;background:#4ade80;border-radius:1px;flex-shrink:0;margin-top:1px;"></div>
+              <div><div style="font-size:9px;color:#ccc;">Team standup</div><div style="font-size:8px;color:#666;">9:00 AM &middot; 30 min</div></div>
+            </div>
+            <div style="display:flex;gap:5px;align-items:flex-start;margin-bottom:6px;">
+              <div style="width:3px;height:22px;background:#a78bfa;border-radius:1px;flex-shrink:0;margin-top:1px;"></div>
+              <div><div style="font-size:9px;color:#ccc;">Strategy review</div><div style="font-size:8px;color:#666;">2:00 PM &middot; 1 hr</div></div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:5px;margin-top:2px;">
+              <div style="font-size:8px;color:#555;">Mon: Design sync &middot; Wed: Team lunch</div>
+            </div>
+          </div>
+
+          <!-- Tasks Due -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Tasks Due</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #a89878;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#ccc;flex:1;">Update Solo training docs</div>
+              <div style="font-size:7px;color:#a89878;">Today</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid rgba(255,255,255,0.2);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#999;flex:1;">Review Retreats listing</div>
+              <div style="font-size:7px;color:#666;">Mon</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid rgba(255,255,255,0.2);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#999;flex:1;">Finalize R&Co pricing</div>
+              <div style="font-size:7px;color:#666;">Thu</div>
+            </div>
+          </div>
+
+          <!-- Automations -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Automations</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;"><div style="width:5px;height:5px;background:#4ade80;border-radius:50%;"></div><div style="font-size:9px;color:#ccc;flex:1;">Weekly report</div><div style="font-size:7px;color:#4ade80;">Done</div></div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;"><div style="width:5px;height:5px;background:rgba(255,255,255,0.2);border-radius:50%;"></div><div style="font-size:9px;color:#888;flex:1;">Content report</div><div style="font-size:7px;color:#666;">11 AM</div></div>
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:5px;height:5px;background:rgba(255,255,255,0.2);border-radius:50%;"></div><div style="font-size:9px;color:#888;flex:1;">Evening summary</div><div style="font-size:7px;color:#666;">6 PM</div></div>
+          </div>
+
+          <!-- Reminders -->
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;">Reminders</div>
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;"><div style="width:5px;height:5px;background:#fbbf24;border-radius:50%;"></div><div style="font-size:9px;color:#ccc;flex:1;">Call accountant</div><div style="font-size:7px;color:#fbbf24;">1 PM</div></div>
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:5px;height:5px;background:rgba(255,255,255,0.2);border-radius:50%;"></div><div style="font-size:9px;color:#888;flex:1;">Dentist appointment</div><div style="font-size:7px;color:#666;">Tue</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Today & Upcoming</h3>
+      <p>AI briefing with insights + inline chat at top. Source-grouped cards below: Calendar Events, Tasks Due, Automations, Reminders. Each card shows today + upcoming items inline.</p>
+    </div>
+  </div>
+
+  <!-- Tasks Pill -->
+  <div class="card" data-choice="tasks" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+
+        <!-- PERSISTENT HEADER -->
+        <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:12px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+            <div>
+              <div style="font-size:16px;font-weight:600;color:#fff;">Good morning, Jordan</div>
+              <div style="color:#888;font-size:10px;margin-top:2px;">Sunday, March 23 &middot; TRC</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">4</div>
+                <div style="font-size:7px;color:#666;">Tasks</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">2</div>
+                <div style="font-size:7px;color:#666;">Events</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 8px;text-align:center;">
+                <div style="font-size:13px;font-weight:600;color:#a89878;">1</div>
+                <div style="font-size:7px;color:#666;">Reminder</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:5px 14px;border-radius:20px;font-size:10px;">Dashboard</div>
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:5px 14px;border-radius:20px;font-size:10px;">Today & Upcoming</div>
+            <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:5px 14px;border-radius:20px;font-size:10px;font-weight:600;">Tasks</div>
+          </div>
+        </div>
+
+        <!-- TASKS CONTENT -->
+        <!-- Category filter pills + actions -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            <div style="background:rgba(168,152,120,0.2);border:1px solid rgba(168,152,120,0.3);color:#a89878;padding:2px 8px;border-radius:12px;font-size:8px;">All</div>
+            <div style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.25);color:#a78bfa;padding:2px 8px;border-radius:12px;font-size:8px;">Marketing</div>
+            <div style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.25);color:#4ade80;padding:2px 8px;border-radius:12px;font-size:8px;">Operations</div>
+            <div style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.25);color:#fbbf24;padding:2px 8px;border-radius:12px;font-size:8px;">Finance</div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#666;padding:2px 8px;border-radius:12px;font-size:8px;">+ New</div>
+          </div>
+          <div style="display:flex;gap:4px;">
+            <div style="background:rgba(168,152,120,0.12);border:1px solid rgba(168,152,120,0.25);color:#a89878;padding:3px 7px;border-radius:6px;font-size:8px;display:flex;align-items:center;gap:3px;">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              AI Categories
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:3px 7px;border-radius:6px;font-size:8px;">+ Add Task</div>
+          </div>
+        </div>
+
+        <!-- Marketing Category -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+            <div style="width:7px;height:7px;background:#a78bfa;border-radius:2px;"></div>
+            <div style="font-size:9px;font-weight:600;color:#ccc;">Marketing</div>
+            <div style="font-size:8px;color:#666;">3</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:12px;">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #a78bfa;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#ccc;flex:1;">Update brand guidelines</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">TRC</div>
+              <div style="font-size:7px;color:#666;">Tomorrow</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #a78bfa;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#ccc;flex:1;">Review listing photos</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Retreats</div>
+              <div style="font-size:7px;color:#666;">Mon</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #a78bfa;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#ccc;flex:1;">Social media content plan</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Solo</div>
+              <div style="font-size:7px;color:#666;">Wed</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operations Category -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+            <div style="width:7px;height:7px;background:#4ade80;border-radius:2px;"></div>
+            <div style="font-size:9px;font-weight:600;color:#ccc;">Operations</div>
+            <div style="font-size:8px;color:#666;">3</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:12px;">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #4ade80;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#ccc;flex:1;">Update Solo training docs</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Solo</div>
+              <div style="font-size:7px;color:#a89878;">Today</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #4ade80;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#ccc;flex:1;">New certification flow</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Solo</div>
+              <div style="font-size:7px;color:#666;">Thu</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #4ade80;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#888;flex:1;">Plan team offsite</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">TRC</div>
+              <div style="font-size:7px;color:#555;">Next week</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finance Category -->
+        <div style="margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;">
+            <div style="width:7px;height:7px;background:#fbbf24;border-radius:2px;"></div>
+            <div style="font-size:9px;font-weight:600;color:#ccc;">Finance</div>
+            <div style="font-size:8px;color:#666;">2</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:12px;">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #fbbf24;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#ccc;flex:1;">Q1 financial review</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">TRC</div>
+              <div style="font-size:7px;color:#666;">Wed</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <div style="width:9px;height:9px;border:1.5px solid #fbbf24;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:9px;color:#ccc;flex:1;">Update pricing page</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Retreats</div>
+              <div style="font-size:7px;color:#555;">Fri</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Tasks</h3>
+      <p>Custom categories with filter pills. "AI Categories" button with sparkle SVG to auto-suggest groupings. Brand tag on each task. "+ New" to create custom categories. "+ Add Task" to add tasks.</p>
+    </div>
+  </div>
+</div>

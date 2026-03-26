@@ -1,0 +1,134 @@
+<h2>Section 3: Visualization Design</h2>
+<p class="subtitle">Two states: floating indicator during onboarding, then full-screen takeover at brand setup</p>
+
+<div class="cards">
+  <div class="card" data-choice="floating" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0a0a0a;border-radius:12px;padding:24px;position:relative;height:280px;overflow:hidden;">
+        <!-- Simulated onboarding step behind -->
+        <div style="opacity:0.3;text-align:center;padding-top:20px;">
+          <div style="font-size:14px;color:#888;margin-bottom:12px;">Step 5 of 9: Connect Calendar</div>
+          <div style="width:200px;height:36px;border:1px solid #333;border-radius:8px;margin:0 auto 8px;"></div>
+          <div style="width:140px;height:36px;border:1px solid #333;border-radius:8px;margin:0 auto;"></div>
+        </div>
+
+        <!-- Floating indicator - bottom right -->
+        <div style="position:absolute;bottom:16px;right:16px;background:rgba(20,20,20,0.95);border:1px solid rgba(168,152,120,0.3);border-radius:16px;padding:12px 16px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(12px);">
+          <!-- Mini network graph -->
+          <div style="width:40px;height:40px;position:relative;">
+            <svg width="40" height="40" viewBox="0 0 40 40">
+              <!-- Center node -->
+              <circle cx="20" cy="20" r="4" fill="#a89878"/>
+              <!-- Connected nodes -->
+              <line x1="20" y1="20" x2="10" y2="10" stroke="rgba(168,152,120,0.4)" stroke-width="1"/>
+              <circle cx="10" cy="10" r="2.5" fill="#a89878" opacity="0.7"/>
+              <line x1="20" y1="20" x2="32" y2="12" stroke="rgba(168,152,120,0.4)" stroke-width="1"/>
+              <circle cx="32" cy="12" r="2.5" fill="#a89878" opacity="0.7"/>
+              <line x1="20" y1="20" x2="30" y2="30" stroke="rgba(168,152,120,0.4)" stroke-width="1"/>
+              <circle cx="30" cy="30" r="2.5" fill="#a89878" opacity="0.5"/>
+              <line x1="20" y1="20" x2="8" y2="28" stroke="rgba(168,152,120,0.3)" stroke-width="1"/>
+              <circle cx="8" cy="28" r="2" fill="#a89878" opacity="0.3"/>
+              <!-- Pulse animation hint -->
+              <circle cx="20" cy="20" r="7" fill="none" stroke="rgba(168,152,120,0.15)" stroke-width="1"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:11px;color:#a89878;font-weight:500;letter-spacing:0.5px;">SCANNING</div>
+            <div style="font-size:10px;color:#666;margin-top:2px;">12 pages found</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Floating Indicator (During Onboarding)</h3>
+      <p>Compact pill in the bottom-right corner. Mini network graph pulses as pages are discovered. Shows page count. Non-intrusive while user completes other steps. Tappable to expand on mobile.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="takeover" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0a0a0a;border-radius:12px;padding:24px;height:280px;display:flex;gap:20px;overflow:hidden;">
+        <!-- Network graph side -->
+        <div style="flex:1;position:relative;">
+          <svg width="100%" height="100%" viewBox="0 0 200 240">
+            <!-- Center node (homepage) -->
+            <circle cx="100" cy="120" r="8" fill="#a89878"/>
+            <text x="100" y="140" text-anchor="middle" fill="#666" font-size="7">acme.com</text>
+
+            <!-- Level 1 nodes -->
+            <line x1="100" y1="120" x2="50" y2="60" stroke="rgba(168,152,120,0.4)" stroke-width="1"/>
+            <circle cx="50" cy="60" r="5" fill="#a89878" opacity="0.8"/>
+            <text x="50" y="50" text-anchor="middle" fill="#555" font-size="6">/about</text>
+
+            <line x1="100" y1="120" x2="155" y2="55" stroke="rgba(168,152,120,0.4)" stroke-width="1"/>
+            <circle cx="155" cy="55" r="5" fill="#a89878" opacity="0.8"/>
+            <text x="155" y="45" text-anchor="middle" fill="#555" font-size="6">/services</text>
+
+            <line x1="100" y1="120" x2="160" y2="130" stroke="rgba(168,152,120,0.4)" stroke-width="1"/>
+            <circle cx="160" cy="130" r="5" fill="#a89878" opacity="0.7"/>
+            <text x="160" y="145" text-anchor="middle" fill="#555" font-size="6">/team</text>
+
+            <line x1="100" y1="120" x2="45" y2="150" stroke="rgba(168,152,120,0.4)" stroke-width="1"/>
+            <circle cx="45" cy="150" r="5" fill="#a89878" opacity="0.7"/>
+            <text x="45" y="165" text-anchor="middle" fill="#555" font-size="6">/blog</text>
+
+            <line x1="100" y1="120" x2="130" y2="190" stroke="rgba(168,152,120,0.4)" stroke-width="1"/>
+            <circle cx="130" cy="190" r="5" fill="#a89878" opacity="0.6"/>
+            <text x="130" y="205" text-anchor="middle" fill="#555" font-size="6">/contact</text>
+
+            <!-- Level 2 nodes -->
+            <line x1="155" y1="55" x2="185" y2="25" stroke="rgba(168,152,120,0.2)" stroke-width="0.5"/>
+            <circle cx="185" cy="25" r="3" fill="#a89878" opacity="0.4"/>
+
+            <line x1="50" y1="60" x2="20" y2="35" stroke="rgba(168,152,120,0.2)" stroke-width="0.5"/>
+            <circle cx="20" cy="35" r="3" fill="#a89878" opacity="0.4"/>
+
+            <!-- External search nodes (different color) -->
+            <line x1="100" y1="120" x2="15" y2="110" stroke="rgba(120,160,200,0.3)" stroke-width="0.5" stroke-dasharray="3,2"/>
+            <circle cx="15" cy="110" r="3" fill="#78a0c8" opacity="0.5"/>
+
+            <line x1="100" y1="120" x2="185" y2="170" stroke="rgba(120,160,200,0.3)" stroke-width="0.5" stroke-dasharray="3,2"/>
+            <circle cx="185" cy="170" r="3" fill="#78a0c8" opacity="0.5"/>
+          </svg>
+        </div>
+
+        <!-- Identity cards side -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px;justify-content:center;">
+          <div style="background:rgba(168,152,120,0.1);border:1px solid rgba(168,152,120,0.2);border-radius:8px;padding:8px 10px;">
+            <div style="font-size:8px;color:#a89878;letter-spacing:0.5px;margin-bottom:3px;">BRAND ESSENCE</div>
+            <div style="font-size:9px;color:#999;line-height:1.3;">Premium sustainable fashion brand focused on timeless design...</div>
+          </div>
+          <div style="background:rgba(168,152,120,0.1);border:1px solid rgba(168,152,120,0.2);border-radius:8px;padding:8px 10px;">
+            <div style="font-size:8px;color:#a89878;letter-spacing:0.5px;margin-bottom:3px;">VOICE & TONE</div>
+            <div style="font-size:9px;color:#999;line-height:1.3;">Refined, confident, understated luxury. Avoids hard-sell...</div>
+          </div>
+          <div style="background:rgba(168,152,120,0.08);border:1px solid rgba(168,152,120,0.15);border-radius:8px;padding:8px 10px;">
+            <div style="font-size:8px;color:#a89878;letter-spacing:0.5px;margin-bottom:3px;">TARGET AUDIENCE</div>
+            <div style="font-size:9px;color:#666;line-height:1.3;opacity:0.5;">Analyzing...</div>
+          </div>
+          <div style="background:rgba(168,152,120,0.05);border:1px solid rgba(168,152,120,0.1);border-radius:8px;padding:8px 10px;opacity:0.4;">
+            <div style="font-size:8px;color:#a89878;letter-spacing:0.5px;margin-bottom:3px;">KEY MESSAGING</div>
+            <div style="font-size:9px;color:#444;">Waiting...</div>
+          </div>
+          <div style="background:rgba(168,152,120,0.05);border:1px solid rgba(168,152,120,0.1);border-radius:8px;padding:8px 10px;opacity:0.3;">
+            <div style="font-size:8px;color:#a89878;letter-spacing:0.5px;">PRODUCTS & SERVICES</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Full-Screen Takeover (Brand Setup Step)</h3>
+      <p>Network graph on the left shows all discovered pages -- gold nodes for internal pages, blue dashed nodes for external web search results. Identity cards on the right fill in progressively. Cards animate from dim/waiting to populated as data arrives. After completion, transitions to editable form fields.</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+  <h3 style="margin-top:0;">Mobile Adaptation</h3>
+  <p style="color:#999;font-size:14px;line-height:1.6;">
+    <strong>Floating indicator:</strong> Smaller pill, bottom-center instead of bottom-right. Just the pulse dot + "Scanning..." text, no mini graph.<br><br>
+    <strong>Takeover:</strong> Stacked vertically -- network graph on top (shorter, ~40% height), identity cards scrollable below. Graph simplified to fewer visible nodes.
+  </p>
+</div>
+
+<p class="subtitle" style="margin-top:20px;">Both states shown above work together -- does this visual approach feel right for roweOS?</p>

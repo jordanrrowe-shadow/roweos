@@ -1,0 +1,8 @@
+{"type":"server-started","port":55244,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:55244","screen_dir":"/Volumes/roweOS/.superpowers/brainstorm/56655-1774482533/content","state_dir":"/Volumes/roweOS/.superpowers/brainstorm/56655-1774482533/state"}
+{"type":"screen-added","file":"/Volumes/roweOS/.superpowers/brainstorm/56655-1774482533/content/lifeai-color-direction.html"}
+{"type":"screen-added","file":"/Volumes/roweOS/.superpowers/brainstorm/56655-1774482533/content/lifeai-color-v2.html"}
+{"type":"screen-added","file":"/Volumes/roweOS/.superpowers/brainstorm/56655-1774482533/content/waiting.html"}
+{"type":"screen-added","file":"/Volumes/roweOS/.superpowers/brainstorm/56655-1774482533/content/campaign-design.html"}
+{"type":"screen-added","file":"/Volumes/roweOS/.superpowers/brainstorm/56655-1774482533/content/campaign-design-v2.html"}
+{"type":"screen-added","file":"/Volumes/roweOS/.superpowers/brainstorm/56655-1774482533/content/waiting-2.html"}
+{"type":"server-stopped","reason":"idle timeout"}

@@ -1,0 +1,430 @@
+<h2>Tasks Pill: Category Organization</h2>
+<p class="subtitle">How should tasks be grouped in the dedicated Tasks view?</p>
+
+<div class="cards">
+  <!-- Option A: By Brand -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- Pill Nav -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Dashboard</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Today & Upcoming</div>
+          <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;">Tasks</div>
+        </div>
+
+        <!-- Filter row -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:10px;color:#fff;font-weight:600;">All Tasks <span style="color:#666;font-weight:400;">(12)</span></div>
+          <div style="display:flex;gap:6px;">
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:3px 8px;border-radius:4px;font-size:8px;">+ Add Task</div>
+          </div>
+        </div>
+
+        <!-- TRC Group -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#a89878;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">TRC</div>
+            <div style="font-size:8px;color:#666;">4 tasks</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #a89878;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update brand guidelines</div>
+              <div style="font-size:8px;color:#666;">Tomorrow</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #a89878;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Q1 financial review</div>
+              <div style="font-size:8px;color:#666;">Wed</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.2);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">Plan team offsite</div>
+              <div style="font-size:8px;color:#555;">Next week</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solo Group -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#4ade80;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">Solo</div>
+            <div style="font-size:8px;color:#666;">3 tasks</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #a89878;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update training docs</div>
+              <div style="font-size:8px;color:#a89878;">Today</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.2);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">New certification flow</div>
+              <div style="font-size:8px;color:#555;">Thu</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Retreats Group -->
+        <div style="margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#f472b6;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">Retreats</div>
+            <div style="font-size:8px;color:#666;">2 tasks</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #a89878;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Review listing photos</div>
+              <div style="font-size:8px;color:#666;">Mon</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.2);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">Update pricing page</div>
+              <div style="font-size:8px;color:#555;">Fri</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A: By Brand</h3>
+      <p>Tasks grouped under each brand with a color indicator. Simple, familiar -- matches how current todo list filters. Quick scan of workload per brand.</p>
+    </div>
+  </div>
+
+  <!-- Option B: By Priority/Status -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- Pill Nav -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Dashboard</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Today & Upcoming</div>
+          <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;">Tasks</div>
+        </div>
+
+        <!-- Filter row -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:10px;color:#fff;font-weight:600;">All Tasks <span style="color:#666;font-weight:400;">(12)</span></div>
+          <div style="display:flex;gap:6px;">
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:3px 8px;border-radius:4px;font-size:8px;">+ Add Task</div>
+          </div>
+        </div>
+
+        <!-- High Priority -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#ef4444;border-radius:50%;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ef4444;">High Priority</div>
+            <div style="font-size:8px;color:#666;">3</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #ef4444;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update Solo training docs</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Solo</div>
+                <div style="font-size:8px;color:#a89878;">Today</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #ef4444;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Q1 financial review</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">TRC</div>
+                <div style="font-size:8px;color:#666;">Wed</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #ef4444;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Review listing photos</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Retreats</div>
+                <div style="font-size:8px;color:#666;">Mon</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Due Soon -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#fbbf24;border-radius:50%;"></div>
+            <div style="font-size:10px;font-weight:600;color:#fbbf24;">Due Soon</div>
+            <div style="font-size:8px;color:#666;">4</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #fbbf24;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update brand guidelines</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">TRC</div>
+                <div style="font-size:8px;color:#666;">Tomorrow</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #fbbf24;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">New certification flow</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Solo</div>
+                <div style="font-size:8px;color:#666;">Thu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backlog -->
+        <div style="margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:rgba(255,255,255,0.2);border-radius:50%;"></div>
+            <div style="font-size:10px;font-weight:600;color:#888;">Backlog</div>
+            <div style="font-size:8px;color:#666;">5</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.15);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">Plan team offsite</div>
+              <div style="font-size:7px;color:#555;background:rgba(255,255,255,0.04);padding:1px 4px;border-radius:3px;">TRC</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.15);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">Update pricing page</div>
+              <div style="font-size:7px;color:#555;background:rgba(255,255,255,0.04);padding:1px 4px;border-radius:3px;">Retreats</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.15);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">Draft Reserve invite</div>
+              <div style="font-size:7px;color:#555;background:rgba(255,255,255,0.04);padding:1px 4px;border-radius:3px;">Reserve</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: By Priority / Status</h3>
+      <p>High Priority, Due Soon, Backlog groups. Brand shown as a small tag. Urgency-driven -- what needs attention NOW floats to top regardless of brand.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Custom Categories -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- Pill Nav -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Dashboard</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Today & Upcoming</div>
+          <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;">Tasks</div>
+        </div>
+
+        <!-- Category pills filter -->
+        <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;">
+          <div style="background:rgba(168,152,120,0.2);border:1px solid rgba(168,152,120,0.3);color:#a89878;padding:2px 8px;border-radius:12px;font-size:8px;">All</div>
+          <div style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.25);color:#a78bfa;padding:2px 8px;border-radius:12px;font-size:8px;">Marketing</div>
+          <div style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.25);color:#4ade80;padding:2px 8px;border-radius:12px;font-size:8px;">Operations</div>
+          <div style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.25);color:#fbbf24;padding:2px 8px;border-radius:12px;font-size:8px;">Finance</div>
+          <div style="background:rgba(244,114,182,0.15);border:1px solid rgba(244,114,182,0.25);color:#f472b6;padding:2px 8px;border-radius:12px;font-size:8px;">Content</div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#666;padding:2px 8px;border-radius:12px;font-size:8px;">+ New</div>
+        </div>
+
+        <!-- Marketing -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#a78bfa;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">Marketing</div>
+            <div style="font-size:8px;color:#666;">3</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #a78bfa;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update brand guidelines</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">TRC</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #a78bfa;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Review listing photos</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Retreats</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operations -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#4ade80;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">Operations</div>
+            <div style="font-size:8px;color:#666;">3</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #4ade80;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update Solo training docs</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Solo</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #4ade80;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">New certification flow</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Solo</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finance -->
+        <div style="margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#fbbf24;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">Finance</div>
+            <div style="font-size:8px;color:#666;">2</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #fbbf24;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Q1 financial review</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">TRC</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #fbbf24;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update pricing page</div>
+              <div style="font-size:7px;color:#888;background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">Retreats</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C: Custom Categories</h3>
+      <p>User-defined categories (Marketing, Operations, Finance, Content) that cut across brands. Filterable pills at top. Brand shown as a small tag. Requires assigning categories to tasks.</p>
+    </div>
+  </div>
+
+  <!-- Option D: Hybrid Brand + Priority -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- Pill Nav -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Dashboard</div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:4px 12px;border-radius:20px;font-size:10px;">Today & Upcoming</div>
+          <div style="background:rgba(168,152,120,0.25);border:1px solid rgba(168,152,120,0.5);color:#a89878;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:600;">Tasks</div>
+        </div>
+
+        <!-- Filter row -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:10px;color:#fff;font-weight:600;">All Tasks <span style="color:#666;font-weight:400;">(12)</span></div>
+          <div style="display:flex;gap:6px;">
+            <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#888;padding:3px 8px;border-radius:4px;font-size:8px;">+ Add Task</div>
+          </div>
+        </div>
+
+        <!-- TRC Group -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#a89878;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">TRC</div>
+            <div style="font-size:8px;color:#666;">4 tasks</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #ef4444;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Q1 financial review</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:5px;height:5px;background:#ef4444;border-radius:50%;"></div>
+                <div style="font-size:8px;color:#666;">Wed</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #fbbf24;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update brand guidelines</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:5px;height:5px;background:#fbbf24;border-radius:50%;"></div>
+                <div style="font-size:8px;color:#666;">Tomorrow</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.15);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">Plan team offsite</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:5px;height:5px;background:rgba(255,255,255,0.15);border-radius:50%;"></div>
+                <div style="font-size:8px;color:#555;">Next week</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solo Group -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#4ade80;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">Solo</div>
+            <div style="font-size:8px;color:#666;">3 tasks</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #ef4444;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Update training docs</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:5px;height:5px;background:#ef4444;border-radius:50%;"></div>
+                <div style="font-size:8px;color:#a89878;">Today</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.15);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">New certification flow</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:5px;height:5px;background:rgba(255,255,255,0.15);border-radius:50%;"></div>
+                <div style="font-size:8px;color:#555;">Thu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Retreats Group -->
+        <div style="margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <div style="width:8px;height:8px;background:#f472b6;border-radius:2px;"></div>
+            <div style="font-size:10px;font-weight:600;color:#ccc;">Retreats</div>
+            <div style="font-size:8px;color:#666;">2 tasks</div>
+            <div style="flex:1;height:1px;background:rgba(255,255,255,0.06);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding-left:14px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid #ef4444;border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#ccc;flex:1;">Review listing photos</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:5px;height:5px;background:#ef4444;border-radius:50%;"></div>
+                <div style="font-size:8px;color:#666;">Mon</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div style="width:10px;height:10px;border:1.5px solid rgba(255,255,255,0.15);border-radius:2px;flex-shrink:0;"></div>
+              <div style="font-size:10px;color:#888;flex:1;">Update pricing page</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <div style="width:5px;height:5px;background:rgba(255,255,255,0.15);border-radius:50%;"></div>
+                <div style="font-size:8px;color:#555;">Fri</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>D: Brand + Priority Within</h3>
+      <p>Brand headings as primary grouping. Within each brand, tasks sorted by priority with colored dots (red = high, yellow = medium, gray = low). See workload per brand AND urgency at a glance.</p>
+    </div>
+  </div>
+</div>

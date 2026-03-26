@@ -1,0 +1,192 @@
+<h2>AI Suggestions Card: Intelligence Level</h2>
+<p class="subtitle">How smart should the Today & Upcoming AI card be?</p>
+
+<div class="cards">
+  <!-- Option A: Static Daily Briefing -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- AI Card -->
+        <div style="background:linear-gradient(135deg,rgba(168,152,120,0.12),rgba(168,152,120,0.04));border:1px solid rgba(168,152,120,0.2);border-radius:12px;padding:14px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <div style="color:#a89878;font-size:13px;">&#10024;</div>
+            <div style="font-size:11px;font-weight:600;color:#a89878;">Daily Briefing</div>
+            <div style="margin-left:auto;font-size:8px;color:#666;">Generated 8:00 AM</div>
+          </div>
+          <div style="font-size:11px;color:#ccc;line-height:1.6;">
+            Good morning, Jordan. You have <span style="color:#fff;font-weight:500;">4 tasks</span> and <span style="color:#fff;font-weight:500;">2 calendar events</span> today. 1 automation is scheduled to run at 11 AM. You also have <span style="color:#fff;font-weight:500;">1 reminder</span> set for this afternoon.
+          </div>
+        </div>
+
+        <!-- Rest of view hint -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Calendar Events</div>
+            <div style="font-size:9px;color:#666;">Team standup, Strategy review...</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Tasks Due</div>
+            <div style="font-size:9px;color:#666;">Update Solo docs, Review listing...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A: Static Daily Briefing</h3>
+      <p>Generated once per day. Counts and summary only -- "You have X tasks, Y events." Cached, lightweight, no API call on every visit. Simple and fast.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Context-Aware Suggestions -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- AI Card -->
+        <div style="background:linear-gradient(135deg,rgba(168,152,120,0.12),rgba(168,152,120,0.04));border:1px solid rgba(168,152,120,0.2);border-radius:12px;padding:14px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <div style="color:#a89878;font-size:13px;">&#10024;</div>
+            <div style="font-size:11px;font-weight:600;color:#a89878;">Daily Briefing</div>
+            <div style="margin-left:auto;font-size:8px;color:#666;">Generated 8:00 AM</div>
+          </div>
+          <div style="font-size:11px;color:#ccc;line-height:1.6;margin-bottom:10px;">
+            Good morning. <span style="color:#fff;font-weight:500;">4 tasks</span>, <span style="color:#fff;font-weight:500;">2 events</span>, and <span style="color:#fff;font-weight:500;">1 automation</span> today. Strategy review at 2 PM needs prep.
+          </div>
+
+          <!-- Insight items -->
+          <div style="border-top:1px solid rgba(168,152,120,0.15);padding-top:10px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:18px;height:18px;background:rgba(74,222,128,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <div style="color:#4ade80;font-size:9px;">&#9650;</div>
+              </div>
+              <div>
+                <div style="font-size:10px;color:#ccc;">Solo training enrollments up 23% this quarter</div>
+                <div style="font-size:9px;color:#888;">Consider scheduling a marketing push this week</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:18px;height:18px;background:rgba(251,191,36,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <div style="color:#fbbf24;font-size:9px;">!</div>
+              </div>
+              <div>
+                <div style="font-size:10px;color:#ccc;">Retreats listing hasn't been updated in 5 days</div>
+                <div style="font-size:9px;color:#888;">Last edit was pricing -- photos still need review</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:18px;height:18px;background:rgba(34,211,238,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <div style="color:#22d3ee;font-size:9px;">&#10003;</div>
+              </div>
+              <div>
+                <div style="font-size:10px;color:#ccc;">Weekly report automation completed at 7 AM</div>
+                <div style="font-size:9px;color:#888;">TRC revenue summary ready -- <span style="color:#a89878;cursor:pointer;">view result</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rest of view hint -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Calendar Events</div>
+            <div style="font-size:9px;color:#666;">Team standup, Strategy review...</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Tasks Due</div>
+            <div style="font-size:9px;color:#666;">Update Solo docs, Review listing...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: Context-Aware Suggestions</h3>
+      <p>Daily briefing PLUS actionable insights pulled from brand data, task history, and automation results. Trend alerts, staleness warnings, completed automation links. Generated once, richer content.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Interactive AI -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;">
+      <div style="background:#0a0a0a;padding:16px;font-family:system-ui;color:#e0e0e0;font-size:11px;line-height:1.4;">
+        <!-- AI Card with chat -->
+        <div style="background:linear-gradient(135deg,rgba(168,152,120,0.12),rgba(168,152,120,0.04));border:1px solid rgba(168,152,120,0.2);border-radius:12px;padding:14px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <div style="color:#a89878;font-size:13px;">&#10024;</div>
+            <div style="font-size:11px;font-weight:600;color:#a89878;">AI Assistant</div>
+            <div style="margin-left:auto;display:flex;gap:4px;">
+              <div style="font-size:8px;color:#666;background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;">Refresh</div>
+            </div>
+          </div>
+
+          <!-- Briefing -->
+          <div style="font-size:11px;color:#ccc;line-height:1.6;margin-bottom:10px;">
+            Good morning. 4 tasks, 2 events today. Solo enrollments trending up -- good time for a marketing push.
+          </div>
+
+          <!-- Insight items -->
+          <div style="border-top:1px solid rgba(168,152,120,0.15);padding-top:8px;margin-bottom:10px;">
+            <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">
+              <div style="width:18px;height:18px;background:rgba(74,222,128,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <div style="color:#4ade80;font-size:9px;">&#9650;</div>
+              </div>
+              <div>
+                <div style="font-size:10px;color:#ccc;">Solo enrollments up 23%</div>
+                <div style="font-size:9px;color:#888;">Schedule a marketing push</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <div style="width:18px;height:18px;background:rgba(34,211,238,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+                <div style="color:#22d3ee;font-size:9px;">&#10003;</div>
+              </div>
+              <div>
+                <div style="font-size:10px;color:#ccc;">Weekly report completed</div>
+                <div style="font-size:9px;color:#888;"><span style="color:#a89878;">View result</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat exchange -->
+          <div style="border-top:1px solid rgba(168,152,120,0.15);padding-top:10px;margin-bottom:10px;">
+            <!-- User message -->
+            <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
+              <div style="background:rgba(168,152,120,0.2);border-radius:10px 10px 2px 10px;padding:6px 10px;max-width:70%;">
+                <div style="font-size:10px;color:#ccc;">What should I prioritize before the strategy review?</div>
+              </div>
+            </div>
+            <!-- AI response -->
+            <div style="display:flex;justify-content:flex-start;margin-bottom:6px;">
+              <div style="background:rgba(255,255,255,0.06);border-radius:10px 10px 10px 2px;padding:6px 10px;max-width:80%;">
+                <div style="font-size:10px;color:#ccc;line-height:1.5;">Finish the Solo training docs first -- that's your highest priority task. Then review the weekly report results before your 2 PM strategy meeting. The enrollment data will be useful context.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input -->
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 10px;">
+              <div style="font-size:10px;color:#555;">Ask about your day...</div>
+            </div>
+            <div style="width:28px;height:28px;background:rgba(168,152,120,0.25);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+              <div style="color:#a89878;font-size:11px;">&#8593;</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rest of view hint -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Calendar Events</div>
+            <div style="font-size:9px;color:#666;">Team standup, Strategy review...</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;">
+            <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Tasks Due</div>
+            <div style="font-size:9px;color:#666;">Update Solo docs, Review listing...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C: Interactive AI</h3>
+      <p>Context-aware briefing + insights (same as B), PLUS an inline chat input. Ask follow-up questions about your day, get prioritization advice, drill into automation results. Mini-chat right in the Focus view.</p>
+    </div>
+  </div>
+</div>
