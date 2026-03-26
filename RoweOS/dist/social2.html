@@ -216,6 +216,7 @@ var CATEGORIES = [
   { id: 'mac-wallpapers', label: 'Mac Wallpapers' },
   { id: 'brand-intel', label: 'Brand Intelligence' },
   { id: 'life-intel', label: 'Life Intelligence' },
+  { id: 'lifeai-campaigns', label: 'LifeAI Campaigns' },
   { id: 'premium-features', label: 'Premium Features' },
   { id: 'tiers', label: 'Tier Comparison' },
   { id: 'client', label: 'Client Facing' },
@@ -860,6 +861,61 @@ var COACH_COLORS = {
     });
   });
 })();
+
+// ─── LIFEAI CAMPAIGN HELPERS ───
+
+var COASTAL_BLUE = {
+  light: {
+    bg: '#ffffff',
+    gradient: 'linear-gradient(145deg, #edf2f8 0%, #d4e0ec 40%, #c4d4e4 100%)',
+    text: '#2c4f6b',
+    secondary: '#3a5268',
+    muted: '#627d94',
+    accent: '#5c8aab',
+    surface: '#8aabc4',
+    pillBorder: 'rgba(44,79,107,0.25)',
+    wmColor: 'rgba(44,79,107,0.25)',
+    checkColor: '#5c8aab'
+  },
+  dark: {
+    bg: '#0a0a0a',
+    gradient: 'linear-gradient(145deg, #0a0a0a 0%, #0f1520 40%, #121e2e 100%)',
+    text: '#c4d4e4',
+    secondary: '#8aabc4',
+    muted: '#5c8aab',
+    accent: '#1e3a5f',
+    surface: 'rgba(30,58,95,0.15)',
+    pillBorder: 'rgba(140,171,196,0.25)',
+    wmColor: 'rgba(140,171,196,0.25)',
+    checkColor: '#8aabc4'
+  }
+};
+
+function cardWrapBlue(mode, inner) {
+  var c = COASTAL_BLUE[mode];
+  return '<div style="width:'+CARD_W+'px;height:'+CARD_H+'px;background:'+c.gradient+';color:'+c.text+';font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;">'
+    + inner + watermarkBlue(mode) + '</div>';
+}
+
+function watermarkBlue(mode) {
+  var c = COASTAL_BLUE[mode];
+  return '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:'+c.wmColor+';font-weight:500;">roweos.com</div>';
+}
+
+function pillBlue(mode, label) {
+  var c = COASTAL_BLUE[mode];
+  return '<span style="display:inline-block;padding:4px 14px;border:1px solid '+c.pillBorder+';border-radius:20px;font-size:14px;color:'+c.accent+';letter-spacing:0.06em;">'+label+'</span>';
+}
+
+function checkIconBlue(mode) {
+  var c = COASTAL_BLUE[mode];
+  return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+c.checkColor+'" stroke-width="2" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>';
+}
+
+function disclaimerText(mode) {
+  var c = COASTAL_BLUE[mode];
+  return '<div style="position:absolute;bottom:60px;left:0;right:0;text-align:center;font-size:14px;color:'+c.muted+';padding:0 80px;">*AI-powered guidance built on IRS knowledge. Not tax, legal, or financial advice.</div>';
+}
 
 // ─── PREMIUM FEATURES TEMPLATES (20) ───
 
