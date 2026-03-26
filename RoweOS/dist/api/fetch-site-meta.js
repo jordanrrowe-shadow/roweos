@@ -31,6 +31,7 @@ export default async function handler(req, res) {
     if (!/^https?:\/\//i.test(url)) {
       url = 'https://' + url;
     }
+    url = url.replace(/\/+$/, ''); // Strip trailing slashes
 
     var parsed;
     try { parsed = new URL(url); } catch (e) {
@@ -101,6 +102,156 @@ export default async function handler(req, res) {
         url: parsed.href,
         title: titleMatch2 ? titleMatch2[1].trim() : '',
         content: text
+      });
+    }
+
+    if (mode === 'deep') {
+      // Extract page content (same stripping logic as content mode)
+      var textDeep = fullHtml
+        .replace(/<img\b[^>]*(?:>|$)/gi, '')
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<svg[\s\S]*?<\/svg>/gi, '')
+        .replace(/<noscript[\s\S]*?<\/noscript>/gi, '')
+        .replace(/<picture[\s\S]*?<\/picture>/gi, '')
+        .replace(/<video[\s\S]*?<\/video>/gi, '')
+        .replace(/<audio[\s\S]*?<\/audio>/gi, '')
+        .replace(/<canvas[\s\S]*?<\/canvas>/gi, '')
+        .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (textDeep.length > 12000) textDeep = textDeep.substring(0, 12000) + '...';
+
+      // Use first 100KB for tag parsing
+      var htmlDeep = fullHtml.substring(0, 100000);
+
+      // Extract title
+      var titleMatchDeep = htmlDeep.match(/<title[^>]*>([^<]*)<\/title>/i);
+      var titleDeep = titleMatchDeep ? titleMatchDeep[1].trim() : '';
+
+      // Extract meta tags (description, og:image)
+      var descDeep = '';
+      var ogImageDeep = '';
+      var metaRegexDeep = /<meta\s+[^>]*>/gi;
+      var metaMatchDeep;
+      while ((metaMatchDeep = metaRegexDeep.exec(htmlDeep)) !== null) {
+        var tagDeep = metaMatchDeep[0];
+        var nameMatchDeep = tagDeep.match(/(?:name|property)\s*=\s*["']([^"']+)["']/i);
+        var contentMatchDeep = tagDeep.match(/content\s*=\s*["']([^"']+)["']/i);
+        if (nameMatchDeep && contentMatchDeep) {
+          var nameDeep = nameMatchDeep[1].toLowerCase();
+          var contentDeep = contentMatchDeep[1];
+          if ((nameDeep === 'description' || nameDeep === 'og:description') && !descDeep) descDeep = contentDeep;
+          if (nameDeep === 'og:title' && !titleDeep) titleDeep = contentDeep;
+          if (nameDeep === 'og:image' && !ogImageDeep) ogImageDeep = contentDeep;
+        }
+      }
+
+      // Extract favicon
+      var faviconDeep = '';
+      var faviconMatchDeep = htmlDeep.match(/<link[^>]*rel\s*=\s*["'](?:icon|shortcut icon|apple-touch-icon)["'][^>]*href\s*=\s*["']([^"']+)["']/i);
+      if (!faviconMatchDeep) faviconMatchDeep = htmlDeep.match(/<link[^>]*href\s*=\s*["']([^"']+)["'][^>]*rel\s*=\s*["'](?:icon|shortcut icon|apple-touch-icon)["']/i);
+      if (faviconMatchDeep) {
+        var faviconUrlDeep = faviconMatchDeep[1];
+        if (faviconUrlDeep.startsWith('//')) faviconUrlDeep = 'https:' + faviconUrlDeep;
+        else if (faviconUrlDeep.startsWith('/')) faviconUrlDeep = parsed.origin + faviconUrlDeep;
+        else if (!faviconUrlDeep.startsWith('http')) faviconUrlDeep = parsed.origin + '/' + faviconUrlDeep;
+        faviconDeep = faviconUrlDeep;
+      }
+      if (!faviconDeep) faviconDeep = parsed.origin + '/favicon.ico';
+
+      // Make ogImage absolute
+      if (ogImageDeep && !ogImageDeep.startsWith('http')) {
+        if (ogImageDeep.startsWith('//')) ogImageDeep = 'https:' + ogImageDeep;
+        else if (ogImageDeep.startsWith('/')) ogImageDeep = parsed.origin + ogImageDeep;
+        else ogImageDeep = parsed.origin + '/' + ogImageDeep;
+      }
+
+      // Extract social links
+      var socialLinksDeep = {};
+      var linkRegexDeep = /href\s*=\s*["'](https?:\/\/[^"']+)["']/gi;
+      var linkMatchDeep;
+      var socialPatternsDeep = {
+        x: [/(?:twitter\.com|x\.com)\/([a-zA-Z0-9_]+)/],
+        threads: [/threads\.net\/@?([a-zA-Z0-9_.]+)/],
+        instagram: [/instagram\.com\/([a-zA-Z0-9_.]+)/],
+        facebook: [/facebook\.com\/([a-zA-Z0-9_.]+)/],
+        linkedin: [/linkedin\.com\/(?:in|company)\/([a-zA-Z0-9_-]+)/],
+        youtube: [/youtube\.com\/(?:@|channel\/|c\/)?([a-zA-Z0-9_-]+)/],
+        tiktok: [/tiktok\.com\/@([a-zA-Z0-9_.]+)/]
+      };
+      while ((linkMatchDeep = linkRegexDeep.exec(htmlDeep)) !== null) {
+        var hrefDeep = linkMatchDeep[1];
+        for (var platformDeep in socialPatternsDeep) {
+          var patternsDeep = socialPatternsDeep[platformDeep];
+          for (var pi = 0; pi < patternsDeep.length; pi++) {
+            var mDeep = hrefDeep.match(patternsDeep[pi]);
+            if (mDeep && mDeep[1] && !socialLinksDeep[platformDeep]) {
+              var handleDeep = mDeep[1].toLowerCase();
+              if (['share', 'intent', 'sharer', 'home', 'explore', 'search', 'about', 'help', 'login', 'signup', 'policy', 'terms'].indexOf(handleDeep) === -1) {
+                socialLinksDeep[platformDeep] = { handle: mDeep[1], url: hrefDeep };
+              }
+            }
+          }
+        }
+      }
+
+      // Discover internal links
+      var internalLinks = [];
+      var seenDeep = {};
+      var skipExtDeep = /\.(pdf|zip|png|jpg|jpeg|gif|webp|svg|mp4|mp3|mov|avi|exe|dmg|pkg|docx?|xlsx?|pptx?)(\?|$)/i;
+      var aTagRegex = /<a\s[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+      var aMatch;
+      var priorityPatternsDeep = [
+        { re: /\/(about|team|people|who-we-are)\b/i, priority: 1 },
+        { re: /\/(services|products|offerings|solutions|pricing|features|what-we-do)\b/i, priority: 2 },
+        { re: /\/(blog|news|press|media|articles|resources|insights)\b/i, priority: 3 },
+        { re: /\/(contact|location|get-in-touch|support)\b/i, priority: 4 }
+      ];
+      while ((aMatch = aTagRegex.exec(htmlDeep)) !== null) {
+        var rawHref = aMatch[1].trim();
+        var rawText = aMatch[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!rawHref || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:') || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) continue;
+        if (skipExtDeep.test(rawHref)) continue;
+        var absDeep;
+        try {
+          absDeep = new URL(rawHref, parsed.origin).href;
+        } catch (e) { continue; }
+        var absUrlDeep = new URL(absDeep);
+        if (absUrlDeep.hostname !== parsed.hostname) continue;
+        // Dedup: strip hash and trailing slash
+        var cleanDeep = absDeep.replace(/#[^?]*$/, '').replace(/\/+$/, '');
+        if (seenDeep[cleanDeep]) continue;
+        seenDeep[cleanDeep] = true;
+        var priorityDeep = 5;
+        for (var pp = 0; pp < priorityPatternsDeep.length; pp++) {
+          if (priorityPatternsDeep[pp].re.test(absUrlDeep.pathname)) {
+            priorityDeep = priorityPatternsDeep[pp].priority;
+            break;
+          }
+        }
+        internalLinks.push({ url: cleanDeep, text: rawText, priority: priorityDeep });
+      }
+      internalLinks.sort(function(a, b) { return a.priority - b.priority; });
+      internalLinks = internalLinks.slice(0, 30);
+
+      return res.status(200).json({
+        url: parsed.href,
+        domain: parsed.hostname,
+        title: titleDeep,
+        description: descDeep,
+        ogImage: ogImageDeep,
+        favicon: faviconDeep,
+        socialLinks: socialLinksDeep,
+        content: textDeep,
+        links: internalLinks
       });
     }
 
