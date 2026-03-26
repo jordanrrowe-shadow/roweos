@@ -917,6 +917,532 @@ function disclaimerText(mode) {
   return '<div style="position:absolute;bottom:60px;left:0;right:0;text-align:center;font-size:14px;color:'+c.muted+';padding:0 80px;">*AI-powered guidance built on IRS knowledge. Not tax, legal, or financial advice.</div>';
 }
 
+// ─── LIFEAI CAMPAIGN TEMPLATES (44) ───
+
+// Campaign 1: Tax Season (8 posts)
+(function() {
+  var tsId = 7000;
+
+  ['dark', 'light'].forEach(function(mode) {
+    var c = COASTAL_BLUE[mode];
+
+    // Post 1: Urgency Hook
+    templates.push({
+      id: tsId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Tax Season — Urgency Hook (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="font-size:14px;letter-spacing:0.25em;text-transform:uppercase;color:'+cl.muted+';margin-bottom:40px;font-weight:500;">RoweOS</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:96px;font-weight:300;color:'+cl.text+';margin-bottom:24px;">April 15</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:36px;font-weight:400;color:'+cl.secondary+';text-align:center;margin-bottom:48px;">Your AI is ready. Are you?</div>'
+            + '<div style="margin-bottom:20px;">' + pillBlue(m, 'LifeAI') + '</div>'
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 2: The Pitch
+    templates.push({
+      id: tsId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Tax Season — The Pitch (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var features = ['Income tracking', 'Deduction finder', 'Business expenses', 'Quarterly estimates', 'Document organization'];
+          var featureList = '';
+          for (var i = 0; i < features.length; i++) {
+            featureList += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">'
+              + checkIconBlue(m)
+              + '<span style="font-size:20px;color:'+cl.text+';">' + features[i] + '</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid #f59e0b;display:flex;flex-direction:column;justify-content:center;padding:80px 80px 100px;">'
+            + '<div style="position:absolute;top:40px;left:40px;">' + logoIcon(m, 56) + '</div>'
+            + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">'
+            + '<span style="font-size:28px;font-weight:600;color:'+cl.text+';">Tax Intelligence</span>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:40px;font-weight:400;color:'+cl.text+';margin-bottom:48px;line-height:1.15;">Already knows your income, deductions, and business expenses.</div>'
+            + featureList
+            + '</div>'
+            + disclaimerText(m);
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 3: IRS Knowledge
+    templates.push({
+      id: tsId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Tax Season — IRS Knowledge (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="font-size:14px;letter-spacing:0.25em;text-transform:uppercase;color:'+cl.muted+';margin-bottom:40px;font-weight:500;">Tax Intelligence</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:400;color:'+cl.text+';text-align:center;margin-bottom:32px;line-height:1.15;">Built on IRS publications.<br>Guidance you can trust.</div>'
+            + '<div style="width:60px;height:1px;background:'+cl.accent+';margin-bottom:32px;"></div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>'
+            + disclaimerText(m);
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 4: Personal + Business
+    templates.push({
+      id: tsId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Tax Season — Personal + Business (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var personalItems = ['W-2 income', 'Standard deduction', 'Credits & refunds'];
+          var businessItems = ['1099 income', 'Business expenses', 'Quarterly estimates'];
+          var leftCol = '';
+          var rightCol = '';
+          for (var i = 0; i < personalItems.length; i++) {
+            leftCol += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+              + checkIconBlue(m)
+              + '<span style="font-size:18px;color:'+cl.text+';">' + personalItems[i] + '</span></div>';
+          }
+          for (var j = 0; j < businessItems.length; j++) {
+            rightCol += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+              + checkIconBlue(m)
+              + '<span style="font-size:18px;color:'+cl.text+';">' + businessItems[j] + '</span></div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 60px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:400;color:'+cl.text+';text-align:center;margin-bottom:60px;line-height:1.15;">Personal or business.<br>LifeAI handles both.</div>'
+            + '<div style="display:flex;gap:40px;width:100%;">'
+            + '<div style="flex:1;padding:32px;border:1px solid '+cl.pillBorder+';border-radius:16px;">'
+            + '<div style="font-size:20px;font-weight:600;color:'+cl.text+';margin-bottom:24px;">Personal</div>'
+            + leftCol + '</div>'
+            + '<div style="flex:1;padding:32px;border:1px solid '+cl.pillBorder+';border-radius:16px;">'
+            + '<div style="font-size:20px;font-weight:600;color:'+cl.text+';margin-bottom:24px;">Business</div>'
+            + rightCol + '</div>'
+            + '</div>'
+            + '<div style="margin-top:32px;">' + pillBlue(m, 'LifeAI') + '</div>'
+            + '</div>'
+            + disclaimerText(m);
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 5: CTA
+    templates.push({
+      id: tsId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Tax Season — CTA (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:72px;font-weight:300;color:'+cl.text+';text-align:center;margin-bottom:48px;">Don\'t file alone.</div>'
+            + logoIcon(m, 80)
+            + '<div style="margin-top:32px;">' + pillBlue(m, 'LifeAI') + '</div>'
+            + '</div>'
+            + disclaimerText(m);
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 6: Time Saving
+    templates.push({
+      id: tsId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Tax Season — Time Saving (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;color:'+cl.muted+';text-align:center;margin-bottom:8px;">Hours of prep.</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:600;color:'+cl.text+';text-align:center;margin-bottom:48px;">Seconds with Tax Intelligence.</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>'
+            + disclaimerText(m);
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 7: Receipts Pain Point
+    templates.push({
+      id: tsId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Tax Season — Receipts (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:400;color:'+cl.text+';text-align:center;margin-bottom:32px;line-height:1.15;">Stop digging through receipts.</div>'
+            + '<div style="font-size:20px;color:'+cl.secondary+';text-align:center;line-height:1.6;margin-bottom:40px;">Tax Intelligence organizes what you\'d spend hours finding.</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>'
+            + disclaimerText(m);
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 8: Summary Output
+    templates.push({
+      id: tsId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Tax Season — Summary (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var items = [
+            { label: 'Deductions found', status: '12 identified' },
+            { label: 'Deadlines tracked', status: 'April 15, June 15' },
+            { label: 'Estimates ready', status: 'Q1 & Q2 prepared' }
+          ];
+          var rows = '';
+          for (var i = 0; i < items.length; i++) {
+            rows += '<div style="display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid '+cl.pillBorder+';">'
+              + '<div style="display:flex;align-items:center;gap:14px;">'
+              + checkIconBlue(m)
+              + '<span style="font-size:20px;color:'+cl.text+';">' + items[i].label + '</span>'
+              + '</div>'
+              + '<span style="font-size:16px;color:'+cl.accent+';letter-spacing:0.04em;">' + items[i].status + '</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:center;padding:80px 80px 100px;">'
+            + '<div style="font-size:14px;letter-spacing:0.25em;text-transform:uppercase;color:'+cl.muted+';margin-bottom:16px;font-weight:500;">Tax Intelligence</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:400;color:'+cl.text+';margin-bottom:48px;line-height:1.15;">Your tax situation, summarized.</div>'
+            + '<div style="width:100%;">' + rows + '</div>'
+            + '<div style="margin-top:32px;text-align:center;">' + pillBlue(m, 'LifeAI') + '</div>'
+            + '</div>'
+            + disclaimerText(m);
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+  });
+})();
+
+// Campaign 2: "Your AI Already Knows You" (4 posts)
+(function() {
+  var akId = 7100;
+
+  ['dark', 'light'].forEach(function(mode) {
+    var c = COASTAL_BLUE[mode];
+
+    // Post 1: The Question
+    templates.push({
+      id: akId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Already Knows You — The Question (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:400;color:'+cl.text+';text-align:center;line-height:1.15;margin-bottom:48px;">What if your AI already knew the answer?</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 2: The Stack
+    templates.push({
+      id: akId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Already Knows You — The Stack (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var layers = [
+            { icon: 'identity', label: 'Identity' },
+            { icon: 'memory', label: 'History' },
+            { icon: 'memory', label: 'Memory' },
+            { icon: 'focus', label: 'Context' }
+          ];
+          var stack = '';
+          for (var i = 0; i < layers.length; i++) {
+            var opacity = 1 - (i * 0.15);
+            stack += '<div style="display:flex;align-items:center;gap:20px;padding:24px 32px;background:'+cl.surface+';border:1px solid '+cl.pillBorder+';border-radius:12px;opacity:'+opacity+';">'
+              + '<div style="font-size:36px;font-weight:300;color:'+cl.accent+';width:40px;text-align:center;">' + (i + 1) + '</div>'
+              + '<div style="font-size:24px;font-weight:500;color:'+cl.text+';letter-spacing:0.04em;">' + layers[i].label + '</div>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 120px;">'
+            + '<div style="font-size:14px;letter-spacing:0.25em;text-transform:uppercase;color:'+cl.muted+';margin-bottom:40px;font-weight:500;">What makes LifeAI different</div>'
+            + '<div style="display:flex;flex-direction:column;gap:12px;width:100%;margin-bottom:40px;">' + stack + '</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 3: Time Saving
+    templates.push({
+      id: akId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Already Knows You — Time Saving (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:400;color:'+cl.text+';text-align:center;line-height:1.15;margin-bottom:32px;">Skip the catch-up.<br>Start with the answer.</div>'
+            + '<div style="font-size:20px;color:'+cl.secondary+';text-align:center;line-height:1.6;margin-bottom:40px;">LifeAI remembers so you don\'t have to repeat yourself.</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 4: The Payoff
+    templates.push({
+      id: akId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Already Knows You — The Payoff (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:400;color:'+cl.text+';text-align:center;line-height:1.15;margin-bottom:48px;">Not a chatbot.<br>An intelligence that knows you.</div>'
+            + logoIcon(m, 80)
+            + '<div style="margin-top:32px;">' + pillBlue(m, 'LifeAI') + '</div>'
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+  });
+})();
+
+// Campaign 3: Life Coach Spotlight (4 posts)
+(function() {
+  var lcId = 7200;
+
+  ['dark', 'light'].forEach(function(mode) {
+    var c = COASTAL_BLUE[mode];
+
+    // Post 1: Pain Point
+    templates.push({
+      id: lcId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Life Coach — Pain Point (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid #22c55e;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:400;color:'+cl.text+';text-align:center;line-height:1.15;margin-bottom:48px;">Your goals deserve more than a notes app.</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 2: Capabilities
+    templates.push({
+      id: lcId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Life Coach — Capabilities (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var caps = ['Goal setting', 'Habit tracking', 'Daily planning', 'Motivation', 'Life reviews'];
+          var capList = '';
+          for (var i = 0; i < caps.length; i++) {
+            capList += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">'
+              + checkIconBlue(m)
+              + '<span style="font-size:20px;color:'+cl.text+';">' + caps[i] + '</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid #22c55e;display:flex;flex-direction:column;justify-content:center;padding:80px 80px 60px;">'
+            + '<div style="position:absolute;top:40px;left:40px;">' + logoIcon(m, 56) + '</div>'
+            + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">'
+            + '<span style="font-size:28px;font-weight:600;color:'+cl.text+';">Life Coach</span>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:400;color:'+cl.text+';margin-bottom:48px;line-height:1.15;">Guidance for every chapter of your life.</div>'
+            + capList
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 3: Memory Angle
+    templates.push({
+      id: lcId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Life Coach — Memory (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:400;color:'+cl.text+';text-align:center;line-height:1.15;margin-bottom:48px;">A coach that remembers every goal you\'ve ever set.</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 4: Aspirational Closer
+    templates.push({
+      id: lcId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Life Coach — Never Forgets (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:400;color:'+cl.text+';text-align:center;line-height:1.15;margin-bottom:48px;">What would you do with a personal coach who never forgets?</div>'
+            + logoIcon(m, 80)
+            + '<div style="margin-top:32px;">' + pillBlue(m, 'LifeAI') + '</div>'
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+  });
+})();
+
+// Campaign 4: Wellness Check-In (3 posts)
+(function() {
+  var wcId = 7300;
+
+  ['dark', 'light'].forEach(function(mode) {
+    var c = COASTAL_BLUE[mode];
+
+    // Post 1: The Prompt
+    templates.push({
+      id: wcId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Wellness — The Prompt (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid #06b6d4;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:400;color:'+cl.text+';text-align:center;line-height:1.15;margin-bottom:48px;">When was the last time you checked in with yourself?</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 2: Capabilities
+    templates.push({
+      id: wcId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Wellness — Capabilities (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var caps = ['Fitness guidance', 'Nutrition advice', 'Sleep optimization', 'Stress management', 'Mental health'];
+          var capList = '';
+          for (var i = 0; i < caps.length; i++) {
+            capList += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">'
+              + checkIconBlue(m)
+              + '<span style="font-size:20px;color:'+cl.text+';">' + caps[i] + '</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;border-top:4px solid #06b6d4;display:flex;flex-direction:column;justify-content:center;padding:80px 80px 60px;">'
+            + '<div style="position:absolute;top:40px;left:40px;">' + logoIcon(m, 56) + '</div>'
+            + '<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">'
+            + '<span style="font-size:28px;font-weight:600;color:'+cl.text+';">Wellness</span>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:400;color:'+cl.text+';margin-bottom:48px;line-height:1.15;">Your health, optimized.</div>'
+            + capList
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 3: Tagline
+    templates.push({
+      id: wcId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'Wellness — Tagline (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:64px;font-weight:300;color:'+cl.text+';text-align:center;margin-bottom:48px;">Your health, optimized.</div>'
+            + logoIcon(m, 80)
+            + '<div style="margin-top:32px;">' + pillBlue(m, 'LifeAI') + '</div>'
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+  });
+})();
+
+// Campaign 5: "One Platform, Every Part of Your Life" (3 posts)
+(function() {
+  var opId = 7400;
+
+  var allCoaches = [
+    { name: 'Tax Intelligence', color: '#f59e0b' },
+    { name: 'Wellness', color: '#06b6d4' },
+    { name: 'Life Coach', color: '#22c55e' },
+    { name: 'Personal AI', color: '#a78bfa' },
+    { name: 'Standard AI', color: '#b2997b' }
+  ];
+
+  var breadthWords = [
+    { word: 'Taxes', color: '#f59e0b' },
+    { word: 'Wellness', color: '#06b6d4' },
+    { word: 'Goals', color: '#22c55e' },
+    { word: 'Decisions', color: '#a78bfa' },
+    { word: 'Conversation', color: '#b2997b' }
+  ];
+
+  ['dark', 'light'].forEach(function(mode) {
+    var c = COASTAL_BLUE[mode];
+
+    // Post 1: The Breadth
+    templates.push({
+      id: opId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'One Platform — The Breadth (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var words = '';
+          for (var i = 0; i < breadthWords.length; i++) {
+            words += '<div style="display:flex;align-items:center;gap:16px;">'
+              + '<div style="width:12px;height:12px;border-radius:50%;background:'+breadthWords[i].color+';"></div>'
+              + '<span style="font-family:\'Cormorant Garamond\',serif;font-size:40px;font-weight:400;color:'+cl.text+';">'+breadthWords[i].word+'</span>'
+              + '</div>';
+          }
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="display:flex;flex-direction:column;gap:16px;margin-bottom:48px;">' + words + '</div>'
+            + pillBlue(m, 'LifeAI')
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 2: The Grid
+    templates.push({
+      id: opId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'One Platform — The Grid (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var cells = '';
+          for (var i = 0; i < allCoaches.length; i++) {
+            var coach = allCoaches[i];
+            cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:'+cl.surface+';border-radius:12px;">'
+              + '<div style="width:64px;height:64px;border-radius:50%;background:'+coach.color+'1a;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:28px;font-weight:600;color:'+coach.color+';">'
+              + coach.name.charAt(0) + '</div>'
+              + '<div style="font-size:16px;font-weight:500;color:'+cl.text+';margin-bottom:4px;text-align:center;">' + coach.name + '</div>'
+              + '<div style="font-size:12px;color:'+cl.muted+';letter-spacing:0.08em;text-transform:uppercase;">Coach</div>'
+              + '</div>';
+          }
+          cells += '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:'+cl.surface+';border-radius:12px;">'
+            + logoIcon(m, 48)
+            + '<div style="font-size:16px;font-weight:500;color:'+cl.text+';margin-top:12px;">RoweOS</div>'
+            + '</div>';
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 80px 60px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:48px;font-weight:400;color:'+cl.text+';text-align:center;margin-bottom:60px;">5 AI coaches.<br>One platform.</div>'
+            + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;">' + cells + '</div>'
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+
+    // Post 3: The Close
+    templates.push({
+      id: opId++, category: 'lifeai-campaigns', mode: mode,
+      label: 'One Platform — The Close (' + mode + ')',
+      render: (function(m, cl) {
+        return function() {
+          var inner = '<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+            + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:'+cl.text+';text-align:center;line-height:1.15;margin-bottom:48px;">Every part of your life.<br>One intelligence.</div>'
+            + logoIcon(m, 80)
+            + '<div style="margin-top:32px;">' + pillBlue(m, 'LifeAI') + '</div>'
+            + '</div>';
+          return cardWrapBlue(m, inner);
+        };
+      })(mode, c)
+    });
+  });
+})();
+
 // ─── PREMIUM FEATURES TEMPLATES (20) ───
 
 (function() {
