@@ -33,10 +33,16 @@ LifeAI uses a **dual-write architecture** that writes to both Firebase Realtime 
 
 ### Section 1: Sync Layer Consolidation
 
-**Remove all Realtime DB writes for LifeAI:**
-- Delete `syncLifeProfileToFirebase()` (~line 142653)
-- Delete `syncLifeProfilesToFirebase()` (~line 139736)
-- Delete `loadLifeProfilesFromFirebase()` (~line 139756) -- startup already uses Firestore via `loadFromFirebaseV2()`
+**Remove all Realtime DB writes and reads for LifeAI:**
+- Delete `syncLifeProfileToFirebase()` (~line 142653) -- Realtime DB single-profile write
+- Delete `syncLifeProfilesToFirebase()` (~line 139736) -- Realtime DB multi-profile write
+- Delete `loadLifeProfilesFromFirebase()` (~line 139756) -- Realtime DB multi-profile read
+- Delete `loadLifeProfileFromFirebase()` (~line 142673) -- Realtime DB single-profile read
+- Startup already uses Firestore via `loadFromFirebaseV2()`, so all Realtime DB paths are redundant
+
+**Remove existing ad-hoc `writeDB` calls that will be replaced:**
+- Remove `writeDB` call inside `saveLifeRoutines()` (~line 154457) -- replaced by `syncLifeAIToFirestore`
+- Note: `saveLifeHabits()` and `saveLifeGoals()` have NO Firestore sync today -- they only write to localStorage
 
 **Create a single sync entry point:**
 ```javascript
@@ -54,14 +60,21 @@ LifeAI uses a **dual-write architecture** that writes to both Firebase Realtime 
 - `saveLifeAIConversation()` -> updates profile locally -> `syncLifeAIToFirestore({ profiles, agentCommands })`
 - `saveRhythmWidgetConfig()` -> `syncLifeAIToFirestore({ rhythmWidgetConfig })`
 - Rhythm preferences -> `syncLifeAIToFirestore({ rhythmPreferences })`
-- Routines/habits/goals saves -> `syncLifeAIToFirestore({ routines })` / `{ habits }` / `{ goals }`
+- `saveLifeRoutines()` -> `syncLifeAIToFirestore({ routines })` (remove existing direct `writeDB` call)
+- `saveLifeHabits()` -> `syncLifeAIToFirestore({ habits })` (net-new Firestore sync -- none exists today)
+- `saveLifeGoals()` -> `syncLifeAIToFirestore({ goals })` (net-new Firestore sync -- none exists today)
 - Life memory -> `syncLifeAIToFirestore({ memory })`
 - Prompt/agent changes -> `syncLifeAIToFirestore({ mainSystemPrompt, coachPrompts, currentAgent })`
+
+**Refactor insight/goal functions to use profiles array directly:**
+- `addLifeAIInsight()` and `addLifeAIGoal()` currently read from `roweos_life_profile` (singular key) and write back to it, then separately patch the profiles array in a try-catch that swallows errors
+- Refactor both to work directly with `getLifeProfiles()` / `saveLifeProfiles()` so changes flow through the single sync path reliably
 
 **Debouncing strategy:**
 - 300ms debounce window
 - Dirty fields accumulate during the window, flushed as a single `writeDB()` call
-- Immediate flush on `beforeunload` (no debounce delay)
+- Immediate flush on `beforeunload` AND `visibilitychange` (hidden state) -- iOS Safari often skips `beforeunload` when switching apps or closing tabs
+- Flush pending debounced writes immediately before any `loadFromFirebaseV2()` call to prevent cloud pull from overwriting un-flushed local changes
 
 ### Section 2: Write Verification and Sync Indicator Honesty
 
@@ -82,6 +95,7 @@ LifeAI uses a **dual-write architecture** that writes to both Firebase Realtime 
 **Unsaved changes guard:**
 - On `beforeunload`, if `pendingWrites > 0`, trigger browser's native "unsaved changes" warning
 - Flush any debounced writes immediately before unload
+- On `visibilitychange` (hidden), flush debounced writes immediately -- critical for iOS Safari where `beforeunload` is unreliable
 
 **Stale data detection:**
 - Store `lastConfirmedSync` timestamp in localStorage after each successful Firestore write
@@ -146,13 +160,19 @@ LifeAI uses a **dual-write architecture** that writes to both Firebase Realtime 
 - localStorage key values (agent selection)
 - System prompt text references
 - Migration: on startup, if localStorage has `taxcopilot` as selected agent, auto-migrate to `taxintelligence`
+- Migration must also apply during `loadFromFirebaseV2()` cloud pull -- if Firestore returns `taxcopilot`, convert to `taxintelligence` before writing to localStorage (prevents older device from re-syncing the old name)
+
+**Resolve dual localStorage key for main prompt:**
+- Two keys exist: `roweos_lifeai_main_prompt` (used by prompt editor UI) and `roweos_life_main_prompt` (used by Firestore sync and some read paths)
+- Canonicalize on `roweos_life_main_prompt` -- migrate `roweos_lifeai_main_prompt` on startup if it exists and the canonical key is empty
+- Update prompt editor UI to read/write from canonical key
 
 **Prompt sync audit -- add missing fields to Firestore sync:**
-- `mainSystemPrompt` (custom override) -- currently `roweos_lifeai_main_prompt` in localStorage only
-- `coachPrompts` (per-agent custom prompts) -- currently `roweos_life_coach_prompts` in localStorage only
-- `currentAgent` (selected agent type) -- currently `roweos_life_agent` in localStorage only
+- `mainSystemPrompt` (custom override) -- partially synced today under `roweos_life_main_prompt`, but the prompt editor UI writes to `roweos_lifeai_main_prompt` which is NOT synced. Canonicalizing the key (above) fixes this.
+- `coachPrompts` (per-agent custom prompts) -- currently `roweos_life_coach_prompts` in localStorage only, NOT synced. Net-new restore path needed in `loadFromFirebaseV2()`.
+- `currentAgent` (selected agent type) -- currently `roweos_life_agent` in localStorage only, NOT synced. Net-new restore path needed in `loadFromFirebaseV2()`.
 - All three get added to `syncLifeAIToFirestore()` dirty field tracking
-- All three get restored in `loadFromFirebaseV2()` cloud pull
+- All three get net-new restore lines in `loadFromFirebaseV2()` cloud pull (these are additions, not modifications to existing restore code)
 
 ---
 
@@ -167,10 +187,11 @@ LifeAI uses a **dual-write architecture** that writes to both Firebase Realtime 
 | `syncLifeProfileToFirebase()` | **DELETE** |
 | `syncLifeProfilesToFirebase()` | **DELETE** |
 | `loadLifeProfilesFromFirebase()` | **DELETE** |
+| `loadLifeProfileFromFirebase()` | **DELETE** (singular variant, also Realtime DB) |
 | `syncLifeAIToFirestore()` | **NEW** -- single sync entry point |
 | `saveLifeProfiles()` | Route through new sync function |
-| `addLifeAIInsight()` | Route through new sync function |
-| `addLifeAIGoal()` | Route through new sync function |
+| `addLifeAIInsight()` | Refactor to use profiles array directly, route through new sync function |
+| `addLifeAIGoal()` | Refactor to use profiles array directly, route through new sync function |
 | `saveLifeAIConversation()` | Route through new sync function |
 | `deleteLifeProfile()` | Add write confirmation, soft-delete |
 | `getCurrentLifeProfile()` | Add index bounds validation |
@@ -198,3 +219,16 @@ LifeAI uses a **dual-write architecture** that writes to both Firebase Realtime 
 - [ ] Tax Intelligence rename appears everywhere Tax Co-Pilot was
 - [ ] Custom prompts persist across reload and devices
 - [ ] Profile index stays valid after cross-device deletion
+- [ ] Brand mode operations unaffected (regression check)
+- [ ] iOS Safari: switch apps mid-edit, return -- data persists (visibilitychange flush)
+- [ ] Prompt editor saves persist across reload (canonical key migration)
+
+---
+
+## Risks and Notes
+
+1. **Firestore document size:** `lifeAI/main` holds profiles with conversation histories (50 per profile, 500 chars each), plus goals, habits, routines, memory, widget config, and prompts. Firestore has a 1 MB document limit. Monitor document size -- if users approach the limit, a splitting strategy will be needed in a future iteration.
+
+2. **Soft-delete merge limitation:** With `merge: true`, the `_deletedProfiles` array replaces the previous one on each write. If two devices delete different profiles simultaneously, one device's deletions could be lost. Acceptable risk for now given the rarity of concurrent cross-device deletes.
+
+3. **Debounce masking:** If a Firestore error persists on one field, the dirty-field accumulation means all subsequent fields are also blocked. The retry mechanism should be monitored -- if a specific field consistently fails, it should be isolated in error logs for debugging.
