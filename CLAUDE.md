@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Version:  v28.3
-File:     RoweOS/dist/index.html (195898 lines)
+File:     RoweOS/dist/index.html (195899 lines)
 Live:     roweos.com
 ```
 
@@ -113,18 +113,22 @@ const items = data.filter(d => d.active);
 
 ## KEY FEATURES (v25.2)
 
-### Sync Architecture (V3.1 Cloud-Authoritative, v27.3 fixes)
+### Sync Architecture (V3.1 Cloud-Authoritative, v28.3 fixes)
 - Write-through: every save hits localStorage + Firestore simultaneously
 - Cloud always wins on pull (no "local wins" guards)
 - `mergeByTimestamp()` resolves per-item conflicts using `_modifiedAt`
 - `_normalizeTs()` converts `_modifiedAt` to numeric ms (handles ISO strings from Firestore and numeric from localStorage)
 - `safeSyncWrite()` applies cloud data unconditionally (empty = deleted)
-- `manualSyncNow()` pulls only (no push phase)
+- `manualSyncNow()` pushes brands first (3s wait for ghost cleanup), then pulls. Was pull-only before v28.3.
 - Pre-pull backup stored in `roweos_pre_pull_backup` as safety net
 - All data items should have `id` and `_modifiedAt` fields
-- v27.3: Brands use stable ID doc paths (`brand_name_*`), NOT array indices. Ghost docs auto-cleaned on save.
-- v27.3: Brand writes use `batch.commit()` for atomicity (prevents partial snapshot in onSnapshot)
-- v27.3: Todos/Calendar onSnapshot listeners watch `main` doc directly (not the collection)
+- v27.3: Brands use stable ID doc paths (`brand_name_*`), NOT array indices
+- v28.3: `saveBrands()` fetches existing docs FIRST, then batch writes + deletes ghosts atomically (no window for onSnapshot resurrection)
+- v28.3: `deleteBrand()` deletes Firestore doc IMMEDIATELY via direct `.delete()` call, BEFORE saveBrands runs
+- v28.3: `_all` doc saves ALL brand fields (deep copy minus large base64). Individual docs ALWAYS preferred over `_all` on pull.
+- v28.3: Theme is device-local. Cloud theme only seeds on first load (no `roweos-theme` in localStorage). Never overwritten by cloud pull or onSnapshot.
+- v28.3: `checkApiConnection()` runs after auth resolves AND after every cloud key sync path completes
+- **CRITICAL: `_all` doc must NEVER save a subset of fields.** Previously caused silent data loss when `loadFromFirebaseV2` preferred `_all` over individual docs and the subset won the timestamp merge.
 
 ### Universal Search (Hybrid)
 - **Cmd+K** opens centered Spotlight modal (fast navigation + actions + inline AI)
@@ -232,7 +236,9 @@ Key patterns to remember without looking up:
 - `showView('agent')` to switch views
 - `showToast(msg, type)` for notifications
 - `escapeHtml(str)` for innerHTML sanitization
-- `loadFromFirebaseV2()` for cloud pull (cloud-authoritative). `writeDB()` / `writeDBDoc()` / `deleteDBDoc()` for write-through. `syncToFirebaseV2()` is DEPRECATED (no-op). `manualSyncNow()` pulls only (no push). `reconcileOnStartup()` always pulls. `safeSyncWrite()` unconditionally applies cloud data. `mergeByTimestamp(local, cloud, idField)` for per-item conflict resolution. Tombstone tracking keys are REMOVED (v25.0+)
+- `loadFromFirebaseV2()` for cloud pull (cloud-authoritative). `writeDB()` / `writeDBDoc()` / `deleteDBDoc()` for write-through. `syncToFirebaseV2()` is DEPRECATED (no-op). `manualSyncNow()` pushes brands first, then pulls. `reconcileOnStartup()` always pulls. `safeSyncWrite()` unconditionally applies cloud data. `mergeByTimestamp(local, cloud, idField)` for per-item conflict resolution. Tombstone tracking keys are REMOVED (v25.0+)
+- **JSON.parse safety:** Every `JSON.parse` expecting an array MUST guard with `Array.isArray()`. Non-array returns (object, string) crash `.filter()/.map()` and silently break entire call chains.
+- **Push/pull path matching:** When adding sync for a category, verify the push write path matches the cloud count read path. Mismatches cause "Push needed" that never resolves.
 - `getAccentFallback()` for accent color with fallback (replaces inline `getComputedStyle` calls)
 - `AGENT_COLORS` global constant for agent color map (strategy, marketing, operations, documents, coach, etc.)
 - `ROWEOS_DEBUG` — `console.log` gated by `localStorage.getItem('roweos_debug') === 'true'`
@@ -299,7 +305,9 @@ Pre-deployment validation, common errors, and known technical debt are in the **
 `export PATH="$HOME/.local/share/fnm:$PATH" && eval "$(fnm env)" && vercel --prod --yes`
 
 ### Common Bug Patterns
-- **Sync data resurrection:** If deleted items reappear across devices, check: (1) `safeSyncWrite` is NOT guarding against empty cloud data, (2) `manualSyncNow` is NOT pushing before pulling, (3) real-time listeners handle empty snapshots and `!doc.exists`, (4) `loadFromFirebaseV2` uses `!== undefined` guards not truthy checks. Cloud is always authoritative.
+- **Sync data resurrection:** If deleted items reappear across devices, check: (1) `deleteBrand()` fires direct `.delete()` BEFORE `saveBrands()`, (2) `manualSyncNow()` pushes brands first (3s wait), then pulls, (3) `onSnapshot` listener has grace period check, (4) `_all` doc is updated immediately on delete. The `onSnapshot` listener is the #1 source of resurrection — it fires between async writes and ghost cleanup.
+- **`_all` doc data loss:** NEVER write a subset of brand fields to `_all`. Use `JSON.parse(JSON.stringify(brand))` with only base64 stripping. `loadFromFirebaseV2` and `onSnapshot` now prefer individual docs over `_all`. `_all` is fallback only.
+- **Crashes breaking call chains:** View renders called from `onBrandChange()` (like `renderFocusView`) must be wrapped in try/catch. A crash in one render prevents all subsequent brand-change logic from executing. Always guard `JSON.parse` results with `Array.isArray()` before calling `.filter()/.map()`.
 - **Mail outbox stale on other devices:** Outbox merge in `loadFromFirebaseV2` must be cloud-authoritative (not local-authoritative). Cloud `[]` means all items were sent.
 - **Duplicate function names:** Single-file means later definitions silently overwrite earlier ones. Before adding a function, grep for existing definitions with the same name.
 - **NEVER touch `* { }` margin:** The global reset is `* { padding: 0; box-sizing: border-box; }` — do NOT add `margin: 0` to it. Margin resets are on a separate explicit element list. Do NOT re-add `min-height: 100vh` or `padding-bottom: env(safe-area-inset-bottom)` to body.
