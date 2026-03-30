@@ -1,0 +1,66 @@
+
+      <!-- v25.3: Analytics Dashboard -->
+      <div id="analyticsView" class="panel-view hidden">
+        <div class="panel">
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">Analytics</span>
+          </div>
+          <div class="panel-header" style="margin-bottom:var(--space-2);display:flex;align-items:center;">
+            <span>Analytics</span>
+            <button class="section-help-btn" onclick="showSectionHelp('analytics')" title="About Analytics">?</button>
+          </div>
+          <p style="color:var(--text-muted);font-size:13px;margin-bottom:var(--space-4);line-height:1.5;">Website traffic, social performance, and engagement metrics.</p>
+
+          <!-- Tab bar -->
+          <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border-color);padding-bottom:12px;">
+            <button class="analytics-tab active" data-tab="website" onclick="switchAnalyticsTab('website')" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;color:var(--text-primary);background:var(--bg-secondary);border:1px solid var(--border-color);cursor:pointer;font-family:inherit;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              Website
+            </button>
+            <button class="analytics-tab" data-tab="social" onclick="switchAnalyticsTab('social')" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-secondary);background:transparent;border:1px solid transparent;cursor:pointer;font-family:inherit;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:-2px;margin-right:4px;"><path d="M17 2h4v4M14.5 9.5L21 3M7 22H3v-4M9.5 14.5L3 21M22 17v4h-4M14.5 14.5L21 21M2 7V3h4M9.5 9.5L3 3"/></svg>
+              Social
+            </button>
+            <!-- Time range selector -->
+            <select id="analyticsTimeRange" onchange="loadAnalyticsDashboard()" style="margin-left:auto;padding:6px 12px;font-size:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;cursor:pointer;">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+            <button onclick="loadAnalyticsDashboard()" style="padding:6px 12px;font-size:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;font-family:inherit;" title="Refresh">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+          </div>
+
+          <!-- Website Analytics Tab -->
+          <div id="analyticsWebsiteTab">
+            <div id="analyticsLoading" style="text-align:center;padding:60px;color:var(--text-muted);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:spin 1s linear infinite;margin-bottom:12px;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              <div>Loading analytics...</div>
+            </div>
+            <div id="analyticsContent" style="display:none;">
+              <!-- Summary cards -->
+              <div id="analyticsSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;"></div>
+              <!-- Top pages -->
+              <div id="analyticsTopPages" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;"></div>
+              <!-- Two-column: Referrers + Countries -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div id="analyticsReferrers" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;"></div>
+                <div id="analyticsCountries" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;"></div>
+              </div>
+              <!-- Devices -->
+              <div id="analyticsDevices" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;"></div>
+            </div>
+          </div>
+
+          <!-- Social Analytics Tab (placeholder) -->
+          <div id="analyticsSocialTab" style="display:none;">
+            <div style="text-align:center;padding:60px 20px;color:var(--text-tertiary);">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom:16px;opacity:0.3;"><path d="M17 2h4v4M14.5 9.5L21 3M7 22H3v-4M9.5 14.5L3 21"/></svg>
+              <div style="font-size:15px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Social Analytics</div>
+              <div style="font-size:13px;max-width:400px;margin:0 auto;">Instagram, X, and Threads analytics will show here when social accounts are connected. Post performance, follower growth, and engagement metrics.</div>
+            </div>
+          </div>
+        </div>
+      </div>

@@ -1,0 +1,242 @@
+
+      <!-- Export View (Phase 8) -->
+      <div id="exportView" class="panel-view hidden">
+        <div class="panel" style="max-width: 900px;">
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">Export</span>
+          </div>
+          
+          <div class="panel-header">
+            <span>Export & Deploy</span>
+          </div>
+          <p style="color: #888; margin-bottom: var(--space-5);">Export brand configurations, clone presets, and prepare for deployment.</p>
+          
+          <div class="guardrails-grid">
+            <!-- Export Config -->
+            <div class="guardrails-section">
+              <h3 class="guardrails-title">Export Configuration</h3>
+              <p class="guardrails-desc">Download brand settings as JSON</p>
+              
+              <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                <button class="btn" onclick="exportBrandConfig()">Export Current Brand</button>
+                <button class="btn btn-secondary" onclick="exportAllBrands()">Export All Brands</button>
+                <button class="btn btn-secondary" onclick="exportTuningData()">Export Tuning Data</button>
+              </div>
+            </div>
+            
+            <!-- Import Config -->
+            <div class="guardrails-section">
+              <h3 class="guardrails-title">Import Configuration</h3>
+              <p class="guardrails-desc">Load brand settings from JSON file</p>
+              
+              <div style="border: 2px dashed var(--border-color); border-radius: var(--radius); padding: var(--space-8); text-align: center;">
+                <div style="font-size: var(--text-4xl); margin-bottom: var(--space-3); color: var(--text-secondary);">↓</div>
+                <div style="color: var(--text-secondary); margin-bottom: var(--space-3);">Drop JSON file or click to import</div>
+                <input type="file" id="importConfigInput" style="display: none;" accept=".json" onchange="handleConfigImport(event)">
+                <button class="btn btn-secondary btn-small" onclick="document.getElementById('importConfigInput').click()">Select File</button>
+              </div>
+            </div>
+            
+            <!-- Clone Preset -->
+            <div class="guardrails-section">
+              <h3 class="guardrails-title">Clone Preset</h3>
+              <p class="guardrails-desc">Create new brand from existing template</p>
+              
+              <div class="form-group" style="margin-bottom: var(--space-3);">
+                <label class="form-label">Source Brand</label>
+                <select id="cloneSourceBrand" style="width: 100%; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);" data-brand-selector="true">
+                  <!-- Dynamically populated from brands array -->
+                </select>
+              </div>
+              
+              <div class="form-group" style="margin-bottom: var(--space-3);">
+                <label class="form-label">New Brand Name</label>
+                <input type="text" id="cloneNewName" placeholder="e.g., New Brand Name" style="width: 100%; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary);">
+              </div>
+              
+              <button class="btn" onclick="cloneBrandPreset()">Clone Brand</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Calendar Item Modal -->
+      <div class="modal-overlay" id="calendarItemModal">
+        <div class="modal" style="max-width: 480px;">
+          <div class="modal-title" id="calModalTitle">Calendar Item</div>
+          
+          <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Title</label>
+              <input type="text" id="calItemTitle" placeholder="e.g., Weekly Content Calendar">
+            </div>
+            
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Date</label>
+              <input type="date" id="calItemDate" class="form-input">
+            </div>
+            
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Time</label>
+              <div style="display: flex; gap: var(--space-2); align-items: center;">
+                <input type="time" id="calItemTime" class="form-input" style="flex: 1;" placeholder="Start">
+                <span style="color: var(--text-tertiary); font-size: 12px;">to</span>
+                <input type="time" id="calItemEndTime" class="form-input" style="flex: 1;" placeholder="End">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); color: var(--text-secondary); white-space: nowrap;">
+                  <input type="checkbox" id="calItemAllDay" onchange="toggleAllDay()" checked>
+                  All day
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Brand</label>
+              <select id="calItemBrand" class="form-select" data-brand-selector="true">
+                <!-- Dynamically populated from brands array -->
+              </select>
+            </div>
+            
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Status</label>
+              <select id="calItemStatus" class="form-select">
+                <option value="proposed">Proposed</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+            
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Notes</label>
+              <textarea id="calItemNotes" placeholder="Add notes..." style="min-height: 80px;"></textarea>
+            </div>
+
+            <!-- v22.39: Reminder -->
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Reminder</label>
+              <select id="calItemReminder" class="form-select">
+                <option value="">No reminder</option>
+                <option value="0">At time of event</option>
+                <option value="5">5 minutes before</option>
+                <option value="15">15 minutes before</option>
+                <option value="30">30 minutes before</option>
+                <option value="60">1 hour before</option>
+                <option value="1440">1 day before</option>
+              </select>
+            </div>
+
+            <!-- v24.26: Calendar selector -->
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Calendar</label>
+              <select id="calItemCalendar" class="form-select">
+                <option value="roweos">RoweOS (Local)</option>
+              </select>
+            </div>
+
+            <!-- v22.39: Per-calendar sync checkboxes -->
+            <div class="form-group" id="calSyncExternalGroup" style="margin: 0;">
+              <label class="form-label">Sync To</label>
+              <div id="calItemSyncCalendars" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+              <span style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px; display: block;" id="calSyncExternalLabel"></span>
+            </div>
+          </div>
+
+          <!-- Execute Actions -->
+          <div id="calExecuteActions" class="cal-execute-actions">
+            <div class="cal-execute-label">Execute this item:</div>
+            <div style="display: flex; gap: var(--space-2);">
+              <button class="btn btn-secondary" onclick="sendCalendarToAgent()" style="flex: 1;">
+                <span style="margin-right: 6px;">◉</span> Ask BrandAI
+              </button>
+              <button class="btn btn-secondary" onclick="sendCalendarToStudio()" style="flex: 1;">
+                <span style="margin-right: 6px;">▤</span> Run in Studio
+              </button>
+            </div>
+          </div>
+          
+          <div class="modal-actions" style="display: flex; gap: var(--space-2); margin-top: var(--space-5);">
+            <button class="btn btn-danger btn-small" id="calDeleteBtn" onclick="deleteCalendarItem()" style="margin-right: auto;">Delete</button>
+            <button class="btn btn-secondary" onclick="closeCalendarItemModal()">Cancel</button>
+            <button class="btn" onclick="saveCalendarItem()">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Day View Modal -->
+      <div class="modal-overlay" id="dayViewModal" onclick="if(event.target===this)closeDayView()">
+        <div class="day-view-container">
+          <!-- Main Content Area -->
+          <div class="day-view-main">
+            <!-- Header -->
+            <div class="day-view-header">
+              <div>
+                <div class="day-view-date" id="dayViewTitle">December 19, 2025</div>
+                <div class="day-view-weekday" id="dayViewSubtitle">Friday</div>
+              </div>
+              <div class="day-view-nav">
+                <div class="day-view-toggle">
+                  <button class="day-toggle-btn active" data-view="stack" onclick="setDayViewMode('stack')">Stack</button>
+                  <button class="day-toggle-btn" data-view="hour" onclick="setDayViewMode('hour')">Hour</button>
+                </div>
+                <button class="btn btn-secondary btn-small" onclick="dayViewPrev()">←</button>
+                <button class="btn btn-secondary btn-small" onclick="dayViewToday()">Today</button>
+                <button class="btn btn-secondary btn-small" onclick="dayViewNext()">→</button>
+                <button class="btn btn-secondary btn-small" onclick="closeDayView()" style="margin-left: var(--space-2);">✕</button>
+              </div>
+            </div>
+            
+            <!-- Stack View (default) -->
+            <div class="day-stack-view" id="dayStackView">
+              <div class="day-stack-list" id="dayStackList"></div>
+            </div>
+            
+            <!-- Hour View -->
+            <div class="day-hour-view hidden" id="dayHourView">
+              <div class="day-allday-row">
+                <div class="day-time-label">all-day</div>
+                <div class="day-allday-events" id="dayViewAllDay"></div>
+              </div>
+              <div class="day-timeline-scroll">
+                <div class="day-timeline" id="dayViewTimeline"></div>
+              </div>
+            </div>
+            
+            <!-- Quick Add Bar -->
+            <div class="day-quickadd">
+              <button class="day-add-btn" onclick="openDayAddForm()">
+                <span>+</span> Add Item
+              </button>
+            </div>
+            
+            <!-- Add Form (hidden by default) -->
+            <div class="day-add-form hidden" id="dayAddForm">
+              <div class="day-add-form-header">
+                <span>New Item</span>
+                <span class="day-add-form-close" onclick="closeDayAddForm()">×</span>
+              </div>
+              <div class="day-add-form-body">
+                <div class="day-add-type-toggle">
+                  <button class="day-type-btn active" data-type="task" onclick="setDayAddType('task')">Task</button>
+                  <button class="day-type-btn" data-type="event" onclick="setDayAddType('event')">Event</button>
+                </div>
+                <input type="text" id="dayAddTitle" placeholder="What needs to be done?" class="day-add-input">
+                <select id="dayAddBrand" class="day-add-select">
+                  <option value="">Select Brand...</option>
+                </select>
+                <textarea id="dayAddNotes" placeholder="Add notes (optional)..." class="day-add-textarea"></textarea>
+                <div class="day-add-actions">
+                  <button class="btn btn-secondary btn-small" onclick="closeDayAddForm()">Cancel</button>
+                  <button class="btn btn-small" onclick="submitDayAddForm()">Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Sidebar - Enhanced Detail Panel -->
+          <div class="day-view-sidebar">
+            <div class="day-sidebar-scroll" id="dayViewSidebarContent">
+              <!-- Will be populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>

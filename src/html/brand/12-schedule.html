@@ -1,0 +1,66 @@
+
+      <!-- Schedule View -->
+      <div id="scheduleView" class="panel-view hidden">
+        <div class="panel">
+          <!-- Breadcrumb Trail -->
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">Automation</span>
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);">
+            <div class="panel-header" style="margin: 0;">Automation</div>
+            <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
+              <button class="btn btn-small" onclick="createScheduledTask()">+ New Task</button>
+              <button class="btn btn-secondary btn-small" onclick="viewTaskHistory()">History</button>
+              <span style="color: #333;">|</span>
+              <button class="btn btn-secondary btn-small" onclick="previousMonth()">← Prev</button>
+              <button class="btn btn-secondary btn-small" onclick="nextMonth()">Next →</button>
+            </div>
+          </div>
+          
+          <div id="currentMonth" style="color: var(--text-secondary); margin-bottom: var(--space-4); font-size: var(--text-lg);">January 2026</div>
+          
+          <!-- Calendar Grid -->
+          <div id="calendarGrid" class="schedule-calendar-grid">
+            <!-- Day headers -->
+            <div class="schedule-day-header">Sun</div>
+            <div class="schedule-day-header">Mon</div>
+            <div class="schedule-day-header">Tue</div>
+            <div class="schedule-day-header">Wed</div>
+            <div class="schedule-day-header">Thu</div>
+            <div class="schedule-day-header">Fri</div>
+            <div class="schedule-day-header">Sat</div>
+            <!-- Calendar days will be appended by JavaScript -->
+          </div>
+          
+          <!-- Scheduled Tasks List -->
+          <div style="margin-bottom: var(--space-6);">
+            <div style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4); color: var(--accent);">Active Tasks</div>
+            <div id="scheduledTasksList">
+              <div style="padding: var(--space-6); color: var(--text-tertiary); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
+                No scheduled tasks yet. Click "+ New Task" to create your first automation.
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Actions -->
+          <div style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-4); color: var(--accent);">Quick Actions</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-3);">
+            <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); cursor: pointer; transition: border-color 0.2s;" onclick="quickSchedule('daily-report')" onmouseover="this.style.borderColor='rgba(212,175,55,0.5)'" onmouseout="this.style.borderColor=''">
+              <div style="font-size: var(--text-base); font-weight: 600; margin-bottom: 6px;">Daily Brand Report</div>
+              <div style="font-size: var(--text-base); color: var(--text-tertiary);">Generate brand performance report every morning</div>
+            </div>
+            
+            <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); cursor: pointer; transition: border-color 0.2s;" onclick="quickSchedule('content-generation')" onmouseover="this.style.borderColor='rgba(212,175,55,0.5)'" onmouseout="this.style.borderColor=''">
+              <div style="font-size: var(--text-base); font-weight: 600; margin-bottom: 6px;">Content Generation</div>
+              <div style="font-size: var(--text-base); color: var(--text-tertiary);">Schedule weekly content for social media</div>
+            </div>
+            
+            <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); cursor: pointer; transition: border-color 0.2s;" onclick="quickSchedule('consistency-check')" onmouseover="this.style.borderColor='rgba(212,175,55,0.5)'" onmouseout="this.style.borderColor=''">
+              <div style="font-size: var(--text-base); font-weight: 600; margin-bottom: 6px;">Consistency Check</div>
+              <div style="font-size: var(--text-base); color: var(--text-tertiary);">Automated brand guidelines review</div>
+            </div>
+          </div>
+        </div>
+      </div>

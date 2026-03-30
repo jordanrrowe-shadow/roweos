@@ -1,0 +1,141 @@
+
+      <!-- v16.11: Clients View — identity-card expandable pattern -->
+      <div id="clientsView" class="panel-view hidden">
+        <div class="panel">
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">People</span> <!-- v25.3: Renamed from Clients -->
+          </div>
+          <div class="identity-header">
+            <div class="identity-header-info">
+              <h1 id="clientsViewTitle" style="display: flex; align-items: center; gap: 10px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                People
+                <button class="section-help-btn" onclick="showSectionHelp('clients')" title="How to use People">?</button>
+              </h1>
+              <p id="clientsSubtitle" style="margin: 2px 0 0 0; font-size: var(--text-sm); color: var(--text-secondary);">Manage clients, team members, and direct reports.</p> <!-- v25.3: Updated subtitle -->
+            </div>
+            <div class="identity-header-actions">
+              <label style="display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); color: var(--text-muted); cursor: pointer; white-space: nowrap; margin-right: var(--space-2);">
+                <input type="checkbox" id="clientsShowAllBrands" onchange="toggleClientsBrandFilter()"> All Brands
+              </label>
+              <!-- v25.3: Add Person dropdown -->
+              <div style="position:relative;display:inline-block;" id="addPersonDropdownWrap">
+                <button class="identity-action-btn primary" onclick="toggleAddPersonDropdown()">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M12 5v14m-7-7h14"/></svg>
+                  Add Person
+                  <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px;"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div id="addPersonDropdown" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.3);min-width:180px;z-index:100;overflow:hidden;">
+                  <div onclick="closeAddPersonDropdown(); openPersonModal('client')" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text-primary);display:flex;align-items:center;gap:8px;transition:background 0.1s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background=''">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    Client
+                  </div>
+                  <div onclick="closeAddPersonDropdown(); openPersonModal('team')" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text-primary);display:flex;align-items:center;gap:8px;transition:background 0.1s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background=''">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Team Member
+                  </div>
+                  <div onclick="closeAddPersonDropdown(); openPersonModal('report')" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text-primary);display:flex;align-items:center;gap:8px;transition:background 0.1s;" onmouseover="this.style.background='var(--bg-tertiary)'" onmouseout="this.style.background=''">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+                    Direct Report
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- v26.1: People Pill Nav (replaces people type tabs) -->
+          <div id="peoplePillNav"></div>
+          <!-- v24.24: Clients/Pipeline/Address Book draggable tab switcher -->
+          <div id="clientsTabBar" style="display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-4);">
+            <button id="clientsTabPipeline" class="accent-mode-tab" data-client-tab="pipeline" draggable="true" onclick="switchClientsTab('pipeline')" style="flex:0 0 auto;padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-size:13px;font-weight:600;cursor:grab;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Pipeline
+            </button>
+            <button id="clientsTabList" class="accent-mode-tab" data-client-tab="list" draggable="true" onclick="switchClientsTab('list')" style="flex:0 0 auto;padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-size:13px;font-weight:600;cursor:grab;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              Clients
+            </button>
+            <button id="clientsTabAddressBook" class="accent-mode-tab" data-client-tab="addressbook" draggable="true" onclick="switchClientsTab('addressbook')" style="flex:0 0 auto;padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-size:13px;font-weight:600;cursor:grab;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Address Book
+            </button>
+          </div>
+          <!-- Pipeline tab content -->
+          <div id="clientsPipelineTab">
+          <!-- v23.3: Enhanced filters toolbar -->
+          <div style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; margin-bottom: var(--space-4);">
+            <input type="text" id="clientsSearchInput" placeholder="Search clients by name, company, role..." class="form-control" style="padding: 8px 14px; font-size: var(--text-sm); flex: 1; min-width: 200px; max-width: 400px;" oninput="filterClients(this.value)">
+            <select id="clientsCategoryFilter" class="client-sort-select" onchange="filterClientsByCategory(this.value)">
+              <option value="">All Categories</option>
+              <option value="lead">Lead</option>
+              <option value="active_client">Active Client</option>
+              <option value="past_client">Past Client</option>
+              <option value="partner">Partner</option>
+              <option value="prospect">Prospect</option>
+              <option value="custom">Custom</option>
+            </select>
+            <select id="clientsSortBy" class="client-sort-select" onchange="sortClientsBy(this.value)">
+              <option value="name">Sort: Name</option>
+              <option value="priority">Sort: Priority</option>
+              <option value="category">Sort: Category</option>
+              <option value="dateAdded">Sort: Date Added</option>
+              <option value="lastContacted">Sort: Last Contacted</option>
+            </select>
+          </div>
+          <!-- v23.3: Bulk actions bar (shown when clients selected) -->
+          <div id="clientsBulkBar" class="client-bulk-bar" style="display: none;">
+            <span id="clientsBulkCount" style="font-size: var(--text-sm); font-weight: 600; color: var(--accent);">0 selected</span>
+            <button class="btn btn-small" onclick="clientBulkSetCategory()" style="padding: 4px 10px; font-size: 11px;">Set Category</button>
+            <button class="btn btn-small" onclick="clientBulkSetPriority()" style="padding: 4px 10px; font-size: 11px;">Set Priority</button>
+            <button class="btn btn-small" onclick="clientBulkExport()" style="padding: 4px 10px; font-size: 11px;">Export</button>
+            <button class="btn btn-small" onclick="clientClearBulkSelection()" style="padding: 4px 10px; font-size: 11px; color: var(--text-muted);">Clear</button>
+          </div>
+          <div class="identity-cards" id="clientsCardsContainer"></div>
+          </div>
+          <!-- v23.10: Clients List tab content -->
+          <div id="clientsListTab" style="display:none;">
+            <div style="display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap;margin-bottom:var(--space-4);">
+              <input type="text" id="clientsListSearch" placeholder="Search clients..." class="form-control" style="padding:8px 14px;font-size:var(--text-sm);flex:1;min-width:200px;max-width:400px;" oninput="renderClientsList()">
+              <select id="clientsListSort" class="client-sort-select" onchange="renderClientsList()">
+                <option value="alpha">A - Z</option>
+                <option value="alpha_desc">Z - A</option>
+                <option value="stage">By Stage</option>
+                <option value="category">By Category</option>
+                <option value="priority">By Priority</option>
+                <option value="recent">Recently Added</option>
+              </select>
+            </div>
+            <div id="clientsListContainer"></div>
+          </div>
+          <!-- v23.9: Address Book tab content -->
+          <div id="clientsAddressBookTab" style="display:none;">
+            <div style="display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap;margin-bottom:var(--space-4);">
+              <input type="text" id="clientsAbSearch" placeholder="Search contacts..." class="form-control" style="padding:8px 14px;font-size:var(--text-sm);flex:1;min-width:200px;max-width:400px;" oninput="renderClientsAddressBook()">
+              <button class="btn" onclick="mailPopulateAddressBookFromClients()" style="padding:6px 12px;font-size:12px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Import from Clients
+              </button>
+              <button class="btn" onclick="mailPopulateAddressBookFromSent()" style="padding:6px 12px;font-size:12px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                Import from Sent
+              </button>
+            </div>
+            <!-- v24.9: Filter chips -->
+            <div style="display:flex;gap:6px;margin-bottom:var(--space-3);">
+              <button class="mail-folder-chip active" id="abFilterAll" onclick="setAbFilter('all')">All</button>
+              <button class="mail-folder-chip" id="abFilterClients" onclick="setAbFilter('clients')">My Clients</button>
+              <button class="mail-folder-chip" id="abFilterRecent" onclick="setAbFilter('recent')">Recents</button>
+              <button class="mail-folder-chip" id="abFilterBook" onclick="setAbFilter('book')">Address Book</button>
+            </div>
+            <!-- Add contact inline -->
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:var(--space-4);padding:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+              <input type="text" id="clientsAbNewName" placeholder="Name" class="form-control" style="padding:6px 10px;font-size:var(--text-sm);flex:1;min-width:100px;">
+              <input type="email" id="clientsAbNewEmail" placeholder="Email" class="form-control" style="padding:6px 10px;font-size:var(--text-sm);flex:1;min-width:140px;">
+              <input type="text" id="clientsAbNewCompany" placeholder="Company" class="form-control" style="padding:6px 10px;font-size:var(--text-sm);flex:1;min-width:100px;">
+              <button class="btn btn-primary" onclick="clientsAbAddContact()" style="padding:6px 14px;font-size:12px;white-space:nowrap;">Add</button>
+            </div>
+            <div id="clientsAbList"></div>
+          </div>
+          <div id="clientDetailPanel" class="client-detail-panel" style="display: none;"></div>
+        </div>
+      </div>

@@ -1,0 +1,77 @@
+
+      <!-- v22.11: Bloom - AI-Powered Brand Feed -->
+      <div id="bloomView" class="panel-view hidden">
+        <div class="panel">
+          <!-- v22.44: Collapsible header block — hides on scroll for full-screen feed on mobile -->
+          <div id="bloomHeaderBlock" style="padding: 24px 32px 0 32px; background: var(--bg-primary);">
+            <div class="breadcrumb">
+              <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+              <span class="breadcrumb-item active">Bloom</span>
+            </div>
+            <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;"><span>Bloom</span><button class="section-help-btn" onclick="showSectionHelp('bloom')" title="How to use Bloom">?</button></div>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Curated content feed with inspiration, trends, and ideas for your brands.</p>
+          </div>
+          <!-- v22.40: Consolidated bloom header — Library inline with filters -->
+          <div class="bloom-header">
+            <div class="bloom-filters-row">
+              <div class="bloom-filters" id="bloomFilters"></div>
+              <button class="bloom-library-toggle" id="bloomLibraryToggle" onclick="toggleBloomLibrary()" title="Content Library">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                </svg>
+                Library
+                <span class="bloom-library-toggle-count" id="bloomLibraryCount" style="display:none;">0</span>
+              </button>
+              <!-- v22.56: Custom content generation button -->
+              <button class="bloom-library-toggle" id="bloomCreateBtn" onclick="openBloomCreateModal()" title="What would you like to see?">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M12 3v18M5 10l7-7 7 7"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/>
+                </svg>
+                Create
+              </button>
+              <select class="bloom-brand-select" id="bloomBrandSelect" onchange="bloomSwitchSource(this.value)"></select>
+              <button onclick="renderBloom._launchChecked=false;showBloomLaunchModal()" style="background:none;border:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;padding:4px 8px;">Change feed type</button>
+              <!-- v23.7: Media type checkboxes (9.2) -->
+              <div class="bloom-media-checks" id="bloomMediaChecks">
+                <label class="bloom-media-check" title="Include text content"><input type="checkbox" id="bloomMediaText" onchange="bloomUpdateMediaTypes()" checked> Text</label>
+                <label class="bloom-media-check" title="Include AI-generated images"><input type="checkbox" id="bloomMediaImages" onchange="bloomUpdateMediaTypes()"> Images</label>
+                <label class="bloom-media-check" title="Include AI-generated video"><input type="checkbox" id="bloomMediaVideo" onchange="bloomUpdateMediaTypes()"> Video</label>
+                <label class="bloom-media-check" title="Include AI-generated infographics"><input type="checkbox" id="bloomMediaInfographic" onchange="bloomUpdateMediaTypes()"> Infographic</label>
+              </div>
+              <select class="bloom-length-select" id="bloomLengthSelect" onchange="bloomSetLength(this.value)" title="Post length">
+                <option value="short">Short</option>
+                <option value="long">Long</option>
+                <option value="mix">Hybrid</option>
+              </select>
+            </div>
+          </div>
+          <!-- v22.16: Content Library panel -->
+          <div class="bloom-library-panel" id="bloomLibraryPanel">
+            <div class="bloom-library-tabs" id="bloomLibraryTabs"></div>
+            <div class="bloom-library-grid" id="bloomLibraryGrid"></div>
+            <div class="bloom-library-limit" id="bloomLibraryLimit"></div>
+            <input type="file" id="bloomLibraryFileInput" accept="image/*,video/*" multiple style="display:none;" onchange="handleBloomLibraryUpload(event)">
+          </div>
+          <!-- v22.56: Bloom Create modal -->
+          <div class="bloom-create-overlay" id="bloomCreateOverlay">
+            <div class="bloom-create-modal">
+              <div class="bloom-create-header">
+                <span style="font-size:13px;color:var(--text-secondary);">What would you like to see?</span>
+                <button onclick="closeBloomCreateModal()" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="bloom-create-row">
+                <textarea id="bloomCreateInput" class="bloom-create-input" rows="1" placeholder="A topic, idea, or theme..." oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
+                <span id="bloomCreateStatus" style="display:none;"></span>
+                <button class="bloom-create-submit" id="bloomCreateSubmit" onclick="bloomGenerateCustomContent()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="7" rx="2.5" ry="4"/><ellipse cx="16.5" cy="10.5" rx="2.5" ry="4" transform="rotate(72 16.5 10.5)"/><ellipse cx="15" cy="15" rx="2.5" ry="4" transform="rotate(144 15 15)"/><ellipse cx="9" cy="15" rx="2.5" ry="4" transform="rotate(-144 9 15)"/><ellipse cx="7.5" cy="10.5" rx="2.5" ry="4" transform="rotate(-72 7.5 10.5)"/><circle cx="12" cy="11.5" r="2"/></svg>
+                  Generate
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="bloom-feed" id="bloomFeed"></div>
+        </div>
+      </div>

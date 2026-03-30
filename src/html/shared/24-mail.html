@@ -1,0 +1,593 @@
+
+  <!-- v22.23: Mail View -->
+  <div id="mailView" class="panel-view hidden">
+    <div class="panel">
+      <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+        <span class="breadcrumb-item active">Mail</span>
+      </div>
+      <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;">
+        <span>Mail</span>
+        <button class="section-help-btn" onclick="showSectionHelp('mail')" title="How to use Mail">?</button>
+      </div>
+      <p style="color: var(--text-muted); font-size: 12px; margin-bottom: var(--space-5); line-height: 1.5; opacity: 0.6; letter-spacing: 0.2px;">Compose, review, and manage correspondence across all connected accounts.</p>
+      <!-- v26.0: Mail pill nav (replaces old tab buttons) -->
+      <div id="mailPillNav"></div>
+
+      <!-- Outbox Tab -->
+      <div class="mail-tab-content" id="mailOutboxTab">
+        <div id="mailOutboxList"></div>
+        <div id="mailOutboxEmpty" class="mail-empty">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--text-secondary)" stroke-width="1" style="opacity:0.4;margin-bottom:12px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+          <div>No emails pending review</div>
+          <div style="font-size:12px;margin-top:8px;color:var(--text-secondary);">Pipeline-generated emails will appear here for your review before sending</div>
+        </div>
+      </div>
+
+      <!-- Sent Tab -->
+      <div class="mail-tab-content hidden" id="mailSentTab">
+        <div id="mailSentList"></div>
+        <div id="mailSentEmpty" class="mail-empty">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--text-secondary)" stroke-width="1" style="opacity:0.4;margin-bottom:12px;"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          <div>No emails sent yet</div>
+        </div>
+      </div>
+
+      <!-- v22.25: Drafts Tab -->
+      <div class="mail-tab-content hidden" id="mailDraftsTab">
+        <div id="mailDraftsList"></div>
+        <div id="mailDraftsEmpty" class="mail-empty">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--text-secondary)" stroke-width="1" style="opacity:0.4;margin-bottom:12px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <div>No drafts saved</div>
+          <div style="font-size:12px;margin-top:8px;color:var(--text-secondary);">Save drafts from Compose to continue editing later</div>
+        </div>
+      </div>
+
+      <!-- v22.40: Social Outbox moved to Automations > Pending Approval -->
+
+      <!-- Compose Tab -->
+      <div class="mail-tab-content hidden" id="mailComposeTab">
+        <div class="mail-compose-form" style="position:relative;">
+          <!-- v22.32: Drag and drop overlay -->
+          <div id="mailDropOverlay" style="display:none;position:absolute;inset:0;z-index:100;background:rgba(var(--brand-accent-rgb, 168,152,120),0.08);backdrop-filter:blur(4px);border:2px dashed var(--accent, #a89878);border-radius:12px;pointer-events:none;">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#a89878" stroke-width="1.5" style="opacity:0.7;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              <div style="font-size:14px;font-weight:500;color:var(--accent, #a89878);">Drop to attach</div>
+              <div style="font-size:11px;color:var(--text-muted);">PDF, images, documents up to 10MB</div>
+            </div>
+          </div>
+          <!-- Header fields row -->
+          <div class="mail-from-replyto-row" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="mail-compose-field" style="flex:1;min-width:0;">
+              <label>From</label>
+              <select id="mailComposeFrom">
+                <option value="">Select address...</option>
+              </select>
+            </div>
+            <div class="mail-compose-field" style="flex:1;min-width:0;">
+              <label>Reply-To</label>
+              <input type="text" id="mailComposeReplyTo" placeholder="Reply address">
+            </div>
+          </div>
+          <!-- v23.2: Autocomplete-enabled To/CC/BCC fields -->
+          <div class="mail-compose-field" style="position:relative;">
+            <label>To <button type="button" onclick="mailOpenAddressBook('to')" style="border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:11px;padding:0 4px;vertical-align:middle;" title="Address Book"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></button></label>
+            <input type="text" id="mailComposeTo" placeholder="recipient@example.com" oninput="mailShowContactSuggestions(this, 'to')" onfocus="mailShowContactSuggestions(this, 'to')" autocomplete="off">
+            <div class="mail-contact-suggestions" id="mailSuggestionsTo"></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <div class="mail-compose-field" style="flex:1;position:relative;">
+              <label>CC</label>
+              <input type="text" id="mailComposeCc" placeholder="Comma-separated" oninput="mailShowContactSuggestions(this, 'cc')" onfocus="mailShowContactSuggestions(this, 'cc')" autocomplete="off">
+              <div class="mail-contact-suggestions" id="mailSuggestionsCc"></div>
+            </div>
+            <div class="mail-compose-field" style="flex:1;position:relative;">
+              <label>BCC</label>
+              <input type="text" id="mailComposeBcc" placeholder="Comma-separated" oninput="mailShowContactSuggestions(this, 'bcc')" onfocus="mailShowContactSuggestions(this, 'bcc')" autocomplete="off">
+              <div class="mail-contact-suggestions" id="mailSuggestionsBcc"></div>
+            </div>
+          </div>
+          <div class="mail-compose-field">
+            <label>Subject</label>
+            <input type="text" id="mailComposeSubject" placeholder="Email subject" onblur="mailAutoCapitalizeSubject()">
+          </div>
+
+          <!-- v22.24: Rich Email Canvas -->
+          <div class="mail-canvas-wrap">
+            <div class="mail-canvas-toolbar" id="mailCanvasToolbar">
+              <button onclick="mailExecCmd('bold')" title="Bold"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>
+              <button onclick="mailExecCmd('italic')" title="Italic"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg></button>
+              <button onclick="mailExecCmd('underline')" title="Underline"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg></button>
+              <button onclick="mailExecCmd('strikeThrough')" title="Strikethrough"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.3 4.9c-1.2-.9-2.8-1.4-4.5-1.4-3.3 0-5.3 1.8-5.3 4.3 0 1 .3 1.8.8 2.5"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M17.8 13.4c.3.6.4 1.3.4 2.1 0 2.8-2.2 4.9-5.7 4.9-2 0-3.7-.6-4.9-1.7"/></svg></button>
+              <span class="toolbar-sep"></span>
+              <select class="mail-font-size-select" onchange="mailSetFontSize(this.value)" title="Font Size">
+                <option value="">Size</option>
+                <option value="1">10</option>
+                <option value="2">12</option>
+                <option value="3" selected>14</option>
+                <option value="4">16</option>
+                <option value="5">20</option>
+                <option value="6">24</option>
+                <option value="7">32</option>
+              </select>
+              <button onclick="mailExecCmd('formatBlock','h2')" title="Heading"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h8M4 4v16M12 4v16"/></svg></button>
+              <button onclick="mailExecCmd('insertUnorderedList')" title="Bullet List"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg></button>
+              <button onclick="mailExecCmd('insertOrderedList')" title="Numbered List"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><text x="2" y="8" font-size="8" fill="currentColor" stroke="none" font-weight="600">1</text><text x="2" y="14" font-size="8" fill="currentColor" stroke="none" font-weight="600">2</text><text x="2" y="20" font-size="8" fill="currentColor" stroke="none" font-weight="600">3</text></svg></button>
+              <button onclick="mailExecCmd('formatBlock','blockquote')" title="Quote"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg></button>
+              <span class="toolbar-sep"></span>
+              <button onclick="mailInsertLink()" title="Insert Link"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+              <button onclick="mailInsertHR()" title="Divider"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/></svg></button>
+              <button onclick="mailClearFormat()" title="Clear Formatting"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 10L7 20M7 10l10 10"/></svg></button>
+              <span class="toolbar-sep"></span>
+              <!-- BrandAI/LifeAI Writing Tools -->
+              <button class="toolbar-ai-btn" id="mailVoiceToolsBtn" onclick="mailShowVoiceTools(event)" title="Writing Tools">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"/><path d="M17 4a2 2 0 0 0 0 4"/><path d="M19 2v6"/></svg>
+                <span id="mailVoiceToolsLabel">BrandAI Tools</span>
+              </button>
+              <button class="toolbar-ai-btn" onclick="mailAICompose()" title="Generate with AI" style="border-color:transparent;color:var(--text-secondary);">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z"/></svg>
+                Write with AI
+              </button>
+            </div>
+            <div class="mail-canvas-body" id="mailComposeBody" contenteditable="true" data-placeholder="Write your email..." onpaste="mailHandleCanvasPaste(event)"></div>
+            <!-- v23.2: AI loading overlay -->
+            <div class="mail-compose-loading" id="mailComposeLoading" style="display:none;">
+              <div class="mail-compose-loading-inner">
+                <div class="mail-compose-spinner"></div>
+                <div class="mail-compose-loading-text" id="mailComposeLoadingText">Generating...</div>
+              </div>
+            </div>
+            <div class="mail-canvas-statusbar">
+              <span id="mailCanvasWordCount">0 words</span>
+              <span id="mailCanvasCharCount">0 characters</span>
+            </div>
+          </div>
+
+          <!-- Template & actions row -->
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="mail-compose-field" style="flex:1;min-width:130px;">
+              <label>Template</label>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <select id="mailComposeTemplate" onchange="mailOnTemplateChange()" style="flex:1;">
+                  <option value="professional">Professional</option>
+                  <option value="minimal">Minimal</option>
+                  <option value="bold">Bold</option>
+                  <option value="newsletter">Newsletter</option>
+                  <option value="plain">Plain Text</option>
+                  <option value="ai">AI Generated</option>
+                </select>
+                <button id="mailCustomTemplateDeleteBtn" onclick="mailDeleteCustomTemplate()" style="display:none;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-muted);cursor:pointer;font-size:13px;flex-shrink:0;" title="Delete saved template"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/></svg></button>
+              </div>
+            </div>
+            <div class="mail-compose-field" style="min-width:90px;">
+              <label>Logo Position</label>
+              <select id="mailComposeLogoPos" onchange="mailOnTemplateChange()">
+                <option value="center">Center</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <!-- v23.2: Logo Size -->
+            <div class="mail-compose-field" style="min-width:80px;">
+              <label>Logo Size</label>
+              <select id="mailComposeLogoSize" onchange="mailOnTemplateChange()">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+              </select>
+            </div>
+            <!-- v23.2: Font Family -->
+            <div class="mail-compose-field" style="min-width:100px;">
+              <label>Font</label>
+              <select id="mailComposeFont" onchange="mailOnTemplateChange()">
+                <option value="system">System Default</option>
+                <option value="georgia">Georgia (Serif)</option>
+                <option value="helvetica">Helvetica</option>
+                <option value="verdana">Verdana</option>
+                <option value="palatino">Palatino</option>
+                <option value="brand">Brand Font</option>
+              </select>
+            </div>
+            <!-- v23.2: Formatting Tier -->
+            <div class="mail-compose-field" style="min-width:90px;">
+              <label>Formatting</label>
+              <select id="mailComposeFormatTier" onchange="mailSaveFormatTier()">
+                <option value="minimal">Minimal</option>
+                <option value="moderate" selected>Moderate</option>
+                <option value="max">Maximum</option>
+              </select>
+            </div>
+            <div class="mail-compose-field" style="min-width:120px;">
+              <label>Signature</label>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <select id="mailSignatureSelect" onchange="mailInsertSignature()" style="flex:1;">
+                  <option value="">No signature</option>
+                </select>
+              </div>
+            </div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text-secondary);padding-bottom:6px;">
+              <input type="checkbox" id="mailComposeBccSelf"> BCC self
+            </label>
+          </div>
+          <!-- v22.25: AI Template inline prompt (shown when 'ai' template selected) -->
+          <div id="mailAiTemplateRow" style="display:none;margin-bottom:10px;">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="mailAiTemplatePrompt" placeholder="Describe the template style you want..." style="flex:1;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text-primary);outline:none;" onkeydown="if(event.key==='Enter'){mailGenerateAiTemplate();event.preventDefault();}">
+              <button onclick="mailGenerateAiTemplate()" style="padding:8px 14px;border:none;border-radius:8px;background:var(--brand-accent, #a89878);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446A9 9 0 1 1 12 3z"/><path d="M17 4a2 2 0 0 0 0 4"/><path d="M19 2v6"/></svg>
+                Generate
+              </button>
+              <button id="mailAiTemplateSaveBtn" onclick="mailSaveAiTemplate()" style="display:none;padding:8px 14px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;align-items:center;gap:5px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save Template
+              </button>
+            </div>
+          </div>
+          <!-- v22.25: Live Template Preview -->
+          <div id="mailTemplatePreview" style="display:none;margin-bottom:10px;border:1px solid var(--border-color);border-radius:8px;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg-tertiary);border-bottom:1px solid var(--border-color);">
+              <span style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">Template Preview</span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--text-muted);">
+                  <input type="checkbox" id="mailPreviewIncludeLogo" onchange="mailUpdateTemplatePreview()" checked> Logo
+                </label>
+                <button onclick="document.getElementById('mailLogoUploadInput').click()" style="border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:11px;" title="Upload logo">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload
+                </button>
+                <input type="file" id="mailLogoUploadInput" accept="image/*" onchange="mailUploadLogo(this)" style="display:none;">
+                <button onclick="document.getElementById('mailTemplatePreview').style.display='none'" style="border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:11px;">Hide</button>
+              </div>
+            </div>
+            <iframe id="mailTemplatePreviewFrame" style="width:100%;min-height:400px;border:none;background:#fff;" sandbox="allow-same-origin allow-scripts"></iframe>
+          </div>
+          <!-- v22.31: Attachments -->
+          <div id="mailAttachmentsRow" style="margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <button onclick="document.getElementById('mailAttachFileInput').click()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-tertiary);color:var(--text-secondary);font-size:12px;cursor:pointer;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                Attach File
+              </button>
+              <button onclick="mailAttachCurrentPDF()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-tertiary);color:var(--text-secondary);font-size:12px;cursor:pointer;" title="Generate PDF from latest Studio output and attach">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Attach PDF from Studio
+              </button>
+              <input type="file" id="mailAttachFileInput" multiple onchange="mailHandleFileAttach(this)" style="display:none;" accept=".pdf,.doc,.docx,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.gif,.svg">
+              <span id="mailAttachCount" style="font-size:11px;color:var(--text-muted);"></span>
+            </div>
+            <div id="mailAttachmentsList" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
+          <!-- v23.2: Client identity toggle + compose actions -->
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+              <input type="checkbox" id="mailInformClientIdentity"> Inform to Client Identity
+            </label>
+            <span id="mailInformClientHint" style="font-size:11px;color:var(--text-muted);display:none;">Key points will be saved to client profile after sending</span>
+          </div>
+          <div class="mail-compose-actions">
+            <button class="mail-compose-clear" onclick="mailClearCompose()" title="Clear form">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M17 10L7 20M7 10l10 10"/></svg> Clear
+            </button>
+            <button class="mail-compose-clear" onclick="mailCancelCompose()">Cancel</button>
+            <button class="mail-compose-draft" onclick="mailSaveDraft()">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Save Draft
+            </button>
+            <button class="mail-compose-draft" onclick="mailSaveToOutbox()">Save to Outbox</button>
+            <!-- v23.2: Preview button -->
+            <button class="mail-compose-draft" onclick="mailShowFinalPreview()" style="border-color:var(--brand-accent, #a89878);color:var(--brand-accent, #a89878);">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Preview
+            </button>
+            <button class="mail-compose-send" onclick="mailComposeSend()">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- v22.24: BrandAI Voice Tools Popover -->
+      <div class="mail-voice-popover" id="mailVoicePopover">
+        <div class="voice-label" id="mailVoicePopoverLabel">BrandAI Writing Tools</div>
+        <button onclick="mailVoiceAction('rewrite')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Rewrite</button>
+        <button onclick="mailVoiceAction('professional')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Professional Tone</button>
+        <button onclick="mailVoiceAction('friendly')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> Friendly Tone</button>
+        <button onclick="mailVoiceAction('concise')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Make Concise</button>
+        <button onclick="mailVoiceAction('expand')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Expand</button>
+        <button onclick="mailVoiceAction('grammar')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Fix Grammar</button>
+        <button onclick="mailVoiceAction('brand_voice')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Brand Voice</button>
+      </div>
+
+      <!-- v22.25: Write with AI Modal -->
+      <div class="mail-ai-overlay" id="mailAiOverlay" style="display:none;">
+        <div class="mail-ai-modal">
+          <div class="mail-ai-modal-header">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8L19 13"/><path d="M15 9h.01"/><path d="M17.8 6.2L19 5"/><path d="M11 6.2L9.7 5"/><path d="M11 11.8L9.7 13"/><path d="M3 21l9-9"/><path d="M12.2 6.25a3.5 3.5 0 0 0-4.95 4.95"/></svg>
+            <span id="mailAiModalTitle">Write with BrandAI</span>
+          </div>
+          <div class="mail-ai-modal-body">
+            <label style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;display:block;">What changes should BrandAI make?</label>
+            <textarea id="mailAiPromptInput" class="mail-ai-prompt-input" rows="4" placeholder="e.g. Make it more concise, add pricing details, change the tone..."></textarea>
+            <div class="mail-ai-modal-hint" id="mailAiModalHint">BrandAI will use your brand identity, knowledge, and voice to draft the email.</div>
+          </div>
+          <div class="mail-ai-modal-actions">
+            <button class="mail-ai-modal-cancel" onclick="mailAiModalClose()">Cancel</button>
+            <button class="mail-ai-modal-go" onclick="mailAiModalSubmit()">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Write Email
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- v23.2: Final Preview Modal (3.3/3.4) -->
+      <div class="mail-preview-overlay" id="mailPreviewOverlay" style="display:none;">
+        <div class="mail-preview-modal">
+          <div class="mail-preview-modal-header">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Email Preview</span>
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+              <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;cursor:pointer;">
+                <input type="checkbox" id="mailPreviewEditMode" onchange="mailTogglePreviewEdit(this.checked)"> Edit Mode
+              </label>
+              <button onclick="mailClosePreview()" style="border:none;background:none;color:var(--text-muted);cursor:pointer;padding:4px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+          <!-- Preview metadata bar -->
+          <div class="mail-preview-meta" id="mailPreviewMeta"></div>
+          <!-- Preview iframe -->
+          <div class="mail-preview-body">
+            <iframe id="mailPreviewFrame" style="width:100%;min-height:500px;border:none;background:#fff;" sandbox="allow-same-origin allow-scripts"></iframe>
+          </div>
+          <!-- v23.2: Floating rich text toolbar for edit mode (3.4) -->
+          <div class="mail-preview-float-toolbar" id="mailPreviewFloatToolbar" style="display:none;">
+            <button onclick="mailPreviewExec('bold')" title="Bold"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>
+            <button onclick="mailPreviewExec('italic')" title="Italic"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg></button>
+            <button onclick="mailPreviewExec('underline')" title="Underline"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg></button>
+          </div>
+          <!-- Preview actions -->
+          <div class="mail-preview-actions">
+            <button class="mail-compose-clear" onclick="mailClosePreview()">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit
+            </button>
+            <button class="mail-compose-draft" onclick="mailClosePreview(); mailSaveDraft();">Save as Draft</button>
+            <button class="mail-compose-draft" onclick="mailClosePreview(); mailClearCompose();">Discard</button>
+            <button class="mail-compose-send" onclick="mailClosePreview(); mailComposeSend();">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg> Send
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- v23.2: Address Book Modal (3.2) -->
+      <div class="mail-addressbook-overlay" id="mailAddressBookOverlay" style="display:none;">
+        <div class="mail-addressbook-modal">
+          <div class="mail-addressbook-header">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Address Book</span>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <input type="text" id="mailAddressBookSearch" placeholder="Search contacts..." oninput="mailFilterAddressBook()" style="padding:6px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;font-size:12px;color:var(--text-primary);width:180px;outline:none;">
+              <button onclick="mailCloseAddressBook()" style="border:none;background:none;color:var(--text-muted);cursor:pointer;padding:4px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="mail-addressbook-body" id="mailAddressBookBody"></div>
+          <div class="mail-addressbook-footer">
+            <div style="display:flex;gap:8px;flex:1;">
+              <input type="text" id="mailAddressBookNewName" placeholder="Name" style="flex:1;padding:8px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;font-size:12px;color:var(--text-primary);outline:none;">
+              <input type="email" id="mailAddressBookNewEmail" placeholder="email@example.com" style="flex:1;padding:8px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;font-size:12px;color:var(--text-primary);outline:none;">
+              <button onclick="mailAddContact()" style="padding:8px 16px;border-radius:8px;border:none;background:var(--brand-accent, #a89878);color:#fff;font-size:12px;cursor:pointer;white-space:nowrap;">Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- v23.2: Client Identity Confirmation Modal (3.8) -->
+      <div class="mail-client-identity-overlay" id="mailClientIdentityOverlay" style="display:none;">
+        <div class="mail-client-identity-modal">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span style="font-weight:600;font-size:15px;color:var(--text-primary);">Save to Client Identity</span>
+            <button onclick="mailCloseClientIdentity()" style="margin-left:auto;border:none;background:none;color:var(--text-muted);cursor:pointer;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">AI extracted the following from your email. Review and confirm to save to the client profile.</div>
+          <div id="mailClientIdentityContent" style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:14px;font-size:13px;color:var(--text-primary);max-height:300px;overflow-y:auto;line-height:1.6;margin-bottom:16px;white-space:pre-wrap;"></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button onclick="mailCloseClientIdentity()" style="padding:8px 20px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:13px;cursor:pointer;">Skip</button>
+            <button onclick="mailConfirmClientIdentity()" style="padding:8px 20px;border:none;border-radius:8px;background:var(--brand-accent, #a89878);color:#fff;font-size:13px;cursor:pointer;">Save to Profile</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inbox Tab (Phase 2: Gmail/Outlook) -->
+      <div class="mail-tab-content hidden" id="mailInboxTab">
+        <div id="mailInboxConnected" style="display:none;">
+          <!-- v23.12: Fetch indicator — glowing mail icon -->
+          <div class="mail-fetch-indicator" id="mailFetchIndicator">
+            <div class="mail-fetch-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg></div>
+            <div class="mail-fetch-text" id="mailFetchText">Fetching new mail...</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <div class="mail-inbox-filters" id="mailInboxFilters"></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="font-size:11px;color:var(--text-secondary);opacity:0.6;" id="mailInboxStatus"></div>
+              <!-- v24.13: Compact/full toggle -->
+              <button onclick="toggleMailCompact()" id="mailCompactToggle" style="padding:7px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text-secondary);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;" title="Toggle compact view">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+              </button>
+              <button onclick="mailRefreshInbox()" style="padding:7px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text-primary);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;letter-spacing:0.2px;">Refresh</button>
+              <button onclick="mailToggleSelectMode()" id="mailSelectToggle" style="padding:7px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text-secondary);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;" title="Select multiple">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              </button>
+            </div>
+          </div>
+          <!-- v25.0: Bulk action bar for multi-select -->
+          <div id="mailBulkBar" style="display:none;align-items:center;gap:10px;padding:10px 14px;margin-bottom:10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;">
+            <button onclick="mailSelectAll()" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border-color);background:transparent;color:var(--text-secondary);font-size:11px;cursor:pointer;">Select All</button>
+            <span id="mailBulkCount" style="font-size:11px;color:var(--text-secondary);flex:1;">0 selected</span>
+            <button onclick="mailBulkMarkRead()" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);font-size:11px;cursor:pointer;">Mark Read</button>
+            <button onclick="mailBulkMarkUnread()" style="padding:5px 12px;border-radius:8px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);font-size:11px;cursor:pointer;">Mark Unread</button>
+            <button onclick="mailBulkDelete()" style="padding:5px 12px;border-radius:8px;border:none;background:#e74c3c;color:#fff;font-size:11px;cursor:pointer;">Delete</button>
+            <button onclick="mailToggleSelectMode()" style="padding:5px 8px;border-radius:8px;border:none;background:transparent;color:var(--text-muted);font-size:11px;cursor:pointer;">Cancel</button>
+          </div>
+          <div id="mailInboxList"></div>
+        </div>
+        <div id="mailInboxDisconnected">
+          <div class="mail-empty">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--text-secondary)" stroke-width="1" style="opacity:0.4;margin-bottom:12px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+            <div>Connect your email to view your inbox</div>
+            <div style="font-size:12px;margin-top:8px;color:var(--text-secondary);">Go to the Settings tab to connect Gmail or Outlook</div>
+            <button onclick="switchMailTab('connections')" style="margin-top:16px;padding:10px 24px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;">Connect Email</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- v22.33: Enriched Mail Detail View -->
+      <div class="mail-detail-view" id="mailDetailView">
+        <button onclick="mailCloseDetail()" class="mail-detail-back-btn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <div class="mail-detail-header">
+          <div class="mail-detail-subject" id="mailDetailSubject"></div>
+          <div class="mail-detail-sender-row">
+            <div class="mail-detail-avatar" id="mailDetailAvatar">?</div>
+            <div class="mail-detail-sender-info">
+              <div class="mail-detail-sender-name" id="mailDetailSenderName"></div>
+              <div class="mail-detail-sender-email" id="mailDetailFrom"></div>
+            </div>
+            <div class="mail-detail-meta-date" id="mailDetailDate"></div>
+          </div>
+          <div class="mail-detail-meta">
+            <div><span class="mail-detail-meta-label">To</span> <span class="mail-detail-meta-value" id="mailDetailTo"></span></div>
+          </div>
+        </div>
+        <div class="mail-detail-body-wrap">
+          <div class="mail-detail-body" id="mailDetailBody"></div>
+        </div>
+        <div class="mail-detail-actions">
+          <button onclick="mailReplyTo()" class="mail-detail-action-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+            Reply
+          </button>
+          <button onclick="mailForward()" class="mail-detail-action-btn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
+            Forward
+          </button>
+          <button id="mailDetailReadToggle" onclick="mailToggleReadState()" class="mail-detail-action-btn" style="margin-left:auto;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Mark as Read
+          </button>
+          <button onclick="mailDeleteMessage()" class="mail-detail-action-btn" style="color:#ef4444;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <!-- Connections/Settings Tab -->
+      <div class="mail-tab-content hidden" id="mailConnectionsTab">
+        <!-- v24.9: Your Contact Card (read-only, edit in Identity) -->
+        <div class="mail-settings-section" id="mailContactCardSection">
+          <h3 style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">Your Contact Card</h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Your contact info appears as "Me" in email dropdowns and client forms.</p>
+          <div id="mailContactCardDisplay" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:13px;"></div>
+          <button onclick="showView('memory')" style="margin-top:10px;padding:6px 14px;border-radius:8px;border:1px solid var(--border-color);background:none;color:var(--accent,#a89878);font-size:12px;cursor:pointer;">Edit in Identity</button>
+        </div>
+        <!-- v24.27: Unified Accounts Section — avatar, connections, from addresses, signatures all in one -->
+        <div class="mail-settings-section">
+          <h3 style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Your Accounts</h3>
+          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">Each connected account has its own avatar, signature, and inbox color.</p>
+
+          <!-- Default Mail Avatar (used when no per-account avatar) -->
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-md);border:1px solid var(--border-color);">
+            <div id="mailLogoPreview" style="width:48px;height:48px;border-radius:50%;background:var(--bg-tertiary);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer;" onclick="document.getElementById('mailLogoInput').click()">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--text-muted)" stroke-width="1.5" id="mailLogoPlaceholderIcon"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);">Default Mail Avatar</div>
+              <div style="font-size:11px;color:var(--text-muted);">Used on sent emails when no per-account avatar is set</div>
+              <input type="file" id="mailLogoInput" accept="image/*" onchange="mailHandleLogoUpload(this)" style="display:none;">
+            </div>
+            <button onclick="document.getElementById('mailLogoInput').click()" style="padding:6px 14px;border-radius:6px;border:1px solid var(--accent,#a89878);background:none;color:var(--accent,#a89878);font-size:11px;cursor:pointer;">Upload</button>
+            <button id="mailLogoRemoveBtn" onclick="mailRemoveLogo()" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(239,68,68,0.3);background:none;color:#ef4444;font-size:11px;cursor:pointer;display:none;">Remove</button>
+            <button id="mailLogoDownloadBtn" onclick="downloadMailLogo()" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border-color);background:none;color:var(--text-secondary);font-size:11px;cursor:pointer;display:none;">Download</button>
+          </div>
+
+          <!-- Connected Account Cards (rendered by JS) -->
+          <div id="mailUnifiedAccountCards"></div>
+
+          <!-- Connect buttons -->
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button id="gmailConnectBtn" onclick="mailConnectGmail()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="#ea4335"><path d="M20 18h-2V9.25L12 13 6 9.25V18H4V6h1.2l6.8 4.25L18.8 6H20m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2z"/></svg>
+              <span id="gmailConnectionStatus">Connect Gmail</span>
+            </button>
+            <button id="outlookConnectBtn" onclick="mailConnectOutlook()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="#0078d4"><path d="M21.17 2.06A13.1 13.1 0 0019 1.87a12.94 12.94 0 00-7 2.05 12.94 12.94 0 00-7-2A13.1 13.1 0 002.83 2.06 1 1 0 002 3v12a1 1 0 001.17 1 10.9 10.9 0 012.83-.32 11 11 0 016 1.78 11 11 0 016-1.78 10.9 10.9 0 012.83.32A1 1 0 0022 15V3a1 1 0 00-.83-.94zM11 15.15a13 13 0 00-5-1.32V4.47a11 11 0 015 1.2zm2-10.48a11 11 0 015-1.2v9.36a13 13 0 00-5 1.32z"/></svg>
+              <span id="outlookConnectionStatus">Connect Outlook</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Hidden legacy elements for compatibility -->
+        <div id="mailFromAddressList" style="display:none;"></div>
+        <input type="hidden" id="mailReplyToConfig">
+        <input type="hidden" id="mailDisplayName">
+        <input type="hidden" id="mailNewFromAddress">
+        <!-- v23.2: Compose Preferences expanded -->
+        <div class="mail-settings-section">
+        <h3 style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">Compose Preferences</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-secondary);">
+            <input type="checkbox" id="mailAutoCapToggle" onchange="localStorage.setItem('roweos_mail_autocap_subject', this.checked ? 'true' : 'false')" checked> Auto-capitalize subject lines (title case)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-secondary);">
+            <input type="checkbox" id="mailInformClientToggle" onchange="localStorage.setItem('roweos_mail_inform_client', this.checked ? 'true' : 'false')"> Always enable "Inform to Client Identity" by default
+          </label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="font-size:13px;color:var(--text-secondary);white-space:nowrap;">Default formatting tier:</label>
+            <select id="mailDefaultFormatTier" onchange="localStorage.setItem('roweos_mail_format_tier', this.value)" style="padding:6px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:12px;">
+              <option value="minimal">Minimal</option>
+              <option value="moderate" selected>Moderate</option>
+              <option value="max">Maximum</option>
+            </select>
+          </div>
+          <!-- v23.13: Default mailbox tab -->
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="font-size:13px;color:var(--text-secondary);white-space:nowrap;">Default mailbox:</label>
+            <select id="mailDefaultTabSelect" onchange="localStorage.setItem('roweos_mail_default_tab', this.value)" style="padding:6px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:12px;">
+              <option value="outbox">Outbox</option>
+              <option value="inbox">Inbox</option>
+            </select>
+          </div>
+        </div>
+
+        </div>
+        <!-- v23.2: Address Book -->
+        <div class="mail-settings-section">
+        <h3 style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">Address Book</h3>
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Manage contacts for quick access when composing. Auto-populated from clients and previous recipients.</p>
+        <button onclick="mailOpenAddressBook()" style="padding:8px 20px;border-radius:8px;border:1px solid var(--accent, #a89878);background:none;color:var(--accent, #a89878);font-size:13px;cursor:pointer;margin-bottom:8px;">Open Address Book</button>
+        <div style="display:flex;gap:8px;">
+          <button onclick="mailPopulateAddressBookFromClients()" style="padding:6px 14px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-tertiary);color:var(--text-secondary);font-size:11px;cursor:pointer;">Sync from Clients</button>
+          <button onclick="mailPopulateAddressBookFromSent()" style="padding:6px 14px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-tertiary);color:var(--text-secondary);font-size:11px;cursor:pointer;">Import from Sent</button>
+        </div>
+
+        </div>
+        <!-- v22.31: Signature Manager -->
+        <div class="mail-settings-section">
+        <h3 style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">Email Signatures</h3>
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Create signatures to quickly add to your emails. Select a signature from the dropdown in the composer.</p>
+        <div id="mailSignatureManager"></div>
+        <div style="margin-top:12px;padding:14px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;">
+          <input type="text" id="mailSigNewName" placeholder="Signature name (e.g. Professional, Casual)" style="width:100%;padding:8px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-size:13px;margin-bottom:8px;box-sizing:border-box;">
+          <div id="mailSigNewBody" contenteditable="true" style="width:100%;min-height:80px;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-size:13px;line-height:1.5;outline:none;box-sizing:border-box;" data-placeholder="Type your signature here..."></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+            <button id="mailSigSaveBtn" onclick="mailSaveSignatureUI()" style="padding:8px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;">Save Signature</button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>

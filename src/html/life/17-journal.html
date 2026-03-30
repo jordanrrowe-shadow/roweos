@@ -1,0 +1,27 @@
+
+      <!-- v12.2.4: Journal View -->
+      <div id="journalView" class="panel-view hidden">
+        <div class="panel">
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item"><a href="#" onclick="showView('pulse'); return false;">Focus</a></span>
+            <span class="breadcrumb-item active">Journal</span>
+          </div>
+
+          <div class="journal-container">
+            <div class="journal-book">
+              <div class="journal-spine"></div>
+              <div class="journal-header">
+                <div class="journal-title">My Journal</div>
+                <button class="focus-2-widget-action" onclick="showView('pulse')">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Back to Focus
+                </button>
+              </div>
+              <div class="journal-entries" id="journalEntriesList">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>

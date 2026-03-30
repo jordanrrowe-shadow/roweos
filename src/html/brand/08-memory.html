@@ -1,0 +1,608 @@
+      
+      <!-- Memory View (Phase 7) -->
+      <div id="memoryView" class="panel-view hidden">
+        <div class="panel">
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">Identity</span>
+          </div>
+          
+          <!-- v9.1.14: Clean Identity Header -->
+          <div class="identity-header">
+            <div class="identity-header-info">
+              <h1 id="memoryBrandTitle" style="display:flex;align-items:center;gap:8px;">Brand Name <button class="section-help-btn" onclick="showSectionHelp('memory')" title="How to use Identity">?</button></h1>
+              <p id="memoryBrandTagline">Brand tagline</p>
+            </div>
+            <div class="identity-header-actions">
+              <!-- v27.0: Research button — dynamically updated with brand website -->
+              <button class="identity-action-btn" id="identityResearchBtn" onclick="launchResearch('', selectedBrand)" title="Research this brand" style="display:none;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                Research
+              </button>
+              <button class="identity-action-btn" id="identityAddBtn" onclick="handleIdentityAdd()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                <span id="identityAddBtnLabel">Add Brand</span>
+              </button>
+              <button class="identity-action-btn" onclick="openEditBrandModal()" title="Edit brand name, short name, and basic info">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit
+              </button>
+              <button class="identity-action-btn" onclick="handleIdentityDelete()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+                Delete
+              </button>
+              <button class="identity-action-btn primary" onclick="handleIdentitySave()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+                Save All
+              </button>
+              <!-- v24.13: Reorganize identity content with AI -->
+              <button class="identity-action-btn" onclick="reorganizeIdentityWithAI()" title="AI-reorganize all identity content for clarity">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/><path d="M8 6v12"/><path d="M16 6v12"/></svg>
+                Reorganize
+              </button>
+              <!-- v24.13: Push identity to system prompt -->
+              <button class="identity-action-btn" onclick="pushIdentityToSystemPrompt()" title="Push updated identity into system prompt with diff approval">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                Push to Prompt
+              </button>
+              <!-- v20.4: Share My Brand button — visible when signed in -->
+              <button class="identity-action-btn" id="shareBrandBtn" onclick="openShareBrandModal()" style="display:none;" title="Share this brand config with team members">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share
+              </button>
+            </div>
+          </div>
+
+          <!-- v15.15: Identity timestamps -->
+          <div id="identityTimestamps" style="display:flex;gap:16px;font-size:12px;color:var(--text-muted);padding:0 0 8px 0;flex-wrap:wrap;"></div>
+
+          <!-- v26.2: Link to logo settings -->
+          <div style="margin-top:var(--space-3);font-size:12px;">
+            <a href="#" onclick="showView('settings'); setTimeout(function(){ openSettingsFolder('appearance'); }, 100); return false;" style="color:var(--brand-accent, #a89878);text-decoration:none;">
+              Change logo in Settings > Appearance
+            </a>
+          </div>
+
+          <!-- v9.1.14: Hidden compat divs -->
+          <div id="settings" style="display: none;"></div>
+          <div id="brandKnowledgeRepo" style="display: none;"></div>
+          
+          <!-- v18.8: Role badge — static container for renderIdentityRoleBadge() -->
+          <div id="identityRoleBadgeArea"></div>
+          <!-- v26.1: Identity Pill Nav (replaces category tabs) -->
+          <div id="identityPillNav"></div>
+
+          <!-- v24.15: Category: Brand User -->
+          <div class="identity-category-panel" id="identityCat_user">
+          <div class="identity-cards" id="identityCardsContainer">
+
+            <!-- v12.2.4: Your Role at this Brand -->
+            <div class="identity-card" data-section="role">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="identity-card-title">
+                  <h3>Your Role</h3>
+                  <p>Your relationship to this brand</p>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Relationship to Brand</div>
+                  <div style="display: flex; gap: var(--space-3); margin-bottom: var(--space-4);">
+                    <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; padding: 10px 16px; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 2px solid transparent;" id="roleOwnerLabel">
+                      <input type="radio" name="brandRole" value="owner" onchange="updateBrandRole('owner')" style="width: 18px; height: 18px;">
+                      <span>Owner / Founder</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; padding: 10px 16px; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 2px solid transparent;" id="roleEmployeeLabel">
+                      <input type="radio" name="brandRole" value="employee" onchange="updateBrandRole('employee')" style="width: 18px; height: 18px;">
+                      <span>Employee / Team Member</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Employee-specific fields -->
+                <div id="employeeRoleFields" style="display: none;">
+                  <div class="identity-field-group">
+                    <div class="identity-field-label">Job Title</div>
+                    <input type="text" class="identity-input" id="identity-role-title" placeholder="e.g., Marketing Manager, Sales Director, Developer" onblur="saveBrandRoleField('title')">
+                  </div>
+                  <div class="identity-field-group">
+                    <div class="identity-field-label">Profession / Field</div>
+                    <input type="text" class="identity-input" id="identity-role-profession" placeholder="e.g., Digital Marketing, Software Engineering, Operations" onblur="saveBrandRoleField('profession')">
+                  </div>
+                  <div class="identity-field-group">
+                    <div class="identity-field-label">Job Description / Responsibilities</div>
+                    <textarea class="identity-textarea" id="identity-role-description" placeholder="Describe your main responsibilities and what you do at this company..." onblur="saveBrandRoleField('description')" style="min-height: 80px;"></textarea>
+                  </div>
+                </div>
+
+                <!-- Owner-specific fields -->
+                <div id="ownerRoleFields" style="display: none;">
+                  <div class="identity-field-group">
+                    <div class="identity-field-label">Your Title</div>
+                    <input type="text" class="identity-input" id="identity-owner-title" placeholder="e.g., CEO, Founder, Owner" onblur="saveBrandRoleField('ownerTitle')">
+                  </div>
+                </div>
+
+                <div style="margin-top: var(--space-3); padding: 10px 14px; background: rgba(212, 175, 55, 0.1); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-secondary);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  This helps BrandAI tailor responses to your specific role and responsibilities.
+                </div>
+              </div>
+            </div>
+
+            <!-- v24.13: Logo Variants -->
+            <div class="identity-card" data-section="logos">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </div>
+                <div class="identity-card-title">
+                  <h3>Brand Logos</h3>
+                  <p>Logo variants for different contexts</p>
+                </div>
+                <span class="identity-card-badge" id="badge-logos-count" style="display:none;">0</span>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div id="logoVariantsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:12px;"></div>
+                <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--bg-tertiary);border-radius:var(--radius-md);cursor:pointer;font-size:13px;color:var(--text-secondary);border:1px dashed var(--border-subtle);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  Add Logo Variant
+                  <input type="file" accept="image/*" onchange="handleLogoVariantUpload(event)" style="display:none;">
+                </label>
+                <p style="font-size:11px;color:var(--text-muted);margin:8px 0 0;">Primary, horizontal, icon-only, light background, dark background, etc.</p>
+              </div>
+            </div>
+
+            <!-- v20.6: Digital Presence — moved under Your Role -->
+            <div id="identityDigitalPresenceArea"></div>
+
+            <!-- v24.11: My Contact Info — proper identity card -->
+            <div class="identity-card" data-section="contact" id="userContactCard">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="identity-card-title">
+                  <h3>My Contact</h3>
+                  <p>Your contact details for AI and automations</p>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                  <div class="identity-field-group"><div class="identity-field-label">Full Name</div><input type="text" class="identity-input" id="ucName" placeholder="Jordan Rowe" onblur="saveUserContactFromUI()"></div>
+                  <div class="identity-field-group"><div class="identity-field-label">Title</div><input type="text" class="identity-input" id="ucTitle" placeholder="CEO" onblur="saveUserContactFromUI()"></div>
+                  <div class="identity-field-group"><div class="identity-field-label">Company</div><input type="text" class="identity-input" id="ucCompany" placeholder="The Rowe Collection" onblur="saveUserContactFromUI()"></div>
+                  <div class="identity-field-group"><div class="identity-field-label">Personal Email</div><input type="email" class="identity-input" id="ucEmail" placeholder="you@personal.com" onblur="saveUserContactFromUI()"></div>
+                  <div class="identity-field-group"><div class="identity-field-label">Work Email</div><input type="email" class="identity-input" id="ucWorkEmail" placeholder="you@company.com" onblur="saveUserContactFromUI()"></div>
+                  <div class="identity-field-group"><div class="identity-field-label">Phone</div><input type="tel" class="identity-input" id="ucPhone" placeholder="+1 555-0100" onblur="saveUserContactFromUI()"></div>
+                  <div class="identity-field-group"><div class="identity-field-label">Website</div><input type="url" class="identity-input" id="ucWebsite" placeholder="https://yoursite.com" onblur="saveUserContactFromUI()"></div>
+                  <div class="identity-field-group"><div class="identity-field-label">Location</div><input type="text" class="identity-input" id="ucLocation" placeholder="City, State" onblur="saveUserContactFromUI()"></div>
+                </div>
+                <div style="margin-top: var(--space-3); padding: 10px 14px; background: rgba(212, 175, 55, 0.1); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-secondary);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  Auto-saves on blur. BrandAI and Automations use this when they need to reference you.
+                </div>
+              </div>
+            </div>
+
+          </div>
+          </div><!-- end identityCat_user -->
+
+          <!-- v24.15: Category: Brand Knowledge -->
+          <div class="identity-category-panel" id="identityCat_knowledge" style="display:none;">
+          <div class="identity-cards" id="identityKnowledgeCards">
+
+            <!-- Brand Essence -->
+            <div class="identity-card" data-section="essence">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">✦</div>
+                <div class="identity-card-title">
+                  <h3>Brand Essence</h3>
+                  <p>Core identity and positioning</p>
+                </div>
+                <div class="identity-card-meta">
+                  <span class="identity-card-badge" id="badge-essence-owner" style="display:none;">You</span>
+                  <span class="identity-card-badge ai" id="badge-essence-ai" style="display:none;">AI</span>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div class="identity-field-group">
+                  <div class="identity-field-label">
+                    <span class="ai-indicator">◉ AI Insights</span>
+                    <span class="identity-field-hint">(click to edit)</span>
+                  </div>
+                  <div class="identity-ai-insights" onclick="makeAiInsightEditable('essence')">
+                    <textarea class="identity-ai-textarea" id="identity-essence-ai" placeholder="AI-generated insights will appear here. You can also add your own notes..." onblur="autoSaveIdentityField('essence', 'ai')"></textarea>
+                  </div>
+                  <button class="identity-ai-refine-btn" onclick="refineIdentityWithBrandAI('essence', 'Brand Essence')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Refine with BrandAI
+                  </button>
+                </div>
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Your Definition</div>
+                  <textarea class="identity-textarea" id="identity-essence-owner" placeholder="What is your brand's core identity? What does it stand for?" onblur="autoSaveIdentityField('essence', 'owner')"></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Voice & Tone -->
+            <div class="identity-card" data-section="voice">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">◎</div>
+                <div class="identity-card-title">
+                  <h3>Voice & Tone</h3>
+                  <p>How the brand communicates</p>
+                </div>
+                <div class="identity-card-meta">
+                  <span class="identity-card-badge" id="badge-voice-owner" style="display:none;">You</span>
+                  <span class="identity-card-badge ai" id="badge-voice-ai" style="display:none;">AI</span>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div class="identity-field-group">
+                  <div class="identity-field-label">
+                    <span class="ai-indicator">◉ AI Insights</span>
+                    <span class="identity-field-hint">(click to edit)</span>
+                  </div>
+                  <div class="identity-ai-insights" onclick="makeAiInsightEditable('voice')">
+                    <textarea class="identity-ai-textarea" id="identity-voice-ai" placeholder="AI-generated insights will appear here. You can also add your own notes..." onblur="autoSaveIdentityField('voice', 'ai')"></textarea>
+                  </div>
+                  <button class="identity-ai-refine-btn" onclick="refineIdentityWithBrandAI('voice', 'Voice & Tone')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Refine with BrandAI
+                  </button>
+                </div>
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Your Definition</div>
+                  <textarea class="identity-textarea" id="identity-voice-owner" placeholder="How should your brand sound? What tone should it take?" onblur="autoSaveIdentityField('voice', 'owner')"></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Target Audience -->
+            <div class="identity-card" data-section="audience">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">◇</div>
+                <div class="identity-card-title">
+                  <h3>Target Audience</h3>
+                  <p>Who you serve</p>
+                </div>
+                <div class="identity-card-meta">
+                  <span class="identity-card-badge" id="badge-audience-owner" style="display:none;">You</span>
+                  <span class="identity-card-badge ai" id="badge-audience-ai" style="display:none;">AI</span>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div class="identity-field-group">
+                  <div class="identity-field-label">
+                    <span class="ai-indicator">◉ AI Insights</span>
+                    <span class="identity-field-hint">(click to edit)</span>
+                  </div>
+                  <div class="identity-ai-insights" onclick="makeAiInsightEditable('audience')">
+                    <textarea class="identity-ai-textarea" id="identity-audience-ai" placeholder="AI-generated insights will appear here. You can also add your own notes..." onblur="autoSaveIdentityField('audience', 'ai')"></textarea>
+                  </div>
+                  <button class="identity-ai-refine-btn" onclick="refineIdentityWithBrandAI('audience', 'Target Audience')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Refine with BrandAI
+                  </button>
+                </div>
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Your Definition</div>
+                  <textarea class="identity-textarea" id="identity-audience-owner" placeholder="Who is your ideal customer? What are their characteristics?" onblur="autoSaveIdentityField('audience', 'owner')"></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Key Messaging -->
+            <div class="identity-card" data-section="messaging">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">◆</div>
+                <div class="identity-card-title">
+                  <h3>Key Messaging</h3>
+                  <p>Core messages and value propositions</p>
+                </div>
+                <div class="identity-card-meta">
+                  <span class="identity-card-badge" id="badge-messaging-owner" style="display:none;">You</span>
+                  <span class="identity-card-badge ai" id="badge-messaging-ai" style="display:none;">AI</span>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div class="identity-field-group">
+                  <div class="identity-field-label">
+                    <span class="ai-indicator">◉ AI Insights</span>
+                    <span class="identity-field-hint">(click to edit)</span>
+                  </div>
+                  <div class="identity-ai-insights" onclick="makeAiInsightEditable('messaging')">
+                    <textarea class="identity-ai-textarea" id="identity-messaging-ai" placeholder="AI-generated insights will appear here. You can also add your own notes..." onblur="autoSaveIdentityField('messaging', 'ai')"></textarea>
+                  </div>
+                  <button class="identity-ai-refine-btn" onclick="refineIdentityWithBrandAI('messaging', 'Key Messaging')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Refine with BrandAI
+                  </button>
+                </div>
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Your Definition</div>
+                  <textarea class="identity-textarea" id="identity-messaging-owner" placeholder="What are your key messages? What value propositions should be emphasized?" onblur="autoSaveIdentityField('messaging', 'owner')"></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Products & Services -->
+            <div class="identity-card" data-section="products">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">▣</div>
+                <div class="identity-card-title">
+                  <h3>Products & Services</h3>
+                  <p>What you offer</p>
+                </div>
+                <div class="identity-card-meta">
+                  <span class="identity-card-badge" id="badge-products-owner" style="display:none;">You</span>
+                  <span class="identity-card-badge ai" id="badge-products-ai" style="display:none;">AI</span>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div class="identity-field-group">
+                  <div class="identity-field-label">
+                    <span class="ai-indicator">◉ AI Insights</span>
+                    <span class="identity-field-hint">(click to edit)</span>
+                  </div>
+                  <div class="identity-ai-insights" onclick="makeAiInsightEditable('products')">
+                    <textarea class="identity-ai-textarea" id="identity-products-ai" placeholder="AI-generated insights will appear here. You can also add your own notes..." onblur="autoSaveIdentityField('products', 'ai')"></textarea>
+                  </div>
+                  <button class="identity-ai-refine-btn" onclick="refineIdentityWithBrandAI('products', 'Products & Services')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Refine with BrandAI
+                  </button>
+                </div>
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Your Definition</div>
+                  <textarea class="identity-textarea" id="identity-products-owner" placeholder="What products or services does your brand offer?" onblur="autoSaveIdentityField('products', 'owner')"></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Visual Identity -->
+            <div class="identity-card" data-section="visual">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">✧</div>
+                <div class="identity-card-title">
+                  <h3>Visual Identity</h3>
+                  <p>Design language and aesthetics</p>
+                </div>
+                <div class="identity-card-meta">
+                  <span class="identity-card-badge" id="badge-visual-owner" style="display:none;">You</span>
+                  <span class="identity-card-badge ai" id="badge-visual-ai" style="display:none;">AI</span>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div class="identity-field-group">
+                  <div class="identity-field-label">
+                    <span class="ai-indicator">◉ AI Insights</span>
+                    <span class="identity-field-hint">(click to edit)</span>
+                  </div>
+                  <div class="identity-ai-insights" onclick="makeAiInsightEditable('visual')">
+                    <textarea class="identity-ai-textarea" id="identity-visual-ai" placeholder="AI-generated insights will appear here. You can also add your own notes..." onblur="autoSaveIdentityField('visual', 'ai')"></textarea>
+                  </div>
+                  <button class="identity-ai-refine-btn" onclick="refineIdentityWithBrandAI('visual', 'Visual Identity')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Refine with BrandAI
+                  </button>
+                </div>
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Your Definition</div>
+                  <textarea class="identity-textarea" id="identity-visual-owner" placeholder="Colors, typography, imagery style - what defines your visual brand?" onblur="autoSaveIdentityField('visual', 'owner')"></textarea>
+                </div>
+                <!-- v24.13: Reference Photos -->
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Reference Photos</div>
+                  <p style="font-size:12px;color:var(--text-muted);margin:0 0 8px;">Website homepage, key visuals, product shots, mood board images</p>
+                  <div id="visualRefPhotos" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>
+                  <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--bg-tertiary);border-radius:var(--radius-md);cursor:pointer;font-size:13px;color:var(--text-secondary);border:1px dashed var(--border-subtle);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Add Photo
+                    <input type="file" accept="image/*" multiple onchange="handleVisualRefUpload(event)" style="display:none;">
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Competitive Positioning -->
+            <div class="identity-card" data-section="competitive">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">⬡</div>
+                <div class="identity-card-title">
+                  <h3>Competitive Positioning</h3>
+                  <p>Market differentiation</p>
+                </div>
+                <div class="identity-card-meta">
+                  <span class="identity-card-badge" id="badge-competitive-owner" style="display:none;">You</span>
+                  <span class="identity-card-badge ai" id="badge-competitive-ai" style="display:none;">AI</span>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div class="identity-field-group">
+                  <div class="identity-field-label">
+                    <span class="ai-indicator">◉ AI Insights</span>
+                    <span class="identity-field-hint">(click to edit)</span>
+                  </div>
+                  <div class="identity-ai-insights" onclick="makeAiInsightEditable('competitive')">
+                    <textarea class="identity-ai-textarea" id="identity-competitive-ai" placeholder="AI-generated insights will appear here. You can also add your own notes..." onblur="autoSaveIdentityField('competitive', 'ai')"></textarea>
+                  </div>
+                  <button class="identity-ai-refine-btn" onclick="refineIdentityWithBrandAI('competitive', 'Competitive Position')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Refine with BrandAI
+                  </button>
+                </div>
+                <div class="identity-field-group">
+                  <div class="identity-field-label">Your Definition</div>
+                  <textarea class="identity-textarea" id="identity-competitive-owner" placeholder="How does your brand differentiate from competitors?" onblur="autoSaveIdentityField('competitive', 'owner')"></textarea>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- v24.15: Documents & Sources — inside Brand Knowledge -->
+          <div class="identity-upload-section" id="brandDocUploadSection" style="margin-top:16px;">
+            <div class="identity-upload-header">
+              <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: var(--space-2);"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Documents & Sources</h3>
+              <div class="identity-upload-stats">
+                <span id="identityDocCount">0</span> docs ·
+                <span id="identityInsightCount">0</span> insights learned
+              </div>
+            </div>
+
+            <div class="identity-dropzone" id="identityDropzone"
+                 onclick="document.getElementById('identityFileInput').click()"
+                 ondragover="event.preventDefault(); this.classList.add('dragover');"
+                 ondragleave="this.classList.remove('dragover');"
+                 ondrop="handleIdentityDocDrop(event); this.classList.remove('dragover');">
+              <div class="identity-dropzone-icon">↑</div>
+              <div class="identity-dropzone-text">Drop files here or click to upload</div>
+              <div class="identity-dropzone-hint">PDF, TXT, MD, DOCX supported</div>
+              <input type="file" id="identityFileInput" style="display: none;" multiple accept=".txt,.rtf,.md,.pdf,.docx" onchange="handleIdentityUpload(event)">
+            </div>
+
+            <div class="identity-docs-list" id="identityDocsList">
+              <!-- Documents will be rendered here -->
+            </div>
+
+            <!-- Processing overlay -->
+            <div class="identity-processing" id="identityProcessing" style="display: none;">
+              <div class="identity-processing-spinner"></div>
+              <div class="identity-processing-text" id="identityProcessingText">Analyzing document...</div>
+            </div>
+          </div>
+
+          </div><!-- end identityCat_knowledge -->
+
+          <!-- v24.15: Category: Platform Memory -->
+          <div class="identity-category-panel" id="identityCat_platform" style="display:none;">
+
+          <!-- v24.18: Platform Memory as identity cards -->
+          <div class="identity-cards">
+
+            <!-- Bloom Knowledge -->
+            <div class="identity-card" data-section="bloom-knowledge" id="bloomKnowledgeSection">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+                </div>
+                <div class="identity-card-title">
+                  <h3>Bloom Knowledge <span class="tuning-section-count" id="bloomKnowledgeCount">0</span></h3>
+                  <p>Preferences and insights saved from Bloom conversations</p>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div style="padding: 10px 14px; background: rgba(212, 175, 55, 0.1); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-4);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  These shape how your AI generates content.
+                </div>
+                <div id="bloomKnowledgeList"></div>
+              </div>
+            </div>
+
+            <!-- Automation Memory -->
+            <div class="identity-card" data-section="automation-memory" id="automationMemorySection">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M12 6v6l4 2"/></svg>
+                </div>
+                <div class="identity-card-title">
+                  <h3>Automation Memory <span class="tuning-section-count" id="automationMemoryCount">0</span></h3>
+                  <p>Preferences auto-learned from your pipeline configurations</p>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div style="padding: 10px 14px; background: rgba(212, 175, 55, 0.1); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-4);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  Items seen 2+ times become active AI hints.
+                </div>
+                <div id="automationMemoryList"></div>
+              </div>
+            </div>
+
+            <!-- v25.0: Folio Knowledge -->
+            <div class="identity-card" data-section="folio-knowledge" id="folioKnowledgeSection">
+              <div class="identity-card-header" onclick="toggleIdentityCard(this)">
+                <div class="identity-card-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                </div>
+                <div class="identity-card-title">
+                  <h3>Folio Knowledge <span class="tuning-section-count" id="folioKnowledgeCount">0</span></h3>
+                  <p>Visual preferences and design context for Folio creations</p>
+                </div>
+                <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+              <div class="identity-card-body">
+                <div style="padding: 10px 14px; background: var(--brand-accent-10, rgba(168,152,120,0.1)); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-4);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  These guide AI visual generation in Folio.
+                </div>
+                <div id="folioKnowledgeList"></div>
+                <div style="display:flex;gap:8px;margin-top:var(--space-3);">
+                  <input id="folioKnowledgeInput" type="text" placeholder="Add design preference or visual context..." style="flex:1;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);font-family:inherit;outline:none;" onkeydown="if(event.key==='Enter'){event.preventDefault();addFolioKnowledgeEntry();}">
+                  <button onclick="addFolioKnowledgeEntry()" style="padding:8px 14px;border-radius:var(--radius-md);border:none;background:var(--brand-accent, #a89878);color:#fff;font-size:var(--text-sm);font-weight:600;cursor:pointer;font-family:inherit;">Add</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          </div><!-- end identityCat_platform -->
+
+          <!-- v10.5.25: Life Identity Cards Container (separate from Brand) -->
+          <div class="identity-cards" id="lifeIdentityCardsContainer" style="display: none;">
+            <!-- Dynamically populated by renderLifeIdentityView() -->
+          </div>
+
+          <!-- v12.2.4: LifeAI Document Upload Section -->
+          <div class="identity-upload-section" id="lifeIdentityUploadSection" style="display: none;">
+            <div class="identity-upload-header">
+              <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: var(--space-2);"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Life Documents & Sources</h3>
+              <div class="identity-upload-stats">
+                <span id="lifeDocCount">0</span> docs ·
+                <span id="lifeInsightCount">0</span> insights learned
+              </div>
+            </div>
+
+            <div class="identity-dropzone" id="lifeIdentityDropzone"
+                 onclick="document.getElementById('lifeIdentityFileInput').click()"
+                 ondragover="event.preventDefault(); this.classList.add('dragover');"
+                 ondragleave="this.classList.remove('dragover');"
+                 ondrop="handleLifeIdentityDocDrop(event); this.classList.remove('dragover');">
+              <div class="identity-dropzone-icon">↑</div>
+              <div class="identity-dropzone-text">Drop files here or click to upload</div>
+              <div class="identity-dropzone-hint">PDF, TXT, MD, DOCX supported - health records, journals, goals, etc.</div>
+              <input type="file" id="lifeIdentityFileInput" style="display: none;" multiple accept=".txt,.rtf,.md,.pdf,.docx" onchange="handleLifeIdentityUpload(event)">
+            </div>
+
+            <div class="identity-docs-list" id="lifeIdentityDocsList">
+              <!-- Life Documents will be rendered here -->
+            </div>
+
+            <!-- Processing overlay -->
+            <div class="identity-processing" id="lifeIdentityProcessing" style="display: none;">
+              <div class="identity-processing-spinner"></div>
+              <div class="identity-processing-text" id="lifeIdentityProcessingText">Analyzing document...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>

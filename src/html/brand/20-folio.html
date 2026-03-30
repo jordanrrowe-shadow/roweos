@@ -1,0 +1,82 @@
+
+      <!-- v25.0: Folio - Living Canvas View -->
+      <div id="folioView" class="panel-view hidden">
+        <div class="panel">
+          <div id="folioHeaderBlock">
+            <!-- Breadcrumb Trail -->
+            <div class="breadcrumb">
+              <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+              <span class="breadcrumb-item active">Folio</span>
+            </div>
+            <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;">
+              <span>Folio</span>
+              <button class="section-help-btn" onclick="showSectionHelp('folio')" title="How to use Folio">?</button>
+            </div>
+            <p style="color:var(--text-muted);font-size:13px;margin-bottom:var(--space-5);line-height:1.5;">Your living canvas. Create, evolve, and refine visual work.</p>
+
+            <!-- Tab bar: Gallery | Chat -->
+            <div id="folioTabBar" style="display:flex;gap:2px;margin-bottom:var(--space-4);background:var(--bg-secondary);border-radius:10px;padding:3px;width:fit-content;">
+            <button class="folio-tab active" onclick="switchFolioTab('gallery')" data-folio-tab="gallery" style="padding:7px 20px;border-radius:8px;border:none;background:var(--bg-elevated);color:var(--text-primary);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;">Gallery</button>
+            <button class="folio-tab" onclick="switchFolioTab('chat')" data-folio-tab="chat" style="padding:7px 20px;border-radius:8px;border:none;background:transparent;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;">Chat</button>
+          </div>
+          </div><!-- end #folioHeaderBlock -->
+
+          <!-- Gallery tab content -->
+          <div id="folioGalleryTab">
+            <div id="folioGalleryGrid" class="folio-gallery-grid"></div>
+            <div id="folioEmptyState" style="display:none;padding:40px 0;text-align:left;">
+              <div style="margin-bottom:12px;">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1" opacity="0.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+              </div>
+              <div style="font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">Your canvas is waiting.</div>
+              <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Create interactive visuals, dashboards, and living artifacts with AI.</div>
+              <button onclick="switchFolioTab('chat')" style="padding:10px 24px;border-radius:20px;border:1px solid var(--brand-accent, #a89878);background:var(--brand-accent-10, rgba(168,152,120,0.1));color:var(--brand-accent, #a89878);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;">Open Folio Chat</button>
+            </div>
+          </div>
+
+          <!-- Chat tab content -->
+          <div id="folioChatTab" style="display:none;">
+            <div class="folio-chat" id="folioChatContainer" ondragover="event.preventDefault();this.classList.add('auto-agent-drag-over');" ondragleave="this.classList.remove('auto-agent-drag-over');" ondrop="event.preventDefault();this.classList.remove('auto-agent-drag-over');handleFolioFile({target:{files:event.dataTransfer.files}});">
+              <div class="auto-agent-messages" id="folioChatMessages">
+                <div class="auto-agent-welcome" id="folioChatWelcome">
+                  <div class="auto-agent-welcome-icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                  </div>
+                  <div class="auto-agent-welcome-title">Folio Chat</div>
+                  <div class="auto-agent-welcome-sub">Describe a visual — dashboard, chart, diagram, interactive — and I will build it.</div>
+                  <div class="auto-agent-suggestions" id="folioSuggestions">
+                    <button class="auto-agent-suggest-btn" onclick="folioQuickPrompt('Build a brand performance dashboard')">Brand performance dashboard</button>
+                    <button class="auto-agent-suggest-btn" onclick="folioQuickPrompt('Create an interactive org chart')">Interactive org chart</button>
+                    <button class="auto-agent-suggest-btn" onclick="folioQuickPrompt('Design a pricing comparison table')">Pricing comparison table</button>
+                    <button class="auto-agent-suggest-btn" onclick="folioQuickPrompt('Make a project timeline visualization')">Project timeline</button>
+                    <button class="auto-agent-suggest-btn" onclick="folioQuickPrompt('Build a competitive analysis framework')">Competitive analysis</button>
+                    <button class="auto-agent-suggest-btn" onclick="folioQuickPrompt('Create an interactive pitch deck')">Interactive pitch deck</button>
+                  </div>
+                </div>
+              </div>
+              <button class="auto-agent-scroll-btn" id="folioChatScrollBtn" onclick="var m=document.getElementById('folioChatMessages');if(m)m.scrollTop=m.scrollHeight;" style="display:none;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="auto-agent-input-area" id="folioInputArea">
+                <div class="folio-collapsed-icon" style="display:none;width:48px;height:48px;align-items:center;justify-content:center;" onclick="expandFolioInput()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+                <div class="auto-agent-file-chips" id="folioFileChips"></div>
+                <div class="auto-agent-input-row">
+                  <button class="auto-agent-attach-btn" onclick="document.getElementById('folioFileInput').click();" title="Attach file">
+                    <input type="file" id="folioFileInput" style="display:none;" onchange="handleFolioFile(event)" accept="image/*,.pdf,.txt,.md,.json,.csv,.xlsx,.xls,.doc,.docx,.pptx,.ppt,.rtf,.html,.xml,.yaml,.yml,.js,.ts,.py,.css,.sql" multiple>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                  <textarea id="folioChatInput" placeholder="Describe a visual to create..." rows="1" oninput="autoResizeTextarea(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFolioChatMessage();}" autocomplete="off"></textarea>
+                  <div class="auto-agent-input-right">
+                    <button class="auto-agent-attach-btn" onclick="newFolioChatSession()" title="New chat">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 8v4M8 10h8"/></svg>
+                    </button>
+                    <button class="auto-agent-send-btn" id="folioSendBtn" onclick="sendFolioChatMessage()">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>

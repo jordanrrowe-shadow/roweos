@@ -1,0 +1,159 @@
+
+      <!-- v9.1.14: Commerce View (Enhanced Analytics) -->
+      <div id="commerceView" class="panel-view hidden">
+        <div class="panel">
+          <!-- Breadcrumb Trail -->
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active" id="commerceBreadcrumbLabel">Analytics</span>
+          </div>
+
+          <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;">
+            <span id="commerceHeaderTitle">Analytics</span>
+            <button class="section-help-btn" onclick="showSectionHelp('commerce')" title="How to use Analytics">?</button>
+          </div>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">API spend, invoices, clients, and business metrics.</p>
+
+          <!-- v26.1: Analytics Pill Nav (replaces commerce tabs) -->
+          <div id="analyticsPillNav"></div>
+          
+          <!-- Tab Content: Overview -->
+          <div id="commerceTabOverview" class="commerce-tab-content">
+            <!-- Summary Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); margin-bottom: 32px;">
+              <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);">
+                <div style="font-size: var(--text-base); color: var(--text-tertiary); margin-bottom: var(--space-2);" id="commerceApiSpendLabel">API Spend (30 Days)</div>
+                <div style="font-size: var(--text-4xl); font-weight: 600; color: var(--accent);" id="commerceApiSpend">$0.00</div>
+                <div id="commerceApiBudgetSub" style="display:none;font-size:var(--text-xs);color:var(--text-muted);margin-top:4px;"></div>
+              </div>
+              <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);">
+                <div style="font-size: var(--text-base); color: var(--text-tertiary); margin-bottom: var(--space-2);">Outstanding Invoices</div>
+                <div style="font-size: var(--text-4xl); font-weight: 600; color: #ff6b6b;" id="commerceOutstanding">$0.00</div>
+              </div>
+              <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);">
+                <div style="font-size: var(--text-base); color: var(--text-tertiary); margin-bottom: var(--space-2);">Total Clients</div>
+                <div style="font-size: var(--text-4xl); font-weight: 600; color: var(--text-primary);" id="commerceTotalClients">0</div>
+              </div>
+              <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);">
+                <div style="font-size: var(--text-base); color: var(--text-tertiary); margin-bottom: var(--space-2);">Active Products</div>
+                <div style="font-size: var(--text-4xl); font-weight: 600; color: var(--text-primary);" id="commerceActiveProducts">0</div>
+              </div>
+              <!-- v24.25: Per-provider Budget/Threshold cards (rendered dynamically) -->
+              <div id="providerBudgetCard_claude" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);"></div>
+              <div id="providerBudgetCard_openai" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);"></div>
+              <div id="providerBudgetCard_gemini" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-5);"></div>
+            </div>
+            
+            <!-- v15.7: Analytics Highlights -->
+            <div id="commerceOverviewHighlights" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-5);"></div>
+            <!-- v15.7: Model Comparison Chart -->
+            <div id="commerceOverviewModelChart" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-5);"></div>
+            <!-- v15.7: Model Breakdown Table -->
+            <div id="commerceOverviewModelTable" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4);"></div>
+          </div>
+          
+          <!-- v15.7: Tab Content: AI Integration + API Costs Dashboard -->
+          <div id="commerceTabApi" class="commerce-tab-content" style="display: none;">
+            <!-- v15.7: Provider Status Cards -->
+            <div id="apiProviderStatus" style="margin-bottom: var(--space-5);"></div>
+            <!-- v15.7: Settings Toggles (Caching, Web Search) -->
+            <div id="apiSettingsToggles" style="margin-bottom: var(--space-5);"></div>
+            <!-- Period Selector -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+              <div style="font-size: var(--text-lg); font-weight: 600;">API Usage & Costs</div>
+              <div style="display: flex; gap: var(--space-2);">
+                <button class="btn btn-small" onclick="renderApiCostsDashboard('7d')" id="apiPeriod7d" style="padding: 4px 12px;">7d</button>
+                <button class="btn btn-small" onclick="renderApiCostsDashboard('30d')" id="apiPeriod30d" style="padding: 4px 12px;">30d</button>
+                <button class="btn btn-small" onclick="renderApiCostsDashboard('90d')" id="apiPeriod90d" style="padding: 4px 12px;">90d</button>
+              </div>
+            </div>
+            <!-- v24.18: Spending Alerts Banner -->
+            <div id="apiCostAlertBanner" style="margin-bottom: var(--space-4);"></div>
+            <!-- Summary Cards -->
+            <div id="apiCostSummaryCards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-5);"></div>
+            <!-- Provider Breakdown -->
+            <div id="apiCostProviderBreakdown" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-5);"></div>
+            <!-- v24.18: Cost by Feature -->
+            <div id="apiCostFeatureBreakdown" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-5);"></div>
+            <!-- Model Breakdown Table -->
+            <div id="apiCostModelBreakdown" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-5);"></div>
+            <!-- Daily Usage Chart (Bar Chart) -->
+            <div id="apiCostDailyChart" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-5);"></div>
+            <!-- Recent Activity -->
+            <div id="apiCostRecentActivity" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-5);"></div>
+            <!-- v24.18: Image Generation Stats -->
+            <div id="apiCostImageGen" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: var(--space-4);"></div>
+          </div>
+          
+          <!-- Tab Content: Invoices -->
+          <!-- v15.4: Invoices Tab -->
+          <div id="commerceTabInvoices" class="commerce-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-2);">
+              <div style="font-size: var(--text-lg); font-weight: 600;">Invoices</div>
+              <div style="display: flex; gap: var(--space-2);">
+                <button class="btn btn-secondary btn-small" onclick="openInvoiceImport()">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Import
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="openAiInvoiceGenerator()">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                  AI Generate
+                </button>
+                <button class="btn btn-primary btn-small" onclick="openInvoiceBuilder()">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M12 5v14m-7-7h14"/></svg>
+                  New Invoice
+                </button>
+              </div>
+            </div>
+            <!-- Invoice Summary -->
+            <div id="invoiceSummaryCards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-5);"></div>
+            <!-- Invoice List -->
+            <div id="invoiceListContainer"></div>
+          </div>
+          
+          <!-- v18.4: Clients tab removed — use standalone Clients view -->
+
+          <!-- v25.3: Tab Content: Website Analytics (Vercel) -->
+          <div id="commerceTabWebsite" class="commerce-tab-content" style="display: none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+              <div style="font-size:var(--text-lg);font-weight:600;">Website Analytics</div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <select id="webAnalyticsTimeRange" onchange="loadWebAnalytics()" style="padding:4px 10px;font-size:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-family:inherit;">
+                  <option value="7">7 days</option>
+                  <option value="30" selected>30 days</option>
+                  <option value="90">90 days</option>
+                </select>
+                <button onclick="loadWebAnalytics()" style="padding:4px 10px;font-size:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-secondary);cursor:pointer;font-family:inherit;" title="Refresh">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </button>
+              </div>
+            </div>
+            <div id="webAnalyticsLoading" style="text-align:center;padding:60px;color:var(--text-muted);">
+              <div style="font-size:13px;">Loading analytics...</div>
+            </div>
+            <div id="webAnalyticsContent" style="display:none;">
+              <div id="webAnalyticsSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;"></div>
+              <div id="webAnalyticsPages" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;"></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div id="webAnalyticsReferrers" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;"></div>
+                <div id="webAnalyticsCountries" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;"></div>
+              </div>
+              <div id="webAnalyticsDevices" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:20px;"></div>
+            </div>
+          </div>
+
+          <!-- v25.3: Tab Content: Social Analytics -->
+          <div id="commerceTabSocial" class="commerce-tab-content" style="display: none;">
+            <div style="text-align:center;padding:60px 20px;color:var(--text-tertiary);">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom:16px;opacity:0.3;"><path d="M17 2h4v4M14.5 9.5L21 3M7 22H3v-4M9.5 14.5L3 21"/></svg>
+              <div style="font-size:15px;font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Social Analytics</div>
+              <div style="font-size:13px;max-width:400px;margin:0 auto;">Instagram, X, and Threads analytics will appear here when social accounts are connected with analytics access.</div>
+            </div>
+          </div>
+
+          <!-- v15.4: Tab Content: Budget Dashboard (LifeAI) -->
+          <div id="commerceTabBudget" class="commerce-tab-content" style="display: none;">
+            <div id="budgetDashboardContainer"></div>
+          </div>
+        </div>
+      </div>

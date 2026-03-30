@@ -1,0 +1,94 @@
+
+      <!-- v13.9: Automations Lab -->
+      <div id="automationsView" class="panel-view hidden">
+        <div class="panel">
+          <!-- Breadcrumb -->
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">Automations</span>
+          </div>
+
+          <!-- v22.37: Header — gold title + stat cards like Analytics -->
+          <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;">
+            <span>Adaptive Operations</span>
+            <button class="section-help-btn" onclick="showSectionHelp('automations')" title="How to use Automations">?</button>
+          </div>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Autonomous workflows, custom agents, scheduled intelligence, and AI-powered image generation.</p>
+          <div id="autoLabStats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); margin-bottom: var(--space-5);">
+            <!-- Stat cards rendered by JS -->
+          </div>
+
+          <!-- v26.0: Automations pill nav (replaces old tab buttons) -->
+          <div id="autoLabPillNav"></div>
+
+          <!-- Tab Content Containers -->
+          <div class="auto-lab-content">
+            <div class="auto-lab-tab-content" id="autoLabWorkflows">
+              <!-- Populated by JS -->
+            </div>
+            <div class="auto-lab-tab-content" id="autoLabAgents">
+              <!-- Populated by JS -->
+            </div>
+            <div class="auto-lab-tab-content" id="autoLabScheduler">
+              <!-- Populated by JS -->
+            </div>
+            <div class="auto-lab-tab-content" id="autoLabImageLab">
+              <!-- Populated by JS -->
+            </div>
+            <!-- v21.15: Video Lab -->
+            <div class="auto-lab-tab-content" id="autoLabVideoLab">
+              <!-- Populated by JS -->
+            </div>
+            <div class="auto-lab-tab-content" id="autoLabUsage">
+              <!-- v15.7: Populated by renderAutoLabUsage() -->
+            </div>
+            <!-- v22.40: Pending Approval queue (social, email, document) -->
+            <div class="auto-lab-tab-content" id="autoLabPending">
+            </div>
+            <!-- v24.20: Browse Preset Library -->
+            <div class="auto-lab-tab-content" id="autoLabBrowse">
+            </div>
+            <!-- v24.2: Automations Agent — conversational automation builder -->
+            <div class="auto-lab-tab-content active" id="autoLabAutoAgent">
+              <div class="auto-agent-chat" ondragover="event.preventDefault();event.stopPropagation();this.classList.add('auto-agent-drag-over');" ondragleave="event.preventDefault();event.stopPropagation();this.classList.remove('auto-agent-drag-over');" ondrop="event.preventDefault();event.stopPropagation();this.classList.remove('auto-agent-drag-over');handleAutoAgentDrop(event);">
+                <div class="auto-agent-messages" id="autoAgentMessages">
+                  <div class="auto-agent-welcome">
+                    <div class="auto-agent-welcome-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+                    <div class="auto-agent-welcome-title">Automations Agent</div>
+                    <div class="auto-agent-welcome-sub">Describe what you want to automate and I will build it for you.</div>
+                    <div class="auto-agent-suggestions">
+                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Generate a social media post and publish it to X tonight at 9pm')">Post to X tonight at 9pm</button>
+                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Research my competitors using Intelligence Agent and email me a summary report')">Competitor research + email</button>
+                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Find potential clients in my industry, write personalized outreach emails for each, and queue them to my Outbox')">Prospect outreach campaign</button>
+                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Write a weekly newsletter summarizing brand updates and queue it to Outbox every Monday at 9am')">Weekly newsletter</button>
+                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Generate content, create an image, and post to X, Threads, and Instagram')">Cross-platform campaign</button>
+                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Research a potential client, generate a pitch PDF, write a cover email, and queue everything to Outbox')">Client pitch packet</button>
+                    </div>
+                  </div>
+                </div>
+                <button class="auto-agent-scroll-btn" id="autoAgentScrollBtn" onclick="scrollAutoAgentToBottom()" title="Scroll to bottom">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 13l5 5 5-5"/><path d="M7 6l5 5 5-5"/></svg>
+                </button>
+                <div class="auto-agent-input-area">
+                  <div class="auto-agent-file-chips" id="autoAgentFileChips"></div>
+                  <div class="auto-agent-input-row">
+                    <input type="file" id="autoAgentFileInput" style="display:none;" onchange="handleAutoAgentFile(this)" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.md,.json" multiple>
+                    <button class="auto-agent-attach-btn" onclick="document.getElementById('autoAgentFileInput').click()" title="Attach file (images, PDF, Word, Excel, etc.)">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    </button>
+                    <textarea id="autoAgentInput" placeholder="Describe an automation to build..." rows="1" oninput="autoResizeTextarea(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAutoAgentMessage();}" autocomplete="off"></textarea>
+                    <div class="auto-agent-input-right">
+                      <button class="auto-agent-attach-btn" onclick="newAutoAgentChat()" title="New chat">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 8v4M8 10h8"/></svg>
+                      </button>
+                      <button class="auto-agent-send-btn" id="autoAgentSendBtn" onclick="sendAutoAgentMessage()">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>

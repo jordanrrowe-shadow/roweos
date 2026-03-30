@@ -1,0 +1,903 @@
+
+  <!-- v22.7: Email Composer Modal — flex layout, CC/BCC, pinned footer -->
+  <div id="betaEmailPreviewModal" class="modal-overlay" style="display: none;">
+    <div class="modal" style="max-width: 700px; max-height: 92vh; display:flex; flex-direction:column;">
+      <div class="modal-header" style="flex-shrink:0;">
+        <div class="modal-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Compose Email
+        </div>
+        <button class="modal-close" onclick="closeModal('betaEmailPreviewModal')">&times;</button>
+      </div>
+      <!-- Scrollable middle section -->
+      <div style="flex:1;min-height:0;overflow-y:auto;padding-bottom:4px;">
+        <!-- From / To / Subject fields -->
+        <div style="padding:0 20px 12px;">
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <div style="flex:0 0 auto;">
+              <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">From</label>
+              <select id="composerFrom" style="padding:8px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:13px;">
+                <option value="">Select address...</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">To</label>
+              <input id="composerTo" type="email" placeholder="recipient@email.com" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:13px;outline:none;box-sizing:border-box;">
+            </div>
+          </div>
+          <!-- v22.7: CC/BCC toggle + fields -->
+          <div style="margin-bottom:8px;">
+            <span id="composerCcBccToggle" onclick="toggleComposerCcBcc()" style="font-size:11px;color:var(--text-muted);cursor:pointer;user-select:none;">
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:2px;"><path d="M12 5v14M5 12h14"/></svg>
+              CC / BCC
+            </span>
+          </div>
+          <div id="composerCcBccFields" style="display:none;">
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <div style="flex:1;min-width:0;">
+                <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">CC</label>
+                <input id="composerCc" type="text" placeholder="cc@email.com (comma-separated)" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:13px;outline:none;box-sizing:border-box;">
+              </div>
+              <div style="flex:1;min-width:0;">
+                <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">BCC</label>
+                <input id="composerBcc" type="text" placeholder="bcc@email.com (comma-separated)" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:13px;outline:none;box-sizing:border-box;">
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Subject</label>
+            <input id="composerSubject" type="text" style="width:100%;padding:8px 12px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:13px;outline:none;box-sizing:border-box;">
+          </div>
+        </div>
+        <!-- v22.4: Template selector -->
+        <div style="padding:0 20px 8px;">
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Template</label>
+          <select id="composerTemplate" onchange="loadComposerTemplate(this.value)" style="padding:8px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:13px;">
+            <option value="default">Default Welcome</option>
+            <option value="individual">Individual (Solo)</option>
+            <option value="company">Company (Founder)</option>
+            <option value="check-in">Check-in (Feedback)</option>
+            <optgroup label="Branded Templates">
+              <option value="brand-professional">Professional</option>
+              <option value="brand-minimal">Minimal</option>
+              <option value="brand-bold">Bold</option>
+              <option value="brand-newsletter">Newsletter</option>
+            </optgroup>
+          </select>
+        </div>
+        <!-- Editable email body -->
+        <div style="padding:0 20px;">
+          <label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Body <span style="color:var(--text-muted);font-weight:400;">(click to edit)</span></label>
+          <!-- v22.2: Formatting toolbar (onmousedown+preventDefault preserves iframe selection) -->
+          <div id="composerToolbar" style="display:flex;gap:2px;padding:4px 6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-bottom:none;border-radius:var(--radius-md) var(--radius-md) 0 0;flex-wrap:wrap;">
+            <button onmousedown="event.preventDefault();composerExec('bold')" title="Bold (Cmd+B)" style="padding:4px 8px;background:none;border:1px solid transparent;border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:13px;font-weight:700;line-height:1;" onmouseover="this.style.background='var(--bg-primary)';this.style.borderColor='var(--border-color)'" onmouseout="this.style.background='none';this.style.borderColor='transparent'">B</button>
+            <button onmousedown="event.preventDefault();composerExec('italic')" title="Italic (Cmd+I)" style="padding:4px 8px;background:none;border:1px solid transparent;border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:13px;font-style:italic;line-height:1;" onmouseover="this.style.background='var(--bg-primary)';this.style.borderColor='var(--border-color)'" onmouseout="this.style.background='none';this.style.borderColor='transparent'">I</button>
+            <button onmousedown="event.preventDefault();composerExec('underline')" title="Underline (Cmd+U)" style="padding:4px 8px;background:none;border:1px solid transparent;border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:13px;text-decoration:underline;line-height:1;" onmouseover="this.style.background='var(--bg-primary)';this.style.borderColor='var(--border-color)'" onmouseout="this.style.background='none';this.style.borderColor='transparent'">U</button>
+            <div style="width:1px;background:var(--border-color);margin:2px 4px;"></div>
+            <button onmousedown="event.preventDefault();composerExec('insertUnorderedList')" title="Bullet list" style="padding:4px 8px;background:none;border:1px solid transparent;border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:12px;line-height:1;" onmouseover="this.style.background='var(--bg-primary)';this.style.borderColor='var(--border-color)'" onmouseout="this.style.background='none';this.style.borderColor='transparent'">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+            <button onmousedown="event.preventDefault();composerExec('insertOrderedList')" title="Numbered list" style="padding:4px 8px;background:none;border:1px solid transparent;border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:12px;line-height:1;" onmouseover="this.style.background='var(--bg-primary)';this.style.borderColor='var(--border-color)'" onmouseout="this.style.background='none';this.style.borderColor='transparent'">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+            </button>
+            <button onmousedown="event.preventDefault();composerExecLink()" title="Insert link" style="padding:4px 8px;background:none;border:1px solid transparent;border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:12px;line-height:1;" onmouseover="this.style.background='var(--bg-primary)';this.style.borderColor='var(--border-color)'" onmouseout="this.style.background='none';this.style.borderColor='transparent'">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </button>
+            <div style="width:1px;background:var(--border-color);margin:2px 4px;"></div>
+            <button onmousedown="event.preventDefault();composerExecColor('#a89878')" title="Gold text" style="padding:4px 8px;background:none;border:1px solid transparent;border-radius:4px;color:#a89878;cursor:pointer;font-size:13px;font-weight:700;line-height:1;" onmouseover="this.style.background='var(--bg-primary)';this.style.borderColor='var(--border-color)'" onmouseout="this.style.background='none';this.style.borderColor='transparent'">A</button>
+            <div style="width:1px;background:var(--border-color);margin:2px 4px;"></div>
+            <select id="composerFontSize" onmousedown="event.stopPropagation();" onchange="composerExecFontSize(this.value);this.blur();" title="Font size" style="padding:2px 4px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:11px;line-height:1;outline:none;min-width:44px;">
+              <option value="">Size</option>
+              <option value="1">Small</option>
+              <option value="3">Normal</option>
+              <option value="4">Large</option>
+              <option value="5">XL</option>
+              <option value="6">XXL</option>
+            </select>
+          </div>
+          <div id="betaEmailPreviewContent" style="border:1px solid var(--border-color);border-top:1px solid var(--border-color);border-radius:0 0 var(--radius-md) var(--radius-md);overflow:hidden;background:#0a0a0a;"></div>
+        </div>
+      </div>
+      <!-- v22.7: Pinned footer — always visible -->
+      <div style="flex-shrink:0;padding:12px 20px 16px;border-top:1px solid var(--border-color);display:flex;gap:8px;justify-content:flex-end;background:var(--bg-secondary);">
+        <button onclick="openComposerInMail()" style="padding:10px 16px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);cursor:pointer;font-size:var(--text-sm);font-weight:500;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Open in Mail
+        </button>
+        <button onclick="sendComposedEmail()" style="padding:10px 20px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:var(--radius-md);color:#3b82f6;cursor:pointer;font-size:var(--text-sm);font-weight:600;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Brand Modal - Simplified for Short Name -->
+  <div id="editBrandModal" class="modal-overlay" style="display: none;">
+    <div class="modal" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="svg-icon-lg" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7m-1.586-9.414a2 2 0 112.828 2.828L11.5 19.5l-4 1 1-4 8.793-8.793z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          Brand Settings
+        </div>
+        <button class="modal-close" onclick="closeModal('editBrandModal')">
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editBrandIndex">
+        
+        <div class="modal-form-group">
+          <label class="modal-label">Brand Name</label>
+          <input type="text" id="editBrandName" class="modal-input" readonly style="background: var(--bg-secondary); cursor: not-allowed;">
+          <div style="font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-1);">Edit in Identity → Brand Essence</div>
+        </div>
+        
+        <div class="modal-form-group" style="margin-top: var(--space-5);">
+          <label class="modal-label">
+            Short Name 
+            <span style="font-weight: 400; color: var(--accent);">(for sidebar)</span>
+          </label>
+          <input type="text" id="editBrandShortName" class="modal-input" placeholder="e.g., Acme, HQ, Main">
+          <div style="font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-1);">
+            Abbreviated name shown in the brand switcher. Leave empty to use full name.
+          </div>
+        </div>
+        
+        <div class="modal-form-group" style="margin-top: var(--space-5);">
+          <label class="modal-label">Tagline</label>
+          <input type="text" id="editBrandTagline" class="modal-input" placeholder="Enter brand tagline">
+          <div style="font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-1);">Also editable in Identity → Brand Essence</div>
+        </div>
+
+        <!-- v16.5: Primary Brand for Welcome Screen -->
+        <div class="modal-form-group" style="margin-top: var(--space-4);">
+          <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 10px 14px; background: var(--bg-secondary); border-radius: var(--radius-md);">
+            <input type="checkbox" id="editPrimaryBrand" style="width: 16px; height: 16px; accent-color: var(--accent);">
+            <div>
+              <div style="font-size: var(--text-base); font-weight: 500; color: var(--text-primary);">Primary Brand</div>
+              <div style="font-size: var(--text-sm); color: var(--text-muted);">Show as the main card on the Welcome screen</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- v15.16: Owner/Employee selection in Edit Brand modal -->
+        <div class="modal-form-group" style="margin-top: var(--space-5);">
+          <label class="modal-label">Your Relationship</label>
+          <div style="display: flex; gap: var(--space-3); margin-top: var(--space-2);">
+            <label id="editRoleOwnerLabel" style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg-secondary); border: 2px solid transparent; border-radius: var(--radius-md); cursor: pointer; transition: border-color 0.2s;">
+              <input type="radio" name="editBrandRole" value="owner" onchange="updateEditBrandRole('owner')" style="width: 16px; height: 16px;">
+              <span style="font-size: var(--text-base);">Owner / Founder</span>
+            </label>
+            <label id="editRoleEmployeeLabel" style="flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg-secondary); border: 2px solid transparent; border-radius: var(--radius-md); cursor: pointer; transition: border-color 0.2s;">
+              <input type="radio" name="editBrandRole" value="employee" onchange="updateEditBrandRole('employee')" style="width: 16px; height: 16px;">
+              <span style="font-size: var(--text-base);">Employee / Team</span>
+            </label>
+          </div>
+          <div id="editOwnerRoleFields" style="display: none; margin-top: var(--space-3);">
+            <input type="text" id="editRoleOwnerTitle" class="modal-input" placeholder="Your title (e.g., CEO, Founder)" onblur="saveEditBrandRoleField('ownerTitle', this.value)">
+          </div>
+          <div id="editEmployeeRoleFields" style="display: none; margin-top: var(--space-3);">
+            <input type="text" id="editRoleTitle" class="modal-input" placeholder="Job title" style="margin-bottom: var(--space-2);" onblur="saveEditBrandRoleField('title', this.value)">
+            <input type="text" id="editRoleDepartment" class="modal-input" placeholder="Department" onblur="saveEditBrandRoleField('profession', this.value)">
+          </div>
+        </div>
+
+        <!-- v13.0: Per-brand accent color picker -->
+        <div class="modal-form-group" style="margin-top: var(--space-5);">
+          <label class="modal-label">
+            Brand Color
+            <span style="font-weight: 400; color: var(--accent);">(accent)</span>
+          </label>
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-2);">
+            <input type="color" id="editBrandColor" value="#a89878" style="width: 44px; height: 44px; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: transparent; cursor: pointer; padding: 2px;">
+            <div id="editBrandColorPresets" style="display: flex; gap: var(--space-2); flex-wrap: wrap;"></div>
+          </div>
+          <div style="font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-2);">
+            Used for calendar items, Signal dashboard, and UI accents when this brand is active
+          </div>
+        </div>
+
+        <div style="margin-top: var(--space-6); padding: var(--space-4); background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <div style="font-size: var(--text-sm); color: var(--text-secondary); line-height: 1.5;">
+            <strong style="color: var(--text-primary);">Tip:</strong> All other brand details (voice, tone, messaging, etc.) are managed in the Identity section. Use the expandable cards there to edit your brand's full profile.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button-secondary" onclick="closeModal('editBrandModal')">Cancel</button>
+        <button class="modal-button-primary" onclick="saveBrandSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Brand Confirmation Modal -->
+  <div id="deleteBrandModal" class="modal-overlay" style="display: none;">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="svg-icon-lg" viewBox="0 0 24 24" style="color: var(--error);">
+            <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          Delete Brand
+        </div>
+        <button class="modal-close" onclick="closeModal('deleteBrandModal')">
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="deleteBrandIndex">
+        <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-4);">
+          Are you sure you want to delete <strong id="deleteBrandName" style="color: var(--text-primary);"></strong>?
+        </p>
+        <p style="color: var(--text-muted); font-size: var(--text-base); line-height: 1.6;">
+          This will permanently remove all brand data, including identity, memory, files, and configurations. This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button-secondary" onclick="closeModal('deleteBrandModal')">Cancel</button>
+        <button class="modal-button-danger" onclick="confirmDeleteBrand()">Delete Brand</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import/Export Modal -->
+  <div id="importExportModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="svg-icon-lg" viewBox="0 0 24 24">
+            <path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          Import/Export Brands
+        </div>
+        <button class="modal-close" onclick="closeModal('importExportModal')">
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="import-export-panel">
+          <div class="import-export-title">Export Brand Data</div>
+          <p style="color: var(--text-muted); font-size: var(--text-base); margin-bottom: var(--space-4); line-height: 1.6;">
+            Download your brand data as a JSON file. This includes all brand configurations, identity, and memory.
+          </p>
+          <div class="import-export-actions">
+            <button class="brand-action-btn primary" onclick="openExportBrandModal()">
+              <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+              Export Brand
+            </button>
+          </div>
+        </div>
+        
+        <div class="import-export-panel">
+          <div class="import-export-title">Import Brand Data</div>
+          <p style="color: var(--text-muted); font-size: var(--text-base); margin-bottom: var(--space-4); line-height: 1.6;">
+            Upload a previously exported brand JSON file. This will add the brand to your collection.
+          </p>
+          <input type="file" id="brandImportFile" class="file-input" accept=".json" onchange="importBrandData(this)">
+          <div class="import-export-actions">
+            <button class="brand-action-btn" onclick="document.getElementById('brandImportFile').click()">
+              <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+              Choose File to Import
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button-secondary" onclick="closeModal('importExportModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- v23.9: Backup Restore Modal — 3 modes: Add Brand, Merge, Full Overwrite -->
+  <div id="backupRestoreModal" class="modal-overlay" style="display: none;">
+    <div class="modal" style="max-width: 640px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="svg-icon-lg" viewBox="0 0 24 24">
+            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          Restore from Backup
+        </div>
+        <button class="modal-close" onclick="closeModal('backupRestoreModal')">
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 0;">
+        <!-- Backup info -->
+        <div id="restoreBackupInfo" style="padding: 16px 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary);">
+          <div style="font-size: 13px; color: var(--text-muted);">Loading backup...</div>
+        </div>
+        <!-- Mode selector -->
+        <div style="display: flex; border-bottom: 1px solid var(--border-color);">
+          <button class="restore-mode-tab active" data-restore-mode="merge" onclick="selectRestoreMode('merge')" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid var(--accent); color: var(--text-primary); font-size: 13px; font-weight: 600; cursor: pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 5H4m0 0l4 4m-4-4l4-4"/></svg>
+            Merge
+          </button>
+          <button class="restore-mode-tab" data-restore-mode="addBrand" onclick="selectRestoreMode('addBrand')" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M12 5v14m-7-7h14"/></svg>
+            Add Brand
+          </button>
+          <button class="restore-mode-tab" data-restore-mode="overwrite" onclick="selectRestoreMode('overwrite')" style="flex: 1; padding: 12px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            Full Overwrite
+          </button>
+        </div>
+        <!-- Mode content -->
+        <div id="restoreModeContent" style="padding: 16px 20px; max-height: 400px; overflow-y: auto;"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="modal-button-secondary" onclick="closeModal('backupRestoreModal')">Cancel</button>
+        <button id="restoreExecuteBtn" class="modal-button-primary" onclick="executeSmartRestore()" style="background: var(--accent); color: #000; font-weight: 600;">Restore</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- v20.19: Feedback Modal -->
+  <!-- v21.12: Feedback screenshot lightbox -->
+  <div id="feedbackLightbox" onclick="this.style.display='none'"><img id="feedbackLightboxImg" src="" alt="Screenshot"></div>
+
+  <div id="feedbackModal" class="modal-overlay" style="display: none;" onclick="if(event.target===this)closeFeedbackModal()">
+    <div class="modal" style="max-width:680px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="svg-icon-lg" viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          Send Feedback
+        </div>
+        <button class="modal-close" onclick="closeFeedbackModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;max-height:70vh;overflow-y:auto;">
+        <!-- v20.20: Category cards -->
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:var(--text-sm);font-weight:600;color:var(--text-secondary);margin-bottom:8px;">What type of feedback?</label>
+          <div class="feedback-category-grid" id="feedbackCategoryGrid">
+            <div class="feedback-category-card" onclick="selectFeedbackCategory('bug')">
+              <div class="fcc-icon" style="background:rgba(255,68,68,0.15);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ff4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+              <div class="fcc-name">Bug Report</div>
+              <div class="fcc-desc">Something isn't working as expected</div>
+            </div>
+            <div class="feedback-category-card" onclick="selectFeedbackCategory('feature')">
+              <div class="fcc-icon" style="background:rgba(96,165,250,0.15);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+              <div class="fcc-name">Feature Request</div>
+              <div class="fcc-desc">Suggest a new feature or improvement</div>
+            </div>
+            <div class="feedback-category-card selected" onclick="selectFeedbackCategory('general')">
+              <div class="fcc-icon" style="background:rgba(168,152,120,0.15);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#a89878" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+              <div class="fcc-name">General Feedback</div>
+              <div class="fcc-desc">Share thoughts, praise, or suggestions</div>
+            </div>
+            <div class="feedback-category-card" onclick="selectFeedbackCategory('ui_ux')">
+              <div class="fcc-icon" style="background:rgba(244,114,182,0.15);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#f472b6" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div>
+              <div class="fcc-name">UI/UX Issue</div>
+              <div class="fcc-desc">Layout, design, or usability problems</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- v20.20: Feature area cards (multi-select) -->
+        <div id="feedbackAreaSection" style="margin-bottom:16px;">
+          <label style="display:block;font-size:var(--text-sm);font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Which area(s)?</label>
+          <p style="font-size:11px;color:var(--text-tertiary);margin:0 0 8px;">Select all that apply</p>
+          <div class="feedback-area-grid" id="feedbackAreaGrid">
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('chat')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+              <div class="fac-name">Chat</div>
+              <div class="fac-desc">Your AI agents</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('studio')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+              <div class="fac-name">Studio</div>
+              <div class="fac-desc">Operations and content</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('focus')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+              <div class="fac-name">Focus</div>
+              <div class="fac-desc">Tasks and daily focus</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('pulse')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div class="fac-name">Pulse</div>
+              <div class="fac-desc">Goals and momentum</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('rhythm')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+              <div class="fac-name">Rhythm</div>
+              <div class="fac-desc">Scheduling and routines</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('library')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+              <div class="fac-name">Library</div>
+              <div class="fac-desc">Storage and assets</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('automations')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+              <div class="fac-name">Automations</div>
+              <div class="fac-desc">Pipelines and schedules</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('identity')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+              <div class="fac-name">Identity</div>
+              <div class="fac-desc">Brand voice and tuning</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('memory')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a4 4 0 014 4c0 2-2 3-2 6h-4c0-3-2-4-2-6a4 4 0 014-4z"/><line x1="10" y1="16" x2="14" y2="16"/><line x1="10" y1="19" x2="14" y2="19"/></svg></div>
+              <div class="fac-name">Memory</div>
+              <div class="fac-desc">Persistent context</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('inventory')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+              <div class="fac-name">Inventory</div>
+              <div class="fac-desc">Products and services</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('clients')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+              <div class="fac-name">Clients</div>
+              <div class="fac-desc">Contacts and CRM</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('analytics')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+              <div class="fac-name">Analytics</div>
+              <div class="fac-desc">Usage and performance</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('settings')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+              <div class="fac-name">Settings</div>
+              <div class="fac-desc">App configuration</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('notifications')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+              <div class="fac-name">Notifications</div>
+              <div class="fac-desc">Alerts and push</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('mail')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div class="fac-name">Mail</div>
+              <div class="fac-desc">Compose, inbox, outbox</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('bloom')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12l2 2 4-4"/></svg></div>
+              <div class="fac-name">Bloom</div>
+              <div class="fac-desc">AI news feed</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('sync')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10"/><path d="M20.49 15a9 9 0 01-14.85 3.36L1 14"/></svg></div>
+              <div class="fac-name">Sync</div>
+              <div class="fac-desc">Cloud sync</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('onboarding')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+              <div class="fac-name">Onboarding</div>
+              <div class="fac-desc">Setup wizard</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('admin')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+              <div class="fac-name">Admin</div>
+              <div class="fac-desc">Admin panel</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('other')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></div>
+              <div class="fac-name">Other</div>
+              <div class="fac-desc">Something else</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- v20.20: Platform + OS chips -->
+        <div style="margin-bottom:16px;">
+          <div class="feedback-chip-row">
+            <span class="fc-label">Platform:</span>
+            <span class="feedback-chip" onclick="toggleFeedbackChip('platform', 'desktop', this)">Desktop</span>
+            <span class="feedback-chip" onclick="toggleFeedbackChip('platform', 'mobile', this)">Mobile</span>
+          </div>
+          <div class="feedback-chip-row">
+            <span class="fc-label">OS:</span>
+            <span class="feedback-chip" onclick="toggleFeedbackChip('os', 'ios', this)">iOS</span>
+            <span class="feedback-chip" onclick="toggleFeedbackChip('os', 'android', this)">Android</span>
+            <span class="feedback-chip" onclick="toggleFeedbackChip('os', 'mac', this)">Mac</span>
+            <span class="feedback-chip" onclick="toggleFeedbackChip('os', 'windows', this)">Windows</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:var(--text-sm);font-weight:600;color:var(--text-secondary);margin-bottom:6px;">Description</label>
+          <textarea id="feedbackDescription" placeholder="Tell us what's on your mind..." rows="4" style="width:100%;padding:10px 14px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);resize:vertical;font-family:inherit;line-height:1.6;box-sizing:border-box;"></textarea>
+        </div>
+
+        <!-- Screenshots -->
+        <div style="margin-bottom:16px;">
+          <label style="display:block;font-size:var(--text-sm);font-weight:600;color:var(--text-secondary);margin-bottom:6px;">Screenshots (optional, max 3)</label>
+          <div id="feedbackScreenshotPreviews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
+          <div id="feedbackDropZone" ondragover="handleFeedbackDragOver(event)" ondragleave="handleFeedbackDragLeave(event)" ondrop="handleFeedbackDrop(event)" style="padding:16px;border:2px dashed var(--border-color);border-radius:var(--radius-md);text-align:center;color:var(--text-tertiary);font-size:var(--text-xs);margin-bottom:8px;transition:border-color 0.2s,background 0.2s;cursor:pointer;" onclick="addFeedbackScreenshot()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 6px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            Drag and drop images here, or click to browse
+          </div>
+          <input type="file" id="feedbackFileInput" accept="image/*" style="display:none;" onchange="handleFeedbackFileSelect(this)" multiple>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button-secondary" onclick="closeFeedbackModal()">Cancel</button>
+        <button class="modal-button-primary" id="feedbackSubmitBtn" onclick="submitFeedback()" style="background:var(--accent);color:#000;">Submit Feedback</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- v25.2: Universal Search Spotlight -->
+  <div id="searchOverlay" class="search-overlay" onclick="if(event.target===this)closeSpotlight()">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" class="search-input" id="spotlightInput" placeholder="Search or ask anything..." oninput="onSpotlightInput(this.value)" onkeydown="onSpotlightKeydown(event)" autofocus>
+        <span class="search-kbd">ESC</span>
+      </div>
+      <div class="search-mode-bar">
+        <button class="search-mode-btn active" data-mode="ai" onclick="setSearchMode('ai',this)">AI</button>
+        <button class="search-mode-btn" data-mode="navigate" onclick="setSearchMode('navigate',this)">Navigate</button>
+        <button class="search-mode-btn" data-mode="actions" onclick="setSearchMode('actions',this)">Actions</button>
+      </div>
+      <div class="search-scope-bar">
+        <span style="color:var(--text-tertiary)">Scope:</span>
+        <button class="search-scope-toggle" id="spotlightScopeBtn" onclick="toggleSearchScope()"></button>
+      </div>
+      <div class="search-results" id="spotlightResults">
+        <div class="search-empty" id="spotlightEmpty">Type to search across all of RoweOS</div>
+      </div>
+      <div class="search-footer">
+        <span class="search-footer-hint">Up/Down Navigate</span>
+        <span class="search-footer-hint">Enter Open</span>
+        <span class="search-footer-hint">Tab Switch mode</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- v25.2: Search Side Panel -->
+  <div class="search-side-scrim" id="searchSideScrim" onclick="closeSearchPanel()"></div>
+  <div class="search-side-panel" id="searchSidePanel">
+    <button class="search-side-close" onclick="closeSearchPanel()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="search-side-tabs">
+      <div class="search-side-tab active" data-tab="search" onclick="switchSidePanelTab('search',this)">Search</div>
+      <div class="search-side-tab" data-tab="notifications" onclick="switchSidePanelTab('notifications',this)">Notifications <span class="tab-badge" id="sidePanelBadge" style="display:none">0</span></div>
+    </div>
+    <div id="sidePanelSearchView">
+      <div class="search-side-input">
+        <input type="text" id="sidePanelSearchInput" placeholder="Search or ask anything..." oninput="onSidePanelSearch(this.value)">
+      </div>
+      <div class="search-side-content" id="sidePanelResults"></div>
+    </div>
+    <div id="sidePanelNotificationsView" style="display:none;flex:1;overflow-y:auto;">
+    </div>
+  </div>
+
+  <!-- v19.6: Notification Center Panel -->
+  <div class="nc-scrim" id="ncScrim" onclick="closeNotificationPanel()"></div>
+  <div class="nc-panel" id="notificationCenterPanel">
+    <div class="nc-header">
+      <div class="nc-header-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        Notifications
+      </div>
+      <div class="nc-header-actions">
+        <button class="nc-header-btn" onclick="clearAllNotifications()">Clear All</button>
+        <button class="nc-close-btn" onclick="closeNotificationPanel()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- v20.5: Status Widgets -->
+    <div class="nc-widgets" id="ncWidgets">
+      <div class="nc-widget" id="ncWidgetSync" onclick="triggerNCSync()" style="cursor:pointer;" title="Click to sync now">
+        <div class="nc-widget-icon nc-wi-sync">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6"/><path d="M2.5 11.5a10 10 0 0 1 18.42-4.5M21.5 12.5a10 10 0 0 1-18.42 4.5"/></svg>
+        </div>
+        <div class="nc-widget-body">
+          <div class="nc-widget-label">Sync</div>
+          <div class="nc-widget-row">
+            <div class="nc-widget-value" id="ncSyncValue">--</div>
+            <div class="nc-widget-bar"><div class="nc-widget-bar-fill" id="ncSyncBar" style="width:0%;background:#60a5fa;"></div></div>
+          </div>
+          <div class="nc-widget-sub" id="ncSyncSub"></div>
+        </div>
+      </div>
+      <div class="nc-widget" id="ncWidgetAi">
+        <div class="nc-widget-icon nc-wi-ai">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.57-3.25 3.92L12 10v2"/><circle cx="12" cy="16" r="2"/><path d="M12 18v2"/><path d="M7 20h10"/><path d="M5 8h2M17 8h2M8 3l1 1M16 3l-1 1"/></svg>
+        </div>
+        <div class="nc-widget-body">
+          <div class="nc-widget-label">AI Activity</div>
+          <div class="nc-widget-value" id="ncAiValue">--</div>
+          <div class="nc-widget-sub" id="ncAiSub"></div>
+        </div>
+      </div>
+      <div class="nc-widget" id="ncWidgetAuto">
+        <div class="nc-widget-icon nc-wi-auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="nc-widget-body">
+          <div class="nc-widget-label">Automations</div>
+          <div class="nc-widget-value" id="ncAutoValue">--</div>
+          <div class="nc-widget-sub" id="ncAutoSub"></div>
+        </div>
+      </div>
+      <div class="nc-widget" id="ncWidgetClock" style="cursor:pointer;" onclick="checkAndRunDueTasks();renderNCWidgets();" title="Scheduler clock: click to check now">
+        <div class="nc-widget-icon" style="background:rgba(74,222,128,0.12);color:#4ade80;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/><path d="M2 12h2M20 12h2M12 2v2M12 20v2"/></svg>
+        </div>
+        <div class="nc-widget-body">
+          <div class="nc-widget-label">Scheduler</div>
+          <div class="nc-widget-value" id="ncClockValue">--</div>
+          <div class="nc-widget-sub" id="ncClockSub"></div>
+        </div>
+      </div>
+    </div>
+    <div class="nc-body" id="ncBody"></div>
+  </div>
+
+  <!-- Keyboard Shortcuts Panel -->
+  <div id="shortcutsPanel" class="shortcuts-panel" style="display: none;">
+    <div class="shortcuts-container">
+      <div class="shortcuts-header">
+        <div class="shortcuts-title">Keyboard Shortcuts</div>
+        <button class="modal-close" onclick="closeShortcuts()">
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="shortcuts-body">
+        <div class="shortcuts-group">
+          <div class="shortcuts-group-title">Navigation</div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Open search</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">K</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Go to BrandAI</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">G</span>
+              <span class="shortcut-key">B</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Go to Studio</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">G</span>
+              <span class="shortcut-key">S</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Go to Signal</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">G</span>
+              <span class="shortcut-key">D</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="shortcuts-group">
+          <div class="shortcuts-group-title">Brand Management</div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Add new brand</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">N</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Edit current brand</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">E</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Switch brands</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">B</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="shortcuts-group">
+          <div class="shortcuts-group-title">General</div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Show shortcuts</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">?</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Close dialog</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">ESC</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Toggle sidebar</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">\\</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Customization Modal -->
+  <div id="shortcutsCustomModal" class="modal-overlay" style="display: none;">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg class="svg-icon-lg" viewBox="0 0 24 24">
+            <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          Keyboard Shortcuts
+        </div>
+        <button class="modal-close" onclick="closeModal('shortcutsCustomModal')">
+          <svg class="svg-icon" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style="padding: var(--space-4); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-bottom: var(--space-6);">
+          <div style="font-size: var(--text-base); color: var(--text-primary); margin-bottom: var(--space-2); font-weight: 600;">Current Shortcuts</div>
+          <div style="font-size: var(--text-base); color: var(--text-secondary); line-height: 1.6;">
+            Below are the current keyboard shortcuts for RoweOS. Full customization is coming in a future update.
+          </div>
+        </div>
+        
+        <div class="shortcuts-group">
+          <div class="shortcuts-group-title">Navigation</div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Open search</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">K</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Go to BrandAI</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">G</span>
+              <span class="shortcut-key">B</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Go to Studio</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">G</span>
+              <span class="shortcut-key">S</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Go to Signal</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">G</span>
+              <span class="shortcut-key">D</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="shortcuts-group">
+          <div class="shortcuts-group-title">Brand Management</div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Add new brand</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">N</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Edit current brand</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">E</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Switch brands</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">B</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="shortcuts-group">
+          <div class="shortcuts-group-title">General</div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Show shortcuts</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">?</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Close dialog</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">ESC</span>
+            </div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-action">Toggle sidebar</div>
+            <div class="shortcut-keys">
+              <span class="shortcut-key">⌘</span>
+              <span class="shortcut-key">\</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button-secondary" onclick="closeModal('shortcutsCustomModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- v20.4: Share My Brand Modal -->
+  <div id="shareBrandModal" class="modal-overlay" style="display: none;">
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-header">
+        <div class="modal-title">Share My Brand</div>
+        <button class="modal-close" onclick="closeModal('shareBrandModal')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding:16px 20px;">
+        <!-- Brand preview -->
+        <div id="shareBrandPreview" style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:16px;">
+          <div id="shareBrandColorSwatch" style="width:32px;height:32px;border-radius:8px;flex-shrink:0;"></div>
+          <div>
+            <div id="shareBrandName" style="font-weight:600;color:var(--text-primary);font-size:var(--text-sm);"></div>
+            <div id="shareBrandTagline" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+          </div>
+        </div>
+        <!-- Custom slug -->
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;color:var(--text-muted);margin-bottom:4px;">Custom link slug (optional)</label>
+          <input type="text" id="shareBrandSlugInput" placeholder="e.g. my-company" style="width:100%;padding:8px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);font-family:'SF Mono',Monaco,monospace;box-sizing:border-box;">
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Leave blank for an auto-generated code</div>
+        </div>
+        <!-- Generate button -->
+        <button id="shareBrandGenerateBtn" onclick="generateShareBrandLink()" style="width:100%;padding:10px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:var(--text-sm);">Generate Share Link</button>
+        <!-- Result area -->
+        <div id="shareBrandResult" style="display:none;margin-top:14px;padding:12px;background:var(--bg-secondary);border-radius:var(--radius-md);border:1px solid var(--border-color);">
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Share this link with team members:</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div id="shareBrandUrl" style="flex:1;padding:8px 10px;background:var(--bg-primary);border-radius:var(--radius-sm);font-family:'SF Mono',Monaco,monospace;font-size:var(--text-sm);color:var(--accent);word-break:break-all;"></div>
+            <button onclick="copyShareBrandUrl()" style="padding:8px 12px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:12px;white-space:nowrap;">Copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button-secondary" onclick="closeModal('shareBrandModal')">Close</button>
+      </div>
+    </div>
+  </div>
+

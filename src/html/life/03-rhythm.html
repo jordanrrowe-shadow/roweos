@@ -1,0 +1,483 @@
+
+      <!-- Intelligence View (Brand Configuration) -->
+      <!-- Rhythm View (Calendar) -->
+      <div id="rhythmView" class="panel-view hidden">
+        <div class="panel">
+          <!-- Breadcrumb Trail -->
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">Rhythm</span>
+          </div>
+          
+          <!-- v22.39: Uniform gold header -->
+          <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;"><span>Rhythm</span><button class="section-help-btn" onclick="showSectionHelp('rhythm')" title="How to use Rhythm">?</button></div>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Calendar, events, tasks, and automations. Sync with Google, iCloud, and Outlook.</p>
+          <!-- v10.5.25: BrandAI Rhythm Content -->
+          <div id="rhythmBrandContent" class="brand-mode-only">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);">
+              <div></div>
+              <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
+                <!-- v9.1.14: Unified Add to Rhythm Dropdown -->
+                <div class="rhythm-add-dropdown" id="rhythmAddDropdown">
+                  <button class="btn btn-small rhythm-add-trigger" onclick="toggleRhythmAddDropdown()">
+                    <span>+</span> Add to Rhythm
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                  <div class="rhythm-add-menu" id="rhythmAddMenu">
+                    <div class="rhythm-add-menu-item" onclick="openRhythmAddForm('event')">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/></svg>
+                      <span>Event</span>
+                    </div>
+                    <div class="rhythm-add-menu-item" onclick="openRhythmAddForm('todo')">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+                      <span>To-Do</span>
+                    </div>
+                    <!-- v22.39: Automation option removed — use Automations Lab -->
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-small" onclick="clearCalendar()">Clear All</button>
+                <span style="color: #333;">|</span>
+                <button class="btn btn-secondary btn-small" onclick="toggleCalendarView()">
+                  <span id="calViewToggle">Week View</span>
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="changeWeek(-1)">← Prev</button>
+                <button class="btn btn-secondary btn-small" onclick="changeWeek(1)">Next →</button>
+                <!-- v25.2: Calendars toggle panel button -->
+                <button class="btn btn-secondary btn-small" onclick="toggleCalendarsPanel()" style="padding:5px 12px;font-size:12px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;">Calendars</button>
+                <!-- v16.12: External calendar sync button -->
+                <button class="rhythm-cal-sync-btn" id="rhythmCalSyncBtn" onclick="syncAllExternalCalendars()" title="Sync external calendars" style="display: none;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                  Sync
+                </button>
+              </div>
+            </div>
+            <!-- v15.37: AI Goal Tasks container for BrandAI -->
+            <div id="rhythmBrandGoalTasks" class="rhythm-ai-goals-card" style="display: none;"></div>
+          </div>
+
+          <!-- v10.5.25: LifeAI Rhythm Content -->
+          <div id="rhythmLifeContent" class="life-mode-only">
+            <!-- Header with Quick Add -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);">
+              <div class="panel-header" style="margin: 0; background: linear-gradient(135deg, var(--life-accent), var(--life-accent-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Life Rhythm</div>
+              <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
+                <!-- Quick Add Dropdown -->
+                <div class="rhythm-add-dropdown" id="lifeRhythmAddDropdown">
+                  <button class="btn btn-small rhythm-add-trigger" onclick="toggleLifeRhythmAddDropdown()">
+                    <span>+</span> Add to Rhythm
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                  <div class="rhythm-add-menu" id="lifeRhythmAddMenu">
+                    <div class="rhythm-add-menu-item" onclick="openLifeRhythmAddForm('routine')">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                      <span>Routine Item</span>
+                    </div>
+                    <div class="rhythm-add-menu-item" onclick="openLifeRhythmAddForm('task')">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+                      <span>Task</span>
+                    </div>
+                    <div class="rhythm-add-menu-item" onclick="openLifeRhythmAddForm('habit')">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+                      <span>Habit</span>
+                    </div>
+                    <div class="rhythm-add-menu-item" onclick="openLifeRhythmAddForm('goal')">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                      <span>Goal</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-small" onclick="showLifeRhythmSurvey()" title="Focus area survey">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                  Survey
+                </button>
+                <!-- v15.4: Widget Builder Button -->
+                <button class="btn btn-secondary btn-small" onclick="openRhythmWidgetBuilder()" title="Customize widgets">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  Widgets
+                </button>
+                <span style="color: var(--border-color);">|</span>
+                <button class="btn btn-secondary btn-small" onclick="toggleLifeCalendarView()">
+                  <span id="lifeCalViewToggle">Week View</span>
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="changeLifeWeek(-1)">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="changeLifeWeek(1)">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Week/Month Display -->
+            <div id="lifeWeekDisplay" style="color: var(--text-muted); margin-bottom: var(--space-4); font-size: var(--text-base);"></div>
+            
+            <!-- Main Split Layout: Left Sections | Calendar + Day Panel -->
+            <div class="life-rhythm-split">
+              <!-- Left: Separate Section Cards -->
+              <div class="life-routine-panel" style="display: flex; flex-direction: column; gap: var(--space-4);">
+                
+                <!-- Today's Routine Card -->
+                <div class="life-rhythm-card" data-widget-id="routine">
+                  <div class="life-rhythm-card-header">
+                    <div class="life-rhythm-card-title">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                      <span>Today's Routine</span>
+                    </div>
+                    <button class="life-rhythm-add-btn" onclick="addLifeRoutineItem()" title="Add routine item">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    </button>
+                  </div>
+                  <div class="life-routine-list" id="lifeRoutineList">
+                    <!-- Drag & drop routine items populated by JS -->
+                  </div>
+                </div>
+                
+                <!-- Daily Habits Card -->
+                <div class="life-rhythm-card" data-widget-id="habits">
+                  <div class="life-rhythm-card-header">
+                    <div class="life-rhythm-card-title">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+                      <span>Daily Habits</span>
+                    </div>
+                    <button class="life-rhythm-add-btn" onclick="addLifeHabit()" title="Add habit">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    </button>
+                  </div>
+                  <div class="life-habits-list" id="lifeHabitsList">
+                    <!-- Habits populated by JS -->
+                  </div>
+                </div>
+                
+                <!-- Active Goals Card -->
+                <div class="life-rhythm-card" data-widget-id="goals">
+                  <div class="life-rhythm-card-header">
+                    <div class="life-rhythm-card-title">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                      <span>Active Goals</span>
+                    </div>
+                    <button class="life-rhythm-add-btn" onclick="showView('pulse')" title="Add goal in Pulse">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    </button>
+                  </div>
+                  <div class="life-goals-list" id="lifeGoalsListPanel">
+                    <!-- Goals populated by JS -->
+                  </div>
+                </div>
+
+                <!-- v15.37: AI Goal Tasks for LifeAI -->
+                <div class="life-rhythm-card" id="rhythmLifeGoalTasksCard" data-widget-id="goaltasks" style="display: none;">
+                  <div class="life-rhythm-card-header">
+                    <div class="life-rhythm-card-title">
+                      <svg class="ai-sparkle-icon" viewBox="0 0 16 16" width="16" height="16" fill="var(--life-accent, #60a5fa)"><path d="M8 0l1.5 4.5L14 6l-4.5 1.5L8 12l-1.5-4.5L2 6l4.5-1.5L8 0z"/><path d="M13 9l.75 2.25L16 12l-2.25.75L13 15l-.75-2.25L10 12l2.25-.75L13 9z" opacity="0.6"/></svg>
+                      <span>AI Goal Tasks</span>
+                    </div>
+                    <button class="life-rhythm-add-btn" onclick="refreshRhythmGoalTasks()" title="Refresh AI tasks">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                    </button>
+                  </div>
+                  <div id="rhythmLifeGoalTasksList"></div>
+                </div>
+
+                <!-- v13.2: Patterns Card -->
+                <div class="life-rhythm-card" data-widget-id="patterns">
+                  <div class="life-rhythm-card-header">
+                    <div class="life-rhythm-card-title">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--life-accent)" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                      <span>Patterns</span>
+                    </div>
+                    <button class="life-rhythm-add-btn" onclick="analyzeLifePatterns()" title="Refresh patterns">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                    </button>
+                  </div>
+                  <div id="lifePatternsContent">
+                    <div class="life-empty-state">Tap refresh to analyze your patterns.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Calendar + Day Panel -->
+              <div class="life-calendar-panel">
+                <div id="lifeCalendar">
+                  <!-- Calendar populated by JS - fed from Focus todos -->
+                </div>
+                
+                <!-- Day Detail Panel (always visible below calendar) -->
+                <div id="lifeRhythmDayPanel" class="rhythm-day-panel" style="margin-top: var(--space-4);">
+                  <div class="rhythm-day-header">
+                    <div>
+                      <div class="rhythm-day-title" id="lifeRhythmDayTitle">Today</div>
+                      <div class="rhythm-day-subtitle" id="lifeRhythmDaySubtitle"></div>
+                    </div>
+                  </div>
+                  <div class="rhythm-day-grid">
+                    <!-- Tasks Section -->
+                    <div class="rhythm-day-section">
+                      <div class="rhythm-section-label">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+                          Tasks
+                        </span>
+                        <button class="rhythm-section-add-btn" onclick="addLifeTaskToDay()" title="Add Task">+</button>
+                      </div>
+                      <div id="lifeRhythmDayTasks" class="rhythm-day-list"></div>
+                    </div>
+                    
+                    <!-- Routine Section -->
+                    <div class="rhythm-day-section">
+                      <div class="rhythm-section-label">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                          Routine
+                        </span>
+                      </div>
+                      <div id="lifeRhythmDayRoutine" class="rhythm-day-list"></div>
+                    </div>
+                    
+                    <!-- Habits Section -->
+                    <div class="rhythm-day-section">
+                      <div class="rhythm-section-label">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4"/></svg>
+                          Habits
+                        </span>
+                      </div>
+                      <div id="lifeRhythmDayHabits" class="rhythm-day-list"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- v9.1.14: Unified Add Form Panel (shared, but content adapts to mode) -->
+          <!-- v22.39: Overhauled Rhythm Add Form — Event + To-Do only (Automations in Automations Lab) -->
+          <div id="rhythmAddFormPanel" class="rhythm-add-form-panel" style="display: none;">
+            <div class="rhythm-add-form-header">
+              <div class="rhythm-add-form-type-tabs">
+                <button class="rhythm-type-tab active" data-type="event" onclick="switchRhythmAddType('event')">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Event
+                </button>
+                <button class="rhythm-type-tab" data-type="todo" onclick="switchRhythmAddType('todo')">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+                  To-Do
+                </button>
+              </div>
+              <button class="rhythm-add-form-close" onclick="closeRhythmAddForm()">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="rhythm-add-form-body">
+              <div class="rhythm-form-row">
+                <label>Title</label>
+                <input type="text" id="rhythmAddTitle" placeholder="Enter title...">
+              </div>
+              <div class="rhythm-form-row">
+                <label>Description</label>
+                <textarea id="rhythmAddDescription" placeholder="Add description..." rows="2"></textarea>
+              </div>
+              <div class="rhythm-form-row-grid">
+                <div class="rhythm-form-row">
+                  <label>Date</label>
+                  <input type="date" id="rhythmAddDate">
+                </div>
+                <div class="rhythm-form-row">
+                  <label>Brand</label>
+                  <div class="rhythm-select-wrapper">
+                    <select id="rhythmAddBrand">
+                      <option value="">Select Brand</option>
+                    </select>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </div>
+              </div>
+              <!-- v22.39: Start/End Time + All Day for events -->
+              <div class="rhythm-form-row-grid" id="rhythmAddTimeRow">
+                <div class="rhythm-form-row">
+                  <label>Start</label>
+                  <input type="time" id="rhythmAddTime" value="09:00">
+                </div>
+                <div class="rhythm-form-row">
+                  <label>End</label>
+                  <input type="time" id="rhythmAddEndTime" value="10:00">
+                </div>
+                <div class="rhythm-form-row">
+                  <label class="rhythm-checkbox-label" style="margin-top: 24px;">
+                    <input type="checkbox" id="rhythmAddAllDay" onchange="var d=this.checked; document.getElementById('rhythmAddTime').disabled=d; document.getElementById('rhythmAddEndTime').disabled=d; if(d){document.getElementById('rhythmAddTime').value='';document.getElementById('rhythmAddEndTime').value='';}">
+                    <span>All Day</span>
+                  </label>
+                </div>
+              </div>
+              <!-- v22.39: Reminder for events -->
+              <div class="rhythm-form-row" id="rhythmAddReminderRow">
+                <label>Reminder</label>
+                <div class="rhythm-select-wrapper">
+                  <select id="rhythmAddReminder">
+                    <option value="">No reminder</option>
+                    <option value="0">At time of event</option>
+                    <option value="5">5 minutes before</option>
+                    <option value="15" selected>15 minutes before</option>
+                    <option value="30">30 minutes before</option>
+                    <option value="60">1 hour before</option>
+                    <option value="1440">1 day before</option>
+                  </select>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+              </div>
+              <!-- v25.2: Push-to calendar picker for event creation -->
+              <div class="cal-push-to" id="rhythmAddCalendarRow">
+                <label style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px;display:block;">Push to</label>
+                <select id="eventPushTo">
+                  <option value="local">RoweOS (local)</option>
+                </select>
+              </div>
+              <!-- v22.39: Calendar sync selector -->
+              <div class="rhythm-form-row" id="rhythmAddCalSyncRow">
+                <label>Sync To</label>
+                <div id="rhythmAddCalSyncOptions" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+              </div>
+              <!-- Category field for To-Do items -->
+              <div class="rhythm-form-row" id="rhythmAddCategoryRow" style="display: none;">
+                <label>Category</label>
+                <div class="rhythm-select-wrapper">
+                  <select id="rhythmAddCategory" onchange="handleRhythmCategoryChange(this.value)">
+                    <option value="">Select Category</option>
+                  </select>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
+              </div>
+              <div class="rhythm-form-row-grid">
+                <div class="rhythm-form-row">
+                  <label class="rhythm-checkbox-label">
+                    <input type="checkbox" id="rhythmAddRecurring" onchange="toggleRhythmRecurring()">
+                    <span>Recurring</span>
+                  </label>
+                </div>
+                <div class="rhythm-form-row" id="rhythmRecurringFrequency" style="display: none;">
+                  <div class="rhythm-select-wrapper">
+                    <select id="rhythmAddFrequency">
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                  </div>
+                </div>
+              </div>
+              <div class="rhythm-form-row">
+                <label>Color</label>
+                <div class="rhythm-color-picker">
+                  <button type="button" class="rhythm-color-btn selected" data-color="#a89878" onclick="selectRhythmColor('#a89878')" style="background: #a89878;"></button>
+                  <button type="button" class="rhythm-color-btn" data-color="#6366f1" onclick="selectRhythmColor('#6366f1')" style="background: #6366f1;"></button>
+                  <button type="button" class="rhythm-color-btn" data-color="#22c55e" onclick="selectRhythmColor('#22c55e')" style="background: #22c55e;"></button>
+                  <button type="button" class="rhythm-color-btn" data-color="#ef4444" onclick="selectRhythmColor('#ef4444')" style="background: #ef4444;"></button>
+                  <button type="button" class="rhythm-color-btn" data-color="#8b5cf6" onclick="selectRhythmColor('#8b5cf6')" style="background: #8b5cf6;"></button>
+                  <button type="button" class="rhythm-color-btn" data-color="#06b6d4" onclick="selectRhythmColor('#06b6d4')" style="background: #06b6d4;"></button>
+                </div>
+                <input type="hidden" id="rhythmAddColor" value="#a89878">
+              </div>
+            </div>
+            <div class="rhythm-add-form-footer">
+              <button class="btn btn-secondary" onclick="closeRhythmAddForm()">Cancel</button>
+              <button class="btn btn-primary" onclick="saveRhythmItem()">
+                <span id="rhythmAddSaveText">Add Event</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- v25.2: Calendars toggle panel -->
+          <div class="calendars-panel" id="calendarsPanel"></div>
+
+          <div id="weekDisplay" style="color: #888; margin-bottom: var(--space-4);"></div>
+          
+          <!-- v22.39: Automation Notification Center moved into Activity column below -->
+          
+          <div id="calendar"></div>
+          
+          <!-- v22.39: Unified Day Detail Panel — single column timeline -->
+          <div id="rhythmDayPanel" class="rhythm-day-panel" style="display: none;">
+            <div class="rhythm-day-header">
+              <div>
+                <div class="rhythm-day-title" id="rhythmDayTitle">December 21, 2025</div>
+                <div class="rhythm-day-subtitle" id="rhythmDaySubtitle">Saturday</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-secondary btn-small" onclick="openRhythmAddForm('event')" title="Add Event">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Event
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="openRhythmAddForm('todo')" title="Add To-Do">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+                  Task
+                </button>
+                <button class="rhythm-close-btn" onclick="closeRhythmDayPanel()">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Unified day content — events, tasks, automations in one stream -->
+            <div class="rhythm-day-unified" id="rhythmDayUnified">
+              <!-- Populated by renderRhythmDayPanelUnified() -->
+            </div>
+          </div>
+          
+          <!-- v22.39: Rhythm Intelligence Grid — 3-column guardrails-style layout -->
+          <div class="rhythm-intel-grid">
+            <!-- Column 1: Auto-Pilot + AI Suggestions -->
+            <div class="guardrails-section" id="autoPilotSection">
+              <div class="guardrails-section-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>
+              </div>
+              <h3 class="guardrails-title">Auto-Pilot</h3>
+              <p class="guardrails-desc" id="autoPilotStatusText">AI-suggested actions based on your patterns</p>
+              <div id="autoPilotActionsContainer" style="margin-bottom: 16px;">
+                <div style="padding: 14px; color: var(--text-tertiary); font-size: 13px; line-height: 1.5; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md);">No pending actions. Enable Auto-Pilot in Settings.</div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="guardrails-btn" onclick="analyzeUserPatterns()" style="padding: 8px 14px; font-size: 12px;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  Analyze Patterns
+                </button>
+                <button class="guardrails-btn" onclick="clearAutoPilotQueue()" style="padding: 8px 14px; font-size: 12px;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  Clear
+                </button>
+              </div>
+              <span class="rhythm-autopilot-badge" id="autoPilotBadge" style="display: none; position: absolute; top: 16px; right: 16px;">0</span>
+            </div>
+
+            <!-- Column 2: Scheduled Automations + Activity -->
+            <div class="guardrails-section" id="rhythmAutomationsSection">
+              <div class="guardrails-section-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <h3 class="guardrails-title">Scheduled</h3>
+              <p class="guardrails-desc">Active automations and upcoming tasks</p>
+              <div id="rhythmScheduledTasksList" style="margin-bottom: 16px; max-height: 240px; overflow-y: auto;">
+                <div style="padding: 14px; color: var(--text-tertiary); font-size: 13px; line-height: 1.5; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md);">No scheduled automations.</div>
+              </div>
+              <button class="guardrails-btn" onclick="showView('automations')" style="padding: 8px 14px; font-size: 12px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Automations Lab
+              </button>
+            </div>
+
+            <!-- Column 3: Activity Feed -->
+            <div class="guardrails-section" id="rhythmActivitySection">
+              <div class="guardrails-section-icon">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              <h3 class="guardrails-title">Activity</h3>
+              <p class="guardrails-desc">Recent automation runs and completions</p>
+              <div id="rhythmActivityFeed" style="max-height: 240px; overflow-y: auto;">
+                <div id="notificationScheduledList" class="notification-list"></div>
+                <div id="notificationCompletedList" class="notification-list"></div>
+                <div id="rhythmActivityEmpty" style="padding: 14px; color: var(--text-tertiary); font-size: 13px; line-height: 1.5; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md);">No recent activity.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>

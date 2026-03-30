@@ -74,11 +74,18 @@ concat_sorted() {
   cat "$SRC/html/shared/webgl-shaders.html"
 
   # SECTION 10: Remaining HTML views (agent, studio, social, etc.)
-  concat_sorted "$SRC/html/brand" "html"
-  concat_sorted "$SRC/html/life" "html"
-  # Note: html/shared is depth-1 only, so modals/ subdir is not included here
-  # Exclude webgl-shaders (already emitted in SECTION 9)
-  concat_sorted "$SRC/html/shared" "html" "webgl-shaders"
+  # Views are split across brand/life/shared dirs but interleaved in the DOM.
+  # Numeric prefixes (01-, 02-, ...) control global concat order across all dirs.
+  # Collect all .html files from all three dirs, sort by basename, then concat.
+  {
+    find "$SRC/html/brand" -maxdepth 1 -name "*.html" 2>/dev/null
+    find "$SRC/html/life" -maxdepth 1 -name "*.html" 2>/dev/null
+    find "$SRC/html/shared" -maxdepth 1 -name "*.html" 2>/dev/null
+  } | grep -v "webgl-shaders" | while IFS= read -r f; do echo "$(basename "$f") $f"; done | sort | while IFS= read -r entry; do
+    f="${entry#* }"
+    cat "$f"
+    echo ""
+  done
 
   # SECTION 11: Main JavaScript
   echo "  <script>"

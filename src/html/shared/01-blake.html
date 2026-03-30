@@ -1,0 +1,304 @@
+          <!-- v24.20: Blob + title group — vertically centered together -->
+          <div id="blobTitleGroup" style="display:flex;flex-direction:column;align-items:center;margin-top:var(--blob-vertical-offset, -350px);">
+            <div id="blobContainer" style="width: 280px; height: 280px; cursor: pointer; z-index: 1;" onclick="if(typeof cycleBlobShape==='function')cycleBlobShape()">
+              <canvas id="blobCanvas" width="560" height="560" style="width: 100%; height: 100%;"></canvas>
+            </div>
+            <!-- v10.5.25: Platform Title (mode-aware) - centered below blob -->
+            <div class="landing-platform-title" id="desktopPlatformTitle">Brand Intelligence Platform</div>
+          </div>
+        </div>
+        
+        <!-- Brand dropdown (hidden, for functionality) -->
+        <div style="display: none;">
+          <div class="tool-wrapper">
+            <div class="tool-dropdown" id="brandDropdown">
+              <div class="tool-dropdown-title">Select Brand</div>
+              <div style="display: flex; flex-direction: column; gap: var(--space-1);">
+                <!-- Dynamically populated from brands array -->
+              </div>
+            </div>
+            <input type="hidden" id="agentBrand" value="0">
+          </div>
+        </div>
+        
+        <!-- v10.5.25: Clean Chat Input - landing layout (brand selector visible, save/new hidden on mobile) -->
+        <div class="chat-input-area">
+          <div class="chat-input-v2" id="agentInputContainer" style="position: relative;">
+            <div class="chat-drop-overlay" id="agentDropOverlay">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Drop file here
+            </div>
+            <div id="agentFilePreview" class="file-preview hidden"></div>
+            <div id="agentFileChips" class="file-chips-container"></div>
+            <textarea id="agentCommand" placeholder="Ask about your brand..." rows="1" oninput="autoResizeTextarea(this)" autocomplete="off"></textarea>
+            <div class="chat-input-footer-v2">
+              <div class="chat-input-tools-v2" style="gap: 10px;">
+                <input type="file" id="agentFileInput" style="display: none;" onchange="handleAgentFileUpload(this)" accept=".txt,.rtf,.pdf,.doc,.docx,.csv,.json,.md,.png,.jpg,.jpeg,.gif" multiple>
+                <!-- 1. Attach button - plus icon -->
+                <button class="chat-tool-btn-v2 tool-icon-btn" id="landingAttachBtn" onclick="document.getElementById('agentFileInput').click()" title="Attach file">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                </button>
+                <!-- 2. Brand selector - diamond/gem icon (visible on landing) -->
+                <div style="position: relative;" class="model-selector-wrapper landing-brand-selector">
+                  <button class="model-selector-pill tool-icon-btn brand-icon-btn brand-active" onclick="toggleV71BrandDropdown(event)" id="landingBrandBtn" title="Select brand">
+                    <svg class="brand-icon-svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2L2 7l10 15 10-15-10-5z"/>
+                      <path d="M2 7h20"/>
+                    </svg>
+                  </button>
+                  <div class="model-dropdown model-dropdown-up brand-dropdown" id="landingBrandDropdown">
+                    <!-- Dynamically populated -->
+                  </div>
+                </div>
+                <!-- 3. Model selector - sparkles icon -->
+                <div style="position: relative;" class="model-selector-wrapper">
+                  <button class="model-selector-pill tool-icon-btn model-star-btn" onclick="toggleModelDropdown(event)" id="landingModelBtn" title="Select AI Model">
+                    <svg class="model-star-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9.5 2l1.5 3.5L14.5 7l-3.5 1.5L9.5 12l-1.5-3.5L4.5 7l3.5-1.5L9.5 2z"/>
+                      <path d="M17 12l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5z"/>
+                    </svg>
+                  </button>
+                  <div class="model-dropdown model-dropdown-up" id="landingModelDropdown">
+                    <div class="model-dropdown-section">
+                      <div class="model-dropdown-label">Anthropic, Claude</div>
+                      <div class="model-dropdown-item" onclick="selectModel('anthropic', 'claude-sonnet-4-6', 'Sonnet 4.6')">Sonnet 4.6</div>
+                      <div class="model-dropdown-item" onclick="selectModel('anthropic', 'claude-haiku-4-5-20251001', 'Haiku 4.5')">Haiku 4.5</div>
+                      <div class="model-dropdown-item" onclick="selectModel('anthropic', 'claude-opus-4-6', 'Opus 4.6')">Opus 4.6</div>
+                    </div>
+                    <div class="model-dropdown-section">
+                      <div class="model-dropdown-label">OpenAI, ChatGPT</div>
+                      <div class="model-dropdown-item" onclick="selectModel('openai', 'gpt-5.4', 'GPT-5.4')">GPT-5.4</div>
+                      <div class="model-dropdown-item" onclick="selectModel('openai', 'gpt-5.4-pro', 'GPT-5.4 Pro')">GPT-5.4 Pro</div>
+                      <div class="model-dropdown-item" onclick="selectModel('openai', 'gpt-5.4-thinking', 'GPT-5.4 Thinking')">GPT-5.4 Thinking</div>
+                    </div>
+                    <div class="model-dropdown-section">
+                      <div class="model-dropdown-label">Google, Gemini</div>
+                      <div class="model-dropdown-item" onclick="selectModel('google', 'gemini-3.1-pro-preview', 'Gemini 3.1 Pro')">3.1 Pro</div>
+                      <div class="model-dropdown-item" onclick="selectModel('google', 'gemini-3-flash-preview', 'Gemini 3 Flash')">3.0 Flash</div>
+                    </div>
+                    <!-- v13.9: Nanobanana in chat -->
+                    <div class="model-dropdown-section nanobanana-chat-section" style="display:none;">
+                      <div class="model-dropdown-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#a89878" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M12 2C6.48 2 2 6 2 10c0 2.5 1.5 5 4 6.5V22l3-2 3 2v-5.5c2.5-1.5 4-4 4-6.5 0-4-4.48-8-10-8z"/></svg>Nano Banana</div>
+                      <div class="model-dropdown-item" onclick="selectModel('nanobanana', 'gemini-2.5-flash-image', 'Nano Banana 3.0')">Nano Banana 3.0</div>
+                      <div class="model-dropdown-item" onclick="selectModel('nanobanana', 'gemini-3-pro-image-preview', 'Nano Banana 3.0 Pro')">Nano Banana 3.0 Pro</div>
+                    </div>
+                    <!-- v20.5: RoweOS AI — at bottom for upward-opening dropdowns -->
+                    <div class="model-dropdown-section">
+                      <div class="model-dropdown-label">RoweOS AI</div>
+                      <div class="model-dropdown-item" onclick="selectModel('roweos', 'auto', 'RoweOS AI')">Auto (Smart Routing)</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- v11.0.5: Response Length Toggle (left = pre-send config) -->
+                <div style="position: relative;" class="model-selector-wrapper chat-length-wrapper">
+                  <button class="model-selector-pill tool-icon-btn chat-length-btn" onclick="toggleChatLengthDropdown(event)" id="chatLengthBtn" title="Response length">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18M3 12h12M3 18h6"/>
+                    </svg>
+                  </button>
+                  <div class="model-dropdown model-dropdown-up chat-length-dropdown" id="chatLengthDropdown">
+                    <div class="chat-length-option" data-length="brief" onclick="setChatResponseLength('brief')">
+                      <span>Brief</span>
+                      <span class="chat-length-check">✓</span>
+                    </div>
+                    <div class="chat-length-option active" data-length="standard" onclick="setChatResponseLength('standard')">
+                      <span>Standard</span>
+                      <span class="chat-length-check">✓</span>
+                    </div>
+                    <div class="chat-length-option" data-length="detailed" onclick="setChatResponseLength('detailed')">
+                      <span>Detailed</span>
+                      <span class="chat-length-check">✓</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- v15.3: Deep Research toggle on landing (same circle style) -->
+                <button id="landingDeepResearchToggle" class="chat-tool-btn-v2 tool-icon-btn deep-research-landing-btn" onclick="toggleDeepResearch()" title="Toggle Deep Research" style="display:none;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>
+                </button>
+                <!-- 4. Save to Library button - DESKTOP ONLY on landing -->
+                <button class="chat-tool-btn-v2 tool-icon-btn landing-desktop-only" id="landingSaveBtn" onclick="openSaveConversationToLibrary()" title="Save conversation to Library">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                    <path d="M17 21v-8H7v8M7 3v5h8"/>
+                  </svg>
+                </button>
+                <!-- 5. New Chat button - DESKTOP ONLY on landing -->
+                <button class="chat-tool-btn-v2 tool-icon-btn new-chat-tool-btn landing-desktop-only" onclick="newConversation()" title="Start new conversation">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    <path d="M12 8v4M8 10h8"/>
+                  </svg>
+                </button>
+                <!-- v24.20: Session cost indicator (right = post-send result) -->
+                <span id="sessionCostDisplay" class="landing-desktop-only" style="font-size: 11px; color: var(--text-muted); font-family: monospace; padding: 0 4px; opacity: 0.7;" title="Session API cost">$0.0000</span>
+                <!-- Hidden native selects for iOS pickers on mobile -->
+                <select id="chatBrandSelect" class="mobile-hidden-select" onchange="onChatBrandSelectChange(this.value)">
+                  <!-- Populated dynamically -->
+                </select>
+                <select id="chatModelSelect" class="mobile-hidden-select" onchange="onChatModelSelectChange(this.value)">
+                  <optgroup label="RoweOS AI">
+                    <option value="roweos|auto|RoweOS AI">Auto (Smart Routing)</option>
+                  </optgroup>
+                  <optgroup label="Anthropic, Claude">
+                    <option value="anthropic|claude-sonnet-4-6|Sonnet 4.6">Sonnet 4.6</option>
+                    <option value="anthropic|claude-haiku-4-5-20251001|Haiku 4.5">Haiku 4.5</option>
+                    <option value="anthropic|claude-opus-4-6|Opus 4.6">Opus 4.6</option>
+                  </optgroup>
+                  <optgroup label="OpenAI, ChatGPT">
+                    <option value="openai|gpt-5.4|GPT-5.4">GPT-5.4</option>
+                    <option value="openai|gpt-5.4-pro|GPT-5.4 Pro">GPT-5.4 Pro</option>
+                    <option value="openai|gpt-5.4-thinking|GPT-5.4 Thinking">GPT-5.4 Thinking</option>
+                  </optgroup>
+                  <optgroup label="Google, Gemini">
+                    <option value="google|gemini-3.1-pro-preview|Gemini 3.1 Pro">3.1 Pro</option>
+                    <option value="google|gemini-3-flash-preview|Gemini 3.0 Flash">3.0 Flash</option>
+                  </optgroup>
+                </select>
+                <select id="chatLengthSelect" class="mobile-hidden-select" onchange="onChatLengthSelectChange(this.value)">
+                  <option value="brief">Brief</option>
+                  <option value="standard" selected>Standard</option>
+                  <option value="detailed">Detailed</option>
+                </select>
+              </div>
+              <button class="chat-send-btn-v2" id="agentRunBtn" onclick="runAgent()" title="Send message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+                <span class="send-text">Sending...</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Agent Conversation (appears after first message) - v7.1 Redesign -->
+        <div id="agentConversation" class="hidden" style="width: 100%; max-height: none; display: flex; flex-direction: column;">
+          <div id="conversationThread" class="conversation-thread chat-messages-v2" style="flex: 1; overflow-y: auto;"></div>
+          <div class="chat-input-v2" id="followupInputContainer" style="position: relative;">
+            <span class="chat-collapse-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+            <div class="chat-drop-overlay" id="followupDropOverlay">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Drop file here
+            </div>
+            <div id="followupFileChips" class="file-chips-container"></div>
+            <div id="followupFilePreview" class="file-preview hidden"></div>
+            <!-- v16.8: Deep Research progress above chat input -->
+            <div id="deepResearchProgressAbove" style="display:none;align-items:center;gap:8px;padding:6px 14px;margin:0 0 6px 0;background:rgba(168,139,250,0.08);border:1px solid rgba(168,139,250,0.2);border-radius:8px;">
+              <div style="flex:1;height:3px;background:rgba(168,139,250,0.15);border-radius:2px;overflow:hidden;min-width:60px;">
+                <div id="deepResearchProgressBarAbove" style="height:100%;width:30%;background:linear-gradient(90deg,#a78bfa,#7c3aed,#a78bfa);background-size:200% 100%;border-radius:2px;animation:deepResearchSweep 1.5s ease-in-out infinite;"></div>
+              </div>
+              <span id="deepResearchTimerAbove" style="font-size:11px;color:#a78bfa;font-weight:500;white-space:nowrap;">Researching... 0:00</span>
+            </div>
+            <!-- v22.19: GPT-5.4 Thinking progress above chat input -->
+            <div id="thinkingProgressAbove" style="display:none;align-items:center;gap:8px;padding:6px 14px;margin:0 0 6px 0;background:rgba(134,239,172,0.08);border:1px solid rgba(134,239,172,0.2);border-radius:8px;">
+              <div style="flex:1;height:3px;background:rgba(134,239,172,0.15);border-radius:2px;overflow:hidden;min-width:60px;">
+                <div id="thinkingProgressBar" style="height:100%;width:30%;background:linear-gradient(90deg,#86efac,#22c55e,#86efac);background-size:200% 100%;border-radius:2px;animation:deepResearchSweep 1.5s ease-in-out infinite;"></div>
+              </div>
+              <span id="thinkingTimer" style="font-size:11px;color:#22c55e;font-weight:500;white-space:nowrap;">Thinking... 0:00</span>
+            </div>
+            <textarea id="followupCommand" placeholder="Continue the conversation..." rows="1" oninput="autoResizeTextarea(this)" autocomplete="off"></textarea>
+            <div class="chat-input-footer-v2">
+              <div class="chat-input-tools-v2" style="gap: 10px;">
+                <!-- 1. Attach button - plus icon -->
+                <input type="file" id="followupFileInput" style="display: none;" onchange="handleFollowupFileUpload(this)" accept=".txt,.rtf,.pdf,.doc,.docx,.csv,.json,.md,.png,.jpg,.jpeg,.gif" multiple>
+                <button class="chat-tool-btn-v2" id="followupAttachBtn" onclick="document.getElementById('followupFileInput').click()" title="Attach file">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                </button>
+                <!-- 2. Model selector - sparkles icon -->
+                <div style="position: relative;" class="model-selector-wrapper">
+                  <button class="model-selector-pill model-star-btn" onclick="toggleModelDropdown(event)" id="followupModelBtn" title="Select AI Model">
+                    <svg class="model-star-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9.5 2l1.5 3.5L14.5 7l-3.5 1.5L9.5 12l-1.5-3.5L4.5 7l3.5-1.5L9.5 2z"/>
+                      <path d="M17 12l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5z"/>
+                    </svg>
+                  </button>
+                  <div class="model-dropdown model-dropdown-up" id="followupModelDropdown">
+                    <div class="model-dropdown-section">
+                      <div class="model-dropdown-label">Anthropic, Claude</div>
+                      <div class="model-dropdown-item" onclick="selectModel('anthropic', 'claude-sonnet-4-6', 'Sonnet 4.6')">Sonnet 4.6</div>
+                      <div class="model-dropdown-item" onclick="selectModel('anthropic', 'claude-haiku-4-5-20251001', 'Haiku 4.5')">Haiku 4.5</div>
+                      <div class="model-dropdown-item" onclick="selectModel('anthropic', 'claude-opus-4-6', 'Opus 4.6')">Opus 4.6</div>
+                    </div>
+                    <div class="model-dropdown-section">
+                      <div class="model-dropdown-label">OpenAI, ChatGPT</div>
+                      <div class="model-dropdown-item" onclick="selectModel('openai', 'gpt-5.4', 'GPT-5.4')">GPT-5.4</div>
+                      <div class="model-dropdown-item" onclick="selectModel('openai', 'gpt-5.4-pro', 'GPT-5.4 Pro')">GPT-5.4 Pro</div>
+                      <div class="model-dropdown-item" onclick="selectModel('openai', 'gpt-5.4-thinking', 'GPT-5.4 Thinking')">GPT-5.4 Thinking</div>
+                    </div>
+                    <div class="model-dropdown-section">
+                      <div class="model-dropdown-label">Google, Gemini</div>
+                      <div class="model-dropdown-item" onclick="selectModel('google', 'gemini-3.1-pro-preview', 'Gemini 3.1 Pro')">3.1 Pro</div>
+                      <div class="model-dropdown-item" onclick="selectModel('google', 'gemini-3-flash-preview', 'Gemini 3 Flash')">3.0 Flash</div>
+                    </div>
+                    <!-- v13.9: Nanobanana in chat -->
+                    <div class="model-dropdown-section nanobanana-chat-section" style="display:none;">
+                      <div class="model-dropdown-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#a89878" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M12 2C6.48 2 2 6 2 10c0 2.5 1.5 5 4 6.5V22l3-2 3 2v-5.5c2.5-1.5 4-4 4-6.5 0-4-4.48-8-10-8z"/></svg>Nano Banana</div>
+                      <div class="model-dropdown-item" onclick="selectModel('nanobanana', 'gemini-2.5-flash-image', 'Nano Banana 3.0')">Nano Banana 3.0</div>
+                      <div class="model-dropdown-item" onclick="selectModel('nanobanana', 'gemini-3-pro-image-preview', 'Nano Banana 3.0 Pro')">Nano Banana 3.0 Pro</div>
+                    </div>
+                    <!-- v20.5: RoweOS AI — at bottom for upward-opening dropdowns -->
+                    <div class="model-dropdown-section">
+                      <div class="model-dropdown-label">RoweOS AI</div>
+                      <div class="model-dropdown-item" onclick="selectModel('roweos', 'auto', 'RoweOS AI')">Auto (Smart Routing)</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- v9.1.14: Save to Library button -->
+                <button class="chat-tool-btn-v2 tool-icon-btn" onclick="openSaveConversationToLibrary()" title="Save conversation to Library">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                    <path d="M17 21v-8H7v8M7 3v5h8"/>
+                  </svg>
+                </button>
+                <!-- 3. New Chat button - chat bubble icon (desktop only) -->
+                <button class="chat-tool-btn-v2 tool-icon-btn new-chat-tool-btn" onclick="newConversation()" title="Start new conversation">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    <path d="M12 8v4M8 10h8"/>
+                  </svg>
+                </button>
+              </div>
+              <!-- v20.6: Group length + ambient + deep research + send together on the right -->
+              <div style="display:flex;align-items:center;gap:6px;">
+                <!-- v24.25: Reduce ambient toggle — circular button in input bar -->
+                <button class="chat-tool-btn-v2 helix-dim-btn" id="helixDimBtn" onclick="toggleReduceAmbient()" title="Reduce background effect">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v20"/><path d="M12 2a10 10 0 010 20" fill="currentColor" opacity="0.3"/></svg>
+                </button>
+                <!-- v16.4: Follow-up Length Toggle -->
+                <div style="position:relative;" class="chat-length-wrapper">
+                  <button class="chat-tool-btn-v2" onclick="toggleFollowupLengthDropdown(event)" title="Response length" id="followupLengthBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18M3 12h12M3 18h6"/>
+                    </svg>
+                  </button>
+                  <div class="model-dropdown model-dropdown-up chat-length-dropdown" id="followupLengthDropdown" style="display:none;">
+                    <div class="chat-length-option" data-length="brief" onclick="setChatResponseLength('brief')">
+                      Brief <span class="chat-length-check">&#10003;</span>
+                    </div>
+                    <div class="chat-length-option active" data-length="standard" onclick="setChatResponseLength('standard')">
+                      Standard <span class="chat-length-check">&#10003;</span>
+                    </div>
+                    <div class="chat-length-option" data-length="detailed" onclick="setChatResponseLength('detailed')">
+                      Detailed <span class="chat-length-check">&#10003;</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- v13.9: Deep Research toggle -->
+                <button id="deepResearchToggle" class="chat-tool-btn-v2 tool-icon-btn" onclick="toggleDeepResearch()" title="Toggle Deep Research" style="display:none;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>
+                </button>
+                <!-- v16.8: Badge and progress moved above textarea (deepResearchProgressAbove) -->
+                <button class="chat-send-btn-v2" id="followupBtn" onclick="sendFollowup()" title="Send message">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
+                </svg>
+                <span class="send-text">Sending...</span>
+              </button>
+              </div><!-- /v20.6 right-group wrapper -->
+            </div>
+          </div>
+        </div>
+      </div>

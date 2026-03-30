@@ -1,0 +1,52 @@
+
+  <!-- v27.0: Research View -->
+<div id="researchView" class="view hidden">
+  <div class="panel">
+    <div class="panel-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="4" stroke-dasharray="2 2"/></svg>
+        <h2 style="margin:0;font-size:var(--text-xl);font-weight:600;">Research</h2>
+      </div>
+      <button class="section-help-btn" onclick="showSectionHelp('research')" title="Help">?</button>
+    </div>
+
+    <div id="researchUrlBar" style="display:flex;gap:8px;align-items:center;margin:var(--space-4) 0;">
+      <span style="color:var(--text-muted);flex-shrink:0;font-size:var(--text-sm);">https://</span>
+      <input type="text" id="researchUrlInput" class="onboarding-input" placeholder="Enter a URL to research..." style="flex:1;padding:12px;font-size:var(--text-base);" onkeydown="if(event.key==='Enter')startResearchFromView()" />
+      <button id="researchGoBtn" class="btn btn-primary" onclick="startResearchFromView()" style="padding:10px 20px;font-weight:600;white-space:nowrap;">Research</button>
+      <button id="researchCancelBtn" class="btn btn-secondary" onclick="cancelResearch()" style="display:none;padding:10px 16px;">Cancel</button>
+    </div>
+
+    <!-- v27.0: Research context/guidance field -->
+    <div id="researchContextBar" style="margin-bottom:var(--space-4);">
+      <label style="font-size:var(--text-xs);color:var(--text-muted);display:block;margin-bottom:4px;">Research Focus (optional)</label>
+      <textarea id="researchContextInput" class="onboarding-input" placeholder="Guide the research: e.g. 'Focus on their pricing and competitor positioning' or 'Find team bios and company culture'" style="width:100%;padding:10px 12px;font-size:var(--text-sm);min-height:48px;max-height:120px;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div id="researchVisualContainer" style="display:none;">
+      <div id="researchSummaryBar" style="display:none;padding:12px 16px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-md);margin-bottom:var(--space-4);font-size:var(--text-sm);color:var(--text-secondary);"></div>
+      <canvas id="researchGraphCanvas" style="width:100%;height:350px;margin-bottom:var(--space-4);"></canvas>
+      <div id="researchCardsContainer" class="ws-cards-panel"></div>
+    </div>
+
+    <div id="researchActionsBar" style="display:none;margin-top:var(--space-4);flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-primary" onclick="saveResearchToIdentity()">Save to Identity</button>
+      <button class="btn btn-secondary" onclick="addResearchToClient()">Add to Client</button>
+      <button class="btn btn-secondary" onclick="sendResearchToChat()">Send to Chat</button>
+      <button class="btn btn-secondary" onclick="saveResearchToLibrary()">Save to Library</button>
+      <button class="btn btn-secondary" onclick="saveResearchToFolio()">Add to Folio</button>
+      <button class="btn btn-secondary" onclick="copyResearchResults()">Copy</button>
+    </div>
+
+    <div id="researchSourcesList" style="display:none;margin-top:var(--space-5);"></div>
+
+    <div id="researchHistorySection">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:var(--space-5);">
+        <h3 style="margin:0;font-size:var(--text-base);font-weight:600;color:var(--text-secondary);">Recent Researches</h3>
+        <button onclick="clearResearchHistory()" style="background:none;border:none;color:var(--text-muted);font-size:var(--text-xs);cursor:pointer;">Clear All</button>
+      </div>
+      <div id="researchHistoryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:var(--space-3);"></div>
+      <div id="researchHistoryEmpty" style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:var(--text-sm);">No research history yet. Enter a URL above to get started.</div>
+    </div>
+  </div>
+</div>

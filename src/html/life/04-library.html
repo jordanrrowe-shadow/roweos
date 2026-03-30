@@ -1,0 +1,163 @@
+      
+      <!-- Library View (Finder-style) -->
+      <div id="libraryView" class="panel-view hidden">
+        <!-- v9.1.14: Library UI - Collapsible brand cards with SVG icons -->
+        <div class="library-container">
+          <!-- v22.37: Uniform header -->
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">Library</span>
+          </div>
+          <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;"><span>Library</span><button class="section-help-btn" onclick="showSectionHelp('library')" title="How to use Library">?</button></div>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Notes, documents, uploads, and brand resources.</p>
+          <!-- Header with Filter Toggle -->
+          <div class="library-header">
+            <!-- v10.5.25: Quick action buttons in header -->
+            <!-- v12.2.6: All 3 action buttons in header -->
+            <div class="library-header-actions">
+              <button class="library-header-btn" onclick="createModeAwareStickyNote()" title="New Note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                New Note
+              </button>
+              <button class="library-header-btn" onclick="openModeAwareFolderModal()" title="New Folder">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                New Folder
+              </button>
+              <button class="library-header-btn" onclick="uploadFileToModeLibrary()" title="Upload File">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload File
+              </button>
+              <!-- v23.0: Download Library button -->
+              <button class="library-header-btn" onclick="downloadCategoryBackup('library')" title="Download Library">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download
+              </button>
+            </div>
+            <div class="library-filter-toggle" id="libraryFilterToggle" onclick="toggleLibraryBrandFilter()">
+              <input type="checkbox" id="libraryHideOtherBrands">
+              <span class="library-filter-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+              </span>
+              <span class="library-filter-label">Show only selected brand</span>
+            </div>
+          </div>
+          
+          <!-- Collapsible Brand Cards -->
+          <div class="library-brands-list" id="libraryBrandsGrid">
+            <!-- Dynamically rendered brand cards -->
+          </div>
+          
+          <!-- Files Section (shown when folder selected) -->
+          <div class="library-files-section hidden" id="libraryFilesSection">
+            <div class="library-files-header">
+              <button class="library-back-btn" onclick="showLibraryFolders()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Back
+              </button>
+              <h2 class="library-files-title" id="libraryFolderTitle">All Files</h2>
+              <span class="library-files-brand" id="libraryFilesBrand"></span>
+            </div>
+            
+            <div class="library-files-grid" id="libraryFilesGrid">
+              <!-- Files in selected folder -->
+            </div>
+            
+            <div class="library-files-empty hidden" id="libraryFilesEmpty">
+              <div class="library-empty-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>
+              </div>
+              <p>No files yet</p>
+              <span>Save content from BrandAI or Studio to see it here</span>
+            </div>
+          </div>
+          
+          <!-- New Folder Modal -->
+          <div class="library-new-folder-modal hidden" id="libraryNewFolderModal">
+            <div class="library-modal-content">
+              <h3>Create New Folder</h3>
+              <!-- v10.5.25: Show current folder path -->
+              <div class="library-modal-field" id="newFolderPathField">
+                <label>Creating in</label>
+                <div id="newFolderPath" style="font-size: var(--text-base); color: var(--text-secondary); padding: 10px 12px; background: var(--bg-tertiary); border-radius: var(--radius-md); margin-top: var(--space-1);">/ Root</div>
+              </div>
+              <div class="library-modal-field">
+                <label>Folder Name</label>
+                <input type="text" id="newLibraryFolderName" placeholder="e.g., Research">
+              </div>
+              <div class="library-modal-field">
+                <label>Icon</label>
+                <div class="library-icon-picker" id="libraryIconPicker">
+                  <button class="library-icon-btn selected" data-icon="folder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></button>
+                  <button class="library-icon-btn" data-icon="chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
+                  <button class="library-icon-btn" data-icon="sparkles"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v1m0 16v1m-7.071-2.929l.707-.707m12.728 0l.707.707M3 12h1m16 0h1M5.636 5.636l.707.707m12.728 12.728l-.707-.707M12 8l1.5 3 3.5.5-2.5 2.5.5 3.5L12 16l-3 1.5.5-3.5L7 11.5l3.5-.5z"/></svg></button>
+                  <button class="library-icon-btn" data-icon="envelope"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></button>
+                  <button class="library-icon-btn" data-icon="phone"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/></svg></button>
+                  <button class="library-icon-btn" data-icon="chart"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></button>
+                  <button class="library-icon-btn" data-icon="lightning"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></button>
+                  <button class="library-icon-btn" data-icon="document"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></button>
+                  <button class="library-icon-btn" data-icon="briefcase"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></button>
+                  <button class="library-icon-btn" data-icon="archive"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg></button>
+                </div>
+              </div>
+              <div class="library-modal-actions">
+                <button class="btn btn-secondary" onclick="closeNewFolderModal()">Cancel</button>
+                <button class="btn" onclick="createNewLibraryFolder()">Create Folder</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- File Preview Modal -->
+          <div class="library-preview-modal hidden" id="libraryPreviewModal" onclick="if(event.target === this) closeLibraryPreview()">
+            <div class="library-preview-content" onclick="event.stopPropagation()">
+              <div class="library-preview-header">
+                <div class="library-preview-info">
+                  <h3 class="library-preview-title" id="libraryPreviewTitle" onclick="renameLibraryPreviewFile()" title="Click to rename" style="cursor: pointer;">File Name</h3>
+                  <div class="library-preview-meta" id="libraryPreviewMeta">Saved on Jan 24 • Brand Name</div>
+                </div>
+                <button class="library-preview-close" onclick="closeLibraryPreview()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="library-preview-body" id="libraryPreviewBody">
+                <!-- Content rendered here -->
+              </div>
+              <!-- v10.5.25: Notes section - collapsible on mobile -->
+              <div class="library-preview-notes" id="libraryPreviewNotes">
+                <div class="library-notes-header" onclick="toggleLibraryNotes()">
+                  <label>Notes</label>
+                  <button class="library-notes-save-btn" id="libraryNotesSaveBtn" onclick="event.stopPropagation(); saveLibraryFileNote()">Save</button>
+                </div>
+                <div class="library-notes-body">
+                  <textarea class="library-notes-textarea" id="libraryNotesTextarea" placeholder="Add notes about this file..."></textarea>
+                </div>
+              </div>
+              <div class="library-preview-actions" id="libraryPreviewActions">
+                <button class="btn btn-secondary" onclick="exportLibraryFile()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                  Export
+                </button>
+                <button class="btn btn-secondary" onclick="exportLibraryFileAsPDF(libraryPreviewFileId, libraryPreviewBrandIdx)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  PDF
+                </button>
+                <button class="btn btn-secondary library-continue-btn hidden" id="libraryContinueBtn" onclick="continueConversationFromLibrary()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                  Continue in BrandAI
+                </button>
+                <button class="btn btn-secondary library-upload-btn hidden" id="libraryUploadBtn" onclick="uploadLibraryFileToChat()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                  Upload to Chat
+                </button>
+                <button class="btn btn-secondary" onclick="moveLibraryFile()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                  Move
+                </button>
+                <button class="btn btn-danger" onclick="deleteLibraryFile()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>

@@ -1,0 +1,200 @@
+
+  <!-- v22.1: Dedicated Admin Panel View -->
+  <div id="adminView" class="panel-view hidden">
+    <div class="panel">
+      <!-- v22.37: Uniform breadcrumb + gold header -->
+      <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+        <span class="breadcrumb-item active">Admin</span>
+      </div>
+      <div class="panel-header" style="margin-bottom: var(--space-2);"><span>Admin</span></div>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Access keys, user management, and system configuration.</p>
+      <!-- Tab bar -->
+      <div id="adminTabBar" style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border-color);padding-bottom:0;overflow-x:auto;">
+        <button class="admin-tab active" onclick="showAdminTab('keys')" data-tab="keys" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-size:var(--text-sm);font-weight:600;cursor:pointer;white-space:nowrap;">Keys</button>
+        <button class="admin-tab" onclick="showAdminTab('users')" data-tab="users" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Users</button>
+        <button class="admin-tab" onclick="showAdminTab('configs')" data-tab="configs" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Configs</button>
+        <button class="admin-tab" onclick="showAdminTab('pool')" data-tab="pool" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Pool</button>
+        <button class="admin-tab" onclick="showAdminTab('feedback')" data-tab="feedback" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Feedback</button>
+        <button class="admin-tab" onclick="showAdminTab('signups')" data-tab="signups" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Signups</button>
+      </div>
+      <!-- Keys tab -->
+      <div class="admin-tab-content" id="adminTabKeys" style="display:block;">
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="font-weight:600;margin-bottom:12px;color:var(--text-primary);">Generate Access Key</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                  <select id="adminKeyTier" style="padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);">
+                    <option value="solo">Solo</option>
+                    <option value="founder">Founder</option>
+                    <option value="premium">Premium</option>
+                  </select>
+                  <input type="text" id="adminKeyNote" placeholder="Note (optional)" style="flex:1;min-width:120px;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);">
+                  <button onclick="adminGenerateKey()" style="padding:8px 16px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:var(--text-sm);">Generate</button>
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">
+                  <span style="font-size:var(--text-xs);color:var(--text-muted);white-space:nowrap;">Expiry (optional):</span>
+                  <input type="date" id="adminKeyExpiry" style="padding:6px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-xs);">
+                  <select id="adminKeyExpiryAction" style="padding:6px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-xs);">
+                    <option value="expire">Auto-revoke</option>
+                    <option value="downgrade">Downgrade to Solo</option>
+                    <option value="flag">Flag for review</option>
+                  </select>
+                </div>
+                <div id="adminKeyResult" style="display:none;padding:12px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:var(--radius-md);font-family:'SF Mono',Monaco,monospace;font-size:18px;text-align:center;letter-spacing:2px;color:#a89878;font-weight:700;margin-bottom:12px;"></div>
+                <button id="adminGenEmailBtn" onclick="showBetaEmailPreview()" style="display:none;width:100%;padding:10px 16px;background:transparent;border:1px solid #a8987844;border-radius:var(--radius-md);color:#a89878;cursor:pointer;font-size:var(--text-sm);font-weight:500;margin-bottom:12px;transition:all 0.2s;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  Generate Welcome Email
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                  <div style="font-weight:600;color:var(--text-primary);">Access Keys</div>
+                  <button onclick="renderAdminPanel()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>
+                </div>
+                <div id="adminKeyList" style="font-size:var(--text-sm);color:var(--text-secondary);">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Users tab -->
+      <div class="admin-tab-content" id="adminTabUsers" style="display:none;">
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="font-weight:600;margin-bottom:12px;color:var(--text-primary);">Registered Users</div>
+                <div id="adminUserList" style="font-size:var(--text-sm);color:var(--text-secondary);">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Configs tab -->
+      <div class="admin-tab-content" id="adminTabConfigs" style="display:none;">
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="font-weight:600;margin-bottom:12px;color:var(--text-primary);">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><path d="M8.59 13.51l2.83 2.83L20 7.83M2 12l5 5L18 6"/></svg>
+                  Share Brand Config
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                  <input type="text" id="adminBrandConfigName" placeholder="Brand / client name" style="flex:1;min-width:140px;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);">
+                  <input type="text" id="adminBrandConfigSlug" placeholder="Custom slug (optional)" style="flex:1;min-width:140px;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);font-family:'SF Mono',Monaco,monospace;">
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                  <select id="adminBrandConfigBrand" style="padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);min-width:140px;">
+                    <option value="invite">Invite Only (no brand data)</option>
+                    <option value="all">All My Brands</option>
+                  </select>
+                  <button onclick="adminGenerateBrandConfig()" style="padding:8px 16px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:var(--text-sm);white-space:nowrap;">Generate Config Link</button>
+                </div>
+                <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px;">Invite Only creates a join link with no pre-loaded brands. The client sets up their own brand on first login.</div>
+                <div id="adminBrandConfigResult" style="display:none;padding:12px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:var(--radius-md);margin-bottom:12px;">
+                  <div style="font-size:var(--text-xs);color:var(--text-secondary);margin-bottom:6px;">Share this link with team members:</div>
+                  <div id="adminBrandConfigUrl" style="font-family:'SF Mono',Monaco,monospace;font-size:13px;color:#a89878;word-break:break-all;margin-bottom:8px;"></div>
+                  <button onclick="copyBrandConfigUrl()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Copy Link</button>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <div style="font-size:var(--text-sm);color:var(--text-secondary);">Shared Configs</div>
+                  <button onclick="adminLoadBrandConfigs()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>
+                </div>
+                <div id="adminBrandConfigList" style="font-size:var(--text-sm);color:var(--text-secondary);">Click Refresh to load</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Pool tab -->
+      <div class="admin-tab-content" id="adminTabPool" style="display:none;">
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="font-weight:600;margin-bottom:12px;color:var(--text-primary);">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  API Key Pool
+                </div>
+                <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">Add pre-loaded API keys to sell. Webhook auto-assigns on purchase.</div>
+                <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+                  <select id="poolKeyProvider" style="padding:7px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-xs);">
+                    <option value="anthropic">Anthropic</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="google">Google</option>
+                  </select>
+                  <input type="text" id="poolKeyInput" placeholder="API Key (sk-ant-...)" style="flex:1;min-width:160px;padding:7px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-xs);font-family:'SF Mono',Monaco,monospace;">
+                  <select id="poolKeyCreditTier" style="padding:7px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-xs);">
+                    <option value="5">$5 credit</option>
+                    <option value="10">$10 credit</option>
+                    <option value="20">$20 credit</option>
+                  </select>
+                  <button onclick="adminAddToApiKeyPool()" style="padding:7px 14px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:var(--text-xs);white-space:nowrap;">Add to Pool</button>
+                </div>
+                <div id="apiKeyPoolList" style="font-size:var(--text-sm);color:var(--text-secondary);">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Feedback tab -->
+      <div class="admin-tab-content" id="adminTabFeedback" style="display:none;">
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                  <div style="font-weight:600;color:var(--text-primary);">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    User Feedback
+                  </div>
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <select id="adminFeedbackFilter" onchange="renderAdminFeedback()" style="padding:4px 10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);font-size:var(--text-xs);">
+                      <option value="all">All</option>
+                      <option value="new">New</option>
+                      <option value="bug">Bugs</option>
+                      <option value="feature">Features</option>
+                      <option value="reviewed">Reviewed</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+                    <button onclick="renderAdminFeedback()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:var(--text-secondary);"><input type="checkbox" id="fbSelectAll" onchange="toggleAllFeedbackSelect(this.checked)" style="accent-color:var(--accent);"> Select All</label>
+                    <button onclick="exportFeedbackByStatus('reviewed')" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Export Reviewed</button>
+                    <button onclick="exportFeedbackByStatus('new')" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Export New</button>
+                  </div>
+                </div>
+                <div id="adminFeedbackList" style="font-size:var(--text-sm);color:var(--text-secondary);">Click Refresh to load</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- v22.4: Signups tab -->
+      <div class="admin-tab-content" id="adminTabSignups" style="display:none;">
+        <div class="settings-section">
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                  <div style="font-weight:600;color:var(--text-primary);">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    Signups
+                  </div>
+                  <button onclick="adminLoadSignups()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>
+                </div>
+                <div id="adminSignupsList" style="font-size:var(--text-sm);color:var(--text-secondary);">Click Refresh to load</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
