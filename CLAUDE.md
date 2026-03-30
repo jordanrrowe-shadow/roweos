@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v28.2
+Version:  v28.3
 File:     RoweOS/dist/index.html (195797 lines)
 Live:     roweos.com
 ```
