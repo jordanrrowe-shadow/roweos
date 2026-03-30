@@ -962,13 +962,34 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
         var emailTo = (step.target && step.target.emailTo) || '';
         var emailSubject = (step.target && step.target.emailSubject) || (brand.shortName || brand.name || 'RoweOS') + ' Report';
         var emailBody = '';
-        // Use previous step output as body if includeStepOutput is set
-        if (step.config && step.config.includeStepOutput) {
-          for (var _ei = s; _ei >= 1; _ei--) {
-            if (context['step' + _ei + '_output']) { emailBody = context['step' + _ei + '_output']; break; }
+        // v28.2: Always try to use previous step output as body (not gated by includeStepOutput flag)
+        for (var _ei = s; _ei >= 1; _ei--) {
+          if (context['step' + _ei + '_output'] && context['step' + _ei + '_output'].length > 10) {
+            emailBody = context['step' + _ei + '_output'];
+            break;
           }
         }
+        // Also check explicit emailBody from step config
+        if (!emailBody && step.target && step.target.emailBody) {
+          emailBody = step.target.emailBody;
+        }
         if (!emailBody) emailBody = stepText || '';
+        // v28.2: If email body is still just the task name or too short, generate AI content
+        if (emailBody && emailBody.length < 50 && apiKeys) {
+          try {
+            var _emailPm = resolveProviderAndModel(step, brandSettingsObj, apiKeys, apiRouting);
+            if (apiKeys[_emailPm.provider]) {
+              var _emailPrompt = 'Generate the content for this email.\nSubject: ' + emailSubject + '\nRecipient: ' + emailTo + '\nContext: ' + (stepText || task.name || '') + '\n\nProduce the email body content only, formatted in plain text. Be comprehensive and professional.';
+              var _aiBody = await makeAICall(_emailPm.provider, _emailPm.model, apiKeys[_emailPm.provider], buildSystemPrompt(brand), _emailPrompt);
+              if (_aiBody && _aiBody.length > 50) {
+                emailBody = _aiBody;
+                console.log('[Scheduler] Email step: generated AI content (' + emailBody.length + ' chars)');
+              }
+            }
+          } catch(_emailAiErr) {
+            console.warn('[Scheduler] Email step AI fallback failed:', _emailAiErr.message);
+          }
+        }
         // v26.3: Resolve all template vars (step outputs + current_date, brand_name, etc.)
         var _resolveVars = function(text) {
           if (!text || typeof text !== 'string') return text || '';
