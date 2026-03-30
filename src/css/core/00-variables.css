@@ -1,0 +1,144 @@
+    /* Theme Variables */
+    /* 
+     * COLOR SYSTEM
+     * TODO: Future feature - Make these colors customizable based on user's brand
+     * This will allow each brand to have its own color scheme that reflects 
+     * their brand identity (primary color, accent color, etc.)
+     */
+    :root {
+      --bg-primary: #09090b;
+      --accent-text: #0a0a0a; /* v11.5.4: Always dark — for text on gold accent buttons */
+      --bg-secondary: #0f0f12;
+      --bg-tertiary: #16161a;
+      --bg-elevated: #1c1c21;
+      --bg-hover: #222228;
+      --border-color: #27272a;
+      --border-light: #1e1e22;
+      --border-subtle: #202024;
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --text-faint: #52525b;
+      --accent: #a89878;
+      --accent-hover: #b8a888;
+      --accent-muted: #8c7c62;
+      --accent-glow: rgba(168, 152, 120, 0.12);
+      --accent-gold: #a89878;
+      --brand-accent: #a89878; /* v15.1: Per-brand accent color, updated via JS */
+      --brand-accent-dark: #867a60; /* v15.3: Fixed from old BDB331 yellow */
+      --brand-accent-light: #c0b090;
+      --brand-accent-text: #ffffff;
+      --brand-accent-rgb: 168, 152, 120;
+      --brand-accent-10: rgba(168, 152, 120, 0.1);
+      --brand-accent-15: rgba(168, 152, 120, 0.15);
+      --brand-accent-20: rgba(168, 152, 120, 0.2);
+      --brand-accent-25: rgba(168, 152, 120, 0.25);
+      --brand-accent-30: rgba(168, 152, 120, 0.3);
+      --brand-accent-40: rgba(168, 152, 120, 0.4);
+      --brand-accent-50: rgba(168, 152, 120, 0.5);
+      --brand-accent-60: rgba(168, 152, 120, 0.6);
+      --brand-accent-70: rgba(168, 152, 120, 0.7);
+      --gold: #a89878;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #f59e0b;
+
+      /* v10.5.25: LifeAI Customizable Accent Color System */
+      --life-accent: #22c55e;
+      --life-accent-dark: #16a34a;
+      --life-accent-light: #4ade80;
+      --life-accent-text: #1a1a1a; /* Auto-calculated: dark text for light accent, white for dark */
+      --life-accent-rgb: 34, 197, 94; /* v11.0.5: For rgba() usage */
+      --life-accent-10: rgba(34, 197, 94, 0.1);
+      --life-accent-15: rgba(34, 197, 94, 0.15);
+      --life-accent-20: rgba(34, 197, 94, 0.2);
+      --life-accent-25: rgba(34, 197, 94, 0.25);
+      --life-accent-30: rgba(34, 197, 94, 0.3);
+      --life-accent-40: rgba(34, 197, 94, 0.4);
+      --life-accent-50: rgba(34, 197, 94, 0.5);
+      --life-accent-60: rgba(34, 197, 94, 0.6);
+      --life-accent-70: rgba(34, 197, 94, 0.7);
+
+      /* v11.5.4: Collapsible Glass Sidebar */
+      --sidebar-collapsed-width: 64px;
+      --sidebar-expanded-width: 260px;
+      --sidebar-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --glass-blur: blur(40px) saturate(180%);
+      --glass-bg-dark: rgba(0, 0, 0, 0.95);
+      --glass-bg-light: rgba(255, 255, 255, 0.78);
+      --glass-border-dark: rgba(255, 255, 255, 0.08);
+      --glass-border-light: rgba(0, 0, 0, 0.08);
+      
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35), 0 4px 8px rgba(0, 0, 0, 0.2);
+      --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.25);
+      --shadow-glow: 0 0 20px rgba(168, 152, 120, 0.08);
+      /* v24.26: Gold glow tokens (match promo site) */
+      --gold-glow-sm: 0 0 12px rgba(168,152,120,0.1);
+      --gold-glow-md: 0 4px 16px rgba(168,152,120,0.15);
+      --gold-glow-lg: 0 8px 24px rgba(168,152,120,0.2);
+
+      /* v12.0.0: Border Radius Tokens */
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 18px;
+      --radius-2xl: 24px;
+      --radius-full: 9999px;
+
+      /* v12.0.0: Spacing Tokens */
+      --space-0: 0;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+      --space-16: 64px;
+
+      /* v12.0.0: Font Size Tokens */
+      --text-2xs: 9px;
+      --text-xs: 10px;
+      --text-sm: 12px;
+      --text-base: 14px;
+      --text-lg: 16px;
+      --text-xl: 18px;
+      --text-2xl: 20px;
+      --text-3xl: 24px;
+      --text-4xl: 32px;
+      --text-5xl: 48px;
+
+      /* v12.0.0: Font Weight Tokens */
+      --font-normal: 400;
+      --font-medium: 500;
+      --font-semibold: 600;
+      --font-bold: 700;
+
+      /* v12.0.0: Line Height Tokens */
+      --leading-none: 1;
+      --leading-tight: 1.25;
+      --leading-snug: 1.375;
+      --leading-normal: 1.5;
+      --leading-relaxed: 1.625;
+
+      /* v12.0.0: Z-Index Layers */
+      --z-dropdown: 100;
+      --z-sticky: 200;
+      --z-fixed: 300;
+      --z-modal-backdrop: 400;
+      --z-modal: 500;
+      --z-popover: 600;
+      --z-tooltip: 700;
+      --z-toast: 800;
+      --z-max: 9999;
+
+      /* Transitions */
+      --transition-fast: 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
