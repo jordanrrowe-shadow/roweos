@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v28.3
-File:     RoweOS/dist/index.html (195899 lines)
+Version:  v28.4
+File:     src/ (modular source) → builds to RoweOS/dist/index.html
 Live:     roweos.com
 ```
 
@@ -20,7 +20,7 @@ serena start-mcp-server --language-backend JetBrains
 
 ### Deploy to Production
 ```bash
-./deploy.sh
+bash src/build.sh && ./deploy.sh
 ```
 Handles: version sync to CLAUDE.md, git commit+push, Vercel deploy. Manual fallback: `cd RoweOS/dist && npx vercel --prod` (needs `.vercel/project.json` or it prompts).
 
@@ -32,13 +32,43 @@ Handles: version sync to CLAUDE.md, git commit+push, Vercel deploy. Manual fallb
 5. **Logo injection:** `document.createElement('img')` — never innerHTML for base64
 6. **Init ordering:** `initBrandAccentColor()` / `initBrandLogo()` run before brand selector — re-call after restoration
 
-### File Structure
+### File Structure (Modular Source)
+Source code lives in src/, built into RoweOS/dist/index.html by src/build.sh
 ```
-index.html
-|- Lines 1-15,000      CSS (themes, components, animations)
-|- Lines 15,000-44,000 HTML (views, modals, overlays)
-|- Lines 44,000-117512 JavaScript (state, API, logic)
+src/css/           CSS (core themes, components, view-specific styles)
+src/html/          HTML (head, shell, views organized by brand/life/shared)
+src/js/core/       Core JS (foundation, state, sync, agents, features)
+src/js/late/       Late JS (API bridge, mail/messaging)
+src/build.sh       Concatenation build script
+src/verify.sh      Diff verifier against reference
+
+Key JS files:
+  08-foundation.js   Store API, utils, constants, modal system
+  09-state.js        Brand state, data initialization
+  10-sync.js         Sync engine v4.0
+  11-agents.js       BrandAI agent system, model switching
+  12-library.js      File library, finder view
+  13-studio.js       Studio panels, streaming, deep research
+  14-calendar.js     Calendar, external integrations
+  15-focus.js        Focus/today command center
+  16-bloom.js        Bloom AI brand feed
+  17-automations.js  Automations lab, folio
+  18-social.js       Social media integration
+  19-journal.js      Journal, inline automations
+  20-ui-misc.js      Dropdowns, categories, misc UI
+  21-sidebar.js      Liquid glass navigation
+  22-firebase-sync.js Firebase sync, IndexedDB, admin
+  23-offline.js      Offline support
+  24-remaining.js    LifeAI identity + remaining features
 ```
+
+### Editing Rules
+- Edit src/ files only -- NEVER edit RoweOS/dist/index.html directly (it's generated)
+- After any edit: run `bash src/build.sh` to regenerate index.html
+- Verify with: `bash src/verify.sh` (diffs against reference)
+- New features: create new file in src/js/core/ with appropriate numeric prefix
+- CSS changes: edit src/css/core/01-base.css
+- HTML view changes: find the view in src/html/brand/, life/, or shared/
 
 ---
 
@@ -52,7 +82,7 @@ A private AI platform with two modes:
 - **Life Intelligence (LifeAI)** — Personal life management with coach archetypes
 
 ### Architecture
-- Single-file HTML app — no build tools, no bundler, no framework
+- Modular source (src/) concatenated into single HTML file — no bundler, no framework
 - Pure vanilla HTML/CSS/JS, CDN deps: Firebase SDK, Marked.js
 - Direct browser API calls to Anthropic/OpenAI/Google (keys in localStorage)
 - Firebase sync (V3.1 write-through, cloud-authoritative) — every save writes to localStorage AND Firestore immediately. Cloud always wins on pull. `mergeByTimestamp()` handles per-item conflicts with `_modifiedAt` stamps. `safeSyncWrite()` applies cloud data unconditionally (no "skip empty" guard).

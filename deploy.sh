@@ -9,6 +9,10 @@ cd "$PROJECT_DIR"
 
 echo "=== RoweOS Deploy ==="
 
+# 0. Build from modular source
+echo "Building from source..."
+bash "$PROJECT_DIR/src/build.sh"
+
 # 1. Extract current version from ROWEOS_VERSION constant in index.html
 if [ -f "RoweOS/dist/index.html" ]; then
     CURRENT_VERSION=$(grep -o "var ROWEOS_VERSION = 'v[^']*'" RoweOS/dist/index.html | tail -1 | sed "s/var ROWEOS_VERSION = '//" | sed "s/'//")
@@ -94,7 +98,7 @@ git push origin main
 
 # 8. Minify for production
 echo "Building minified version..."
-"$PROJECT_DIR/build.sh"
+"$PROJECT_DIR/build.sh" --minify
 
 # 9. Deploy to Vercel
 echo "Deploying to Vercel..."

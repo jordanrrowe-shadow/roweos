@@ -1,15 +1,15 @@
 #!/bin/bash
 # RoweOS Build Script
-# Minifies index.html for production deployment
-# Usage: ./build.sh [--restore]
-
+# Step 1: Concatenate src/ into index.html
+# Step 2: Optionally minify for production
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SRC_FILE="$PROJECT_DIR/RoweOS/dist/index.html"
-BACKUP_FILE="$PROJECT_DIR/RoweOS/dist/index.src.html"
 
+# Handle --restore flag (for post-deploy un-minify)
 if [ "$1" = "--restore" ]; then
+    BACKUP_FILE="$PROJECT_DIR/RoweOS/dist/index.src.html"
+    SRC_FILE="$PROJECT_DIR/RoweOS/dist/index.html"
     if [ -f "$BACKUP_FILE" ]; then
         mv "$BACKUP_FILE" "$SRC_FILE"
         echo "Restored source from backup"
@@ -19,32 +19,30 @@ if [ "$1" = "--restore" ]; then
     exit 0
 fi
 
-echo "=== RoweOS Build ==="
+# Step 1: Modular build
+bash "$PROJECT_DIR/src/build.sh"
 
-# Check if html-minifier-terser is available
-if ! npx html-minifier-terser --version > /dev/null 2>&1; then
-    echo "Installing html-minifier-terser..."
-    npm install -g html-minifier-terser
+# Step 2: Minify (only if --minify flag passed)
+if [ "$1" = "--minify" ]; then
+    SRC_FILE="$PROJECT_DIR/RoweOS/dist/index.html"
+    BACKUP_FILE="$PROJECT_DIR/RoweOS/dist/index.src.html"
+
+    if ! npx html-minifier-terser --version > /dev/null 2>&1; then
+        echo "Installing html-minifier-terser..."
+        npm install -g html-minifier-terser
+    fi
+
+    cp "$SRC_FILE" "$BACKUP_FILE"
+
+    npx html-minifier-terser \
+        --collapse-whitespace \
+        --remove-comments \
+        --minify-css true \
+        --minify-js "{\"mangle\":false,\"compress\":{\"drop_console\":false}}" \
+        < "$BACKUP_FILE" > "$SRC_FILE"
+
+    ORIG_SIZE=$(wc -c < "$BACKUP_FILE" | tr -d ' ')
+    MIN_SIZE=$(wc -c < "$SRC_FILE" | tr -d ' ')
+    SAVINGS=$(( (ORIG_SIZE - MIN_SIZE) * 100 / ORIG_SIZE ))
+    echo "Minified: ${SAVINGS}% savings"
 fi
-
-# Backup source
-cp "$SRC_FILE" "$BACKUP_FILE"
-echo "Backed up source to index.src.html"
-
-# Minify
-echo "Minifying..."
-npx html-minifier-terser \
-    --collapse-whitespace \
-    --remove-comments \
-    --minify-css true \
-    --minify-js "{\"mangle\":false,\"compress\":{\"drop_console\":false}}" \
-    < "$BACKUP_FILE" > "$SRC_FILE"
-
-ORIG_SIZE=$(wc -c < "$BACKUP_FILE" | tr -d ' ')
-MIN_SIZE=$(wc -c < "$SRC_FILE" | tr -d ' ')
-SAVINGS=$(( (ORIG_SIZE - MIN_SIZE) * 100 / ORIG_SIZE ))
-
-echo "Original: ${ORIG_SIZE} bytes"
-echo "Minified: ${MIN_SIZE} bytes"
-echo "Savings:  ${SAVINGS}%"
-echo "=== Build Complete ==="
