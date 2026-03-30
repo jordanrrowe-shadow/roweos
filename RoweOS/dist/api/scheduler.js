@@ -962,13 +962,18 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
         var emailTo = (step.target && step.target.emailTo) || '';
         var emailSubject = (step.target && step.target.emailSubject) || (brand.shortName || brand.name || 'RoweOS') + ' Report';
         var emailBody = '';
-        // v28.2: Always try to use previous step output as body (not gated by includeStepOutput flag)
+        // v28.2: Find the best previous step output for email body
+        // Prefer the longest AI-generated content (skip short notify/library outputs)
+        var _bestBody = '';
+        var _bestLen = 0;
         for (var _ei = s; _ei >= 1; _ei--) {
-          if (context['step' + _ei + '_output'] && context['step' + _ei + '_output'].length > 10) {
-            emailBody = context['step' + _ei + '_output'];
-            break;
+          var _stepOut = context['step' + _ei + '_output'] || '';
+          if (_stepOut.length > _bestLen && _stepOut.length > 100) {
+            _bestBody = _stepOut;
+            _bestLen = _stepOut.length;
           }
         }
+        if (_bestBody) emailBody = _bestBody;
         // Also check explicit emailBody from step config
         if (!emailBody && step.target && step.target.emailBody) {
           emailBody = step.target.emailBody;
