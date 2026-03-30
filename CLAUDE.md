@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v26.3
-File:     RoweOS/dist/index.html (190345 lines)
+Version:  v28.2
+File:     RoweOS/dist/index.html (195748 lines)
 Live:     roweos.vercel.app
 ```
 
@@ -113,14 +113,18 @@ const items = data.filter(d => d.active);
 
 ## KEY FEATURES (v25.2)
 
-### Sync Architecture (V3.1 Cloud-Authoritative)
+### Sync Architecture (V3.1 Cloud-Authoritative, v27.3 fixes)
 - Write-through: every save hits localStorage + Firestore simultaneously
 - Cloud always wins on pull (no "local wins" guards)
 - `mergeByTimestamp()` resolves per-item conflicts using `_modifiedAt`
+- `_normalizeTs()` converts `_modifiedAt` to numeric ms (handles ISO strings from Firestore and numeric from localStorage)
 - `safeSyncWrite()` applies cloud data unconditionally (empty = deleted)
 - `manualSyncNow()` pulls only (no push phase)
 - Pre-pull backup stored in `roweos_pre_pull_backup` as safety net
 - All data items should have `id` and `_modifiedAt` fields
+- v27.3: Brands use stable ID doc paths (`brand_name_*`), NOT array indices. Ghost docs auto-cleaned on save.
+- v27.3: Brand writes use `batch.commit()` for atomicity (prevents partial snapshot in onSnapshot)
+- v27.3: Todos/Calendar onSnapshot listeners watch `main` doc directly (not the collection)
 
 ### Universal Search (Hybrid)
 - **Cmd+K** opens centered Spotlight modal (fast navigation + actions + inline AI)
