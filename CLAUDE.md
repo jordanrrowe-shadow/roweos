@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 Version:  v28.3
-File:     RoweOS/dist/index.html (195827 lines)
+File:     RoweOS/dist/index.html (195886 lines)
 Live:     roweos.com
 ```
 
