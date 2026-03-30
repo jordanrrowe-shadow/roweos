@@ -1665,6 +1665,39 @@ function loadBrands() {
         }
       }
 
+      // v28.5: Migrate index-based logo keys to ID-based keys (one-time, survives reorder)
+      // Old keys: roweos_brand_0_logo, roweos_brand_1_logo, etc.
+      // New keys: roweos_brandlogo_<brand.id>
+      // Problem: if brands reorder, index-based keys point to wrong brand's logo
+      var _logoMigrationDone = localStorage.getItem('roweos_logo_id_migration_done');
+      if (!_logoMigrationDone) {
+        var _logosMigrated = 0;
+        for (var _li = 0; _li < brands.length; _li++) {
+          var _brand = brands[_li];
+          if (!_brand || !_brand.id) continue;
+          var _idLogoKey = 'roweos_brandlogo_' + _brand.id;
+          var _idSizeKey = _idLogoKey + '_size';
+          // Skip if ID-based key already has data
+          if (localStorage.getItem(_idLogoKey)) continue;
+          // Check if this brand has _order (original index before any reorder)
+          var _origIdx = (typeof _brand._order === 'number') ? _brand._order : _li;
+          var _oldLogoKey = 'roweos_brand_' + _origIdx + '_logo';
+          var _oldSizeKey = 'roweos_brand_' + _origIdx + '_logo_size';
+          var _oldLogo = localStorage.getItem(_oldLogoKey);
+          if (_oldLogo) {
+            localStorage.setItem(_idLogoKey, _oldLogo);
+            var _oldSize = localStorage.getItem(_oldSizeKey);
+            if (_oldSize) localStorage.setItem(_idSizeKey, _oldSize);
+            _logosMigrated++;
+            console.log('[loadBrands] Migrated logo: ' + _brand.name + ' (index ' + _origIdx + ' -> ' + _idLogoKey + ')');
+          }
+        }
+        if (_logosMigrated > 0 || brands.length > 0) {
+          localStorage.setItem('roweos_logo_id_migration_done', '1');
+          console.log('[loadBrands] Logo key migration complete: ' + _logosMigrated + ' logos migrated to ID-based keys');
+        }
+      }
+
       // Ensure brand settings exist for all brands
       var storedSettings = localStorage.getItem(USER_DATA_KEYS.brandSettings);
       var settings = storedSettings ? JSON.parse(storedSettings) : {};
