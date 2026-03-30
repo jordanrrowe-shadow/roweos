@@ -77,7 +77,8 @@ concat_sorted() {
   concat_sorted "$SRC/html/brand" "html"
   concat_sorted "$SRC/html/life" "html"
   # Note: html/shared is depth-1 only, so modals/ subdir is not included here
-  concat_sorted "$SRC/html/shared" "html"
+  # Exclude webgl-shaders (already emitted in SECTION 9)
+  concat_sorted "$SRC/html/shared" "html" "webgl-shaders"
 
   # SECTION 11: Main JavaScript
   echo "  <script>"
@@ -103,7 +104,8 @@ concat_sorted() {
   cat "$SRC/html/shared/modals/late-modals.html"
 
   # SECTION 13: Second JavaScript block (API bridge, mail, messaging)
-  echo "  <script>"
+  # Note: no indentation on <script> tags -- matches original monolith
+  echo "<script>"
   # Include all late JS files -- currently mail.js, future: api-bridge.js etc.
   concat_sorted "$SRC/js/late" "js"
   # Fallback: if js/late/ doesn't exist yet, use mail.js directly
@@ -111,7 +113,7 @@ concat_sorted() {
     cat "$SRC/js/shared/mail.js"
     echo ""
   fi
-  echo "  </script>"
+  echo "</script>"
   echo ""
 
   # SECTION 14: Footer (reminder popup, web search indicator, closing tags)

@@ -1,0 +1,42 @@
+  <!-- Firebase SDK v9 compat (for single-file apps) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+  <!-- v9.1.14: PDF.js for document text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- v22.31: jsPDF for programmatic dark-theme PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- v23.5: SheetJS for spreadsheet parsing (invoicing) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+  <!-- v16.12: Google Identity Services for Calendar OAuth -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- v16.12: ical.js for iCloud CalDAV ICS parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/ical.js@2.1.0/dist/ical.es5.min.cjs"></script>
+  <!-- v23.8: Chart.js for infographic data visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <!-- v23.8: html2canvas for infographic PNG capture -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- v24.8: docx for proper Word document generation -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@9.1.1/build/index.umd.min.js"></script>
+  <!-- v24.8: PptxGenJS for proper PowerPoint generation -->
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgenjs.bundle.js"></script>
+  <!-- v24.20: Three.js for WebGL blob animation -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script>
+    // v9.1.14: Configure PDF.js worker
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+</head>
+<body>
+
+  <!-- v23.8: Hidden infographic render host — off-screen, used by html2canvas -->
+  <div id="infographicCanvas" style="position:fixed;left:-9999px;top:-9999px;width:800px;z-index:-1;pointer-events:none;"></div>
+
+  <!-- v22.53: Boot screen — covers everything until auth resolves or auth gate shows -->
+  <div id="bootScreen" style="position:fixed;inset:0;z-index:99999;background:#0a0a0a;"></div>
+  <script>try{if(localStorage.getItem('roweos-theme')==='light'){document.getElementById('bootScreen').style.background='#ffffff';}}catch(e){}</script>

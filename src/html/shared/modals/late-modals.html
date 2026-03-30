@@ -1,0 +1,142 @@
+
+<!-- Task Creation/Edit Modal -->
+<div id="taskModal" class="modal hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10000;">
+  <div class="modal-content" style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--space-8); width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+      <h2 id="taskModalTitle" style="font-size: var(--text-2xl); font-weight: 600; margin: 0;">Create Automation</h2>
+      <button onclick="closeTaskModal()" style="background: transparent; border: none; color: var(--text-secondary); font-size: var(--text-3xl); cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
+    </div>
+    
+    <div class="modal-body" style="display: flex; flex-direction: column; gap: var(--space-4);">
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Automation Name</label>
+        <input id="taskNameInput" type="text" placeholder="e.g., Daily Brand Report" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base);">
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Description</label>
+        <textarea id="taskDescriptionInput" placeholder="What should this automation do?" rows="2" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); resize: vertical;"></textarea>
+      </div>
+      
+      <!-- v9.1.14: Date Picker -->
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Start Date</label>
+        <input id="taskDateInput" type="date" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); cursor: pointer;">
+      </div>
+      
+      <!-- v9.1.14: Recurring Toggle -->
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-4);">
+        <label style="display: flex; align-items: center; gap: var(--space-3); cursor: pointer; margin-bottom: var(--space-3);">
+          <input type="checkbox" id="taskRecurringInput" onchange="toggleRecurringOptions()" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent);">
+          <span style="font-size: var(--text-base); font-weight: 500; color: var(--text-primary);">Recurring Automation</span>
+        </label>
+        <div id="recurringOptions" style="display: none; padding-top: var(--space-3); border-top: 1px solid var(--border-color);">
+          <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Repeat</label>
+          <select id="taskFrequencyInput" style="width: 100%; padding: var(--space-3); background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); cursor: pointer;">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Action Type</label>
+        <select id="taskActionInput" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); cursor: pointer;">
+          <option value="none">Reminder Only (No Action)</option>
+          <option value="generate_report">Generate Report</option>
+          <option value="generate_content">Generate Content</option>
+          <option value="consistency_check">Consistency Check</option>
+        </select>
+        <div style="font-size: var(--text-sm); color: var(--text-tertiary); margin-top: 6px;">"No Action" creates a calendar reminder without AI execution</div>
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Brand</label>
+        <select id="taskBrandInput" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); cursor: pointer;">
+          <option value="">All Brands</option>
+        </select>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+        <div>
+          <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Time</label>
+          <input id="taskTimeInput" type="time" value="09:00" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); cursor: pointer;">
+        </div>
+        <div>
+          <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Color</label>
+          <div style="display: flex; gap: 6px; padding: 8px 0;">
+            <button type="button" onclick="selectTaskColor('#a89878')" class="task-color-option selected" data-color="#a89878" style="width: 28px; height: 28px; border-radius: var(--radius-sm); border: 2px solid var(--accent); cursor: pointer; background: #a89878;"></button>
+            <button type="button" onclick="selectTaskColor('#6366f1')" class="task-color-option" data-color="#6366f1" style="width: 28px; height: 28px; border-radius: var(--radius-sm); border: 2px solid transparent; cursor: pointer; background: #6366f1;"></button>
+            <button type="button" onclick="selectTaskColor('#22c55e')" class="task-color-option" data-color="#22c55e" style="width: 28px; height: 28px; border-radius: var(--radius-sm); border: 2px solid transparent; cursor: pointer; background: #22c55e;"></button>
+            <button type="button" onclick="selectTaskColor('#ef4444')" class="task-color-option" data-color="#ef4444" style="width: 28px; height: 28px; border-radius: var(--radius-sm); border: 2px solid transparent; cursor: pointer; background: #ef4444;"></button>
+            <button type="button" onclick="selectTaskColor('#8b5cf6')" class="task-color-option" data-color="#8b5cf6" style="width: 28px; height: 28px; border-radius: var(--radius-sm); border: 2px solid transparent; cursor: pointer; background: #8b5cf6;"></button>
+          </div>
+          <input type="hidden" id="taskColorInput" value="#a89878">
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer" style="display: flex; gap: var(--space-3); margin-top: var(--space-6); justify-content: flex-end;">
+      <button onclick="closeTaskModal()" class="btn btn-secondary">Cancel</button>
+      <button onclick="saveTaskFromModal()" class="btn btn-primary" id="saveTaskBtn">Create Automation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Operation Modal -->
+<div id="customOpModal" class="modal hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10001;">
+  <div class="modal-content" style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: var(--space-8); width: 90%; max-width: 600px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-height: 85vh; overflow-y: auto;">
+    <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+      <h2 style="font-size: var(--text-2xl); font-weight: 600; margin: 0;">Create Custom Operation</h2>
+      <button onclick="closeCustomOpModal()" style="background: transparent; border: none; color: var(--text-secondary); font-size: var(--text-3xl); cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
+    </div>
+    
+    <div class="modal-body" style="display: flex; flex-direction: column; gap: var(--space-5);">
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Operation Name</label>
+        <input id="customOpName" type="text" placeholder="e.g., Weekly Newsletter Generator" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base);">
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Description</label>
+        <textarea id="customOpDesc" placeholder="What does this operation do?" rows="3" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); resize: vertical;"></textarea>
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Category</label>
+        <select id="customOpCategory" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); cursor: pointer;">
+          <option value="strategic">Strategic</option>
+          <option value="marketing">Marketing</option>
+          <option value="operations">Operations</option>
+          <option value="documents">Documents</option>
+          <option value="intelligence">Intelligence</option>
+          <option value="research">Research</option>
+          <option value="social">Social Media</option>
+        </select>
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Prompt Template</label>
+        <textarea id="customOpPrompt" placeholder="Enter the AI prompt for this operation. Use {{brand_name}}, {{brand_voice}}, etc. for dynamic values." rows="6" style="width: 100%; padding: var(--space-3); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-size: var(--text-base); font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; resize: vertical;"></textarea>
+        <div style="font-size: var(--text-sm); color: var(--text-tertiary); margin-top: 6px;">Available variables: {{brand_name}}, {{brand_voice}}, {{brand_values}}</div>
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: var(--text-base); font-weight: 500; color: var(--text-secondary); margin-bottom: var(--space-2);">Expected Outputs</label>
+        <div id="customOpOutputsList" style="display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-2);">
+          <input type="text" class="custom-op-output" placeholder="Output 1" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: var(--text-base);">
+        </div>
+        <button onclick="addCustomOpOutput()" type="button" style="padding: 8px 14px; background: transparent; border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-secondary); font-size: var(--text-sm); cursor: pointer; transition: all 0.2s;">+ Add Output</button>
+      </div>
+    </div>
+    
+    <div class="modal-footer" style="display: flex; gap: var(--space-3); margin-top: 28px; justify-content: flex-end;">
+      <button onclick="closeCustomOpModal()" class="btn btn-secondary">Cancel</button>
+      <button onclick="saveCustomOperation()" class="btn btn-primary">Create Operation</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- RoweOS v6.0 API Bridge - Browser Mode -->
