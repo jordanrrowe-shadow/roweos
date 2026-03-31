@@ -5654,9 +5654,17 @@ function showPostLoginWelcome() {
       + 'box-shadow: 0 2px 24px rgba(' + rgb + ', 0.08);';
   }
 
-  // v16.5: Primary brand index (user-configurable, defaults to 0)
-  var primaryBrandIdx = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
-  if (isNaN(primaryBrandIdx) || primaryBrandIdx < 0 || !brands || primaryBrandIdx >= brands.length) primaryBrandIdx = 0;
+  // v16.5 / v28.5: Primary brand — resolve by ID first (survives reorder), fall back to index
+  var primaryBrandIdx = 0;
+  var _primaryId = localStorage.getItem('roweos_primary_brand_id');
+  if (_primaryId && brands && brands.length > 0) {
+    for (var _pi = 0; _pi < brands.length; _pi++) {
+      if (brands[_pi] && brands[_pi].id === _primaryId) { primaryBrandIdx = _pi; break; }
+    }
+  } else {
+    primaryBrandIdx = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
+    if (isNaN(primaryBrandIdx) || primaryBrandIdx < 0 || !brands || primaryBrandIdx >= brands.length) primaryBrandIdx = 0;
+  }
 
   // Build cards
   var cardsHtml = '';
@@ -5672,9 +5680,7 @@ function showPostLoginWelcome() {
     if (brand && brand.id) {
       brandLogo = localStorage.getItem(getBrandLogoKeyById(brand.id));
       if (!brandLogo) {
-        // Use _order (original index before reorder) to find correct logo
-        var _origWelcomeIdx = (typeof brand._order === 'number') ? brand._order : primaryBrandIdx;
-        brandLogo = localStorage.getItem('roweos_brand_' + _origWelcomeIdx + '_logo');
+        brandLogo = localStorage.getItem('roweos_brand_' + primaryBrandIdx + '_logo');
       }
     } else {
       brandLogo = localStorage.getItem('roweos_brand_' + primaryBrandIdx + '_logo');
