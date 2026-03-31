@@ -5658,8 +5658,15 @@ function showPostLoginWelcome() {
   var primaryBrandIdx = 0;
   var _primaryId = localStorage.getItem('roweos_primary_brand_id');
   if (_primaryId && brands && brands.length > 0) {
+    var _foundPrimary = false;
     for (var _pi = 0; _pi < brands.length; _pi++) {
-      if (brands[_pi] && brands[_pi].id === _primaryId) { primaryBrandIdx = _pi; break; }
+      if (brands[_pi] && brands[_pi].id === _primaryId) { primaryBrandIdx = _pi; _foundPrimary = true; break; }
+    }
+    if (!_foundPrimary) {
+      // ID not found in brands — stale, clear it and fall back to index
+      try { localStorage.removeItem('roweos_primary_brand_id'); } catch(e) {}
+      primaryBrandIdx = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
+      if (isNaN(primaryBrandIdx) || primaryBrandIdx < 0 || !brands || primaryBrandIdx >= brands.length) primaryBrandIdx = 0;
     }
   } else {
     primaryBrandIdx = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
@@ -5680,7 +5687,8 @@ function showPostLoginWelcome() {
     if (brand && brand.id) {
       brandLogo = localStorage.getItem(getBrandLogoKeyById(brand.id));
       if (!brandLogo) {
-        brandLogo = localStorage.getItem('roweos_brand_' + primaryBrandIdx + '_logo');
+        var _origPIdx = (typeof brand._order === 'number') ? brand._order : primaryBrandIdx;
+        brandLogo = localStorage.getItem('roweos_brand_' + _origPIdx + '_logo');
       }
     } else {
       brandLogo = localStorage.getItem('roweos_brand_' + primaryBrandIdx + '_logo');

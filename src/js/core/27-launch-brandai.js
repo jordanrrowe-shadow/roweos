@@ -1195,14 +1195,18 @@ function saveBrandSettings() {
     // v18.2 / v28.5: Save primary brand with ID (survives reorder)
     var primaryCheckbox = document.getElementById('editPrimaryBrand');
     if (primaryCheckbox && primaryCheckbox.checked) {
-      localStorage.setItem('roweos_primary_brand', String(idx));
-      if (brands[idx] && brands[idx].id) localStorage.setItem('roweos_primary_brand_id', brands[idx].id);
+      try {
+        localStorage.setItem('roweos_primary_brand', String(idx));
+        if (brands[idx] && brands[idx].id) localStorage.setItem('roweos_primary_brand_id', brands[idx].id);
+      } catch(e) { console.warn('[Primary] Save failed (storage full?):', e); }
     } else if (primaryCheckbox && !primaryCheckbox.checked) {
       var _pId = localStorage.getItem('roweos_primary_brand_id');
       var isPrimary = _pId ? (brands[idx] && brands[idx].id === _pId) : (parseInt(localStorage.getItem('roweos_primary_brand') || '0') === idx);
       if (isPrimary) {
-        localStorage.setItem('roweos_primary_brand', '0');
-        if (brands[0] && brands[0].id) localStorage.setItem('roweos_primary_brand_id', brands[0].id);
+        try {
+          localStorage.setItem('roweos_primary_brand', '0');
+          if (brands[0] && brands[0].id) localStorage.setItem('roweos_primary_brand_id', brands[0].id);
+        } catch(e) {}
       }
     }
 
@@ -1949,15 +1953,19 @@ function saveBrandEdits() {
     // v16.5 / v28.5: Primary brand setting with ID (survives reorder)
     var primaryCheckbox = document.getElementById('editPrimaryBrand');
     if (primaryCheckbox && primaryCheckbox.checked) {
-      localStorage.setItem('roweos_primary_brand', String(idx));
-      if (brands[idx] && brands[idx].id) localStorage.setItem('roweos_primary_brand_id', brands[idx].id);
+      try {
+        localStorage.setItem('roweos_primary_brand', String(idx));
+        if (brands[idx] && brands[idx].id) localStorage.setItem('roweos_primary_brand_id', brands[idx].id);
+      } catch(e) { console.warn('[Primary] Save failed:', e); }
     } else if (primaryCheckbox && !primaryCheckbox.checked) {
       // If unchecked and this WAS the primary, reset to 0
       var _pId2 = localStorage.getItem('roweos_primary_brand_id');
       var isPrimary2 = _pId2 ? (brands[idx] && brands[idx].id === _pId2) : (parseInt(localStorage.getItem('roweos_primary_brand') || '0') === idx);
       if (isPrimary2) {
-        localStorage.setItem('roweos_primary_brand', '0');
-        if (brands[0] && brands[0].id) localStorage.setItem('roweos_primary_brand_id', brands[0].id);
+        try {
+          localStorage.setItem('roweos_primary_brand', '0');
+          if (brands[0] && brands[0].id) localStorage.setItem('roweos_primary_brand_id', brands[0].id);
+        } catch(e) {}
       }
     }
 
