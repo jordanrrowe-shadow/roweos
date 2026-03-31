@@ -5672,13 +5672,9 @@ function showPostLoginWelcome() {
     if (brand && brand.id) {
       brandLogo = localStorage.getItem(getBrandLogoKeyById(brand.id));
       if (!brandLogo) {
-        var _oldWelcomeKey = 'roweos_brand_' + primaryBrandIdx + '_logo';
-        brandLogo = localStorage.getItem(_oldWelcomeKey);
-        if (brandLogo) {
-          localStorage.setItem(getBrandLogoKeyById(brand.id), brandLogo);
-          var _oldSize = localStorage.getItem(_oldWelcomeKey + '_size');
-          if (_oldSize) localStorage.setItem(getBrandLogoKeyById(brand.id) + '_size', _oldSize);
-        }
+        // Use _order (original index before reorder) to find correct logo
+        var _origWelcomeIdx = (typeof brand._order === 'number') ? brand._order : primaryBrandIdx;
+        brandLogo = localStorage.getItem('roweos_brand_' + _origWelcomeIdx + '_logo');
       }
     } else {
       brandLogo = localStorage.getItem('roweos_brand_' + primaryBrandIdx + '_logo');
