@@ -1069,8 +1069,14 @@ function openEditBrandModal() {
     // v16.5: Primary brand checkbox
     var primaryCheckbox = document.getElementById('editPrimaryBrand');
     if (primaryCheckbox) {
-      var currentPrimary = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
-      primaryCheckbox.checked = (idx === currentPrimary);
+      // v28.5: Resolve primary by ID first, then fall back to index
+      var _pId = localStorage.getItem('roweos_primary_brand_id');
+      if (_pId && brands[idx] && brands[idx].id) {
+        primaryCheckbox.checked = (brands[idx].id === _pId);
+      } else {
+        var currentPrimary = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
+        primaryCheckbox.checked = (idx === currentPrimary);
+      }
     }
 
     // Open modal
