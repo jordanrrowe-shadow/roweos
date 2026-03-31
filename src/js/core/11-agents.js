@@ -5708,8 +5708,15 @@ function getCurrentLogoKey(brandIdx) {
     if (localStorage.getItem(idKey)) return idKey;
   }
   // Fallback: index-based key (pre-v29)
-  var indexKey = 'roweos_brand_' + brandIdx + '_logo';
+  // v28.5: Use _order (original index before reorder) if available, not current array position
+  var origIdx = (brand && typeof brand._order === 'number') ? brand._order : brandIdx;
+  var indexKey = 'roweos_brand_' + origIdx + '_logo';
   if (localStorage.getItem(indexKey)) return indexKey;
+  // v28.5: Also check current index as last resort (for brands without _order)
+  if (origIdx !== brandIdx) {
+    var currKey = 'roweos_brand_' + brandIdx + '_logo';
+    if (localStorage.getItem(currKey)) return currKey;
+  }
   // Return ID-based key for new saves (even if empty), falling back to index key
   if (brand && brand.id) return 'roweos_brandlogo_' + brand.id;
   return indexKey;

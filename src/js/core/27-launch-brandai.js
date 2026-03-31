@@ -1187,14 +1187,16 @@ function saveBrandSettings() {
       applyBrandAccentColor(brandColor);
     }
 
-    // v18.2: Save primary brand checkbox (was missing — only in saveBrandEdits)
+    // v18.2 / v28.5: Save primary brand checkbox with ID-based key
     var primaryCheckbox = document.getElementById('editPrimaryBrand');
     if (primaryCheckbox && primaryCheckbox.checked) {
       localStorage.setItem('roweos_primary_brand', String(idx));
+      if (brands[idx] && brands[idx].id) localStorage.setItem('roweos_primary_brand_id', brands[idx].id);
     } else if (primaryCheckbox && !primaryCheckbox.checked) {
       var currentPrimary = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
       if (currentPrimary === idx) {
         localStorage.setItem('roweos_primary_brand', '0');
+        if (brands[0] && brands[0].id) localStorage.setItem('roweos_primary_brand_id', brands[0].id);
       }
     }
 
@@ -1938,15 +1940,17 @@ function saveBrandEdits() {
     brand.location = getFieldValue('editBrandLocation');
     brand.contacts = getFieldValue('editBrandContacts');
 
-    // v16.5: Primary brand setting
+    // v16.5 / v28.5: Primary brand setting with ID-based key
     var primaryCheckbox = document.getElementById('editPrimaryBrand');
     if (primaryCheckbox && primaryCheckbox.checked) {
       localStorage.setItem('roweos_primary_brand', String(idx));
+      if (brands[idx] && brands[idx].id) localStorage.setItem('roweos_primary_brand_id', brands[idx].id);
     } else if (primaryCheckbox && !primaryCheckbox.checked) {
       // If unchecked and this WAS the primary, reset to 0
       var currentPrimary = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
       if (currentPrimary === idx) {
         localStorage.setItem('roweos_primary_brand', '0');
+        if (brands[0] && brands[0].id) localStorage.setItem('roweos_primary_brand_id', brands[0].id);
       }
     }
 
