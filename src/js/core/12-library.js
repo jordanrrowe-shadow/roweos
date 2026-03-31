@@ -5654,21 +5654,9 @@ function showPostLoginWelcome() {
       + 'box-shadow: 0 2px 24px rgba(' + rgb + ', 0.08);';
   }
 
-  // v16.5 / v28.5: Primary brand — resolve by ID first, fall back to index
-  var primaryBrandIdx = 0;
-  var _primaryBrandId = localStorage.getItem('roweos_primary_brand_id');
-  if (_primaryBrandId && brands && brands.length > 0) {
-    for (var _pi = 0; _pi < brands.length; _pi++) {
-      if (brands[_pi].id === _primaryBrandId) { primaryBrandIdx = _pi; break; }
-    }
-  } else {
-    primaryBrandIdx = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
-    if (isNaN(primaryBrandIdx) || primaryBrandIdx < 0 || !brands || primaryBrandIdx >= brands.length) primaryBrandIdx = 0;
-    // v28.5: Migrate — save ID-based primary brand key
-    if (brands && brands[primaryBrandIdx] && brands[primaryBrandIdx].id) {
-      try { localStorage.setItem('roweos_primary_brand_id', brands[primaryBrandIdx].id); } catch(e) {}
-    }
-  }
+  // v16.5: Primary brand index (user-configurable, defaults to 0)
+  var primaryBrandIdx = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
+  if (isNaN(primaryBrandIdx) || primaryBrandIdx < 0 || !brands || primaryBrandIdx >= brands.length) primaryBrandIdx = 0;
 
   // Build cards
   var cardsHtml = '';
@@ -5684,13 +5672,12 @@ function showPostLoginWelcome() {
     if (brand && brand.id) {
       brandLogo = localStorage.getItem(getBrandLogoKeyById(brand.id));
       if (!brandLogo) {
-        // v28.5: Use _order (original index) for fallback, not current array position
-        var _origWelcomeIdx = (typeof brand._order === 'number') ? brand._order : primaryBrandIdx;
-        var _oldWelcomeKey = 'roweos_brand_' + _origWelcomeIdx + '_logo';
+        var _oldWelcomeKey = 'roweos_brand_' + primaryBrandIdx + '_logo';
         brandLogo = localStorage.getItem(_oldWelcomeKey);
-        // Also try current index as last resort
-        if (!brandLogo && _origWelcomeIdx !== primaryBrandIdx) {
-          brandLogo = localStorage.getItem('roweos_brand_' + primaryBrandIdx + '_logo');
+        if (brandLogo) {
+          localStorage.setItem(getBrandLogoKeyById(brand.id), brandLogo);
+          var _oldSize = localStorage.getItem(_oldWelcomeKey + '_size');
+          if (_oldSize) localStorage.setItem(getBrandLogoKeyById(brand.id) + '_size', _oldSize);
         }
       }
     } else {

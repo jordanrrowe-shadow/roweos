@@ -1665,16 +1665,6 @@ function loadBrands() {
         }
       }
 
-      // v28.5: Remove bad ID-based logo keys from failed migration attempt
-      // Logo lookup now uses _order at read-time (getCurrentLogoKey checks brand._order)
-      try { localStorage.removeItem('roweos_logo_id_migration_done'); } catch(e) {}
-      for (var _ci = 0; _ci < brands.length; _ci++) {
-        if (brands[_ci] && brands[_ci].id) {
-          var _badKey = 'roweos_brandlogo_' + brands[_ci].id;
-          try { localStorage.removeItem(_badKey); localStorage.removeItem(_badKey + '_size'); } catch(e) {}
-        }
-      }
-
       // Ensure brand settings exist for all brands
       var storedSettings = localStorage.getItem(USER_DATA_KEYS.brandSettings);
       var settings = storedSettings ? JSON.parse(storedSettings) : {};
