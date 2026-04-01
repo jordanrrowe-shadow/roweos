@@ -1014,14 +1014,14 @@ function showAutoLabTab(tabName) {
     var target = document.getElementById(map[tabName]);
     if (target) {
       target.classList.add('active');
-      target.innerHTML = '<div style="text-align:center;padding:60px 20px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" style="margin-bottom:12px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><h3 style="color:var(--text-primary);margin-bottom:8px;">Image Lab has moved</h3><p style="color:var(--text-secondary);margin-bottom:16px;">Image Lab is now in Social Hub > Media</p><button onclick="showView(\'social\');showSocialTab(\'media\');" style="padding:8px 20px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;">Go to Media</button></div>';
+      target.innerHTML = '<div style="text-align:center;padding:60px 20px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" style="margin-bottom:12px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><h3 style="color:var(--text-primary);margin-bottom:8px;">Image Lab has moved</h3><p style="color:var(--text-secondary);margin-bottom:16px;">Image Lab is now in Media Lab > Media</p><button onclick="showView(\'social\');showSocialTab(\'media\');" style="padding:8px 20px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;">Go to Media</button></div>';
     }
   }
   else if (tabName === 'videolab') {
     var target2 = document.getElementById(map[tabName]);
     if (target2) {
       target2.classList.add('active');
-      target2.innerHTML = '<div style="text-align:center;padding:60px 20px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" style="margin-bottom:12px;"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><h3 style="color:var(--text-primary);margin-bottom:8px;">Video Lab has moved</h3><p style="color:var(--text-secondary);margin-bottom:16px;">Video Lab is now in Social Hub > Media</p><button onclick="showView(\'social\');showSocialTab(\'media\');setTimeout(function(){showMediaSubTab(\'video\');},100);" style="padding:8px 20px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;">Go to Media</button></div>';
+      target2.innerHTML = '<div style="text-align:center;padding:60px 20px;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" style="margin-bottom:12px;"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><h3 style="color:var(--text-primary);margin-bottom:8px;">Video Lab has moved</h3><p style="color:var(--text-secondary);margin-bottom:16px;">Video Lab is now in Media Lab > Media</p><button onclick="showView(\'social\');showSocialTab(\'media\');setTimeout(function(){showMediaSubTab(\'video\');},100);" style="padding:8px 20px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;">Go to Media</button></div>';
     }
   }
   else if (tabName === 'usage') renderAutoLabUsage();
@@ -2390,8 +2390,9 @@ function buildAutoAgentSystemPrompt() {
     '4. For social posts, use action "post" with target.platforms array and target.contentRef for the content.\n' +
     '5. For AI-generated content, use action "studio" with target.operationId AND target.contextRef containing the detailed instructions/prompt for what the AI should generate. Operation IDs: 45=Social Post, 47=Cross-Platform, 48=Caption (for social content); 508=Email Writer with agentId "documents" (for any email drafting/writing tasks). Use outputKey like "step1_content" so later steps can reference {{step1_content}}.\n' +
     '6. For images, use action "image" with target.text as the image prompt AND target.contextRef for any additional instructions. outputKey like "step1_image".\n' +
-    '7. For research steps, include target.contextRef with the research query/instructions.\n' +
+    '7. For research steps, use target.researchQuery for the main research question/query text. Optionally include target.contextRef for additional research instructions.\n' +
     '8. For post steps that reference a previous step, use target.contentRef like "{{step1_content}}" to pull in that step\'s output. You can also add target.contextRef for additional posting instructions.\n' +
+    '8b. For pulse (goal) steps, use action "pulse" with target.goalId (ID of existing goal) and target.contextRef for instructions on what the AI should do with the goal.\n' +
     '9. If the user provides an image file, set "includeUserImage": true in the config of the post step that should use it. The system will automatically attach the image.\n' +
     '10. For scheduling: type "one-time" needs date+time. "daily" needs time. "weekly" needs dayOfWeek+time. "monthly" needs dayOfMonth+time.\n' +
     '11. Use 24-hour time format (e.g., "21:00" for 9pm).\n' +
@@ -2734,11 +2735,17 @@ function addAutoAgentAutomation(cardId) {
         stepConfig.includeImage = 'custom';
         stepConfig._hasUserImage = true;
       }
+      // v28.4: For research steps, ensure contextRef maps to researchQuery (AI may use either)
+      var stepTarget = s.target || {};
+      if (s.action === 'research' && !stepTarget.researchQuery && stepTarget.contextRef) {
+        stepTarget.researchQuery = stepTarget.contextRef;
+        delete stepTarget.contextRef;
+      }
       return {
         stepId: s.stepId || 1,
         name: s.name || (PIPELINE_STEP_TYPES[s.action] ? PIPELINE_STEP_TYPES[s.action].label : s.action),
         action: s.action,
-        target: s.target || {},
+        target: stepTarget,
         config: stepConfig,
         outputKey: s.outputKey || ('step' + (s.stepId || 1) + '_content')
       };
@@ -2838,11 +2845,17 @@ function editAutoAgentAutomation(cardId) {
       if (!s.target) s.target = {};
       s.target.uploadedImage = userImage;
     }
+    // v28.4: For research steps, map contextRef to researchQuery for correct field routing
+    var editTarget = s.target || {};
+    if ((s.action || 'studio') === 'research' && !editTarget.researchQuery && editTarget.contextRef) {
+      editTarget.researchQuery = editTarget.contextRef;
+      delete editTarget.contextRef;
+    }
     return {
       stepId: s.stepId || (idx + 1),
       name: s.name || '',
       action: s.action || 'studio',
-      target: s.target || {},
+      target: editTarget,
       config: stepConfig,
       outputKey: s.outputKey || ('step' + (idx + 1) + '_output')
     };
@@ -3090,7 +3103,7 @@ function renderFolioGallery() {
     html += '<iframe sandbox="allow-scripts" srcdoc="' + escapeSrcdoc(item.html || '<html><body style="background:#111;color:#555;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:system-ui;"><div>Empty</div></body></html>') + '" style="width:200%;height:200%;transform:scale(0.5);transform-origin:0 0;pointer-events:none;"></iframe>';
     html += '</div>';
     html += '<div class="folio-card-body">';
-    html += '<div class="folio-card-title">' + escapeHtml(item.title || 'Untitled') + '</div>';
+    html += '<div class="folio-card-title" onclick="event.stopPropagation();editFolioTitle(this,\'' + item.id + '\')" title="Click to rename">' + escapeHtml(item.title || 'Untitled') + '</div>';
     html += '<div class="folio-card-meta">';
     html += '<span class="folio-card-version-badge"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg> v' + versionCount + '</span>';
     if (item.branchedFrom) {
@@ -3115,6 +3128,42 @@ function toggleFolioPin(id) {
   }
   saveFolioItems(items);
   renderFolioGallery();
+}
+
+// v28.4: Inline folio title editing
+function editFolioTitle(el, id) {
+  if (el.querySelector('input')) return; // already editing
+  var currentTitle = '';
+  var items = getFolioItems();
+  for (var i = 0; i < items.length; i++) { if (items[i].id === id) { currentTitle = items[i].title || 'Untitled'; break; } }
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.value = currentTitle;
+  input.style.cssText = 'width:100%;background:var(--bg-secondary);border:1px solid var(--brand-accent, #a89878);border-radius:6px;color:var(--text-primary);font-size:inherit;font-weight:inherit;font-family:inherit;padding:2px 6px;outline:none;';
+  input.onclick = function(e) { e.stopPropagation(); };
+  var save = function() {
+    var newTitle = input.value.trim() || 'Untitled';
+    var items2 = getFolioItems();
+    for (var j = 0; j < items2.length; j++) {
+      if (items2[j].id === id) {
+        items2[j].title = newTitle;
+        items2[j].updatedAt = new Date().toISOString();
+        break;
+      }
+    }
+    saveFolioItems(items2);
+    renderFolioGallery();
+  };
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    e.stopPropagation();
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { e.preventDefault(); renderFolioGallery(); }
+  };
+  el.textContent = '';
+  el.appendChild(input);
+  input.focus();
+  input.select();
 }
 
 // --- Full-Screen Living Canvas View ---
@@ -3675,6 +3724,12 @@ function sendFolioChatMessage() {
         renderFolioChatMessages();
       }
     );
+  }).catch(function(err) {
+    // v28.4: Reset streaming flag on promise rejection to prevent stuck state
+    if (_folioRenderTimer) { clearTimeout(_folioRenderTimer); _folioRenderTimer = null; }
+    assistantMsg.content = (assistantMsg.content || '') + '\n\n[Error: ' + (err.message || err) + ']';
+    _folioStreaming = false;
+    renderFolioChatMessages();
   });
 }
 
@@ -3714,7 +3769,9 @@ function renderFolioChatMessages() {
           bubbleDiv.innerHTML = '<p class="auto-agent-thinking">Creating visual...</p>';
         } else {
           // Only update text during streaming (no iframe re-render until complete)
-          var hasCompleteHtml = lastMsg.content.indexOf('```html') !== -1 && lastMsg.content.indexOf('```', lastMsg.content.indexOf('```html') + 7) !== -1;
+          // v28.4: Case-insensitive check for ```html
+          var _lc = lastMsg.content.toLowerCase();
+          var hasCompleteHtml = _lc.indexOf('```html') !== -1 && _lc.indexOf('```', _lc.indexOf('```html') + 7) !== -1;
           if (!hasCompleteHtml) {
             bubbleDiv.innerHTML = renderFolioChatContent(lastMsg.content, _folioMessages.length - 1);
           }
@@ -3760,7 +3817,22 @@ function renderFolioChatMessages() {
 }
 
 function renderFolioChatContent(text, msgIdx) {
-  var parts = text.split(/```html\s*/);
+  // v28.4: Case-insensitive match for ```html, ```HTML, ```Html etc.
+  var parts = text.split(/```html\s*/i);
+  // v28.4: Also detect bare ``` code fences containing HTML (<!DOCTYPE or <html)
+  if (parts.length === 1) {
+    var bareMatch = text.split(/```\s*\n/);
+    if (bareMatch.length > 1) {
+      for (var bm = 1; bm < bareMatch.length; bm++) {
+        var bareEnd = bareMatch[bm].indexOf('```');
+        var bareCode = bareEnd !== -1 ? bareMatch[bm].substring(0, bareEnd) : bareMatch[bm];
+        if (bareCode.indexOf('<!DOCTYPE') !== -1 || bareCode.indexOf('<html') !== -1 || (bareCode.indexOf('<head') !== -1 && bareCode.indexOf('<body') !== -1)) {
+          parts = text.split(/```\s*\n/);
+          break;
+        }
+      }
+    }
+  }
   var html = '';
   parts.forEach(function(part, i) {
     if (i === 0) {
@@ -3788,12 +3860,12 @@ function renderFolioChatContent(text, msgIdx) {
         html += '<span class="preview-type-badge" style="background:var(--brand-accent, #a89878);">Visual</span>';
         html += '<span class="preview-name">Live Preview</span>';
         html += '</div>';
-        html += '<div class="folio-preview-frame">';
-        html += '<iframe sandbox="allow-scripts allow-same-origin" srcdoc="' + escapeSrcdoc(htmlCode.trim()) + '" style="width:100%;height:100%;border:none;"></iframe>';
+        html += '<div class="folio-preview-frame" style="height:auto;overflow:visible;">';
+        html += '<iframe sandbox="allow-scripts allow-same-origin" srcdoc="' + escapeSrcdoc(htmlCode.trim()) + '" style="width:100%;border:none;min-height:200px;" onload="resizeFolioPreviewIframe(this)"></iframe>';
         html += '</div>';
         html += '<div class="auto-agent-preview-actions" style="border-color:var(--brand-accent-10, rgba(168,152,120,0.1));">';
         html += '<button class="auto-agent-add-btn" id="' + previewId + '" onclick="savePreviewToFolio(this)">Save to Folio</button>';
-        html += '<button class="auto-agent-edit-btn" onclick="expandFolioPreview(\'' + previewId + '\')">Expand</button>';
+        html += '<button class="auto-agent-edit-btn" onclick="saveFolioPreviewToLibrary(\'' + previewId + '\')">Save to Library</button>';
         html += '</div>';
         html += '</div>';
       }
@@ -3825,6 +3897,30 @@ function savePreviewToFolio(btn) {
   btn.style.pointerEvents = 'none';
 }
 
+// v28.4: Save folio preview content to Library
+function saveFolioPreviewToLibrary(previewId) {
+  var htmlCode = window._folioPreviews && window._folioPreviews[previewId];
+  if (!htmlCode) { showToast('Could not find preview data', 'error'); return; }
+  var currentMode = localStorage.getItem('roweos_app_mode') || 'brand';
+  var key = currentMode === 'life' ? '_life' : (typeof brands !== 'undefined' && typeof selectedBrand !== 'undefined' && brands[selectedBrand] ? (brands[selectedBrand].shortName || brands[selectedBrand].name) : 'default');
+  if (typeof fileLibrary === 'undefined') window.fileLibrary = {};
+  if (!fileLibrary[key]) fileLibrary[key] = { folders: [{ id: 'root', name: 'Root', parentId: null }], files: [] };
+  if (!fileLibrary[key].files) fileLibrary[key].files = [];
+  var dateStr = new Date().toLocaleDateString();
+  fileLibrary[key].files.push({
+    id: 'file_' + Date.now(),
+    name: 'Folio Visual - ' + dateStr,
+    type: 'text/html',
+    content: htmlCode,
+    folderId: 'root',
+    createdAt: new Date().toISOString(),
+    metadata: { source: 'folio-chat' }
+  });
+  try { localStorage.setItem('roweos_file_library', JSON.stringify(fileLibrary)); } catch(e) {}
+  if (typeof writeDB === 'function') writeDB('library/brand', { data: JSON.stringify(fileLibrary) });
+  showToast('Folio visual saved to Library', 'success');
+}
+
 function expandFolioPreview(previewId) {
   var htmlCode = window._folioPreviews && window._folioPreviews[previewId];
   if (!htmlCode) { showToast('Could not find preview data', 'error'); return; }
@@ -3843,6 +3939,19 @@ function expandFolioPreview(previewId) {
   iframe.style.cssText = 'flex:1;border:none;width:100%;background:#111;';
   overlay.appendChild(iframe);
   document.body.appendChild(overlay);
+}
+
+// v29.0: Auto-resize folio preview iframe to match its content height
+function resizeFolioPreviewIframe(iframe) {
+  try {
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    if (doc && doc.body) {
+      var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight, 200);
+      iframe.style.height = h + 'px';
+    }
+  } catch(e) {
+    iframe.style.height = '400px';
+  }
 }
 
 function savePreviewToFolioById(previewId) {
@@ -5535,6 +5644,12 @@ function savePipeline() {
       _pipelineSteps[i].config = _pipelineSteps[i].config || {};
       var resBrandEl2 = document.getElementById('pipelineStepResearchBrandCtx_' + i);
       if (resBrandEl2) _pipelineSteps[i].config.includeBrandContext = resBrandEl2.checked;
+    } else if (action === 'pulse') {
+      // v28.4: Save pulse step data (goalId + context) — was missing, causing data loss on save
+      var pulseGoalEl2 = document.getElementById('pipelineStepGoal_' + i);
+      if (pulseGoalEl2) stepTarget.goalId = pulseGoalEl2.value;
+      var pulseCtxEl2 = document.getElementById('pipelineStepContext_' + i);
+      if (pulseCtxEl2 && pulseCtxEl2.value.trim()) stepTarget.contextRef = pulseCtxEl2.value.trim();
     } else {
       var textEl2 = document.getElementById('pipelineStepText_' + i);
       if (textEl2) stepTarget.text = textEl2.value.trim();
@@ -5743,6 +5858,11 @@ function createAutomationFromChat(cardIndex) {
           if (s.target.emailBody) stepTarget.emailBody = s.target.emailBody;
           if (s.target.goalId) stepTarget.goalId = s.target.goalId;
           if (s.target.imageRef) stepTarget.imageRef = s.target.imageRef;
+        }
+        // v28.4: For research steps, map contextRef to researchQuery if researchQuery is missing
+        if ((s.action || 'studio') === 'research' && !stepTarget.researchQuery && stepTarget.contextRef) {
+          stepTarget.researchQuery = stepTarget.contextRef;
+          delete stepTarget.contextRef;
         }
         steps.push({
           stepId: i + 1,

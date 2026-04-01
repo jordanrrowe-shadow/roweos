@@ -8925,6 +8925,272 @@ function saveInlineGoal(card) {
 }
 
 /**
+ * v28.4: Create a Pulse goal from automation or AI chat
+ * @param {Object} goalData - { title, description, items: string[] }
+ * @returns {string} Created goal ID
+ */
+function createPulseGoalFromAutomation(goalData) {
+  if (!goalData || !goalData.title) {
+    console.warn('[Pulse] createPulseGoalFromAutomation: no title provided');
+    return null;
+  }
+  var currentMode = localStorage.getItem('roweos_app_mode') || 'brand';
+  var items = [];
+  if (goalData.items && Array.isArray(goalData.items)) {
+    goalData.items.forEach(function(taskText, idx) {
+      if (typeof taskText === 'string' && taskText.trim()) {
+        items.push({
+          id: 'item_' + Date.now() + '_' + idx,
+          text: taskText.trim(),
+          completed: false,
+          completedAt: null
+        });
+      }
+    });
+  }
+  var newGoal = {
+    id: 'goal_' + Date.now(),
+    title: goalData.title.trim(),
+    description: goalData.description || '',
+    items: items,
+    sections: null,
+    createdAt: new Date().toISOString(),
+    _modifiedAt: Date.now(),
+    source: currentMode === 'life' ? 'lifeai' : 'automation',
+    archived: false,
+    completed: false
+  };
+  pulseGoals.unshift(newGoal);
+  savePulseGoals();
+  if (typeof renderPulse3Overview === 'function') renderPulse3Overview();
+  if (typeof renderPulse3Checklists === 'function') renderPulse3Checklists();
+  console.log('[Pulse] Goal created from automation:', newGoal.id, newGoal.title);
+  return newGoal.id;
+}
+
+/**
+ * v28.4: Check AI chat response for goal creation blocks
+ * Looks for ```pulse_goal JSON blocks in the response and offers to create them.
+ * Called from both LifeAI and BrandAI onComplete handlers.
+ */
+function checkForPulseGoalInResponse(streamContainer, fullText) {
+  if (!streamContainer || !fullText) return;
+  // Match ```pulse_goal ... ``` blocks
+  var goalMatch = fullText.match(/```pulse_goal\s*([\s\S]*?)```/);
+  if (!goalMatch) return;
+  var goalJson = null;
+  try { goalJson = JSON.parse(goalMatch[1].trim()); } catch(e) {
+    console.warn('[Pulse] Could not parse pulse_goal JSON:', e.message);
+    return;
+  }
+  if (!goalJson || !goalJson.title) return;
+  // Build an action bar similar to checkForSaveToIdentity
+  var actionBar = document.createElement('div');
+  actionBar.style.cssText = 'margin-top: 12px; padding: 12px 16px; background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; gap: 12px;';
+  var itemCount = (goalJson.items && Array.isArray(goalJson.items)) ? goalJson.items.length : 0;
+  var infoDiv = document.createElement('div');
+  infoDiv.style.cssText = 'display: flex; align-items: center; gap: 10px; flex: 1;';
+  infoDiv.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#a89878" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>' +
+    '<div style="flex: 1;">' +
+      '<div style="font-weight: 500; color: var(--text-primary); font-size: var(--text-sm);">Add goal to Pulse?</div>' +
+      '<div style="font-size: var(--text-xs); color: var(--text-muted);">"' + escapeHtml(goalJson.title) + '" with ' + itemCount + ' task(s)</div>' +
+    '</div>';
+  var btnGroup = document.createElement('div');
+  btnGroup.style.cssText = 'display: flex; gap: 8px;';
+  var dismissBtn = document.createElement('button');
+  dismissBtn.style.cssText = 'padding: 6px 12px; background: transparent; border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; font-size: var(--text-sm);';
+  dismissBtn.textContent = 'Dismiss';
+  dismissBtn.onclick = function() { actionBar.remove(); };
+  var addBtn = document.createElement('button');
+  addBtn.style.cssText = 'padding: 6px 12px; background: var(--accent); border: none; border-radius: var(--radius-sm); color: var(--accent-text, #fff); cursor: pointer; font-size: var(--text-sm); font-weight: 500;';
+  addBtn.textContent = 'Add to Pulse';
+  addBtn.onclick = function() {
+    var goalId = createPulseGoalFromAutomation(goalJson);
+    if (goalId) {
+      addBtn.disabled = true;
+      addBtn.textContent = 'Added';
+      addBtn.style.opacity = '0.6';
+      dismissBtn.style.display = 'none';
+      showToast('Goal added to Pulse', 'success');
+    } else {
+      showToast('Failed to create goal', 'error');
+    }
+  };
+  btnGroup.appendChild(dismissBtn);
+  btnGroup.appendChild(addBtn);
+  actionBar.appendChild(infoDiv);
+  actionBar.appendChild(btnGroup);
+  // Find the bubble to append to
+  var bubble = streamContainer.closest('.conversation-message-bubble');
+  if (bubble) {
+    bubble.appendChild(actionBar);
+  } else {
+    streamContainer.appendChild(actionBar);
+  }
+}
+
+/**
+ * v29.0: Add a pending pulse goal from an inline chat card
+ * Called from the formatted pulse_goal card buttons rendered by formatMessageContent()
+ */
+function addPendingPulseGoal(goalId, btn) {
+  var goalData = window._pendingPulseGoals && window._pendingPulseGoals[goalId];
+  if (!goalData) { showToast('Could not find goal data', 'error'); return; }
+  var created = createPulseGoalFromAutomation(goalData);
+  if (created) {
+    btn.textContent = 'Added';
+    btn.style.background = '#22c55e';
+    btn.style.borderColor = '#22c55e';
+    btn.style.color = '#fff';
+    btn.style.pointerEvents = 'none';
+    var dismissBtn = btn.nextElementSibling;
+    if (dismissBtn) dismissBtn.style.display = 'none';
+    showToast('Goal added to Pulse', 'success');
+  } else {
+    showToast('Failed to create goal', 'error');
+  }
+}
+
+/**
+ * v28.4: Motivate Me - pick an active goal and send a motivational prompt to agent chat
+ */
+function motivateMe() {
+  var activeGoals = pulseGoals.filter(function(g) {
+    return !g.archived && !g.completed;
+  });
+
+  if (activeGoals.length === 0) {
+    showToast('No active goals to motivate you on. Create a goal first!', 'warning');
+    return;
+  }
+
+  // Build picker modal
+  var overlay = document.createElement('div');
+  overlay.id = 'motivateMeOverlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;max-width:480px;width:90%;max-height:70vh;overflow-y:auto;';
+
+  var header = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">' +
+    '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
+    '<div>' +
+      '<div style="font-weight:600;font-size:var(--text-lg);color:var(--text-primary);">Motivate Me</div>' +
+      '<div style="font-size:var(--text-sm);color:var(--text-muted);">Pick a goal to get motivated on</div>' +
+    '</div>' +
+  '</div>';
+
+  var goalListHtml = activeGoals.map(function(goal) {
+    var allItems = [];
+    if (goal.sections && goal.sections.length > 0) {
+      goal.sections.forEach(function(s) { if (s.items) allItems = allItems.concat(s.items); });
+    }
+    if ((!goal.sections || goal.sections.length === 0) && goal.items) {
+      allItems = allItems.concat(goal.items);
+    }
+    var total = allItems.length;
+    var done = allItems.filter(function(i) { return i.completed; }).length;
+    var progress = total > 0 ? Math.round((done / total) * 100) : 0;
+    var remaining = total - done;
+
+    return '<div class="motivate-me-goal-item" onclick="selectMotivateGoal(\'' + goal.id + '\')" ' +
+      'style="padding:12px 16px;border:1px solid var(--border-color);border-radius:var(--radius-md);cursor:pointer;margin-bottom:8px;transition:background 0.15s,border-color 0.15s;" ' +
+      'onmouseover="this.style.background=\'var(--bg-tertiary)\';this.style.borderColor=\'var(--accent)\'" ' +
+      'onmouseout="this.style.background=\'transparent\';this.style.borderColor=\'var(--border-color)\'">' +
+      '<div style="font-weight:500;color:var(--text-primary);font-size:var(--text-base);margin-bottom:4px;">' + escapeHtml(goal.title) + '</div>' +
+      (goal.description ? '<div style="font-size:var(--text-sm);color:var(--text-muted);margin-bottom:6px;line-height:1.4;">' + escapeHtml(goal.description).substring(0, 120) + (goal.description.length > 120 ? '...' : '') + '</div>' : '') +
+      '<div style="display:flex;align-items:center;gap:8px;font-size:var(--text-xs);color:var(--text-muted);">' +
+        '<div style="flex:1;height:4px;background:var(--bg-primary);border-radius:2px;overflow:hidden;">' +
+          '<div style="height:100%;width:' + progress + '%;background:var(--accent);border-radius:2px;transition:width 0.3s;"></div>' +
+        '</div>' +
+        '<span>' + done + '/' + total + '</span>' +
+        (remaining > 0 ? '<span style="color:var(--text-secondary);">' + remaining + ' remaining</span>' : '<span style="color:var(--accent);">All done!</span>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var cancelBtn = '<div style="text-align:right;margin-top:12px;">' +
+    '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="document.getElementById(\'motivateMeOverlay\').remove()">Cancel</button>' +
+  '</div>';
+
+  modal.innerHTML = header + goalListHtml + cancelBtn;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+
+/**
+ * v28.4: Handle goal selection from Motivate Me picker
+ */
+function selectMotivateGoal(goalId) {
+  var goal = pulseGoals.find(function(g) { return g.id === goalId; });
+  if (!goal) {
+    showToast('Goal not found', 'error');
+    return;
+  }
+
+  // Close the picker
+  var overlay = document.getElementById('motivateMeOverlay');
+  if (overlay) overlay.remove();
+
+  // Gather goal details for the prompt
+  var allItems = [];
+  if (goal.sections && goal.sections.length > 0) {
+    goal.sections.forEach(function(s) {
+      if (s.items) {
+        s.items.forEach(function(item) {
+          allItems.push({ text: item.text, completed: item.completed, section: s.name });
+        });
+      }
+    });
+  }
+  if ((!goal.sections || goal.sections.length === 0) && goal.items) {
+    goal.items.forEach(function(item) {
+      allItems.push({ text: item.text, completed: item.completed, section: null });
+    });
+  }
+
+  var completedItems = allItems.filter(function(i) { return i.completed; });
+  var remainingItems = allItems.filter(function(i) { return !i.completed; });
+
+  var prompt = 'Help me get started with my goal: ' + goal.title + '.';
+  if (goal.description) {
+    prompt += '\n\nGoal description: ' + goal.description;
+  }
+  if (remainingItems.length > 0) {
+    prompt += '\n\nRemaining tasks (' + remainingItems.length + '):';
+    remainingItems.forEach(function(item) {
+      prompt += '\n- ' + item.text + (item.section ? ' (' + item.section + ')' : '');
+    });
+  }
+  if (completedItems.length > 0) {
+    prompt += '\n\nAlready completed (' + completedItems.length + '):';
+    completedItems.forEach(function(item) {
+      prompt += '\n- ' + item.text;
+    });
+  }
+  prompt += '\n\nGive me motivation, a game plan, and actionable first steps to make progress right now.';
+
+  // Navigate to agent chat and auto-send
+  showView('agent');
+  setTimeout(function() {
+    var input = document.getElementById('agentCommand');
+    if (input) {
+      input.value = prompt;
+      // Trigger auto-resize if textarea
+      if (input.tagName === 'TEXTAREA') {
+        input.style.height = 'auto';
+        input.style.height = input.scrollHeight + 'px';
+      }
+      // Auto-send
+      if (typeof runAgent === 'function') {
+        runAgent();
+      }
+    }
+  }, 300);
+}
+
+/**
  * v22.41: Inline goal title editing — click to edit
  */
 function editGoalTitleInline(el, goalId) {

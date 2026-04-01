@@ -446,7 +446,8 @@ async function stepPost(uid, config) {
         console.log('[Scavenger:Post] Posted reply to @' + target.authorHandle);
         // v25.4: Log to social_activity for Activity tab
         try {
-          await helpers.getDb().collection('roweos_users/' + uid + '/social_activity').add({
+          var activityBasePath = await helpers.getBasePath(uid);
+          await helpers.getDb().collection(activityBasePath + '/social_activity').add({
             type: 'scavenger_reply',
             platform: 'x',
             description: 'Auto-replied to @' + target.authorHandle + ': ' + (target.draftText || '').substring(0, 80),

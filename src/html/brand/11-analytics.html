@@ -35,6 +35,12 @@
 
           <!-- Website Analytics Tab -->
           <div id="analyticsWebsiteTab">
+            <!-- v28.4: Custom website URL input -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <input type="text" id="analyticsWebsiteUrl" placeholder="Enter website URL (e.g. mysite.com)" style="flex:1;padding:6px 12px;font-size:13px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;outline:none;" onkeydown="if(event.key==='Enter'){saveAnalyticsSiteUrl();loadAnalyticsDashboard();}">
+              <button onclick="saveAnalyticsSiteUrl();loadAnalyticsDashboard();" style="padding:6px 12px;font-size:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;font-family:inherit;white-space:nowrap;">Set URL</button>
+            </div>
             <div id="analyticsLoading" style="text-align:center;padding:60px;color:var(--text-muted);">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:spin 1s linear infinite;margin-bottom:12px;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
               <div>Loading analytics...</div>

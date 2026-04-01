@@ -1023,29 +1023,33 @@ function initMobileV2() {
   // v24.27: Use captured initial height so keyboard-close detection is reliable
   if (window.visualViewport && !window._vvListenerAdded) {
     window._vvListenerAdded = true;
+    // v29.0: Use a getter so _initialViewportHeight stays fresh after orientation changes
     var _initialViewportHeight = window.innerHeight;
+    window.addEventListener('orientationchange', function() {
+      setTimeout(function() { _initialViewportHeight = window.innerHeight; }, 500);
+    });
+    // v29.0: Debounce to prevent rapid-fire repositioning during keyboard animation
+    var _kbResizeTimer = null;
     window.visualViewport.addEventListener('resize', function() {
       if (window.innerWidth > 768) return;
+      if (_kbResizeTimer) clearTimeout(_kbResizeTimer);
       var vv = window.visualViewport;
       var keyboardOpen = vv.height < _initialViewportHeight * 0.75;
+      var kbHeight = _initialViewportHeight - vv.height - vv.offsetTop;
       var inputs = document.querySelectorAll('#agentView .chat-input-area');
       var followup = document.getElementById('followupInputContainer');
-      // v24.4: Also adjust automations agent fixed input
       var autoAgentInput = document.querySelector('.auto-agent-input-area');
-      // v24.24: Account for mobile nav bar height when calculating keyboard offset
-      // v24.26: When keyboard is open, position ALL fixed inputs directly above keyboard
-      var kbHeight = _initialViewportHeight - vv.height - vv.offsetTop;
-      // Also adjust followup input in conversation view
       var followupV2 = document.querySelector('#agentConversation > .chat-input-v2');
       if (keyboardOpen) {
         var offset = Math.max(kbHeight, 0) + 'px';
         inputs.forEach(function(el) { el.style.bottom = offset; });
         if (followupV2 && getComputedStyle(followupV2).position === 'fixed') followupV2.style.bottom = offset;
+        if (autoAgentInput && autoAgentInput.style.position === 'fixed') autoAgentInput.style.bottom = offset;
       } else {
         inputs.forEach(function(el) { el.style.bottom = ''; });
         if (followupV2) followupV2.style.bottom = '';
-        // v24.27: Force box-sizing reflow after keyboard closes — same hack as page load
-        // iOS Safari corrupts layout after keyboard dismiss; toggling box-sizing fixes it
+        if (autoAgentInput) autoAgentInput.style.bottom = '';
+        // v24.27: Force box-sizing reflow after keyboard closes
         requestAnimationFrame(function() {
           var _kbFix = document.createElement('style');
           _kbFix.textContent = '* { box-sizing: content-box !important; }';
@@ -1058,36 +1062,24 @@ function initMobileV2() {
         });
       }
       if (typeof resizeHelix === 'function') resizeHelix();
-      if (autoAgentInput && autoAgentInput.style.position === 'fixed') {
-        autoAgentInput.style.bottom = keyboardOpen ? (_initialViewportHeight - vv.height - vv.offsetTop) + 'px' : '';
-      }
+      // v29.0: Single debounced scrollIntoView (replaces triple-scroll that caused flicker)
       if (keyboardOpen) {
-        // v22.7: Scroll active input into view (landing + followup)
-        if (followup && document.activeElement && followup.contains(document.activeElement)) {
-          followup.scrollIntoView({ block: 'end', behavior: 'smooth' });
-        }
-        var landingInput = document.getElementById('agentCommand');
-        if (landingInput && document.activeElement === landingInput) {
-          var inputArea = landingInput.closest('.chat-input-area');
-          if (inputArea) inputArea.scrollIntoView({ block: 'end', behavior: 'smooth' });
-        }
-        // v24.4: Scroll automations agent input into view
-        var autoInput = document.getElementById('autoAgentInput');
-        if (autoInput && document.activeElement === autoInput) {
-          var autoArea = autoInput.closest('.auto-agent-input-area');
-          if (autoArea) autoArea.scrollIntoView({ block: 'end', behavior: 'smooth' });
-        }
+        _kbResizeTimer = setTimeout(function() {
+          var active = document.activeElement;
+          if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')) return;
+          var scrollTarget = active.closest('.chat-input-area') || active.closest('.chat-input-v2') || active.closest('.auto-agent-input-area');
+          if (scrollTarget) scrollTarget.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }, 150);
       }
     });
   }
 
-  // v24.27: Safety net — aggressively clear ALL inline positioning when keyboard closes
+  // v24.27: Safety net -- clear inline positioning when keyboard closes
   document.addEventListener('focusout', function() {
     if (window.innerWidth > 768) return;
     setTimeout(function() {
       var active = document.activeElement;
       if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
-      // Reset all input positions
       var inputs = document.querySelectorAll('#agentView .chat-input-area');
       inputs.forEach(function(el) { el.style.bottom = ''; });
       var followupV2 = document.querySelector('#agentConversation > .chat-input-v2');
@@ -1098,8 +1090,7 @@ function initMobileV2() {
     }, 300);
   });
 
-  // v22.7: Scroll landing chat input into view on focus (iOS keyboard workaround)
-  // v24.24: Double-tap ensures keyboard fully animates before scroll
+  // v29.0: Single scrollIntoView on focus (replaced double-tap that caused cursor flicker)
   var agentCmd = document.getElementById('agentCommand');
   if (agentCmd && window.innerWidth <= 768) {
     agentCmd.addEventListener('focus', function() {
@@ -1107,12 +1098,7 @@ function initMobileV2() {
       setTimeout(function() {
         var inputArea = self.closest('.chat-input-area');
         if (inputArea) inputArea.scrollIntoView({ block: 'end', behavior: 'smooth' });
-      }, 350);
-      // Second pass after keyboard fully opens
-      setTimeout(function() {
-        var inputArea = self.closest('.chat-input-area');
-        if (inputArea) inputArea.scrollIntoView({ block: 'end', behavior: 'smooth' });
-      }, 600);
+      }, 400);
     });
   }
 }

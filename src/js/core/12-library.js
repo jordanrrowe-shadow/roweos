@@ -4078,23 +4078,22 @@ function uploadLibraryFileToChat() {
     if (brandSelect) brandSelect.value = libraryPreviewBrandIdx.toString();
   }
   
-  // Set as attached file (using the landing input file variables)
-  currentAgentFile = { name: fileName, type: 'text/plain', size: textContent.length };
-  currentAgentFileContent = '[Library Document: ' + file.name + ']\n\n' + textContent;
-  
-  // Update the file preview UI
-  var preview = document.getElementById('agentFilePreview');
-  if (preview) {
-    preview.innerHTML = '<span class="file-name">' + escapeHtml(fileName) + '</span><span class="file-status" style="color: var(--success);">From Library</span><button class="file-remove" onclick="removeAgentFile()">✕</button>';
-    preview.classList.remove('hidden');
-  }
-  
-  // Mark attach button
-  var landingAttach = document.getElementById('landingAttachBtn');
-  var followupAttach = document.getElementById('followupAttachBtn');
-  if (landingAttach) landingAttach.classList.add('has-file');
-  if (followupAttach) followupAttach.classList.add('has-file');
-  
+  // v28.4: Use currentAgentFiles array for proper file chip display
+  var libFileId = 'lib_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+  var libFileEntry = {
+    id: libFileId,
+    file: { name: fileName, type: 'text/plain', size: textContent.length },
+    name: file.name || fileName,
+    type: 'text/plain',
+    content: '[Library Document: ' + file.name + ']\n\n' + textContent,
+    status: 'ready',
+    source: 'library'
+  };
+  // Clear any existing files and add this one
+  currentAgentFiles = [libFileEntry];
+  currentAgentFile = libFileEntry.file;
+  currentAgentFileContent = libFileEntry.content;
+
   // Close preview modal and navigate to chat
   closeLibraryPreview();
   showView('agent');
@@ -4126,8 +4125,18 @@ function uploadLibraryFileToChat() {
     landingContent.classList.remove('hidden');
   }
   
-  // Focus the input
+  // Focus the input and render file chips after DOM is ready
   setTimeout(function() {
+    // v28.4: Render file chips after view switch so DOM container is visible
+    if (typeof renderAgentFileChips === 'function') {
+      renderAgentFileChips();
+    }
+    // Mark attach buttons
+    var landingAttach = document.getElementById('landingAttachBtn');
+    var followupAttach = document.getElementById('followupAttachBtn');
+    if (landingAttach) landingAttach.classList.add('has-file');
+    if (followupAttach) followupAttach.classList.add('has-file');
+
     var input = document.getElementById('agentCommand');
     if (input) {
       input.focus();
@@ -7329,7 +7338,7 @@ function deleteSelectedAIOp() {
 function updateRunButton() {
   var btn = document.getElementById('runBtn');
   if (!btn) return;
-  
+
   if (selectedOp) {
     btn.disabled = false;
     // v9.1.14: Different button text for different operation types
@@ -7344,5 +7353,727 @@ function updateRunButton() {
     btn.disabled = true;
     btn.textContent = 'Add Content from Library';
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// v28.4: VISUAL ASSET LIBRARY
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * v28.4: Switch between Files and Visual Assets tabs in Library
+ */
+function switchLibraryMainTab(tab) {
+  // Update tab buttons
+  var tabBar = document.getElementById('libraryTabBar');
+  if (tabBar) {
+    var btns = tabBar.querySelectorAll('.library-tab-btn');
+    btns.forEach(function(btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+    });
+  }
+
+  // Toggle sections
+  var libraryHeader = document.querySelector('.library-header');
+  var brandsGrid = document.getElementById('libraryBrandsGrid');
+  var filesSection = document.getElementById('libraryFilesSection');
+  var visualAssets = document.getElementById('libraryVisualAssets');
+
+  var gdriveSection = document.getElementById('libraryGoogleDrive');
+
+  if (tab === 'files') {
+    if (libraryHeader) libraryHeader.style.display = '';
+    if (brandsGrid) brandsGrid.style.display = '';
+    if (filesSection) filesSection.classList.add('hidden');
+    if (visualAssets) visualAssets.classList.add('hidden');
+    if (gdriveSection) gdriveSection.classList.add('hidden');
+    renderLibraryView();
+  } else if (tab === 'visual-assets') {
+    if (libraryHeader) libraryHeader.style.display = 'none';
+    if (brandsGrid) brandsGrid.style.display = 'none';
+    if (filesSection) filesSection.classList.add('hidden');
+    if (visualAssets) visualAssets.classList.remove('hidden');
+    if (gdriveSection) gdriveSection.classList.add('hidden');
+    renderVisualAssets();
+  } else if (tab === 'google-drive') {
+    if (libraryHeader) libraryHeader.style.display = 'none';
+    if (brandsGrid) brandsGrid.style.display = 'none';
+    if (filesSection) filesSection.classList.add('hidden');
+    if (visualAssets) visualAssets.classList.add('hidden');
+    if (gdriveSection) gdriveSection.classList.remove('hidden');
+    updateGoogleDriveUI();
+  }
+}
+
+/**
+ * v28.4: Collect all visual assets from library files + Image Lab
+ * Returns array of { id, name, dataUrl, source, date, brandIdx, originalIdx }
+ */
+function collectVisualAssets() {
+  var assets = [];
+  var IMAGE_EXTENSIONS = /\.(jpg|jpeg|png|gif|svg|webp)$/i;
+  var IMAGE_TYPES = /^image\//;
+
+  // 1. Collect from brand library files (uploaded images)
+  brands.forEach(function(brand, brandIdx) {
+    var lib = getLibraryForBrandIndex(brandIdx);
+    if (!lib || !lib.files) return;
+    lib.files.forEach(function(file) {
+      var isImage = false;
+      if (file.type === 'image') isImage = true;
+      else if (file.fileType && IMAGE_TYPES.test(file.fileType)) isImage = true;
+      else if (file.name && IMAGE_EXTENSIONS.test(file.name)) isImage = true;
+      else if (file.content && typeof file.content === 'string' && file.content.indexOf('data:image') === 0) isImage = true;
+
+      if (isImage && file.content) {
+        assets.push({
+          id: file.id,
+          name: file.name || 'Unnamed Image',
+          dataUrl: file.content,
+          source: 'Uploaded',
+          date: file.savedAt || file.updatedAt || '',
+          brandIdx: brandIdx,
+          brandName: brand.shortName || brand.name,
+          assetType: 'library'
+        });
+      }
+    });
+  });
+
+  // 2. Collect from Image Lab (roweos_auto_lab_images)
+  var labImages = [];
+  try { labImages = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]'); } catch(e) {}
+  if (Array.isArray(labImages)) {
+    labImages.forEach(function(img, idx) {
+      if (!img || !img.dataUrl) return;
+      var sourceName = 'From Image Lab';
+      if (img.model === 'infographic') sourceName = 'Infographic';
+      else if (img.model === 'auto') sourceName = 'From Automation';
+      else if (img.model) sourceName = 'From Image Lab (' + img.model + ')';
+
+      assets.push({
+        id: 'lab_' + idx + '_' + (img.createdAt || ''),
+        name: img.prompt ? img.prompt.substring(0, 60) : 'Generated Image',
+        dataUrl: img.dataUrl,
+        source: sourceName,
+        date: img.createdAt || '',
+        labIndex: idx,
+        assetType: 'lab'
+      });
+    });
+  }
+
+  // 3. Collect from LifeAI library if in life mode
+  var isLifeMode = document.documentElement.classList.contains('life-mode');
+  if (isLifeMode) {
+    var lifeLib = null;
+    try { lifeLib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : null; } catch(e) {}
+    if (lifeLib && lifeLib.files) {
+      lifeLib.files.forEach(function(file) {
+        var isImage = false;
+        if (file.type === 'image') isImage = true;
+        else if (file.fileType && IMAGE_TYPES.test(file.fileType)) isImage = true;
+        else if (file.name && IMAGE_EXTENSIONS.test(file.name)) isImage = true;
+        else if (file.content && typeof file.content === 'string' && file.content.indexOf('data:image') === 0) isImage = true;
+
+        if (isImage && file.content) {
+          assets.push({
+            id: file.id,
+            name: file.name || 'Unnamed Image',
+            dataUrl: file.content,
+            source: 'Uploaded (Life)',
+            date: file.savedAt || file.updatedAt || '',
+            brandIdx: -1,
+            brandName: 'LifeAI',
+            assetType: 'library'
+          });
+        }
+      });
+    }
+  }
+
+  // Sort by date (newest first)
+  assets.sort(function(a, b) {
+    return new Date(b.date || 0) - new Date(a.date || 0);
+  });
+
+  return assets;
+}
+
+/**
+ * v28.4: Render the Visual Assets grid
+ */
+function renderVisualAssets() {
+  var grid = document.getElementById('libraryVisualGrid');
+  var emptyEl = document.getElementById('libraryVisualEmpty');
+  var statsEl = document.getElementById('libraryVisualStats');
+  if (!grid) return;
+
+  var assets = collectVisualAssets();
+
+  if (assets.length === 0) {
+    grid.innerHTML = '';
+    if (emptyEl) emptyEl.classList.remove('hidden');
+    if (statsEl) statsEl.textContent = '';
+    return;
+  }
+
+  if (emptyEl) emptyEl.classList.add('hidden');
+  if (statsEl) statsEl.textContent = assets.length + ' image' + (assets.length !== 1 ? 's' : '');
+
+  var html = assets.map(function(asset, idx) {
+    var dateStr = '';
+    if (asset.date) {
+      try {
+        dateStr = new Date(asset.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } catch(e) {}
+    }
+
+    return '<div class="visual-asset-card" onclick="openVisualAssetPreview(' + idx + ')">' +
+      '<img class="visual-asset-thumb" src="' + escapeHtml(asset.dataUrl) + '" alt="' + escapeHtml(asset.name) + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+      '<div class="visual-asset-info">' +
+        '<div class="visual-asset-name" title="' + escapeHtml(asset.name) + '">' + escapeHtml(asset.name) + '</div>' +
+        '<div class="visual-asset-meta">' +
+          '<span class="visual-asset-source">' + escapeHtml(asset.source) + '</span>' +
+          (dateStr ? '<span>' + dateStr + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  grid.innerHTML = html;
+}
+
+/**
+ * v28.4: Open preview lightbox for a visual asset
+ */
+function openVisualAssetPreview(idx) {
+  var assets = collectVisualAssets();
+  if (idx < 0 || idx >= assets.length) return;
+  var asset = assets[idx];
+
+  // Store for action handlers
+  window._visualPreviewAsset = asset;
+  window._visualPreviewIdx = idx;
+
+  var titleEl = document.getElementById('visualLightboxTitle');
+  var metaEl = document.getElementById('visualLightboxMeta');
+  var imageEl = document.getElementById('visualLightboxImage');
+  var actionsEl = document.getElementById('visualLightboxActions');
+
+  if (titleEl) titleEl.textContent = asset.name;
+
+  var dateStr = '';
+  if (asset.date) {
+    try {
+      dateStr = new Date(asset.date).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    } catch(e) {}
+  }
+  var metaParts = [asset.source];
+  if (dateStr) metaParts.push(dateStr);
+  if (asset.brandName) metaParts.push(asset.brandName);
+  if (metaEl) metaEl.textContent = metaParts.join(' \u00B7 ');
+
+  if (imageEl) {
+    var img = document.createElement('img');
+    img.src = asset.dataUrl;
+    img.alt = asset.name;
+    imageEl.innerHTML = '';
+    imageEl.appendChild(img);
+  }
+
+  // Build action buttons
+  if (actionsEl) {
+    var actionsHtml = '';
+    actionsHtml += '<button class="btn btn-secondary" onclick="downloadVisualAsset()">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+      ' Download</button>';
+    actionsHtml += '<button class="btn btn-secondary" onclick="sendVisualAssetToChat()">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' +
+      ' Send to Chat</button>';
+    actionsHtml += '<button class="btn btn-secondary" onclick="useVisualAssetInPost()">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>' +
+      ' Use in Post</button>';
+    actionsHtml += '<button class="btn btn-danger" onclick="deleteVisualAsset()">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>' +
+      ' Delete</button>';
+    actionsEl.innerHTML = actionsHtml;
+  }
+
+  document.getElementById('libraryVisualLightbox').classList.remove('hidden');
+}
+
+/**
+ * v28.4: Close the visual asset lightbox
+ */
+function closeVisualLightbox() {
+  var lb = document.getElementById('libraryVisualLightbox');
+  if (lb) lb.classList.add('hidden');
+  window._visualPreviewAsset = null;
+  window._visualPreviewIdx = null;
+}
+
+/**
+ * v28.4: Download the currently previewed visual asset
+ */
+function downloadVisualAsset() {
+  var asset = window._visualPreviewAsset;
+  if (!asset || !asset.dataUrl) return;
+  var a = document.createElement('a');
+  a.href = asset.dataUrl;
+  var ext = '.png';
+  if (asset.dataUrl.indexOf('data:image/jpeg') === 0) ext = '.jpg';
+  else if (asset.dataUrl.indexOf('data:image/gif') === 0) ext = '.gif';
+  else if (asset.dataUrl.indexOf('data:image/svg') === 0) ext = '.svg';
+  else if (asset.dataUrl.indexOf('data:image/webp') === 0) ext = '.webp';
+  a.download = (asset.name || 'roweos-image').replace(/[^a-zA-Z0-9_\-]/g, '_').substring(0, 50) + ext;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('Image downloaded', 'success');
+}
+
+/**
+ * v28.4: Send visual asset to BrandAI/LifeAI chat
+ */
+function sendVisualAssetToChat() {
+  var asset = window._visualPreviewAsset;
+  if (!asset || !asset.dataUrl) return;
+
+  // Set the image as pending attachment in chat
+  if (typeof window !== 'undefined') {
+    window._pendingChatImage = {
+      dataUrl: asset.dataUrl,
+      name: asset.name || 'Image from Library'
+    };
+  }
+
+  closeVisualLightbox();
+  showView('agent');
+  showToast('Image attached - type a message to send with it', 'success');
+}
+
+/**
+ * v28.4: Use visual asset in social post
+ */
+function useVisualAssetInPost() {
+  var asset = window._visualPreviewAsset;
+  if (!asset || !asset.dataUrl) return;
+
+  // Set as publisher image
+  window._socialPublisherImage = asset.dataUrl;
+
+  closeVisualLightbox();
+  showView('social');
+  showToast('Image ready for social post', 'success');
+}
+
+/**
+ * v28.4: Delete a visual asset
+ */
+function deleteVisualAsset() {
+  var asset = window._visualPreviewAsset;
+  if (!asset) return;
+  if (!confirm('Delete this image?')) return;
+
+  if (asset.assetType === 'lab') {
+    // Delete from Image Lab storage
+    var images = [];
+    try { images = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]'); } catch(e) {}
+    // Sort same as collectVisualAssets uses for lab items, find by labIndex
+    if (typeof asset.labIndex === 'number' && asset.labIndex >= 0 && asset.labIndex < images.length) {
+      images.splice(asset.labIndex, 1);
+      localStorage.setItem('roweos_auto_lab_images', JSON.stringify(images));
+    }
+  } else if (asset.assetType === 'library') {
+    // Delete from library files
+    var brandIdx = asset.brandIdx;
+    var lib;
+    if (brandIdx === -1) {
+      lib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : null;
+    } else {
+      lib = getLibraryForBrandIndex(brandIdx);
+    }
+    if (lib && lib.files) {
+      lib.files = lib.files.filter(function(f) { return f.id !== asset.id; });
+      if (brandIdx === -1) {
+        if (typeof saveLifeLibrary === 'function') saveLifeLibrary();
+      } else {
+        saveBrandLibrary(brandIdx, lib);
+      }
+    }
+  }
+
+  closeVisualLightbox();
+  renderVisualAssets();
+  showToast('Image deleted', 'success');
+}
+
+/**
+ * v28.4: Upload a new image to the Visual Assets section
+ */
+function uploadVisualAsset() {
+  var brandIdx = selectedBrand || 0;
+  var isLifeMode = document.documentElement.classList.contains('life-mode');
+
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/jpeg,image/png,image/gif,image/svg+xml,image/webp';
+  input.multiple = true;
+  var MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+  input.onchange = function(e) {
+    var files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    var oversized = Array.from(files).filter(function(f) { return f.size > MAX_FILE_SIZE; });
+    if (oversized.length > 0) {
+      showToast('Files over 5MB not supported: ' + oversized.map(function(f) { return f.name; }).join(', '), 'error');
+      return;
+    }
+
+    var lib;
+    if (isLifeMode) {
+      lib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : null;
+      if (!lib) lib = { files: [], folders: [] };
+    } else {
+      lib = getLibraryForBrandIndex(brandIdx);
+      if (!lib) lib = { files: [], folders: [] };
+    }
+
+    var processedCount = 0;
+    Array.from(files).forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        var newFile = {
+          id: 'visual_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+          name: file.name,
+          type: 'image',
+          content: evt.target.result,
+          fileType: file.type,
+          fileSize: file.size,
+          folderId: null,
+          savedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isUploaded: true
+        };
+        lib.files.push(newFile);
+        processedCount++;
+        if (processedCount === files.length) {
+          if (isLifeMode) {
+            if (typeof saveLifeLibrary === 'function') saveLifeLibrary();
+          } else {
+            saveBrandLibrary(brandIdx, lib);
+          }
+          showToast(files.length + ' image' + (files.length > 1 ? 's' : '') + ' uploaded', 'success');
+          renderVisualAssets();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  input.click();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// v29.0: GOOGLE DRIVE INTEGRATION
+// ═══════════════════════════════════════════════════════════════
+
+var _gdriveAccessToken = null;
+var _gdriveConnected = false;
+var _gdriveTokenClient = null;
+var _gdriveFolderStack = [{ id: 'root', name: 'My Drive' }];
+var GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+var GDRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
+
+function initGoogleDriveAuth() {
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return;
+  if (!GCAL_CLIENT_ID) return;
+  try {
+    _gdriveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GCAL_CLIENT_ID,
+      scope: GDRIVE_SCOPES,
+      callback: handleGDriveTokenResponse,
+      error_callback: function(err) {
+        var errType = (err && err.type) || 'unknown';
+        if (errType === 'popup_closed') return;
+        showToast('Google Drive: Sign-in error (' + errType + ')', 'error');
+      }
+    });
+    if (localStorage.getItem('roweos_gdrive_connected') === 'true') {
+      _gdriveTokenClient.requestAccessToken({ prompt: '' });
+    }
+  } catch(e) {
+    console.warn('[GDrive] Init error:', e.message);
+  }
+}
+
+function handleGDriveTokenResponse(resp) {
+  if (resp.error) {
+    console.warn('[GDrive] Token error:', resp.error);
+    _gdriveConnected = false;
+    localStorage.removeItem('roweos_gdrive_connected');
+    updateGoogleDriveUI();
+    if (resp.error === 'access_denied' || resp.error === 'org_internal') {
+      showToast('Google Drive access denied. Your Workspace admin may need to allow this app, or try a personal Gmail.', 'error');
+    } else if (resp.error !== 'popup_closed_by_user') {
+      showToast('Google Drive sign-in failed: ' + (resp.error_description || resp.error), 'error');
+    }
+    return;
+  }
+  _gdriveAccessToken = resp.access_token;
+  _gdriveConnected = true;
+  localStorage.setItem('roweos_gdrive_connected', 'true');
+  updateGoogleDriveUI();
+  browseGoogleDrive('root');
+  showToast('Google Drive connected', 'success');
+}
+
+function connectGoogleDrive() {
+  if (!_gdriveTokenClient) initGoogleDriveAuth();
+  if (_gdriveTokenClient) {
+    try {
+      _gdriveTokenClient.requestAccessToken({ prompt: 'consent' });
+    } catch(e) {
+      showToast('Google Drive sign-in failed. Try refreshing.', 'error');
+    }
+  } else {
+    showToast('Google Sign-In library not loaded. Check your internet connection.', 'error');
+  }
+}
+
+function disconnectGoogleDrive() {
+  if (_gdriveAccessToken) {
+    try { google.accounts.oauth2.revoke(_gdriveAccessToken); } catch(e) {}
+  }
+  _gdriveAccessToken = null;
+  _gdriveConnected = false;
+  _gdriveFolderStack = [{ id: 'root', name: 'My Drive' }];
+  localStorage.removeItem('roweos_gdrive_connected');
+  updateGoogleDriveUI();
+  showToast('Google Drive disconnected', 'info');
+}
+
+function updateGoogleDriveUI() {
+  var connectCard = document.getElementById('gdriveConnectCard');
+  var browser = document.getElementById('gdriveBrowser');
+  if (!connectCard || !browser) return;
+  if (_gdriveConnected) {
+    connectCard.classList.add('hidden');
+    browser.classList.remove('hidden');
+  } else {
+    connectCard.classList.remove('hidden');
+    browser.classList.add('hidden');
+  }
+}
+
+function browseGoogleDrive(folderId) {
+  if (!_gdriveAccessToken) { connectGoogleDrive(); return; }
+
+  var fileList = document.getElementById('gdriveFileList');
+  var loading = document.getElementById('gdriveLoading');
+  var empty = document.getElementById('gdriveEmpty');
+  if (fileList) fileList.innerHTML = '';
+  if (loading) loading.classList.remove('hidden');
+  if (empty) empty.classList.add('hidden');
+
+  if (folderId === 'root') {
+    _gdriveFolderStack = [{ id: 'root', name: 'My Drive' }];
+  }
+  renderGDriveBreadcrumb();
+
+  var query = "'" + folderId + "' in parents and trashed=false";
+  var fields = 'files(id,name,mimeType,size,modifiedTime,iconLink,thumbnailLink)';
+  var orderBy = 'folder,name';
+  var url = GDRIVE_API_BASE + '/files?q=' + encodeURIComponent(query) + '&fields=' + encodeURIComponent(fields) + '&orderBy=' + encodeURIComponent(orderBy) + '&pageSize=100';
+
+  fetch(url, {
+    headers: { 'Authorization': 'Bearer ' + _gdriveAccessToken }
+  })
+  .then(function(r) {
+    if (r.status === 401) {
+      _gdriveConnected = false;
+      localStorage.removeItem('roweos_gdrive_connected');
+      updateGoogleDriveUI();
+      showToast('Google Drive session expired. Please reconnect.', 'error');
+      throw new Error('Unauthorized');
+    }
+    return r.json();
+  })
+  .then(function(data) {
+    if (loading) loading.classList.add('hidden');
+    var files = data.files || [];
+    if (files.length === 0) {
+      if (empty) empty.classList.remove('hidden');
+      return;
+    }
+    renderGDriveFiles(files);
+  })
+  .catch(function(err) {
+    if (loading) loading.classList.add('hidden');
+    if (err.message !== 'Unauthorized') {
+      console.warn('[GDrive] Browse error:', err);
+      showToast('Failed to load Drive files', 'error');
+    }
+  });
+}
+
+function renderGDriveBreadcrumb() {
+  var bc = document.getElementById('gdriveBreadcrumb');
+  if (!bc) return;
+  var html = '';
+  _gdriveFolderStack.forEach(function(item, idx) {
+    var isLast = idx === _gdriveFolderStack.length - 1;
+    if (isLast) {
+      html += '<span class="gdrive-breadcrumb-item active">' + escapeHtml(item.name) + '</span>';
+    } else {
+      html += '<span class="gdrive-breadcrumb-item"><a href="#" onclick="navigateGDriveBreadcrumb(' + idx + '); return false;">' + escapeHtml(item.name) + '</a></span>';
+      html += '<span class="gdrive-breadcrumb-sep">/</span>';
+    }
+  });
+  bc.innerHTML = html;
+}
+
+function navigateGDriveBreadcrumb(idx) {
+  _gdriveFolderStack = _gdriveFolderStack.slice(0, idx + 1);
+  browseGoogleDrive(_gdriveFolderStack[idx].id);
+}
+
+function renderGDriveFiles(files) {
+  var container = document.getElementById('gdriveFileList');
+  if (!container) return;
+  var html = '';
+  files.forEach(function(file) {
+    var isFolder = file.mimeType === 'application/vnd.google-apps.folder';
+    var isGoogleDoc = file.mimeType.indexOf('application/vnd.google-apps.') === 0;
+    var fileIcon = getGDriveFileIcon(file.mimeType);
+    var sizeStr = file.size ? formatGDriveFileSize(parseInt(file.size)) : '';
+    var dateStr = file.modifiedTime ? new Date(file.modifiedTime).toLocaleDateString() : '';
+
+    html += '<div class="gdrive-file-row' + (isFolder ? ' gdrive-folder-row' : '') + '" ' + (isFolder ? 'onclick="openGDriveFolder(\'' + file.id + '\', \'' + escapeHtml(file.name).replace(/'/g, "\\'") + '\')"' : '') + '>';
+    html += '<div class="gdrive-file-icon">' + fileIcon + '</div>';
+    html += '<div class="gdrive-file-info">';
+    html += '<div class="gdrive-file-name">' + escapeHtml(file.name) + '</div>';
+    html += '<div class="gdrive-file-meta">' + (sizeStr ? sizeStr + ' &middot; ' : '') + dateStr + '</div>';
+    html += '</div>';
+    if (!isFolder) {
+      html += '<button class="gdrive-import-btn" onclick="event.stopPropagation(); importGDriveFile(\'' + file.id + '\', \'' + escapeHtml(file.name).replace(/'/g, "\\'") + '\', \'' + file.mimeType + '\', this)" title="Import to Library">';
+      html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+      html += ' Import';
+      html += '</button>';
+    }
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function openGDriveFolder(folderId, folderName) {
+  _gdriveFolderStack.push({ id: folderId, name: folderName });
+  browseGoogleDrive(folderId);
+}
+
+function getGDriveFileIcon(mimeType) {
+  if (mimeType === 'application/vnd.google-apps.folder') return '<svg width="18" height="18" viewBox="0 0 24 24" fill="var(--brand-accent, #a89878)" stroke="none"><path d="M10 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2h-8l-2-2z"/></svg>';
+  if (mimeType.indexOf('image/') === 0 || mimeType === 'application/vnd.google-apps.photo') return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+  if (mimeType === 'application/vnd.google-apps.document') return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4285f4" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>';
+  if (mimeType === 'application/vnd.google-apps.spreadsheet') return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f9d58" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>';
+  if (mimeType === 'application/vnd.google-apps.presentation') return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f4b400" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>';
+  if (mimeType === 'application/pdf') return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>';
+  return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/></svg>';
+}
+
+function formatGDriveFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function importGDriveFile(fileId, fileName, mimeType, btn) {
+  if (!_gdriveAccessToken) { showToast('Not connected to Google Drive', 'error'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="gdrive-spinner-sm"></span> Importing...';
+
+  var isGoogleDoc = mimeType.indexOf('application/vnd.google-apps.') === 0;
+  var downloadUrl;
+  var exportMime;
+
+  if (mimeType === 'application/vnd.google-apps.document') {
+    exportMime = 'text/plain';
+    downloadUrl = GDRIVE_API_BASE + '/files/' + fileId + '/export?mimeType=' + encodeURIComponent(exportMime);
+  } else if (mimeType === 'application/vnd.google-apps.spreadsheet') {
+    exportMime = 'text/csv';
+    downloadUrl = GDRIVE_API_BASE + '/files/' + fileId + '/export?mimeType=' + encodeURIComponent(exportMime);
+  } else if (mimeType === 'application/vnd.google-apps.presentation') {
+    exportMime = 'text/plain';
+    downloadUrl = GDRIVE_API_BASE + '/files/' + fileId + '/export?mimeType=' + encodeURIComponent(exportMime);
+  } else if (isGoogleDoc) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Import';
+    showToast('This Google file type is not supported for import', 'info');
+    return;
+  } else {
+    downloadUrl = GDRIVE_API_BASE + '/files/' + fileId + '?alt=media';
+  }
+
+  var isImage = mimeType.indexOf('image/') === 0;
+
+  fetch(downloadUrl, {
+    headers: { 'Authorization': 'Bearer ' + _gdriveAccessToken }
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Download failed: ' + r.status);
+    if (isImage) return r.blob();
+    return r.text();
+  })
+  .then(function(data) {
+    if (isImage) {
+      return new Promise(function(resolve) {
+        var reader = new FileReader();
+        reader.onload = function() { resolve({ content: reader.result, type: 'image', fileType: mimeType }); };
+        reader.readAsDataURL(data);
+      });
+    }
+    var detectedType = 'text';
+    if (mimeType === 'application/pdf') detectedType = 'document';
+    return { content: data, type: detectedType, fileType: exportMime || mimeType };
+  })
+  .then(function(result) {
+    var currentMode = localStorage.getItem('roweos_app_mode') || 'brand';
+    var key = currentMode === 'life' ? '_life' : (typeof brands !== 'undefined' && typeof selectedBrand !== 'undefined' && brands[selectedBrand] ? (brands[selectedBrand].shortName || brands[selectedBrand].name) : 'default');
+    if (typeof fileLibrary === 'undefined') window.fileLibrary = {};
+    if (!fileLibrary[key]) fileLibrary[key] = { folders: [{ id: 'root', name: 'Root', parentId: null }], files: [] };
+    if (!fileLibrary[key].files) fileLibrary[key].files = [];
+
+    fileLibrary[key].files.push({
+      id: 'gdrive_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      name: fileName,
+      type: result.type,
+      content: result.content,
+      fileType: result.fileType,
+      folderId: 'root',
+      savedAt: new Date().toISOString(),
+      isUploaded: true,
+      storageMode: 'local',
+      metadata: { source: 'google-drive', driveFileId: fileId }
+    });
+
+    if (currentMode === 'life') {
+      if (typeof saveLifeLibrary === 'function') saveLifeLibrary();
+    } else {
+      try { localStorage.setItem('roweosLibrary', JSON.stringify(fileLibrary)); } catch(e) {}
+      if (typeof writeDB === 'function') writeDB('library/brand', { data: JSON.stringify(fileLibrary) });
+    }
+
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Imported';
+    btn.style.color = '#22c55e';
+    btn.style.borderColor = '#22c55e';
+    showToast(fileName + ' imported to Library', 'success');
+  })
+  .catch(function(err) {
+    console.warn('[GDrive] Import error:', err);
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Import';
+    showToast('Failed to import: ' + err.message, 'error');
+  });
 }
 

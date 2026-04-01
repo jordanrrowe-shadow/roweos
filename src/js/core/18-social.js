@@ -400,6 +400,8 @@ function showSocialAuthModal(platform, authUrl, scope) {
       if (statusEl) { statusEl.style.color = '#4ade80'; statusEl.textContent = platformName + ' connected!'; }
       if (typeof refreshSocialAccountCards === 'function') refreshSocialAccountCards();
       if (typeof renderDigitalPresenceCard === 'function') renderDigitalPresenceCard();
+      // v28.4: Update onboarding social step if visible
+      if (typeof updateOnboardingSocialStatus === 'function') updateOnboardingSocialStatus();
       showToast(platformName + ' connected', 'success');
       setTimeout(closeSocialAuthModal, 1200);
       return true;
@@ -977,11 +979,11 @@ function formatForPlatform(content, platform) {
 
 // --- Social Publisher Panel ---
 function showSocialPublisher(content, platforms) {
-  // v25.4: Redirect to Social Hub Publish tab
+  // v28.4: Redirect to Media Lab Post tab
   window._socialPublisherContent = content || null;
   window._socialPublisherImage = window._socialPublisherImage || null;
   showView('social');
-  showSocialTab('publish');
+  showSocialTab('post');
   // Re-render after tab switch to pick up pre-filled content
   setTimeout(function() { renderPublishTab(); }, 50);
 }
@@ -1076,7 +1078,7 @@ function handleSocialPublisherImageUpload(input) {
 }
 
 function closeSocialPublisher() {
-  // v25.4: No-op — publisher is now a permanent tab in Social Hub
+  // v25.4: No-op — publisher is now a permanent tab in Media Lab
 }
 
 // v20.8: Auto-refresh expired social tokens before posting
@@ -2876,20 +2878,28 @@ function clearExpendableStorageData() {
 }
 
 // v18.5: Sync lastRun timestamp to roweos_automations so card rendering shows it
+// v28.4: Also write to Firestore so lastRun syncs across devices
 function syncLastRunToAutomations(taskId, timestamp) {
   var idStr = String(taskId);
   try {
     var automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
     var updated = false;
+    var updatedAuto = null;
     for (var i = 0; i < automations.length; i++) {
       if (String(automations[i].id) === idStr) {
         automations[i].lastRun = timestamp;
+        automations[i]._modifiedAt = Date.now();
         updated = true;
+        updatedAuto = automations[i];
         break;
       }
     }
     if (updated) {
       localStorage.setItem('roweos_automations', JSON.stringify(automations));
+      // v28.4: Write lastRun to Firestore so second device sees it
+      if (updatedAuto && typeof writeDBAutomation === 'function') {
+        writeDBAutomation(updatedAuto);
+      }
     }
   } catch(e) {}
 }
@@ -3970,13 +3980,14 @@ function executeWorkflowStep(step, context) {
       // v24.4: Prefer uploaded URL over base64 (email clients block base64 images)
       var _showLogo = !(step.config && step.config.includeLogo === false);
       if (_showLogo) {
-        if (window._mailLogoUrl) {
-          _logo = window._mailLogoUrl;
+        // v28.4: Prefer base64 over Firebase Storage URL (Storage URLs expire after ~1hr)
+        if (window._mailLogoBase64) {
+          _logo = window._mailLogoBase64;
         } else {
           try {
             var _logoEl = document.querySelector('.brand-logo-img');
             if (_logoEl) _logo = _logoEl.src;
-            // Upload base64 for future use (fire-and-forget)
+            // Resize logo for email use (fire-and-forget)
             if (_logo && _logo.indexOf('data:') === 0 && typeof mailEnsureLogoUrl === 'function') {
               mailEnsureLogoUrl(_logo);
             }
@@ -4354,15 +4365,15 @@ function executeWorkflowStep(step, context) {
     var _beBrandName = (context && context.brandName) ? context.brandName : 'Brand';
     var _beAccent = '#a89878';
     try { _beAccent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
-    // v25.3: Prefer uploaded HTTP URL over base64 (email clients block base64)
+    // v28.4: Prefer base64 over Firebase Storage URL (Storage URLs expire after ~1hr)
     var _beLogo = '';
-    if (window._mailLogoUrl) {
-      _beLogo = window._mailLogoUrl;
+    if (window._mailLogoBase64) {
+      _beLogo = window._mailLogoBase64;
     } else {
       try {
         var _beLogoEl = document.querySelector('.brand-logo-img');
         if (_beLogoEl) _beLogo = _beLogoEl.src;
-        // Upload base64 for this and future sends
+        // Resize logo for email use (fire-and-forget)
         if (_beLogo && _beLogo.indexOf('data:') === 0 && typeof mailEnsureLogoUrl === 'function') {
           mailEnsureLogoUrl(_beLogo);
         }
@@ -5384,6 +5395,9 @@ function renderImageLabChatHTML() {
   // Thread
   h += '<div class="imagelab-chat-thread" id="imageLabChatThread"></div>';
 
+  // v28.4: Recent generated images gallery strip
+  h += '<div id="imageLabGalleryStrip" style="margin-top:8px;"></div>';
+
   // v25.4: Reference image chips (shown above input bar if any refs attached)
   if (window._imageLabChatRefImages && window._imageLabChatRefImages.length > 0) {
     h += '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;flex-wrap:wrap;padding:0 4px;">';
@@ -5431,6 +5445,36 @@ function loadImageLabChatHistory() {
   }
 }
 
+// v28.4: Render gallery strip of recent generated images below Image Chat
+function renderImageLabGalleryStrip() {
+  var strip = document.getElementById('imageLabGalleryStrip');
+  if (!strip) return;
+  var images = [];
+  try {
+    images = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+    if (!Array.isArray(images)) images = [];
+  } catch(e) { images = []; }
+  if (images.length === 0) {
+    strip.innerHTML = '';
+    return;
+  }
+  // Show last 10 images, newest first
+  var recent = images.slice(-10).reverse();
+  var html = '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">';
+  html += '<span style="font-size:11px;color:var(--text-tertiary);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Recent Images</span>';
+  html += '</div>';
+  html += '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;">';
+  for (var i = 0; i < recent.length; i++) {
+    var img = recent[i];
+    if (!img.dataUrl) continue;
+    html += '<div style="flex-shrink:0;width:72px;height:72px;border-radius:8px;overflow:hidden;border:1px solid var(--border-color);cursor:pointer;" onclick="window.open(this.querySelector(\'img\').src)" title="' + escapeHtml((img.prompt || '').substring(0, 60)) + '">';
+    html += '<img src="' + img.dataUrl + '" style="width:100%;height:100%;object-fit:cover;" alt="Generated image">';
+    html += '</div>';
+  }
+  html += '</div>';
+  strip.innerHTML = html;
+}
+
 // v15.18: Render the chat thread from _imageLabChatMessages
 function renderImageLabChatThread() {
   var thread = document.getElementById('imageLabChatThread');
@@ -5469,6 +5513,8 @@ function renderImageLabChatThread() {
 
   thread.innerHTML = html;
   thread.scrollTop = thread.scrollHeight;
+  // v28.4: Update gallery strip after thread render
+  if (typeof renderImageLabGalleryStrip === 'function') renderImageLabGalleryStrip();
 }
 
 // v15.23: Handle multi-file reference image upload for Image Lab Chat

@@ -1198,6 +1198,8 @@ function saveBrandSettings() {
       try {
         localStorage.setItem('roweos_primary_brand', String(idx));
         if (brands[idx] && brands[idx].id) localStorage.setItem('roweos_primary_brand_id', brands[idx].id);
+        // v29.0: Sync primary brand to Firestore for cross-device consistency
+        writeDB('profile/main', { 'settings.primaryBrand': String(idx), 'settings.primaryBrandId': brands[idx] ? brands[idx].id : '' });
       } catch(e) { console.warn('[Primary] Save failed (storage full?):', e); }
     } else if (primaryCheckbox && !primaryCheckbox.checked) {
       var _pId = localStorage.getItem('roweos_primary_brand_id');
@@ -1206,6 +1208,8 @@ function saveBrandSettings() {
         try {
           localStorage.setItem('roweos_primary_brand', '0');
           if (brands[0] && brands[0].id) localStorage.setItem('roweos_primary_brand_id', brands[0].id);
+          // v29.0: Sync primary brand reset to Firestore
+          writeDB('profile/main', { 'settings.primaryBrand': '0', 'settings.primaryBrandId': brands[0] ? brands[0].id : '' });
         } catch(e) {}
       }
     }
@@ -1956,6 +1960,8 @@ function saveBrandEdits() {
       try {
         localStorage.setItem('roweos_primary_brand', String(idx));
         if (brands[idx] && brands[idx].id) localStorage.setItem('roweos_primary_brand_id', brands[idx].id);
+        // v29.0: Sync primary brand to Firestore for cross-device consistency
+        writeDB('profile/main', { 'settings.primaryBrand': String(idx), 'settings.primaryBrandId': brands[idx] ? brands[idx].id : '' });
       } catch(e) { console.warn('[Primary] Save failed:', e); }
     } else if (primaryCheckbox && !primaryCheckbox.checked) {
       // If unchecked and this WAS the primary, reset to 0
@@ -1965,6 +1971,8 @@ function saveBrandEdits() {
         try {
           localStorage.setItem('roweos_primary_brand', '0');
           if (brands[0] && brands[0].id) localStorage.setItem('roweos_primary_brand_id', brands[0].id);
+          // v29.0: Sync primary brand reset to Firestore
+          writeDB('profile/main', { 'settings.primaryBrand': '0', 'settings.primaryBrandId': brands[0] ? brands[0].id : '' });
         } catch(e) {}
       }
     }

@@ -24,8 +24,35 @@ function switchAnalyticsTab(tab) {
 
 function loadAnalyticsDashboard() { if (typeof loadWebAnalytics === 'function') loadWebAnalytics(); }
 
+// v28.4: Save/load custom analytics site URL per brand
+function saveAnalyticsSiteUrl() {
+  var brandIdx = (typeof selectedBrand !== 'undefined') ? selectedBrand : 0;
+  var urlEl = document.getElementById('commerceWebsiteUrl') || document.getElementById('analyticsWebsiteUrl');
+  if (!urlEl) return;
+  var url = urlEl.value.trim();
+  if (url) {
+    localStorage.setItem('roweos_analytics_site_' + brandIdx, url);
+    showToast('Analytics site URL saved', 'success');
+  } else {
+    localStorage.removeItem('roweos_analytics_site_' + brandIdx);
+    showToast('Analytics site URL cleared', 'info');
+  }
+}
+
+function loadAnalyticsSiteUrl() {
+  var brandIdx = (typeof selectedBrand !== 'undefined') ? selectedBrand : 0;
+  var url = localStorage.getItem('roweos_analytics_site_' + brandIdx) || '';
+  var el1 = document.getElementById('commerceWebsiteUrl');
+  var el2 = document.getElementById('analyticsWebsiteUrl');
+  if (el1) el1.value = url;
+  if (el2) el2.value = url;
+}
+
 // v25.3: Website Analytics (Vercel API)
 function loadWebAnalytics() {
+  // v28.4: Populate URL inputs on load
+  loadAnalyticsSiteUrl();
+
   var loading = document.getElementById('webAnalyticsLoading');
   var content = document.getElementById('webAnalyticsContent');
   if (loading) loading.style.display = '';
@@ -36,7 +63,12 @@ function loadWebAnalytics() {
   var from = new Date(now.getTime() - days * 86400000).toISOString();
   var to = now.toISOString();
 
-  fetch('/api/analytics?days=' + days)
+  // v28.4: Pass custom site URL if configured
+  var brandIdx = (typeof selectedBrand !== 'undefined') ? selectedBrand : 0;
+  var siteUrl = localStorage.getItem('roweos_analytics_site_' + brandIdx) || '';
+  var urlParam = siteUrl ? '&site=' + encodeURIComponent(siteUrl) : '';
+
+  fetch('/api/analytics?days=' + days + urlParam)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.error) {
@@ -295,9 +327,9 @@ function renderProviderBudgetCard(provider) {
 
   var html = '';
   // Header with toggle
-  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3);">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3);gap:8px;flex-wrap:wrap;">';
   html += '<div style="display:flex;align-items:center;gap:6px;font-size:var(--text-base);color:var(--text-tertiary);"><span style="color:' + cfg.color + ';">&#9679;</span> ' + cfg.label + '</div>';
-  html += '<div style="display:flex;background:var(--bg-tertiary);border-radius:6px;overflow:hidden;border:1px solid var(--border-color);">';
+  html += '<div style="display:flex;background:var(--bg-tertiary);border-radius:6px;overflow:hidden;border:1px solid var(--border-color);flex-shrink:0;">';
   html += '<button onclick="toggleProviderMode(\'' + provider + '\')" style="padding:3px 8px;font-size:10px;border:none;cursor:pointer;background:' + (mode === 'threshold' ? 'var(--accent)' : 'transparent') + ';color:' + (mode === 'threshold' ? '#fff' : 'var(--text-muted)') + ';font-weight:600;">Threshold</button>';
   html += '<button onclick="toggleProviderMode(\'' + provider + '\')" style="padding:3px 8px;font-size:10px;border:none;cursor:pointer;background:' + (mode === 'budget' ? 'var(--accent)' : 'transparent') + ';color:' + (mode === 'budget' ? '#fff' : 'var(--text-muted)') + ';font-weight:600;">Budget</button>';
   html += '</div></div>';
@@ -312,9 +344,9 @@ function renderProviderBudgetCard(provider) {
     var thresholdPct = thresholdNum > 0 ? Math.min(100, (thresholdSpent / thresholdNum) * 100) : 0;
     var thresholdBarColor = thresholdRemain <= 0 ? '#ef4444' : (thresholdRemain < thresholdNum * 0.2 ? '#f59e0b' : cfg.color);
 
-    html += '<div style="display:flex;align-items:center;gap:8px;">';
+    html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
     html += '<span style="font-size:var(--text-xl);font-weight:600;color:var(--text-secondary);">$</span>';
-    html += '<input type="number" id="analyticsThreshold_' + provider + '" placeholder="0.00" step="0.50" min="0" value="' + (thresholdVal || '') + '" style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:6px 10px;font-size:var(--text-lg);font-weight:600;color:' + cfg.color + ';width:100px;outline:none;" onchange="saveAnalyticsThreshold(\'' + provider + '\',this.value)">';
+    html += '<input type="number" id="analyticsThreshold_' + provider + '" placeholder="0.00" step="0.50" min="0" value="' + (thresholdVal || '') + '" style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:6px 10px;font-size:var(--text-lg);font-weight:600;color:' + cfg.color + ';width:100px;min-width:70px;outline:none;" onchange="saveAnalyticsThreshold(\'' + provider + '\',this.value)">';
     html += '</div>';
     if (thresholdNum > 0) {
       html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;margin-bottom:4px;">';
@@ -337,11 +369,11 @@ function renderProviderBudgetCard(provider) {
     var pct = loaded > 0 ? Math.min(100, (spentSince / loaded) * 100) : 0;
     var barColor = remaining <= 0 ? '#ef4444' : (remaining < loaded * 0.2 ? '#f59e0b' : cfg.color);
 
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">';
     html += '<span style="font-size:var(--text-sm);color:var(--text-muted);">Loaded:</span>';
     html += '<span style="font-size:var(--text-secondary);font-weight:600;">$</span>';
-    html += '<input type="number" id="providerBudgetLoaded_' + provider + '" placeholder="0.00" step="1" min="0" value="' + (loaded || '') + '" style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:4px 8px;font-size:var(--text-sm);font-weight:600;color:' + cfg.color + ';width:80px;outline:none;">';
-    html += '<button onclick="reloadProviderBudget(\'' + provider + '\')" style="padding:4px 10px;font-size:10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-weight:600;">Reload</button>';
+    html += '<input type="number" id="providerBudgetLoaded_' + provider + '" placeholder="0.00" step="1" min="0" value="' + (loaded || '') + '" style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:4px 8px;font-size:var(--text-sm);font-weight:600;color:' + cfg.color + ';width:80px;min-width:60px;outline:none;">';
+    html += '<button onclick="reloadProviderBudget(\'' + provider + '\')" style="padding:4px 10px;font-size:10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-weight:600;flex-shrink:0;">Reload</button>';
     html += '</div>';
 
     if (loaded > 0) {
@@ -2302,7 +2334,24 @@ function manualSyncNow() {
     showToast('Sync complete', 'success');
   }).catch(function(e) {
     console.error('[manualSyncNow] Error:', e);
-    showToast('Sync failed: ' + (e.message || e), 'error');
+    // v28.5: Firebase client terminated (common on iOS when app is backgrounded)
+    // Re-initialize Firestore and retry once
+    var errMsg = String(e.message || e);
+    if (errMsg.indexOf('terminated') !== -1 && !manualSyncNow._retried) {
+      manualSyncNow._retried = true;
+      console.log('[manualSyncNow] Firestore terminated, re-initializing...');
+      try {
+        firebase.firestore().clearPersistence().catch(function() {});
+      } catch(ignore) {}
+      showToast('Reconnecting...', 'info');
+      setTimeout(function() {
+        manualSyncNow._retried = false;
+        manualSyncNow();
+      }, 2000);
+      return;
+    }
+    manualSyncNow._retried = false;
+    showToast('Sync failed: ' + errMsg, 'error');
   });
 }
 

@@ -2037,6 +2037,82 @@ function saveWebsiteUrlAndContinue() {
   goToOnboardingStep(3);
 }
 
+// v28.4: Resume onboarding after marketplace API key purchase and delivery
+// Called on page load when ?api_key_purchase=success is detected, and polls
+// until checkAndDeliverPurchasedApiKeys() has stored the key in localStorage.
+function resumeOnboardingAfterMarketplacePurchase(provider) {
+  if (!provider) provider = onboardingSelectedProvider || 'anthropic';
+  var step4El = document.getElementById('onboardingStep4');
+  // Only resume if onboarding step 4 is visible (user is in onboarding)
+  if (!step4El || step4El.style.display === 'none') return;
+
+  console.log('[Onboarding Marketplace] Checking for delivered key for', provider);
+  var attempts = 0;
+  var maxAttempts = 20; // Poll for up to ~20 seconds
+  var pollInterval = setInterval(async function() {
+    attempts++;
+    var apiKey = '';
+    try { apiKey = await getApiKey(provider); } catch(e) {}
+
+    if (apiKey) {
+      clearInterval(pollInterval);
+      console.log('[Onboarding Marketplace] Key delivered for', provider, '- resuming onboarding');
+
+      // Update provider keys state
+      if (typeof providerKeys !== 'undefined') providerKeys[provider] = true;
+      if (typeof checkApiConnection === 'function') {
+        try { await checkApiConnection(); } catch(e) {}
+      }
+
+      // Show success in the status element
+      var statusEl = document.getElementById('onboardingKeyStatus');
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(74, 222, 128, 0.1)';
+        statusEl.style.color = '#4ade80';
+        statusEl.textContent = 'API key activated from marketplace purchase';
+      }
+
+      // Set the connected provider name
+      var providerName = provider === 'anthropic' ? 'Anthropic' : provider === 'openai' ? 'OpenAI' : 'Google';
+      var connectedEl = document.getElementById('onboardingConnectedProvider');
+      if (connectedEl) connectedEl.textContent = providerName;
+
+      // Continue to model picker (same as saveOnboardingApiKey success path)
+      setTimeout(function() {
+        if (typeof showModelPickerInOnboarding === 'function') {
+          showModelPickerInOnboarding(provider);
+        }
+      }, 1000);
+    } else if (attempts >= maxAttempts) {
+      clearInterval(pollInterval);
+      console.warn('[Onboarding Marketplace] Key not delivered after', maxAttempts, 'attempts - user may need to refresh');
+      var statusEl2 = document.getElementById('onboardingKeyStatus');
+      if (statusEl2) {
+        statusEl2.style.display = 'block';
+        statusEl2.style.background = 'rgba(251, 191, 36, 0.1)';
+        statusEl2.style.color = '#fbbf24';
+        statusEl2.textContent = 'Key delivery in progress. If it doesn\'t appear, try refreshing the page.';
+      }
+    }
+  }, 1000);
+}
+
+// v28.4: Auto-detect marketplace purchase return during onboarding
+// Runs on DOMContentLoaded to catch ?api_key_purchase=success URL param
+(function() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('api_key_purchase') === 'success') {
+      var returnProvider = params.get('provider') || '';
+      // Wait for auth and onboarding to be ready, then resume
+      setTimeout(function() {
+        resumeOnboardingAfterMarketplacePurchase(returnProvider);
+      }, 3000); // Give auth + checkAndDeliverPurchasedApiKeys time to run
+    }
+  } catch(e) {}
+})();
+
 // v26.5: Start web search after API key is validated
 async function startOnboardingWebSearch() {
   var url = window._pendingWebSearchUrl || localStorage.getItem('roweos_pending_web_search_url');
@@ -2099,6 +2175,53 @@ function _showWebSearchResults() {
   if (takeover) takeover.classList.add('active');
   if (canvas) renderNetworkGraph(canvas, state);
   if (cardsContainer) renderIdentityCards(cardsContainer, state);
+
+  // v28.4: Add hover tooltip to graph panel showing pages scanned and web searches
+  var graphPanel = canvas ? canvas.parentElement : null;
+  if (graphPanel && !graphPanel._wsTooltipAdded) {
+    graphPanel._wsTooltipAdded = true;
+    graphPanel.style.position = 'relative';
+    var wsTooltip = document.createElement('div');
+    wsTooltip.id = 'wsGraphTooltip';
+    wsTooltip.style.cssText = 'display:none;position:absolute;top:8px;right:8px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--text-secondary);z-index:10;max-width:260px;pointer-events:none;opacity:0;transition:opacity 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+    graphPanel.appendChild(wsTooltip);
+
+    graphPanel.addEventListener('mouseenter', function() {
+      var s = typeof getWebSearchState === 'function' ? getWebSearchState() : state;
+      var pages = s.pages || [];
+      var donePages = pages.filter(function(p) { return p.status === 'done' && !p.isExternal; });
+      var extSearches = pages.filter(function(p) { return p.isExternal; });
+      var fetchingPages = pages.filter(function(p) { return p.status === 'fetching'; });
+      var html = '<div style="font-weight:600;color:var(--text-primary);margin-bottom:6px;">Analysis Progress</div>';
+      html += '<div style="display:flex;gap:16px;margin-bottom:8px;">';
+      html += '<div><span style="font-weight:600;color:var(--accent,#a89878);">' + donePages.length + '</span> pages scanned</div>';
+      html += '<div><span style="font-weight:600;color:rgb(120,160,200);">' + extSearches.length + '</span> web searches</div>';
+      html += '</div>';
+      if (fetchingPages.length > 0) {
+        html += '<div style="color:var(--text-muted);font-size:11px;margin-bottom:6px;">Currently scanning ' + fetchingPages.length + ' page' + (fetchingPages.length > 1 ? 's' : '') + '...</div>';
+      }
+      if (donePages.length > 0 || extSearches.length > 0) {
+        html += '<div style="border-top:1px solid var(--border-color);padding-top:6px;margin-top:4px;max-height:120px;overflow-y:auto;">';
+        for (var pi = 0; pi < pages.length && pi < 10; pi++) {
+          if (pages[pi].status !== 'done' && !pages[pi].isExternal) continue;
+          var pUrl = pages[pi].url || '';
+          try { pUrl = new URL(pUrl).pathname || pUrl; } catch(e) {}
+          if (pUrl.length > 35) pUrl = pUrl.substring(0, 35) + '...';
+          var dotColor = pages[pi].isExternal ? 'rgb(120,160,200)' : 'var(--accent,#a89878)';
+          html += '<div style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:4px;padding:1px 0;"><span style="color:' + dotColor + ';flex-shrink:0;">&#9679;</span> ' + escapeHtml(pUrl) + '</div>';
+        }
+        if (pages.length > 10) html += '<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">+ ' + (pages.length - 10) + ' more...</div>';
+        html += '</div>';
+      }
+      wsTooltip.innerHTML = html;
+      wsTooltip.style.display = '';
+      setTimeout(function() { wsTooltip.style.opacity = '1'; }, 10);
+    });
+    graphPanel.addEventListener('mouseleave', function() {
+      wsTooltip.style.opacity = '0';
+      setTimeout(function() { wsTooltip.style.display = 'none'; }, 200);
+    });
+  }
 
   if (state.status === 'complete' && state.finalResults) {
     if (subtitle) subtitle.textContent = 'Your brand identity has been built and saved to Identity.';
@@ -2169,6 +2292,16 @@ function _showWebSearchResults() {
 var _researchHistory = [];
 var _researchCurrentResult = null;
 
+// v28.5: Relative time helper for research completion status
+function _researchTimeAgo(ts) {
+  var diff = Date.now() - ts;
+  if (diff < 5000) return 'just now';
+  if (diff < 60000) return Math.floor(diff / 1000) + 's ago';
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' min ago';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+  return Math.floor(diff / 86400000) + 'd ago';
+}
+
 function renderResearchView() {
   loadResearchHistory();
   renderResearchHistory();
@@ -2225,6 +2358,8 @@ function startResearchFromView() {
   if (!url) { showToast('Please enter a URL', 'warning'); return; }
   if (url.indexOf('.') === -1) { showToast('Please enter a valid domain', 'warning'); return; }
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  // v28.5: Clear previous result so stale "Completed" status doesn't persist
+  _researchCurrentResult = null;
 
   var currentMode = localStorage.getItem('roweos_app_mode') || 'brand';
   var provider = 'anthropic';
@@ -2342,11 +2477,14 @@ function showResearchResults(result) {
   var externalPages = pages.filter(function(p) { return p.isExternal; });
   var durationSec = Math.round((result.durationMs || 0) / 1000);
 
-  // Summary bar
+  // Summary bar - v28.5: show relative timestamp so status doesn't feel stale
   var summary = document.getElementById('researchSummaryBar');
   if (summary) {
     summary.style.display = '';
-    summary.innerHTML = '<span style="font-weight:600;color:var(--text-primary);">Complete</span> &nbsp; ' +
+    var completedAt = result.completedAt ? new Date(result.completedAt).getTime() : Date.now();
+    var agoText = _researchTimeAgo(completedAt);
+    summary.innerHTML = '<span style="font-weight:600;color:var(--text-primary);">Completed</span> ' +
+      '<span style="color:var(--text-muted);">' + escapeHtml(agoText) + '</span> &nbsp; ' +
       donePages.length + ' pages scanned &bull; ' +
       externalPages.length + ' web sources &bull; ' +
       durationSec + 's';
@@ -2740,12 +2878,34 @@ function saveResearchToFolio() {
 
   if (typeof saveFolioItem === 'function' && saveFolioItem(item) !== false) {
     showToast('Research added to Folio', 'success');
+    // v28.5: Switch to Folio view and scroll to the new item
+    if (typeof showView === 'function') {
+      showView('folio');
+      setTimeout(function() {
+        if (typeof renderFolioGallery === 'function') renderFolioGallery();
+        setTimeout(function() {
+          var grid = document.getElementById('folioGalleryGrid');
+          if (grid && grid.firstElementChild) {
+            grid.firstElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Brief highlight effect
+            grid.firstElementChild.style.outline = '2px solid var(--brand-accent, #a89878)';
+            grid.firstElementChild.style.outlineOffset = '2px';
+            setTimeout(function() {
+              if (grid.firstElementChild) {
+                grid.firstElementChild.style.outline = '';
+                grid.firstElementChild.style.outlineOffset = '';
+              }
+            }, 2000);
+          }
+        }, 150);
+      }, 100);
+    }
   } else {
     showToast('Could not save to Folio', 'error');
   }
 }
 
-// v28.4: Add research results as a new client
+// v28.4: Add research results to existing or new client
 function addResearchToClient() {
   if (!_researchCurrentResult || !_researchCurrentResult.state.finalResults) {
     showToast('No research results to add', 'warning');
@@ -2756,7 +2916,6 @@ function addResearchToClient() {
   // Extract company/brand name from essence or URL
   var companyName = '';
   if (results.essence) {
-    // Try to extract brand name from first sentence of essence
     var firstLine = results.essence.split('\n')[0].substring(0, 100);
     companyName = firstLine;
   }
@@ -2771,15 +2930,110 @@ function addResearchToClient() {
       notes += sections[i].charAt(0).toUpperCase() + sections[i].slice(1) + ':\n' + results[sections[i]] + '\n\n';
     }
   }
-  // Open client modal with pre-filled data
+  var notesText = notes.trim();
+
+  // v28.5: Show picker with existing clients + option to create new
+  var clients = typeof getClients === 'function' ? getClients() : [];
+  var domain = '';
+  try { domain = new URL(url).hostname.replace('www.', ''); } catch(e) {}
+
+  // Find potential matches by company name, website, or name
+  var matchedClients = [];
+  var domainLower = domain.toLowerCase();
+  for (var ci = 0; ci < clients.length; ci++) {
+    var c = clients[ci];
+    var cName = (c.name || '').toLowerCase();
+    var cCompany = (c.company || '').toLowerCase();
+    var cWebsite = (c.website || '').toLowerCase();
+    if ((domainLower && (cWebsite.indexOf(domainLower) !== -1 || cCompany.indexOf(domainLower.split('.')[0]) !== -1)) ||
+        (companyName && (cName.indexOf(companyName.toLowerCase().substring(0, 20)) !== -1 || cCompany.indexOf(companyName.toLowerCase().substring(0, 20)) !== -1))) {
+      matchedClients.unshift(c); // matches first
+    } else {
+      matchedClients.push(c);
+    }
+  }
+
+  var overlay = document.createElement('div');
+  overlay.id = 'researchClientPickerOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;';
+
+  var listHtml = '';
+  for (var li = 0; li < matchedClients.length; li++) {
+    var mc = matchedClients[li];
+    var label = escapeHtml(mc.name || mc.company || 'Unnamed');
+    var sub = mc.company && mc.name ? ' (' + escapeHtml(mc.company) + ')' : '';
+    listHtml += '<div class="research-client-pick-item" data-client-id="' + escapeHtml(mc.id) + '" onclick="_mergeResearchIntoClient(\'' + escapeHtml(mc.id) + '\')" style="padding:10px 14px;border:1px solid var(--border-color);border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.15s;"' +
+      ' onmouseenter="this.style.background=\'var(--bg-tertiary)\'" onmouseleave="this.style.background=\'transparent\'">';
+    if (mc.logo) {
+      listHtml += '<img src="' + escapeHtml(mc.logo) + '" style="width:32px;height:32px;border-radius:var(--radius-sm);object-fit:contain;flex-shrink:0;">';
+    } else {
+      listHtml += '<div style="width:32px;height:32px;border-radius:var(--radius-sm);background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:var(--text-muted);">' + (mc.name || mc.company || '?').charAt(0).toUpperCase() + '</div>';
+    }
+    listHtml += '<div><div style="font-weight:600;font-size:var(--text-sm);">' + label + sub + '</div>';
+    if (mc.website) listHtml += '<div style="font-size:11px;color:var(--text-muted);">' + escapeHtml(mc.website) + '</div>';
+    listHtml += '</div></div>';
+  }
+
+  overlay.innerHTML = '<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-xl);padding:var(--space-6);max-width:480px;width:90%;max-height:85vh;overflow-y:auto;">' +
+    '<div style="font-size:var(--text-xl);font-weight:700;margin-bottom:var(--space-4);">Add Research to Client</div>' +
+    (matchedClients.length > 0 ? '<div style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:var(--space-3);">Select an existing client to merge research into:</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:var(--space-4);max-height:300px;overflow-y:auto;">' + listHtml + '</div>' +
+      '<div style="border-top:1px solid var(--border-color);padding-top:var(--space-3);margin-bottom:var(--space-3);font-size:var(--text-xs);color:var(--text-muted);">Or create a new client:</div>' : '') +
+    '<div style="display:flex;gap:var(--space-3);">' +
+      '<button onclick="document.getElementById(\'researchClientPickerOverlay\').remove()" class="btn" style="flex:1;padding:10px;">Cancel</button>' +
+      '<button onclick="_addResearchAsNewClient()" class="btn btn-primary" style="flex:1;padding:10px;">Create New Client</button>' +
+    '</div>' +
+  '</div>';
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+  // Store research data for picker callbacks
+  window._pendingResearchClient = { companyName: companyName, notes: notesText, url: url };
+}
+
+// v28.5: Merge research into an existing client
+function _mergeResearchIntoClient(clientId) {
+  var pending = window._pendingResearchClient;
+  if (!pending) return;
+  var clients = typeof getClients === 'function' ? getClients() : [];
+  var client = null;
+  for (var i = 0; i < clients.length; i++) {
+    if (clients[i].id === clientId) { client = clients[i]; break; }
+  }
+  if (!client) { showToast('Client not found', 'error'); return; }
+
+  // Merge: append research notes, fill empty fields
+  if (!client.website && pending.url) client.website = pending.url;
+  var existingNotes = client.notes || '';
+  var separator = existingNotes ? '\n\n--- Research (' + new Date().toLocaleDateString() + ') ---\n\n' : '';
+  client.notes = existingNotes + separator + pending.notes;
+
+  if (typeof saveClients === 'function') saveClients(clients);
+  if (typeof renderClientsView === 'function') renderClientsView();
+
+  var picker = document.getElementById('researchClientPickerOverlay');
+  if (picker) picker.remove();
+  window._pendingResearchClient = null;
+  showToast('Research merged into ' + (client.name || client.company || 'client'), 'success');
+}
+
+// v28.5: Create new client from research (original flow)
+function _addResearchAsNewClient() {
+  var pending = window._pendingResearchClient;
+  if (!pending) return;
+  var picker = document.getElementById('researchClientPickerOverlay');
+  if (picker) picker.remove();
+  window._pendingResearchClient = null;
+
   if (typeof openClientModal === 'function') openClientModal();
   setTimeout(function() {
     var companyEl = document.getElementById('clientCompany');
     var notesEl = document.getElementById('clientNotes');
     var websiteEl = document.getElementById('clientWebsite');
-    if (companyEl) companyEl.value = companyName;
-    if (notesEl) notesEl.value = notes.trim();
-    if (websiteEl) websiteEl.value = url;
+    if (companyEl) companyEl.value = pending.companyName;
+    if (notesEl) notesEl.value = pending.notes;
+    if (websiteEl) websiteEl.value = pending.url;
     showToast('Research loaded into client form', 'success');
   }, 200);
 }
@@ -4311,7 +4565,20 @@ async function getApiKey(provider) {
       console.log('[getApiKey] ✓ Retrieved', provider, 'key from old localStorage format');
       return oldKey;
     }
-    
+
+    // v28.4: Check marketplace-delivered key format (roweos_anthropic_key, etc.)
+    var marketplaceKey = localStorage.getItem('roweos_' + provider + '_key');
+    if (marketplaceKey) {
+      console.log('[getApiKey] ✓ Retrieved', provider, 'key from marketplace delivery format');
+      // Also store in canonical format so future lookups are fast
+      try {
+        var canonicalKeys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}');
+        canonicalKeys[provider] = marketplaceKey;
+        localStorage.setItem('roweos_api_keys', JSON.stringify(canonicalKeys));
+      } catch(e) {}
+      return marketplaceKey;
+    }
+
     console.warn('[getApiKey] ✗ No', provider, 'API key found in any storage location');
     return '';
   } catch (error) {

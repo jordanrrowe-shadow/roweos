@@ -119,6 +119,8 @@ function initCalendar() {
   rebuildMergedCalendar();
   // v16.12: Init Google Calendar auth (tries silent re-auth if previously connected)
   setTimeout(function() { initGoogleCalendarAuth(); }, 500);
+  // v29.0: Init Google Drive auth (tries silent re-auth if previously connected)
+  setTimeout(function() { if (typeof initGoogleDriveAuth === 'function') initGoogleDriveAuth(); }, 600);
   // v16.12: Sync iCloud if previously connected
   if (_icloudConnected) {
     setTimeout(function() { syncICloudCalendarEvents(); }, 1000);

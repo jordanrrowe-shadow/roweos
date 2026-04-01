@@ -1,14 +1,14 @@
 
-  <!-- v26.3: Social Hub View -->
+  <!-- v28.4: Media Lab View (renamed from Social Hub) -->
   <div id="socialView" class="panel-view hidden">
    <div class="panel">
     <div class="breadcrumb">
             <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
-            <span class="breadcrumb-item active">Social Hub</span>
+            <span class="breadcrumb-item active">Media Lab</span>
           </div>
-    <div class="panel-header" style="margin-bottom:var(--space-2);display:flex;align-items:center;"><span style="color:var(--accent);">Social Hub</span><button class="section-help-btn" onclick="showSectionHelp('social')" title="How to use Social Hub">?</button></div>
-    <p class="panel-description" style="margin-bottom:16px;color:var(--text-secondary);">Monitor, engage, and publish across social platforms.</p>
-    <!-- v26.0: Social Hub pill nav (replaces old tab buttons) -->
+    <div class="panel-header" style="margin-bottom:var(--space-2);display:flex;align-items:center;"><span style="color:var(--accent);">Media Lab</span><button class="section-help-btn" onclick="showSectionHelp('social')" title="How to use Media Lab">?</button></div>
+    <p class="panel-description" style="margin-bottom:16px;color:var(--text-secondary);">Create, publish, and engage across social platforms.</p>
+    <!-- v28.4: Media Lab pill nav -->
     <div id="socialHubPillNav"></div>
     <!-- Activity Tab (default) -->
     <div id="socialTabActivity" class="social-tab-panel">
@@ -24,7 +24,7 @@
         <button onclick="loadMoreActivityLog()" style="padding:8px 20px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-tertiary);color:var(--text-secondary);cursor:pointer;">Load more</button>
       </div>
       <div id="activityEmptyState" style="text-align:center;padding:40px;color:var(--text-tertiary);">
-        No social activity yet. Actions you take across Social Hub will appear here.
+        No social activity yet. Actions you take across Media Lab will appear here.
       </div>
     </div>
     <!-- Other tabs (placeholder) -->
@@ -67,29 +67,45 @@
         Search for posts or click Load Feed to see your pipeline targets.
       </div>
     </div>
-    <div id="socialTabPublish" class="social-tab-panel" style="display:none;">
-      <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text-primary);">Compose Post</h3>
-      <div id="socialPublishCompose">
-        <!-- v25.4: Compose area rendered by renderPublishTab() -->
-      </div>
-      <div style="margin-top:24px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:8px 0;" onclick="togglePublishOutbox()">
-          <h3 style="font-size:14px;font-weight:600;color:var(--text-primary);" id="publishOutboxHeader">Outbox (0 pending)</h3>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-secondary);transition:transform 0.2s;" id="publishOutboxChevron"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div id="publishOutboxList" style="display:none;"></div>
-      </div>
-    </div>
-    <!-- v25.4: Create tab — AI chat + DMs sub-tabs -->
-    <div id="socialTabCreate" class="social-tab-panel" style="display:none;">
-      <!-- Sub-tab switcher (pill style, same as Media tab) -->
+    <!-- v28.4: Merged Post tab (was Publish + Create) -->
+    <div id="socialTabPost" class="social-tab-panel" style="display:none;">
+      <!-- Sub-tab switcher: Compose, AI Assist, DMs -->
       <div class="scavenger-filter-bar" style="margin-bottom:16px;">
-        <button class="scavenger-filter-btn active" id="createSubCreate" onclick="showCreateSubTab('chat')">Create</button>
-        <button class="scavenger-filter-btn" id="createSubDMs" onclick="showCreateSubTab('dms')">DMs</button>
+        <button class="scavenger-filter-btn active" id="postSubCompose" onclick="showPostSubTab('compose')">Compose</button>
+        <button class="scavenger-filter-btn" id="postSubAI" onclick="showPostSubTab('ai')">AI Assist</button>
+        <button class="scavenger-filter-btn" id="postSubDMs" onclick="showPostSubTab('dms')">DMs</button>
       </div>
 
-      <!-- Create (AI Chat) sub-tab -->
-      <div id="createChatPanel">
+      <!-- Compose sub-tab (was Publish) -->
+      <div id="postComposePanel">
+        <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text-primary);">Compose Post</h3>
+        <div id="socialPublishCompose">
+          <!-- v25.4: Compose area rendered by renderPublishTab() -->
+        </div>
+        <!-- AI Quick Actions (inline helpers) -->
+        <div style="margin-top:16px;padding:12px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-secondary);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;">AI Quick Actions</span>
+            <button onclick="showPostSubTab('ai')" style="padding:3px 10px;border-radius:6px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-size:11px;">Open AI Chat</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="scavenger-filter-btn" onclick="handleCreateQuickAction('post');showPostSubTab('ai');">Generate Post</button>
+            <button class="scavenger-filter-btn" onclick="handleCreateQuickAction('image');showPostSubTab('ai');">Generate Image</button>
+            <button class="scavenger-filter-btn" onclick="handleCreateQuickAction('hashtags');showPostSubTab('ai');">Suggest Hashtags</button>
+            <button class="scavenger-filter-btn" onclick="handleCreateQuickAction('rewrite');showPostSubTab('ai');">Rewrite for Platform</button>
+          </div>
+        </div>
+        <div style="margin-top:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:8px 0;" onclick="togglePublishOutbox()">
+            <h3 style="font-size:14px;font-weight:600;color:var(--text-primary);" id="publishOutboxHeader">Outbox (0 pending)</h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-secondary);transition:transform 0.2s;" id="publishOutboxChevron"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div id="publishOutboxList" style="display:none;"></div>
+        </div>
+      </div>
+
+      <!-- AI Assist sub-tab (was Create chat) -->
+      <div id="postAIPanel" style="display:none;">
         <!-- Quick action buttons -->
         <div id="createQuickActions" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
           <button class="scavenger-filter-btn" onclick="handleCreateQuickAction('post')">Generate Post</button>
@@ -418,19 +434,18 @@
    </div>
   </div>
 
-  <!-- v25.5: Social Hub Help Modal -->
+  <!-- v28.4: Media Lab Help Modal -->
   <div id="socialHelpModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:480px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="font-size:16px;font-weight:600;color:var(--text-primary);">Social Hub Guide</h3>
+        <h3 style="font-size:16px;font-weight:600;color:var(--text-primary);">Media Lab Guide</h3>
         <button onclick="closeSocialHelp()" style="border:none;background:none;color:var(--text-secondary);cursor:pointer;font-size:18px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px;">
-        <div><strong style="color:var(--accent);">Publish</strong><br><span style="color:var(--text-secondary);font-size:13px;">Post content to your connected social accounts</span></div>
+        <div><strong style="color:var(--accent);">Post</strong><br><span style="color:var(--text-secondary);font-size:13px;">Compose, publish, and use AI to draft content</span></div>
         <div><strong style="color:var(--accent);">Engage</strong><br><span style="color:var(--text-secondary);font-size:13px;">Find and reply to relevant posts in your niche</span></div>
-        <div><strong style="color:var(--accent);">Create</strong><br><span style="color:var(--text-secondary);font-size:13px;">AI-powered content drafting and DMs</span></div>
         <div><strong style="color:var(--accent);">Blog</strong><br><span style="color:var(--text-secondary);font-size:13px;">Write and publish blog content with AI assistance</span></div>
         <div><strong style="color:var(--accent);">Analytics</strong><br><span style="color:var(--text-secondary);font-size:13px;">Track post performance and audience insights</span></div>
         <div><strong style="color:var(--accent);">Settings</strong><br><span style="color:var(--text-secondary);font-size:13px;">Connect social accounts and configure automation</span></div>
@@ -441,16 +456,16 @@
     </div>
   </div>
 
-  <!-- v25.5: Social Hub Feedback Modal -->
+  <!-- v28.4: Media Lab Feedback Modal -->
   <div id="socialFeedbackModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:480px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="font-size:16px;font-weight:600;color:var(--text-primary);">Social Hub Feedback</h3>
+        <h3 style="font-size:16px;font-weight:600;color:var(--text-primary);">Media Lab Feedback</h3>
         <button onclick="closeSocialFeedback()" style="border:none;background:none;color:var(--text-secondary);cursor:pointer;font-size:18px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:12px;">How is the Social Hub working for you?</p>
+      <p style="color:var(--text-secondary);font-size:13px;margin-bottom:12px;">How is Media Lab working for you?</p>
       <div style="display:flex;gap:12px;margin-bottom:16px;">
         <button id="feedbackThumbUp" onclick="setSocialFeedbackSentiment('positive')" style="flex:1;padding:12px;border-radius:8px;border:2px solid var(--border-color);background:var(--bg-tertiary);color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>

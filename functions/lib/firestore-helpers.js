@@ -13,6 +13,26 @@ function getDb() {
   return admin.firestore();
 }
 
+// v28.0: Check if user has migrated to v4 namespace
+// Returns 'roweos_v4/{uid}' if migrated, else 'roweos_users/{uid}'
+// Caches result per uid for the lifetime of this function invocation
+var _basePathCache = {};
+async function getBasePath(uid) {
+  if (_basePathCache[uid]) return _basePathCache[uid];
+  var db = getDb();
+  try {
+    var configDoc = await db.collection('roweos_v4').doc(uid).collection('_meta').doc('config').get();
+    if (configDoc.exists && configDoc.data().migrationCompleted) {
+      _basePathCache[uid] = 'roweos_v4/' + uid;
+      return _basePathCache[uid];
+    }
+  } catch (e) {
+    // Fall back to old namespace
+  }
+  _basePathCache[uid] = 'roweos_users/' + uid;
+  return _basePathCache[uid];
+}
+
 /**
  * Read user's API keys from secure storage
  * @param {string} uid - Firebase user ID
@@ -20,7 +40,8 @@ function getDb() {
  */
 async function getUserApiKeys(uid) {
   var db = getDb();
-  var doc = await db.doc('roweos_users/' + uid + '/secure/api_keys').get();
+  var basePath = await getBasePath(uid);
+  var doc = await db.doc(basePath + '/secure/api_keys').get();
   if (!doc.exists) return null;
   return doc.data();
 }
@@ -33,7 +54,8 @@ async function getUserApiKeys(uid) {
  */
 async function getUserBrands(uid) {
   var db = getDb();
-  var snap = await db.collection('roweos_users/' + uid + '/brands').get();
+  var basePath = await getBasePath(uid);
+  var snap = await db.collection(basePath + '/brands').get();
   if (snap.empty) return [];
   var brands = [];
   snap.forEach(function(doc) {
@@ -55,7 +77,8 @@ async function getUserBrands(uid) {
  */
 async function getUserBrandSettings(uid) {
   var db = getDb();
-  var doc = await db.doc('roweos_users/' + uid + '/profile/main').get();
+  var basePath = await getBasePath(uid);
+  var doc = await db.doc(basePath + '/profile/main').get();
   if (!doc.exists) return {};
   var data = doc.data();
   return data.brandSettings || {};
@@ -68,7 +91,8 @@ async function getUserBrandSettings(uid) {
  */
 async function getUserSettings(uid) {
   var db = getDb();
-  var doc = await db.doc('roweos_users/' + uid + '/profile/main').get();
+  var basePath = await getBasePath(uid);
+  var doc = await db.doc(basePath + '/profile/main').get();
   if (!doc.exists) return {};
   var data = doc.data();
   return data.settings || {};
@@ -83,7 +107,8 @@ async function getUserSettings(uid) {
  */
 async function getUserAutomations(uid) {
   var db = getDb();
-  var snap = await db.collection('roweos_users/' + uid + '/automations').get();
+  var basePath = await getBasePath(uid);
+  var snap = await db.collection(basePath + '/automations').get();
   if (snap.empty) return [];
   var automations = [];
   snap.forEach(function(doc) {
@@ -102,7 +127,8 @@ async function getUserAutomations(uid) {
  */
 async function getUserCustomOps(uid) {
   var db = getDb();
-  var snap = await db.collection('roweos_users/' + uid + '/customOps').get();
+  var basePath = await getBasePath(uid);
+  var snap = await db.collection(basePath + '/customOps').get();
   if (snap.empty) return [];
   var ops = [];
   snap.forEach(function(doc) { ops.push(doc.data()); });
@@ -117,7 +143,8 @@ async function getUserCustomOps(uid) {
  */
 async function getUserGeneratedBrandOps(uid) {
   var db = getDb();
-  var snap = await db.collection('roweos_users/' + uid + '/generatedBrandOps').get();
+  var basePath = await getBasePath(uid);
+  var snap = await db.collection(basePath + '/generatedBrandOps').get();
   if (snap.empty) return [];
   var ops = [];
   snap.forEach(function(doc) { ops.push(doc.data()); });
@@ -142,7 +169,8 @@ async function writeCloudResult(uid, result) {
     executedBy: 'cloud_function',
     picked_up: false
   };
-  await db.collection('roweos_users/' + uid + '/cloud_results').add(resultDoc);
+  var basePath = await getBasePath(uid);
+  await db.collection(basePath + '/cloud_results').add(resultDoc);
 }
 
 /**
@@ -154,8 +182,9 @@ async function writeCloudResult(uid, result) {
  */
 async function updateAutomationLastRun(uid, taskId, timestamp, executor, errorMsg) {
   var db = getDb();
+  var basePath = await getBasePath(uid);
   var idStr = String(taskId);
-  var docRef = db.doc('roweos_users/' + uid + '/automations/' + idStr);
+  var docRef = db.doc(basePath + '/automations/' + idStr);
   var doc = await docRef.get();
   if (doc.exists) {
     var update = {
@@ -186,7 +215,8 @@ async function updateAutomationLastRun(uid, taskId, timestamp, executor, errorMs
  */
 async function setCloudLock(uid, taskId, lock) {
   var db = getDb();
-  var lockRef = db.doc('roweos_users/' + uid + '/cloud_locks/' + taskId);
+  var basePath = await getBasePath(uid);
+  var lockRef = db.doc(basePath + '/cloud_locks/' + taskId);
 
   if (lock) {
     try {
@@ -227,11 +257,12 @@ async function setCloudLock(uid, taskId, lock) {
  */
 async function getUserSocialToken(uid, platform, scope) {
   var db = getDb();
+  var basePath = await getBasePath(uid);
   var tokenKey = platform + (scope || '');
 
   // Try individual token doc first (fresher, written by storeSocialToken())
   try {
-    var tokenDoc = await db.doc('roweos_users/' + uid + '/social_tokens/' + tokenKey).get();
+    var tokenDoc = await db.doc(basePath + '/social_tokens/' + tokenKey).get();
     if (tokenDoc.exists) {
       var tokenData = tokenDoc.data();
       if (tokenData.accessToken) return tokenData;
@@ -242,7 +273,7 @@ async function getUserSocialToken(uid, platform, scope) {
 
   // Fall back to profile blob (written by syncToFirebaseV2)
   try {
-    var profileDoc = await db.doc('roweos_users/' + uid + '/profile/main').get();
+    var profileDoc = await db.doc(basePath + '/profile/main').get();
     if (profileDoc.exists) {
       var data = profileDoc.data();
       var connections = data.socialConnections || {};
@@ -271,7 +302,8 @@ async function getUserSocialToken(uid, platform, scope) {
 async function getUserSocialConnections(uid) {
   var db = getDb();
   try {
-    var doc = await db.doc('roweos_users/' + uid + '/profile/main').get();
+    var basePath = await getBasePath(uid);
+    var doc = await db.doc(basePath + '/profile/main').get();
     if (!doc.exists) return {};
     var data = doc.data();
     return data.socialConnections || {};
@@ -285,7 +317,8 @@ async function getUserSocialConnections(uid) {
 
 async function getActiveScavengerConfigs(uid) {
   var db = getDb();
-  var snap = await db.collection('roweos_users/' + uid + '/scavenger_configs')
+  var basePath = await getBasePath(uid);
+  var snap = await db.collection(basePath + '/scavenger_configs')
     .where('active', '==', true)
     .get();
   if (snap.empty) return [];
@@ -300,18 +333,21 @@ async function getActiveScavengerConfigs(uid) {
 
 async function writeScavengerTarget(uid, target) {
   var db = getDb();
-  var docRef = await db.collection('roweos_users/' + uid + '/scavenger_targets').add(target);
+  var basePath = await getBasePath(uid);
+  var docRef = await db.collection(basePath + '/scavenger_targets').add(target);
   return docRef.id;
 }
 
 async function updateScavengerTarget(uid, targetId, updates) {
   var db = getDb();
-  await db.doc('roweos_users/' + uid + '/scavenger_targets/' + targetId).set(updates, { merge: true });
+  var basePath = await getBasePath(uid);
+  await db.doc(basePath + '/scavenger_targets/' + targetId).set(updates, { merge: true });
 }
 
 async function getScavengerTargetsByStatus(uid, status) {
   var db = getDb();
-  var snap = await db.collection('roweos_users/' + uid + '/scavenger_targets')
+  var basePath = await getBasePath(uid);
+  var snap = await db.collection(basePath + '/scavenger_targets')
     .where('status', '==', status)
     .get();
   var targets = [];
@@ -325,7 +361,8 @@ async function getScavengerTargetsByStatus(uid, status) {
 
 async function scavengerTargetExists(uid, postId) {
   var db = getDb();
-  var snap = await db.collection('roweos_users/' + uid + '/scavenger_targets')
+  var basePath = await getBasePath(uid);
+  var snap = await db.collection(basePath + '/scavenger_targets')
     .where('postId', '==', postId)
     .limit(1)
     .get();
@@ -334,8 +371,9 @@ async function scavengerTargetExists(uid, postId) {
 
 async function countScavengerTargets(uid, configId, status, sinceMs) {
   var db = getDb();
+  var basePath = await getBasePath(uid);
   var sinceDate = new Date(sinceMs);
-  var snap = await db.collection('roweos_users/' + uid + '/scavenger_targets')
+  var snap = await db.collection(basePath + '/scavenger_targets')
     .where('configId', '==', configId)
     .where('status', '==', status)
     .where('postedAt', '>=', sinceDate)
@@ -345,7 +383,8 @@ async function countScavengerTargets(uid, configId, status, sinceMs) {
 
 async function setScavengerLock(uid, lock) {
   var db = getDb();
-  var lockRef = db.doc('roweos_users/' + uid + '/scavenger_lock/pipeline');
+  var basePath = await getBasePath(uid);
+  var lockRef = db.doc(basePath + '/scavenger_lock/pipeline');
   if (lock) {
     try {
       var result = await db.runTransaction(async function(transaction) {
@@ -376,6 +415,7 @@ async function setScavengerLock(uid, lock) {
 
 module.exports = {
   getDb: getDb,
+  getBasePath: getBasePath,
   getUserApiKeys: getUserApiKeys,
   getUserBrands: getUserBrands,
   getUserBrandSettings: getUserBrandSettings,

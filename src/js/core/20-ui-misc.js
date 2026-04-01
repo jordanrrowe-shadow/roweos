@@ -3699,8 +3699,12 @@ function handleChatPaste(e) {
  * v10.5.33: Process a single file and add to currentAgentFiles array
  */
 function processAgentFile(file) {
+  // v29.0: Hide any stale progress bars when attaching a file mid-conversation
+  if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
+  if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
+
   var fileId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  
+
   // v20.1: Fallback type detection from extension if MIME type is empty
   var fileType = file.type;
   if (!fileType) {
@@ -3825,18 +3829,21 @@ function renderAgentFileChips() {
         // File type icon
         var iconSvg = getFileIcon(entry.name);
         
+        // v28.4: Show "From Library" badge for library-sourced files
+        var sourceBadge = entry.source === 'library' ? '<span class="file-chip-status" style="color: var(--accent); font-weight: 500;">From Library</span>' : '';
+
         html += '<div class="file-chip ' + statusClass + '" data-file-id="' + entry.id + '">' +
           '<span class="file-chip-icon">' + iconSvg + '</span>' +
           '<span class="file-chip-name" title="' + escapeHtml(entry.name) + '">' + escapeHtml(entry.name) + '</span>' +
-          '<span class="file-chip-status">' + statusText + '</span>' +
+          (sourceBadge || '<span class="file-chip-status">' + statusText + '</span>') +
           '<button class="file-chip-remove" onclick="removeAgentFileById(\'' + entry.id + '\')" title="Remove">✕</button>' +
         '</div>';
       });
-      
+
       container.innerHTML = html;
     }
   }
-  
+
   // v11.0.5: Also render in followup container (if visible)
   var followupContainer = document.getElementById('followupFileChips');
   if (followupContainer) {
@@ -3857,15 +3864,18 @@ function renderAgentFileChips() {
         }
         
         var iconSvg = getFileIcon(entry.name);
-        
+
+        // v28.4: Show "From Library" badge for library-sourced files
+        var sourceBadge2 = entry.source === 'library' ? '<span class="file-chip-status" style="color: var(--accent); font-weight: 500;">From Library</span>' : '';
+
         html += '<div class="file-chip ' + statusClass + '" data-file-id="' + entry.id + '">' +
           '<span class="file-chip-icon">' + iconSvg + '</span>' +
           '<span class="file-chip-name" title="' + escapeHtml(entry.name) + '">' + escapeHtml(entry.name) + '</span>' +
-          '<span class="file-chip-status">' + statusText + '</span>' +
+          (sourceBadge2 || '<span class="file-chip-status">' + statusText + '</span>') +
           '<button class="file-chip-remove" onclick="removeAgentFileById(\'' + entry.id + '\')" title="Remove">✕</button>' +
         '</div>';
       });
-      
+
       followupContainer.innerHTML = html;
     }
   }
@@ -5144,6 +5154,40 @@ function formatMessageContent(content) {
     return '%%VISUAL_PLACEHOLDER_' + localIdx + '%%';
   });
 
+  // v29.0: Extract ```pulse_goal blocks and render as styled goal cards (not raw JSON)
+  if (!window._pulseGoalCardCounter) window._pulseGoalCardCounter = 0;
+  var pulseGoalCardStore = [];
+  displayContent = displayContent.replace(/```pulse_goal\s*\n([\s\S]*?)```/g, function(match, jsonStr) {
+    var localIdx = pulseGoalCardStore.length;
+    var cardHtml = '';
+    try {
+      var parsed = JSON.parse(jsonStr.trim());
+      var title = parsed.title || 'Untitled Goal';
+      var desc = parsed.description || '';
+      var items = (parsed.items && Array.isArray(parsed.items)) ? parsed.items : [];
+      var previewDesc = desc.length > 120 ? desc.substring(0, 120) + '...' : desc;
+      var goalId = 'pulseGoalCard_' + (window._pulseGoalCardCounter++);
+      // Store for later use by action buttons
+      if (!window._pendingPulseGoals) window._pendingPulseGoals = {};
+      window._pendingPulseGoals[goalId] = parsed;
+      cardHtml = '<div style="padding:14px 16px;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);border-radius:10px;margin:8px 0;">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
+        + '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a89878" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>'
+        + '<span style="font-weight:600;color:var(--brand-accent, #a89878);font-size:13px;">' + escapeHtml(title) + '</span>'
+        + '</div>'
+        + (previewDesc ? '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px;">' + escapeHtml(previewDesc) + '</div>' : '')
+        + (items.length > 0 ? '<div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">' + items.length + ' task' + (items.length > 1 ? 's' : '') + '</div>' : '')
+        + '<div style="display:flex;gap:8px;">'
+        + '<button onclick="addPendingPulseGoal(\'' + goalId + '\', this)" style="padding:5px 12px;border-radius:var(--radius-sm, 6px);border:1px solid var(--brand-accent, #a89878);background:var(--brand-accent-10, rgba(168,152,120,0.1));color:var(--brand-accent, #a89878);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">Add to Pulse</button>'
+        + '<button onclick="this.closest(\'div[style]\').parentElement.style.display=\'none\'" style="padding:5px 12px;border-radius:var(--radius-sm, 6px);border:1px solid var(--border-color);background:transparent;color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;">Dismiss</button>'
+        + '</div></div>';
+    } catch(e) {
+      cardHtml = '<div style="padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#ef4444;font-size:13px;">Failed to parse pulse goal</div>';
+    }
+    pulseGoalCardStore.push(cardHtml);
+    return '%%PULSE_GOAL_PLACEHOLDER_' + localIdx + '%%';
+  });
+
   // v25.1: ST2 fix — detect incomplete ```html blocks (still streaming) and show building animation
   // If there's an open ```html block without a closing ```, replace it with a pulsating placeholder
   var incompleteHtmlMatch = displayContent.match(/```html\s*\n([\s\S]*)$/);
@@ -5299,6 +5343,11 @@ function formatMessageContent(content) {
     displayContent = displayContent.replace('%%VISUAL_PLACEHOLDER_' + vIdx + '%%', visualCardStore[vIdx]);
   }
 
+  // v29.0: Restore pulse goal card placeholders
+  for (var pgIdx = 0; pgIdx < pulseGoalCardStore.length; pgIdx++) {
+    displayContent = displayContent.replace('%%PULSE_GOAL_PLACEHOLDER_' + pgIdx + '%%', pulseGoalCardStore[pgIdx]);
+  }
+
   // v24.27: Restore web search indicator placeholders
   displayContent = displayContent.replace(/%%WEB_SEARCH_INDICATOR%%/g, webSearchIndicatorHtml);
 
@@ -5407,15 +5456,13 @@ function resizeVisualIframe(iframe) {
   }
 }
 
-// v20.6: Apply identity update from chat AI response and render confirmation card
+// v20.6 / v29.0: Render identity update proposal card — does NOT auto-apply, user must confirm
 function applyIdentityUpdateFromChat(jsonStr, cardIndex) {
-  if (!window._processedIdentityBlocks) window._processedIdentityBlocks = {};
   try {
     var trimmedJson = jsonStr.trim();
     var parsed = JSON.parse(trimmedJson);
     var section = parsed.section;
     var content = parsed.content;
-    // v22.50: Added visual and competitive sections
     var validSections = ['essence', 'voice', 'audience', 'messaging', 'products', 'visual', 'competitive'];
     var sectionLabels = { essence: 'Brand Essence', voice: 'Brand Voice', audience: 'Target Audience', messaging: 'Key Messaging', products: 'Products & Services', visual: 'Visual Identity', competitive: 'Competitive Position' };
 
@@ -5423,43 +5470,76 @@ function applyIdentityUpdateFromChat(jsonStr, cardIndex) {
       return '<div style="padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#ef4444;font-size:13px;">Invalid identity update: unknown section "' + escapeHtml(section || '') + '"</div>';
     }
 
-    // v22.35: Only apply once — skip if this exact block was already processed
-    if (!window._processedIdentityBlocks[trimmedJson]) {
-      window._processedIdentityBlocks[trimmedJson] = true;
-      if (brands[selectedBrand]) {
-        var brand = brands[selectedBrand];
-        if (!brand.identityData) brand.identityData = {};
-        if (!brand.identityData[section]) brand.identityData[section] = {};
-        // v22.50: Append to existing AI content rather than overwriting
-        var existingAi = brand.identityData[section].ai || '';
-        if (Array.isArray(existingAi)) {
-          existingAi = existingAi.map(function(item) {
-            return typeof item === 'string' ? item : (item.text || '');
-          }).join('\n');
-        }
-        brand.identityData[section].ai = existingAi ? existingAi + '\n\n' + content : content;
-        saveBrands();
-        var textarea = document.getElementById('identity-' + section + '-ai');
-        if (textarea) textarea.value = brand.identityData[section].ai;
-        // v22.50: Update Identity badges so green checkmarks appear
-        if (typeof updateIdentityBadges === 'function') updateIdentityBadges(section);
-        if (typeof saveBrandAIPromptTimestamp === 'function') saveBrandAIPromptTimestamp(selectedBrand);
-        // v25.1: saveBrands() already writes through to Firestore
-      }
-    }
+    // Store pending update data for confirmation
+    if (!window._pendingIdentityUpdates) window._pendingIdentityUpdates = {};
+    var updateId = 'identityUpdate_' + (window._identityUpdateCounter = (window._identityUpdateCounter || 0) + 1);
+    window._pendingIdentityUpdates[updateId] = { section: section, content: content };
 
-    // Render confirmation card with green checkmark
     var preview = content.length > 200 ? content.substring(0, 200) + '...' : content;
-    return '<div style="padding:14px 16px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;margin:8px 0;">' +
+    // v29.0: Render as a proposal card with Add/Dismiss — NOT auto-applied
+    return '<div id="' + updateId + '_card" style="padding:14px 16px;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);border-radius:10px;margin:8px 0;">' +
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
-      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
-      '<span style="font-weight:600;color:#22c55e;font-size:13px;">Updated: ' + escapeHtml(sectionLabels[section] || section) + '</span>' +
+      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a89878" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
+      '<span style="font-weight:600;color:var(--brand-accent, #a89878);font-size:13px;">Update: ' + escapeHtml(sectionLabels[section] || section) + '</span>' +
       '</div>' +
-      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;white-space:pre-wrap;">' + escapeHtml(preview) + '</div>' +
-      '</div>';
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;white-space:pre-wrap;margin-bottom:10px;">' + escapeHtml(preview) + '</div>' +
+      '<div style="display:flex;gap:8px;">' +
+      '<button onclick="confirmIdentityUpdate(\'' + updateId + '\', this)" style="padding:5px 12px;border-radius:var(--radius-sm, 6px);border:1px solid var(--brand-accent, #a89878);background:var(--brand-accent-10, rgba(168,152,120,0.1));color:var(--brand-accent, #a89878);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">Add to Identity</button>' +
+      '<button onclick="this.closest(\'[id$=_card]\').style.display=\'none\'" style="padding:5px 12px;border-radius:var(--radius-sm, 6px);border:1px solid var(--border-color);background:transparent;color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;">Dismiss</button>' +
+      '</div></div>';
   } catch(e) {
     return '<div style="padding:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#ef4444;font-size:13px;">Failed to parse identity update</div>';
   }
+}
+
+// v29.0: Confirm and apply an identity update when user clicks "Add to Identity"
+function confirmIdentityUpdate(updateId, btn) {
+  var updateData = window._pendingIdentityUpdates && window._pendingIdentityUpdates[updateId];
+  if (!updateData) { showToast('Could not find update data', 'error'); return; }
+  var section = updateData.section;
+  var content = updateData.content;
+  var sectionLabels = { essence: 'Brand Essence', voice: 'Brand Voice', audience: 'Target Audience', messaging: 'Key Messaging', products: 'Products & Services', visual: 'Visual Identity', competitive: 'Competitive Position' };
+
+  if (typeof brands !== 'undefined' && typeof selectedBrand !== 'undefined' && brands[selectedBrand]) {
+    var brand = brands[selectedBrand];
+    if (!brand.identityData) brand.identityData = {};
+    if (!brand.identityData[section]) brand.identityData[section] = {};
+    var existingAi = brand.identityData[section].ai || '';
+    if (Array.isArray(existingAi)) {
+      existingAi = existingAi.map(function(item) {
+        return typeof item === 'string' ? item : (item.text || '');
+      }).join('\n');
+    }
+    brand.identityData[section].ai = existingAi ? existingAi + '\n\n' + content : content;
+    saveBrands();
+    var textarea = document.getElementById('identity-' + section + '-ai');
+    if (textarea) textarea.value = brand.identityData[section].ai;
+    if (typeof updateIdentityBadges === 'function') updateIdentityBadges(section);
+    if (typeof saveBrandAIPromptTimestamp === 'function') saveBrandAIPromptTimestamp(selectedBrand);
+  }
+
+  // Transform the card to green confirmed state
+  var card = document.getElementById(updateId + '_card');
+  if (card) {
+    card.style.background = 'rgba(34,197,94,0.08)';
+    card.style.borderColor = 'rgba(34,197,94,0.25)';
+  }
+  btn.textContent = 'Added';
+  btn.style.background = '#22c55e';
+  btn.style.borderColor = '#22c55e';
+  btn.style.color = '#fff';
+  btn.style.pointerEvents = 'none';
+  // Update the header icon and text to green checkmark
+  var header = btn.closest('[id$="_card"]').querySelector('span[style*="font-weight:600"]');
+  if (header) {
+    header.style.color = '#22c55e';
+    header.textContent = 'Updated: ' + (sectionLabels[section] || section);
+  }
+  var iconSvg = btn.closest('[id$="_card"]').querySelector('svg');
+  if (iconSvg) iconSvg.setAttribute('stroke', '#22c55e');
+  var dismissBtn = btn.nextElementSibling;
+  if (dismissBtn) dismissBtn.style.display = 'none';
+  showToast((sectionLabels[section] || section) + ' updated', 'success');
 }
 
 // v19.7: Render an inline automation/pipeline proposal card from AI-generated JSON
@@ -6443,6 +6523,10 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
         if (typeof checkForSaveToIdentity === 'function') {
           checkForSaveToIdentity(streamContent, fullText, 'life');
         }
+        // v28.4: Check for pulse_goal blocks in response
+        if (typeof checkForPulseGoalInResponse === 'function') {
+          checkForPulseGoalInResponse(streamContent, fullText);
+        }
       }
       // v16.10: Append export actions (Copy/Word/Excel/Slides/PDF)
       appendStreamingMsgActions();
@@ -6719,6 +6803,10 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       }
       if (!fullText || !fullText.trim()) {
         console.warn('[StandardAI] onComplete received empty response. Provider:', provider, 'Model:', model);
+      }
+      // v28.4: Check for pulse_goal blocks in response
+      if (streamContent && typeof checkForPulseGoalInResponse === 'function') {
+        checkForPulseGoalInResponse(streamContent, fullText);
       }
       // v16.10: Append export actions (Copy/Word/Excel/Slides/PDF)
       appendStreamingMsgActions();
@@ -7160,6 +7248,10 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
           console.error('[BrandAI] formatMessageContent error:', fmtErr);
           streamContent.innerHTML = '<p style="color:var(--error-red, #ef4444);">Error rendering response.</p>';
         }
+      }
+      // v28.4: Check for pulse_goal blocks in response
+      if (streamContent && typeof checkForPulseGoalInResponse === 'function') {
+        checkForPulseGoalInResponse(streamContent, fullText);
       }
       // v20.18: Debug logging for blank response investigation
       if (!fullText || !fullText.trim()) {

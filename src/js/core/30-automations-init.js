@@ -2751,6 +2751,13 @@ function checkAndRunDueTasks() {
     _schedulerLastCheck = Date.now();
     return;
   }
+  // v28.4: Wait for first cloud sync before running tasks — prevents re-execution
+  // on second device that hasn't pulled lastRun timestamps from Firestore yet
+  if (typeof firebaseUser !== 'undefined' && firebaseUser && localStorage.getItem('roweos_first_sync_completed') !== 'true') {
+    console.log('[Scheduler] Waiting for first cloud sync before checking tasks');
+    _schedulerLastCheck = Date.now();
+    return;
+  }
   // v20.11: Track last check time for scheduler clock
   _schedulerLastCheck = Date.now();
   // v22.8: Use getMergedAutomations() — single source of truth with deletion filtering
@@ -3542,6 +3549,68 @@ async function executeScheduledTask(task, idx) {
     // v20.11: Write lastRun by ID (not index)
     writeLastRunById(task.id, _pgTs);
     showToast(_pgResult, 'success');
+    return;
+  }
+
+  // v28.4: Handle "create_goal" action — create a new Pulse goal from automation
+  if (task.action === 'create_goal') {
+    var _cgResult = 'Goal creation triggered';
+    var _cgTitle = (task.target && task.target.goalTitle) ? task.target.goalTitle : (task.name || 'Untitled Goal');
+    var _cgDesc = (task.target && task.target.goalDescription) ? task.target.goalDescription : (task.description || '');
+    var _cgItems = (task.target && task.target.goalItems) ? task.target.goalItems : [];
+    // If instructions provided but no items, use AI to generate tasks
+    var _cgInstructions = (task.target && task.target.contextRef) ? task.target.contextRef : '';
+    if (_cgInstructions && (!_cgItems || _cgItems.length === 0)) {
+      var _cgIsLife = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+      var _cgContext = _cgIsLife ? (typeof getLifeIdentityContextForGoals === 'function' ? getLifeIdentityContextForGoals() : '') : (typeof getBrandContextForGoals === 'function' ? getBrandContextForGoals() : '');
+      var _cgSysPrompt = 'You are a goal planning assistant. Given a goal title and instructions, generate actionable tasks. Return ONLY a JSON array of strings, no other text. Each task should be concise and actionable. Never use em-dashes.';
+      var _cgUserPrompt = 'Goal: "' + _cgTitle + '"';
+      if (_cgDesc) _cgUserPrompt += '\nDescription: ' + _cgDesc;
+      _cgUserPrompt += '\nInstructions: ' + _cgInstructions;
+      if (_cgContext) _cgUserPrompt += _cgContext;
+      _cgUserPrompt += '\n\nReturn a JSON array of 3-8 recommended task strings.';
+      try {
+        await new Promise(function(resolve) {
+          callLifeAIForGoal(
+            _cgSysPrompt,
+            _cgUserPrompt,
+            function(responseText) {
+              var tasks = [];
+              try { tasks = JSON.parse(responseText); } catch(e) {
+                var jsonMatch = responseText.match(/\[[\s\S]*?\]/);
+                if (jsonMatch) { try { tasks = JSON.parse(jsonMatch[0]); } catch(e2) {} }
+              }
+              if (Array.isArray(tasks) && tasks.length > 0) {
+                _cgItems = tasks.filter(function(t) { return typeof t === 'string' && t.trim(); });
+              }
+              resolve();
+            },
+            function(err) {
+              console.warn('[Scheduler] AI task gen for create_goal failed:', err);
+              resolve();
+            }
+          );
+        });
+      } catch(e) {
+        console.warn('[Scheduler] create_goal AI error:', e.message);
+      }
+    }
+    if (typeof createPulseGoalFromAutomation === 'function') {
+      var _cgGoalId = createPulseGoalFromAutomation({ title: _cgTitle, description: _cgDesc, items: _cgItems });
+      if (_cgGoalId) {
+        _cgResult = 'Created goal "' + _cgTitle + '" with ' + _cgItems.length + ' task(s)';
+      } else {
+        _cgResult = 'Failed to create goal "' + _cgTitle + '"';
+      }
+    } else {
+      _cgResult = 'createPulseGoalFromAutomation not available';
+    }
+    var _cgTs = new Date().toISOString();
+    if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, true);
+    if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, true, _cgResult);
+    if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, _cgResult);
+    writeLastRunById(task.id, _cgTs);
+    showToast(_cgResult, 'success');
     return;
   }
 

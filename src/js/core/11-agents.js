@@ -434,7 +434,7 @@ var SIDEBAR_LABELS = {
   folio: 'Folio', rhythm: 'Rhythm', library: 'Library', automations: 'Automations',
   mail: 'Mail', memory: 'Identity', tuning: 'History', guardrails: 'Guardrails',
   clients: 'People', commerce: 'Analytics', inventory: 'Inventory', sync: 'Sync',
-  settings: 'System', bloom: 'Bloom', social: 'Social Hub', admin: 'Admin'
+  settings: 'System', bloom: 'Bloom', social: 'Media Lab', admin: 'Admin'
 };
 var runs = [];
 var calendar = [];
@@ -932,7 +932,8 @@ function swapLogoForTheme() {
   var brand = brands[brandIdx];
   if (!brand) return;
   var isLight = document.documentElement.classList.contains('light-mode');
-  var logoToUse = (isLight && brand.logoLight) ? brand.logoLight : (brand.logo || '');
+  // v28.4: Fix — logoLight is the light-colored logo (for dark backgrounds), brand.logo is dark-colored (for light backgrounds)
+  var logoToUse = (!isLight && brand.logoLight) ? brand.logoLight : (brand.logo || '');
   if (!logoToUse) return;
 
   // v28.4: Update ALL logo display elements including collapsed sidebar
@@ -1137,7 +1138,7 @@ var _sectionGroups = {
     description: 'Content generation, social media management, automation pipelines, and growth tools.',
     features: [
       { id: 'studio', label: 'Studio', desc: 'Generate content with specialized agents', icon: 'studio' },
-      { id: 'social', label: 'Social Hub', desc: 'Monitor, engage, and publish across platforms', icon: 'social' },
+      { id: 'social', label: 'Media Lab', desc: 'Create, publish, and engage across platforms', icon: 'social' },
       { id: 'automations', label: 'Automations', desc: 'Multi-step AI workflows and pipelines', icon: 'automations' },
       { id: 'bloom', label: 'Bloom', desc: 'Growth algorithm and audience building', icon: 'bloom' }
     ],
@@ -1944,7 +1945,7 @@ var _viewLabels = {
   rhythm: 'Rhythm', library: 'Library', memory: 'Identity', tuning: 'History',
   settings: 'Settings', inventory: 'Inventory', clients: 'People',
   commerce: 'Analytics', admin: 'Admin', mail: 'Mail', folio: 'Folio',
-  social: 'Social Hub', bloom: 'Bloom', automations: 'Automations',
+  social: 'Media Lab', bloom: 'Bloom', automations: 'Automations',
   brandIntel: 'Guardrails'
 };
 
@@ -2099,13 +2100,12 @@ function navigateToSubSection(groupName, viewId) {
 // v26.0: Per-page landing configurations (for pages with sub-tabs)
 var _pageLandingConfigs = {
   'social': {
-    label: 'SOCIAL HUB',
+    label: 'MEDIA LAB',
     tagline: 'Your Social Command Center',
-    description: 'Monitor, engage, and publish across all your platforms from one place.',
+    description: 'Create, publish, and engage across all your platforms from one place.',
     features: [
       { id: 'engage', label: 'Engage', desc: 'Find and reply to relevant posts in your niche' },
-      { id: 'publish', label: 'Publish', desc: 'Post content to all your platforms at once' },
-      { id: 'create', label: 'Create', desc: 'AI-powered content drafting and DMs' },
+      { id: 'post', label: 'Post', desc: 'Compose, publish, and draft content with AI' },
       { id: 'analytics', label: 'Analytics', desc: 'Track post performance and audience insights' }
     ],
     secondary: [
@@ -2715,14 +2715,12 @@ function showView(view) {
     }
   }
 
-  // v26.3: Social Hub view
-  // v26.3: Social Hub view
+  // v28.4: Media Lab view (renamed from Social Hub)
   if (view === 'social') {
-    // v26.0: Render pill nav for Social Hub
+    // v28.4: Render pill nav for Media Lab (merged Create+Publish into Post)
     renderPillNav('socialHubPillNav', [
       { id: 'engage', label: 'Engage' },
-      { id: 'publish', label: 'Publish' },
-      { id: 'create', label: 'Create' },
+      { id: 'post', label: 'Post' },
       { id: 'analytics', label: 'Analytics' },
       { id: 'blog', label: 'Blog', secondary: true },
       { id: 'activity', label: 'Activity', secondary: true },
@@ -3229,7 +3227,11 @@ function onBrandChange() {
   try { localStorage.setItem('roweos_selected_brand', String(brandIdx)); } catch(e) {}
   // v28.1: Also persist brand ID for stable resolution after reorder
   try { if (brands[brandIdx] && brands[brandIdx].id) localStorage.setItem('roweos_selected_brand_id', brands[brandIdx].id); } catch(e) {}
-  
+  // v29.0: Sync selected brand to Firestore for cross-device consistency
+  if (typeof writeDB === 'function' && brands[brandIdx] && brands[brandIdx].id) {
+    writeDB('profile/main', { 'settings.selectedBrandId': brands[brandIdx].id, 'settings.selectedBrand': String(brandIdx) });
+  }
+
   // v9.1.14: Update brand icon active state and tooltip
   var landingBrandBtn = document.getElementById('landingBrandBtn');
   if (landingBrandBtn && brands[brandIdx]) {

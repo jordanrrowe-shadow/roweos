@@ -115,7 +115,7 @@
 
           <!-- v25.3: Tab Content: Website Analytics (Vercel) -->
           <div id="commerceTabWebsite" class="commerce-tab-content" style="display: none;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
               <div style="font-size:var(--text-lg);font-weight:600;">Website Analytics</div>
               <div style="display:flex;gap:8px;align-items:center;">
                 <select id="webAnalyticsTimeRange" onchange="loadWebAnalytics()" style="padding:4px 10px;font-size:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-family:inherit;">
@@ -127,6 +127,12 @@
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 </button>
               </div>
+            </div>
+            <!-- v28.4: Custom website URL input -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <input type="text" id="commerceWebsiteUrl" placeholder="Enter website URL (e.g. mysite.com)" style="flex:1;padding:6px 12px;font-size:13px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-family:inherit;outline:none;" onkeydown="if(event.key==='Enter'){saveAnalyticsSiteUrl();loadWebAnalytics();}">
+              <button onclick="saveAnalyticsSiteUrl();loadWebAnalytics();" style="padding:6px 12px;font-size:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;font-family:inherit;white-space:nowrap;">Set URL</button>
             </div>
             <div id="webAnalyticsLoading" style="text-align:center;padding:60px;color:var(--text-muted);">
               <div style="font-size:13px;">Loading analytics...</div>

@@ -2,7 +2,7 @@
 // DATA INITIALIZATION & MIGRATION - v4.8.0
 // ═══════════════════════════════════════════════════════════════
 
-var ROWEOS_VERSION = 'v28.4';
+var ROWEOS_VERSION = 'v28.5';
 var ROWEOS_DATA_VERSION_KEY = 'roweos_data_version';
 var ROWEOS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/YOUR-REPO/roweos-updates/main/latest-version.json';
 var ROWEOS_LAST_UPDATE_CHECK = 'roweos_last_update_check';
@@ -187,7 +187,8 @@ function writeDBAutomation(auto) {
   if (!auto || !auto.id) return;
   if (!shouldSyncCategory('automations')) return;
   // v25.2: Stamp _modifiedAt for merge support
-  if (!auto._modifiedAt) auto._modifiedAt = Date.now();
+  // v28.4: Always update _modifiedAt so lastRun changes win in mergeByTimestamp across devices
+  auto._modifiedAt = Date.now();
   // Deep-strip base64 data URLs (matches syncToFirebaseV2 regex approach for nested content)
   var dataStr = JSON.stringify(auto);
   dataStr = dataStr.replace(/"data:[^"]{50000,}"/g, '""');

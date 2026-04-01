@@ -3301,7 +3301,7 @@ function blogDeliverSaveToLibrary() {
   }
 }
 
-// v25.5: Social Hub Help
+// v28.4: Media Lab Help
 function showSocialHelp() {
   var modal = document.getElementById('socialHelpModal');
   if (modal) modal.style.display = 'flex';
@@ -3312,7 +3312,7 @@ function closeSocialHelp() {
   localStorage.setItem('roweos_social_help_dismissed', 'true');
 }
 
-// v25.5: Social Hub Feedback
+// v28.4: Media Lab Feedback
 var _socialFeedbackSentiment = '';
 
 function showSocialFeedback() {
@@ -3362,8 +3362,10 @@ function submitSocialFeedback() {
   });
 }
 
-// v26.3: Social Hub — Tab switching
+// v28.4: Media Lab — Tab switching (renamed from Social Hub)
 function showSocialTab(tab) {
+  // v28.4: Map legacy tab names to merged Post tab
+  if (tab === 'publish' || tab === 'create') tab = 'post';
   // v26.0: Only toggle old-style tab buttons if they still exist
   var tabs = document.querySelectorAll('.social-hub-tab');
   if (tabs.length > 0) {
@@ -3379,16 +3381,14 @@ function showSocialTab(tab) {
   }
   var panel = document.getElementById('socialTab' + tab.charAt(0).toUpperCase() + tab.slice(1));
   if (panel) panel.style.display = '';
-  // v25.4: Render tab content on switch
-  if (tab === 'publish' && typeof renderPublishTab === 'function') renderPublishTab();
+  // v28.4: Render tab content on switch
+  if (tab === 'post' && typeof renderPublishTab === 'function') { renderPublishTab(); if (typeof initCreateChat === 'function') initCreateChat(); }
   if (tab === 'media' && typeof showMediaSubTab === 'function') showMediaSubTab('image');
   if (tab === 'settings' && typeof renderSocialSettings === 'function') renderSocialSettings();
   if (tab === 'engage' && typeof initEngageTab === 'function') initEngageTab();
   if (tab === 'activity' && typeof initSocialActivityLog === 'function') initSocialActivityLog();
   if (tab === 'blog' && typeof initBlogTab === 'function') initBlogTab();
   if (tab === 'analytics' && typeof initAnalyticsTab === 'function') initAnalyticsTab();
-  // v25.4: Init Create tab on switch
-  if (tab === 'create' && typeof initCreateChat === 'function') initCreateChat();
 }
 
 // v25.4: Media tab sub-tab switching
@@ -3412,24 +3412,39 @@ function showMediaSubTab(tab) {
   }
 }
 
-// v25.4: Create tab sub-tab switching
-function showCreateSubTab(tab) {
-  var chatPanel = document.getElementById('createChatPanel');
+// v28.4: Post tab sub-tab switching (Compose, AI Assist, DMs)
+function showPostSubTab(tab) {
+  var composePanel = document.getElementById('postComposePanel');
+  var aiPanel = document.getElementById('postAIPanel');
   var dmsPanel = document.getElementById('createDMsPanel');
-  var chatBtn = document.getElementById('createSubCreate');
-  var dmsBtn = document.getElementById('createSubDMs');
-  if (tab === 'chat') {
-    if (chatPanel) chatPanel.style.display = '';
-    if (dmsPanel) dmsPanel.style.display = 'none';
-    if (chatBtn) chatBtn.classList.add('active');
-    if (dmsBtn) dmsBtn.classList.remove('active');
-  } else {
-    if (chatPanel) chatPanel.style.display = 'none';
+  var composeBtn = document.getElementById('postSubCompose');
+  var aiBtn = document.getElementById('postSubAI');
+  var dmsBtn = document.getElementById('postSubDMs');
+  // Reset all
+  if (composePanel) composePanel.style.display = 'none';
+  if (aiPanel) aiPanel.style.display = 'none';
+  if (dmsPanel) dmsPanel.style.display = 'none';
+  if (composeBtn) composeBtn.classList.remove('active');
+  if (aiBtn) aiBtn.classList.remove('active');
+  if (dmsBtn) dmsBtn.classList.remove('active');
+  if (tab === 'compose') {
+    if (composePanel) composePanel.style.display = '';
+    if (composeBtn) composeBtn.classList.add('active');
+  } else if (tab === 'ai') {
+    if (aiPanel) aiPanel.style.display = '';
+    if (aiBtn) aiBtn.classList.add('active');
+    if (typeof initCreateChat === 'function') initCreateChat();
+  } else if (tab === 'dms') {
     if (dmsPanel) dmsPanel.style.display = '';
-    if (chatBtn) chatBtn.classList.remove('active');
     if (dmsBtn) dmsBtn.classList.add('active');
     initDMsTab();
   }
+}
+// v28.4: Backwards-compatible alias
+function showCreateSubTab(tab) {
+  if (tab === 'chat') showPostSubTab('ai');
+  else if (tab === 'dms') showPostSubTab('dms');
+  else showPostSubTab(tab);
 }
 
 // v25.4: Create Tab -- AI Chat
@@ -3478,7 +3493,7 @@ function renderCreateMessage(msg, idx) {
   var sendToPublishBtn = '';
   if (!isUser && idx > 0) {
     sendToPublishBtn = '<div style="margin-top:8px;">'
-      + '<button onclick="sendCreateToPublish(' + idx + ')" style="padding:4px 12px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-size:11px;">Send to Publish</button>'
+      + '<button onclick="sendCreateToPublish(' + idx + ')" style="padding:4px 12px;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-size:11px;">Send to Compose</button>'
       + '</div>';
   }
   return '<div style="display:flex;flex-direction:column;' + align + '">'
@@ -3679,8 +3694,11 @@ function handleCreateQuickAction(action) {
 function sendCreateToPublish(messageIdx) {
   var msg = createChatState.messages[messageIdx];
   if (!msg) return;
-  showSocialPublisher(msg.content);
-  logSocialActivity('create_to_publish', { description: 'Sent AI-crafted content to Publish' });
+  // v28.4: Navigate to Compose sub-tab within merged Post tab
+  window._socialPublisherContent = msg.content;
+  showPostSubTab('compose');
+  if (typeof renderPublishTab === 'function') renderPublishTab();
+  logSocialActivity('create_to_publish', { description: 'Sent AI-crafted content to Compose' });
 }
 
 function clearCreateChat() {
@@ -3725,7 +3743,7 @@ function loadDMConversations(platform) {
 
   getSocialToken('x').then(function(tokenData) {
     if (!tokenData || !tokenData.access_token) {
-      listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-secondary);font-size:13px;">X not connected. Connect X in Social Hub Settings to view DMs.</div>';
+      listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-secondary);font-size:13px;">X not connected. Connect X in Media Lab Settings to view DMs.</div>';
       return;
     }
     var token = tokenData.access_token;
@@ -3963,7 +3981,7 @@ function postMediaToPublish(mediaSrc) {
   logSocialActivity('image_generated', { description: 'Attached generated image to Publish' });
 }
 
-// v25.4: Render Social Hub Settings tab
+// v28.4: Render Media Lab Settings tab
 function renderSocialSettings() {
   try {
   var el = document.getElementById('socialSettingsContainer') || document.getElementById('socialTabSettings');
@@ -4103,12 +4121,11 @@ function renderSocialSettings() {
   }
 }
 
-// v25.5: Social Hub Guided Tour
+// v28.4: Media Lab Guided Tour
 var _socialTourSteps = [
   { tab: 'settings', title: 'Settings', desc: 'Connect your social accounts here' },
-  { tab: 'publish', title: 'Publish', desc: 'Post content to all your platforms at once' },
+  { tab: 'post', title: 'Post', desc: 'Compose, publish, and draft content with AI' },
   { tab: 'engage', title: 'Engage', desc: 'Find relevant posts and draft replies' },
-  { tab: 'create', title: 'Create', desc: 'Use AI to craft content and manage DMs' },
   { tab: 'blog', title: 'Blog', desc: 'Write blog posts with AI assistance' },
   { tab: 'analytics', title: 'Analytics', desc: 'Track your social performance' }
 ];
@@ -7045,16 +7062,18 @@ function mailGenerateAiTemplate() {
     accent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878';
   } catch(e) {}
 
-  // v22.44: Ensure logo URL is ready before generating template (email clients block base64)
-  var logoReady = Promise.resolve(window._mailLogoUrl || null);
-  if (!window._mailLogoUrl) {
+  // v28.4: Prefer base64 for logo (never expires). Firebase Storage URLs expire after ~1hr.
+  var logoReady = Promise.resolve(window._mailLogoBase64 || window._mailLogoUrl || null);
+  if (!window._mailLogoBase64 && !window._mailLogoUrl) {
     try {
       var _idx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
       var base64Logo = localStorage.getItem(getCurrentLogoKey(_idx)) || '';
       if (!base64Logo) { var _lb = brands[_idx]; if (_lb) base64Logo = _lb.logo || _lb.brandLogo || ''; }
       if (base64Logo && base64Logo.indexOf('data:') === 0) {
         mailEnsureLogoUrl(base64Logo);
-        logoReady = window._mailLogoUploadPromise || Promise.resolve(null);
+        logoReady = (window._mailLogoUploadPromise || Promise.resolve(null)).then(function() {
+          return window._mailLogoBase64 || window._mailLogoUrl || base64Logo;
+        });
       }
     } catch(e) {}
   }
@@ -7063,9 +7082,9 @@ function mailGenerateAiTemplate() {
   mailShowComposeLoading(true);
   var canvas = document.getElementById('mailComposeBody');
 
-  // v22.44: Wait for logo URL then generate
+  // v28.4: Wait for logo then generate — prefer base64 (permanent) over HTTP URL (expires)
   logoReady.then(function(resolvedLogoUrl) {
-  var logoUrl = resolvedLogoUrl || window._mailLogoUrl || '';
+  var logoUrl = window._mailLogoBase64 || resolvedLogoUrl || window._mailLogoUrl || '';
 
   var sys = 'You are an expert HTML email template designer. Create a professional, email-safe HTML template. Requirements:\n' +
     '- Complete HTML document with ALL styles inline (no <style> blocks, no CSS classes)\n' +
@@ -7079,7 +7098,7 @@ function mailGenerateAiTemplate() {
     '- Use max-width: 600px centered layout (standard email width)\n' +
     '- The template should have: a branded header area, the content area, and a minimal footer\n' +
     '- Return ONLY the raw HTML. No markdown, no code fences, no explanation.\n' +
-    '- CRITICAL: Do NOT use base64 data URIs for images.' + (logoUrl ? ' Use ONLY the logo URL provided above.' : ' Do NOT include any logo image.');
+    '- CRITICAL: Use ONLY the exact logo image tag provided above if one was given.' + (!logoUrl ? ' Do NOT include any logo image.' : '');
 
   var user = 'Template style: ' + desc + '\n\nEmail content to wrap in this template:\n' + canvasContent;
 
@@ -11925,13 +11944,16 @@ function selectOnboardingBlob(shapeName) {
   // v24.25: Both previews stay visible in side-by-side layout; just highlight active type
   var onbHelixWrap = document.getElementById('onboardingHelixPreviewWrap');
   if (onbHelixWrap && isHelix) initOnboardingHelixPreview();
-  // Update B.L.A.K.E. type highlight
-  if (typeof selectOnboardingBlakeType === 'function') {
+  // Update B.L.A.K.E. type highlight (skip if 'both' mode is active - handled by selectOnboardingBlakeType)
+  var isBothMode = (localStorage.getItem('roweos_blob_shape') === 'both');
+  if (typeof selectOnboardingBlakeType === 'function' && !isBothMode) {
     var blobCard = document.getElementById('onbBlakeBlob');
     var helixCard = document.getElementById('onbBlakeHelix');
+    var bothCard = document.getElementById('onbBlakeBoth');
     if (blobCard && helixCard) {
       blobCard.style.borderColor = isHelix ? 'var(--border-color)' : 'var(--brand-accent, #a89878)';
       helixCard.style.borderColor = isHelix ? 'var(--brand-accent, #a89878)' : 'var(--border-color)';
+      if (bothCard) bothCard.style.borderColor = 'var(--border-color)';
     }
   }
   // Show/hide main containers
@@ -12094,21 +12116,37 @@ function setOnboardingTheme(mode) {
 function selectOnboardingBlakeType(type) {
   var blobCard = document.getElementById('onbBlakeBlob');
   var helixCard = document.getElementById('onbBlakeHelix');
+  var bothCard = document.getElementById('onbBlakeBoth');
   var blobShapes = document.getElementById('onboardingBlobShapes');
   var bgCanvas = document.getElementById('onboardingHelixBgCanvas');
+  // v28.4: Reset all card borders
+  if (blobCard) blobCard.style.borderColor = 'var(--border-color)';
+  if (helixCard) helixCard.style.borderColor = 'var(--border-color)';
+  if (bothCard) bothCard.style.borderColor = 'var(--border-color)';
   if (type === 'helix') {
     if (helixCard) helixCard.style.borderColor = 'var(--brand-accent, #a89878)';
-    if (blobCard) blobCard.style.borderColor = 'var(--border-color)';
     if (blobShapes) blobShapes.style.display = 'none';
     selectOnboardingBlob('helix');
-    // v24.26: Show helix as full background — dramatic edge-to-edge like chat view
+    // v24.26: Show helix as full background - dramatic edge-to-edge like chat view
     if (bgCanvas) bgCanvas.style.opacity = '0.6';
+    setTimeout(function() { initOnboardingHelixPreview(); }, 100);
+  } else if (type === 'both') {
+    // v28.4: Both mode - show blob shapes and helix background
+    if (bothCard) bothCard.style.borderColor = 'var(--brand-accent, #a89878)';
+    if (blobShapes) blobShapes.style.display = 'flex';
+    if (bgCanvas) bgCanvas.style.opacity = '0.4';
+    // Set 'both' in localStorage BEFORE selectOnboardingBlob so isBothMode guard works
+    try { localStorage.setItem('roweos_blob_shape', 'both'); } catch(e) {}
+    var current = _blobCurrentShape || 'crystal';
+    if (current === 'helix' || current === 'both') current = 'crystal';
+    selectOnboardingBlob(current);
+    // Re-set 'both' since selectOnboardingBlob overwrites localStorage with the blob shape
+    try { localStorage.setItem('roweos_blob_shape', 'both'); } catch(e) {}
     setTimeout(function() { initOnboardingHelixPreview(); }, 100);
   } else {
     // v24.26: Hide helix background when blob selected
     if (bgCanvas) bgCanvas.style.opacity = '0';
     if (blobCard) blobCard.style.borderColor = 'var(--brand-accent, #a89878)';
-    if (helixCard) helixCard.style.borderColor = 'var(--border-color)';
     if (blobShapes) blobShapes.style.display = 'flex';
     // Default to crystal if currently helix
     var current = _blobCurrentShape || 'crystal';
@@ -12142,8 +12180,9 @@ function initOnboardingBlobPrefUI() {
   if (typeof initOnboardingBlobPreview === 'function') initOnboardingBlobPreview();
   initOnboardingHelixPreview();
   // Highlight current selection
-  var isHelix = (_blobCurrentShape === 'helix');
-  selectOnboardingBlakeType(isHelix ? 'helix' : 'blob');
+  var savedShape = _blobCurrentShape || localStorage.getItem('roweos_blob_shape') || 'crystal';
+  var initType = savedShape === 'helix' ? 'helix' : (savedShape === 'both' ? 'both' : 'blob');
+  selectOnboardingBlakeType(initType);
 }
 
 function proceedFromBlobPref() {

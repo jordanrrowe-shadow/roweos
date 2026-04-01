@@ -2459,6 +2459,26 @@ function setupRealtimeSync() {
         console.log('[Firebase V3] Skipping brandSettings merge — local model config saved ' + (Date.now() - _brandModelConfigSavedAt) + 'ms ago');
       }
       // v28.3: Theme is device-local, never overwrite from real-time sync
+      // v29.0: Real-time primary brand sync across devices
+      if (profile.settings && profile.settings.primaryBrandId) {
+        var _currentPrimaryId = localStorage.getItem('roweos_primary_brand_id');
+        if (_currentPrimaryId !== profile.settings.primaryBrandId) {
+          localStorage.setItem('roweos_primary_brand_id', profile.settings.primaryBrandId);
+          if (profile.settings.primaryBrand != null) {
+            localStorage.setItem('roweos_primary_brand', String(profile.settings.primaryBrand));
+          }
+          // Resolve index from ID in case brands were reordered on this device
+          if (typeof brands !== 'undefined') {
+            for (var _pbi = 0; _pbi < brands.length; _pbi++) {
+              if (brands[_pbi].id === profile.settings.primaryBrandId) {
+                localStorage.setItem('roweos_primary_brand', String(_pbi));
+                break;
+              }
+            }
+          }
+          console.log('[Firebase V3] Primary brand synced from cloud:', profile.settings.primaryBrandId);
+        }
+      }
       // v19.0: Real-time social connection sync (desktop → mobile)
       if (profile.socialConnections) {
         var sc = profile.socialConnections;
@@ -6476,16 +6496,13 @@ function generateBrandedEmail(layout) {
   var accent = ctx.accentColor || '#a89878';
   var logo = ctx.brandLogo || '';
   var date = ctx.date || '';
-  // v25.1: Prefer hosted URL over base64 (email clients strip data: URLs)
-  if (logo && logo.indexOf('data:') === 0 && window._mailLogoUrl && window._mailLogoUrl.indexOf('http') === 0) {
-    logo = window._mailLogoUrl;
+  // v28.4: Prefer base64 over Firebase Storage URLs (Storage URLs expire after ~1hr, causing "?" in email clients)
+  // Base64 data URIs work reliably in Apple Mail, Gmail, and most modern email clients.
+  if (logo && logo.indexOf('http') === 0 && window._mailLogoBase64) {
+    // Replace expiring HTTP URL with permanent base64
+    logo = window._mailLogoBase64;
   } else if (logo && logo.indexOf('data:') === 0) {
-    // Upload logo to get a hosted URL for email compatibility
-    if (typeof mailEnsureLogoUrl === 'function') mailEnsureLogoUrl(logo);
-    // If a URL was previously resolved, use it
-    if (window._mailLogoUrl && window._mailLogoUrl.indexOf('http') === 0) logo = window._mailLogoUrl;
-    // Fallback: use RoweOS hosted logo if this is the RoweOS brand
-    else if (brandName === 'RoweOS' || brandName === 'Rowe OS') logo = 'https://roweos.com/logo.png';
+    // Already base64 — use as-is (no need to upload to Storage)
   }
   var logoPos = ctx.logoAlignment || ctx.logoPosition || 'center'; // v22.45/v23.11: left, center, right
   // v23.2: Logo size and font from context
@@ -6496,14 +6513,15 @@ function generateBrandedEmail(layout) {
   var logoHtml = '';
   var logoAlign = logoPos === 'left' ? 'left' : logoPos === 'right' ? 'right' : 'center';
   var logoMargin = logoPos === 'center' ? 'margin:0 auto;' : logoPos === 'right' ? 'margin:0 0 0 auto;' : '';
-  // v25.1: Email clients strip JS (onerror) and base64 data: URIs — only use HTTP URLs for img tags
+  // v28.4: Use base64 data URIs directly — they work in Apple Mail, Gmail, and most modern clients.
+  // Firebase Storage URLs expire after ~1hr causing logos to show "?" placeholder.
   var initial = brandName.charAt(0).toUpperCase();
   var initialHtml = '<div style="width:48px;height:48px;border-radius:10px;background:' + accent + ';color:#fff;font-size:22px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;line-height:1;' + logoMargin + '">' + initial + '</div>';
-  if (logo && logo.indexOf('http') === 0) {
-    // HTTP URL — safe for email clients; use brand initial as alt text fallback
+  if (logo && (logo.indexOf('http') === 0 || logo.indexOf('data:') === 0)) {
+    // v28.4: Accept both HTTP URLs and base64 data URIs — base64 never expires
     logoHtml = '<img src="' + logo + '" alt="' + escapeHtml(brandName) + '" width="' + logoSizePx + '" height="auto" style="display:block;' + logoMargin + 'max-width:' + logoSizePx + 'px;max-height:' + maxH + 'px;width:' + logoSizePx + 'px;border-radius:6px;object-fit:contain;">';
   } else {
-    // base64 or no logo — show brand initial circle (base64 data URIs are stripped by most email clients)
+    // No logo available — show brand initial circle
     logoHtml = initialHtml;
   }
   // v23.2: Store font family globally for template use
@@ -8456,9 +8474,16 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           }
         }
       }
-      // v18.3: Restore primary brand setting
+      // v18.3 / v29.0: Restore primary brand setting (index + stable ID)
       if (profile.settings && profile.settings.primaryBrand != null) {
         localStorage.setItem('roweos_primary_brand', String(profile.settings.primaryBrand));
+      }
+      if (profile.settings && profile.settings.primaryBrandId) {
+        localStorage.setItem('roweos_primary_brand_id', profile.settings.primaryBrandId);
+      }
+      // v29.0: Restore selected brand from cloud (cross-device)
+      if (profile.settings && profile.settings.selectedBrandId) {
+        localStorage.setItem('roweos_selected_brand_id', profile.settings.selectedBrandId);
       }
       // v18.4: Restore calendar scope setting
       if (profile.settings && profile.settings.calendarScope) {

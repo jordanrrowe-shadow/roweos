@@ -2122,7 +2122,15 @@ function buildAutomationCapabilityPrompt() {
     '```roweos-add-clients\n' +
     '[{"name":"Business Name","company":"Company Name","industry":"Industry","location":"City, ST","notes":"Brief context"}]\n' +
     '```\n' +
-    'Include all known fields from context. Always output this block when the user explicitly asks to add to clients or leads. Include a brief confirmation alongside it.\n';
+    'Include all known fields from context. Always output this block when the user explicitly asks to add to clients or leads. Include a brief confirmation alongside it.\n\n' +
+    'PULSE GOAL CREATION CAPABILITY:\n' +
+    'When the user asks you to create a goal, action plan, checklist, or objective, output:\n' +
+    '```pulse_goal\n' +
+    '{"title":"Goal Title","description":"Brief description of the goal","items":["Task 1","Task 2","Task 3"]}\n' +
+    '```\n' +
+    'Fields: title (required), description (optional), items (array of actionable task strings, 3-8 recommended).\n' +
+    'Each item should be a concise, actionable task. Never use em-dashes in task text.\n' +
+    'Only output this block when the user explicitly asks to create a goal, plan, or checklist for Pulse. Include a brief explanation alongside it.\n';
 }
 
 /**
@@ -4675,8 +4683,10 @@ function isOpenAIThinkingModel(model) {
 // v22.18: Migrated to OpenAI Responses API (from Chat Completions)
 async function callOpenAIStudioStreaming(model, apiKey, prompt, onChunk, onComplete, onError) {
   // v22.19: Show thinking progress for thinking models and wrap callbacks
+  // v29.0: Skip progress bars for multimodal (image) conversations
+  var _studioHasMultimodal = typeof prompt === 'object' && Array.isArray(prompt);
   var _thinkingShownStudio = false;
-  if (isOpenAIThinkingModel(model)) {
+  if (isOpenAIThinkingModel(model) && !_studioHasMultimodal) {
     showThinkingProgress();
     _thinkingShownStudio = true;
     var _origOnChunkS = onChunk;

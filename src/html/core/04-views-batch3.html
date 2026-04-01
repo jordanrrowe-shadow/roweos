@@ -62,7 +62,7 @@
           <span class="sidebar-tooltip">Create</span>
           <div class="nav-subitems" style="display:none;">
             <div class="nav-subitem" data-view="studio" onclick="event.stopPropagation(); navigateToSubSection('Create','studio')">Studio</div>
-            <div class="nav-subitem" data-view="social" onclick="event.stopPropagation(); navigateToSubSection('Create','social')">Social Hub</div>
+            <div class="nav-subitem" data-view="social" onclick="event.stopPropagation(); navigateToSubSection('Create','social')">Media Lab</div>
             <div class="nav-subitem" data-view="automations" onclick="event.stopPropagation(); navigateToSubSection('Create','automations')">Automations</div>
             <div class="nav-subitem" data-view="bloom" onclick="event.stopPropagation(); showPageLanding('bloom')">Bloom</div>
           </div>
@@ -162,7 +162,7 @@
         </div>
       </div>
 
-      <!-- v26.3: CREATE - Studio, Social Hub, Automations, Bloom -->
+      <!-- v28.4: CREATE - Studio, Media Lab, Automations, Bloom -->
       <div class="nav-section">
         <div class="nav-section-title">Create</div>
         <div class="nav-item" onclick="showPageLanding('studio')" data-view="studio">
@@ -172,8 +172,8 @@
         </div>
         <div class="nav-item" onclick="showPageLanding('social')" data-view="social">
           <span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
-          <span class="nav-item-label">Social Hub</span>
-          <span class="sidebar-tooltip">Social Hub</span>
+          <span class="nav-item-label">Media Lab</span>
+          <span class="sidebar-tooltip">Media Lab</span>
         </div>
         <div class="nav-item" onclick="showPageLanding('automations')" data-view="automations" style="position:relative;">
           <span class="nav-item-icon svg-icon-wrapper">
@@ -384,7 +384,7 @@
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version" id="sidebarVersionDisplay">v28.4</span>
+          <span class="sidebar-version" id="sidebarVersionDisplay">v28.5</span>
         </div>
       </div>
     </div>
@@ -500,7 +500,7 @@
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v28.4 -- Built for the future</p>
+        <p>RoweOS v28.5 -- Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -564,10 +564,112 @@
         <!-- v24.26: CTA pinned at bottom -->
         <div class="onboarding-actions" style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:12px 20px 8px;gap:8px;">
           <div style="animation:fadeUp 0.8s ease 0.85s both;width:100%;max-width:320px;">
-            <button onclick="goToOnboardingStep('mode')" style="width:100%;padding:15px 32px;background:linear-gradient(135deg,#b2997b,#8b7b67);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;">Get Started</button>
+            <button onclick="goToOnboardingStep('pwa')" style="width:100%;padding:15px 32px;background:linear-gradient(135deg,#b2997b,#8b7b67);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;">Get Started</button>
           </div>
           <div style="width:80px;height:1px;background:linear-gradient(90deg,transparent,rgba(168,152,120,0.3),transparent);margin:4px auto 2px;animation:fadeUp 0.8s ease 0.95s both;"></div>
           <p style="font-family:'DM Sans',sans-serif;font-size:10px;color:var(--text-muted);opacity:0.5;margin:0;letter-spacing:0.1em;animation:fadeUp 0.8s ease 1s both;">v24.26</p>
+        </div>
+      </div>
+
+      <!-- v28.4: PWA Install Guide Step -->
+      <div id="onboardingStepPWA" class="onboarding-step" style="display: none;">
+        <div class="onboarding-content" style="display:flex;flex-direction:column;flex:1;padding:20px 0;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;">
+          <div style="text-align:center;margin-bottom:28px;">
+            <div style="margin-bottom:16px;">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#c9a86c" stroke-width="1.5">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                <path d="M12 18h.01"/>
+                <path d="M9 8l3-3 3 3"/>
+                <path d="M12 5v8"/>
+              </svg>
+            </div>
+            <h2 class="onboarding-title" style="font-size:var(--text-3xl);margin-bottom:var(--space-2);">Install RoweOS as an App</h2>
+            <p class="onboarding-subtitle" style="font-size:var(--text-base);color:var(--text-muted);max-width:440px;margin:0 auto;">For the best experience, add RoweOS to your device before continuing. If you skip this step, you may need to re-enter your setup later.</p>
+          </div>
+
+          <div id="pwaInstallAccordion" style="max-width:500px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:8px;">
+
+            <!-- Mac -->
+            <div class="pwa-install-section" data-platform="mac">
+              <button onclick="togglePWASection(this)" class="pwa-install-toggle" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;cursor:pointer;transition:all 0.2s;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M15.5 8.5c-.83 0-1.5-.28-2-.72-.52.44-1.17.72-2 .72-.55 0-1.07-.14-1.5-.42v4.42c0 1.93 1.57 3.5 3.5 3.5s3.5-1.57 3.5-3.5V8.08c-.43.28-.95.42-1.5.42z"/></svg>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text-primary);">Mac (Safari)</span>
+                </div>
+                <svg class="pwa-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="pwa-install-body" style="display:none;padding:14px 18px 16px;border:1px solid var(--border-color);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-secondary);">
+                <ol style="margin:0;padding:0 0 0 18px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-secondary);line-height:1.8;">
+                  <li>Open <strong style="color:var(--text-primary);">roweos.com</strong> in Safari</li>
+                  <li>Click <strong style="color:var(--text-primary);">File</strong> then <strong style="color:var(--text-primary);">Add to Dock</strong> (or Share then Add to Dock)</li>
+                  <li>RoweOS will open as its own app window</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Windows -->
+            <div class="pwa-install-section" data-platform="windows">
+              <button onclick="togglePWASection(this)" class="pwa-install-toggle" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;cursor:pointer;transition:all 0.2s;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text-primary);">Windows (Chrome / Edge)</span>
+                </div>
+                <svg class="pwa-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="pwa-install-body" style="display:none;padding:14px 18px 16px;border:1px solid var(--border-color);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-secondary);">
+                <ol style="margin:0;padding:0 0 0 18px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-secondary);line-height:1.8;">
+                  <li>Open <strong style="color:var(--text-primary);">roweos.com</strong> in Chrome or Edge</li>
+                  <li>Click the install icon in the address bar, or Menu then <strong style="color:var(--text-primary);">"Install RoweOS"</strong></li>
+                  <li>RoweOS will appear in your Start menu</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- iPhone / iPad -->
+            <div class="pwa-install-section" data-platform="ios">
+              <button onclick="togglePWASection(this)" class="pwa-install-toggle" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;cursor:pointer;transition:all 0.2s;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text-primary);">iPhone / iPad (Safari)</span>
+                </div>
+                <svg class="pwa-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="pwa-install-body" style="display:none;padding:14px 18px 16px;border:1px solid var(--border-color);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-secondary);">
+                <ol style="margin:0;padding:0 0 0 18px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-secondary);line-height:1.8;">
+                  <li>Open <strong style="color:var(--text-primary);">roweos.com</strong> in Safari</li>
+                  <li>Tap the <strong style="color:var(--text-primary);">Share</strong> button (the square with an arrow pointing up)</li>
+                  <li>Scroll down and tap <strong style="color:var(--text-primary);">"Add to Home Screen"</strong></li>
+                  <li>RoweOS will appear as an app on your home screen</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Android -->
+            <div class="pwa-install-section" data-platform="android">
+              <button onclick="togglePWASection(this)" class="pwa-install-toggle" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;cursor:pointer;transition:all 0.2s;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 16V8a7 7 0 0 1 14 0v8"/><path d="M3 16h18"/><path d="M8 16v2a4 4 0 0 0 8 0v-2"/></svg>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--text-primary);">Android (Chrome)</span>
+                </div>
+                <svg class="pwa-chevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" style="transition:transform 0.2s;"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="pwa-install-body" style="display:none;padding:14px 18px 16px;border:1px solid var(--border-color);border-top:none;border-radius:0 0 10px 10px;background:var(--bg-secondary);">
+                <ol style="margin:0;padding:0 0 0 18px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-secondary);line-height:1.8;">
+                  <li>Open <strong style="color:var(--text-primary);">roweos.com</strong> in Chrome</li>
+                  <li>Tap <strong style="color:var(--text-primary);">Menu</strong> (three dots) then <strong style="color:var(--text-primary);">"Add to Home Screen"</strong> or <strong style="color:var(--text-primary);">"Install App"</strong></li>
+                  <li>RoweOS will appear as an app on your device</li>
+                </ol>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Actions pinned at bottom -->
+        <div class="onboarding-actions" style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:12px 20px 8px;gap:10px;">
+          <button onclick="goToOnboardingStep('mode')" style="width:100%;max-width:320px;padding:14px 32px;background:linear-gradient(135deg,#b2997b,#8b7b67);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;">Continue</button>
+          <button onclick="goToOnboardingStep('mode')" style="width:100%;max-width:320px;padding:10px 32px;background:transparent;color:var(--text-muted);border:1px solid var(--border-color);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;">Skip for Now</button>
+          <p style="font-family:'DM Sans',sans-serif;font-size:11px;color:var(--text-muted);opacity:0.6;margin:4px 0 0;text-align:center;max-width:360px;">You can always install later from Settings, but we recommend doing it now to avoid re-entering your setup.</p>
         </div>
       </div>
 
@@ -2292,7 +2394,7 @@
               <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 16px;background:linear-gradient(135deg, rgba(168,152,120,0.08), rgba(212,184,150,0.04));border:1px solid rgba(168,152,120,0.3);border-radius:var(--radius-lg);position:relative;">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#a89878" stroke-width="1.5" style="flex-shrink:0;margin-top:2px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 <div style="flex:1;">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px;">
                     <span style="font-weight:600;color:var(--text-primary);">Agent Chat</span>
                     <span style="font-size:10px;font-weight:700;letter-spacing:0.5px;padding:2px 8px;background:linear-gradient(135deg, var(--accent, #a89878), #d4b896);color:#0a0a0a;border-radius:10px;">PREMIUM</span>
                   </div>
@@ -2462,7 +2564,7 @@
         <div class="onboarding-content" style="flex:1;overflow-y:auto;position:relative;z-index:1;">
           <div style="max-width:560px;margin:0 auto;text-align:center;">
             <!-- v24.25: Two prominent entity options: Blob vs Helix -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;">
               <!-- Blob option -->
               <div id="onbBlakeBlob" onclick="selectOnboardingBlakeType('blob')" style="cursor:pointer;padding:20px 16px;background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:16px;transition:all 0.2s;text-align:center;">
                 <div id="onboardingBlobPreviewWrap" style="width:120px;height:120px;border-radius:16px;overflow:hidden;margin:0 auto 12px;background:var(--bg-tertiary);">
@@ -2482,6 +2584,19 @@
                 </div>
                 <div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Helix</div>
                 <div style="font-size:11px;color:var(--text-muted);">Flowing ribbon streams</div>
+              </div>
+              <!-- Both option -->
+              <div id="onbBlakeBoth" onclick="selectOnboardingBlakeType('both')" style="cursor:pointer;padding:20px 16px;background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:16px;transition:all 0.2s;text-align:center;">
+                <div style="width:120px;height:120px;border-radius:16px;overflow:hidden;margin:0 auto 12px;background:linear-gradient(135deg, rgba(168,152,120,0.15), rgba(100,80,60,0.08));position:relative;display:flex;align-items:center;justify-content:center;">
+                  <svg viewBox="0 0 120 120" width="120" height="120">
+                    <circle cx="42" cy="60" r="22" fill="none" stroke="#a89878" stroke-width="2.5" opacity="0.6"/>
+                    <circle cx="42" cy="60" r="16" fill="none" stroke="#a89878" stroke-width="1.5" opacity="0.3"/>
+                    <path d="M65 40 Q80 20 95 50 Q110 80 95 90" fill="none" stroke="#a89878" stroke-width="2.5" opacity="0.6"/>
+                    <path d="M65 50 Q78 30 92 55 Q105 75 92 85" fill="none" stroke="#a89878" stroke-width="1.5" opacity="0.3"/>
+                  </svg>
+                </div>
+                <div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Both</div>
+                <div style="font-size:11px;color:var(--text-muted);">Switch between Blob &amp; Helix anytime</div>
               </div>
             </div>
 
@@ -2891,7 +3006,7 @@
                 </div>
                 <div class="step11-feature-card step11-founder">
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#a89878" stroke-width="1.5" style="margin:0 auto 6px;display:block;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  <div class="step11-feature-name">Social Hub</div>
+                  <div class="step11-feature-name">Media Lab</div>
                   <div class="step11-feature-desc">Social publishing</div>
                 </div>
                 <div class="step11-feature-card step11-founder">

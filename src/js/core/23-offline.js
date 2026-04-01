@@ -199,6 +199,15 @@ document.addEventListener('visibilitychange', function() {
       }
       lastVisibilitySync = now;
       console.log('Firebase: Tab visible, checking for updates...');
+      // v28.5: Re-enable Firestore network after iOS background termination
+      try {
+        var _db = firebase.firestore();
+        if (typeof _db.enableNetwork === 'function') {
+          _db.enableNetwork().catch(function(e) {
+            console.log('Firebase: enableNetwork failed, will retry on sync:', e.message);
+          });
+        }
+      } catch(e) {}
       loadFromFirebase(false);
       // v19.1: Pick up any cloud-executed results
       pickUpCloudResults();
@@ -1097,6 +1106,8 @@ function resetOnboardingState() {
   window._pendingWebSearchUrl = null;
   localStorage.removeItem('roweos_pending_web_search_url');
   localStorage.removeItem('roweos_web_import_state');
+  // v28.4: Clear research result to prevent stale data between brand additions
+  if (typeof _researchCurrentResult !== 'undefined') _researchCurrentResult = null;
 
   // Remove .selected from mode cards and provider cards
   var modeCards = document.querySelectorAll('#onboardingStepMode .onboarding-mode-card, #onboardingStepMode .onboarding-model-card');
@@ -1145,13 +1156,71 @@ function hideOnboarding() {
     modal.style.cssText = 'display: none !important;';
     modal.classList.remove('show');
   }
+  // v28.4: Remove onboarding history state so back button doesn't re-trigger
+  if (window._onboardingHistoryPushed) {
+    window._onboardingHistoryPushed = false;
+  }
 }
+
+// v28.4: Update onboarding social step to show connected status for all platforms
+function updateOnboardingSocialStatus() {
+  var platforms = [
+    { key: 'x', statusId: 'onboardingSocialXStatus' },
+    { key: 'threads', statusId: 'onboardingSocialThreadsStatus' },
+    { key: 'instagram', statusId: 'onboardingSocialIGStatus', actionId: 'onboardingSocialIGAction' }
+  ];
+  var checkmark = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#22c55e" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M20 6L9 17l-5-5"/></svg>';
+  for (var i = 0; i < platforms.length; i++) {
+    var p = platforms[i];
+    var connected = typeof isSocialConnected === 'function' && isSocialConnected(p.key);
+    var handle = typeof getSocialHandle === 'function' ? getSocialHandle(p.key) : '';
+    var statusEl = document.getElementById(p.statusId);
+    if (statusEl) {
+      if (connected) {
+        statusEl.innerHTML = checkmark + (handle || 'Connected');
+        statusEl.style.color = '#22c55e';
+      } else {
+        statusEl.textContent = 'Connect';
+        statusEl.style.color = 'var(--text-tertiary)';
+      }
+    }
+    if (p.actionId) {
+      var actionEl = document.getElementById(p.actionId);
+      if (actionEl) {
+        if (connected) {
+          actionEl.innerHTML = checkmark + 'Connected';
+          actionEl.style.color = '#22c55e';
+        } else {
+          actionEl.textContent = 'Connect';
+          actionEl.style.color = 'var(--text-tertiary)';
+        }
+      }
+    }
+  }
+}
+
+// v28.4: Handle browser back button during onboarding from +Add Brand
+window.addEventListener('popstate', function(e) {
+  if (e.state && e.state.onboardingAddBrand) {
+    // Going back into the onboarding state -- ignore
+    return;
+  }
+  // If onboarding was opened from +Add Brand and user hit back, close it
+  if (window._onboardingHistoryPushed) {
+    window._onboardingHistoryPushed = false;
+    var onbModal = document.getElementById('onboardingModal');
+    if (onbModal && onbModal.classList.contains('show')) {
+      hideOnboarding();
+      window._onboardingInProgress = false;
+    }
+  }
+});
 
 function goToOnboardingStep(step) {
   console.log('=== goToOnboardingStep called with step:', step);
-  
+
   // Hide all steps (including new wizard steps 6-11 and import steps)
-  var stepIds = ['onboardingStep0', 'onboardingStepMode', 'onboardingStepName', 'onboardingStepProvider', 'onboardingStep1', 'onboardingBrandName', 'onboardingBrandOwnership', 'onboardingStep2', 'onboardingTemplateSelection', 'onboardingTemplateBranding', 'onboardingStep3', 'onboardingStep4', 'onboardingStep5', 'onboardingStepLogo', 'onboardingStepFirebase', 'onboardingStepSync', 'onboardingStepCalendar', 'onboardingStepSocial', 'onboardingStepEmail', 'onboardingStepAutomations', 'onboardingStyleStep', 'onboardingStepSidebarPref', 'onboardingStepMobileNavPref', 'onboardingStepBlobPref', 'onboardingStepPush', 'onboardingStepCrossDevice', 'onboardingStepBetaWelcome', 'onboardingStep6', 'onboardingStep7', 'onboardingStep8', 'onboardingStep9', 'onboardingStep10', 'onboardingStep11', 'onboardingWebsiteImport', 'onboardingDocumentUpload', 'onboardingLifeStep1', 'onboardingLifeStep2', 'onboardingLifeStep3', 'onboardingLifeStep4', 'onboardingLifeBuilding', 'onboardingLifeStudioPreview', 'onboardingLifeStep5', 'onboardingStepCrossMode', 'onboardingWebSearchReview'];
+  var stepIds = ['onboardingStep0', 'onboardingStepPWA', 'onboardingStepMode', 'onboardingStepName', 'onboardingStepProvider', 'onboardingStep1', 'onboardingBrandName', 'onboardingBrandOwnership', 'onboardingStep2', 'onboardingTemplateSelection', 'onboardingTemplateBranding', 'onboardingStep3', 'onboardingStep4', 'onboardingStep5', 'onboardingStepLogo', 'onboardingStepFirebase', 'onboardingStepSync', 'onboardingStepCalendar', 'onboardingStepSocial', 'onboardingStepEmail', 'onboardingStepAutomations', 'onboardingStyleStep', 'onboardingStepSidebarPref', 'onboardingStepMobileNavPref', 'onboardingStepBlobPref', 'onboardingStepPush', 'onboardingStepCrossDevice', 'onboardingStepBetaWelcome', 'onboardingStep6', 'onboardingStep7', 'onboardingStep8', 'onboardingStep9', 'onboardingStep10', 'onboardingStep11', 'onboardingWebsiteImport', 'onboardingDocumentUpload', 'onboardingLifeStep1', 'onboardingLifeStep2', 'onboardingLifeStep3', 'onboardingLifeStep4', 'onboardingLifeBuilding', 'onboardingLifeStudioPreview', 'onboardingLifeStep5', 'onboardingStepCrossMode', 'onboardingWebSearchReview'];
   stepIds.forEach(function(id) {
     var stepEl = document.getElementById(id);
     if (stepEl) {
@@ -1165,6 +1234,15 @@ function goToOnboardingStep(step) {
   var targetStepId = 'onboardingStep' + step;
   if (step === 'mode') {
     targetStepId = 'onboardingStepMode';
+  } else if (step === 'pwa') {
+    // v28.4: Skip PWA step if already installed as app
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      goToOnboardingStep('mode');
+      return;
+    }
+    targetStepId = 'onboardingStepPWA';
+    // v28.4: Auto-detect platform and expand matching section
+    setTimeout(function() { initPWAInstallStep(); }, 50);
   } else if (step === 'name') {
     targetStepId = 'onboardingStepName';
   } else if (step === 'provider') {
@@ -1225,6 +1303,8 @@ function goToOnboardingStep(step) {
     if (icloudInputs) icloudInputs.style.display = 'none';
   } else if (step === 'social') {
     targetStepId = 'onboardingStepSocial';
+    // v28.4: Update social connection statuses on step entry
+    setTimeout(function() { updateOnboardingSocialStatus(); }, 100);
   } else if (step === 'email') {
     targetStepId = 'onboardingStepEmail';
     // v22.33: Update email connection status on entry
@@ -1503,6 +1583,66 @@ function goToOnboardingStep(step) {
     console.log('✓ Step', step, 'shown (id:', targetStepId, ')');
   } else {
     console.error('✗ Step', step, 'not found! (id:', targetStepId, ')');
+  }
+}
+
+// v28.4: PWA Install Step - platform detection and accordion
+function detectPWAPlatform() {
+  var ua = navigator.userAgent || '';
+  var platform = navigator.platform || '';
+  if (/iPhone|iPad|iPod/.test(ua)) return 'ios';
+  if (/Android/.test(ua)) return 'android';
+  if (/Win/.test(platform)) return 'windows';
+  if (/Mac/.test(platform)) return 'mac';
+  return 'mac'; // default fallback
+}
+
+function initPWAInstallStep() {
+  var detected = detectPWAPlatform();
+  var sections = document.querySelectorAll('#pwaInstallAccordion .pwa-install-section');
+  for (var i = 0; i < sections.length; i++) {
+    var section = sections[i];
+    var plat = section.getAttribute('data-platform');
+    if (plat === detected) {
+      // Expand detected platform
+      var body = section.querySelector('.pwa-install-body');
+      var toggle = section.querySelector('.pwa-install-toggle');
+      var chevron = section.querySelector('.pwa-chevron');
+      if (body) body.style.display = 'block';
+      if (toggle) {
+        toggle.style.borderRadius = '10px 10px 0 0';
+        toggle.style.borderColor = 'rgba(168,152,120,0.3)';
+        toggle.style.background = 'rgba(168,152,120,0.08)';
+      }
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+      // Add "Your device" badge
+      var label = section.querySelector('span[style*="font-weight:600"]');
+      if (label && label.textContent.indexOf('Your device') === -1) {
+        label.innerHTML = label.textContent + ' <span style="font-size:10px;font-weight:500;color:#c9a86c;background:rgba(168,152,120,0.12);padding:2px 8px;border-radius:4px;margin-left:6px;">Your device</span>';
+      }
+    }
+  }
+}
+
+function togglePWASection(btn) {
+  var section = btn.closest('.pwa-install-section');
+  if (!section) return;
+  var body = section.querySelector('.pwa-install-body');
+  var chevron = section.querySelector('.pwa-chevron');
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  if (isOpen) {
+    body.style.display = 'none';
+    btn.style.borderRadius = '10px';
+    btn.style.borderColor = 'var(--border-color)';
+    btn.style.background = 'var(--bg-secondary)';
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+  } else {
+    body.style.display = 'block';
+    btn.style.borderRadius = '10px 10px 0 0';
+    btn.style.borderColor = 'rgba(168,152,120,0.3)';
+    btn.style.background = 'rgba(168,152,120,0.08)';
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
   }
 }
 
@@ -2615,6 +2755,9 @@ function connectOnboardingGoogleCalendar() {
         if (card) { card.style.borderColor = '#22c55e'; card.dataset.connected = 'true'; }
         if (status) status.style.display = 'block';
         if (inputs) inputs.style.display = 'none';
+      } else if (pollCount > 30) {
+        // v28.5: Show guidance if connection timed out (likely "Access blocked")
+        showToast('Google Calendar connection timed out. If you saw "Access blocked", try a personal Gmail account or skip this step.', 'warning');
       }
     }
   }, 1000);

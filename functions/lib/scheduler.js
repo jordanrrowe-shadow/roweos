@@ -15,17 +15,31 @@ var admin = require('firebase-admin');
 async function getEnabledUsers() {
   var db = helpers.getDb();
   // v19.1: Query parent docs where cloudSchedulerEnabled is true
-  // enableCloudScheduler() writes this flag to the parent doc
-  var usersSnap = await db.collection('roweos_users')
+  // v28.0: Check both roweos_users and roweos_v4 namespaces
+  var users = [];
+  var seenUids = {};
+
+  // Query both collections in parallel
+  var oldSnap = await db.collection('roweos_users')
     .where('cloudSchedulerEnabled', '==', true)
     .get();
-  var users = [];
+  var newSnap = await db.collection('roweos_v4')
+    .where('cloudSchedulerEnabled', '==', true)
+    .get();
 
-  for (var i = 0; i < usersSnap.docs.length; i++) {
-    var userDoc = usersSnap.docs[i];
+  // Combine docs from both collections
+  var allDocs = [].concat(oldSnap.docs, newSnap.docs);
+
+  for (var i = 0; i < allDocs.length; i++) {
+    var userDoc = allDocs[i];
     var uid = userDoc.id;
+    if (seenUids[uid]) continue; // Deduplicate if user appears in both
+    seenUids[uid] = true;
+
     try {
-      var keysDoc = await db.doc('roweos_users/' + uid + '/secure/api_keys').get();
+      // Use getBasePath to read from the correct namespace
+      var basePath = await helpers.getBasePath(uid);
+      var keysDoc = await db.doc(basePath + '/secure/api_keys').get();
       if (keysDoc.exists) {
         var data = keysDoc.data();
         if (data.cloudSchedulerEnabled) {

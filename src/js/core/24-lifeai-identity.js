@@ -2411,6 +2411,23 @@ function _showQuickAddBrandModal() {
   _quickAddLogo = null;
   _quickAddColorDark = '#a89878';
   _quickAddColorLight = '#a89878';
+  // v28.4: Clear previous research/onboarding state so consecutive brand additions start fresh
+  if (typeof _researchCurrentResult !== 'undefined') _researchCurrentResult = null;
+  window._pendingWebSearchUrl = null;
+  window._quickAddBrandNameVal = null;
+  window._quickAddWebsiteVal = null;
+  window._onboardingInProgress = false;
+  window.onboardingBrandName = null;
+  window.onboardingPrefillData = null;
+  try { localStorage.removeItem('roweos_pending_web_search_url'); } catch(e) {}
+  // Clear web search state if available
+  if (typeof resetWebSearchState === 'function') resetWebSearchState();
+  // Clear onboarding form fields
+  var wizFields = ['wizardBrandName', 'wizardBrandWebsite', 'wizardBrandTagline', 'wizardBrandDescription', 'wizardBrandColor'];
+  for (var i = 0; i < wizFields.length; i++) {
+    var fld = document.getElementById(wizFields[i]);
+    if (fld) fld.value = '';
+  }
 
   var modal = document.createElement('div');
   modal.id = 'quickAddBrandModal';
@@ -2681,6 +2698,11 @@ function _quickAddBrandSubmit(useResearch) {
   if (onbModal) {
     onbModal.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; z-index: 10000 !important;';
     onbModal.classList.add('show');
+  }
+  // v28.4: Push history state so browser back button closes onboarding instead of navigating away
+  if (!window._onboardingHistoryPushed) {
+    window._onboardingHistoryPushed = true;
+    history.pushState({ onboardingAddBrand: true }, '');
   }
 
   if (useResearch && fullUrl) {

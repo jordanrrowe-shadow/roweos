@@ -225,7 +225,8 @@ async function executeStep(uid, step, stepIndex, context, apiKeys, brands, allOp
 
     // Write to cloud_outbox for client-side pickup and sending
     var db = helpers.getDb();
-    await db.collection('roweos_users/' + uid + '/cloud_outbox').add({
+    var basePath = await helpers.getBasePath(uid);
+    await db.collection(basePath + '/cloud_outbox').add({
       to: emailTo,
       subject: emailSubject,
       bodyMarkdown: emailBody,

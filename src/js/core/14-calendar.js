@@ -4369,7 +4369,8 @@ var _gcalEvents = [];
 var _gcalSyncInProgress = false;
 // v23.2: Hardcoded RoweOS Google Client ID — users just sign in with their Google account
 var GCAL_CLIENT_ID = '145599655206-or0g4iasoasppsdpu6pjlia6gh6jbe50.apps.googleusercontent.com';
-var GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar';
+// v28.5: Narrowed scope — calendar.events is sufficient and less likely to trigger "Access blocked"
+var GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly';
 var GCAL_API_BASE = 'https://www.googleapis.com/calendar/v3';
 
 // iCloud Calendar
@@ -4535,7 +4536,19 @@ function initGoogleCalendarAuth() {
     _gcalTokenClient = google.accounts.oauth2.initTokenClient({
       client_id: GCAL_CLIENT_ID,
       scope: GCAL_SCOPES,
-      callback: handleGCalTokenResponse
+      callback: handleGCalTokenResponse,
+      // v28.5: Catch popup/consent errors (e.g. "Access blocked" from Google Workspace)
+      error_callback: function(err) {
+        console.warn('[GCal] OAuth error:', err);
+        var errType = (err && err.type) || 'unknown';
+        if (errType === 'popup_failed_to_open') {
+          showToast('Could not open Google sign-in popup. Check your popup blocker settings.', 'error');
+        } else if (errType === 'popup_closed') {
+          // User closed — no toast needed
+        } else {
+          showToast('Google Calendar: Sign-in error (' + errType + '). If you see "Access blocked", try with a personal Gmail account.', 'error');
+        }
+      }
     });
     // Try silent re-auth if previously connected
     if (localStorage.getItem('roweos_gcal_connected') === 'true') {
@@ -4548,11 +4561,18 @@ function initGoogleCalendarAuth() {
 
 function handleGCalTokenResponse(resp) {
   if (resp.error) {
-    if (localStorage.getItem('roweos_debug') === 'true') console.log('[GCal] Token error:', resp.error);
-    if (resp.error !== 'popup_closed_by_user') {
-      _gcalConnected = false;
-      localStorage.removeItem('roweos_gcal_connected');
-      updateCalendarIntegrationUI();
+    console.warn('[GCal] Token error:', resp.error, resp.error_description || '');
+    if (resp.error === 'popup_closed_by_user') return;
+    _gcalConnected = false;
+    localStorage.removeItem('roweos_gcal_connected');
+    updateCalendarIntegrationUI();
+    // v28.5: Show helpful error messages for common OAuth failures
+    if (resp.error === 'access_denied' || resp.error === 'org_internal') {
+      showToast('Google Calendar access was denied. If you see "Access blocked", your Google Workspace admin may need to allow this app, or try with a personal Gmail account.', 'error');
+    } else if (resp.error === 'invalid_client') {
+      showToast('Google Calendar configuration error. Please contact support.', 'error');
+    } else {
+      showToast('Google Calendar sign-in failed: ' + (resp.error_description || resp.error), 'error');
     }
     return;
   }
@@ -4597,7 +4617,12 @@ function connectGoogleCalendar() {
     initGoogleCalendarAuth();
   }
   if (_gcalTokenClient) {
-    _gcalTokenClient.requestAccessToken({ prompt: 'consent' });
+    try {
+      _gcalTokenClient.requestAccessToken({ prompt: 'consent' });
+    } catch (e) {
+      console.error('[GCal] requestAccessToken error:', e);
+      showToast('Google Calendar sign-in failed. Try refreshing the page.', 'error');
+    }
   } else {
     showToast('Google Sign-In library not loaded. Check your internet connection.', 'error');
   }
