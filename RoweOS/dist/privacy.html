@@ -72,7 +72,7 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
 
 <div class="hero">
   <h1>Privacy <span class="accent">Policy</span></h1>
-  <p class="subtitle">Last updated: March 10, 2026</p>
+  <p class="subtitle">Last updated: April 1, 2026</p>
 </div>
 
 <div class="content">
@@ -153,6 +153,8 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
           <tr><td>Google (Gemini)</td><td>AI conversations & image generation</td><td>Your prompts (sent directly from browser using your key)</td></tr>
           <tr><td>X/Twitter API</td><td>Social media posting</td><td>Post content & images you choose to publish</td></tr>
           <tr><td>Meta (Threads/Instagram)</td><td>Social media posting</td><td>Post content & images you choose to publish</td></tr>
+          <tr><td>Google Calendar API</td><td>Calendar integration</td><td>Calendar events (read/write via your Google account)</td></tr>
+          <tr><td>Google Drive API</td><td>File import</td><td>File metadata and content (read-only, only files you select)</td></tr>
           <tr><td>Vercel</td><td>Hosting & serverless functions</td><td>OAuth token exchange (server-side only)</td></tr>
         </tbody>
       </table>
@@ -200,6 +202,34 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
       <li><strong style="color:#f4f4f5">Instagram:</strong> Read business profile information (<code>instagram_business_basic</code>), publish photos and reels (<code>instagram_business_content_publish</code>)</li>
     </ul>
     <p>Content is only posted when you explicitly click "Post" or when an automation you configured executes. We never post on your behalf without your direct action or pre-configured automation. You can disconnect any social account at any time, which immediately revokes our access.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="section">
+    <span class="section-label">Google APIs</span>
+    <h2>Google API Services Disclosure</h2>
+    <p>RoweOS integrates with Google API Services to provide calendar and file management features. Our use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+
+    <div class="card">
+      <h3>Google Calendar</h3>
+      <p>When you connect your Google Calendar, RoweOS requests access to read and write calendar events (<code>calendar.events</code>, <code>calendar.readonly</code>). This allows you to view your calendar within RoweOS and create events. We do not modify or delete existing events without your explicit action. Calendar data is displayed in real-time and is not stored on our servers.</p>
+    </div>
+
+    <div class="card">
+      <h3>Google Drive</h3>
+      <p>When you connect Google Drive, RoweOS requests read-only access to your files (<code>drive.readonly</code>). This allows you to browse your Drive folders and import selected files into your RoweOS Library. We only access files you explicitly choose to import. We do not modify, delete, or write to your Google Drive. Imported file content is stored in your browser's local storage and optionally synced to your Firebase account if cloud sync is enabled.</p>
+    </div>
+
+    <div class="card">
+      <h3>Token Handling</h3>
+      <p>Google OAuth access tokens are stored in your browser's memory only (not persisted to disk or our servers). Tokens are obtained via Google's OAuth 2.0 implicit flow and expire automatically. You can disconnect Google services at any time, which immediately revokes the access token. We do not store, share, or transmit Google tokens to any third party.</p>
+    </div>
+
+    <div class="card">
+      <h3>Limited Use Compliance</h3>
+      <p>RoweOS's use of Google user data is limited to the practices disclosed in this privacy policy. We do not use Google data for advertising, do not transfer it to third parties (except as necessary to provide the service), and do not use it to serve ads or build user profiles for advertising purposes.</p>
+    </div>
   </div>
 
   <div class="divider"></div>
