@@ -250,6 +250,19 @@ async function firestoreUpdate(projectId, accessToken, docPath, fields) {
   return await resp.json();
 }
 
+// v28.7: Delete a Firestore document (used for zombie automation cleanup)
+async function firestoreDelete(projectId, accessToken, docPath) {
+  var url = firestoreBaseUrl(projectId) + '/' + docPath;
+  var resp = await fetch(url, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + accessToken }
+  });
+  if (!resp.ok) {
+    var errText = await resp.text();
+    throw new Error('Firestore delete failed (' + docPath + '): ' + resp.status + ' ' + errText);
+  }
+}
+
 // --- Time / Due-check helpers ---
 
 function timeToMinutes(timeStr) {
@@ -1397,9 +1410,10 @@ async function processUser(uid, projectId, accessToken, reqHost) {
       var docId = docIdParts[docIdParts.length - 1];
       if (!task.id) task.id = docId;
 
-      // v22.26: Skip deleted automations (zombie protection)
+      // v28.7: Skip deleted automations and clean up zombie docs from Firestore
       if (deletedAutoIds[docId] || deletedAutoIds[String(task.id)]) {
-        console.log('[Scheduler] Skipping deleted automation: "' + (task.name || docId) + '"');
+        console.log('[Scheduler] Deleting zombie automation doc: "' + (task.name || docId) + '"');
+        try { await firestoreDelete(projectId, accessToken, 'roweos_users/' + uid + '/automations/' + docId); } catch(de) {}
         continue;
       }
 
@@ -1440,15 +1454,16 @@ async function processUser(uid, projectId, accessToken, reqHost) {
         if (execResult.success) {
           tasksExecuted++;
           console.log('[Scheduler] Task "' + (task.name || docId) + '" completed successfully');
-          // v20.14: Push notification on success with result preview
-          var successMsg = (task.name || 'Task') + ' completed successfully';
-          if (execResult.result) successMsg += ': ' + (execResult.result || '').substring(0, 100);
+          // v28.7: Clean push notification — task name + step count, no raw pipeline output
+          var pipeStepCount = (task.steps && task.steps.length) || 0;
+          var successMsg = (task.name || 'Task') + ' completed successfully' + (pipeStepCount > 1 ? ' (' + pipeStepCount + '/' + pipeStepCount + ' steps)' : '');
           try { await sendPushToUser(uid, 'Automation Complete', successMsg, projectId, accessToken, reqHost); } catch(pe) {}
         } else {
           tasksFailed++;
           console.log('[Scheduler] Task "' + (task.name || docId) + '" completed with error: ' + (execResult.result || '').substring(0, 200));
-          // v20.14: Push notification on failure with error detail
-          var failMsg = (task.name || 'Task') + ' failed: ' + ((execResult.result || '').substring(0, 100) || 'unknown error');
+          // v28.7: Clean failure notification — short error, no raw pipeline dump
+          var errPreview = (execResult.result || 'unknown error').split('\n')[0].substring(0, 80);
+          var failMsg = (task.name || 'Task') + ' failed: ' + errPreview;
           try { await sendPushToUser(uid, 'Automation Failed', failMsg, projectId, accessToken, reqHost); } catch(pe) {}
         }
 
