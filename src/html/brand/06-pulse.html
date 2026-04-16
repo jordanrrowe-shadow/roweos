@@ -11,6 +11,17 @@
           <!-- v22.37: Uniform gold header -->
           <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;"><span>Pulse</span><button class="section-help-btn" onclick="showSectionHelp('pulse')" title="How to use Pulse">?</button></div>
           <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Track your goals, habits, and progress.</p>
+          <!-- v28.8: Unified Pulse tabs -->
+          <div class="pulse-tab-bar" id="pulseTabBar">
+            <button class="pulse-tab active" data-tab="overview" onclick="switchPulseTab('overview')">Overview</button>
+            <button class="pulse-tab" data-tab="today" onclick="switchPulseTab('today')">Today</button>
+            <button class="pulse-tab" data-tab="calendar" onclick="switchPulseTab('calendar')">Calendar</button>
+            <button class="pulse-tab" data-tab="goals" onclick="switchPulseTab('goals')">Goals</button>
+            <button class="pulse-tab" data-tab="notes" onclick="switchPulseTab('notes')">Notes</button>
+            <button class="pulse-tab" data-tab="streaks" onclick="switchPulseTab('streaks')">Streaks</button>
+          </div>
+
+          <div class="pulse-tab-content active" id="pulseTabOverview" data-pulse-tab="overview">
           <!-- v22.41: Pulse 3.0 - Goals & Checklists -->
           <div class="pulse-3-header">
             <div style="display:flex;align-items:center;gap:var(--space-3);">
@@ -66,6 +77,24 @@
               <button class="pulse-3-btn pulse-3-btn-secondary" onclick="refreshPulseSuggestions()">Refresh</button>
             </div>
             <div id="pulse3SuggestionsList"></div>
+          </div>
+          </div><!-- /pulseTabOverview -->
+
+          <div class="pulse-tab-content" id="pulseTabToday" data-pulse-tab="today">
+            <div id="pulseTodayContent"></div>
+          </div>
+          <div class="pulse-tab-content" id="pulseTabCalendar" data-pulse-tab="calendar">
+            <div id="pulseCalendarWidget"></div>
+            <div id="pulseCalendarDayDetail"></div>
+          </div>
+          <div class="pulse-tab-content" id="pulseTabGoals" data-pulse-tab="goals">
+            <div id="pulseGoalsList"></div>
+          </div>
+          <div class="pulse-tab-content" id="pulseTabNotes" data-pulse-tab="notes">
+            <div id="pulseNotesContent"></div>
+          </div>
+          <div class="pulse-tab-content" id="pulseTabStreaks" data-pulse-tab="streaks">
+            <div id="pulseStreaksContent"></div>
           </div>
 
           <!-- v10.5.25: Pulse 2.0 - Journal & Analytics Redesign -->
