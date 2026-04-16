@@ -2666,32 +2666,22 @@ function _buildPDF(orientation) {
   );
   newPage();
   drawLabel('B.L.A.K.E. - Brand Life AI Knowledge Engine');
-  drawPara('B.L.A.K.E. is the overarching adaptive intelligence that unifies BrandAI and LifeAI into a single, coherent entity. It is not just an assistant or a chatbot wrapper. BLAKE is an AI entity that learns, adapts, and embodies who you are across both your professional and personal worlds.');
-  drawPara('BLAKE represents the convergence of brand intelligence and life intelligence. When you configure your brand identity, voice, audience, and goals, BLAKE absorbs that context and applies it across every agent, every operation, and every automated workflow.');
-
-  drawH4('Visual Identity');
-  drawPara('BLAKE has a customizable visual presence within the platform. Users choose between two ambient AI visualization modes:');
-  drawList([
-    'Blob - A fluid, organic WebGL shape that responds to AI state (idle, thinking, responding). Multiple shape presets with user-defined color palettes.',
-    'Helix - A full-viewport flowing ribbon gradient that creates an ambient, living workspace. Smooth movement with customizable color themes.'
-  ]);
-  drawPara('Both modes react to BLAKE\'s activity state, creating a visual connection between the user and their AI. Colors and shapes are fully customizable per brand.');
+  drawPara('B.L.A.K.E. is the adaptive intelligence that unifies BrandAI and LifeAI into a single entity. It learns your brand identity, voice, and goals, then applies that context across every agent, operation, and automated workflow. BLAKE has a visual presence via WebGL (Blob or Helix mode), customizable per brand.');
 
   drawH4('Key Capabilities');
   var blakeCards = [
-    { title: 'Adaptive Context', desc: 'Maintains deep context across conversations, brand switches, and mode transitions.' },
-    { title: 'Multi-Provider Intelligence', desc: 'Routes tasks to the optimal AI model automatically. Claude for strategy, GPT for research, Gemini for creative.' },
-    { title: 'Brand Embodiment', desc: 'Every output is filtered through the active brand\'s identity - voice, tone, audience, and constraints.' },
-    { title: 'Autonomous Execution', desc: 'Operates independently on scheduled tasks and multi-step pipelines via the Automations Lab.' }
+    { title: 'Adaptive Context', desc: 'Deep context across conversations, brand switches, and mode transitions.' },
+    { title: 'Multi-Provider Intelligence', desc: 'Routes to optimal model: Claude for strategy, GPT for research, Gemini for creative.' },
+    { title: 'Brand Embodiment', desc: 'Every output filtered through the active brand\'s voice, tone, and constraints.' },
+    { title: 'Autonomous Execution', desc: 'Runs scheduled tasks and multi-step pipelines independently via Automations Lab.' }
   ];
   var bCardW = (CW - 16) / 2;
-  var bCardH = 72;
+  var bCardH = 58;
   for (var bc = 0; bc < blakeCards.length; bc++) {
     var bRow = Math.floor(bc / 2);
     var bCol = bc % 2;
     var bx = M + bCol * (bCardW + 16);
-    var by = y + bRow * (bCardH + 12);
-    checkSpace(bCardH + 12);
+    var by = y + bRow * (bCardH + 10);
     setFill(C.card);
     setDraw(C.border);
     pdf.setLineWidth(0.5);
@@ -2699,17 +2689,17 @@ function _buildPDF(orientation) {
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(9);
     setColor(C.gold);
-    pdf.text(blakeCards[bc].title, bx + 14, by + 20);
+    pdf.text(blakeCards[bc].title, bx + 14, by + 18);
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(8.5);
     setColor(C.sec);
     var bLines = pdf.splitTextToSize(blakeCards[bc].desc, bCardW - 28);
-    pdf.text(bLines, bx + 14, by + 34);
+    pdf.text(bLines, bx + 14, by + 32);
   }
-  y += 2 * (bCardH + 12) + 12;
+  y += 2 * (bCardH + 10) + 14;
 
   drawLabel('Cross-Mode Intelligence');
-  drawPara('BrandAI and LifeAI are not isolated silos. When the user operates in BrandAI mode, BLAKE can reference personal context (schedule, energy levels, priorities) to inform business decisions. In LifeAI mode, brand performance data can surface to provide work-life balance insights. This cross-pollination is controlled by the user and never automatic.');
+  drawPara('BrandAI and LifeAI are not isolated silos. In BrandAI mode, BLAKE references personal context to inform business decisions. In LifeAI mode, brand performance data surfaces for work-life balance insights. Cross-pollination is user-controlled and never automatic.');
   drawFooter('The Rowe Collection LLC', '10');
 
   // =====================
