@@ -190,9 +190,19 @@ Download All (.zip)
 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
 Download PNG
 </button>
+<button class="preview-btn secondary" id="previewFullscreenBtn" onclick="playFullscreen()" style="display:none;">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+Play Fullscreen
+</button>
 <button class="preview-btn secondary" onclick="closePreview()">Close</button>
 </div>
 </div>
+</div>
+
+<!-- FULLSCREEN ANIMATION OVERLAY -->
+<div id="fullscreenOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;background:#0a0a0a;cursor:pointer;" onclick="closeFullscreen()">
+<div id="fullscreenContent" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
+<div style="position:fixed;bottom:24px;right:24px;font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;z-index:501;">Click or press ESC to exit</div>
 </div>
 
 <!-- HIDDEN RENDER CONTAINER -->
@@ -1116,6 +1126,14 @@ function openPreview(idx) {
   container.style.transform = 'scale(' + scale + ')';
   wrap.style.height = (th * scale) + 'px';
 
+  // Show/hide fullscreen button for animated templates
+  var fsBtn = document.getElementById('previewFullscreenBtn');
+  if (t.category === 'animated') {
+    fsBtn.style.display = '';
+  } else {
+    fsBtn.style.display = 'none';
+  }
+
   document.getElementById('previewModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1124,6 +1142,46 @@ function closePreview() {
   document.getElementById('previewModal').classList.remove('open');
   document.body.style.overflow = '';
   previewIdx = -1;
+}
+
+// ─── FULLSCREEN ANIMATION ───
+
+function playFullscreen() {
+  if (previewIdx < 0) return;
+  var t = templates[previewIdx];
+  var overlay = document.getElementById('fullscreenOverlay');
+  var content = document.getElementById('fullscreenContent');
+
+  // Render at viewport size - scale the 1080x1350 card to fit the screen
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
+  var tw = t.w || CARD_W;
+  var th = t.h || CARD_H;
+  var scale = Math.min(vw / tw, vh / th);
+
+  content.innerHTML = '<div style="width:' + tw + 'px;height:' + th + 'px;transform:scale(' + scale + ');transform-origin:center center;">' + t.render() + '</div>';
+  overlay.style.display = 'block';
+  closePreview();
+
+  // Request actual browser fullscreen
+  if (overlay.requestFullscreen) {
+    overlay.requestFullscreen();
+  } else if (overlay.webkitRequestFullscreen) {
+    overlay.webkitRequestFullscreen();
+  }
+}
+
+function closeFullscreen() {
+  var overlay = document.getElementById('fullscreenOverlay');
+  overlay.style.display = 'none';
+  document.getElementById('fullscreenContent').innerHTML = '';
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
 }
 
 // ─── DOWNLOAD ───
@@ -1345,7 +1403,11 @@ function toggleTheme() {
 // ─── KEYBOARD ───
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closePreview();
+  if (e.key === 'Escape') {
+    var overlay = document.getElementById('fullscreenOverlay');
+    if (overlay.style.display !== 'none') { closeFullscreen(); }
+    else { closePreview(); }
+  }
 });
 
 // ─── INIT ───
