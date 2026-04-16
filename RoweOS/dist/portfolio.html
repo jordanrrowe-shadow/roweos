@@ -1165,9 +1165,9 @@ blockquote p {
         <div class="feature-accent"></div>
         <div class="feature-card-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          Clients
+          People
         </div>
-        <div class="feature-card-desc">Client relationship management with contact details, interaction history, and project tracking. AI-informed client communication suggestions based on brand voice and relationship context.</div>
+        <div class="feature-card-desc">Team members, direct reports, and contact management with custom analytics and KPIs. Track relationships, assign roles, monitor performance metrics, and get AI-informed communication suggestions based on brand voice.</div>
       </div>
       <div class="feature-card">
         <div class="feature-accent"></div>
@@ -2097,7 +2097,7 @@ function _buildPDF(orientation) {
     'rhythm': 'Rhythm', 'automations': 'Automations', 'identity': 'Identity',
     'memory': 'Memory', 'bloom': 'Bloom', 'library': 'Library', 'social': 'Social',
     'mail': 'Mail', 'push': 'Push Notifications', 'analytics': 'Analytics',
-    'inventory': 'Inventory', 'clients': 'Clients', 'admin': 'Admin'
+    'inventory': 'Inventory', 'clients': 'People', 'admin': 'Admin'
   };
 
   function drawCardIcon(x, y, iconName) {
@@ -2252,6 +2252,39 @@ function _buildPDF(orientation) {
     pdf.text(text, W / 2, y, { align: 'center' });
   }
 
+  // Draw "Google" with colored letters + optional suffix in grey
+  function drawGoogleColored(fontSize, suffix, suffixColor) {
+    var letters = [
+      { ch: 'G', c: [66,133,244] },
+      { ch: 'o', c: [234,67,53] },
+      { ch: 'o', c: [251,188,5] },
+      { ch: 'g', c: [52,168,83] },
+      { ch: 'l', c: [234,67,53] },
+      { ch: 'e', c: [66,133,244] }
+    ];
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(fontSize);
+    // Calculate total width for centering
+    var totalW = 0;
+    for (var g = 0; g < letters.length; g++) {
+      totalW += pdf.getTextWidth(letters[g].ch);
+    }
+    var suffixText = suffix || '';
+    pdf.setFontSize(fontSize);
+    var suffixW = suffixText ? pdf.getTextWidth(suffixText) : 0;
+    var startX = W / 2 - (totalW + suffixW) / 2;
+    var cx = startX;
+    for (var g2 = 0; g2 < letters.length; g2++) {
+      pdf.setTextColor(letters[g2].c[0], letters[g2].c[1], letters[g2].c[2]);
+      pdf.text(letters[g2].ch, cx, y);
+      cx += pdf.getTextWidth(letters[g2].ch);
+    }
+    if (suffixText) {
+      setColor(suffixColor || C.sec);
+      pdf.text(suffixText, cx, y);
+    }
+  }
+
   // ==================================
   // PAGE RENDERING
   // ==================================
@@ -2295,6 +2328,9 @@ function _buildPDF(orientation) {
   pdf.setFontSize(12);
   setColor(C.gold);
   pdf.text('"Operating intelligence, built for brand and life."', W / 2, y, { align: 'center' });
+  y += 40;
+  // Google for Startups badge (colored)
+  drawGoogleColored(9, '  for Startups Recipient', C.muted);
   y = H - 60;
   drawCenteredText('CONFIDENTIAL - THE ROWE COLLECTION LLC', 8, C.muted);
 
@@ -2356,10 +2392,7 @@ function _buildPDF(orientation) {
   // =====================
   newPage();
   y = H * 0.4;
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(9);
-  setColor(C.gold);
-  pdf.text('GOOGLE FOR STARTUPS', W / 2, y, { align: 'center' });
+  drawGoogleColored(10, '  for Startups', C.sec);
   y += 32;
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(28);
@@ -2410,12 +2443,11 @@ function _buildPDF(orientation) {
   drawLabel('Why RoweOS Was Selected');
   drawPara('Google\'s selection criteria emphasize technical differentiation and scalable architecture. RoweOS stands out for several reasons:');
   var gfsReasons = [
-    'Intelligent auto-routing across AI providers - dynamically selects the optimal model across Anthropic, OpenAI, and Google Gemini for each task.',
-    'Five specialized AI agents per brand - each deeply calibrated to that brand\'s identity, voice, audience, and constraints. Over 200 operations span every business function.',
-    'Autonomous automation engine - scheduled tasks, multi-step pipelines, and workflow presets run 24/7 without user intervention.',
-    'Multi-brand portfolio management - instant switching, per-brand identity configuration, independent social connections, and separated AI contexts.',
-    'Dual-mode platform - BrandAI (business intelligence) and LifeAI (personal management) unified by a single adaptive intelligence.',
-    'Integrated social and email publishing - direct OAuth connections to X, Threads, Instagram, LinkedIn, TikTok, Gmail, and Outlook.'
+    'Intelligent auto-routing across Anthropic, OpenAI, and Google Gemini for each task.',
+    'Five specialized AI agents per brand with over 200 operations across every business function.',
+    'Autonomous automation engine with scheduled tasks and multi-step pipelines running 24/7.',
+    'Multi-brand portfolio management with instant switching and separated AI contexts.',
+    'Dual-mode platform with integrated publishing to X, Threads, Instagram, LinkedIn, Gmail, and Outlook.'
   ];
   drawList(gfsReasons);
   drawFooter('The Rowe Collection LLC', '');
@@ -2597,7 +2629,7 @@ function _buildPDF(orientation) {
   drawCards([
     { title: 'Analytics', icon: 'analytics', desc: 'Revenue tracking, performance metrics, and business intelligence dashboards. Monitor key indicators across all brands in your portfolio with visual trend analysis.' },
     { title: 'Inventory', icon: 'inventory', desc: 'Product and service catalog management. Track items, pricing, availability, and categorization. Integrates with brand identity for consistent product presentation.' },
-    { title: 'Clients', icon: 'clients', desc: 'Client relationship management with contact details, interaction history, and project tracking. AI-informed client communication suggestions based on brand voice and relationship context.' },
+    { title: 'People', icon: 'clients', desc: 'Team members, direct reports, and contact management with custom analytics and KPIs. Track relationships, assign roles, monitor performance metrics, and get AI-informed communication suggestions.' },
     { title: 'Admin', icon: 'admin', desc: 'Access key management, user tier administration, and brand configuration sharing. Generate and distribute access keys, manage subscription tiers, and monitor platform usage.' }
   ]);
   drawFooter('The Rowe Collection LLC', '8');
@@ -2632,7 +2664,53 @@ function _buildPDF(orientation) {
     ],
     [CW * 0.2, CW * 0.8]
   );
-  drawFooter('The Rowe Collection LLC', '9');
+  newPage();
+  drawLabel('B.L.A.K.E. - Brand Life AI Knowledge Engine');
+  drawPara('B.L.A.K.E. is the overarching adaptive intelligence that unifies BrandAI and LifeAI into a single, coherent entity. It is not just an assistant or a chatbot wrapper. BLAKE is an AI entity that learns, adapts, and embodies who you are across both your professional and personal worlds.');
+  drawPara('BLAKE represents the convergence of brand intelligence and life intelligence. When you configure your brand identity, voice, audience, and goals, BLAKE absorbs that context and applies it across every agent, every operation, and every automated workflow.');
+
+  drawH4('Visual Identity');
+  drawPara('BLAKE has a customizable visual presence within the platform. Users choose between two ambient AI visualization modes:');
+  drawList([
+    'Blob - A fluid, organic WebGL shape that responds to AI state (idle, thinking, responding). Multiple shape presets with user-defined color palettes.',
+    'Helix - A full-viewport flowing ribbon gradient that creates an ambient, living workspace. Smooth movement with customizable color themes.'
+  ]);
+  drawPara('Both modes react to BLAKE\'s activity state, creating a visual connection between the user and their AI. Colors and shapes are fully customizable per brand.');
+
+  drawH4('Key Capabilities');
+  var blakeCards = [
+    { title: 'Adaptive Context', desc: 'Maintains deep context across conversations, brand switches, and mode transitions.' },
+    { title: 'Multi-Provider Intelligence', desc: 'Routes tasks to the optimal AI model automatically. Claude for strategy, GPT for research, Gemini for creative.' },
+    { title: 'Brand Embodiment', desc: 'Every output is filtered through the active brand\'s identity - voice, tone, audience, and constraints.' },
+    { title: 'Autonomous Execution', desc: 'Operates independently on scheduled tasks and multi-step pipelines via the Automations Lab.' }
+  ];
+  var bCardW = (CW - 16) / 2;
+  var bCardH = 72;
+  for (var bc = 0; bc < blakeCards.length; bc++) {
+    var bRow = Math.floor(bc / 2);
+    var bCol = bc % 2;
+    var bx = M + bCol * (bCardW + 16);
+    var by = y + bRow * (bCardH + 12);
+    checkSpace(bCardH + 12);
+    setFill(C.card);
+    setDraw(C.border);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(bx, by, bCardW, bCardH, 6, 6, 'FD');
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    setColor(C.gold);
+    pdf.text(blakeCards[bc].title, bx + 14, by + 20);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8.5);
+    setColor(C.sec);
+    var bLines = pdf.splitTextToSize(blakeCards[bc].desc, bCardW - 28);
+    pdf.text(bLines, bx + 14, by + 34);
+  }
+  y += 2 * (bCardH + 12) + 12;
+
+  drawLabel('Cross-Mode Intelligence');
+  drawPara('BrandAI and LifeAI are not isolated silos. When the user operates in BrandAI mode, BLAKE can reference personal context (schedule, energy levels, priorities) to inform business decisions. In LifeAI mode, brand performance data can surface to provide work-life balance insights. This cross-pollination is controlled by the user and never automatic.');
+  drawFooter('The Rowe Collection LLC', '10');
 
   // =====================
   // CHAPTER VIII: Adaptive Operations Engine
