@@ -246,6 +246,8 @@ function loadBrandMemory() {
       localStorage.removeItem('brandMemory');
     } catch(e) { console.warn('[loadBrandMemory] Legacy migration error:', e); }
   }
+  // v29.1: Migrate index-based keys to ID-based keys
+  migrateBrandMemoryKeys();
   // Don't call updateMemoryUI here - it will be called when the view is shown
 }
 
@@ -280,6 +282,37 @@ function saveBrandMemory() {
   // v25.1: Write-through to Firestore (replaces deprecated syncToFirebase)
   if (typeof writeDB === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
     writeDB('profile/main', { brandMemory: JSON.parse(localStorage.getItem('roweos_brand_memory') || '{}') });
+  }
+}
+
+// v29.1: Get stable brand memory key using brand ID (not index, which shifts on reorder)
+function getBrandMemoryKey(brandIdx) {
+  if (typeof brandIdx === 'undefined' || brandIdx === null) brandIdx = (typeof selectedBrand === 'number' ? selectedBrand : 0);
+  if (typeof brands !== 'undefined' && brands[brandIdx] && brands[brandIdx].id) {
+    return brands[brandIdx].id;
+  }
+  // Fallback to index-based key (legacy)
+  return 'brand_' + brandIdx;
+}
+
+// v29.1: Migrate brand memory from index-based keys to ID-based keys
+function migrateBrandMemoryKeys() {
+  if (typeof brands === 'undefined' || !brands.length) return;
+  var changed = false;
+  for (var i = 0; i < brands.length; i++) {
+    var oldKey = 'brand_' + i;
+    var newKey = brands[i].id;
+    if (!newKey || oldKey === newKey) continue;
+    if (brandMemory[oldKey] && !brandMemory[newKey]) {
+      console.log('[Memory] v29.1: Migrating brandMemory key', oldKey, '->', newKey);
+      brandMemory[newKey] = brandMemory[oldKey];
+      delete brandMemory[oldKey];
+      changed = true;
+    }
+  }
+  if (changed) {
+    saveBrandMemory();
+    console.log('[Memory] v29.1: Brand memory keys migrated to ID-based');
   }
 }
 
@@ -979,7 +1012,7 @@ async function handleMemoryUpload(event) {
   var files = event.target.files;
   if (!files || files.length === 0) return;
   
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = getBrandMemoryKey(selectedBrand);
   var brandName = (brands[selectedBrand] ? brands[selectedBrand].name : '') || 'Unknown Brand';
   
   if (!brandMemory[brandKey]) {
@@ -1602,7 +1635,7 @@ function showDocInsights(docId, mode) {
       docIndex = docId;
     }
   } else {
-    var brandKey = 'brand_' + selectedBrand;
+    var brandKey = getBrandMemoryKey(selectedBrand);
     if (brandMemory[brandKey] && brandMemory[brandKey].documents) {
       var brandDocs = brandMemory[brandKey].documents;
       // Try to find by id first
@@ -1753,6 +1786,15 @@ function closeDocInsightsModal() {
     modal.style.display = 'none';
     modal.classList.remove('show');
   }
+  // v14.0: Clean up any lingering backdrop/overlay elements
+  document.querySelectorAll('.modal-backdrop, .modal-overlay-blur').forEach(function(el) {
+    el.remove();
+  });
+  document.body.style.overflow = '';
+  document.body.classList.remove('modal-open');
+  // Reset file input so the same file can be re-uploaded
+  var fileInputs = document.querySelectorAll('input[type="file"]');
+  fileInputs.forEach(function(input) { input.value = ''; });
   currentViewingDoc = null;
 }
 
@@ -1804,7 +1846,7 @@ async function reanalyzeDocument() {
       var brandName = (brands[selectedBrand] ? brands[selectedBrand].name : '') || 'Unknown';
       var summary = await extractIdentityInsights(doc.content || '', doc.name, brandName);
 
-      var brandKey = 'brand_' + selectedBrand;
+      var brandKey = getBrandMemoryKey(selectedBrand);
       var docIndex = (brandMemory[brandKey]?.documents || []).findIndex(function(d) { return d.id === doc.id; });
       if (docIndex >= 0 && summary) {
         // v24.11: Store summary string (not full object) to prevent [object Object] display
@@ -1934,7 +1976,7 @@ async function saveChatDocToIdentity(attachedFiles, aiResponse, mode) {
 
     } else {
       // Save to BrandAI Identity
-      var brandKey = 'brand_' + selectedBrand;
+      var brandKey = getBrandMemoryKey(selectedBrand);
       if (!brandMemory[brandKey]) {
         brandMemory[brandKey] = { documents: [], chunks: 0, lastUpdate: null };
       }
@@ -2298,7 +2340,7 @@ function pushIdentityToSystemPrompt() {
   showConfirmModal('Push Identity to System Prompt?', diffHtml, function() {
     // Save to brand knowledge systemPromptAdditions
     try {
-      var knowledgeKey = 'roweos_brand_knowledge_' + brand.name.replace(/[^a-zA-Z0-9]/g, '_');
+      var knowledgeKey = 'roweos_brand_knowledge_' + brand.name.replace(/\s+/g, '_').toLowerCase();
       var knowledge = {};
       try { knowledge = JSON.parse(localStorage.getItem(knowledgeKey) || '{}'); } catch(e) {}
       knowledge.systemPromptAdditions = newAdditions;
@@ -2906,7 +2948,7 @@ function loadIdentityData() {
     var tsContainer = document.getElementById('identityTimestamps');
     if (tsContainer) {
       var timestamps = JSON.parse(localStorage.getItem('roweos_prompt_timestamps') || '{}');
-      var brandKey = brand.name || 'brand_' + selectedBrand;
+      var brandKey = getBrandMemoryKey(selectedBrand);
       var lastSaved = timestamps[brandKey] ? new Date(timestamps[brandKey]).toLocaleString() : null;
       var syncTs = JSON.parse(localStorage.getItem('roweos_identity_sync_timestamps') || '{}');
       var lastSynced = syncTs[brandKey] ? new Date(syncTs[brandKey]).toLocaleString() : null;
@@ -3053,7 +3095,7 @@ function saveAllIdentityData() {
  * v12.2.4: Load identity documents with clickable insights view
  */
 function loadIdentityDocs() {
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = getBrandMemoryKey(selectedBrand);
   var memory = brandMemory[brandKey] || { documents: [], chunks: 0 };
   var brand = brands[selectedBrand];
 
@@ -3239,7 +3281,7 @@ async function extractFromIdentityWebsite() {
     if (activeProvider === 'anthropic') {
       // v22.49: Validate model name — fall back to known-good model if stored value is invalid
       var claudeModel = localStorage.getItem('claudeModel') || 'claude-sonnet-4-6';
-      var validModels = ['claude-sonnet-4-6', 'claude-opus-4-6', 'claude-haiku-4-5-20251001', 'claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022'];
+      var validModels = ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001', 'claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022'];
       if (validModels.indexOf(claudeModel) === -1 && claudeModel.indexOf('claude') === -1) {
         claudeModel = 'claude-sonnet-4-6';
       }
@@ -3422,7 +3464,7 @@ function handleIdentityDocDrop(event) {
  * v12.2.4: Process identity document with context
  */
 async function processIdentityDocumentWithContext(file, docType, instructions) {
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = getBrandMemoryKey(selectedBrand);
   var brandName = (brands[selectedBrand] ? brands[selectedBrand].name : '') || 'Unknown';
 
   var processingEl = document.getElementById('identityProcessing');
@@ -3734,7 +3776,7 @@ async function extractPDFText(arrayBuffer) {
  * Process identity document with AI
  */
 async function processIdentityDocument(file) {
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = getBrandMemoryKey(selectedBrand);
   var brandName = (brands[selectedBrand] ? brands[selectedBrand].name : '') || 'Unknown';
   
   // Show processing
@@ -3972,7 +4014,7 @@ async function extractIdentityInsights(content, fileName, brandName) {
  * Remove identity document
  */
 function removeIdentityDoc(index) {
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = getBrandMemoryKey(selectedBrand);
   
   if (!brandMemory[brandKey] || !brandMemory[brandKey].documents[index]) {
     showToast('Document not found', 'error');
@@ -4014,8 +4056,8 @@ function renderMemoryBrandPills() {
     }
   }
 
-  currentKnowledgeBrand = 'brand_' + currentBrandIdx;
-  
+  currentKnowledgeBrand = getBrandMemoryKey(currentBrandIdx);
+
   // v9.1.14: Update brand title and tagline in merged Identity view
   var brand = brands[currentBrandIdx];
   if (brand) {
@@ -4053,7 +4095,7 @@ function renderMemoryBrandPills() {
 }
 
 function updateMemoryUI() {
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = getBrandMemoryKey(selectedBrand);
   var memory = brandMemory[brandKey] || { documents: [], chunks: 0, lastUpdate: null };
   var brandName = (brands[selectedBrand] ? brands[selectedBrand].name : '') || '';
   
@@ -4111,7 +4153,7 @@ function updateMemoryUI() {
 }
 
 function removeMemoryDoc(index) {
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = getBrandMemoryKey(selectedBrand);
   var brandName = (brands[selectedBrand] ? brands[selectedBrand].name : '');
   
   if (!brandMemory[brandKey] || !brandMemory[brandKey].documents[index]) {
@@ -4305,7 +4347,7 @@ function regenerateSystemPrompt(knowledge) {
 
 function clearBrandMemory() {
   if (!confirm('Clear all memory and learned knowledge for this brand? This cannot be undone.')) return;
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = getBrandMemoryKey(selectedBrand);
   var brandName = (brands[selectedBrand] ? brands[selectedBrand].name : '');
   
   brandMemory[brandKey] = { documents: [], chunks: 0, lastUpdate: null };
@@ -4657,7 +4699,7 @@ function refreshIdentityTimestamp() {
     var brand = brands[selectedBrand];
     if (!brand) return;
     var timestamps = JSON.parse(localStorage.getItem('roweos_prompt_timestamps') || '{}');
-    var brandKey = brand.name || 'brand_' + selectedBrand;
+    var brandKey = getBrandMemoryKey(selectedBrand);
     var lastSaved = timestamps[brandKey] ? new Date(timestamps[brandKey]).toLocaleString() : null;
     var syncTs = JSON.parse(localStorage.getItem('roweos_identity_sync_timestamps') || '{}');
     var lastSynced = syncTs[brandKey] ? new Date(syncTs[brandKey]).toLocaleString() : null;
@@ -7358,11 +7400,212 @@ function savePulseGoals() {
   pulseGoals.forEach(function(g) {
     if (!g.id) g.id = 'goal_' + now + '_' + Math.random().toString(36).substr(2, 6);
     if (!g._modifiedAt) g._modifiedAt = now;
+    // v28.8: Backfill new goal-level fields
+    if (typeof g.isDefault === 'undefined') g.isDefault = false;
+    if (typeof g.color === 'undefined') g.color = null;
+    if (typeof g.icon === 'undefined') g.icon = null;
+    if (typeof g.brandIdx === 'undefined') g.brandIdx = null;
+    // v28.8: Backfill new item-level fields on flat items
+    if (g.items && Array.isArray(g.items)) {
+      g.items.forEach(function(item) {
+        if (typeof item.date === 'undefined') item.date = null;
+        if (typeof item.assignedTo === 'undefined') item.assignedTo = null;
+        if (typeof item.notes === 'undefined') item.notes = null;
+        if (typeof item.priority === 'undefined') item.priority = null;
+        if (!item.createdAt) item.createdAt = new Date(now).toISOString();
+        if (!item._modifiedAt) item._modifiedAt = now;
+      });
+    }
+    // v28.8: Backfill new item-level fields on section items
+    if (g.sections && Array.isArray(g.sections)) {
+      g.sections.forEach(function(sec) {
+        if (sec.items && Array.isArray(sec.items)) {
+          sec.items.forEach(function(item) {
+            if (typeof item.date === 'undefined') item.date = null;
+            if (typeof item.assignedTo === 'undefined') item.assignedTo = null;
+            if (typeof item.notes === 'undefined') item.notes = null;
+            if (typeof item.priority === 'undefined') item.priority = null;
+            if (!item.createdAt) item.createdAt = new Date(now).toISOString();
+            if (!item._modifiedAt) item._modifiedAt = now;
+          });
+        }
+      });
+    }
   });
   // v25.1: Write-through — localStorage + immediate Firestore
   localStorage.setItem('roweos_pulse_goals', JSON.stringify(pulseGoals));
   // Only write the goals field — merge:true preserves journal/insights/entries/reminders
   writeDB('pulse/main', { goals: pulseGoals }, { category: 'goals' });
+}
+
+// v28.8: Get or create a default "Unassigned" goal for the current mode
+function getUnassignedGoal() {
+  var lifeMode = (typeof isLifeMode === 'function') ? isLifeMode() : false;
+  var source = lifeMode ? 'lifeai' : 'brandai';
+  var existing = null;
+  for (var i = 0; i < pulseGoals.length; i++) {
+    if (pulseGoals[i].isDefault === true && pulseGoals[i].source === source) {
+      existing = pulseGoals[i];
+      break;
+    }
+  }
+  if (existing) return existing;
+  var now = Date.now();
+  var goal = {
+    id: 'goal_' + now + '_' + Math.random().toString(36).substr(2, 6),
+    title: 'Unassigned',
+    source: source,
+    isDefault: true,
+    color: null,
+    icon: null,
+    brandIdx: null,
+    items: [],
+    sections: [],
+    completed: false,
+    archived: false,
+    _modifiedAt: now
+  };
+  pulseGoals.push(goal);
+  savePulseGoals();
+  return goal;
+}
+
+// v28.8: Add an item to a Pulse goal. If goalId is falsy, uses the default Unassigned goal.
+function addItemToPulseGoal(goalId, itemData) {
+  var goal = null;
+  if (goalId) {
+    for (var i = 0; i < pulseGoals.length; i++) {
+      if (pulseGoals[i].id === goalId) { goal = pulseGoals[i]; break; }
+    }
+  }
+  if (!goal) goal = getUnassignedGoal();
+  if (!goal.items) goal.items = [];
+  var now = Date.now();
+  var item = {
+    id: (itemData && itemData.id) ? itemData.id : ('item_' + now + '_' + Math.random().toString(36).substr(2, 6)),
+    text: (itemData && itemData.text) ? itemData.text : '',
+    completed: (itemData && itemData.completed) ? itemData.completed : false,
+    date: (itemData && itemData.date) ? itemData.date : null,
+    assignedTo: (itemData && itemData.assignedTo) ? itemData.assignedTo : null,
+    notes: (itemData && itemData.notes) ? itemData.notes : null,
+    priority: (itemData && itemData.priority) ? itemData.priority : null,
+    createdAt: (itemData && itemData.createdAt) ? itemData.createdAt : new Date(now).toISOString(),
+    _modifiedAt: now
+  };
+  goal.items.push(item);
+  goal._modifiedAt = now;
+  savePulseGoals();
+  return item;
+}
+
+// v28.8: Remove an item from a Pulse goal (checks both flat items and section items)
+function removeItemFromPulseGoal(goalId, itemId) {
+  var goal = null;
+  for (var i = 0; i < pulseGoals.length; i++) {
+    if (pulseGoals[i].id === goalId) { goal = pulseGoals[i]; break; }
+  }
+  if (!goal) return;
+  // Remove from flat items
+  if (goal.items && Array.isArray(goal.items)) {
+    goal.items = goal.items.filter(function(it) { return it.id !== itemId; });
+  }
+  // Remove from section items
+  if (goal.sections && Array.isArray(goal.sections)) {
+    goal.sections.forEach(function(sec) {
+      if (sec.items && Array.isArray(sec.items)) {
+        sec.items = sec.items.filter(function(it) { return it.id !== itemId; });
+      }
+    });
+  }
+  goal._modifiedAt = Date.now();
+  savePulseGoals();
+}
+
+// v28.8: Move an item from one goal to another
+function moveItemBetweenGoals(fromGoalId, toGoalId, itemId) {
+  var fromGoal = null;
+  var foundItem = null;
+  for (var i = 0; i < pulseGoals.length; i++) {
+    if (pulseGoals[i].id === fromGoalId) { fromGoal = pulseGoals[i]; break; }
+  }
+  if (!fromGoal) return null;
+  // Search flat items
+  if (fromGoal.items && Array.isArray(fromGoal.items)) {
+    for (var j = 0; j < fromGoal.items.length; j++) {
+      if (fromGoal.items[j].id === itemId) { foundItem = fromGoal.items[j]; break; }
+    }
+  }
+  // Search section items if not found
+  if (!foundItem && fromGoal.sections && Array.isArray(fromGoal.sections)) {
+    for (var s = 0; s < fromGoal.sections.length; s++) {
+      var secItems = fromGoal.sections[s].items;
+      if (secItems && Array.isArray(secItems)) {
+        for (var k = 0; k < secItems.length; k++) {
+          if (secItems[k].id === itemId) { foundItem = secItems[k]; break; }
+        }
+      }
+      if (foundItem) break;
+    }
+  }
+  if (!foundItem) return null;
+  // Remove from source goal (no save yet -- addItemToPulseGoal will save)
+  removeItemFromPulseGoal(fromGoalId, itemId);
+  // Add to target goal
+  return addItemToPulseGoal(toGoalId, foundItem);
+}
+
+// v28.8: Get all tasks for a specific date (YYYY-MM-DD string)
+function getAllTasksForDate(dateStr) {
+  var results = [];
+  pulseGoals.forEach(function(g) {
+    if (g.archived || g.completed) return;
+    if (g.items && Array.isArray(g.items)) {
+      g.items.forEach(function(item) {
+        if (item.date === dateStr && !item.completed) {
+          results.push({ goal: g, item: item });
+        }
+      });
+    }
+    if (g.sections && Array.isArray(g.sections)) {
+      g.sections.forEach(function(sec) {
+        if (sec.items && Array.isArray(sec.items)) {
+          sec.items.forEach(function(item) {
+            if (item.date === dateStr && !item.completed) {
+              results.push({ goal: g, item: item });
+            }
+          });
+        }
+      });
+    }
+  });
+  return results;
+}
+
+// v28.8: Get all tasks assigned to a specific person
+function getAllTasksForPerson(personId) {
+  var results = [];
+  pulseGoals.forEach(function(g) {
+    if (g.archived || g.completed) return;
+    if (g.items && Array.isArray(g.items)) {
+      g.items.forEach(function(item) {
+        if (item.assignedTo === personId && !item.completed) {
+          results.push({ goal: g, item: item });
+        }
+      });
+    }
+    if (g.sections && Array.isArray(g.sections)) {
+      g.sections.forEach(function(sec) {
+        if (sec.items && Array.isArray(sec.items)) {
+          sec.items.forEach(function(item) {
+            if (item.assignedTo === personId && !item.completed) {
+              results.push({ goal: g, item: item });
+            }
+          });
+        }
+      });
+    }
+  });
+  return results;
 }
 
 /**
@@ -7406,7 +7649,8 @@ function renderPulse3Overview() {
   var completedGoals = modeFilteredGoals.filter(function(g) { return g.completed; }).length;
 
   modeFilteredGoals.forEach(function(goal) {
-    if (goal.items && !goal.archived) {
+    // v29.0: Exclude completed goals from progress % (was inflating after Mark as completed)
+    if (goal.items && !goal.archived && !goal.completed) {
       totalItems += goal.items.length;
       completedItems += goal.items.filter(function(i) { return i.completed; }).length;
     }
@@ -7570,11 +7814,12 @@ function renderPulse3Checklists() {
     if (goal.sections && goal.sections.length > 0) {
       itemsHtml = goal.sections.map(function(section, sIdx) {
         var sectionItems = (section.items || []).map(function(item) {
+          var categoryPill = item.sourceCategory ? '<span style="font-size: 10px; padding: 1px 6px; border-radius: 8px; background: rgba(168,152,120,0.15); color: var(--text-muted); margin-left: 6px;">' + escapeHtml(item.sourceCategory) + '</span>' : '';
           return '<div class="pulse-3-checklist-item">' +
             '<div class="pulse-3-checkbox ' + (item.completed ? 'checked' : '') + '" onclick="togglePulseChecklistItem(\'' + goal.id + '\', \'' + item.id + '\')">' +
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' +
             '</div>' +
-            '<div class="pulse-3-item-text ' + (item.completed ? 'completed' : '') + '" onclick="editTaskInline(this, \'' + goal.id + '\', \'' + item.id + '\')" title="Click to edit">' + escapeHtml(item.text) + '</div>' +
+            '<div class="pulse-3-item-text ' + (item.completed ? 'completed' : '') + '" onclick="editTaskInline(this, \'' + goal.id + '\', \'' + item.id + '\')" title="Click to edit">' + escapeHtml(item.text) + categoryPill + '</div>' +
             '<button class="pulse-3-item-delete" onclick="deleteGoalItem(\'' + goal.id + '\', \'' + item.id + '\')" title="Delete item">×</button>' +
           '</div>';
         }).join('');
@@ -7593,11 +7838,12 @@ function renderPulse3Checklists() {
     // Render flat items (non-sectioned) — v15.47: skip if sections already rendered these items
     if ((!goal.sections || goal.sections.length === 0) && goal.items && goal.items.length > 0) {
       itemsHtml += (goal.items || []).map(function(item) {
+        var categoryPill = item.sourceCategory ? '<span style="font-size: 10px; padding: 1px 6px; border-radius: 8px; background: rgba(168,152,120,0.15); color: var(--text-muted); margin-left: 6px;">' + escapeHtml(item.sourceCategory) + '</span>' : '';
         return '<div class="pulse-3-checklist-item">' +
           '<div class="pulse-3-checkbox ' + (item.completed ? 'checked' : '') + '" onclick="togglePulseChecklistItem(\'' + goal.id + '\', \'' + item.id + '\')">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' +
           '</div>' +
-          '<div class="pulse-3-item-text ' + (item.completed ? 'completed' : '') + '" onclick="editTaskInline(this, \'' + goal.id + '\', \'' + item.id + '\')" title="Click to edit">' + escapeHtml(item.text) + '</div>' +
+          '<div class="pulse-3-item-text ' + (item.completed ? 'completed' : '') + '" onclick="editTaskInline(this, \'' + goal.id + '\', \'' + item.id + '\')" title="Click to edit">' + escapeHtml(item.text) + categoryPill + '</div>' +
           '<button class="pulse-3-item-delete" onclick="deleteGoalItem(\'' + goal.id + '\', \'' + item.id + '\')" title="Delete item">×</button>' +
         '</div>';
       }).join('');
@@ -7673,6 +7919,23 @@ function togglePulseChecklistItem(goalId, itemId) {
   item.completed = !item.completed;
   item.completedAt = item.completed ? new Date().toISOString() : null;
   goal._modifiedAt = Date.now(); // v25.2: Stamp for merge
+
+  // Pulse-Focus completion sync: mirror state back to Focus task
+  if (item.sourceTodoId && typeof todos !== 'undefined') {
+    var focusTodo = todos.find(function(t) { return t.id === item.sourceTodoId; });
+    if (focusTodo) {
+      if (item.completed) {
+        focusTodo.completed = true;
+        focusTodo.completedAt = new Date().toISOString();
+        showToast('Focus task also marked complete', 'success');
+      } else {
+        focusTodo.completed = false;
+        focusTodo.completedAt = null;
+        showToast('Focus task also marked incomplete', 'info');
+      }
+      saveTodos();
+    }
+  }
 
   savePulseGoals();
   renderPulse3Overview();
@@ -8651,12 +8914,15 @@ function importSelectedTodosToGoal(goalId) {
     var todoId = parseInt(cb.getAttribute('data-todo-id'));
     var todo = todos.find(function(t) { return t.id === todoId; });
     if (todo) {
-      goal.items.push({
+      var newItem = {
         id: 'item_' + Date.now() + '_' + count,
         text: todo.text,
         completed: false,
-        completedAt: null
-      });
+        completedAt: null,
+        sourceTodoId: todo.id,
+        sourceCategory: todo.category || null
+      };
+      goal.items.push(newItem);
       count++;
     }
   });
