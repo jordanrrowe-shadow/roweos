@@ -7608,10 +7608,126 @@ function getAllTasksForPerson(personId) {
   return results;
 }
 
+// v28.8: One-time migration of Focus todos into Pulse Goals
+function migrateFocusTodosToPulseGoals() {
+  if (localStorage.getItem('roweos_focus_pulse_migrated') === 'true') return;
+
+  var count = 0;
+  var sources = [
+    { key: 'roweosTodos', catKey: 'roweos_todo_categories', mode: 'brandai' },
+    { key: 'roweos_life_todos', catKey: 'roweos_life_todo_categories', mode: 'lifeai' }
+  ];
+
+  sources.forEach(function(src) {
+    // Parse todos
+    var todos = [];
+    try {
+      var raw = JSON.parse(localStorage.getItem(src.key) || '[]');
+      if (Array.isArray(raw)) todos = raw;
+    } catch(e) { /* skip */ }
+    if (todos.length === 0) return;
+
+    // Parse categories into a lookup
+    var catLookup = {};
+    try {
+      var rawCats = JSON.parse(localStorage.getItem(src.catKey) || '[]');
+      if (Array.isArray(rawCats)) {
+        rawCats.forEach(function(cat) {
+          if (cat && cat.name) catLookup[cat.name] = cat;
+        });
+      }
+    } catch(e) { /* skip */ }
+
+    // Group todos by category
+    var groups = {};
+    var uncategorized = [];
+    todos.forEach(function(todo) {
+      if (!todo || !todo.text) return;
+      if (todo.category && todo.category !== '') {
+        if (!groups[todo.category]) groups[todo.category] = [];
+        groups[todo.category].push(todo);
+      } else {
+        uncategorized.push(todo);
+      }
+    });
+
+    // Helper to map a todo to a Pulse item
+    function mapTodoToItem(todo) {
+      var now = Date.now();
+      return {
+        id: 'item_' + now + '_' + Math.random().toString(36).substr(2, 6),
+        text: todo.text || '',
+        completed: !!todo.completed,
+        completedAt: todo.completedAt || null,
+        date: todo.date || null,
+        assignedTo: todo.assignedTo || null,
+        notes: todo.notes || null,
+        priority: null,
+        createdAt: todo.createdAt || new Date().toISOString(),
+        _modifiedAt: now
+      };
+    }
+
+    // Create a goal per category group
+    var catNames = Object.keys(groups);
+    for (var i = 0; i < catNames.length; i++) {
+      var catName = catNames[i];
+      var catInfo = catLookup[catName] || {};
+      var now = Date.now();
+      var goal = {
+        id: 'goal_' + now + '_' + Math.random().toString(36).substr(2, 6),
+        title: catName,
+        source: src.mode,
+        isDefault: false,
+        color: catInfo.color || null,
+        icon: catInfo.icon || null,
+        brandIdx: null,
+        progress: 0,
+        archived: false,
+        completed: false,
+        sections: [],
+        items: [],
+        _modifiedAt: now
+      };
+      groups[catName].forEach(function(todo) {
+        goal.items.push(mapTodoToItem(todo));
+        count++;
+      });
+      pulseGoals.push(goal);
+    }
+
+    // Uncategorized todos go to the Unassigned goal
+    if (uncategorized.length > 0) {
+      var unassigned = getUnassignedGoal();
+      if (!unassigned.items) unassigned.items = [];
+      uncategorized.forEach(function(todo) {
+        unassigned.items.push(mapTodoToItem(todo));
+        count++;
+      });
+    }
+  });
+
+  // Save once at the end
+  if (count > 0) {
+    savePulseGoals();
+  }
+  localStorage.setItem('roweos_focus_pulse_migrated', 'true');
+  console.log('[Migration] Migrated ' + count + ' Focus todos into Pulse Goals');
+}
+
 /**
  * v10.6: Initialize Pulse 3.0
  */
 function initPulse3() {
+  // v28.8: Run one-time Focus → Pulse migration
+  try {
+    migrateFocusTodosToPulseGoals();
+  } catch(e) {
+    console.error('[Migration] Focus → Pulse migration failed:', e);
+  }
+  // v28.8: Ensure default Unassigned goal exists
+  getUnassignedGoal();
+
   renderPulse3Overview();
   renderPulse3Checklists();
 }
