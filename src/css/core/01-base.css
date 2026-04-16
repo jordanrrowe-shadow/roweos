@@ -3800,6 +3800,7 @@
     html.sidebar-pinned-collapsed #socialView,
     html.sidebar-pinned-collapsed #researchView,
     html.sidebar-pinned-collapsed #sectionLandingView,
+    html.sidebar-pinned-collapsed #scribeView, /* v29.0 */
     html.sidebar-pinned-collapsed #sidebarNavCustom {
       left: var(--sidebar-collapsed-width);
       transition: left var(--sidebar-transition);
@@ -3830,6 +3831,7 @@
     html.sidebar-pinned #socialView,
     html.sidebar-pinned #researchView,
     html.sidebar-pinned #sectionLandingView,
+    html.sidebar-pinned #scribeView, /* v29.0 */
     html.sidebar-pinned #sidebarNavCustom {
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
@@ -3860,6 +3862,7 @@
     html.sidebar-hover-expanded #socialView,
     html.sidebar-hover-expanded #researchView,
     html.sidebar-hover-expanded #sectionLandingView,
+    html.sidebar-hover-expanded #scribeView, /* v29.0 */
     html.sidebar-hover-expanded #sidebarNavCustom {
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
@@ -25360,33 +25363,34 @@
        v28.8: Unified Pulse Tabs
        ============================================ */
 
-    /* --- Tab Bar --- */
+    /* --- Tab Bar — pill/squircle style --- */
     .pulse-tab-bar {
       display: flex;
-      gap: 4px;
-      padding: 12px 16px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      gap: 6px;
+      padding: 12px 16px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
     .pulse-tab {
-      padding: 8px 16px;
+      padding: 8px 18px;
       font-size: 13px;
       font-weight: 500;
-      background: none;
-      border: none;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
       color: rgba(255,255,255,0.5);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
+      border-radius: 10px;
       transition: all 0.2s;
       white-space: nowrap;
     }
     .pulse-tab.active {
-      color: var(--brand-accent, #a89878);
-      border-bottom-color: var(--brand-accent, #a89878);
+      color: #fff;
+      background: var(--brand-accent, #a89878);
+      border-color: var(--brand-accent, #a89878);
     }
-    .pulse-tab:hover {
+    .pulse-tab:hover:not(.active) {
       color: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.1);
     }
     .pulse-tab-content {
       display: none;
@@ -25546,7 +25550,14 @@
     }
     .pulse-cal-day.is-today {
       font-weight: 700;
-      color: var(--brand-accent, #a89878);
+      color: #fff;
+      background: var(--brand-accent, #a89878);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      padding: 0;
+      margin: 0 auto;
     }
     .pulse-cal-day.is-selected {
       background: var(--brand-accent, #a89878);
@@ -25665,12 +25676,17 @@
     /* --- Pulse Tabs: Light Mode --- */
     html.light-mode .pulse-tab {
       color: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.08);
     }
     html.light-mode .pulse-tab.active {
-      color: var(--brand-accent, #a89878);
+      color: #fff;
+      background: var(--brand-accent, #a89878);
+      border-color: var(--brand-accent, #a89878);
     }
-    html.light-mode .pulse-tab-bar {
-      border-bottom-color: rgba(0,0,0,0.08);
+    html.light-mode .pulse-tab:hover:not(.active) {
+      color: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.08);
     }
     html.light-mode .pulse-notes-textarea {
       background: rgba(0,0,0,0.02);
@@ -25692,8 +25708,16 @@
       background: rgba(0,0,0,0.03);
     }
 
-    /* --- Pulse Tabs: Mobile --- */
+    /* --- Pulse + Studio: Mobile --- */
     @media (max-width: 768px) {
+      /* Pulse overview — 2 col on tablet, 1 col on phone */
+      .pulse-3-overview {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      /* Pulse checklists — single column */
+      .pulse-3-checklists {
+        grid-template-columns: 1fr !important;
+      }
       .pulse-tab-bar {
         padding: 8px 12px 0;
       }
@@ -25717,9 +25741,36 @@
         padding: 6px 2px;
         font-size: 12px;
       }
+      .pulse-cal-day.is-today {
+        width: 26px;
+        height: 26px;
+        line-height: 26px;
+      }
       .pulse-streak-cell {
         width: 16px;
         height: 16px;
+      }
+      /* Studio action bar */
+      .studio-action-bar {
+        gap: 6px !important;
+      }
+      .studio-action-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+    }
+    @media (max-width: 480px) {
+      .pulse-3-overview {
+        grid-template-columns: 1fr !important;
+      }
+      .pulse-cal-day {
+        padding: 4px 1px;
+        font-size: 10px;
+      }
+      .pulse-cal-day.is-today {
+        width: 22px;
+        height: 22px;
+        line-height: 22px;
       }
     }
 
@@ -45633,15 +45684,20 @@
     }
 
     /* v21.15: Video Lab */
+    /* v28.9: Video Lab sub-tabs — pill style matching Image Lab */
     .videolab-subtabs {
-      display: flex; gap: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border-color);
+      display: flex; gap: 8px; margin-bottom: 20px;
     }
     .videolab-subtabs button {
-      flex: 1; padding: 10px 16px; background: none; border: none; border-bottom: 2px solid transparent;
-      color: var(--text-secondary); cursor: pointer; font-size: var(--text-sm); font-weight: 500; transition: all 0.2s;
+      padding: 8px 20px; background: transparent; border: 1px solid var(--border-color);
+      border-radius: 20px; color: var(--text-secondary); cursor: pointer; font-size: var(--text-sm);
+      font-weight: 500; transition: all 0.2s; font-family: inherit;
+    }
+    .videolab-subtabs button:hover {
+      border-color: var(--accent); color: var(--text-primary);
     }
     .videolab-subtabs button.active {
-      color: var(--accent); border-bottom-color: var(--accent);
+      background: var(--bg-tertiary); border-color: var(--accent); color: var(--text-primary);
     }
     .videolab-chat-container {
       display: flex; flex-direction: column; height: calc(100vh - 280px); min-height: 400px;

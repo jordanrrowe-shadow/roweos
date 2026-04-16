@@ -1033,7 +1033,12 @@ function renderPillNav(containerId, items, activeId, onSelect, options) {
       inlineStyle = ' style="background:' + bgColor + ';color:' + textColor + ';"';
     }
 
-    html += '<button class="' + cls + '" role="tab" aria-selected="' + isActive + '" tabindex="' + (isActive ? '0' : '-1') + '" data-pill-id="' + escapeHtml(item.id) + '" onclick="handlePillNavClick(this, \'' + escapeHtml(containerId) + '\')"' + inlineStyle + '>' + escapeHtml(item.label) + '</button>';
+    // v28.9: Divider support for visual separation
+    if (item.id === '_divider') {
+      html += '<span class="pill-nav-divider" style="display:inline-flex;align-self:center;width:1px;height:20px;background:var(--border-color,rgba(255,255,255,0.15));margin:0 6px;flex-shrink:0;"></span>';
+    } else {
+      html += '<button class="' + cls + '" role="tab" aria-selected="' + isActive + '" tabindex="' + (isActive ? '0' : '-1') + '" data-pill-id="' + escapeHtml(item.id) + '" onclick="handlePillNavClick(this, \'' + escapeHtml(containerId) + '\')"' + inlineStyle + '>' + escapeHtml(item.label) + '</button>';
+    }
   }
   html += '</div>';
   container.innerHTML = html;
@@ -2124,22 +2129,18 @@ function navigateToSubSection(groupName, viewId) {
 
 // v26.0: Per-page landing configurations (for pages with sub-tabs)
 var _pageLandingConfigs = {
-  'social': {
-    label: 'MEDIA LAB',
-    tagline: 'Your Social Command Center',
-    description: 'Create, publish, and engage across all your platforms from one place.',
+  // v28.9: Media Lab merged into Studio — landing config removed
+  // v29.0: Scribe - Knowledge Workspace
+  'scribe': {
+    label: 'SCRIBE',
+    tagline: 'Your Knowledge Workspace',
+    description: 'Create notebooks, synthesize knowledge, and connect ideas across your brands and life.',
     features: [
-      { id: 'engage', label: 'Engage', desc: 'Find and reply to relevant posts in your niche' },
-      { id: 'post', label: 'Post', desc: 'Compose, publish, and draft content with AI' },
-      { id: 'analytics', label: 'Analytics', desc: 'Track post performance and audience insights' }
+      { id: 'notebooks', label: 'Notebooks', desc: 'Create and organize your thoughts' },
+      { id: 'knowledge', label: 'Knowledge', desc: 'AI-powered synthesis from your sources' }
     ],
-    secondary: [
-      { id: 'blog', label: 'Blog' },
-      { id: 'activity', label: 'Activity' },
-      { id: 'media', label: 'Media' },
-      { id: 'settings', label: 'Settings' }
-    ],
-    tabHandler: 'showSocialTab'
+    secondary: [],
+    tabHandler: 'showScribeSection'
   },
   'automations': {
     label: 'AUTOMATIONS',
@@ -2641,7 +2642,7 @@ function showView(view) {
   }
 
   // Hide all views
-  var allViews = ['agent', 'studio', 'identity', 'signal', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'clients', 'commerce', 'journal', 'sync', 'automations', 'admin', 'bloom', 'mail', 'folio', 'research', 'social', 'sectionLanding']; // v26.0: Added sectionLanding
+  var allViews = ['agent', 'studio', 'identity', 'signal', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'clients', 'commerce', 'journal', 'sync', 'automations', 'admin', 'bloom', 'mail', 'folio', 'research', 'social', 'sectionLanding', 'scribe']; // v29.0: Added scribe
   allViews.forEach(function(v) {
     var el = document.getElementById(v + 'View');
     if (el) el.classList.add('hidden');
@@ -2785,13 +2786,17 @@ function showView(view) {
       { id: 'marketing', label: 'Marketing' },
       { id: 'operations', label: 'Operations' },
       { id: 'documents', label: 'Documents' },
-      { id: 'intelligence', label: 'Intelligence', secondary: true },
-      { id: 'research', label: 'Research', secondary: true },
-      { id: 'social', label: 'Social', secondary: true },
+      { id: 'intelligence', label: 'Intelligence' },
+      { id: 'research', label: 'Research' },
+      { id: 'guided', label: 'Guided' },
+      { id: '_divider', label: '|' },
       { id: 'image', label: 'Image', secondary: true },
+      { id: 'imagechat', label: 'Image Chat', secondary: true },
       { id: 'infographic', label: 'Infographic', secondary: true },
       { id: 'video', label: 'Video', secondary: true },
-      { id: 'guided', label: 'Guided', secondary: true }
+      { id: 'videochat', label: 'Video Chat', secondary: true },
+      { id: 'social', label: 'Social', secondary: true },
+      { id: 'blog', label: 'Blog', secondary: true }
     ];
     renderPillNav('studioPillNav', studioAgents, currentAgent || 'all', function(id) {
       selectAgent(id);
@@ -2834,6 +2839,8 @@ function showView(view) {
   }
   // v28.8: Signal/Focus retired — redirect to Pulse
   if (view === 'signal') { view = 'pulse'; }
+  // v28.9: Media Lab merged into Studio — redirect
+  if (view === 'social') { view = 'studio'; }
   if (view === 'signal') {
     renderSignalView();
     if (typeof initFocus2 === 'function') initFocus2(); // v10.5.25: Init Focus 2.0
@@ -2938,7 +2945,8 @@ function showView(view) {
     ], _guardrailsActiveTab || 'agents', function(tabId) { showGuardrailsTab(tabId); }, { viewId: 'guardrails' });
   }
   if (view === 'pulse') {
-    if (typeof initPulse2 === 'function') initPulse2(); // v10.5.25: Init Pulse 2.0
+    // v28.8: Init Pulse 3.0 (goals, overview, calendar, checklists)
+    if (typeof initPulse3 === 'function') initPulse3();
   }
   if (view === 'analytics') {
     updateAnalyticsDashboard();
@@ -2997,6 +3005,11 @@ function showView(view) {
   // v22.11: Bloom - AI Brand Feed
   if (view === 'bloom') {
     if (typeof renderBloom === 'function') renderBloom();
+  }
+
+  // v29.0: Scribe - Knowledge Workspace
+  if (view === 'scribe') {
+    if (typeof initScribe === 'function') initScribe();
   }
 
   // v28.8: Focus mobile layout block removed — signal retired

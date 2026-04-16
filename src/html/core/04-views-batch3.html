@@ -62,7 +62,9 @@
           <span class="sidebar-tooltip">Create</span>
           <div class="nav-subitems" style="display:none;">
             <div class="nav-subitem" data-view="studio" onclick="event.stopPropagation(); navigateToSubSection('Create','studio')">Studio</div>
-            <div class="nav-subitem" data-view="social" onclick="event.stopPropagation(); navigateToSubSection('Create','social')">Media Lab</div>
+            <!-- v29.0: Scribe knowledge workspace -->
+            <div class="nav-subitem" data-view="scribe" onclick="event.stopPropagation(); navigateToSubSection('Create','scribe')">Scribe</div>
+            <!-- v28.9: Media Lab merged into Studio -->
             <div class="nav-subitem" data-view="automations" onclick="event.stopPropagation(); navigateToSubSection('Create','automations')">Automations</div>
             <div class="nav-subitem" data-view="bloom" onclick="event.stopPropagation(); showPageLanding('bloom')">Bloom</div>
           </div>
@@ -166,11 +168,13 @@
           <span class="nav-item-label">Studio</span>
           <span class="sidebar-tooltip">Studio</span>
         </div>
-        <div class="nav-item" onclick="showPageLanding('social')" data-view="social">
-          <span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
-          <span class="nav-item-label">Media Lab</span>
-          <span class="sidebar-tooltip">Media Lab</span>
+        <!-- v29.0: Scribe knowledge workspace -->
+        <div class="nav-item" onclick="showPageLanding('scribe')" data-view="scribe">
+          <span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></span>
+          <span class="nav-item-label">Scribe</span>
+          <span class="sidebar-tooltip">Scribe</span>
         </div>
+        <!-- v28.9: Media Lab merged into Studio -->
         <div class="nav-item" onclick="showPageLanding('automations')" data-view="automations" style="position:relative;">
           <span class="nav-item-icon svg-icon-wrapper">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="svg-icon" style="width: 16px; height: 16px;">
@@ -380,7 +384,7 @@
             </button>
           </div>
           <!-- v11.5.4: Pin button removed - use Settings > Sidebar Behavior instead -->
-          <span class="sidebar-version" id="sidebarVersionDisplay">v28.7</span>
+          <span class="sidebar-version" id="sidebarVersionDisplay">v28.9</span>
         </div>
       </div>
     </div>
@@ -496,7 +500,7 @@
       <button class="welcome-btn-primary" onclick="showLaunchScreen()">Get Started</button>
       
       <div class="welcome-footer">
-        <p>RoweOS v28.7 -- Built for the future</p>
+        <p>RoweOS v28.9 -- Built for the future</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
