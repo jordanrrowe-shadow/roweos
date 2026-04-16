@@ -985,6 +985,235 @@ var templates = [];
   });
 })();
 
+// ─── ANIMATED HOOKS (5 hooks, dark only) ───
+
+(function() {
+  var ahId = 710;
+
+  // Helper: wrap each word/phrase in a span with staggered fade-in
+  function animWords(words, baseDelay, stepMs, fontSize, color, fontFamily) {
+    var html = '';
+    for (var i = 0; i < words.length; i++) {
+      var delay = (baseDelay + (i * stepMs)) / 1000;
+      var isGoogle = words[i] === '{{GOOGLE}}';
+      var content = isGoogle ? googleText(fontSize) : '<span style="color:' + color + ';">' + words[i] + '</span>';
+      html += '<span style="display:inline;opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:' + delay + 's;font-family:' + fontFamily + ';font-size:' + fontSize + 'px;font-weight:300;">' + content + '</span> ';
+    }
+    return html;
+  }
+
+  // Hook 1: "Operating intelligence, backed by Google."
+  templates.push({
+    id: ahId++, category: 'animated', mode: 'dark',
+    label: 'Animated Hook - Operating Intelligence',
+    render: function() {
+      var line1 = animWords(['Operating', 'intelligence,'], 500, 300, 72, '#ece4d8', "'Cormorant Garamond',serif");
+      var line2 = animWords(['backed', 'by', '{{GOOGLE}}.'], 1400, 300, 72, '#ece4d8', "'Cormorant Garamond',serif");
+      return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;background:#0a0a0a;font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+        + '<div style="text-align:center;line-height:1.15;">'
+        + '<div>' + line1 + '</div>'
+        + '<div>' + line2 + '</div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3s;margin-top:48px;">'
+        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:3.5s;margin-top:32px;display:flex;align-items:center;gap:12px;">'
+        + logoIcon('dark', 40)
+        + '<span style="font-size:20px;color:#655e54;letter-spacing:0.08em;">roweos.com</span>'
+        + '</div>'
+        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.2s;">'
+        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '</div>'
+        + '</div>';
+    }
+  });
+
+  // Hook 2: "Backed by Google. Built for brands."
+  templates.push({
+    id: ahId++, category: 'animated', mode: 'dark',
+    label: 'Animated Hook - Backed by Google',
+    render: function() {
+      var line1 = animWords(['Backed', 'by', '{{GOOGLE}}.'], 500, 300, 72, '#ece4d8', "'Cormorant Garamond',serif");
+      var line2 = animWords(['Built', 'for', 'brands.'], 1800, 300, 72, '#ece4d8', "'Cormorant Garamond',serif");
+      return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;background:#0a0a0a;font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+        + '<div style="text-align:center;line-height:1.15;">'
+        + '<div>' + line1 + '</div>'
+        + '<div>' + line2 + '</div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.2s;margin-top:48px;">'
+        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:3.8s;margin-top:32px;display:flex;align-items:center;gap:12px;">'
+        + logoIcon('dark', 40)
+        + '<span style="font-size:20px;color:#655e54;letter-spacing:0.08em;">roweos.com</span>'
+        + '</div>'
+        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.5s;">'
+        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '</div>'
+        + '</div>';
+    }
+  });
+
+  // Hook 3: "Your brand deserves its own AI."
+  templates.push({
+    id: ahId++, category: 'animated', mode: 'dark',
+    label: 'Animated Hook - Your Brand Deserves',
+    render: function() {
+      var line1 = animWords(['Your', 'brand', 'deserves'], 500, 350, 72, '#ece4d8', "'Cormorant Garamond',serif");
+      var line2 = animWords(['its', 'own', 'AI.'], 1700, 350, 72, '#ece4d8', "'Cormorant Garamond',serif");
+      return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;background:#0a0a0a;font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+        + '<div style="text-align:center;line-height:1.15;">'
+        + '<div>' + line1 + '</div>'
+        + '<div>' + line2 + '</div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.2s;margin-top:48px;">'
+        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:3.8s;margin-top:32px;">'
+        + backedBadge('dark')
+        + '</div>'
+        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.5s;">'
+        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '</div>'
+        + '</div>';
+    }
+  });
+
+  // Hook 4: "We didn't raise funding. Google chose us."
+  templates.push({
+    id: ahId++, category: 'animated', mode: 'dark',
+    label: 'Animated Hook - Google Chose Us',
+    render: function() {
+      var line1 = animWords(['We', 'didn\'t', 'raise', 'funding.'], 500, 280, 68, '#ece4d8', "'Cormorant Garamond',serif");
+      var line2 = animWords(['{{GOOGLE}}', 'chose', 'us.'], 1800, 400, 68, '#ece4d8', "'Cormorant Garamond',serif");
+      return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;background:#0a0a0a;font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+        + '<div style="text-align:center;line-height:1.15;">'
+        + '<div>' + line1 + '</div>'
+        + '<div>' + line2 + '</div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.5s;margin-top:48px;">'
+        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:4s;margin-top:32px;display:flex;align-items:center;gap:12px;">'
+        + logoIcon('dark', 40)
+        + '<span style="font-size:20px;color:#655e54;letter-spacing:0.08em;">roweos.com</span>'
+        + '</div>'
+        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.8s;">'
+        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '</div>'
+        + '</div>';
+    }
+  });
+
+  // Hook 5: "The AI platform Google believes in."
+  templates.push({
+    id: ahId++, category: 'animated', mode: 'dark',
+    label: 'Animated Hook - Google Believes In',
+    render: function() {
+      var line1 = animWords(['The', 'AI', 'platform'], 500, 350, 72, '#ece4d8', "'Cormorant Garamond',serif");
+      var line2 = animWords(['{{GOOGLE}}', 'believes', 'in.'], 1700, 400, 72, '#ece4d8', "'Cormorant Garamond',serif");
+      return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;background:#0a0a0a;font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 100px;">'
+        + '<div style="text-align:center;line-height:1.15;">'
+        + '<div>' + line1 + '</div>'
+        + '<div>' + line2 + '</div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.5s;margin-top:48px;">'
+        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:4s;margin-top:32px;">'
+        + backedBadge('dark')
+        + '</div>'
+        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.8s;">'
+        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '</div>'
+        + '</div>';
+    }
+  });
+
+  // Animated 3: Agent Showcase (staggered agent reveals)
+  templates.push({
+    id: ahId++, category: 'animated', mode: 'dark',
+    label: 'Animated - Agent Showcase',
+    render: function() {
+      var agents = [
+        { name: 'Strategy', color: '#a78bfa', desc: 'Positioning & competitive intel' },
+        { name: 'Marketing', color: '#f472b6', desc: 'Content & campaigns' },
+        { name: 'Operations', color: '#4ade80', desc: 'Workflows & efficiency' },
+        { name: 'Documents', color: '#fbbf24', desc: 'Business writing' },
+        { name: 'Intelligence', color: '#22d3ee', desc: 'Web search & research' }
+      ];
+      var agentHtml = '';
+      for (var i = 0; i < agents.length; i++) {
+        var a = agents[i];
+        var delay = 2.5 + (i * 0.6);
+        agentHtml += '<div style="display:flex;align-items:center;gap:16px;opacity:0;animation:fadeInUp 0.6s ease forwards;animation-delay:' + delay + 's;">'
+          + '<div style="width:10px;height:10px;border-radius:50%;background:' + a.color + ';flex-shrink:0;"></div>'
+          + '<div>'
+          + '<div style="font-size:24px;color:#ece4d8;font-weight:400;">' + a.name + '</div>'
+          + '<div style="font-size:14px;color:#655e54;">' + a.desc + '</div>'
+          + '</div>'
+          + '</div>';
+      }
+      return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;background:#0a0a0a;font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:0.3s;">'
+        + '<div style="font-size:16px;color:#655e54;letter-spacing:0.2em;text-transform:uppercase;text-align:center;">Meet your team</div>'
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeInUp 1s ease forwards;animation-delay:0.8s;margin-top:16px;margin-bottom:48px;">'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;color:#ece4d8;text-align:center;">5 AI agents.<br>One platform.</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:24px;width:500px;">'
+        + agentHtml
+        + '</div>'
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:6s;margin-top:48px;">'
+        + backedBadge('dark')
+        + '</div>'
+        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:6.8s;">'
+        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '</div>'
+        + '</div>';
+    }
+  });
+
+  // Animated 4: Logo Pulse (logo grows/breathes with tagline)
+  templates.push({
+    id: ahId++, category: 'animated', mode: 'dark',
+    label: 'Animated - Logo Reveal',
+    render: function() {
+      return '<div style="width:' + CARD_W + 'px;height:' + CARD_H + 'px;background:#0a0a0a;font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;">'
+        // Subtle radial glow
+        + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:600px;height:600px;background:radial-gradient(circle,rgba(178,153,123,0.04) 0%,transparent 60%);opacity:0;animation:fadeIn 3s ease forwards;animation-delay:0.5s;pointer-events:none;"></div>'
+        // Logo fades in and scales up
+        + '<div style="opacity:0;animation:fadeIn 2s ease forwards;animation-delay:0.5s;">'
+        + logoIcon('dark', 140)
+        + '</div>'
+        + '<div style="height:32px;"></div>'
+        // Wordmark fades up
+        + '<div style="opacity:0;animation:fadeInUp 1.5s ease forwards;animation-delay:2s;">'
+        + logoMark('dark', 36)
+        + '</div>'
+        + '<div style="height:24px;"></div>'
+        // Divider
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.5s;">'
+        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
+        + '</div>'
+        + '<div style="height:20px;"></div>'
+        // Tagline
+        + '<div style="opacity:0;animation:fadeInUp 1s ease forwards;animation-delay:4s;">'
+        + '<div style="font-size:18px;color:#9e9487;letter-spacing:0.08em;text-align:center;">Operating intelligence, built for brands.</div>'
+        + '</div>'
+        + '<div style="height:40px;"></div>'
+        // Google badge
+        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:5s;">'
+        + backedBadge('dark')
+        + '</div>'
+        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:5.8s;">'
+        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '</div>'
+        + '</div>';
+    }
+  });
+})();
+
 // ─── RENDERING ENGINE ───
 
 function getVisibleTemplates() {
