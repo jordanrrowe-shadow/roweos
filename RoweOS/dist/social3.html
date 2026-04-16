@@ -1002,6 +1002,20 @@ var templates = [];
     return html;
   }
 
+  // Shared animated hook bottom section: divider + logo + RoweOS wordmark
+  function animHookBottom(dividerDelay, logoDelay, wmDelay) {
+    return '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:' + dividerDelay + 's;margin-top:48px;">'
+      + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
+      + '</div>'
+      + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:' + logoDelay + 's;margin-top:28px;display:flex;flex-direction:column;align-items:center;gap:16px;">'
+      + logoIcon('dark', 48)
+      + logoMark('dark', 28)
+      + '</div>'
+      + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:' + wmDelay + 's;">'
+      + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+      + '</div>';
+  }
+
   // Hook 1: "Operating intelligence, backed by Google."
   templates.push({
     id: ahId++, category: 'animated', mode: 'dark',
@@ -1014,16 +1028,7 @@ var templates = [];
         + '<div>' + line1 + '</div>'
         + '<div>' + line2 + '</div>'
         + '</div>'
-        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3s;margin-top:48px;">'
-        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
-        + '</div>'
-        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:3.5s;margin-top:32px;display:flex;align-items:center;gap:12px;">'
-        + logoIcon('dark', 40)
-        + '<span style="font-size:20px;color:#655e54;letter-spacing:0.08em;">roweos.com</span>'
-        + '</div>'
-        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.2s;">'
-        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
-        + '</div>'
+        + animHookBottom(3, 3.5, 4.5)
         + '</div>';
     }
   });
@@ -1040,16 +1045,7 @@ var templates = [];
         + '<div>' + line1 + '</div>'
         + '<div>' + line2 + '</div>'
         + '</div>'
-        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.2s;margin-top:48px;">'
-        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
-        + '</div>'
-        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:3.8s;margin-top:32px;display:flex;align-items:center;gap:12px;">'
-        + logoIcon('dark', 40)
-        + '<span style="font-size:20px;color:#655e54;letter-spacing:0.08em;">roweos.com</span>'
-        + '</div>'
-        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.5s;">'
-        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
-        + '</div>'
+        + animHookBottom(3.2, 3.8, 4.8)
         + '</div>';
     }
   });
@@ -1066,15 +1062,7 @@ var templates = [];
         + '<div>' + line1 + '</div>'
         + '<div>' + line2 + '</div>'
         + '</div>'
-        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.2s;margin-top:48px;">'
-        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
-        + '</div>'
-        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:3.8s;margin-top:32px;">'
-        + backedBadge('dark')
-        + '</div>'
-        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.5s;">'
-        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
-        + '</div>'
+        + animHookBottom(3.2, 3.8, 4.8)
         + '</div>';
     }
   });
@@ -1091,16 +1079,7 @@ var templates = [];
         + '<div>' + line1 + '</div>'
         + '<div>' + line2 + '</div>'
         + '</div>'
-        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.5s;margin-top:48px;">'
-        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
-        + '</div>'
-        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:4s;margin-top:32px;display:flex;align-items:center;gap:12px;">'
-        + logoIcon('dark', 40)
-        + '<span style="font-size:20px;color:#655e54;letter-spacing:0.08em;">roweos.com</span>'
-        + '</div>'
-        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.8s;">'
-        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
-        + '</div>'
+        + animHookBottom(3.5, 4, 5)
         + '</div>';
     }
   });
@@ -1117,15 +1096,7 @@ var templates = [];
         + '<div>' + line1 + '</div>'
         + '<div>' + line2 + '</div>'
         + '</div>'
-        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:3.5s;margin-top:48px;">'
-        + '<div style="width:60px;height:1px;background:rgba(178,153,123,0.3);margin:0 auto;"></div>'
-        + '</div>'
-        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:4s;margin-top:32px;">'
-        + backedBadge('dark')
-        + '</div>'
-        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:4.8s;">'
-        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
-        + '</div>'
+        + animHookBottom(3.5, 4, 5)
         + '</div>';
     }
   });
