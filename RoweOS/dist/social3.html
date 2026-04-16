@@ -995,8 +995,8 @@ var templates = [];
     var html = '';
     for (var i = 0; i < words.length; i++) {
       var delay = (baseDelay + (i * stepMs)) / 1000;
-      var isGoogle = words[i] === '{{GOOGLE}}';
-      var content = isGoogle ? googleText(fontSize) : '<span style="color:' + color + ';">' + words[i] + '</span>';
+      var isGoogle = words[i].indexOf('{{GOOGLE}}') !== -1;
+      var content = isGoogle ? (googleText(fontSize) + words[i].replace('{{GOOGLE}}', '')) : '<span style="color:' + color + ';">' + words[i] + '</span>';
       html += '<span style="display:inline;opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:' + delay + 's;font-family:' + fontFamily + ';font-size:' + fontSize + 'px;font-weight:300;">' + content + '</span> ';
     }
     return html;
