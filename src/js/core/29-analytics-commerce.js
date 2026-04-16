@@ -498,9 +498,12 @@ function trackAPIUsage(provider, model, inputTokens, outputTokens, cached, webSe
 
 // v15.4: Updated pricing per MTok (Feb 2026)
 function calculateCost(provider, model, inputTokens, outputTokens, webSearchEnabled) {
+  // Normalize provider names to pricing keys
+  if (provider === 'anthropic') provider = 'claude';
+  if (provider === 'google') provider = 'gemini';
   var pricing = {
     'claude': {
-      'claude-opus-4-6': { input: 5.00, output: 25.00 },
+      'claude-opus-4-7': { input: 5.00, output: 25.00 },
       'claude-sonnet-4-6': { input: 3.00, output: 15.00 },
       'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00 },
       'claude-haiku-4-5-20251001': { input: 1.00, output: 5.00 }
@@ -572,8 +575,12 @@ function calculatePeriodStats(analytics, startTime, endTime) {
   entries.forEach(function(e) {
     stats.totalCost += e.cost || 0;
     if (e.cached) stats.cacheHits++;
-    stats.providerCosts[e.provider] = (stats.providerCosts[e.provider] || 0) + (e.cost || 0);
-    stats.providerRequests[e.provider] = (stats.providerRequests[e.provider] || 0) + 1;
+    // Normalize provider names for aggregation
+    var prov = e.provider;
+    if (prov === 'anthropic') prov = 'claude';
+    if (prov === 'google') prov = 'gemini';
+    stats.providerCosts[prov] = (stats.providerCosts[prov] || 0) + (e.cost || 0);
+    stats.providerRequests[prov] = (stats.providerRequests[prov] || 0) + 1;
     stats.totalInputTokens += e.inputTokens || 0;
     stats.totalOutputTokens += e.outputTokens || 0;
     // v24.18: Context/feature breakdown
@@ -810,10 +817,11 @@ function saveInventoryData() {
   localStorage.setItem(key, JSON.stringify(inventory));
   console.log('[Inventory] Saved to localStorage:', inventory.items.length, 'items');
 
-  // v25.3: Write-through to dedicated Firestore doc (replaces old shared profile/main path)
-  writeDB('profile/inventory', { data: inventory });
-  // Also sync to legacy path for backward compat
-  syncInventoryToFirebase();
+  // v25.3: Write-through to dedicated Firestore doc - mode-aware path
+  var isLifeInventory = key === 'roweos_life_inventory';
+  writeDB(isLifeInventory ? 'lifeAI/possessions' : 'profile/inventory', { data: inventory });
+  // Also sync to legacy path for backward compat (brand mode only)
+  if (!isLifeInventory) syncInventoryToFirebase();
 }
 
 // v11.0.5: Sync inventory to Firebase (uses firebaseUser.uid with roweos_users collection)
@@ -1077,10 +1085,15 @@ async function renderSyncInventory() {
         cloudCounts['Library Files'] = libCount;
         // Root doc for legacy data
         var rootData = results[11].exists ? results[11].data() : {};
-        // v28.3: Automations stored in subcollection, not root doc array
+        // v28.7: Automations stored in subcollection — filter out deleted tombstones
         try {
           var _autoSnap = await db.collection(basePath + '/automations').get();
-          cloudCounts['Automations'] = _autoSnap.size;
+          var _autoCount = 0;
+          _autoSnap.forEach(function(doc) {
+            if (typeof _deletedAutomationIds !== 'undefined' && _deletedAutomationIds[doc.id]) return;
+            _autoCount++;
+          });
+          cloudCounts['Automations'] = _autoCount;
         } catch(ae) { cloudCounts['Automations'] = (rootData.automations || []).length; }
         cloudCounts['Custom Ops'] = (rootData.customOps || []).length;
         // v28.3: Clients stored at profile/clients, fallback to root doc
@@ -2307,15 +2320,75 @@ function manualSyncNow() {
     showToast('Firebase not connected', 'error');
     return;
   }
-  showToast('Syncing...', 'info');
-  // v28.3: Push brands FIRST (ensures deletes propagate), then pull everything.
-  // Brands are the only category where local deletes must push to cloud before pulling.
-  var _pushFirst = Promise.resolve();
-  if (typeof saveBrands === 'function') {
-    saveBrands();
-    _pushFirst = new Promise(function(resolve) { setTimeout(resolve, 3000); }); // Wait for batch + ghost cleanup
-  }
-  _pushFirst.then(function() {
+  showToast('Syncing all data to cloud...', 'info');
+  // v28.7: Full bidirectional sync — push ALL categories first, then pull everything.
+  // Previously only pushed brands, leaving logos/folio/inventory/chats out of sync.
+  try {
+    if (typeof saveBrands === 'function') saveBrands();
+    if (typeof writeDBConversations === 'function') writeDBConversations();
+    if (typeof writeDBTodos === 'function') writeDBTodos();
+    if (typeof writeDBCalendar === 'function') writeDBCalendar();
+    if (typeof pulseGoals !== 'undefined' && typeof writeDB === 'function') {
+      writeDB('pulse/main', { goals: pulseGoals }, { category: 'goals' });
+    }
+    // Automations
+    var _syncAutos = [];
+    try { _syncAutos = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(ae) {}
+    _syncAutos.forEach(function(a) { if (a && a.id && typeof writeDBAutomation === 'function') writeDBAutomation(a); });
+    // Clients
+    var _syncClients = [];
+    try { _syncClients = JSON.parse(localStorage.getItem('roweos_clients') || '[]'); } catch(ce) {}
+    if (_syncClients.length > 0 && typeof writeDB === 'function') {
+      var _cd = JSON.parse(JSON.stringify(_syncClients));
+      _cd.forEach(function(c) { if (c.logo && c.logo.length > 50000) c.logo = ''; });
+      writeDB('profile/clients', { data: _cd });
+    }
+    // Inventory
+    try {
+      var _syncInv = JSON.parse(localStorage.getItem('roweos_inventory') || '{}');
+      if (_syncInv && (_syncInv.items || []).length > 0) writeDB('profile/inventory', { data: _syncInv });
+    } catch(ie) {}
+    // Folio
+    var _syncFolio = [];
+    try { _syncFolio = JSON.parse(localStorage.getItem('roweos_folio_items') || '[]'); } catch(fe) {}
+    if (Array.isArray(_syncFolio) && _syncFolio.length > 0) writeDB('folio/main', { data: _syncFolio });
+    // Library
+    try {
+      var _syncLib = localStorage.getItem('roweosLibrary');
+      if (_syncLib) writeDB('library/brand', { data: _syncLib });
+    } catch(le) {}
+    try {
+      var _syncLifeLib = localStorage.getItem('roweos_life_library');
+      if (_syncLifeLib) writeDB('library/life', { data: _syncLifeLib });
+    } catch(lle) {}
+    // Journal
+    try {
+      var _syncJournal = JSON.parse(localStorage.getItem('roweos_journal') || '[]');
+      if (Array.isArray(_syncJournal) && _syncJournal.length > 0) writeDB('profile/main', { journal: _syncJournal });
+    } catch(je) {}
+    // Life profiles
+    try {
+      var _syncLifeProfiles = JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]');
+      if (Array.isArray(_syncLifeProfiles) && _syncLifeProfiles.length > 0) writeDB('lifeAI/main', { profiles: _syncLifeProfiles });
+    } catch(lpe) {}
+    // Brand logos — push to logos/ subcollection (too large for brand docs)
+    if (typeof pushBrandLogos === 'function') pushBrandLogos();
+    // Studio runs
+    try {
+      var _syncRuns = JSON.parse(localStorage.getItem('roweos_runs') || '{}');
+      var _syncRunsArr = _syncRuns.runs || [];
+      if (_syncRunsArr.length > 0) {
+        for (var _ri = 0; _ri < _syncRunsArr.length; _ri++) {
+          var _run = _syncRunsArr[_ri];
+          if (_run && _run.id) writeDBDoc('runs', String(_run.id), _run);
+        }
+      }
+    } catch(re) {}
+  } catch(pushErr) { console.warn('[manualSyncNow] Push phase error:', pushErr); }
+
+  // Wait for async writes to propagate, then pull everything from cloud
+  var _pushWait = new Promise(function(resolve) { setTimeout(resolve, 4000); });
+  _pushWait.then(function() {
     return loadFromFirebaseV2(true);
   }).then(function() {
     var syncTime = String(Date.now());
@@ -4045,6 +4118,7 @@ function showCommerceTab(tab) {
   // Show selected tab
   var tabMap = {
     'overview': 'commerceTabOverview',
+    'dashboard': 'commerceTabDashboard',
     'api': 'commerceTabApi',
     'invoices': 'commerceTabInvoices',
     'budget': 'commerceTabBudget',
@@ -4065,6 +4139,11 @@ function showCommerceTab(tab) {
   // v15.7: Render overview analytics when overview tab is selected
   if (tab === 'overview') {
     renderCommerceOverview();
+  }
+
+  // v29.0: Render analytics dashboard (team, KPIs, screenshots)
+  if (tab === 'dashboard') {
+    renderAnalyticsDashboard();
   }
 
   // v15.7: Render AI provider status + settings + API costs when API tab is selected
@@ -4102,7 +4181,7 @@ function renderApiProviderStatus() {
   try { apiKeys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}'); } catch(e) { console.warn('[API] Corrupted API keys data:', e.message); }
 
   var providers = [
-    { key: 'anthropic', name: 'Anthropic', models: 'Claude Opus 4.6, Sonnet 4.6, Haiku 4.5', color: '#d4a574', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>' },
+    { key: 'anthropic', name: 'Anthropic', models: 'Claude Opus 4.7, Sonnet 4.6, Haiku 4.5', color: '#d4a574', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>' },
     { key: 'openai', name: 'OpenAI', models: 'GPT-5.4, GPT-5.4 Pro, Thinking', color: '#10b981', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' },
     { key: 'google', name: 'Google', models: 'Gemini 3.1 Pro, 3 Flash, 2.5 Pro', color: '#3b82f6', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>' },
     { key: 'nanobanana', name: 'Nano Banana', models: 'Image Gen, Deep Research', color: '#f59e0b', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' }
@@ -4477,7 +4556,7 @@ function formatTokenCount(tokens) {
 // v15.4: Friendly model display names
 function getModelDisplayName(modelId) {
   var names = {
-    'claude-opus-4-6': 'Claude Opus 4.6',
+    'claude-opus-4-7': 'Claude Opus 4.7',
     'claude-sonnet-4-6': 'Claude Sonnet 4.6',
     'claude-3-5-sonnet-20241022': 'Claude Sonnet 3.5',
     'claude-haiku-4-5-20251001': 'Claude Haiku 4.5',
@@ -4501,6 +4580,290 @@ function getModelDisplayName(modelId) {
     'auto': 'RoweOS AI'
   };
   return names[modelId] || modelId;
+}
+
+/**
+ * v29.0: Analytics Dashboard — Team/Reports, Custom KPIs, Screenshots
+ */
+
+// --- Data accessors ---
+function getDashboardKPIs() {
+  var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+  try { return JSON.parse(localStorage.getItem('roweos_dashboard_kpis_' + brandIdx) || '[]'); } catch(e) { return []; }
+}
+
+function saveDashboardKPIs(kpis) {
+  var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+  localStorage.setItem('roweos_dashboard_kpis_' + brandIdx, JSON.stringify(kpis));
+  if (typeof scheduleAutoSync === 'function') scheduleAutoSync();
+}
+
+function getDashboardScreenshots() {
+  var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+  try { return JSON.parse(localStorage.getItem('roweos_dashboard_screenshots_' + brandIdx) || '[]'); } catch(e) { return []; }
+}
+
+function saveDashboardScreenshots(shots) {
+  var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+  try {
+    localStorage.setItem('roweos_dashboard_screenshots_' + brandIdx, JSON.stringify(shots));
+  } catch(qe) {
+    if (qe.name === 'QuotaExceededError' || (qe.message && qe.message.indexOf('quota') !== -1)) {
+      if (typeof clearExpendableStorageData === 'function') clearExpendableStorageData();
+      try { localStorage.setItem('roweos_dashboard_screenshots_' + brandIdx, JSON.stringify(shots)); } catch(e2) {
+        showToast('Storage full: remove some screenshots', 'error');
+      }
+    }
+  }
+  if (typeof scheduleAutoSync === 'function') scheduleAutoSync();
+}
+
+// --- Main render ---
+function renderAnalyticsDashboard() {
+  var container = document.getElementById('dashboardContainer');
+  if (!container) return;
+
+  var html = '';
+
+  // --- Team & Direct Reports Section ---
+  var team = typeof getPeople === 'function' ? getPeople('team') : [];
+  var reports = typeof getPeople === 'function' ? getPeople('report') : [];
+  var people = team.concat(reports);
+  // Filter to current brand if not showing all
+  if (!clientsShowAllBrands && typeof selectedBrand !== 'undefined') {
+    var bIdx = selectedBrand;
+    people = people.filter(function(p) { return p.brandIndex == null || String(p.brandIndex) === String(bIdx); });
+  }
+
+  html += '<div style="margin-bottom:32px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+  html += '<h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0;">Team & Direct Reports</h3>';
+  html += '<span style="font-size:12px;color:var(--text-muted);">' + people.length + ' people</span>';
+  html += '</div>';
+
+  if (people.length === 0) {
+    html += '<div style="text-align:center;padding:32px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);color:var(--text-muted);font-size:13px;">';
+    html += 'No team members or direct reports yet. Add them from <a href="#" onclick="showView(\'clients\');return false;" style="color:var(--accent);">People</a>.';
+    html += '</div>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
+    people.forEach(function(p) {
+      var lastCheckIn = '';
+      var checkIns = p.checkIns || [];
+      if (checkIns.length > 0) {
+        var last = checkIns[checkIns.length - 1];
+        lastCheckIn = last.date ? new Date(last.date).toLocaleDateString() : '';
+      }
+      var isReport = p.personType === 'report';
+      var typeLabel = isReport ? 'Direct Report' : 'Team Member';
+      var avatar = p.logo ? '<img src="' + p.logo + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="">' :
+        '<div style="width:36px;height:36px;border-radius:50%;background:var(--brand-accent-10,rgba(168,152,120,0.1));display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent);font-weight:700;font-size:14px;">' + (p.name ? p.name.charAt(0).toUpperCase() : '?') + '</div>';
+
+      html += '<div onclick="' + (isReport ? 'openReportDetail' : 'openTeamDetail') + '(\'' + p.id + '\')" style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border-color)\'">';
+      html += avatar;
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-weight:600;font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(p.name || 'Unnamed') + '</div>';
+      html += '<div style="font-size:11px;color:var(--text-muted);">' + escapeHtml(p.role || typeLabel) + '</div>';
+      html += '</div>';
+      html += '<div style="text-align:right;flex-shrink:0;">';
+      if (lastCheckIn) {
+        html += '<div style="font-size:11px;color:var(--text-muted);">Last check-in</div>';
+        html += '<div style="font-size:12px;color:var(--text-secondary);font-weight:500;">' + lastCheckIn + '</div>';
+      } else if (p.nextCheckIn) {
+        html += '<div style="font-size:11px;color:var(--text-muted);">Next check-in</div>';
+        html += '<div style="font-size:12px;color:var(--accent);">' + new Date(p.nextCheckIn).toLocaleDateString() + '</div>';
+      } else {
+        html += '<div style="font-size:11px;color:var(--text-muted);">No check-ins</div>';
+      }
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // --- Custom KPIs Section ---
+  var kpis = getDashboardKPIs();
+  html += '<div style="margin-bottom:32px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+  html += '<h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0;">Custom KPIs</h3>';
+  html += '<button onclick="addDashboardKPI()" style="padding:6px 14px;border-radius:var(--radius-md);border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">';
+  html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add KPI</button>';
+  html += '</div>';
+
+  if (kpis.length === 0) {
+    html += '<div style="text-align:center;padding:32px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);color:var(--text-muted);font-size:13px;">';
+    html += 'No KPIs defined yet. Add custom metrics to track your key performance indicators.';
+    html += '</div>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
+    kpis.forEach(function(kpi, idx) {
+      var pct = kpi.target > 0 ? Math.min(100, Math.round((kpi.value / kpi.target) * 100)) : 0;
+      var barColor = pct >= 100 ? '#4ade80' : pct >= 60 ? 'var(--accent)' : '#fbbf24';
+      html += '<div style="padding:16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);position:relative;">';
+      // Delete button
+      html += '<button onclick="event.stopPropagation();deleteDashboardKPI(' + idx + ')" style="position:absolute;top:8px;right:8px;border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:2px 4px;" title="Remove">x</button>';
+      html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">' + escapeHtml(kpi.title || 'Untitled') + '</div>';
+      html += '<div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px;">';
+      html += '<span style="font-size:28px;font-weight:700;color:var(--text-primary);">' + escapeHtml(String(kpi.value || 0)) + '</span>';
+      if (kpi.unit) html += '<span style="font-size:13px;color:var(--text-muted);">' + escapeHtml(kpi.unit) + '</span>';
+      if (kpi.target > 0) html += '<span style="font-size:11px;color:var(--text-muted);margin-left:auto;">/ ' + kpi.target + '</span>';
+      html += '</div>';
+      // Progress bar
+      if (kpi.target > 0) {
+        html += '<div style="height:4px;background:var(--bg-primary);border-radius:2px;overflow:hidden;">';
+        html += '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:2px;transition:width 0.3s;"></div>';
+        html += '</div>';
+        html += '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;text-align:right;">' + pct + '%</div>';
+      }
+      // Edit button
+      html += '<button onclick="event.stopPropagation();editDashboardKPI(' + idx + ')" style="margin-top:8px;padding:4px 10px;border-radius:6px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-muted);font-size:11px;cursor:pointer;font-family:inherit;">Edit</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // --- Screenshots Section ---
+  var shots = getDashboardScreenshots();
+  html += '<div style="margin-bottom:32px;">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
+  html += '<h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0;">Screenshots</h3>';
+  html += '<label style="padding:6px 14px;border-radius:var(--radius-md);border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">';
+  html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload';
+  html += '<input type="file" accept="image/*" multiple onchange="handleDashboardScreenshots(this)" style="display:none;">';
+  html += '</label>';
+  html += '</div>';
+
+  if (shots.length === 0) {
+    html += '<div style="text-align:center;padding:32px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);color:var(--text-muted);font-size:13px;">';
+    html += 'No screenshots uploaded. Upload screenshots to track visual progress and share with your team.';
+    html += '</div>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">';
+    shots.forEach(function(s, idx) {
+      html += '<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);overflow:hidden;position:relative;">';
+      html += '<img src="' + s.data + '" style="width:100%;height:140px;object-fit:cover;display:block;cursor:pointer;" onclick="window.open(this.src)">';
+      // Delete
+      html += '<button onclick="event.stopPropagation();deleteDashboardScreenshot(' + idx + ')" style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;border:none;font-size:12px;cursor:pointer;line-height:22px;text-align:center;">x</button>';
+      html += '<div style="padding:8px 10px;">';
+      html += '<div style="font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" contenteditable="true" onblur="updateDashboardScreenshotTitle(' + idx + ',this.textContent)">' + escapeHtml(s.title || 'Screenshot') + '</div>';
+      html += '<div style="font-size:10px;color:var(--text-muted);">' + (s.date ? new Date(s.date).toLocaleDateString() : '') + '</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+// --- KPI CRUD ---
+function addDashboardKPI() {
+  var title = prompt('KPI Title (e.g., Monthly Revenue, Client Satisfaction):');
+  if (!title) return;
+  var value = parseFloat(prompt('Current Value:', '0')) || 0;
+  var target = parseFloat(prompt('Target Value (0 for no target):', '0')) || 0;
+  var unit = prompt('Unit (e.g., $, %, pts, leave blank for none):', '') || '';
+
+  var kpis = getDashboardKPIs();
+  kpis.push({ id: Date.now(), title: title.trim(), value: value, target: target, unit: unit.trim() });
+  saveDashboardKPIs(kpis);
+  renderAnalyticsDashboard();
+  showToast('KPI added', 'success');
+}
+
+function editDashboardKPI(idx) {
+  var kpis = getDashboardKPIs();
+  var kpi = kpis[idx];
+  if (!kpi) return;
+
+  var title = prompt('KPI Title:', kpi.title);
+  if (title === null) return;
+  var value = prompt('Current Value:', String(kpi.value));
+  if (value === null) return;
+  var target = prompt('Target Value:', String(kpi.target));
+  if (target === null) return;
+  var unit = prompt('Unit:', kpi.unit || '');
+  if (unit === null) return;
+
+  kpi.title = title.trim();
+  kpi.value = parseFloat(value) || 0;
+  kpi.target = parseFloat(target) || 0;
+  kpi.unit = unit.trim();
+  kpis[idx] = kpi;
+  saveDashboardKPIs(kpis);
+  renderAnalyticsDashboard();
+  showToast('KPI updated', 'success');
+}
+
+function deleteDashboardKPI(idx) {
+  if (!confirm('Remove this KPI?')) return;
+  var kpis = getDashboardKPIs();
+  kpis.splice(idx, 1);
+  saveDashboardKPIs(kpis);
+  renderAnalyticsDashboard();
+  showToast('KPI removed', 'success');
+}
+
+// --- Screenshot CRUD ---
+function handleDashboardScreenshots(input) {
+  if (!input.files) return;
+  var shots = getDashboardScreenshots();
+  var pending = input.files.length;
+
+  for (var fi = 0; fi < input.files.length; fi++) {
+    var file = input.files[fi];
+    if (file.size > 3 * 1024 * 1024) { showToast('Screenshot too large (max 3MB): ' + file.name, 'warning'); pending--; continue; }
+    (function(f) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          // Resize to max 1200px wide
+          var maxW = 1200, maxH = 900;
+          var w = img.naturalWidth, h = img.naturalHeight;
+          if (w > maxW) { h = Math.round(h * (maxW / w)); w = maxW; }
+          if (h > maxH) { w = Math.round(w * (maxH / h)); h = maxH; }
+          var c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          var resized = c.toDataURL('image/jpeg', 0.75);
+          shots.push({
+            id: Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            title: f.name.replace(/\.[^.]+$/, ''),
+            data: resized,
+            date: new Date().toISOString()
+          });
+          pending--;
+          if (pending <= 0) {
+            saveDashboardScreenshots(shots);
+            renderAnalyticsDashboard();
+            showToast('Screenshot(s) uploaded', 'success');
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(f);
+    })(file);
+  }
+  input.value = '';
+}
+
+function deleteDashboardScreenshot(idx) {
+  if (!confirm('Remove this screenshot?')) return;
+  var shots = getDashboardScreenshots();
+  shots.splice(idx, 1);
+  saveDashboardScreenshots(shots);
+  renderAnalyticsDashboard();
+  showToast('Screenshot removed', 'success');
+}
+
+function updateDashboardScreenshotTitle(idx, newTitle) {
+  var shots = getDashboardScreenshots();
+  if (shots[idx]) {
+    shots[idx].title = (newTitle || '').trim() || 'Screenshot';
+    saveDashboardScreenshots(shots);
+  }
 }
 
 /**
@@ -4612,6 +4975,7 @@ function migratePeopleData() {
     });
     localStorage.setItem('roweos_people', JSON.stringify(oldClients));
     savePeople(oldClients);
+    localStorage.removeItem('roweos_clients');
   }
   localStorage.setItem('roweos_people_migrated_v1', 'true');
 }
@@ -4661,18 +5025,21 @@ function scheduleCheckInReminders() {
 // v25.3: Backward-compatible wrappers for existing client code
 function getClients() {
   var fromPeople = getPeople('client');
-  // v25.3: Fallback to roweos_clients if migration hasn't run or people is empty
-  if (fromPeople.length === 0) {
+  // v25.3: Fallback to roweos_clients if migration hasn't run
+  // v28.7: Only migrate once — flag prevents resurrection when user deletes all clients
+  if (fromPeople.length === 0 && !localStorage.getItem('roweos_clients_migrated')) {
     try {
       var legacy = JSON.parse(localStorage.getItem('roweos_clients') || '[]');
       if (legacy.length > 0) {
-        // Auto-migrate now
         legacy.forEach(function(c) { if (!c.personType) c.personType = 'client'; });
         var all = getPeople();
         savePeople(all.concat(legacy));
+        localStorage.removeItem('roweos_clients');
+        localStorage.setItem('roweos_clients_migrated', '1');
         return legacy;
       }
     } catch(e) {}
+    localStorage.setItem('roweos_clients_migrated', '1');
   }
   return fromPeople;
 }
@@ -5282,7 +5649,7 @@ var TEAM_DEPARTMENTS = [
 ];
 
 // v25.3: Direct report constants
-var REPORT_STATUSES = [
+var DEFAULT_REPORT_STATUSES = [
   { id: 'active', label: 'Active', color: '#4ade80' },
   { id: 'probation', label: 'Probation', color: '#fbbf24' },
   { id: 'pip', label: 'Performance Plan', color: '#ef4444' },
@@ -5290,6 +5657,105 @@ var REPORT_STATUSES = [
   { id: 'offboarding', label: 'Offboarding', color: '#94a3b8' },
   { id: 'inactive', label: 'Inactive', color: '#6b7280' }
 ];
+
+// Custom status colors cycle
+var _CUSTOM_STATUS_COLORS = ['#c084fc', '#fb923c', '#2dd4bf', '#f472b6', '#a3e635', '#38bdf8', '#e879f9'];
+
+// Returns default + custom statuses
+function getReportStatuses() {
+  var custom = [];
+  try { custom = JSON.parse(localStorage.getItem('roweos_report_statuses') || '[]'); } catch(e) {}
+  return DEFAULT_REPORT_STATUSES.concat(custom);
+}
+
+// Add a custom report status
+function addCustomReportStatus(name) {
+  if (!name || !name.trim()) return;
+  name = name.trim();
+  var id = name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  var all = getReportStatuses();
+  // Check for duplicate
+  for (var i = 0; i < all.length; i++) {
+    if (all[i].id === id || all[i].label.toLowerCase() === name.toLowerCase()) return;
+  }
+  var custom = [];
+  try { custom = JSON.parse(localStorage.getItem('roweos_report_statuses') || '[]'); } catch(e) {}
+  var colorIdx = custom.length % _CUSTOM_STATUS_COLORS.length;
+  custom.push({ id: id, label: name, color: _CUSTOM_STATUS_COLORS[colorIdx], custom: true });
+  localStorage.setItem('roweos_report_statuses', JSON.stringify(custom));
+}
+
+// Remove a custom report status (cannot remove default ones)
+function removeCustomReportStatus(name) {
+  var custom = [];
+  try { custom = JSON.parse(localStorage.getItem('roweos_report_statuses') || '[]'); } catch(e) {}
+  custom = custom.filter(function(s) { return s.label !== name && s.id !== name; });
+  localStorage.setItem('roweos_report_statuses', JSON.stringify(custom));
+}
+
+// Prompt user to add a custom report status
+function promptAddReportStatus() {
+  var name = prompt('Enter a new status name:');
+  if (!name || !name.trim()) return;
+  addCustomReportStatus(name);
+  // Refresh the status dropdown in the open modal
+  var sel = document.getElementById('personStatus');
+  if (sel) {
+    var currentVal = sel.value;
+    var statuses = getReportStatuses();
+    var opts = '';
+    for (var i = 0; i < statuses.length; i++) {
+      var isSelected = statuses[i].id === currentVal ? ' selected' : '';
+      opts += '<option value="' + escapeHtml(statuses[i].id) + '"' + isSelected + '>' + escapeHtml(statuses[i].label) + '</option>';
+    }
+    sel.innerHTML = opts;
+    // Select the newly added status
+    var newId = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    sel.value = newId;
+  }
+  if (typeof showToast === 'function') showToast('Status "' + name.trim() + '" added', 'success');
+}
+
+// Show manage dialog for custom statuses
+function openManageReportStatuses() {
+  var custom = [];
+  try { custom = JSON.parse(localStorage.getItem('roweos_report_statuses') || '[]'); } catch(e) {}
+  if (custom.length === 0) {
+    if (typeof showToast === 'function') showToast('No custom statuses to manage', 'info');
+    return;
+  }
+  var names = [];
+  for (var i = 0; i < custom.length; i++) {
+    names.push((i + 1) + '. ' + custom[i].label);
+  }
+  var input = prompt('Custom statuses:\n' + names.join('\n') + '\n\nType the name of a status to remove, or cancel:');
+  if (!input || !input.trim()) return;
+  var before = custom.length;
+  removeCustomReportStatus(input.trim());
+  var after = [];
+  try { after = JSON.parse(localStorage.getItem('roweos_report_statuses') || '[]'); } catch(e) {}
+  if (after.length < before) {
+    if (typeof showToast === 'function') showToast('Status "' + input.trim() + '" removed', 'success');
+    // Refresh dropdown
+    var sel = document.getElementById('personStatus');
+    if (sel) {
+      var currentVal = sel.value;
+      var statuses = getReportStatuses();
+      var opts = '';
+      for (var j = 0; j < statuses.length; j++) {
+        var isSelected = statuses[j].id === currentVal ? ' selected' : '';
+        opts += '<option value="' + escapeHtml(statuses[j].id) + '"' + isSelected + '>' + escapeHtml(statuses[j].label) + '</option>';
+      }
+      sel.innerHTML = opts;
+    }
+    // Refresh view if visible
+    if (typeof renderReportsView === 'function') renderReportsView();
+  } else {
+    if (typeof showToast === 'function') showToast('Status not found', 'error');
+  }
+}
+
+var REPORT_STATUSES = getReportStatuses();
 
 var CHECKIN_TYPES = [
   { id: 'weekly', label: 'Weekly 1:1' },
@@ -5330,13 +5796,16 @@ function openPersonModal(personType, editId) {
     deptOptions += '<option value="' + TEAM_DEPARTMENTS[d].id + '"' + sel + '>' + escapeHtml(TEAM_DEPARTMENTS[d].label) + '</option>';
   }
 
-  // v25.3: Build "Reports To" select from all people
+  // v25.3: Build "Reports To" select from brand-scoped people
   var allPeople = getPeople();
+  var rtBrandIdx = (typeof selectedBrand !== 'undefined') ? selectedBrand : 0;
   var reportsToOptions = '<option value="">None</option>';
   for (var r = 0; r < allPeople.length; r++) {
     if (editPerson && allPeople[r].id === editPerson.id) continue;
+    if (!allPeople[r].name) continue;
+    if (allPeople[r].scope !== 'universal' && allPeople[r].brandIndex !== rtBrandIdx) continue;
     var rSel = editPerson && editPerson.reportsTo === allPeople[r].id ? ' selected' : '';
-    reportsToOptions += '<option value="' + allPeople[r].id + '"' + rSel + '>' + escapeHtml(allPeople[r].name || 'Unnamed') + '</option>';
+    reportsToOptions += '<option value="' + allPeople[r].id + '"' + rSel + '>' + escapeHtml(allPeople[r].name) + '</option>';
   }
 
   var saveAction = editPerson ? 'onclick="saveEditPerson(\'' + editPerson.id + '\')"' : 'onclick="saveNewPerson(\'' + personType + '\')"';
@@ -5426,14 +5895,21 @@ function openPersonModal(personType, editId) {
         '<div><label style="font-size: var(--text-xs); color: var(--text-muted); display: block; margin-bottom: 4px;">Department</label>' +
           '<select id="personDepartment" class="form-control" style="padding: 8px 12px;">' + deptOptions + '</select></div>' +
         '<div><label style="font-size: var(--text-xs); color: var(--text-muted); display: block; margin-bottom: 4px;">Status</label>' +
-          '<select id="personStatus" class="form-control" style="padding: 8px 12px;">' +
-            '<option value="active"' + (editPerson && editPerson.status === 'active' ? ' selected' : (!editPerson ? ' selected' : '')) + '>Active</option>' +
-            '<option value="probation"' + (editPerson && editPerson.status === 'probation' ? ' selected' : '') + '>Probation</option>' +
-            '<option value="pip"' + (editPerson && editPerson.status === 'pip' ? ' selected' : '') + '>PIP</option>' +
-            '<option value="onboarding"' + (editPerson && editPerson.status === 'onboarding' ? ' selected' : '') + '>Onboarding</option>' +
-            '<option value="offboarding"' + (editPerson && editPerson.status === 'offboarding' ? ' selected' : '') + '>Offboarding</option>' +
-            '<option value="inactive"' + (editPerson && editPerson.status === 'inactive' ? ' selected' : '') + '>Inactive</option>' +
-          '</select></div>' +
+          '<div style="display:flex;align-items:center;gap:4px;">' +
+            '<select id="personStatus" class="form-control" style="padding: 8px 12px; flex:1;">' +
+              (function() {
+                var statuses = getReportStatuses();
+                var opts = '';
+                for (var si = 0; si < statuses.length; si++) {
+                  var isSelected = editPerson && editPerson.status === statuses[si].id ? ' selected' : (!editPerson && statuses[si].id === 'active' ? ' selected' : '');
+                  opts += '<option value="' + escapeHtml(statuses[si].id) + '"' + isSelected + '>' + escapeHtml(statuses[si].label) + '</option>';
+                }
+                return opts;
+              })() +
+            '</select>' +
+            '<button type="button" onclick="promptAddReportStatus()" style="width:28px;height:28px;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;" title="Add custom status">+</button>' +
+            '<button type="button" onclick="openManageReportStatuses()" style="font-size:11px;color:var(--text-muted);background:none;border:none;cursor:pointer;text-decoration:underline;flex-shrink:0;padding:0 4px;" title="Manage custom statuses">Manage</button>' +
+          '</div></div>' +
       '</div>' +
       '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-top: var(--space-3);">' +
         '<div><label style="font-size: var(--text-xs); color: var(--text-muted); display: block; margin-bottom: 4px;">Start Date</label>' +
@@ -5928,7 +6404,9 @@ function saveEditClient(clientId) {
 
 function deleteClient(id) {
   if (!confirm('Delete this client?')) return;
-  var clients = getClients().filter(function(c) { return c.id !== id; });
+  // v29.0: Use String comparison — id comes as string from onclick, c.id may be number
+  var idStr = String(id);
+  var clients = getClients().filter(function(c) { return String(c.id) !== idStr; });
   saveClients(clients);
   // v25.1: Tombstone tracking removed -- write-through sync handles deletions
   renderClientList();
@@ -5948,7 +6426,8 @@ var CLIENT_PIPELINE_STAGES = [
   { id: 'archived', label: 'Archived', color: '#6b7280' }
 ];
 
-var clientsShowAllBrands = false;
+// v29.0: Persist brand filter preference to localStorage (was resetting on reload)
+var clientsShowAllBrands = localStorage.getItem('roweos_clients_brand_filter') !== 'false'; // default true
 var clientsStageFilterValue = '';
 var clientsSearchTerm = '';
 
@@ -5956,8 +6435,14 @@ var clientsSearchTerm = '';
 function migrateClientsData() {
   var clients = getClients();
   var changed = false;
+  var maxIdx = typeof brands !== 'undefined' ? brands.length : 5;
   clients.forEach(function(c) {
     if (typeof c.brandIndex === 'undefined') {
+      c.brandIndex = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+      changed = true;
+    }
+    // v28.6: Fix orphaned brandIndex from deleted brands
+    if (c.brandIndex >= maxIdx) {
       c.brandIndex = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
       changed = true;
     }
@@ -5977,10 +6462,25 @@ function migrateClientsData() {
 
 function getClientsForBrand() {
   var clients = getClients();
+  if (ROWEOS_DEBUG || localStorage.getItem('roweos_debug') === 'true') {
+    console.log('[Clients] getClientsForBrand: total=' + clients.length + ', showAll=' + clientsShowAllBrands + ', brandIdx=' + (typeof selectedBrand !== 'undefined' ? selectedBrand : 0));
+    if (clients.length > 0) console.log('[Clients] Sample brandIndex values:', clients.slice(0, 3).map(function(c) { return c.name + '=' + c.brandIndex + '(' + typeof c.brandIndex + ')'; }));
+  }
   if (clientsShowAllBrands) return clients;
   var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
   // v23.3: Include universal clients alongside brand-specific
-  return clients.filter(function(c) { return c.scope === 'universal' || c.brandIndex === brandIdx; });
+  // v28.6: Coerce comparison, include clients with null/undefined/out-of-range brandIndex
+  var maxBrandIdx = typeof brands !== 'undefined' ? brands.length : 5;
+  var filtered = clients.filter(function(c) {
+    if (c.scope === 'universal') return true;
+    if (c.brandIndex == null || c.brandIndex === undefined) return true;
+    if (c.brandIndex >= maxBrandIdx) return true; // orphaned from deleted brand
+    return String(c.brandIndex) === String(brandIdx);
+  });
+  if (ROWEOS_DEBUG || localStorage.getItem('roweos_debug') === 'true') {
+    console.log('[Clients] After brand filter: ' + filtered.length + '/' + clients.length);
+  }
+  return filtered;
 }
 
 function getStageColor(stageId) {
@@ -6023,34 +6523,204 @@ function closeAddPersonDropdown() {
   if (dd) dd.style.display = 'none';
 }
 
+// v29: People Select Mode — mass actions across Clients, Team, Reports
+var _peopleSelectMode = false;
+var _selectedPeople = {};
+
+function togglePeopleSelectMode() {
+  _peopleSelectMode = !_peopleSelectMode;
+  _selectedPeople = {};
+  var btn = document.getElementById('peopleSelectModeBtn');
+  if (btn) btn.textContent = _peopleSelectMode ? 'Cancel' : 'Select';
+  // Remove floating bar when exiting
+  _updatePeopleSelectBar();
+  // Re-render current tab
+  _rerenderCurrentPeopleTab();
+}
+
+function togglePersonSelection(personId, event) {
+  if (event) { event.stopPropagation(); event.preventDefault(); }
+  if (_selectedPeople[personId]) {
+    delete _selectedPeople[personId];
+  } else {
+    _selectedPeople[personId] = true;
+  }
+  // Update checkbox visual
+  var cb = document.getElementById('peopleSelCb_' + personId);
+  if (cb) {
+    cb.style.background = _selectedPeople[personId] ? 'var(--brand-accent,#a89878)' : 'transparent';
+    cb.innerHTML = _selectedPeople[personId] ? '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+  }
+  _updatePeopleSelectBar();
+}
+
+function selectAllPeople() {
+  var people = _getVisiblePeopleForSelectMode();
+  for (var i = 0; i < people.length; i++) {
+    _selectedPeople[people[i].id] = true;
+  }
+  _rerenderCurrentPeopleTab();
+  _updatePeopleSelectBar();
+}
+
+function deselectAllPeople() {
+  _selectedPeople = {};
+  _rerenderCurrentPeopleTab();
+  _updatePeopleSelectBar();
+}
+
+function _getVisiblePeopleForSelectMode() {
+  var type = _activePeopleType || 'client';
+  var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+  if (type === 'client') {
+    return typeof getClientsForBrand === 'function' ? getClientsForBrand() : [];
+  } else {
+    var list = getPeople(type);
+    return list.filter(function(p) { return p.scope === 'universal' || p.brandIndex === brandIdx; });
+  }
+}
+
+function _getSelectedCount() {
+  var count = 0;
+  for (var k in _selectedPeople) {
+    if (_selectedPeople.hasOwnProperty(k)) count++;
+  }
+  return count;
+}
+
+function _updatePeopleSelectBar() {
+  var existing = document.getElementById('peopleSelectActionBar');
+  if (existing) existing.parentNode.removeChild(existing);
+  if (!_peopleSelectMode) return;
+
+  var count = _getSelectedCount();
+  if (count === 0) return;
+
+  var bar = document.createElement('div');
+  bar.id = 'peopleSelectActionBar';
+  bar.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;padding:8px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:9999;';
+
+  var countLabel = document.createElement('span');
+  countLabel.style.cssText = 'font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;';
+  countLabel.textContent = count + ' selected';
+  bar.appendChild(countLabel);
+
+  var selAllBtn = document.createElement('button');
+  selAllBtn.style.cssText = 'padding:5px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;font-size:12px;color:var(--text-secondary);cursor:pointer;font-family:inherit;white-space:nowrap;';
+  selAllBtn.textContent = 'Select All';
+  selAllBtn.onclick = function() { selectAllPeople(); };
+  bar.appendChild(selAllBtn);
+
+  var desAllBtn = document.createElement('button');
+  desAllBtn.style.cssText = 'padding:5px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;font-size:12px;color:var(--text-secondary);cursor:pointer;font-family:inherit;white-space:nowrap;';
+  desAllBtn.textContent = 'Deselect All';
+  desAllBtn.onclick = function() { deselectAllPeople(); };
+  bar.appendChild(desAllBtn);
+
+  var delBtn = document.createElement('button');
+  delBtn.style.cssText = 'padding:5px 12px;background:#ef4444;border:none;border-radius:8px;font-size:12px;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;white-space:nowrap;';
+  delBtn.textContent = 'Delete Selected (' + count + ')';
+  delBtn.onclick = function() { deleteSelectedPeople(); };
+  bar.appendChild(delBtn);
+
+  document.body.appendChild(bar);
+}
+
+function deleteSelectedPeople() {
+  var count = _getSelectedCount();
+  if (count === 0) return;
+  // v29.1: Snapshot selected IDs before confirm dialog (confirm() can cause focus loss on some browsers)
+  var idsToDelete = {};
+  for (var k in _selectedPeople) {
+    if (_selectedPeople.hasOwnProperty(k)) idsToDelete[k] = true;
+  }
+  if (!confirm('Delete ' + count + ' selected people? This cannot be undone.')) return;
+
+  var all = getPeople();
+  var beforeCount = all.length;
+  var filtered = all.filter(function(p) { return !idsToDelete[p.id]; });
+  var removedCount = beforeCount - filtered.length;
+  if (removedCount === 0) {
+    console.warn('[People] deleteSelectedPeople: no IDs matched. Selected:', Object.keys(idsToDelete), 'People IDs:', all.map(function(p) { return p.id; }));
+    showToast('No matching people found to delete', 'error');
+    return;
+  }
+  savePeople(filtered);
+  // v29.1: Exit select mode after deletion for cleaner UX
+  _selectedPeople = {};
+  _peopleSelectMode = false;
+  var selBtn = document.getElementById('peopleSelectModeBtn');
+  if (selBtn) selBtn.textContent = 'Select';
+  _updatePeopleSelectBar();
+  _rerenderCurrentPeopleTab();
+  if (typeof updatePeopleTypeCounts === 'function') updatePeopleTypeCounts();
+  showToast(removedCount + ' people deleted', 'success');
+}
+
+function _rerenderCurrentPeopleTab() {
+  var type = _activePeopleType || 'client';
+  if (type === 'client') {
+    // v29.1: Re-render the active client sub-tab (pipeline, list, or addressbook)
+    var activeTab = (typeof _clientsActiveTab !== 'undefined') ? _clientsActiveTab : 'pipeline';
+    if (typeof switchClientsTab === 'function') {
+      switchClientsTab(activeTab);
+    } else if (typeof renderClientsView === 'function') {
+      renderClientsView();
+    }
+  } else if (type === 'team') {
+    if (typeof renderTeamView === 'function') renderTeamView();
+  } else if (type === 'report') {
+    if (typeof renderReportsView === 'function') renderReportsView();
+  }
+}
+
+function _renderPeopleSelectCheckbox(personId) {
+  var isSelected = !!_selectedPeople[personId];
+  var h = '<div id="peopleSelCb_' + personId + '" onclick="togglePersonSelection(\'' + personId + '\', event)" ';
+  h += 'style="position:absolute;top:8px;left:8px;width:20px;height:20px;border-radius:6px;';
+  h += 'border:2px solid var(--border-color);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;';
+  h += 'background:' + (isSelected ? 'var(--brand-accent,#a89878)' : 'transparent') + ';">';
+  if (isSelected) {
+    h += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#000" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+  }
+  h += '</div>';
+  return h;
+}
+
 // v25.3: People type switching
 var _activePeopleType = 'client';
 
 function switchPeopleType(type) {
   _activePeopleType = type;
+  // v29: Clear selections on tab switch but keep select mode active
+  _selectedPeople = {};
+  _updatePeopleSelectBar();
   // v26.1: Update pill nav active state
   updatePillNavActive('peoplePillNav', type);
-  // Show/hide appropriate content
+  // v28.6: Show/hide appropriate content — use dedicated peopleTypeContent container for team/report
   var pipelineTab = document.getElementById('clientsPipelineTab');
   var listTab = document.getElementById('clientsListTab');
   var addressBookTab = document.getElementById('clientsAddressBookTab');
   var clientTabs = document.getElementById('clientsTabBar');
+  var peopleContent = document.getElementById('peopleTypeContent');
+  var detailP = document.getElementById('clientDetailPanel');
 
   if (type === 'client') {
-    // Show existing client view tabs and content
-    if (clientTabs) clientTabs.style.display = '';
-    renderClientsView();
+    // v28.6: Hide team/report container, show client tabs, restore active sub-tab
+    if (peopleContent) peopleContent.style.display = 'none';
+    if (clientTabs) clientTabs.style.display = 'flex';
+    switchClientsTab(_clientsActiveTab || 'pipeline');
   } else if (type === 'team' || type === 'report') {
-    // v25.3: Hide client sub-tabs, show pipeline container for team/report content
+    // v28.6: Hide ALL client containers — never destroy their HTML
     if (clientTabs) clientTabs.style.display = 'none';
+    if (pipelineTab) pipelineTab.style.display = 'none';
     if (listTab) listTab.style.display = 'none';
     if (addressBookTab) addressBookTab.style.display = 'none';
-    var detailP = document.getElementById('clientDetailPanel');
     if (detailP) detailP.style.display = 'none';
-    // Use pipelineTab as container but clear its client content
-    if (pipelineTab) {
-      pipelineTab.style.display = 'block';
-      pipelineTab.innerHTML = '<div id="peopleTypeContent"></div>';
+    // v28.6: Render into dedicated container
+    if (peopleContent) {
+      peopleContent.style.display = 'block';
+      peopleContent.innerHTML = '';
     }
     if (type === 'team') renderTeamView();
     else renderReportsView();
@@ -6100,9 +6770,8 @@ function _availColor(val) {
 
 // v25.3: Render team members view grouped by department
 function renderTeamView() {
-  var container = document.getElementById('peopleTypeContent') || document.getElementById('clientsPipelineTab');
+  var container = document.getElementById('peopleTypeContent');
   if (!container) return;
-  container.style.display = 'block';
 
   var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
   var team = getPeople('team');
@@ -6199,7 +6868,12 @@ function _renderTeamCard(person) {
   var wColor = workload > 80 ? '#ef4444' : workload > 50 ? '#fbbf24' : '#4ade80';
   var startStr = person.startDate ? new Date(person.startDate).toLocaleDateString() : 'N/A';
 
-  var h = '<div class="team-member-card" onclick="openTeamDetail(\'' + person.id + '\')">';
+  var _tmOnclick = _peopleSelectMode ? 'togglePersonSelection(\'' + person.id + '\', event)' : 'openTeamDetail(\'' + person.id + '\')';
+  var h = '<div class="team-member-card" onclick="' + _tmOnclick + '" style="position:relative;">';
+  // v29: Select mode checkbox
+  if (_peopleSelectMode) {
+    h += _renderPeopleSelectCheckbox(person.id);
+  }
   // Top row: avatar + name + badges
   h += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">';
   if (person.logo) {
@@ -6336,10 +7010,30 @@ function openTeamDetail(personId) {
   if (person.company) html += '<div class="client-field-item"><div class="client-field-label">Company</div><div class="client-field-value">' + escapeHtml(person.company) + '</div></div>';
   html += '</div></div>';
 
-  // Assigned Tasks placeholder
+  // Assigned Tasks section (matches report detail pattern)
   html += '<div style="margin-bottom:var(--space-5);">';
-  html += '<div style="font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:var(--space-3);">Assigned Tasks</div>';
-  html += '<div style="padding:20px;text-align:center;color:var(--text-tertiary);font-size:13px;background:var(--bg-tertiary);border-radius:var(--radius-md);">No tasks assigned yet</div>';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3);">';
+  html += '<div style="font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;">Assigned Tasks</div>';
+  html += '<div style="display:flex;gap:6px;">';
+  html += '<button onclick="addTaskForPerson(\'' + person.id + '\',\'' + escapeHtml((person.name || '').replace(/'/g, "\\'")) + '\')" style="padding:5px 12px;background:var(--bg-primary);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">+ Add Task</button>';
+  html += '<button onclick="openTaskLinkerForPerson(\'' + person.id + '\')" style="padding:5px 12px;background:var(--brand-accent,#a89878);color:#000;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">Link Task</button>';
+  html += '</div></div>';
+  var personTasks = typeof getTasksForPerson === 'function' ? getTasksForPerson(person.id) : [];
+  if (personTasks.length > 0) {
+    for (var pt = 0; pt < personTasks.length; pt++) {
+      var pTask = personTasks[pt];
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:var(--bg-tertiary);border-radius:var(--radius-md);font-size:12px;">';
+      html += '<input type="checkbox" onclick="if(typeof quickToggleFocus2Task===\'function\')quickToggleFocus2Task(' + pTask.id + ');setTimeout(function(){openTeamDetail(\'' + person.id + '\');},300);" style="margin-top:2px;cursor:pointer;flex-shrink:0;">';
+      html += '<div style="min-width:0;flex:1;">';
+      html += '<div style="color:var(--text-primary);">' + escapeHtml(pTask.text || '') + '</div>';
+      if (pTask.category) {
+        html += '<div style="color:var(--text-muted);font-size:11px;margin-top:2px;">' + escapeHtml(pTask.category) + '</div>';
+      }
+      html += '</div></div>';
+    }
+  } else {
+    html += '<div style="font-size:12px;color:var(--text-muted);font-style:italic;">No tasks assigned yet.</div>';
+  }
   html += '</div>';
 
   // Timeline
@@ -6416,17 +7110,17 @@ function getCheckinStatus(nextCheckIn) {
 
 // v25.3: Get report status label and color
 function _getReportStatus(statusId) {
-  for (var i = 0; i < REPORT_STATUSES.length; i++) {
-    if (REPORT_STATUSES[i].id === statusId) return REPORT_STATUSES[i];
+  var statuses = getReportStatuses();
+  for (var i = 0; i < statuses.length; i++) {
+    if (statuses[i].id === statusId) return statuses[i];
   }
-  return REPORT_STATUSES[0]; // default active
+  return statuses[0]; // default active
 }
 
 // v25.3: Render direct reports view grouped by status
 function renderReportsView() {
-  var container = document.getElementById('peopleTypeContent') || document.getElementById('clientsPipelineTab');
+  var container = document.getElementById('peopleTypeContent');
   if (!container) return;
-  container.style.display = 'block';
 
   var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
   var reports = getPeople('report');
@@ -6489,16 +7183,17 @@ function renderReportsView() {
     statusGroups[st].push(reports[i]);
   }
 
-  // Render in REPORT_STATUSES order
-  for (var s = 0; s < REPORT_STATUSES.length; s++) {
-    var sid = REPORT_STATUSES[s].id;
+  // Render in dynamic status order (default + custom)
+  var allStatuses = getReportStatuses();
+  for (var s = 0; s < allStatuses.length; s++) {
+    var sid = allStatuses[s].id;
     var members = statusGroups[sid];
     if (!members || members.length === 0) continue;
-    var sColor = REPORT_STATUSES[s].color;
+    var sColor = allStatuses[s].color;
     html += '<div style="margin-bottom:20px;padding:0 24px;">';
     html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.04em;">';
     html += '<span style="width:8px;height:8px;border-radius:50%;background:' + sColor + ';"></span>';
-    html += escapeHtml(REPORT_STATUSES[s].label) + ' (' + members.length + ')</div>';
+    html += escapeHtml(allStatuses[s].label) + ' (' + members.length + ')</div>';
     html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;">';
     for (var m = 0; m < members.length; m++) {
       html += _renderReportCard(members[m]);
@@ -6509,13 +7204,119 @@ function renderReportsView() {
   container.innerHTML = html;
 }
 
-// v25.3: Render a single report card
+// v25.3: Render a single report card (v29: toggle views - Info/Tasks/Goals)
 function _renderReportCard(person) {
   var statusInfo = _getReportStatus(person.status || 'active');
   var checkin = getCheckinStatus(person.nextCheckIn);
   var deptColor = DEPT_COLORS[person.department] || '#94a3b8';
 
-  // Dev goals summary
+  // View state
+  window._reportCardView = window._reportCardView || {};
+  var currentView = window._reportCardView[person.id] || 'goals';
+
+  var h = '<div class="report-card" id="reportCard_' + person.id + '" style="position:relative;">';
+  // v29: Select mode checkbox
+  if (_peopleSelectMode) {
+    h += _renderPeopleSelectCheckbox(person.id);
+  }
+  // Top row: avatar + name + status
+  var _rcClick = _peopleSelectMode ? 'togglePersonSelection(\'' + person.id + '\', event)' : 'openReportDetail(\'' + person.id + '\')';
+  h += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">';
+  if (person.logo) {
+    h += '<img src="' + person.logo + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;cursor:pointer;" alt="" onclick="' + _rcClick + '">';
+  } else {
+    var initials = (person.name || '').split(' ').map(function(w) { return w.charAt(0).toUpperCase(); }).join('').substring(0, 2);
+    h += '<div onclick="' + _rcClick + '" style="cursor:pointer;width:36px;height:36px;border-radius:50%;background:' + deptColor + '22;color:' + deptColor + ';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">' + initials + '</div>';
+  }
+  h += '<div style="min-width:0;flex:1;cursor:pointer;" onclick="' + _rcClick + '">';
+  h += '<div style="font-weight:600;font-size:14px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(person.name || '') + '</div>';
+  h += '<div style="font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(person.role || 'No role set') + '</div>';
+  h += '</div>';
+  h += '<span style="font-size:11px;padding:2px 8px;border-radius:var(--radius-sm);background:' + statusInfo.color + '22;color:' + statusInfo.color + ';font-weight:600;flex-shrink:0;">' + escapeHtml(statusInfo.label) + '</span>';
+  h += '</div>';
+
+  // Toggle row
+  var views = ['info', 'tasks', 'goals'];
+  var viewLabels = { info: 'Info', tasks: 'Tasks', goals: 'Goals' };
+  h += '<div style="display:flex;gap:2px;margin-bottom:8px;border-bottom:1px solid var(--border-color);padding-bottom:6px;">';
+  for (var vi = 0; vi < views.length; vi++) {
+    var vKey = views[vi];
+    var isActive = currentView === vKey;
+    h += '<span onclick="event.stopPropagation();toggleReportCardView(\'' + person.id + '\',\'' + vKey + '\')" ';
+    h += 'style="font-size:11px;padding:2px 10px;cursor:pointer;font-weight:' + (isActive ? '700' : '500') + ';';
+    h += 'color:' + (isActive ? 'var(--brand-accent,#a89878)' : 'var(--text-muted)') + ';';
+    h += 'border-bottom:' + (isActive ? '2px solid var(--brand-accent,#a89878)' : '2px solid transparent') + ';margin-bottom:-7px;">';
+    h += viewLabels[vKey] + '</span>';
+  }
+  h += '</div>';
+
+  // View content
+  if (currentView === 'info') {
+    h += _renderReportCardInfo(person);
+  } else if (currentView === 'tasks') {
+    h += _renderReportCardTasks(person);
+  } else {
+    h += _renderReportCardGoals(person, checkin);
+  }
+
+  h += '</div>';
+  return h;
+}
+
+// v29: Report card Info view
+function _renderReportCardInfo(person) {
+  var h = '';
+  var fields = [
+    { label: 'Email', value: person.email },
+    { label: 'Phone', value: person.phone },
+    { label: 'Location', value: person.location },
+    { label: 'Company', value: person.company }
+  ];
+  var hasAny = false;
+  for (var fi = 0; fi < fields.length; fi++) {
+    if (fields[fi].value) {
+      hasAny = true;
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px;">';
+      h += '<span style="color:var(--text-muted);font-weight:500;">' + fields[fi].label + '</span>';
+      h += '<span style="color:var(--text-primary);text-align:right;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(fields[fi].value) + '</span>';
+      h += '</div>';
+    }
+  }
+  if (!hasAny) {
+    h += '<div style="font-size:12px;color:var(--text-muted);font-style:italic;padding:8px 0;">No contact info available.</div>';
+  }
+  return h;
+}
+
+// v29: Report card Tasks view
+function _renderReportCardTasks(person) {
+  var h = '';
+  var tasks = typeof getTasksForPerson === 'function' ? getTasksForPerson(person.id) : [];
+  if (tasks.length > 0) {
+    for (var ti = 0; ti < tasks.length; ti++) {
+      var t = tasks[ti];
+      h += '<div style="display:flex;align-items:flex-start;gap:8px;padding:3px 0;font-size:12px;">';
+      h += '<input type="checkbox" onclick="event.stopPropagation();if(typeof quickToggleFocus2Task===\'function\')quickToggleFocus2Task(' + t.id + ');setTimeout(function(){toggleReportCardView(\'' + person.id + '\',\'tasks\');},200);" style="margin-top:2px;cursor:pointer;flex-shrink:0;">';
+      h += '<div style="min-width:0;flex:1;">';
+      h += '<div style="color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(t.text || '') + '</div>';
+      if (t.category) {
+        h += '<span style="font-size:10px;color:var(--text-muted);">' + escapeHtml(t.category) + '</span>';
+      }
+      h += '</div></div>';
+    }
+  } else {
+    h += '<div style="font-size:12px;color:var(--text-muted);font-style:italic;padding:8px 0;">No tasks assigned.</div>';
+  }
+  // + Add Task link
+  h += '<div style="padding-top:6px;">';
+  h += '<span onclick="event.stopPropagation();addTaskForPerson(\'' + person.id + '\',\'' + escapeHtml((person.name || '').replace(/'/g, "\\'")) + '\')" ';
+  h += 'style="font-size:11px;color:var(--brand-accent,#a89878);cursor:pointer;font-weight:600;">+ Add Task</span>';
+  h += '</div>';
+  return h;
+}
+
+// v29: Report card Goals view (original default content)
+function _renderReportCardGoals(person, checkin) {
   var goals = person.developmentGoals || [];
   var onTrack = 0;
   for (var g = 0; g < goals.length; g++) {
@@ -6523,21 +7324,7 @@ function _renderReportCard(person) {
   }
   var goalSummary = goals.length > 0 ? onTrack + '/' + goals.length + ' goals on track' : 'No goals set';
 
-  var h = '<div class="report-card" onclick="openReportDetail(\'' + person.id + '\')">';
-  // Top row: avatar + name + status
-  h += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">';
-  if (person.logo) {
-    h += '<img src="' + person.logo + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="">';
-  } else {
-    var initials = (person.name || '').split(' ').map(function(w) { return w.charAt(0).toUpperCase(); }).join('').substring(0, 2);
-    h += '<div style="width:36px;height:36px;border-radius:50%;background:' + deptColor + '22;color:' + deptColor + ';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">' + initials + '</div>';
-  }
-  h += '<div style="min-width:0;flex:1;">';
-  h += '<div style="font-weight:600;font-size:14px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(person.name || '') + '</div>';
-  h += '<div style="font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(person.role || 'No role set') + '</div>';
-  h += '</div>';
-  h += '<span style="font-size:11px;padding:2px 8px;border-radius:var(--radius-sm);background:' + statusInfo.color + '22;color:' + statusInfo.color + ';font-weight:600;flex-shrink:0;">' + escapeHtml(statusInfo.label) + '</span>';
-  h += '</div>';
+  var h = '';
   // Rating + check-in row
   h += '<div class="report-status-grid">';
   h += '<div style="display:flex;align-items:center;gap:6px;">' + renderStarRating(person.performanceRating) + '</div>';
@@ -6548,8 +7335,184 @@ function _renderReportCard(person) {
   h += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5;flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
   h += '<span style="font-size:12px;color:var(--text-muted);">' + escapeHtml(goalSummary) + '</span>';
   h += '</div>';
-  h += '</div>';
   return h;
+}
+
+// v29: Toggle report card view between info/tasks/goals
+function toggleReportCardView(personId, view) {
+  window._reportCardView = window._reportCardView || {};
+  window._reportCardView[personId] = view;
+  // Re-render the specific card if possible, otherwise full view
+  var cardEl = document.getElementById('reportCard_' + personId);
+  if (cardEl) {
+    var person = typeof getPersonById === 'function' ? getPersonById(personId) : null;
+    if (person) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = _renderReportCard(person);
+      var newCard = tmp.firstChild;
+      cardEl.parentNode.replaceChild(newCard, cardEl);
+      return;
+    }
+  }
+  if (typeof renderReportsView === 'function') renderReportsView();
+}
+
+// v29: Open task linker modal for a person
+function openTaskLinkerForPerson(personId) {
+  var existing = document.getElementById('taskLinkerModal');
+  if (existing) existing.parentNode.removeChild(existing);
+
+  var overlay = document.createElement('div');
+  overlay.id = 'taskLinkerModal';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = function(e) { if (e.target === overlay) { overlay.parentNode.removeChild(overlay); } };
+
+  // Get Focus tasks (uncompleted)
+  var allTodos = [];
+  try {
+    var todoKey = typeof getTodosKey === 'function' ? getTodosKey() : 'roweosTodos';
+    allTodos = JSON.parse(localStorage.getItem(todoKey) || '[]');
+  } catch(e) {}
+  var uncompletedTodos = [];
+  for (var ti = 0; ti < allTodos.length; ti++) {
+    if (!allTodos[ti].completed) uncompletedTodos.push(allTodos[ti]);
+  }
+
+  // Group by category
+  var catGroups = {};
+  for (var tc = 0; tc < uncompletedTodos.length; tc++) {
+    var cat = uncompletedTodos[tc].category || 'Uncategorized';
+    if (!catGroups[cat]) catGroups[cat] = [];
+    catGroups[cat].push(uncompletedTodos[tc]);
+  }
+
+  // Get Pulse goals
+  var pulseGoalsList = [];
+  try {
+    pulseGoalsList = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+  } catch(e) {}
+  var activeGoals = [];
+  for (var pg = 0; pg < pulseGoalsList.length; pg++) {
+    if (!pulseGoalsList[pg].completed) activeGoals.push(pulseGoalsList[pg]);
+  }
+
+  var html = '<div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;position:relative;">';
+  html += '<button onclick="var m=document.getElementById(\'taskLinkerModal\');if(m)m.parentNode.removeChild(m);" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer;">&times;</button>';
+  html += '<div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:16px;">Link Tasks & Goals</div>';
+
+  // Focus Tasks section
+  html += '<div style="margin-bottom:16px;">';
+  html += '<div style="font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;font-weight:600;">Focus Tasks</div>';
+  var catKeys = Object.keys(catGroups);
+  if (catKeys.length > 0) {
+    for (var ck = 0; ck < catKeys.length; ck++) {
+      html += '<div style="font-size:11px;color:var(--text-secondary);font-weight:600;margin:8px 0 4px;">' + escapeHtml(catKeys[ck]) + '</div>';
+      var items = catGroups[catKeys[ck]];
+      for (var it = 0; it < items.length; it++) {
+        var alreadyLinked = items[it].assignedTo === personId;
+        html += '<label style="display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:12px;cursor:pointer;">';
+        html += '<input type="checkbox" data-link-type="task" data-link-id="' + items[it].id + '"' + (alreadyLinked ? ' checked disabled' : '') + ' style="margin-top:2px;">';
+        html += '<span style="color:var(--text-primary);">' + escapeHtml(items[it].text || '') + (alreadyLinked ? ' <span style="color:var(--text-muted);font-size:10px;">(linked)</span>' : '') + '</span>';
+        html += '</label>';
+      }
+    }
+  } else {
+    html += '<div style="font-size:12px;color:var(--text-muted);font-style:italic;">No uncompleted tasks.</div>';
+  }
+  html += '</div>';
+
+  // Pulse Goals section
+  html += '<div style="margin-bottom:16px;">';
+  html += '<div style="font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;font-weight:600;">Pulse Goals</div>';
+  if (activeGoals.length > 0) {
+    for (var ag = 0; ag < activeGoals.length; ag++) {
+      var goalLinked = activeGoals[ag].assignedTo === personId;
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:12px;cursor:pointer;">';
+      html += '<input type="checkbox" data-link-type="goal" data-link-id="' + activeGoals[ag].id + '"' + (goalLinked ? ' checked disabled' : '') + ' style="margin-top:2px;">';
+      html += '<span style="color:var(--text-primary);">' + escapeHtml(activeGoals[ag].title || activeGoals[ag].name || '') + (goalLinked ? ' <span style="color:var(--text-muted);font-size:10px;">(linked)</span>' : '') + '</span>';
+      html += '</label>';
+    }
+  } else {
+    html += '<div style="font-size:12px;color:var(--text-muted);font-style:italic;">No active goals.</div>';
+  }
+  html += '</div>';
+
+  // Link button
+  html += '<button onclick="_linkSelectedTasksForPerson(\'' + personId + '\')" style="width:100%;padding:10px;background:var(--brand-accent,#a89878);color:#000;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Link Selected</button>';
+  html += '</div>';
+
+  overlay.innerHTML = html;
+  document.body.appendChild(overlay);
+}
+
+// v29: Process selected links from the task linker modal
+function _linkSelectedTasksForPerson(personId) {
+  var modal = document.getElementById('taskLinkerModal');
+  if (!modal) return;
+
+  var checkboxes = modal.querySelectorAll('input[type="checkbox"]:checked:not(:disabled)');
+  var linkedCount = 0;
+
+  // Collect task IDs and goal IDs
+  var taskIds = [];
+  var goalIds = [];
+  for (var ci = 0; ci < checkboxes.length; ci++) {
+    var linkType = checkboxes[ci].getAttribute('data-link-type');
+    var linkId = checkboxes[ci].getAttribute('data-link-id');
+    if (linkType === 'task') taskIds.push(linkId);
+    else if (linkType === 'goal') goalIds.push(linkId);
+  }
+
+  // Link Focus tasks
+  if (taskIds.length > 0 && typeof todos !== 'undefined') {
+    for (var ti = 0; ti < todos.length; ti++) {
+      for (var tj = 0; tj < taskIds.length; tj++) {
+        if (String(todos[ti].id) === String(taskIds[tj])) {
+          todos[ti].assignedTo = personId;
+          linkedCount++;
+        }
+      }
+    }
+    if (typeof saveTodos === 'function') saveTodos();
+  }
+
+  // Link Pulse goals
+  if (goalIds.length > 0) {
+    try {
+      var pGoals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+      for (var gi = 0; gi < pGoals.length; gi++) {
+        for (var gj = 0; gj < goalIds.length; gj++) {
+          if (String(pGoals[gi].id) === String(goalIds[gj])) {
+            pGoals[gi].assignedTo = personId;
+            linkedCount++;
+          }
+        }
+      }
+      localStorage.setItem('roweos_pulse_goals', JSON.stringify(pGoals));
+      // Update in-memory pulseGoals if it exists
+      if (typeof pulseGoals !== 'undefined') {
+        try { pulseGoals = pGoals; } catch(e) {}
+      }
+    } catch(e) {}
+  }
+
+  // Close modal and refresh
+  modal.parentNode.removeChild(modal);
+  if (linkedCount > 0) {
+    if (typeof showToast === 'function') showToast(linkedCount + ' item' + (linkedCount !== 1 ? 's' : '') + ' linked', 'success');
+    openReportDetail(personId);
+  }
+}
+
+// v28.8: Create task in Pulse Goal with person assignment
+function addTaskForPerson(personId, personName) {
+  var text = prompt('New task for ' + (personName || 'person') + ':');
+  if (!text || !text.trim()) return;
+
+  if (typeof addItemToPulseGoal === 'function') {
+    addItemToPulseGoal(null, { text: text.trim(), assignedTo: personId });
+  }
+  showToast('Task added for ' + (personName || 'person'), 'success');
 }
 
 // v25.3: Open report detail panel
@@ -6654,6 +7617,14 @@ function openReportDetail(personId) {
         var truncated = c.notes.length > 120 ? c.notes.substring(0, 120) + '...' : c.notes;
         html += '<div style="color:var(--text-muted);margin-top:4px;">' + escapeHtml(truncated) + '</div>';
       }
+      // v29.0: Show screenshot thumbnails
+      if (c.screenshots && c.screenshots.length > 0) {
+        html += '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">';
+        for (var si = 0; si < c.screenshots.length; si++) {
+          html += '<img src="' + c.screenshots[si] + '" style="width:60px;height:45px;object-fit:cover;border-radius:4px;border:1px solid var(--border-color);cursor:pointer;" onclick="window.open(this.src)">';
+        }
+        html += '</div>';
+      }
       html += '</div>';
     }
   } else {
@@ -6686,6 +7657,32 @@ function openReportDetail(personId) {
     }
   } else {
     html += '<div style="font-size:12px;color:var(--text-muted);font-style:italic;">No development goals set.</div>';
+  }
+  html += '</div>';
+
+  // v29: Assigned Tasks section
+  html += '<div style="margin-bottom:var(--space-4);padding:16px;background:var(--bg-tertiary);border-radius:var(--radius-md);">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3);">';
+  html += '<div style="font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;">Assigned Tasks</div>';
+  html += '<div style="display:flex;gap:6px;">';
+  html += '<button onclick="addTaskForPerson(\'' + person.id + '\',\'' + escapeHtml((person.name || '').replace(/'/g, "\\'")) + '\')" style="padding:5px 12px;background:var(--bg-primary);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">+ Add Task</button>';
+  html += '<button onclick="openTaskLinkerForPerson(\'' + person.id + '\')" style="padding:5px 12px;background:var(--brand-accent,#a89878);color:#000;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">Link Task</button>';
+  html += '</div></div>';
+  var personTasks = typeof getTasksForPerson === 'function' ? getTasksForPerson(person.id) : [];
+  if (personTasks.length > 0) {
+    for (var pt = 0; pt < personTasks.length; pt++) {
+      var pTask = personTasks[pt];
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;margin-bottom:6px;background:var(--bg-primary);border-radius:var(--radius-md);font-size:12px;">';
+      html += '<input type="checkbox" onclick="if(typeof quickToggleFocus2Task===\'function\')quickToggleFocus2Task(' + pTask.id + ');setTimeout(function(){openReportDetail(\'' + person.id + '\');},300);" style="margin-top:2px;cursor:pointer;flex-shrink:0;">';
+      html += '<div style="min-width:0;flex:1;">';
+      html += '<div style="color:var(--text-primary);">' + escapeHtml(pTask.text || '') + '</div>';
+      if (pTask.category) {
+        html += '<div style="color:var(--text-muted);font-size:11px;margin-top:2px;">' + escapeHtml(pTask.category) + '</div>';
+      }
+      html += '</div></div>';
+    }
+  } else {
+    html += '<div style="font-size:12px;color:var(--text-muted);font-style:italic;">No tasks assigned yet.</div>';
   }
   html += '</div>';
 
@@ -6832,6 +7829,12 @@ function openCheckInModal(personId) {
   mhtml += '<div style="margin-bottom:var(--space-3);"><label style="font-size:var(--text-xs);color:var(--text-muted);display:block;margin-bottom:4px;">Notes</label>';
   mhtml += '<textarea id="checkinNotes" class="form-control" style="padding:8px 12px;min-height:80px;resize:vertical;" placeholder="Discussion summary, feedback..."></textarea></div>';
 
+  // v29.0: Screenshots
+  mhtml += '<div style="margin-bottom:var(--space-3);"><label style="font-size:var(--text-xs);color:var(--text-muted);display:block;margin-bottom:4px;">Screenshots (optional)</label>';
+  mhtml += '<div id="checkinScreenshots" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;"></div>';
+  mhtml += '<input type="file" id="checkinScreenshotInput" accept="image/*" multiple onchange="handleCheckinScreenshots(this)" style="font-size:12px;color:var(--text-secondary);">';
+  mhtml += '</div>';
+
   // Action items
   mhtml += '<div style="margin-bottom:var(--space-4);"><label style="font-size:var(--text-xs);color:var(--text-muted);display:block;margin-bottom:4px;">Action Items</label>';
   mhtml += '<div id="checkinActionItems"><div style="margin-bottom:6px;"><input type="text" class="form-control checkin-action-input" style="padding:8px 12px;" placeholder="Action item..."></div></div>';
@@ -6873,11 +7876,57 @@ function addCheckinActionItem() {
   container.appendChild(div);
 }
 
+// v29.0: Handle check-in screenshot uploads
+var _checkinScreenshots = [];
+function handleCheckinScreenshots(input) {
+  if (!input.files) return;
+  var container = document.getElementById('checkinScreenshots');
+  for (var fi = 0; fi < input.files.length; fi++) {
+    var file = input.files[fi];
+    if (file.size > 2 * 1024 * 1024) { showToast('Screenshot too large (max 2MB)', 'warning'); continue; }
+    (function(f) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        // Resize to max 800px for storage efficiency
+        var img = new Image();
+        img.onload = function() {
+          var maxW = 800, maxH = 600;
+          var w = img.naturalWidth, h = img.naturalHeight;
+          if (w > maxW) { h = Math.round(h * (maxW / w)); w = maxW; }
+          if (h > maxH) { w = Math.round(w * (maxH / h)); h = maxH; }
+          var c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          var resized = c.toDataURL('image/jpeg', 0.8);
+          _checkinScreenshots.push(resized);
+          if (container) {
+            var thumb = document.createElement('div');
+            thumb.style.cssText = 'position:relative;width:80px;height:60px;border-radius:6px;overflow:hidden;border:1px solid var(--border-color);';
+            var idx = _checkinScreenshots.length - 1;
+            thumb.innerHTML = '<img src="' + resized + '" style="width:100%;height:100%;object-fit:cover;">' +
+              '<button onclick="removeCheckinScreenshot(' + idx + ', this.parentElement)" style="position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;border:none;font-size:10px;cursor:pointer;line-height:16px;text-align:center;">x</button>';
+            container.appendChild(thumb);
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(f);
+    })(file);
+  }
+  input.value = '';
+}
+
+function removeCheckinScreenshot(idx, thumbEl) {
+  _checkinScreenshots.splice(idx, 1);
+  if (thumbEl) thumbEl.remove();
+}
+
 // v25.3: Close check-in modal
 function closeCheckinModal() {
   var overlay = document.getElementById('checkinModalOverlay');
   if (overlay) overlay.remove();
   _selectedCheckinMood = 0;
+  _checkinScreenshots = [];
 }
 
 // v25.3: Save check-in
@@ -6907,7 +7956,9 @@ function saveCheckIn(personId) {
     type: ciType,
     mood: _selectedCheckinMood || 0,
     notes: ciNotes,
-    actionItems: actions
+    actionItems: actions,
+    // v29.0: Screenshots support
+    screenshots: _checkinScreenshots.length > 0 ? _checkinScreenshots.slice() : undefined
   };
 
   // Build updates
@@ -7007,6 +8058,9 @@ function renderClientsView() {
   if (!container) return;
   if (detailPanel) detailPanel.style.display = 'none';
   container.style.display = '';
+  // v29.0: Sync checkbox state with persisted preference
+  var _abCb = document.getElementById('clientsShowAllBrands');
+  if (_abCb) _abCb.checked = clientsShowAllBrands;
 
   var allClients = getClientsForBrand();
   var totalCount = allClients.length;
@@ -7120,9 +8174,14 @@ function renderClientsView() {
       var sortedStageClients = typeof sortClientArray === 'function' ? sortClientArray(stageClients) : stageClients;
       sortedStageClients.forEach(function(c) {
         var invoices = typeof getInvoices === 'function' ? getInvoices().filter(function(i) { return i.clientName === c.name; }) : [];
-        html += '<div class="client-row" onclick="openClientDetail(\'' + c.id + '\')" style="position: relative;" draggable="true" data-client-id="' + c.id + '" ondragstart="clientDragStart(event, \'' + c.id + '\')">';
-        // v23.3: Bulk select checkbox
-        html += '<input type="checkbox" class="client-bulk-check" data-cid="' + c.id + '" onclick="event.stopPropagation(); toggleClientBulkSelect(\'' + c.id + '\')" style="margin-right: 4px; flex-shrink: 0; cursor: pointer;"' + (_clientBulkSelected.indexOf(c.id) !== -1 ? ' checked' : '') + '>';
+        var _crClick = _peopleSelectMode ? 'togglePersonSelection(\'' + c.id + '\', event)' : 'openClientDetail(\'' + c.id + '\')';
+        html += '<div class="client-row" onclick="' + _crClick + '" style="position: relative;" draggable="' + (_peopleSelectMode ? 'false' : 'true') + '" data-client-id="' + c.id + '"' + (_peopleSelectMode ? '' : ' ondragstart="clientDragStart(event, \'' + c.id + '\')"') + '>';
+        // v29: People select mode checkbox overlay
+        if (_peopleSelectMode) {
+          html += _renderPeopleSelectCheckbox(c.id);
+        }
+        // v23.3: Bulk select checkbox (hidden in people select mode)
+        html += '<input type="checkbox" class="client-bulk-check" data-cid="' + c.id + '" onclick="event.stopPropagation(); toggleClientBulkSelect(\'' + c.id + '\')" style="margin-right: 4px; flex-shrink: 0; cursor: pointer;' + (_peopleSelectMode ? 'display:none;' : '') + '"' + (_clientBulkSelected.indexOf(c.id) !== -1 ? ' checked' : '') + '>';
         // v23.3: Priority dot
         if (c.priority && c.priority !== 'low') {
           html += '<span class="client-priority-dot client-priority-' + c.priority + '" title="' + (c.priority === 'high' ? 'High' : 'Medium') + ' priority"></span>';
@@ -7223,6 +8282,8 @@ function filterClientsByStage(stage) {
 function toggleClientsBrandFilter() {
   var cb = document.getElementById('clientsShowAllBrands');
   clientsShowAllBrands = cb ? cb.checked : false;
+  // v29.0: Persist preference so it survives page reload
+  localStorage.setItem('roweos_clients_brand_filter', clientsShowAllBrands ? 'true' : 'false');
   renderClientsView();
 }
 
@@ -7515,6 +8576,94 @@ function openClientDetail(clientId) {
   }
   html += '</div>';
 
+  // v28.6: Mini Client Identity (BrandAI-accessible summary)
+  html += '<div style="margin-bottom: var(--space-5);">';
+  html += '<div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-3);">Client Identity</div>';
+  html += '<div style="background: var(--bg-tertiary); border-radius: var(--radius-md); padding: 14px; border: 1px solid var(--border-color);">';
+  var _ciFields = [];
+  if (client.company) _ciFields.push({ label: 'Company', value: client.company });
+  if (client.industry) _ciFields.push({ label: 'Industry', value: client.industry });
+  if (client.role) _ciFields.push({ label: 'Role', value: client.role });
+  if (client.website) _ciFields.push({ label: 'Website', value: client.website });
+  if (client.category) _ciFields.push({ label: 'Category', value: client.category });
+  if (client.stage) _ciFields.push({ label: 'Stage', value: client.stage });
+  if (client.dealValue) _ciFields.push({ label: 'Deal Value', value: '$' + parseFloat(client.dealValue).toLocaleString() });
+  if (client.notes) _ciFields.push({ label: 'Notes', value: client.notes.substring(0, 200) + (client.notes.length > 200 ? '...' : '') });
+  if (_ciFields.length === 0) {
+    html += '<div style="text-align:center;color:var(--text-muted);font-size:var(--text-sm);padding:8px 0;">Fill in client details to build their identity profile.</div>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">';
+    for (var _cf = 0; _cf < _ciFields.length; _cf++) {
+      html += '<div>';
+      html += '<div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;">' + escapeHtml(_ciFields[_cf].label) + '</div>';
+      html += '<div style="font-size:13px;color:var(--text-primary);">' + escapeHtml(_ciFields[_cf].value) + '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div></div>';
+
+  // v28.6: Client Timeline
+  html += '<div style="margin-bottom: var(--space-5);">';
+  html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">';
+  html += '<div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">Timeline</div>';
+  html += '<div style="display:flex;gap:6px;">';
+  html += '<button class="btn btn-small" onclick="addClientTimelineEvent(\'' + client.id + '\')" style="padding: 4px 10px; font-size: 11px;">';
+  html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 3px;"><path d="M12 5v14m-7-7h14"/></svg>Add Event</button>';
+  html += '<button class="btn btn-small" onclick="suggestTimelineEvents(\'' + client.id + '\')" style="padding: 4px 10px; font-size: 11px; color: var(--accent);">';
+  html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 3px;"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M9 22h6"/></svg>AI Suggest</button>';
+  html += '</div></div>';
+  var _tl = client.timeline || [];
+  _tl.sort(function(a, b) { return new Date(a.date || 0) - new Date(b.date || 0); });
+  if (_tl.length === 0) {
+    html += '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:var(--text-sm);background:var(--bg-tertiary);border-radius:var(--radius-md);">No timeline events yet. Add key milestones for this client.</div>';
+  } else {
+    html += '<div style="position:relative;padding-left:24px;">';
+    // Vertical line
+    html += '<div style="position:absolute;left:7px;top:4px;bottom:4px;width:2px;background:var(--border-color);border-radius:1px;"></div>';
+    for (var _ti = 0; _ti < _tl.length; _ti++) {
+      var _te = _tl[_ti];
+      var _teDate = _te.date ? new Date(_te.date) : null;
+      var _teDateStr = _teDate ? _teDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'No date';
+      html += '<div style="position:relative;margin-bottom:16px;">';
+      // Dot on line
+      html += '<div style="position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg-primary);"></div>';
+      html += '<div style="background:var(--bg-tertiary);border-radius:var(--radius-md);padding:12px 14px;border:1px solid var(--border-color);cursor:pointer;" onclick="toggleTimelineNotes(this)">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+      html += '<div>';
+      html += '<div style="font-size:13px;font-weight:600;color:var(--text-primary);">' + escapeHtml(_te.name || 'Event') + '</div>';
+      html += '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + escapeHtml(_teDateStr) + '</div>';
+      html += '</div>';
+      html += '<div style="display:flex;gap:4px;align-items:center;">';
+      if (_te.notes && _te.notes.length > 0) {
+        html += '<span style="font-size:10px;color:var(--text-muted);">' + _te.notes.length + ' note' + (_te.notes.length !== 1 ? 's' : '') + '</span>';
+      }
+      html += '<button onclick="event.stopPropagation(); editClientTimelineEvent(\'' + client.id + '\', \'' + _te.id + '\')" class="btn btn-small" style="padding:2px 6px;font-size:10px;">';
+      html += '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>';
+      html += '<button onclick="event.stopPropagation(); deleteClientTimelineEvent(\'' + client.id + '\', \'' + _te.id + '\')" class="btn btn-small" style="padding:2px 6px;font-size:10px;color:#ef4444;">';
+      html += '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>';
+      html += '</div></div>';
+      // Expandable notes
+      html += '<div class="timeline-notes-panel" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-color);">';
+      if (_te.notes && _te.notes.length > 0) {
+        for (var _ni = 0; _ni < _te.notes.length; _ni++) {
+          html += '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">';
+          html += '<div style="width:4px;height:4px;border-radius:50%;background:var(--text-muted);margin-top:6px;flex-shrink:0;"></div>';
+          html += '<div style="font-size:12px;color:var(--text-secondary);">' + escapeHtml(_te.notes[_ni]) + '</div>';
+          html += '</div>';
+        }
+      } else {
+        html += '<div style="font-size:12px;color:var(--text-muted);font-style:italic;">No notes yet.</div>';
+      }
+      html += '<button onclick="event.stopPropagation(); addTimelineNote(\'' + client.id + '\', \'' + _te.id + '\')" class="btn btn-small" style="margin-top:8px;padding:3px 10px;font-size:10px;">';
+      html += '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:3px;"><path d="M12 5v14m-7-7h14"/></svg>Add Note</button>';
+      html += '</div>';
+      html += '</div></div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+
   // Linked invoices
   if (invoices.length > 0) {
     html += '<div>';
@@ -7556,8 +8705,10 @@ function editClientActionPrompt(clientId, promptId) {
 function _showActionPromptModal(clientId, promptId) {
   var clients = getClients();
   var client = null;
+  // v28.6: Coerce to string for comparison (onclick passes string, id may be number)
+  var _cidStr = String(clientId);
   for (var i = 0; i < clients.length; i++) {
-    if (clients[i].id === clientId) { client = clients[i]; break; }
+    if (String(clients[i].id) === _cidStr) { client = clients[i]; break; }
   }
   if (!client) return;
   var existing = null;
@@ -7590,8 +8741,9 @@ function saveClientActionPrompt(clientId, promptId) {
   var prompt = (document.getElementById('apPromptInput').value || '').trim();
   if (!name || !prompt) { showToast('Name and prompt are required', 'warning'); return; }
   var clients = getClients();
+  var _cidStr = String(clientId);
   for (var i = 0; i < clients.length; i++) {
-    if (clients[i].id === clientId) {
+    if (String(clients[i].id) === _cidStr) {
       if (!clients[i].actionPrompts) clients[i].actionPrompts = [];
       if (promptId) {
         for (var j = 0; j < clients[i].actionPrompts.length; j++) {
@@ -7629,8 +8781,9 @@ function saveClientActionPrompt(clientId, promptId) {
 function deleteClientActionPrompt(clientId, promptId) {
   if (!confirm('Delete this action prompt?')) return;
   var clients = getClients();
+  var _cidStr = String(clientId);
   for (var i = 0; i < clients.length; i++) {
-    if (clients[i].id === clientId && clients[i].actionPrompts) {
+    if (String(clients[i].id) === _cidStr && clients[i].actionPrompts) {
       clients[i].actionPrompts = clients[i].actionPrompts.filter(function(p) { return p.id !== promptId; });
       clients[i]._modifiedAt = Date.now();
       break;
@@ -7685,6 +8838,271 @@ function runClientActionPrompt(clientId, promptId) {
       chatInput.style.height = chatInput.scrollHeight + 'px';
     }
   }, 300);
+}
+
+// v28.6: Client Timeline — visual event timeline per client
+function _saveClientAndRefresh(clients, clientId) {
+  saveClients(clients);
+  if (typeof writeDB === 'function') {
+    var cd = JSON.parse(JSON.stringify(clients));
+    cd.forEach(function(c) { if (c.logo && c.logo.length > 50000) c.logo = ''; });
+    writeDB('profile/clients', { data: cd });
+  }
+  openClientDetail(clientId);
+}
+
+function _findClientById(clients, clientId) {
+  var _cidStr = String(clientId);
+  for (var i = 0; i < clients.length; i++) {
+    if (String(clients[i].id) === _cidStr) return clients[i];
+  }
+  return null;
+}
+
+function toggleTimelineNotes(el) {
+  var notes = el.querySelector('.timeline-notes-panel');
+  if (notes) notes.style.display = notes.style.display === 'none' ? '' : 'none';
+}
+
+function addClientTimelineEvent(clientId) {
+  var overlay = document.createElement('div');
+  overlay.id = 'timelineEventOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10001;display:flex;align-items:center;justify-content:center;';
+  var today = new Date().toISOString().split('T')[0];
+  var mhtml = '<div style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;padding:20px;max-width:440px;width:90%;">';
+  mhtml += '<div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:12px;">Add Timeline Event</div>';
+  mhtml += '<div style="margin-bottom:10px;"><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Event Name</label>';
+  mhtml += '<input type="text" id="tlEventName" placeholder="e.g., Contract Signed, Kickoff Call" style="width:100%;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;box-sizing:border-box;"></div>';
+  mhtml += '<div style="margin-bottom:14px;"><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Date</label>';
+  mhtml += '<input type="date" id="tlEventDate" value="' + today + '" style="width:100%;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;box-sizing:border-box;"></div>';
+  mhtml += '<div style="display:flex;gap:8px;justify-content:flex-end;">';
+  mhtml += '<button onclick="document.getElementById(\'timelineEventOverlay\').remove()" class="btn btn-secondary" style="padding:8px 16px;font-size:13px;">Cancel</button>';
+  mhtml += '<button onclick="saveTimelineEvent(\'' + clientId + '\')" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Add</button>';
+  mhtml += '</div></div>';
+  overlay.innerHTML = mhtml;
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+  setTimeout(function() { var el = document.getElementById('tlEventName'); if (el) el.focus(); }, 100);
+}
+
+function saveTimelineEvent(clientId) {
+  var name = (document.getElementById('tlEventName').value || '').trim();
+  var date = (document.getElementById('tlEventDate').value || '').trim();
+  if (!name) { showToast('Event name is required', 'warning'); return; }
+  var clients = getClients();
+  var client = _findClientById(clients, clientId);
+  if (!client) return;
+  if (!client.timeline) client.timeline = [];
+  client.timeline.push({
+    id: 'tl_' + Date.now(),
+    name: name,
+    date: date || new Date().toISOString().split('T')[0],
+    notes: [],
+    createdAt: new Date().toISOString()
+  });
+  client._modifiedAt = Date.now();
+  var overlay = document.getElementById('timelineEventOverlay');
+  if (overlay) overlay.remove();
+  showToast('Timeline event added', 'success');
+  _saveClientAndRefresh(clients, clientId);
+}
+
+function editClientTimelineEvent(clientId, eventId) {
+  var clients = getClients();
+  var client = _findClientById(clients, clientId);
+  if (!client || !client.timeline) return;
+  var ev = null;
+  for (var i = 0; i < client.timeline.length; i++) {
+    if (client.timeline[i].id === eventId) { ev = client.timeline[i]; break; }
+  }
+  if (!ev) return;
+  var overlay = document.createElement('div');
+  overlay.id = 'timelineEventOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10001;display:flex;align-items:center;justify-content:center;';
+  var mhtml = '<div style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;padding:20px;max-width:440px;width:90%;">';
+  mhtml += '<div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:12px;">Edit Timeline Event</div>';
+  mhtml += '<div style="margin-bottom:10px;"><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Event Name</label>';
+  mhtml += '<input type="text" id="tlEventName" value="' + escapeHtml(ev.name || '') + '" style="width:100%;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;box-sizing:border-box;"></div>';
+  mhtml += '<div style="margin-bottom:14px;"><label style="font-size:11px;color:var(--text-muted);display:block;margin-bottom:4px;">Date</label>';
+  mhtml += '<input type="date" id="tlEventDate" value="' + (ev.date || '') + '" style="width:100%;padding:8px 12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;box-sizing:border-box;"></div>';
+  mhtml += '<div style="display:flex;gap:8px;justify-content:flex-end;">';
+  mhtml += '<button onclick="document.getElementById(\'timelineEventOverlay\').remove()" class="btn btn-secondary" style="padding:8px 16px;font-size:13px;">Cancel</button>';
+  mhtml += '<button onclick="updateTimelineEvent(\'' + clientId + '\', \'' + eventId + '\')" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Save</button>';
+  mhtml += '</div></div>';
+  overlay.innerHTML = mhtml;
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
+
+function updateTimelineEvent(clientId, eventId) {
+  var name = (document.getElementById('tlEventName').value || '').trim();
+  var date = (document.getElementById('tlEventDate').value || '').trim();
+  if (!name) { showToast('Event name is required', 'warning'); return; }
+  var clients = getClients();
+  var client = _findClientById(clients, clientId);
+  if (!client || !client.timeline) return;
+  for (var i = 0; i < client.timeline.length; i++) {
+    if (client.timeline[i].id === eventId) {
+      client.timeline[i].name = name;
+      client.timeline[i].date = date;
+      break;
+    }
+  }
+  client._modifiedAt = Date.now();
+  var overlay = document.getElementById('timelineEventOverlay');
+  if (overlay) overlay.remove();
+  showToast('Event updated', 'success');
+  _saveClientAndRefresh(clients, clientId);
+}
+
+function deleteClientTimelineEvent(clientId, eventId) {
+  if (!confirm('Delete this timeline event?')) return;
+  var clients = getClients();
+  var client = _findClientById(clients, clientId);
+  if (!client || !client.timeline) return;
+  client.timeline = client.timeline.filter(function(e) { return e.id !== eventId; });
+  client._modifiedAt = Date.now();
+  showToast('Event deleted', 'info');
+  _saveClientAndRefresh(clients, clientId);
+}
+
+function addTimelineNote(clientId, eventId) {
+  var note = prompt('Add a note:');
+  if (!note || !note.trim()) return;
+  var clients = getClients();
+  var client = _findClientById(clients, clientId);
+  if (!client || !client.timeline) return;
+  for (var i = 0; i < client.timeline.length; i++) {
+    if (client.timeline[i].id === eventId) {
+      if (!client.timeline[i].notes) client.timeline[i].notes = [];
+      client.timeline[i].notes.push(note.trim());
+      break;
+    }
+  }
+  client._modifiedAt = Date.now();
+  showToast('Note added', 'success');
+  _saveClientAndRefresh(clients, clientId);
+}
+
+function suggestTimelineEvents(clientId) {
+  var clients = getClients();
+  var client = _findClientById(clients, clientId);
+  if (!client) return;
+  // Build context for AI
+  var context = 'Client: ' + (client.name || 'Unknown');
+  if (client.company) context += ', Company: ' + client.company;
+  if (client.industry) context += ', Industry: ' + client.industry;
+  if (client.stage) context += ', Stage: ' + client.stage;
+  if (client.category) context += ', Category: ' + client.category;
+  if (client.notes) context += ', Notes: ' + client.notes.substring(0, 300);
+  var existingEvents = (client.timeline || []).map(function(e) { return e.name; }).join(', ');
+  if (existingEvents) context += ', Existing events: ' + existingEvents;
+
+  var systemPrompt = 'You are a business strategist. Given a client profile, suggest 5-8 key timeline events/milestones that would be valuable to track for this client relationship. Return ONLY a JSON array of objects with "name" and "date" fields (date as YYYY-MM-DD, spread across the next 6 months from today). No explanation, just the JSON array.';
+  var userPrompt = 'Suggest key timeline milestones for this client: ' + context + '. Today is ' + new Date().toISOString().split('T')[0] + '.';
+
+  showToast('Generating AI suggestions...', 'info');
+
+  // Use the existing AI call infrastructure
+  if (typeof callOpenAIStreaming === 'function') {
+    var brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+    callOpenAIStreaming(
+      [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+      function(text) {
+        try {
+          // Extract JSON array from response
+          var match = text.match(/\[[\s\S]*\]/);
+          if (match) {
+            var suggestions = JSON.parse(match[0]);
+            if (Array.isArray(suggestions) && suggestions.length > 0) {
+              _showTimelineSuggestions(clientId, suggestions);
+              return;
+            }
+          }
+        } catch(e) {}
+        showToast('Could not parse AI suggestions', 'warning');
+      },
+      function(err) { showToast('AI suggestion failed: ' + (err.message || err), 'error'); },
+      { temperature: 0.7, maxTokens: 800, brandIndex: brandIdx }
+    );
+  } else {
+    showToast('AI not available', 'warning');
+  }
+}
+
+function _showTimelineSuggestions(clientId, suggestions) {
+  var overlay = document.createElement('div');
+  overlay.id = 'timelineSuggestOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10001;display:flex;align-items:center;justify-content:center;';
+  var mhtml = '<div style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:12px;padding:20px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;">';
+  mhtml += '<div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Suggested Timeline Events</div>';
+  mhtml += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Select events to add to the timeline:</div>';
+  for (var i = 0; i < suggestions.length; i++) {
+    var s = suggestions[i];
+    var dateStr = s.date || '';
+    mhtml += '<label style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);margin-bottom:6px;cursor:pointer;border:1px solid var(--border-color);">';
+    mhtml += '<input type="checkbox" class="tl-suggest-check" data-name="' + escapeHtml(s.name || '') + '" data-date="' + escapeHtml(dateStr) + '" checked>';
+    mhtml += '<div>';
+    mhtml += '<div style="font-size:13px;font-weight:500;color:var(--text-primary);">' + escapeHtml(s.name || 'Event') + '</div>';
+    if (dateStr) mhtml += '<div style="font-size:11px;color:var(--text-muted);">' + escapeHtml(dateStr) + '</div>';
+    mhtml += '</div></label>';
+  }
+  mhtml += '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">';
+  mhtml += '<button onclick="document.getElementById(\'timelineSuggestOverlay\').remove()" class="btn btn-secondary" style="padding:8px 16px;font-size:13px;">Cancel</button>';
+  mhtml += '<button onclick="applyTimelineSuggestions(\'' + clientId + '\')" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">Add Selected</button>';
+  mhtml += '</div></div>';
+  overlay.innerHTML = mhtml;
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
+
+function applyTimelineSuggestions(clientId) {
+  var checks = document.querySelectorAll('.tl-suggest-check:checked');
+  if (checks.length === 0) { showToast('No events selected', 'warning'); return; }
+  var clients = getClients();
+  var client = _findClientById(clients, clientId);
+  if (!client) return;
+  if (!client.timeline) client.timeline = [];
+  for (var i = 0; i < checks.length; i++) {
+    client.timeline.push({
+      id: 'tl_' + (Date.now() + i),
+      name: checks[i].dataset.name,
+      date: checks[i].dataset.date || new Date().toISOString().split('T')[0],
+      notes: [],
+      createdAt: new Date().toISOString(),
+      aiSuggested: true
+    });
+  }
+  client._modifiedAt = Date.now();
+  var overlay = document.getElementById('timelineSuggestOverlay');
+  if (overlay) overlay.remove();
+  showToast(checks.length + ' event' + (checks.length !== 1 ? 's' : '') + ' added', 'success');
+  _saveClientAndRefresh(clients, clientId);
+}
+
+// v28.6: Get client identity context for BrandAI
+function getClientIdentityContext(clientId) {
+  var clients = getClients();
+  var client = _findClientById(clients, clientId);
+  if (!client) return '';
+  var parts = [];
+  parts.push('Client: ' + (client.name || 'Unknown'));
+  if (client.company) parts.push('Company: ' + client.company);
+  if (client.industry) parts.push('Industry: ' + client.industry);
+  if (client.role) parts.push('Role: ' + client.role);
+  if (client.website) parts.push('Website: ' + client.website);
+  if (client.stage) parts.push('Stage: ' + client.stage);
+  if (client.category) parts.push('Category: ' + client.category);
+  if (client.dealValue) parts.push('Deal Value: $' + parseFloat(client.dealValue).toLocaleString());
+  if (client.notes) parts.push('Notes: ' + client.notes.substring(0, 500));
+  if (client.timeline && client.timeline.length > 0) {
+    var tlSummary = client.timeline.map(function(e) { return e.name + ' (' + (e.date || 'no date') + ')'; }).join(', ');
+    parts.push('Timeline: ' + tlSummary);
+  }
+  if (client.actionPrompts && client.actionPrompts.length > 0) {
+    parts.push('Action Prompts: ' + client.actionPrompts.map(function(p) { return p.name; }).join(', '));
+  }
+  return parts.join('. ');
 }
 
 function updateClientStage(clientId, newStage) {

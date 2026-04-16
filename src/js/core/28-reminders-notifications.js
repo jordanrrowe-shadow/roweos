@@ -388,7 +388,7 @@ function reminderAction(remId, action) {
   saveReminders(reminders);
 
   if (action === 'chat') {
-    showView('signal');
+    showView('pulse'); // v28.8: Redirect to Pulse
     setTimeout(function() {
       var input = document.getElementById('chatInput') || document.getElementById('agentInput');
       if (input) { input.value = 'Regarding my reminder: ' + reminder.title; input.focus(); }
@@ -406,9 +406,8 @@ function reminderAction(remId, action) {
       showToast('Added to Pulse goals', 'success');
     }
   } else if (action === 'focus') {
-    showView('signal');
-    if (typeof showScreen === 'function') showScreen('focus');
-    showToast('Open Focus to add task', 'info');
+    showView('pulse'); // v28.8: Redirect to Pulse
+    showToast('Added to Pulse', 'info');
   }
   dismissReminderPopup(remId);
 }
@@ -1538,10 +1537,10 @@ document.addEventListener('keydown', function(e) {
     lastKey = '';
   }
 
-  // G then D = Go to Signal (Dashboard)
+  // G then D = Go to Pulse (Dashboard) // v28.8: Redirect to Pulse
   if (lastKey === 'g' && e.key === 'd' && !_isEditing) {
     e.preventDefault();
-    showView('signal');
+    showView('pulse');
     lastKey = '';
   }
 

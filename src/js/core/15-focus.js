@@ -119,8 +119,7 @@ function initCalendar() {
   rebuildMergedCalendar();
   // v16.12: Init Google Calendar auth (tries silent re-auth if previously connected)
   setTimeout(function() { initGoogleCalendarAuth(); }, 500);
-  // v29.0: Init Google Drive auth (tries silent re-auth if previously connected)
-  setTimeout(function() { if (typeof initGoogleDriveAuth === 'function') initGoogleDriveAuth(); }, 600);
+  // v29.0: Drive auth is lazy — only init when user navigates to Drive tab (no startup popup)
   // v16.12: Sync iCloud if previously connected
   if (_icloudConnected) {
     setTimeout(function() { syncICloudCalendarEvents(); }, 1000);
@@ -1091,9 +1090,19 @@ function renderFocus2DayDetailContent(dateStr) {
     var displayDate = new Date(dateStr + 'T12:00:00');
     if (dateEl) dateEl.textContent = displayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-    dayTasks = todos.filter(function(t) {
-      return t.date === dateStr;
-    });
+    // v29.1: Today shows: tasks dated today + undated incomplete tasks + overdue tasks
+    if (dateStr === todayStr) {
+      dayTasks = todos.filter(function(t) {
+        if (t.date === dateStr) return true;
+        if (!t.completed && (!t.date || t.date === '')) return true;
+        if (!t.completed && t.date && t.date < dateStr) return true;
+        return false;
+      });
+    } else {
+      dayTasks = todos.filter(function(t) {
+        return t.date === dateStr;
+      });
+    }
 
     dayEvents = calendar.filter(function(e) {
       return e.date === dateStr;
@@ -1150,6 +1159,38 @@ function renderFocus2DayDetailContent(dateStr) {
     html += '</div>';
   }
 
+  // v29.1: Pulse Goals section (show active goal items for context)
+  var _pulseItems = [];
+  try {
+    var _pg = (typeof pulseGoals !== 'undefined' && Array.isArray(pulseGoals)) ? pulseGoals : JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+    for (var _pgi = 0; _pgi < _pg.length; _pgi++) {
+      var _g = _pg[_pgi];
+      if (_g.archived || _g.completed) continue;
+      var _items = _g.items || [];
+      for (var _pii = 0; _pii < _items.length; _pii++) {
+        if (!_items[_pii].completed) {
+          _pulseItems.push({ goalTitle: _g.title, goalId: _g.id, item: _items[_pii] });
+        }
+      }
+    }
+  } catch(e) {}
+  if (_pulseItems.length > 0 && (dateStr === todayStr || isUpcoming)) {
+    html += '<div class="focus-2-day-detail-section">';
+    html += '<div class="focus-2-day-detail-section-title"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2 2"/></svg> PULSE GOALS (' + _pulseItems.length + ')</div>';
+    for (var _pri = 0; _pri < _pulseItems.length; _pri++) {
+      var _pi = _pulseItems[_pri];
+      html += '<div class="focus-2-day-detail-item">';
+      html += '<div class="focus-2-day-detail-item-check" onclick="event.stopPropagation(); if(typeof togglePulseChecklistItem===\'function\') { togglePulseChecklistItem(\'' + _pi.goalId + '\', \'' + _pi.item.id + '\'); renderFocus2DayDetailContent(\'' + dateStr + '\'); }">';
+      html += '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>';
+      html += '</div>';
+      html += '<div class="focus-2-day-detail-item-text">';
+      html += '<div class="focus-2-day-detail-item-name">' + escapeHtml(_pi.item.text) + '</div>';
+      html += '<div class="focus-2-day-detail-item-meta">' + escapeHtml(_pi.goalTitle) + '</div>';
+      html += '</div></div>';
+    }
+    html += '</div>';
+  }
+
   // Automations section
   if (dayAutomations.length > 0) {
     html += '<div class="focus-2-day-detail-section">';
@@ -1166,7 +1207,7 @@ function renderFocus2DayDetailContent(dateStr) {
   }
 
   // Empty state
-  if (dayTasks.length === 0 && dayEvents.length === 0 && dayAutomations.length === 0) {
+  if (dayTasks.length === 0 && dayEvents.length === 0 && dayAutomations.length === 0 && _pulseItems.length === 0) {
     html = '<div class="focus-2-day-detail-empty">' + (isUpcoming ? 'No upcoming tasks' : 'Nothing scheduled for this day') + '</div>';
   }
 
@@ -1829,6 +1870,8 @@ function setupDragEvents(card, container) {
         // v13.1: Save both category order AND unified order to persist reorder
         saveFocus2CategoryOrder();
         saveFocus2UnifiedOrder();
+        // v29.0: Re-render from saved order so tasks follow their category header
+        renderFocus2Categories();
       } else if (isDraggedWidget && isTargetWidget) {
         // Both are widgets - reorder within main container
         var widgetCards = Array.from(container.querySelectorAll('.focus-2-widget-card'));
@@ -1981,6 +2024,9 @@ function handleTouchDragEnd(e) {
           categoriesGrid.insertBefore(draggedCard, targetCard);
         }
         saveFocus2CategoryOrder();
+        saveFocus2UnifiedOrder();
+        // v29.0: Re-render from saved order so tasks follow their category header
+        renderFocus2Categories();
       } else if (isDraggedWidget && isTargetWidget) {
         // Both are widgets - reorder within main container
         var widgetCards = Array.from(container.querySelectorAll('.focus-2-widget-card'));
@@ -3092,22 +3138,76 @@ function openFocus2TaskDetail(taskId) {
     });
   }
 
+  // Populate assignee select with team + direct reports
+  var assigneeSelect = document.getElementById('focus2TaskDetailAssignee');
+  if (assigneeSelect) {
+    var teamPeople = (typeof getPeople === 'function') ? getPeople('team') : [];
+    var reportPeople = (typeof getPeople === 'function') ? getPeople('report') : [];
+    var allPeople = teamPeople.concat(reportPeople);
+    var aHtml = '<option value="">Unassigned</option>';
+    if (teamPeople.length > 0) {
+      aHtml += '<optgroup label="Team">';
+      teamPeople.forEach(function(p) {
+        var sel = p.id === task.assignedTo ? ' selected' : '';
+        aHtml += '<option value="' + escapeHtml(p.id) + '"' + sel + '>' + escapeHtml(p.name) + '</option>';
+      });
+      aHtml += '</optgroup>';
+    }
+    if (reportPeople.length > 0) {
+      aHtml += '<optgroup label="Direct Reports">';
+      reportPeople.forEach(function(p) {
+        var sel = p.id === task.assignedTo ? ' selected' : '';
+        aHtml += '<option value="' + escapeHtml(p.id) + '"' + sel + '>' + escapeHtml(p.name) + '</option>';
+      });
+      aHtml += '</optgroup>';
+    }
+    assigneeSelect.innerHTML = aHtml;
+    // Hide if no people available
+    var assigneeRow = assigneeSelect.closest('.focus-2-task-detail-row');
+    if (assigneeRow) {
+      assigneeRow.style.display = allPeople.length > 0 ? '' : 'none';
+    }
+  }
+
   modal.style.display = 'block';
 
-  // v10.5.25: Show backdrop on mobile
+  // Show backdrop always (centered popup modal)
   var backdrop = document.getElementById('focus2TaskDetailBackdrop');
   if (backdrop) backdrop.style.display = 'block';
+
+  // Prevent body scroll while modal is open
+  document.body.style.overflow = 'hidden';
 }
 
 function closeFocus2TaskDetail() {
   var modal = document.getElementById('focus2TaskDetailModal');
   if (modal) modal.style.display = 'none';
-  
-  // v10.5.25: Hide backdrop
+
+  // Hide backdrop
   var backdrop = document.getElementById('focus2TaskDetailBackdrop');
   if (backdrop) backdrop.style.display = 'none';
-  
+
+  // Restore body scroll
+  document.body.style.overflow = '';
+
+  // Reset task ID state
   focus2CurrentTaskId = null;
+  window.currentFocus2TaskId = null;
+
+  // Reset form fields to prevent stale data on next open
+  var titleEl = document.getElementById('focus2TaskDetailTitle');
+  if (titleEl) titleEl.value = '';
+  var dateEl = document.getElementById('focus2TaskDetailDate');
+  if (dateEl) dateEl.value = '';
+  var notesEl = document.getElementById('focus2TaskDetailNotes');
+  if (notesEl) notesEl.value = '';
+  var checkEl = document.getElementById('focus2TaskDetailCheck');
+  if (checkEl) {
+    checkEl.classList.remove('completed');
+    checkEl.innerHTML = '';
+  }
+  var priorityBtn = document.getElementById('focus2TaskDetailPriority');
+  if (priorityBtn) priorityBtn.classList.remove('active');
 }
 
 function toggleFocus2TaskFromDetail() {
@@ -3164,6 +3264,16 @@ function updateFocus2TaskBrand() {
   renderFocus2Categories();
 }
 
+function updateFocus2TaskAssignee() {
+  if (!focus2CurrentTaskId) return;
+  var task = todos.find(function(t) { return t.id === focus2CurrentTaskId; });
+  if (!task) return;
+  var el = document.getElementById('focus2TaskDetailAssignee');
+  task.assignedTo = el ? el.value : '';
+  saveTodos();
+  renderFocus2Categories();
+}
+
 function updateFocus2TaskDate() {
   if (!focus2CurrentTaskId) return;
   var task = todos.find(function(t) { return t.id === focus2CurrentTaskId; });
@@ -3196,48 +3306,35 @@ function deleteFocus2Task() {
 }
 
 /**
- * v10.5.25: Add task directly to category
+ * v28.8: Redirected to Pulse Goal system
  */
 function addTaskToCategory(categoryName, inputIdx) {
-  var inputId = 'focus2AddInput_' + inputIdx;
-  var input = document.getElementById(inputId);
-  if (!input || !input.value.trim()) {
-    showToast('Please enter a task', 'warning');
-    return;
+  var input = document.querySelector('.focus-cat-task-input[data-idx="' + inputIdx + '"]');
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text) return;
+
+  // v28.8: Find a goal matching this category name
+  var goalId = null;
+  if (typeof pulseGoals !== 'undefined' && Array.isArray(pulseGoals)) {
+    for (var i = 0; i < pulseGoals.length; i++) {
+      if (pulseGoals[i].name === categoryName && !pulseGoals[i].archived) {
+        goalId = pulseGoals[i].id;
+        break;
+      }
+    }
   }
-  
-  var isLife = getCurrentMode() === 'life';
-  var brandIdx = parseInt(document.getElementById('brand')?.value || '0');
-  var brand = !isLife && window.brands && window.brands[brandIdx] ? window.brands[brandIdx].name : '';
-  
-  var newTask = {
-    id: Date.now(),
-    text: input.value.trim(),
-    completed: false,
-    date: '', // v12.0.1: Default to no date
-    category: categoryName || '',
-    brand: isLife ? '_life' : brand,
-    isLife: isLife,
-    createdAt: new Date().toISOString()
-  };
-  
-  todos.push(newTask);
-  saveTodos();
+
+  var today = new Date();
+  var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+  if (typeof addItemToPulseGoal === 'function') {
+    addItemToPulseGoal(goalId, { text: text, date: todayStr });
+  }
 
   input.value = '';
-  // v13.9: Reset textarea height after clearing
-  if (input.tagName === 'TEXTAREA') {
-    input.style.height = 'auto';
-  }
-
-  // v11.0.5: Use requestAnimationFrame to batch DOM updates and prevent glitch
-  requestAnimationFrame(function() {
-    renderFocus2Categories();
-    updateFocus2Stats();
-    renderFocus2MiniCalendar();
-  });
-  
   showToast('Task added', 'success');
+  if (typeof renderPulse3Checklists === 'function') renderPulse3Checklists();
 }
 
 /**
@@ -4502,5 +4599,225 @@ function toggleAutomationEnabled(autoId) {
   if (typeof saveScheduledTasks === 'function') saveScheduledTasks(merged);
   renderFocus2Automations();
   // v25.1: saveScheduledTasks() already writes through to Firestore
+}
+
+/**
+ * v29.0: Add Focus task to a Pulse goal with sourceTodoId linkage
+ */
+function addFocusTaskToPulse(taskId) {
+  var task = todos.find(function(t) { return t.id === taskId; });
+  if (!task) {
+    showToast('Task not found', 'error');
+    return;
+  }
+
+  // Load pulse goals from the global var or localStorage
+  var goals;
+  if (typeof pulseGoals !== 'undefined' && Array.isArray(pulseGoals)) {
+    goals = pulseGoals;
+  } else {
+    try {
+      var raw = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+      if (raw && !Array.isArray(raw) && Array.isArray(raw.data)) {
+        goals = raw.data;
+      } else {
+        goals = Array.isArray(raw) ? raw : [];
+      }
+    } catch(e) {
+      goals = [];
+    }
+  }
+
+  // Filter to active goals
+  var activeGoals = goals.filter(function(g) {
+    return !g.archived && !g.completed;
+  });
+
+  // Build picker overlay
+  var overlay = document.createElement('div');
+  overlay.id = 'focusPulsePickerOverlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10002;display:flex;align-items:center;justify-content:center;';
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'background:var(--bg-primary);border-radius:var(--radius-lg);padding:0;max-width:400px;width:90%;max-height:70vh;display:flex;flex-direction:column;border:1px solid var(--border-color);box-shadow:0 8px 32px rgba(0,0,0,0.3);';
+
+  // Header
+  var header = document.createElement('div');
+  header.style.cssText = 'padding:16px 20px;border-bottom:1px solid var(--border-color);font-size:var(--text-base);font-weight:600;color:var(--text-primary);';
+  header.textContent = 'Add to Pulse Goal';
+  modal.appendChild(header);
+
+  // List area
+  var listArea = document.createElement('div');
+  listArea.style.cssText = 'padding:12px 20px;overflow-y:auto;flex:1;';
+
+  if (activeGoals.length === 0) {
+    var emptyMsg = document.createElement('div');
+    emptyMsg.style.cssText = 'color:var(--text-muted);font-size:var(--text-sm);padding:8px 0;';
+    emptyMsg.textContent = 'No active goals yet. Create one below.';
+    listArea.appendChild(emptyMsg);
+  }
+
+  // Radio buttons for each goal
+  for (var i = 0; i < activeGoals.length; i++) {
+    (function(goal, idx) {
+      var row = document.createElement('label');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 4px;cursor:pointer;border-radius:var(--radius-sm);margin:0;';
+      row.onmouseover = function() { row.style.background = 'var(--bg-secondary)'; };
+      row.onmouseout = function() { row.style.background = 'transparent'; };
+
+      var radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'focusPulseGoalPick';
+      radio.value = goal.id;
+      radio.style.cssText = 'margin:0;flex-shrink:0;';
+
+      var label = document.createElement('span');
+      label.style.cssText = 'color:var(--text-primary);font-size:var(--text-sm);';
+      label.textContent = goal.title || 'Untitled Goal';
+
+      row.appendChild(radio);
+      row.appendChild(label);
+      listArea.appendChild(row);
+    })(activeGoals[i], i);
+  }
+
+  // "Create New Goal" option
+  var newRow = document.createElement('label');
+  newRow.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 4px;cursor:pointer;border-radius:var(--radius-sm);margin:0;border-top:1px solid var(--border-color);margin-top:8px;padding-top:14px;';
+  newRow.onmouseover = function() { newRow.style.background = 'var(--bg-secondary)'; };
+  newRow.onmouseout = function() { newRow.style.background = 'transparent'; };
+
+  var newRadio = document.createElement('input');
+  newRadio.type = 'radio';
+  newRadio.name = 'focusPulseGoalPick';
+  newRadio.value = '__new__';
+  newRadio.style.cssText = 'margin:0;flex-shrink:0;';
+
+  var newLabel = document.createElement('span');
+  newLabel.style.cssText = 'color:var(--accent-primary, #6366f1);font-size:var(--text-sm);font-weight:500;';
+  newLabel.textContent = '+ Create New Goal';
+
+  newRow.appendChild(newRadio);
+  newRow.appendChild(newLabel);
+  listArea.appendChild(newRow);
+
+  modal.appendChild(listArea);
+
+  // Footer with buttons
+  var footer = document.createElement('div');
+  footer.style.cssText = 'padding:12px 20px;border-top:1px solid var(--border-color);display:flex;justify-content:flex-end;gap:8px;';
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.className = 'focus-2-btn';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.style.cssText = 'padding:8px 14px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;';
+  cancelBtn.onclick = function() {
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  };
+
+  var addBtn = document.createElement('button');
+  addBtn.className = 'focus-2-btn';
+  addBtn.textContent = 'Add';
+  addBtn.style.cssText = 'padding:8px 14px;background:var(--accent-primary, #6366f1);border:1px solid transparent;border-radius:var(--radius-md);font-size:var(--text-sm);color:#fff;cursor:pointer;font-weight:500;';
+  addBtn.onclick = function() {
+    var selected = overlay.querySelector('input[name="focusPulseGoalPick"]:checked');
+    if (!selected) {
+      showToast('Select a goal first', 'error');
+      return;
+    }
+
+    var newItem = {
+      id: 'item_' + Date.now(),
+      text: task.text,
+      completed: task.completed || false,
+      completedAt: task.completedAt || null,
+      sourceTodoId: task.id,
+      sourceCategory: task.category || null
+    };
+
+    if (selected.value === '__new__') {
+      // Prompt for new goal title
+      var goalTitle = prompt('Enter goal title:');
+      if (!goalTitle || !goalTitle.trim()) return;
+
+      var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
+      var newGoal = {
+        id: 'goal_' + Date.now(),
+        title: goalTitle.trim(),
+        description: '',
+        items: [newItem],
+        sections: null,
+        createdAt: new Date().toISOString(),
+        _modifiedAt: Date.now(),
+        source: isLifeMode ? 'lifeai' : 'brandai',
+        archived: false,
+        completed: false
+      };
+
+      goals.push(newGoal);
+      _focusPulseSaveGoals(goals);
+      showToast('Task added to ' + goalTitle.trim(), 'success');
+    } else {
+      // Find selected goal and add item
+      var targetGoal = null;
+      for (var g = 0; g < goals.length; g++) {
+        if (goals[g].id === selected.value) {
+          targetGoal = goals[g];
+          break;
+        }
+      }
+      if (!targetGoal) {
+        showToast('Goal not found', 'error');
+        return;
+      }
+
+      if (!Array.isArray(targetGoal.items)) {
+        targetGoal.items = [];
+      }
+      targetGoal.items.push(newItem);
+      targetGoal._modifiedAt = Date.now();
+      _focusPulseSaveGoals(goals);
+      showToast('Task added to ' + (targetGoal.title || 'goal'), 'success');
+    }
+
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  };
+
+  footer.appendChild(cancelBtn);
+  footer.appendChild(addBtn);
+  modal.appendChild(footer);
+  overlay.appendChild(modal);
+
+  // Close on backdrop click
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  });
+
+  document.body.appendChild(overlay);
+}
+
+/**
+ * v29.0: Internal helper to save pulse goals from Focus context
+ */
+function _focusPulseSaveGoals(goals) {
+  // Update the global pulseGoals array if it exists
+  if (typeof pulseGoals !== 'undefined' && Array.isArray(pulseGoals)) {
+    pulseGoals.length = 0;
+    for (var i = 0; i < goals.length; i++) {
+      pulseGoals.push(goals[i]);
+    }
+  }
+
+  if (typeof savePulseGoals === 'function') {
+    savePulseGoals();
+  } else {
+    localStorage.setItem('roweos_pulse_goals', JSON.stringify(goals));
+    if (typeof writeDB === 'function') {
+      writeDB('pulse/main', { goals: goals }, { category: 'goals' });
+    }
+  }
 }
 
