@@ -944,6 +944,8 @@ blockquote p {
       <li>Deep brand identity configuration that improves every AI output</li>
       <li>Automated workflows with scheduled execution and pipeline chaining</li>
       <li>Direct social media posting to X, Threads, Instagram, LinkedIn, and TikTok</li>
+      <li>Deep Google ecosystem integration: Google Calendar, Google Drive, Gmail, and Gemini AI models</li>
+      <li>Apple ecosystem support: iCloud Calendar, iCloud Mail via CalDAV</li>
       <li>No subscription required for core AI features - bring your own API keys</li>
     </ul>
   </div>
@@ -1084,7 +1086,7 @@ blockquote p {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           Library
         </div>
-        <div class="feature-card-desc">Document storage and knowledge base for brand materials. Upload reference documents, style guides, and strategic plans. Content is injected into AI context for informed outputs.</div>
+        <div class="feature-card-desc">Document storage and knowledge base with Google Drive integration. Upload reference documents, style guides, and strategic plans. Content is injected into AI context for informed outputs across all agents and operations.</div>
       </div>
       <div class="feature-card">
         <div class="feature-accent"></div>
@@ -1114,7 +1116,7 @@ blockquote p {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
           Mail
         </div>
-        <div class="feature-card-desc">Email composer with branded templates, Gmail and Outlook integration, outbox queue, signature management, and AI writing tools. Batch pipeline support for automated email campaigns.</div>
+        <div class="feature-card-desc">Email composer with branded templates, Gmail, Outlook, and iCloud Mail integration, outbox queue, signature management, and AI writing tools. Batch pipeline support for automated email campaigns.</div>
       </div>
       <div class="feature-card">
         <div class="feature-accent"></div>
@@ -2568,6 +2570,7 @@ function _buildPDF(orientation) {
     'Deep brand identity configuration that improves every AI output',
     'Automated workflows with scheduled execution and pipeline chaining',
     'Direct social media posting to X, Threads, Instagram, LinkedIn, and TikTok',
+    'Google ecosystem: Calendar, Drive, Gmail, and Gemini AI. Apple: iCloud Calendar and Mail',
     'No subscription required for core AI features - bring your own API keys'
   ]);
   drawLabel('LifeAI Value Propositions');
@@ -2607,7 +2610,7 @@ function _buildPDF(orientation) {
     { title: 'Identity', icon: 'identity', desc: 'Deep brand configuration covering essence, voice, audience, messaging, products, constraints, and knowledge documents. LifeAI identity includes about me, goals, health, family, career, and finances.' },
     { title: 'History', desc: 'Browse, search, and revisit past AI conversations across all agents. Full conversation archive with filtering by agent, date, and content. Context preservation ensures continuity across sessions.' },
     { title: 'Bloom', icon: 'bloom', desc: 'Daily content feed with curated insights and brand-relevant articles. AI-powered content discovery tailored to your brand\'s industry, audience, and strategic goals.' },
-    { title: 'Library', icon: 'library', desc: 'Document storage and knowledge base for brand materials. Upload reference documents, style guides, and strategic plans. Content is injected into AI context for informed outputs.' },
+    { title: 'Library', icon: 'library', desc: 'Document storage and knowledge base with Google Drive integration. Upload reference documents, style guides, and strategic plans. Content is injected into AI context for informed outputs.' },
     { title: 'Guardrails', desc: 'Content safety and output preferences. Define constraints, tone boundaries, and content policies that govern all AI outputs. Ensures every response respects your brand\'s standards and communication guidelines.' }
   ]);
   drawFooter('The Rowe Collection LLC', '7');
@@ -2617,7 +2620,7 @@ function _buildPDF(orientation) {
   drawLabel('Communication & Outreach');
   drawCards([
     { title: 'Social', icon: 'social', desc: 'Multi-platform posting to X, Threads, Instagram, LinkedIn, and TikTok. OAuth connections per brand, scheduled posts, and AI-generated content. Direct API integration with no third-party scheduling tools required.' },
-    { title: 'Mail', icon: 'mail', desc: 'Email composer with branded templates, Gmail and Outlook integration, outbox queue, signature management, and AI writing tools. Batch pipeline support for automated email campaigns.' },
+    { title: 'Mail', icon: 'mail', desc: 'Email composer with branded templates, Gmail, Outlook, and iCloud Mail integration, outbox queue, signature management, and AI writing tools. Batch pipeline support for automated email campaigns.' },
     { title: 'Push Notifications', icon: 'push', desc: 'Real-time notification center for automation completions, scheduled task results, system alerts, and important updates. Badge indicators and grouped notification history with direct navigation.' },
     { title: 'Feedback', desc: 'In-app feedback system with categorized submissions for bugs, features, UI/UX, and general input. Area-specific tagging, screenshot support, and admin review dashboard with bulk status management and export.' }
   ]);
