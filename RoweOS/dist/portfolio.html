@@ -1188,6 +1188,109 @@ blockquote p {
   </div>
 </div>
 
+<div class="page">
+  <div class="section">
+    <div class="section-label">Integrations</div>
+    <p>RoweOS connects directly to the platforms you already use. All integrations are per-brand, meaning each brand in your portfolio can have its own connected accounts with zero overlap.</p>
+    <div class="table-wrap" style="margin-top:16px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Platform</th>
+            <th>Capability</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="3"><strong>AI Providers</strong></td>
+            <td>Anthropic (Claude)</td>
+            <td>Opus 4.7, Sonnet 4.6, Haiku 4.5 - strategy, reasoning, documents</td>
+          </tr>
+          <tr>
+            <td>OpenAI (GPT)</td>
+            <td>GPT-5.4, GPT-5.4 Pro - web search, intelligence, research</td>
+          </tr>
+          <tr>
+            <td>Google (Gemini)</td>
+            <td>Gemini 3.1 Pro, 3.0 Flash - creative, multimodal, speed</td>
+          </tr>
+          <tr>
+            <td rowspan="3"><strong>Calendar</strong></td>
+            <td>Google Calendar</td>
+            <td>Read, write, and sync events with color-coded sources</td>
+          </tr>
+          <tr>
+            <td>Microsoft Outlook</td>
+            <td>Full calendar read/write via Microsoft Graph API</td>
+          </tr>
+          <tr>
+            <td>iCloud Calendar</td>
+            <td>CalDAV integration for Apple ecosystem calendar sync</td>
+          </tr>
+          <tr>
+            <td rowspan="3"><strong>Email</strong></td>
+            <td>Gmail</td>
+            <td>Send, receive, branded templates, batch campaigns</td>
+          </tr>
+          <tr>
+            <td>Microsoft Outlook</td>
+            <td>Full email integration via Microsoft Graph</td>
+          </tr>
+          <tr>
+            <td>iCloud Mail</td>
+            <td>Apple ecosystem email support</td>
+          </tr>
+          <tr>
+            <td><strong>Storage</strong></td>
+            <td>Google Drive</td>
+            <td>Document import and knowledge base integration</td>
+          </tr>
+          <tr>
+            <td rowspan="5"><strong>Social Media</strong></td>
+            <td>X (Twitter)</td>
+            <td>OAuth posting, per-brand accounts, media attachments</td>
+          </tr>
+          <tr>
+            <td>Instagram</td>
+            <td>Direct posting via Meta Graph API</td>
+          </tr>
+          <tr>
+            <td>Threads</td>
+            <td>Text and media posting via Meta API</td>
+          </tr>
+          <tr>
+            <td>LinkedIn</td>
+            <td>Profile and company page posting</td>
+          </tr>
+          <tr>
+            <td>TikTok</td>
+            <td>Video and content publishing</td>
+          </tr>
+          <tr>
+            <td rowspan="2"><strong>Media Generation</strong></td>
+            <td>Google Imagen</td>
+            <td>AI image generation from text prompts</td>
+          </tr>
+          <tr>
+            <td>Google Veo</td>
+            <td>AI video generation from text prompts</td>
+          </tr>
+          <tr>
+            <td><strong>Infrastructure</strong></td>
+            <td>Firebase</td>
+            <td>Real-time sync, authentication, Firestore, Cloud Functions scheduler</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>The Rowe Collection LLC</span>
+    <span>9</span>
+  </div>
+</div>
+
 <!-- ============================================
      CHAPTER VII: AI AGENTS
      ============================================ -->
@@ -2563,23 +2666,20 @@ function _buildPDF(orientation) {
   drawQuote('One system. Every brand. Total control.');
   drawLabel('BrandAI Value Propositions');
   drawList([
-    'Five specialized AI agents, each trained on your brand identity and voice',
-    'Over 200 operations spanning strategy, marketing, content, finance, and competitive analysis',
-    'Intelligence agent with live web search powered by GPT-5.4, plus 13 dedicated research operations',
-    'Multi-brand portfolio management with instant brand switching',
-    'Deep brand identity configuration that improves every AI output',
+    'Five specialized AI agents trained on your brand identity and voice',
+    'Over 200 operations: strategy, marketing, content, finance, competitive analysis',
+    'Intelligence agent with live web search (GPT-5.4) and 13 research operations',
+    'Multi-brand portfolio management with instant switching',
     'Automated workflows with scheduled execution and pipeline chaining',
-    'Direct social media posting to X, Threads, Instagram, LinkedIn, and TikTok',
-    'Google ecosystem: Calendar, Drive, Gmail, and Gemini AI. Apple: iCloud Calendar and Mail',
-    'No subscription required for core AI features - bring your own API keys'
+    'Integrated publishing: X, Threads, Instagram, LinkedIn, TikTok, Gmail, Outlook',
+    'Google and Apple ecosystem integrations (Calendar, Drive, iCloud)'
   ]);
   drawLabel('LifeAI Value Propositions');
   drawList([
     'Personal AI coaching that remembers your goals, health, finances, and family context',
     'Five coaching archetypes from life planning to tax strategy',
-    'Complete data sovereignty - your personal information never leaves your browser',
-    'Cross-mode intelligence sharing between your brand and personal contexts',
-    'Wellness tracking, daily planning, and structured personal development'
+    'Complete data sovereignty - personal information never leaves your browser',
+    'Cross-mode intelligence sharing between brand and personal contexts'
   ]);
   drawFooter('The Rowe Collection LLC', '5');
 
@@ -2636,6 +2736,34 @@ function _buildPDF(orientation) {
     { title: 'Admin', icon: 'admin', desc: 'Access key management, user tier administration, and brand configuration sharing. Generate and distribute access keys, manage subscription tiers, and monitor platform usage.' }
   ]);
   drawFooter('The Rowe Collection LLC', '8');
+
+  // =====================
+  // INTEGRATIONS
+  // =====================
+  newPage();
+  drawLabel('Integrations');
+  // Draw table immediately - no paragraph between to avoid page split
+  drawTable(
+    ['Category', 'Platform', 'Capability'],
+    [
+      ['AI Providers', 'Anthropic (Claude)', 'Opus 4.7, Sonnet 4.6, Haiku 4.5'],
+      ['', 'OpenAI (GPT)', 'GPT-5.4, GPT-5.4 Pro - web search, research'],
+      ['', 'Google (Gemini)', 'Gemini 3.1 Pro, 3.0 Flash - creative, multimodal'],
+      ['Calendar', 'Google Calendar', 'Read, write, sync with color-coded sources'],
+      ['', 'Microsoft Outlook', 'Full calendar read/write via MS Graph'],
+      ['', 'iCloud Calendar', 'CalDAV integration for Apple ecosystem'],
+      ['Email', 'Gmail', 'Send, receive, branded templates, batch campaigns'],
+      ['', 'Microsoft Outlook', 'Full email via Microsoft Graph'],
+      ['', 'iCloud Mail', 'Apple ecosystem email support'],
+      ['Storage', 'Google Drive', 'Document import and knowledge base integration'],
+      ['Social', 'X, Instagram, Threads', 'OAuth posting, media, per-brand accounts'],
+      ['', 'LinkedIn, TikTok', 'Profile/company posting, video publishing'],
+      ['Media', 'Google Imagen / Veo', 'AI image and video generation'],
+      ['Infra', 'Firebase', 'Real-time sync, auth, Firestore, Cloud Functions']
+    ],
+    [CW * 0.18, CW * 0.32, CW * 0.50]
+  );
+  drawFooter('The Rowe Collection LLC', '9');
 
   // =====================
   // CHAPTER VII: AI Agents
@@ -2807,19 +2935,12 @@ function _buildPDF(orientation) {
     ],
     [CW * 0.3, CW * 0.35, CW * 0.35]
   );
-  drawLabel('Iconography');
-  drawPara('RoweOS uses inline SVG icons exclusively. No emoji characters appear anywhere in the interface. Icons follow a consistent specification: viewBox="0 0 24 24", stroke-width: 1.5 or 2, with sizes of 14px (small), 16px (default), and 20px (large).');
+  drawLabel('Iconography & Typography');
+  drawPara('Inline SVG icons exclusively (no emoji). viewBox 0 0 24 24, stroke-width 1.5-2, sizes 14/16/20px. SF Pro font stack with weights 300 (headings) and 400 (body).');
   drawLabel('Per-Brand Customization');
-  drawPara('Each brand in a user\'s portfolio can define its own accent color, which propagates through every CSS custom property in real time. Light mode is supported via the html.light-mode class, with separate brand color definitions for light backgrounds.');
-  drawLabel('Typography');
-  drawPara('The system font stack prioritizes SF Pro for maximum rendering quality, falling back through Helvetica Neue and system defaults. Font weights are deliberately restrained - primarily 300 (light) for headings and 400 (regular) for body text.');
+  drawPara('Each brand defines its own accent color, propagating through every CSS custom property in real time. Light mode supported via html.light-mode class.');
   drawLabel('Ambient AI Visualization');
-  drawPara('RoweOS features WebGL-powered ambient backgrounds that respond to AI state. Users choose between two visualization modes:');
-  drawList([
-    'Blob - A fluid, organic WebGL shape centered in the chat view. Customizable colors, multiple shape presets, and state-reactive animation (idle, thinking, responding)',
-    'Helix - A full-viewport flowing ribbon gradient that spans edge-to-edge. Smooth, ambient movement with customizable color palettes'
-  ]);
-  drawPara('Both modes support light and dark themes with reduced opacity for readability, custom color selection, and a Reduce Transparency toggle.');
+  drawPara('WebGL-powered ambient backgrounds respond to AI state. Two modes: Blob (fluid organic shape, multiple presets) and Helix (full-viewport flowing ribbon gradient). Both support per-brand color customization and light/dark themes.');
   drawFooter('The Rowe Collection LLC', '13');
 
   // =====================
