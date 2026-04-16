@@ -11728,12 +11728,13 @@
     .report-checkin-today { background: rgba(251,191,36,0.15); color: #fbbf24; }
     .report-checkin-none { background: var(--bg-tertiary); color: var(--text-muted); }
     .report-status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 0 24px; }
+    .report-card .report-status-grid { padding: 0; }
     .report-status-section { margin-bottom: 24px; }
     .report-status-header { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 24px 8px; display: flex; align-items: center; gap: 8px; }
     .report-status-dot { width: 8px; height: 8px; border-radius: 50%; }
 
     /* Development goals */
-    .report-dev-goal { padding: 10px 14px; background: var(--bg-tertiary); border-radius: var(--radius-md); margin-bottom: 8px; }
+    .report-dev-goal { padding: 10px 14px; background: var(--bg-tertiary); border-radius: var(--radius-md); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
     .report-dev-goal-progress { height: 3px; border-radius: 2px; background: var(--bg-secondary); margin-top: 6px; overflow: hidden; }
     .report-dev-goal-fill { height: 100%; border-radius: 2px; background: var(--brand-accent, #a89878); transition: width 0.3s ease; }
 
@@ -13704,6 +13705,54 @@
     .gdrive-spinner { width: 20px; height: 20px; }
     .gdrive-spinner-sm { width: 12px; height: 12px; display: inline-block; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .gdrive-selection-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--brand-accent-10, rgba(168,152,120,0.08));
+      border: 1px solid var(--brand-accent-20, rgba(168,152,120,0.15));
+      border-radius: var(--radius-md, 8px);
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--brand-accent, #a89878);
+      font-weight: 500;
+    }
+    .gdrive-selection-bar.hidden { display: none; }
+    .gdrive-selection-actions { display: flex; gap: 6px; }
+    .gdrive-checkbox {
+      position: relative;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .gdrive-checkbox input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .gdrive-checkmark {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border-color, rgba(255,255,255,0.15));
+      border-radius: 4px;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gdrive-checkbox input:checked + .gdrive-checkmark {
+      background: var(--brand-accent, #a89878);
+      border-color: var(--brand-accent, #a89878);
+    }
+    .gdrive-checkbox input:checked + .gdrive-checkmark::after {
+      content: '';
+      width: 4px;
+      height: 8px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-top: -2px;
+    }
 
     /* File Preview Modal */
     .library-preview-modal {
@@ -15060,7 +15109,125 @@
       background: linear-gradient(135deg, var(--life-accent), var(--life-accent-dark));
       color: var(--life-accent-text, #ffffff);
     }
-    
+
+    /* v28.7: Save Modal Tabs */
+    .save-modal-tabs {
+      display: flex;
+      gap: var(--space-1);
+      margin-bottom: var(--space-4);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--space-2);
+    }
+    .save-modal-tab {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      padding: var(--space-2) var(--space-3);
+      cursor: pointer;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      transition: color 0.15s, background 0.15s;
+    }
+    .save-modal-tab:hover {
+      color: var(--text-primary);
+    }
+    .save-modal-tab.active {
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+    }
+    .save-tab-content {
+      display: none;
+    }
+    .save-tab-content.active {
+      display: block;
+    }
+
+    /* Google Drive Format Pills */
+    .gdrive-save-formats {
+      display: flex;
+      gap: var(--space-1);
+      margin-bottom: var(--space-2);
+    }
+    .gdrive-fmt-pill {
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .gdrive-fmt-pill:hover {
+      border-color: var(--text-muted);
+    }
+    .gdrive-fmt-pill.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Google Drive Folder Browser */
+    .gdrive-breadcrumb {
+      display: flex;
+      gap: var(--space-1);
+      align-items: center;
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-bottom: var(--space-2);
+      flex-wrap: wrap;
+    }
+    .gdrive-crumb {
+      cursor: pointer;
+      color: var(--accent);
+    }
+    .gdrive-crumb:hover {
+      text-decoration: underline;
+    }
+    .gdrive-crumb-sep {
+      color: var(--text-muted);
+    }
+    .gdrive-folder-browser {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      margin-bottom: var(--space-3);
+    }
+    .gdrive-folder-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      cursor: pointer;
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      transition: background 0.1s;
+    }
+    .gdrive-folder-item:hover {
+      background: var(--bg-hover);
+    }
+    .gdrive-folder-item.selected {
+      background: var(--accent-10);
+      color: var(--accent);
+    }
+    .gdrive-folder-icon {
+      color: #f4b400;
+      flex-shrink: 0;
+    }
+    .gdrive-format-option {
+      padding: var(--space-3);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .gdrive-format-option:hover {
+      border-color: var(--text-muted);
+    }
+
     /* Context Menu */
     .library-context-menu {
       position: fixed;
@@ -15738,31 +15905,30 @@
       margin-top: var(--space-4);
     }
     
-    /* v10.5.25: Task Detail Modal (slide-out panel) */
-    /* v10.5.25: Task detail backdrop for mobile close */
+    /* v10.5.25: Task Detail Modal (centered popup) */
     .focus-2-task-detail-backdrop {
       display: none;
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 10000;
     }
-    
+
     .focus-2-task-detail-modal {
       position: fixed;
-      top: 62px; /* Below header */
-      right: 0;
-      width: 400px;
-      max-width: 90vw;
-      height: calc(100vh - 62px);
-      background: var(--bg-secondary);
-      border-left: 1px solid var(--border-color);
-      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-      animation: slideInRight 0.25s ease;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(520px, 90vw);
+      max-height: 85vh;
+      overflow-y: auto;
+      background: var(--bg-primary);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      z-index: 10001;
     }
     
     
@@ -19217,37 +19383,23 @@
         justify-content: center;
       }
       
-      /* v10.5.25: Mobile task detail backdrop */
-      .focus-2-task-detail-backdrop[style*="display: block"] {
-        z-index: 998 !important; /* v11.0.5: Fixed - must be below modal */
-      }
-      
-      /* v11.0: Mobile task detail modal - full screen overlay, extends to bottom */
+      /* Mobile task detail modal - centered popup, slightly wider on mobile */
       .focus-2-task-detail-modal {
-        position: fixed !important;
-        top: calc(100px + env(safe-area-inset-top, 0px)) !important; /* v12.0.1: Account for header + breadcrumb */
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important; /* v11.0.5: Extend to screen bottom */
-        width: 100% !important;
-        max-width: 100% !important;
-        height: unset !important; /* v11.0.5: CRITICAL - must be unset to allow top/bottom stretch */
-        border-left: none !important;
-        border-radius: 0 !important;
-        z-index: 999 !important; /* v11.0.5: Above backdrop (998), below liquid nav (1000) */
+        width: min(520px, 94vw) !important;
+        max-height: 80vh !important;
       }
-      
+
       .focus-2-task-detail-content {
         height: 100% !important;
         overflow-y: auto !important;
-        padding-bottom: 100px !important; /* v11.0: Space for floating nav */
+        padding-bottom: 40px !important;
       }
-      
+
       .focus-2-task-detail-header {
-        padding: 20px 16px 16px 16px !important; /* v12.0.1: More top padding to prevent cut-off */
+        padding: 20px 16px 16px 16px !important;
         position: sticky !important;
         top: 0 !important;
-        background: var(--bg-secondary) !important;
+        background: var(--bg-primary) !important;
         z-index: 10 !important;
       }
       
@@ -25232,6 +25384,373 @@
       gap: var(--space-2);
     }
     
+    /* ============================================
+       v28.8: Unified Pulse Tabs
+       ============================================ */
+
+    /* --- Tab Bar --- */
+    .pulse-tab-bar {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pulse-tab {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .pulse-tab.active {
+      color: var(--brand-accent, #a89878);
+      border-bottom-color: var(--brand-accent, #a89878);
+    }
+    .pulse-tab:hover {
+      color: rgba(255,255,255,0.8);
+    }
+    .pulse-tab-content {
+      display: none;
+      padding: 16px;
+    }
+    .pulse-tab-content.active {
+      display: block;
+    }
+
+    /* --- Today Tab --- */
+    .pulse-today-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+    .pulse-today-stats {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .pulse-today-stat {
+      text-align: center;
+      flex: 1;
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+    }
+    .pulse-today-stat-num {
+      display: block;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--brand-accent, #a89878);
+    }
+    .pulse-today-stat-label {
+      font-size: 11px;
+      opacity: 0.5;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pulse-today-section {
+      margin-bottom: 20px;
+    }
+    .pulse-today-section h4 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.5;
+      margin: 0 0 8px;
+    }
+    .pulse-today-task {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      background: rgba(255,255,255,0.03);
+    }
+    .pulse-today-task.completed {
+      opacity: 0.5;
+    }
+    .pulse-today-task.completed span {
+      text-decoration: line-through;
+    }
+    .pulse-today-event {
+      display: flex;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      background: rgba(255,255,255,0.03);
+    }
+    .pulse-today-event-time {
+      font-size: 12px;
+      font-weight: 600;
+      min-width: 60px;
+      color: var(--brand-accent, #a89878);
+    }
+    .pulse-today-goal-group {
+      margin-bottom: 12px;
+    }
+    .pulse-today-goal-label {
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.4;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      padding-left: 4px;
+    }
+    .pulse-today-empty {
+      text-align: center;
+      padding: 40px 20px;
+      opacity: 0.4;
+      font-size: 14px;
+    }
+    .pulse-today-reminder {
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    /* --- Calendar Tab --- */
+    .pulse-cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .pulse-cal-month {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .pulse-cal-nav {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 16px;
+      opacity: 0.6;
+      transition: all 0.15s;
+    }
+    .pulse-cal-nav:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.06);
+    }
+    .pulse-cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+    }
+    .pulse-cal-day-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.4;
+      padding: 4px;
+    }
+    .pulse-cal-day {
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .pulse-cal-day:hover {
+      background: rgba(255,255,255,0.06);
+    }
+    .pulse-cal-day.empty {
+      cursor: default;
+    }
+    .pulse-cal-day.is-today {
+      font-weight: 700;
+      color: var(--brand-accent, #a89878);
+    }
+    .pulse-cal-day.is-selected {
+      background: var(--brand-accent, #a89878);
+      color: #fff;
+    }
+    .pulse-cal-day.has-tasks::after {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--brand-accent, #a89878);
+      margin: 2px auto 0;
+    }
+    .pulse-cal-day.is-selected.has-tasks::after {
+      background: #fff;
+    }
+    .pulse-cal-detail-header {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 16px 0 8px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .pulse-cal-detail-empty {
+      opacity: 0.4;
+      font-size: 13px;
+      padding: 12px 0;
+    }
+    .pulse-cal-detail-goal {
+      font-size: 11px;
+      opacity: 0.4;
+      margin-left: auto;
+    }
+
+    /* --- Notes Tab --- */
+    .pulse-notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+    .pulse-notes-textarea {
+      width: 100%;
+      min-height: 300px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 16px;
+      color: inherit;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+    }
+    .pulse-notes-textarea:focus {
+      outline: none;
+      border-color: var(--brand-accent, #a89878);
+    }
+
+    /* --- Streaks Tab --- */
+    .pulse-streaks-hero {
+      text-align: center;
+      padding: 30px 0;
+    }
+    .pulse-streak-number {
+      font-size: 64px;
+      font-weight: 700;
+      color: var(--brand-accent, #a89878);
+      line-height: 1;
+    }
+    .pulse-streak-label {
+      font-size: 14px;
+      opacity: 0.5;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .pulse-streak-heatmap {
+      margin: 20px 0;
+    }
+    .pulse-streak-heatmap h4 {
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0.5;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px;
+    }
+    .pulse-streak-grid {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+    .pulse-streak-cell {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.06);
+    }
+    .pulse-streak-cell.low {
+      background: rgba(168,152,120,0.3);
+    }
+    .pulse-streak-cell.med {
+      background: rgba(168,152,120,0.6);
+    }
+    .pulse-streak-cell.high {
+      background: rgba(168,152,120,1);
+    }
+    .pulse-streaks-stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    /* --- Pulse Tabs: Light Mode --- */
+    html.light-mode .pulse-tab {
+      color: rgba(0,0,0,0.4);
+    }
+    html.light-mode .pulse-tab.active {
+      color: var(--brand-accent, #a89878);
+    }
+    html.light-mode .pulse-tab-bar {
+      border-bottom-color: rgba(0,0,0,0.08);
+    }
+    html.light-mode .pulse-notes-textarea {
+      background: rgba(0,0,0,0.02);
+      border-color: rgba(0,0,0,0.1);
+    }
+    html.light-mode .pulse-streak-cell {
+      background: rgba(0,0,0,0.06);
+    }
+    html.light-mode .pulse-streak-cell.low {
+      background: rgba(168,152,120,0.2);
+    }
+    html.light-mode .pulse-streak-cell.med {
+      background: rgba(168,152,120,0.4);
+    }
+    html.light-mode .pulse-streak-cell.high {
+      background: rgba(168,152,120,0.8);
+    }
+    html.light-mode .pulse-today-stat {
+      background: rgba(0,0,0,0.03);
+    }
+
+    /* --- Pulse Tabs: Mobile --- */
+    @media (max-width: 768px) {
+      .pulse-tab-bar {
+        padding: 8px 12px 0;
+      }
+      .pulse-tab {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+      .pulse-tab-content {
+        padding: 12px;
+      }
+      .pulse-today-stats {
+        flex-wrap: wrap;
+      }
+      .pulse-today-stat {
+        min-width: calc(50% - 8px);
+      }
+      .pulse-cal-grid {
+        gap: 1px;
+      }
+      .pulse-cal-day {
+        padding: 6px 2px;
+        font-size: 12px;
+      }
+      .pulse-streak-cell {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
     /* Guardrails Styles - v22.37 Tabbed UI Overhaul */
     .guardrails-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); margin-bottom: var(--space-5); }
     .guardrails-tab-bar { display: flex; gap: 4px; padding: 0 0 var(--space-4); border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-5); overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
@@ -27672,6 +28191,10 @@
       background: rgba(168, 152, 120, 0.12) !important;
       color: #d4c8a8 !important;
       border-left: 2px solid #a89878;
+    }
+    .sidebar-brand-item[data-brand-idx] {
+      cursor: grab;
+      transition: all 0.15s ease, border-top 0s;
     }
 
     /* v15.32: Hide "Add New Life" on desktop — only show on mobile */
@@ -43404,7 +43927,8 @@
       padding: 0;
     }
     .auto-lab-card.expanded .auto-lab-card-expand {
-      max-height: 600px;
+      max-height: 70vh;
+      overflow-y: auto;
       opacity: 1;
       padding: 12px 0 4px;
     }
