@@ -2304,6 +2304,7 @@ function _buildPDF(orientation) {
   drawCenteredText('Contents', 22, C.text);
   y += 48;
   var tocItems = [
+    ['0', 'Backed by Google - Google for Startups Cloud Program'],
     ['I', 'Brand Essence'], ['II', 'Voice & Tone'], ['III', 'Target Audience'],
     ['IV', 'Competitive Advantages'], ['V', 'Key Messaging'], ['VI', 'Platform Features'],
     ['VII', 'AI Agents'], ['VIII', 'Adaptive Operations Engine'],
@@ -2349,6 +2350,75 @@ function _buildPDF(orientation) {
     setColor(C.sec);
     pdf.text(desc, W / 2, y, { align: 'center' });
   }
+
+  // =====================
+  // GOOGLE FOR STARTUPS
+  // =====================
+  newPage();
+  y = H * 0.4;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  setColor(C.gold);
+  pdf.text('GOOGLE FOR STARTUPS', W / 2, y, { align: 'center' });
+  y += 32;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(28);
+  setColor(C.text);
+  pdf.text('Backed by Google', W / 2, y, { align: 'center' });
+  y += 24;
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(11);
+  setColor(C.sec);
+  pdf.text('RoweOS has been selected for the Google for Startups Cloud Program.', W / 2, y, { align: 'center' });
+
+  newPage();
+  drawLabel('Google for Startups Cloud Program');
+  drawPara('RoweOS has been accepted into the Google for Startups Cloud Program, a highly selective initiative that provides promising startups with cloud credits, technical support, and access to Google\'s infrastructure and expertise. The program is designed to help early-stage companies scale their technology with enterprise-grade cloud resources.');
+  drawPara('Acceptance into the program is not open-application. Google identifies and selects companies that demonstrate meaningful technical innovation, clear product-market fit, and the potential to scale. RoweOS was selected on the strength of its AI-powered brand intelligence platform and its unique approach to consolidating brand operations, content strategy, and life management into a single, self-contained application.');
+
+  drawLabel('What This Means');
+  var gfsCards = [
+    { title: 'Cloud Infrastructure', desc: 'Google Cloud credits to power RoweOS infrastructure, enabling faster scaling and reduced operational costs as the platform grows.' },
+    { title: 'Technical Expertise', desc: 'Access to Google engineers and technical advisors who provide guidance on architecture, scaling, and best practices.' },
+    { title: 'Validation', desc: 'Selection by Google serves as third-party validation of RoweOS\'s technical approach and market potential.' },
+    { title: 'Network Access', desc: 'Connection to Google\'s startup ecosystem, including other program participants, mentors, and venture partners.' }
+  ];
+  var gfsCardW = (CW - 16) / 2;
+  var gfsCardH = 80;
+  for (var gc = 0; gc < gfsCards.length; gc++) {
+    var gcRow = Math.floor(gc / 2);
+    var gcCol = gc % 2;
+    var gcx = M + gcCol * (gfsCardW + 16);
+    var gcy = y + gcRow * (gfsCardH + 12);
+    checkSpace(gfsCardH + 12);
+    setFill(C.card);
+    setDraw(C.border);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(gcx, gcy, gfsCardW, gfsCardH, 6, 6, 'FD');
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    setColor(C.gold);
+    pdf.text(gfsCards[gc].title, gcx + 14, gcy + 20);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8.5);
+    setColor(C.sec);
+    var gfsLines = pdf.splitTextToSize(gfsCards[gc].desc, gfsCardW - 28);
+    pdf.text(gfsLines, gcx + 14, gcy + 36);
+  }
+  y += 2 * (gfsCardH + 12) + 16;
+
+  drawLabel('Why RoweOS Was Selected');
+  drawPara('Google\'s selection criteria emphasize technical differentiation and scalable architecture. RoweOS stands out for several reasons:');
+  var gfsReasons = [
+    'Intelligent auto-routing across AI providers - dynamically selects the optimal model across Anthropic, OpenAI, and Google Gemini for each task.',
+    'Five specialized AI agents per brand - each deeply calibrated to that brand\'s identity, voice, audience, and constraints. Over 200 operations span every business function.',
+    'Autonomous automation engine - scheduled tasks, multi-step pipelines, and workflow presets run 24/7 without user intervention.',
+    'Multi-brand portfolio management - instant switching, per-brand identity configuration, independent social connections, and separated AI contexts.',
+    'Dual-mode platform - BrandAI (business intelligence) and LifeAI (personal management) unified by a single adaptive intelligence.',
+    'Integrated social and email publishing - direct OAuth connections to X, Threads, Instagram, LinkedIn, TikTok, Gmail, and Outlook.'
+  ];
+  drawList(gfsReasons);
+  drawFooter('The Rowe Collection LLC', '');
 
   // =====================
   // CHAPTER I: Brand Essence
