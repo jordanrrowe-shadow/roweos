@@ -94,6 +94,7 @@ html.light-mode .top-bar{background:rgba(255,255,255,0.92)}
 
 /* ANIMATIONS */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes goldShine { 0% { opacity:0; color:#655e54; text-shadow:none; } 30% { opacity:1; color:#b2997b; text-shadow:0 0 20px rgba(178,153,123,0.4); } 60% { color:#d4c4a8; text-shadow:0 0 40px rgba(212,196,168,0.6), 0 0 80px rgba(178,153,123,0.3); } 100% { opacity:0.7; color:#b2997b; text-shadow:none; } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes countUp { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
@@ -910,7 +911,7 @@ var templates = [];
         + '<div style="height:32px;"></div>'
         // "RoweOS" then "Brand & Life Intelligence Platform" fades in at 4s
         + '<div style="opacity:0;animation:fadeInUp 1s ease forwards;animation-delay:4s;text-align:center;">'
-        + logoMark('dark', 64)
+        + logoMark('dark', 80)
         + '</div>'
         + '<div style="height:8px;"></div>'
         + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:4.5s;text-align:center;">'
@@ -943,9 +944,14 @@ var templates = [];
         + '<div style="font-size:13px;color:#9e9487;margin-top:8px;letter-spacing:0.04em;">Gemini</div>'
         + '</div>'
         + '</div>'
+        // Animated gold shine ROWEOS.COM at bottom
+        + '<div style="position:absolute;bottom:28px;left:0;right:0;text-align:center;z-index:2;opacity:0;animation:goldShine 2.5s ease forwards;animation-delay:9.5s;">'
+        + '<span style="font-size:20px;letter-spacing:0.3em;text-transform:uppercase;font-weight:600;">ROWEOS.COM</span>'
         + '</div>'
         + '</div>';
-      return cardWrap('dark', inner);
+      // Hide default watermark so animated one takes over
+      var result = cardWrap('dark', inner);
+      return result.replace('rgba(178,153,123,0.35)', 'transparent');
     }
   });
 
