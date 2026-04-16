@@ -992,12 +992,13 @@ var templates = [];
         + backedBadge('dark')
         + '</div>'
         + '<div style="height:16px;"></div>'
-        // "roweos.com" fades in at 18s
-        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:18s;">'
-        + '<div style="font-size:20px;color:#b2997b;letter-spacing:0.15em;">roweos.com</div>'
+        // Gold shine ROWEOS.COM at 18s
+        + '<div style="opacity:0;animation:goldShine 2.5s ease forwards;animation-delay:18s;">'
+        + '<span style="font-size:20px;letter-spacing:0.3em;text-transform:uppercase;font-weight:600;">ROWEOS.COM</span>'
         + '</div>'
         + '</div>';
-      return cardWrap('dark', inner);
+      var result = cardWrap('dark', inner);
+      return result.replace('rgba(178,153,123,0.35)', 'transparent');
     }
   });
 })();
@@ -1026,10 +1027,10 @@ var templates = [];
       + '</div>'
       + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:' + logoDelay + 's;margin-top:28px;display:flex;flex-direction:column;align-items:center;gap:16px;">'
       + logoIcon('dark', 48)
-      + logoMark('dark', 28)
+      + logoMark('dark', 64)
       + '</div>'
-      + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:' + wmDelay + 's;">'
-      + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+      + '<div style="position:absolute;bottom:28px;left:0;right:0;text-align:center;z-index:2;opacity:0;animation:goldShine 2.5s ease forwards;animation-delay:' + wmDelay + 's;">'
+      + '<span style="font-size:20px;letter-spacing:0.3em;text-transform:uppercase;font-weight:600;">ROWEOS.COM</span>'
       + '</div>';
   }
 
@@ -1155,8 +1156,8 @@ var templates = [];
         + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:6s;margin-top:48px;">'
         + backedBadge('dark')
         + '</div>'
-        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:6.8s;">'
-        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '<div style="position:absolute;bottom:28px;left:0;right:0;text-align:center;z-index:2;opacity:0;animation:goldShine 2.5s ease forwards;animation-delay:7s;">'
+        + '<span style="font-size:20px;letter-spacing:0.3em;text-transform:uppercase;font-weight:600;">ROWEOS.COM</span>'
         + '</div>'
         + '</div>';
     }
@@ -1177,7 +1178,7 @@ var templates = [];
         + '<div style="height:32px;"></div>'
         // Wordmark fades up
         + '<div style="opacity:0;animation:fadeInUp 1.5s ease forwards;animation-delay:2s;">'
-        + logoMark('dark', 36)
+        + logoMark('dark', 80)
         + '</div>'
         + '<div style="height:24px;"></div>'
         // Divider
@@ -1194,8 +1195,8 @@ var templates = [];
         + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:5s;">'
         + backedBadge('dark')
         + '</div>'
-        + '<div style="position:absolute;bottom:32px;left:0;right:0;text-align:center;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:5.8s;">'
-        + '<span style="font-size:16px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(178,153,123,0.35);font-weight:500;">roweos.com</span>'
+        + '<div style="position:absolute;bottom:28px;left:0;right:0;text-align:center;z-index:2;opacity:0;animation:goldShine 2.5s ease forwards;animation-delay:5.8s;">'
+        + '<span style="font-size:20px;letter-spacing:0.3em;text-transform:uppercase;font-weight:600;">ROWEOS.COM</span>'
         + '</div>'
         + '</div>';
     }
