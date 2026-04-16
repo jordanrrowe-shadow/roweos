@@ -908,14 +908,18 @@ var templates = [];
         + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:56px;font-weight:300;color:#ece4d8;text-align:center;">Backed by ' + googleText(56) + '</div>'
         + '</div>'
         + '<div style="height:32px;"></div>'
-        // "RoweOS Intelligence Platform" fades in at 4s
+        // "RoweOS" then "Brand & Life Intelligence Platform" fades in at 4s
         + '<div style="opacity:0;animation:fadeInUp 1s ease forwards;animation-delay:4s;text-align:center;">'
-        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;font-weight:300;color:#9e9487;letter-spacing:0.06em;">RoweOS Intelligence Platform</div>'
+        + logoMark('dark', 64)
         + '</div>'
-        + '<div style="height:20px;"></div>'
-        // "Google for Startups Cloud Program" subtitle at 5s
-        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:5s;text-align:center;">'
-        + '<div style="font-size:15px;color:#655e54;letter-spacing:0.15em;text-transform:uppercase;">' + googleText(15) + ' <span style="color:#655e54;">for Startups Cloud Program</span></div>'
+        + '<div style="height:8px;"></div>'
+        + '<div style="opacity:0;animation:fadeInUp 0.8s ease forwards;animation-delay:4.5s;text-align:center;">'
+        + '<div style="font-size:18px;color:#9e9487;letter-spacing:0.1em;">Brand & Life Intelligence Platform</div>'
+        + '</div>'
+        + '<div style="height:16px;"></div>'
+        // "Google for Startups Recipient" subtitle at 5.2s
+        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:5.2s;text-align:center;">'
+        + '<div style="font-size:14px;color:#655e54;letter-spacing:0.1em;">Google for Startups Recipient</div>'
         + '</div>'
         + '<div style="height:40px;"></div>'
         // "Powered by" + AI provider logos at 6.5s
@@ -939,10 +943,6 @@ var templates = [];
         + '<div style="font-size:13px;color:#9e9487;margin-top:8px;letter-spacing:0.04em;">Gemini</div>'
         + '</div>'
         + '</div>'
-        + '<div style="height:32px;"></div>'
-        // "roweos.com" fades in at 9.5s
-        + '<div style="opacity:0;animation:fadeIn 1s ease forwards;animation-delay:9.5s;">'
-        + '<div style="font-size:20px;color:#b2997b;letter-spacing:0.15em;">roweos.com</div>'
         + '</div>'
         + '</div>';
       return cardWrap('dark', inner);
