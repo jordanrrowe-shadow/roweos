@@ -52,7 +52,7 @@ function launchDashboard() {
   }
   
   // Show the main dashboard
-  showView('signal');
+  showView('pulse'); // v28.8: signal retired, redirect to pulse
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -754,7 +754,7 @@ function populateRevealScreen() {
   // AI Model
   var modelNames = {
     'claude-sonnet-4-6': 'Claude Sonnet 4.6',
-    'claude-opus-4-6': 'Claude Opus 4.6',
+    'claude-opus-4-7': 'Claude Opus 4.7',
     'claude-haiku-4-5-20251001': 'Claude Haiku 4.5',
     'gpt-5.4': 'GPT-5.4',
     'gpt-5.4-pro': 'GPT-5.4 Pro',
@@ -2097,7 +2097,7 @@ function exportBrandData() {
   }
 
   // Get brand-specific data
-  var brandKey = 'brand_' + selectedBrand;
+  var brandKey = typeof getBrandMemoryKey === 'function' ? getBrandMemoryKey(selectedBrand) : 'brand_' + selectedBrand;
   var modelConfig = loadFromLocalStorage('model_' + selectedBrand);
   var brandMemory = loadFromLocalStorage(brandKey);
   var brandFiles = loadFromLocalStorage('files_' + brandKey);
@@ -2580,7 +2580,7 @@ function searchNavigate(query) {
     var b = brands[bi];
     var bText = (b.name || '') + ' ' + (b.shortName || '') + ' ' + (b.tagline || '') + ' ' + (b.industry || '');
     if (fuzzyMatch(bText, q)) {
-      results.push({ type: 'brand', title: b.shortName || b.name, desc: b.tagline || b.industry || 'Brand', action: function(idx) { return function() { selectedBrand = idx; localStorage.setItem('roweos_selected_brand', String(idx)); if (typeof applyCurrentBrandAccent === 'function') applyCurrentBrandAccent(); showView('signal'); }; }(bi) });
+      results.push({ type: 'brand', title: b.shortName || b.name, desc: b.tagline || b.industry || 'Brand', action: function(idx) { return function() { selectedBrand = idx; localStorage.setItem('roweos_selected_brand', String(idx)); if (typeof applyCurrentBrandAccent === 'function') applyCurrentBrandAccent(); showView('pulse'); }; }(bi) }); // v28.8: signal→pulse
     }
   }
 
@@ -2677,7 +2677,7 @@ function searchActions(query) {
   // Pattern: "new task {text}" or "add task {text}"
   var taskMatch = q.match(/^(?:add|new|create) (?:task|todo|focus) (.+)/i);
   if (taskMatch) {
-    results.push({ type: 'action', title: 'Add Focus task: "' + taskMatch[1].trim() + '"', desc: 'Creates a new task', action: function() { showView('signal'); if (typeof showScreen === 'function') showScreen('focus'); } });
+    results.push({ type: 'action', title: 'Add Pulse task: "' + taskMatch[1].trim() + '"', desc: 'Creates a new task', action: function() { showView('pulse'); } }); // v28.8: signal→pulse
   }
 
   // Pattern: "open {feature}"

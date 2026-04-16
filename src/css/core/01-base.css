@@ -3337,32 +3337,7 @@
       height: 100%;
       width: 100%;
     }
-    /* Focus view - expanded layout like Studio */
-    #signalView {
-      position: fixed;
-      top: 38px;
-      left: var(--sidebar-collapsed-width); /* v11.5.4: Dynamic */
-      right: 0;
-      bottom: 0;
-      padding: 0;
-      background: var(--bg-primary);
-      z-index: 10;
-      overflow-y: auto;
-      transition: left var(--sidebar-transition);
-    }
-    #signalView > .panel {
-      max-width: none;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 24px 32px;
-      background: transparent;
-      border: none;
-      box-shadow: none;
-      border-radius: 0;
-      display: flex;
-      flex-direction: column;
-    }
+    /* v28.8: #signalView desktop styles removed — Focus retired */
     /* v26.1: Focus Pill Layout */
     #focusPersistentHeader {
       margin-bottom: var(--space-4);
@@ -3802,8 +3777,7 @@
     
     /* v11.5.4: Dynamic left positioning when sidebar is collapsed */
     html.sidebar-pinned-collapsed #studioView,
-    html.sidebar-pinned-collapsed #signalView,
-    html.sidebar-pinned-collapsed #memoryView,
+    html.sidebar-pinned-collapsed #memoryView, /* v28.8: removed #signalView */
     html.sidebar-pinned-collapsed #tuningView,
     html.sidebar-pinned-collapsed #settingsView,
     html.sidebar-pinned-collapsed #exportView,
@@ -3833,8 +3807,7 @@
     
     /* v11.5.4: Push panels right when sidebar is pinned open (Always Open) */
     html.sidebar-pinned #studioView,
-    html.sidebar-pinned #signalView,
-    html.sidebar-pinned #memoryView,
+    html.sidebar-pinned #memoryView, /* v28.8: removed #signalView */
     html.sidebar-pinned #tuningView,
     html.sidebar-pinned #settingsView,
     html.sidebar-pinned #exportView,
@@ -3864,8 +3837,7 @@
     
     /* v11.5.4: Push panels right when sidebar hover-expands (Auto mode) */
     html.sidebar-hover-expanded #studioView,
-    html.sidebar-hover-expanded #signalView,
-    html.sidebar-hover-expanded #memoryView,
+    html.sidebar-hover-expanded #memoryView, /* v28.8: removed #signalView */
     html.sidebar-hover-expanded #tuningView,
     html.sidebar-hover-expanded #settingsView,
     html.sidebar-hover-expanded #exportView,
@@ -36329,8 +36301,7 @@
         background: #f8f8f8;
       }
       html.light-mode .panel-view,
-      html.light-mode #signalView,
-      html.light-mode #agentView,
+      html.light-mode #agentView, /* v28.8: removed #signalView */
       html.light-mode #studioView,
       html.light-mode #identityView,
       html.light-mode #rhythmView,
@@ -37622,7 +37593,7 @@
       
       /* All views - Mobile positioning - v11.0: Extend to bottom for floating nav - v14.0: Added syncView, commerceView */
       .panel-view,
-      #agentView, #studioView, #identityView, #signalView,
+      #agentView, #studioView, #identityView, /* v28.8: removed #signalView */
       #rhythmView, #pulseView, #brandIntelView, #tuningView,
       #settingsView, #memoryView, #exportView, #libraryView,
       #analyticsView, #scheduleView, #inventoryView, #clientsView, #automationsView,
@@ -38153,72 +38124,7 @@
         padding: 8px 10px !important;
       }
 
-      /* ═══════════════════════════════════════════════════════════════════════════
-         FOCUS VIEW - Mobile Optimized (v7.0.4)
-         ═══════════════════════════════════════════════════════════════════════════ */
-      
-      /* v11.0.5: CRITICAL - Force all Focus elements to respect container width */
-      #signalView,
-      #signalView .panel,
-      #signalView .panel > *,
-      #signalView .focus-2-unified-grid,
-      #signalView .focus-2-unified-grid > *,
-      #signalView .focus-2-widget-card,
-      #signalView .focus-2-widget-card > *,
-      #signalView .breadcrumb {
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      
-      #signalView {
-        overflow-x: hidden !important;
-        width: 100% !important;
-      }
-      
-      #signalView .panel {
-        padding: 12px !important;
-        /* v11.0.5: Removed padding-bottom: 120px - was blocking content */
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        -webkit-overflow-scrolling: touch !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        width: calc(100% - 0px) !important;
-      }
-      
-      /* v10.5.25: Focus breadcrumb - NOT sticky, static position */
-      #signalView .breadcrumb {
-        position: static;
-        background: transparent;
-        z-index: auto;
-        padding-top: var(--space-2);
-        padding-bottom: var(--space-2);
-        margin-bottom: var(--space-2) !important;
-      }
-      
-      #signalView .focus-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: var(--space-4) !important;
-        overflow: visible !important;
-      }
-      
-      #signalView .focus-column {
-        width: 100% !important;
-        overflow: visible !important;
-      }
-      
-      #signalView .focus-card {
-        margin-bottom: var(--space-4);
-      }
-      
-      #signalView .focus-card:last-child {
-        margin-bottom: 0 !important;
-      }
-      #signalView > .panel {
-        height: auto !important;
-        margin-bottom: 0 !important;
-      }
+      /* v28.8: Focus/signalView mobile CSS removed — Focus retired */
 
       /* ═══════════════════════════════════════════════════════════════════════════
          SETTINGS VIEW - Mobile Optimized (v9.1.14)
@@ -40969,7 +40875,7 @@
       #studioView,
       #settingsView,
       #identityView,
-      #signalView,
+      /* v28.8: removed #signalView */
       #rhythmView,
       #pulseView,
       #memoryView,
@@ -42731,7 +42637,7 @@
     #agentView.landing-view.hidden,
     #studioView.hidden,
     #identityView.hidden,
-    #signalView.hidden,
+    /* v28.8: removed #signalView.hidden */
     #rhythmView.hidden,
     #pulseView.hidden,
     #brandIntelView.hidden,

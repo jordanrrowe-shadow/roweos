@@ -808,10 +808,21 @@ function renderSelectorStylePicker() {
 var _logoUploadMode = 'dark'; // which slot is being uploaded to
 
 function toggleLogoSameMode() {
-  var same = document.getElementById('logoSameForBoth');
-  var lightSlot = document.getElementById('logoLightSlot');
-  if (same && lightSlot) {
-    lightSlot.style.display = same.checked ? 'none' : '';
+  var useDifferent = document.getElementById('logoSameForBoth');
+  var slotsContainer = document.getElementById('logoUploadSlots');
+  if (useDifferent && slotsContainer) {
+    // v29.1: Checkbox now means "use different logos" (checked = show both slots)
+    slotsContainer.style.display = useDifferent.checked ? 'flex' : 'none';
+    // If unchecked (same logo for both), clear the light logo variant
+    if (!useDifferent.checked) {
+      var brandIdx = 0;
+      try { brandIdx = parseInt(document.getElementById('brand').value); } catch(e) {}
+      if (typeof brands !== 'undefined' && brands[brandIdx] && brands[brandIdx].logoLight) {
+        delete brands[brandIdx].logoLight;
+        if (typeof saveBrands === 'function') saveBrands();
+        if (typeof swapLogoForTheme === 'function') swapLogoForTheme();
+      }
+    }
   }
 }
 
@@ -854,15 +865,22 @@ function handleLogoFileSelect(e) {
         brands[brandIdx].logoLight = dataUrl;
       } else {
         brands[brandIdx].logo = dataUrl;
-        // If "same for both" is checked, also clear light logo
-        var same = document.getElementById('logoSameForBoth');
-        if (same && same.checked) {
+        // v29.1: Checkbox now means "use different logos" — if NOT checked (same for both), clear light logo
+        var useDiff = document.getElementById('logoSameForBoth');
+        if (useDiff && !useDiff.checked) {
           delete brands[brandIdx].logoLight;
         }
       }
       saveBrands();
+      // v29.1: Also save to localStorage key for instant sidebar update
+      var _lk = (typeof getCurrentLogoKey === 'function') ? getCurrentLogoKey() : null;
+      if (_lk) {
+        try { localStorage.setItem(_lk, dataUrl); } catch(e) {}
+      }
+      applyBrandLogo(dataUrl, localStorage.getItem((_lk || '') + '_size') || '100');
       swapLogoForTheme();
-      renderLogoUploadPreviews();
+      // v29.1: Re-render the full logo picker (includes dark/light previews now)
+      if (typeof renderBrandLogoPicker === 'function') renderBrandLogoPicker('settingsBrandLogoUploader');
       showToast('Logo updated', 'success');
     };
     img.src = ev.target.result;
@@ -878,10 +896,17 @@ function removeBrandLogo(mode) {
     delete brands[brandIdx].logoLight;
   } else {
     delete brands[brandIdx].logo;
+    // v29.1: Also clear from localStorage
+    var _lk = (typeof getCurrentLogoKey === 'function') ? getCurrentLogoKey() : null;
+    if (_lk) {
+      try { localStorage.removeItem(_lk); } catch(e) {}
+    }
   }
   saveBrands();
+  if (typeof loadCurrentLogo === 'function') loadCurrentLogo();
   swapLogoForTheme();
-  renderLogoUploadPreviews();
+  // v29.1: Re-render full picker (includes dark/light previews now)
+  if (typeof renderBrandLogoPicker === 'function') renderBrandLogoPicker('settingsBrandLogoUploader');
   showToast('Logo removed', 'success');
 }
 
@@ -917,10 +942,10 @@ function renderLogoUploadPreviews() {
     }
   }
 
-  // Update checkbox state
-  var same = document.getElementById('logoSameForBoth');
-  if (same) {
-    same.checked = !brand.logoLight;
+  // v29.1: Update checkbox state — checkbox now means "use different logos"
+  var useDifferent = document.getElementById('logoSameForBoth');
+  if (useDifferent) {
+    useDifferent.checked = !!brand.logoLight;
     toggleLogoSameMode();
   }
 }
@@ -2246,18 +2271,7 @@ var _pageLandingConfigs = {
     ],
     tabHandler: 'filterStudioByCategory'
   },
-  'signal': {
-    label: 'FOCUS',
-    tagline: 'Your day at a glance',
-    description: 'Daily intelligence dashboard with calendar, automations, reminders, and AI-powered insights.',
-    features: [
-      { id: 'dashboard', label: 'Dashboard', desc: 'Customizable widget grid with calendar, events, and automations' },
-      { id: 'today', label: 'Today & Upcoming', desc: 'AI briefing, calendar events, tasks, automations, and reminders' },
-      { id: 'tasks', label: 'Tasks', desc: 'Categorized task management across all brands' }
-    ],
-    secondary: [],
-    tabHandler: 'showFocusSection'
-  },
+  // v28.8: signal/Focus landing config removed — retired, redirects to pulse
   'rhythm': {
     label: 'RHYTHM',
     tagline: 'Time well orchestrated',
@@ -2816,7 +2830,10 @@ function showView(view) {
       if (needsSync) syncAllExternalCalendars();
     }
     updateCalendarIntegrationUI();
+    if (typeof updateDriveIntegrationUI === 'function') updateDriveIntegrationUI(); // v28.7
   }
+  // v28.8: Signal/Focus retired — redirect to Pulse
+  if (view === 'signal') { view = 'pulse'; }
   if (view === 'signal') {
     renderSignalView();
     if (typeof initFocus2 === 'function') initFocus2(); // v10.5.25: Init Focus 2.0
@@ -2943,6 +2960,9 @@ function showView(view) {
       { id: 'report', label: 'Reports' }
     ], 'client', function(tabId) { showPeopleType(tabId); }, { viewId: 'clients' });
     if (typeof initClientsTabDrag === 'function') initClientsTabDrag();
+    // v28.6: Ensure team/report container is hidden on init
+    var _ptc = document.getElementById('peopleTypeContent');
+    if (_ptc) _ptc.style.display = 'none';
     switchClientsTab(_clientsActiveTab || 'pipeline');
     if (typeof updatePeopleTypeCounts === 'function') updatePeopleTypeCounts();
   }
@@ -2951,6 +2971,7 @@ function showView(view) {
     // v26.1: Render pill nav for Analytics
     renderPillNav('analyticsPillNav', [
       { id: 'overview', label: 'Overview' },
+      { id: 'dashboard', label: 'Dashboard' },
       { id: 'api', label: 'API Costs' },
       { id: 'invoices', label: 'Invoices' },
       { id: 'website', label: 'Website', secondary: true },
@@ -2978,10 +2999,7 @@ function showView(view) {
     if (typeof renderBloom === 'function') renderBloom();
   }
 
-  // v11.0.5: Fix Focus mobile layout when view is shown
-  if (view === 'signal' && window.innerWidth <= 768) {
-    fixFocusMobileLayout();
-  }
+  // v28.8: Focus mobile layout block removed — signal retired
 
   // v26.1: Inject favorite star into page header
   updateFavoriteStarButton(view);
@@ -4964,8 +4982,8 @@ function populateSidebarBrandDropdown() {
     var clickAction = currentMode === 'brand'
       ? 'selectSidebarBrand(' + idx + ')'
       : 'switchToBrandMode(); setTimeout(function(){ selectSidebarBrand(' + idx + '); }, 100);';
-    html += '<button class="sidebar-brand-item' + selected + '" onclick="' + clickAction + '">';
-    html += '  <span style="display: flex; align-items: center; gap: 8px;">';
+    html += '<button class="sidebar-brand-item' + selected + '" data-brand-idx="' + idx + '" onclick="' + clickAction + '">';
+    html += '  <span style="display: flex; align-items: center; gap: 8px; pointer-events: none;">';
     html += '    ' + icon('briefcase', {size: 15});
     html += '    ' + escapeHtml(brand.shortName || brand.name);
     html += '  </span>';
@@ -5002,6 +5020,155 @@ function populateSidebarBrandDropdown() {
   }
   
   dropdown.innerHTML = html;
+
+}
+
+// v29.x: Brand switcher drag reorder — single global handler, no stacking
+var _bsDrag = { active: false, fromIdx: -1, startY: 0, el: null };
+
+(function() {
+  var THRESHOLD = 8;
+
+  document.addEventListener('mousedown', function(e) {
+    var btn = e.target.closest && e.target.closest('.sidebar-brand-item[data-brand-idx]');
+    if (!btn) return;
+    _bsDrag.fromIdx = parseInt(btn.getAttribute('data-brand-idx'));
+    _bsDrag.startY = e.clientY;
+    _bsDrag.el = btn;
+    _bsDrag.active = false;
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (_bsDrag.fromIdx === -1) return;
+    var dy = Math.abs(e.clientY - _bsDrag.startY);
+    if (!_bsDrag.active && dy > THRESHOLD) {
+      _bsDrag.active = true;
+      _bsDrag.el.style.opacity = '0.4';
+    }
+    if (!_bsDrag.active) return;
+    e.preventDefault();
+    var dd = document.getElementById('sidebarBrandDropdown');
+    if (dd) dd.querySelectorAll('.sidebar-brand-item[data-brand-idx]').forEach(function(b) { b.style.borderTop = ''; });
+    var target = document.elementFromPoint(e.clientX, e.clientY);
+    target = target && target.closest ? target.closest('.sidebar-brand-item[data-brand-idx]') : null;
+    if (target && parseInt(target.getAttribute('data-brand-idx')) !== _bsDrag.fromIdx) {
+      target.style.borderTop = '2px solid var(--accent)';
+    }
+  });
+
+  document.addEventListener('mouseup', function(e) {
+    if (_bsDrag.fromIdx === -1) return;
+    var wasActive = _bsDrag.active;
+    var dd = document.getElementById('sidebarBrandDropdown');
+    if (dd) dd.querySelectorAll('.sidebar-brand-item[data-brand-idx]').forEach(function(b) { b.style.borderTop = ''; b.style.opacity = ''; });
+    if (wasActive) {
+      var target = document.elementFromPoint(e.clientX, e.clientY);
+      target = target && target.closest ? target.closest('.sidebar-brand-item[data-brand-idx]') : null;
+      if (target) {
+        var toIdx = parseInt(target.getAttribute('data-brand-idx'));
+        if (toIdx !== _bsDrag.fromIdx) reorderBrand(_bsDrag.fromIdx, toIdx);
+      }
+      // Block the click event that fires after mouseup on a drag
+      var dragEl = _bsDrag.el;
+      if (dragEl) {
+        var blocker = function(ev) { ev.stopImmediatePropagation(); ev.preventDefault(); dragEl.removeEventListener('click', blocker, true); };
+        dragEl.addEventListener('click', blocker, true);
+      }
+    }
+    _bsDrag.fromIdx = -1;
+    _bsDrag.active = false;
+    _bsDrag.el = null;
+  });
+
+  // Touch support
+  document.addEventListener('touchstart', function(e) {
+    var btn = e.target.closest && e.target.closest('.sidebar-brand-item[data-brand-idx]');
+    if (!btn) return;
+    _bsDrag.fromIdx = parseInt(btn.getAttribute('data-brand-idx'));
+    _bsDrag.startY = e.touches[0].clientY;
+    _bsDrag.el = btn;
+    _bsDrag.active = false;
+  }, {passive: true});
+
+  document.addEventListener('touchmove', function(e) {
+    if (_bsDrag.fromIdx === -1) return;
+    var t = e.touches[0];
+    var dy = Math.abs(t.clientY - _bsDrag.startY);
+    if (!_bsDrag.active && dy > THRESHOLD) {
+      _bsDrag.active = true;
+      _bsDrag.el.style.opacity = '0.4';
+    }
+    if (!_bsDrag.active) return;
+    if (e.cancelable) e.preventDefault();
+    var dd = document.getElementById('sidebarBrandDropdown');
+    if (dd) dd.querySelectorAll('.sidebar-brand-item[data-brand-idx]').forEach(function(b) { b.style.borderTop = ''; });
+    var target = document.elementFromPoint(t.clientX, t.clientY);
+    target = target && target.closest ? target.closest('.sidebar-brand-item[data-brand-idx]') : null;
+    if (target && parseInt(target.getAttribute('data-brand-idx')) !== _bsDrag.fromIdx) {
+      target.style.borderTop = '2px solid var(--accent)';
+    }
+  }, {passive: false});
+
+  document.addEventListener('touchend', function(e) {
+    if (_bsDrag.fromIdx === -1) return;
+    var wasActive = _bsDrag.active;
+    var dd = document.getElementById('sidebarBrandDropdown');
+    if (dd) dd.querySelectorAll('.sidebar-brand-item[data-brand-idx]').forEach(function(b) { b.style.borderTop = ''; b.style.opacity = ''; });
+    if (wasActive) {
+      var t = e.changedTouches[0];
+      var target = document.elementFromPoint(t.clientX, t.clientY);
+      target = target && target.closest ? target.closest('.sidebar-brand-item[data-brand-idx]') : null;
+      if (target) {
+        var toIdx = parseInt(target.getAttribute('data-brand-idx'));
+        if (toIdx !== _bsDrag.fromIdx) reorderBrand(_bsDrag.fromIdx, toIdx);
+      }
+    }
+    _bsDrag.fromIdx = -1;
+    _bsDrag.active = false;
+    _bsDrag.el = null;
+  });
+})();
+
+function reorderBrand(fromIdx, toIdx) {
+  if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0 || fromIdx >= brands.length || toIdx >= brands.length) return;
+
+  // Track which brand was selected before reorder
+  var currentBrand = parseInt(document.getElementById('brand').value) || 0;
+  var activeBrandId = brands[currentBrand] ? (brands[currentBrand].id || brands[currentBrand].name) : null;
+
+  // Move the brand in the array
+  var moved = brands.splice(fromIdx, 1)[0];
+  brands.splice(toIdx, 0, moved);
+
+  // Update _order property on all brands
+  for (var i = 0; i < brands.length; i++) {
+    brands[i]._order = i;
+  }
+
+  // Restore selectedBrand to the same brand (index may have changed)
+  if (activeBrandId) {
+    for (var b = 0; b < brands.length; b++) {
+      if ((brands[b].id || brands[b].name) === activeBrandId) {
+        selectedBrand = b;
+        document.getElementById('brand').value = b;
+        break;
+      }
+    }
+  }
+
+  // Persist and sync
+  if (typeof saveBrands === 'function') saveBrands();
+
+  // Re-render the dropdown
+  populateSidebarBrandDropdown();
+
+  // Update sidebar brand name display
+  var sidebarName = document.getElementById('sidebarBrandName');
+  if (sidebarName && brands[selectedBrand]) {
+    sidebarName.innerHTML = (brands[selectedBrand].shortName || brands[selectedBrand].name) + ' <span class="sidebar-brand-arrow">\u25BE</span>';
+  }
+
+  showToast('Brand order updated', 'success');
 }
 
 // v10.5.25: Select life profile by index
@@ -6067,28 +6234,72 @@ function handleBrandLogoUpload(input) {
       try {
         localStorage.setItem(logoKey, base64Logo);
         localStorage.setItem(sizeKey, '100');
-        applyBrandLogo(base64Logo, 100);
-        renderBrandLogoPicker('settingsBrandLogoUploader');
-        syncBrandLogoToFirebase(base64Logo, 100);
-        var isLife = typeof isLifeMode === 'function' && isLifeMode();
-        showToast((isLife ? 'LifeAI' : 'Brand') + ' logo uploaded successfully', 'success');
       } catch (err) {
+        if (err.name === 'QuotaExceededError' || err.code === 22 || err.code === 1014) {
+          console.error('[Logo] localStorage quota exceeded:', err);
+          showToast('Storage full. Clear some data or use a smaller image.', 'error');
+          return;
+        }
         console.error('[Logo] Error saving logo:', err);
         showToast('Error saving logo. File may be too large.', 'error');
+        return;
       }
+      // v29.1: Save to BOTH ID-based and index-based keys for compatibility
+      var isLife = typeof isLifeMode === 'function' && isLifeMode();
+      if (!isLife) {
+        var _brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+        var _brand = (typeof brands !== 'undefined' && brands[_brandIdx]) ? brands[_brandIdx] : null;
+        if (_brand) {
+          try {
+            if (_brand.id) localStorage.setItem('roweos_brandlogo_' + _brand.id, base64Logo);
+            var _origIdx = (typeof _brand._order === 'number') ? _brand._order : _brandIdx;
+            localStorage.setItem('roweos_brand_' + _origIdx + '_logo', base64Logo);
+          } catch(e) { /* best-effort dual save */ }
+          // Sync to brands array so dark/light system stays in sync
+          _brand.logo = base64Logo;
+          if (typeof saveBrands === 'function') saveBrands();
+        }
+      }
+      applyBrandLogo(base64Logo, 100);
+      // v29.1: Also apply dark/light theme variant immediately
+      if (typeof swapLogoForTheme === 'function') swapLogoForTheme();
+      renderBrandLogoPicker('settingsBrandLogoUploader');
+      syncBrandLogoToFirebase(base64Logo, 100);
+      showToast((isLife ? 'LifeAI' : 'Brand') + ' logo uploaded successfully', 'success');
     };
     img.onerror = function() {
       // SVG or non-rasterizable — save as-is
       try {
         localStorage.setItem(logoKey, rawBase64);
         localStorage.setItem(sizeKey, '100');
-        applyBrandLogo(rawBase64, 100);
-        renderBrandLogoPicker('settingsBrandLogoUploader');
-        syncBrandLogoToFirebase(rawBase64, 100);
-        showToast('Logo uploaded successfully', 'success');
       } catch (err) {
+        if (err.name === 'QuotaExceededError' || err.code === 22 || err.code === 1014) {
+          showToast('Storage full. Clear some data or use a smaller image.', 'error');
+          return;
+        }
         showToast('Error saving logo. File may be too large.', 'error');
+        return;
       }
+      // v29.1: Dual-key save for SVG path
+      var isLife = typeof isLifeMode === 'function' && isLifeMode();
+      if (!isLife) {
+        var _brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
+        var _brand = (typeof brands !== 'undefined' && brands[_brandIdx]) ? brands[_brandIdx] : null;
+        if (_brand) {
+          try {
+            if (_brand.id) localStorage.setItem('roweos_brandlogo_' + _brand.id, rawBase64);
+            var _origIdx = (typeof _brand._order === 'number') ? _brand._order : _brandIdx;
+            localStorage.setItem('roweos_brand_' + _origIdx + '_logo', rawBase64);
+          } catch(e) {}
+          _brand.logo = rawBase64;
+          if (typeof saveBrands === 'function') saveBrands();
+        }
+      }
+      applyBrandLogo(rawBase64, 100);
+      if (typeof swapLogoForTheme === 'function') swapLogoForTheme();
+      renderBrandLogoPicker('settingsBrandLogoUploader');
+      syncBrandLogoToFirebase(rawBase64, 100);
+      showToast('Logo uploaded successfully', 'success');
     };
     img.src = rawBase64;
   };
@@ -6169,6 +6380,53 @@ function renderBrandLogoPicker(containerId) {
     html += '<span class="brand-logo-size-value" id="brandLogoSizeValue">' + savedSize + '%</span>';
     html += '</div>';
     html += '<input type="range" class="brand-logo-size-slider" id="brandLogoSizeSlider" min="30" max="300" value="' + savedSize + '" oninput="handleBrandLogoSizeChange(this.value)">';
+    html += '</div>';
+  }
+
+  // v29.1: Dark/Light mode logos — consolidated here (BrandAI only)
+  if (!isLife) {
+    var _bIdx = brandSelect ? parseInt(brandSelect.value) : 0;
+    var _curBrand = (typeof brands !== 'undefined' && brands[_bIdx]) ? brands[_bIdx] : null;
+    var _hasDarkLight = _curBrand && !!_curBrand.logoLight;
+    var placeholder = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+
+    html += '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">';
+    html += '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">';
+    html += '<input type="checkbox" id="logoSameForBoth" onchange="toggleLogoSameMode()"' + (_hasDarkLight ? ' checked' : '') + '>';
+    html += '<span style="font-size:12px;color:var(--text-secondary);">Use different logos for dark/light mode</span>';
+    html += '</label>';
+    html += '<div class="logo-upload-slots" id="logoUploadSlots" style="' + (_hasDarkLight ? 'display:flex;' : 'display:none;') + 'gap:12px;margin-top:8px;">';
+
+    // Dark mode slot
+    html += '<div class="logo-upload-slot" style="flex:1;">';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Dark Mode</div>';
+    html += '<div class="logo-upload-preview" id="logoDarkPreview" style="width:48px;height:48px;border-radius:8px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:4px;">';
+    if (_curBrand && _curBrand.logo) {
+      html += '<img src="' + _curBrand.logo + '" alt="Dark logo" style="max-width:100%;max-height:100%;object-fit:contain;">';
+    } else {
+      html += placeholder;
+    }
+    html += '</div>';
+    html += '<button class="brand-logo-upload-btn" style="font-size:11px;padding:4px 8px;" onclick="uploadBrandLogo(\'dark\')">Upload</button>';
+    html += ' <button style="font-size:11px;padding:4px 8px;background:none;border:none;color:var(--text-muted);cursor:pointer;" onclick="removeBrandLogo(\'dark\')">Remove</button>';
+    html += '</div>';
+
+    // Light mode slot
+    html += '<div class="logo-upload-slot" id="logoLightSlot" style="flex:1;">';
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Light Mode</div>';
+    html += '<div class="logo-upload-preview" id="logoLightPreview" style="width:48px;height:48px;border-radius:8px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:4px;">';
+    if (_curBrand && _curBrand.logoLight) {
+      html += '<img src="' + _curBrand.logoLight + '" alt="Light logo" style="max-width:100%;max-height:100%;object-fit:contain;">';
+    } else {
+      html += placeholder;
+    }
+    html += '</div>';
+    html += '<button class="brand-logo-upload-btn" style="font-size:11px;padding:4px 8px;" onclick="uploadBrandLogo(\'light\')">Upload</button>';
+    html += ' <button style="font-size:11px;padding:4px 8px;background:none;border:none;color:var(--text-muted);cursor:pointer;" onclick="removeBrandLogo(\'light\')">Remove</button>';
+    html += '</div>';
+
+    html += '</div>'; // .logo-upload-slots
+    html += '<input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif" style="display:none;" onchange="handleLogoFileSelect(event)">';
     html += '</div>';
   }
 
@@ -6389,7 +6647,7 @@ var ROWEOS_AI_ROUTING = {
     { provider: 'openai', model: 'gpt-5.4' }
   ],
   strategic: [
-    { provider: 'anthropic', model: 'claude-opus-4-6' },
+    { provider: 'anthropic', model: 'claude-opus-4-7' },
     { provider: 'google', model: 'gemini-3.1-pro-preview' },
     { provider: 'anthropic', model: 'claude-sonnet-4-6' },
     { provider: 'openai', model: 'gpt-5.4' }

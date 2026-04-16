@@ -178,7 +178,7 @@ function initLiquidNavScroll() {
   document.addEventListener('scroll', handleLiquidNavScroll, { passive: true, capture: true });
   
   // Also add to specific known scrollable containers
-  var panels = document.querySelectorAll('.panel-view, #agentView, #studioView, #identityView, #signalView, #rhythmView, #pulseView, #brandIntelView, #tuningView, #settingsView, .panel');
+  var panels = document.querySelectorAll('.panel-view, #agentView, #studioView, #identityView, #rhythmView, #pulseView, #brandIntelView, #tuningView, #settingsView, .panel'); // v28.8: removed #signalView
   
   panels.forEach(function(panel) {
     panel.addEventListener('scroll', handleLiquidNavScroll, { passive: true });
@@ -195,7 +195,7 @@ function handleLiquidNavScroll(e) {
     scrollTop = target.scrollTop;
   } else {
     // Try to find the currently visible panel's scroll position
-    var visiblePanel = document.querySelector('#signalView:not([style*="display: none"]), #agentView:not([style*="display: none"]), #studioView:not([style*="display: none"]), #rhythmView:not([style*="display: none"]), #pulseView:not([style*="display: none"]), #identityView:not([style*="display: none"]), #settingsView:not([style*="display: none"])');
+    var visiblePanel = document.querySelector('#agentView:not([style*="display: none"]), #studioView:not([style*="display: none"]), #rhythmView:not([style*="display: none"]), #pulseView:not([style*="display: none"]), #identityView:not([style*="display: none"]), #settingsView:not([style*="display: none"])'); // v28.8: removed #signalView
     if (visiblePanel) {
       scrollTop = visiblePanel.scrollTop || 0;
     }
@@ -1049,17 +1049,19 @@ function initMobileV2() {
         inputs.forEach(function(el) { el.style.bottom = ''; });
         if (followupV2) followupV2.style.bottom = '';
         if (autoAgentInput) autoAgentInput.style.bottom = '';
-        // v24.27: Force box-sizing reflow after keyboard closes
-        requestAnimationFrame(function() {
-          var _kbFix = document.createElement('style');
-          _kbFix.textContent = '* { box-sizing: content-box !important; }';
-          document.head.appendChild(_kbFix);
-          void document.body.offsetHeight;
+        // v29.0: Box-sizing reflow only when no input is focused (prevents stealing focus on tap)
+        if (!document.activeElement || (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA')) {
           requestAnimationFrame(function() {
-            _kbFix.remove();
+            var _kbFix = document.createElement('style');
+            _kbFix.textContent = '* { box-sizing: content-box !important; }';
+            document.head.appendChild(_kbFix);
             void document.body.offsetHeight;
+            requestAnimationFrame(function() {
+              _kbFix.remove();
+              void document.body.offsetHeight;
+            });
           });
-        });
+        }
       }
       if (typeof resizeHelix === 'function') resizeHelix();
       // v29.0: Single debounced scrollIntoView (replaces triple-scroll that caused flicker)
@@ -1074,7 +1076,8 @@ function initMobileV2() {
     });
   }
 
-  // v24.27: Safety net -- clear inline positioning when keyboard closes
+  // v24.27 / v29.0: Safety net -- clear inline positioning when keyboard fully closes
+  // Increased delay to 500ms to avoid interfering with tap-to-focus transitions
   document.addEventListener('focusout', function() {
     if (window.innerWidth > 768) return;
     setTimeout(function() {
@@ -1087,7 +1090,7 @@ function initMobileV2() {
       var autoAgentInput = document.querySelector('.auto-agent-input-area');
       if (autoAgentInput) autoAgentInput.style.bottom = '';
       if (typeof resizeHelix === 'function') resizeHelix();
-    }, 300);
+    }, 500);
   });
 
   // v29.0: Single scrollIntoView on focus (replaced double-tap that caused cursor flicker)
@@ -1281,7 +1284,7 @@ var PROVIDER_CONFIG = {
     docsLabel: 'console.anthropic.com',
     icon: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e8956a" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>',
     models: [
-      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', desc: 'Most capable, complex tasks' },
+      { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', desc: 'Most capable, complex tasks' },
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', desc: 'Balanced speed and quality' },
       { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', desc: 'Fast and efficient' }
     ],
@@ -1696,6 +1699,9 @@ async function saveProviderApiKey(provider) {
     console.log('[API] Checking connection...');
     await checkApiConnection();
     console.log('[API] Connection check complete. apiConnected:', apiConnected);
+
+    // v29.1: Immediately update provider badges so Connected/Disconnected reflects without page flip
+    if (typeof updateProviderStatuses === 'function') updateProviderStatuses();
     
     // v25.3: Re-open modal to show updated state (model picker is now inline)
     setTimeout(function() {
@@ -1733,7 +1739,7 @@ function showModelPickerInModal(provider) {
 
   var models = {
     anthropic: [
-      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', desc: 'Most capable, complex reasoning and analysis', color: '#a89878', recommended: true },
+      { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', desc: 'Most capable, complex reasoning and analysis', color: '#a89878', recommended: true },
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', desc: 'Fast, intelligent, great for most tasks', color: '#f97316', recommended: false },
       { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', desc: 'Fastest responses, cost-effective', color: '#22c55e', recommended: false }
     ],
@@ -1814,6 +1820,7 @@ async function clearApiKey() {
   
   apiConnected = false;
   updateApiStatus();
+  if (typeof updateProviderStatuses === 'function') updateProviderStatuses();
   showToast('API keys removed', 'info');
 }
 

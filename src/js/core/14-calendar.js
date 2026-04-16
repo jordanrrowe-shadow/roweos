@@ -1323,6 +1323,12 @@ async function runInfographicOperation() {
     var settings = (typeof brandSettings !== 'undefined' && brandSettings[brandIdx]) ? brandSettings[brandIdx] : {};
     var provider = settings.provider || 'anthropic';
     var model = settings.model || 'claude-sonnet-4-6';
+    // v28.8: Resolve 'roweos'/'auto' smart routing to actual provider/model
+    if (model === 'auto' || provider === 'roweos') {
+      var _resolved = (typeof resolveRoweOSAI === 'function') ? resolveRoweOSAI({ userMessage: prompt.substring(0, 200) }) : null;
+      if (_resolved) { provider = _resolved.provider; model = _resolved.model; }
+      else { provider = 'anthropic'; model = 'claude-sonnet-4-6'; }
+    }
     var apiKey = typeof getApiKey === 'function' ? await getApiKey(provider) : null;
     if (!apiKey) throw new Error('No API key configured for ' + provider);
 
@@ -1486,6 +1492,12 @@ function generateInfographicForPipeline(topic, brandIdx, config) {
   // Per-step overrides
   if (config && config.provider) provider = config.provider;
   if (config && config.model) model = config.model;
+  // v28.8: Resolve 'roweos'/'auto' smart routing to actual provider/model
+  if (model === 'auto' || provider === 'roweos') {
+    var _resolved = (typeof resolveRoweOSAI === 'function') ? resolveRoweOSAI({ userMessage: topic || 'infographic' }) : null;
+    if (_resolved) { provider = _resolved.provider; model = _resolved.model; }
+    else { provider = 'anthropic'; model = 'claude-sonnet-4-6'; }
+  }
 
   var sysPrompt = 'You are an infographic data architect for ' + brandName + '. You produce only valid JSON. Never include explanations, markdown, or text outside the JSON object.';
 
@@ -3645,8 +3657,8 @@ function studioSmartCreateFocusTasks() {
   }
 
   // Fallback: navigate to Focus and show toast
-  showView('signal');
-  showToast('Paste relevant tasks into Focus from your Studio output', 'info');
+  showView('pulse'); // v28.8: signal retired, redirect to pulse
+  showToast('Paste relevant tasks into Pulse from your Studio output', 'info');
 }
 
 // v23.14: Smart Automation — pre-fill automation from current operation
