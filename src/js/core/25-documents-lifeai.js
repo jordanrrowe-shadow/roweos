@@ -5122,7 +5122,7 @@ function updateStudioForMode() {
     // v24.27: Use querySelector to update only the span, not wipe out the ? button
     var titleSpan = titleEl.querySelector('span');
     if (titleSpan) {
-      titleSpan.textContent = inLifeMode ? 'Life Studio' : 'Agent Studio';
+      titleSpan.textContent = inLifeMode ? 'Life Studio' : 'Studio';
     }
   }
   
@@ -7720,16 +7720,12 @@ function migrateFocusTodosToPulseGoals() {
  */
 function initPulse3() {
   // v28.8: Run one-time Focus → Pulse migration
-  try {
-    migrateFocusTodosToPulseGoals();
-  } catch(e) {
-    console.error('[Migration] Focus → Pulse migration failed:', e);
-  }
-  // v28.8: Ensure default Unassigned goal exists
-  getUnassignedGoal();
-
-  renderPulse3Overview();
-  renderPulse3Checklists();
+  try { migrateFocusTodosToPulseGoals(); } catch(e) { console.error('[Migration] Focus→Pulse failed:', e); }
+  try { getUnassignedGoal(); } catch(e) {}
+  try { renderPulse3Overview(); } catch(e) { console.error('[Pulse3] Overview error:', e); }
+  try { renderPulseCalendar(); } catch(e) { console.error('[Pulse3] Calendar error:', e); }
+  try { renderPulse3Checklists(); } catch(e) { console.error('[Pulse3] Checklists error:', e); }
+  try { renderPulseCompletedGoals(); } catch(e) { console.error('[Pulse3] Completed goals error:', e); }
 }
 
 // v15.37: Pulse goal mode filter
@@ -7769,11 +7765,9 @@ function switchPulseTab(tabId) {
     renderPulse3Checklists();
   } else if (tabId === 'today') {
     renderPulseTodayTab();
-  } else if (tabId === 'calendar') {
-    renderPulseCalendarTab();
   } else if (tabId === 'goals') {
     renderPulseGoalsTab();
-  } else if (tabId === 'notes') {
+  } else if (tabId === 'REMOVED_notes') {
     renderPulseNotesTab();
   } else if (tabId === 'streaks') {
     renderPulseStreaksTab();
@@ -7781,6 +7775,7 @@ function switchPulseTab(tabId) {
 }
 
 // v28.8: Today tab — shows today's tasks, calendar events, reminders
+// v28.8: Today tab — shows ALL pending tasks across all goals + inline calendar
 function renderPulseTodayTab() {
   var container = document.getElementById('pulseTodayContent');
   if (!container) return;
@@ -7789,120 +7784,337 @@ function renderPulseTodayTab() {
   var todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
   var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  var dateLabel = dayNames[now.getDay()] + ', ' + monthNames[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+  var dateLabel = dayNames[now.getDay()] + ', ' + monthNames[now.getMonth()] + ' ' + now.getDate();
 
-  // Tasks for today
-  var todayTasks = [];
-  try { todayTasks = getAllTasksForDate(todayStr) || []; } catch(e) { /* skip */ }
-  var todoCount = 0;
-  var doneCount = 0;
-  todayTasks.forEach(function(pair) {
-    if (pair.item && pair.item.completed) { doneCount++; } else { todoCount++; }
-  });
-
-  // Calendar events
-  var calEvents = [];
-  if (typeof getCalendarItems === 'function') {
-    try { calEvents = getCalendarItems(todayStr) || []; } catch(e) { /* skip */ }
+  // v28.8: Gather ALL pending tasks across all active goals (not just date-filtered)
+  var lifeMode = typeof isLifeMode === 'function' ? isLifeMode() : false;
+  var allPendingTasks = [];
+  var allDoneTodayTasks = [];
+  for (var gi = 0; gi < pulseGoals.length; gi++) {
+    var g = pulseGoals[gi];
+    if (g.archived || g.completed) continue;
+    if (!pulseShowAllGoals) {
+      if (lifeMode && g.source !== 'lifeai') continue;
+      if (!lifeMode && g.source === 'lifeai') continue;
+    }
+    var gItems = (g.items || []).slice();
+    if (g.sections) {
+      for (var si = 0; si < g.sections.length; si++) {
+        gItems = gItems.concat(g.sections[si].items || []);
+      }
+    }
+    for (var ii = 0; ii < gItems.length; ii++) {
+      var it = gItems[ii];
+      if (!it.completed) {
+        allPendingTasks.push({ goal: g, item: it });
+      } else if (it.completedAt && String(it.completedAt).substring(0, 10) === todayStr) {
+        allDoneTodayTasks.push({ goal: g, item: it });
+      }
+    }
   }
 
-  // Reminders
-  var reminders = [];
-  if (window.reminders && Array.isArray(window.reminders)) {
-    reminders = window.reminders.filter(function(r) {
-      if (!r || !r.scheduledAt) return false;
-      return r.scheduledAt.substring(0, 10) === todayStr && r.status !== 'completed';
-    });
+  // Calendar events for today
+  var calEvents = [];
+  if (typeof getCalendarItems === 'function') {
+    try { calEvents = getCalendarItems(todayStr) || []; } catch(e) {}
   }
 
   var html = '';
-  // Header
-  html += '<div class="pulse-today-header" style="margin-bottom: 16px;">';
-  html += '<h3 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 600; color: var(--text-primary);">' + escapeHtml(dateLabel) + '</h3>';
+
+  // Mini calendar inline
+  html += '<div style="margin-bottom:20px;">';
+  html += _renderInlineMiniCalendar(now, todayStr);
   html += '</div>';
 
-  // Stats row
-  html += '<div class="pulse-today-stats" style="display: flex; gap: 16px; margin-bottom: 20px;">';
-  html += '<div style="padding: 12px 16px; border-radius: 8px; background: var(--bg-secondary); flex: 1; text-align: center;">';
-  html += '<div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">' + todoCount + '</div>';
-  html += '<div style="font-size: 12px; color: var(--text-muted);">To Do</div></div>';
-  html += '<div style="padding: 12px 16px; border-radius: 8px; background: var(--bg-secondary); flex: 1; text-align: center;">';
-  html += '<div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">' + doneCount + '</div>';
-  html += '<div style="font-size: 12px; color: var(--text-muted);">Done</div></div>';
-  html += '<div style="padding: 12px 16px; border-radius: 8px; background: var(--bg-secondary); flex: 1; text-align: center;">';
-  html += '<div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">' + calEvents.length + '</div>';
-  html += '<div style="font-size: 12px; color: var(--text-muted);">Events</div></div>';
+  // Date header + stats
+  html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;">';
+  html += '<h3 style="margin:0;font-size:18px;font-weight:600;">' + dateLabel + '</h3>';
+  html += '<span style="font-size:13px;opacity:0.5;">' + allPendingTasks.length + ' pending, ' + allDoneTodayTasks.length + ' done today</span>';
   html += '</div>';
 
-  // Calendar events section
+  // Calendar events
   if (calEvents.length > 0) {
-    html += '<div style="margin-bottom: 20px;">';
-    html += '<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Calendar Events</h4>';
-    calEvents.forEach(function(ev) {
-      var title = (ev && ev.title) ? escapeHtml(ev.title) : 'Untitled';
-      var time = (ev && ev.time) ? escapeHtml(ev.time) : '';
-      html += '<div style="padding: 8px 12px; border-radius: 6px; background: var(--bg-secondary); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">';
-      if (time) html += '<span style="font-size: 12px; color: var(--text-muted); min-width: 60px;">' + time + '</span>';
-      html += '<span style="font-size: 13px; color: var(--text-primary);">' + title + '</span>';
+    html += '<div style="margin-bottom:20px;">';
+    html += '<h4 style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;opacity:0.5;">Events</h4>';
+    for (var ei = 0; ei < calEvents.length; ei++) {
+      var ev = calEvents[ei];
+      html += '<div class="pulse-today-event">';
+      html += '<span class="pulse-today-event-time">' + escapeHtml(ev.time || '') + '</span>';
+      html += '<span>' + escapeHtml(ev.title || ev.name || '') + '</span>';
       html += '</div>';
-    });
+    }
     html += '</div>';
   }
 
-  // Tasks grouped by goal
-  if (todayTasks.length > 0) {
-    html += '<div style="margin-bottom: 20px;">';
-    html += '<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Tasks</h4>';
-    // Group by goal
+  // Pending tasks grouped by goal
+  if (allPendingTasks.length > 0) {
+    html += '<div style="margin-bottom:20px;">';
+    html += '<h4 style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;opacity:0.5;">Tasks</h4>';
     var goalGroups = {};
-    todayTasks.forEach(function(pair) {
-      var gId = pair.goal ? pair.goal.id : '_none';
-      var gTitle = pair.goal ? pair.goal.title : 'Unassigned';
-      if (!goalGroups[gId]) goalGroups[gId] = { title: gTitle, items: [] };
-      goalGroups[gId].items.push({ item: pair.item, goalId: gId });
-    });
+    for (var ti = 0; ti < allPendingTasks.length; ti++) {
+      var p = allPendingTasks[ti];
+      var gId = p.goal.id;
+      if (!goalGroups[gId]) goalGroups[gId] = { name: p.goal.name || p.goal.title || 'Unassigned', items: [] };
+      goalGroups[gId].items.push(p);
+    }
     var gKeys = Object.keys(goalGroups);
-    for (var gi = 0; gi < gKeys.length; gi++) {
-      var grp = goalGroups[gKeys[gi]];
-      html += '<div style="margin-bottom: 12px;">';
-      html += '<div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">' + escapeHtml(grp.title) + '</div>';
-      for (var ti = 0; ti < grp.items.length; ti++) {
-        var taskItem = grp.items[ti].item;
-        var taskGoalId = grp.items[ti].goalId;
-        html += '<div style="padding: 6px 10px; border-radius: 6px; background: var(--bg-secondary); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; cursor: pointer;">';
-        html += '<div class="pulse-3-checkbox ' + (taskItem.completed ? 'checked' : '') + '" onclick="togglePulseChecklistItem(\'' + taskGoalId + '\', \'' + taskItem.id + '\'); renderPulseTodayTab();">';
+    for (var gk = 0; gk < gKeys.length; gk++) {
+      var grp = goalGroups[gKeys[gk]];
+      html += '<div class="pulse-today-goal-group">';
+      html += '<div class="pulse-today-goal-label">' + escapeHtml(grp.name) + '</div>';
+      for (var ti2 = 0; ti2 < grp.items.length; ti2++) {
+        var task = grp.items[ti2];
+        html += '<div class="pulse-today-task">';
+        html += '<div class="pulse-3-checkbox" onclick="togglePulseChecklistItem(\'' + task.goal.id + '\', \'' + task.item.id + '\'); renderPulseTodayTab();">';
         html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>';
-        html += '<span style="font-size: 13px; color: var(--text-primary);' + (taskItem.completed ? ' text-decoration: line-through; opacity: 0.5;' : '') + '">' + escapeHtml(taskItem.text) + '</span>';
+        html += '<span>' + escapeHtml(task.item.text) + '</span>';
         html += '</div>';
       }
       html += '</div>';
     }
     html += '</div>';
-  } else {
-    html += '<div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px;">No tasks scheduled for today.</div>';
   }
 
-  // Reminders section
-  if (reminders.length > 0) {
-    html += '<div style="margin-bottom: 20px;">';
-    html += '<h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: var(--text-secondary);">Reminders</h4>';
-    reminders.forEach(function(rem) {
-      var rTitle = (rem && rem.title) ? escapeHtml(rem.title) : 'Reminder';
-      html += '<div style="padding: 8px 12px; border-radius: 6px; background: var(--bg-secondary); margin-bottom: 6px; font-size: 13px; color: var(--text-primary);">';
-      html += rTitle;
+  // Done today
+  if (allDoneTodayTasks.length > 0) {
+    html += '<div style="margin-bottom:20px;">';
+    html += '<h4 style="margin:0 0 8px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;opacity:0.3;">Completed Today</h4>';
+    for (var di = 0; di < allDoneTodayTasks.length; di++) {
+      var dt = allDoneTodayTasks[di];
+      html += '<div class="pulse-today-task completed">';
+      html += '<div class="pulse-3-checkbox checked" onclick="togglePulseChecklistItem(\'' + dt.goal.id + '\', \'' + dt.item.id + '\'); renderPulseTodayTab();">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>';
+      html += '<span>' + escapeHtml(dt.item.text) + '</span>';
       html += '</div>';
-    });
+    }
+    html += '</div>';
+  }
+
+  if (allPendingTasks.length === 0 && calEvents.length === 0 && allDoneTodayTasks.length === 0) {
+    html += '<div class="pulse-today-empty">No tasks or events. Add goals in the Goals tab.</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+// v28.8: Self-contained Pulse calendar — no Focus dependencies
+var _pulseCalMonth = new Date();
+
+function renderPulseCalendar() {
+  var container = document.getElementById('pulseCalendarSection');
+  if (!container) return;
+
+  var now = new Date();
+  var todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  var year = _pulseCalMonth.getFullYear();
+  var month = _pulseCalMonth.getMonth();
+  var firstDay = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+  var monthName = _pulseCalMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  // Today card + calendar side by side in a styled card
+  var html = '<div class="pulse-date-calendar-card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:20px;background:var(--bg-secondary,rgba(255,255,255,0.04));border-radius:12px;border:1px solid var(--border-color,rgba(255,255,255,0.08));">';
+
+  // Today date card — centered vertically within the flex row
+  html += '<div class="pulse-date-card" style="text-align:center;padding:20px 24px;min-width:120px;display:flex;flex-direction:column;justify-content:center;align-items:center;align-self:center;">';
+  html += '<div style="font-size:36px;font-weight:700;color:var(--text-primary);line-height:1;">' + now.getDate() + '</div>';
+  html += '<div style="font-size:12px;font-weight:600;letter-spacing:1px;color:var(--accent,#a89878);margin-top:4px;">' + now.toLocaleDateString('en-US', { month: 'long' }).toUpperCase() + '</div>';
+  html += '<div style="font-size:13px;color:var(--text-secondary);margin-top:2px;">' + now.toLocaleDateString('en-US', { weekday: 'long' }) + '</div>';
+  html += '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + now.getFullYear() + '</div>';
+  html += '</div>';
+
+  // Vertical divider
+  html += '<div style="width:1px;align-self:stretch;background:var(--border-color,rgba(255,255,255,0.08));"></div>';
+
+  // Calendar grid
+  html += '<div style="flex:1;min-width:280px;">';
+  html += '<div class="pulse-cal-header">';
+  html += '<button class="pulse-cal-nav" style="opacity:0.3;font-size:13px;padding:4px 8px;" onclick="_pulseCalMonth.setMonth(_pulseCalMonth.getMonth()-1);renderPulseCalendar();">';
+  html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>';
+  html += '<span class="pulse-cal-month">' + monthName + '</span>';
+  html += '<button class="pulse-cal-nav" style="opacity:0.3;font-size:13px;padding:4px 8px;" onclick="_pulseCalMonth.setMonth(_pulseCalMonth.getMonth()+1);renderPulseCalendar();">';
+  html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>';
+  html += '</div>';
+  html += '<div class="pulse-cal-grid">';
+  var labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  for (var d = 0; d < 7; d++) {
+    html += '<div class="pulse-cal-day-label">' + labels[d] + '</div>';
+  }
+  for (var e = 0; e < startOffset; e++) {
+    html += '<div class="pulse-cal-day empty"></div>';
+  }
+  for (var day = 1; day <= daysInMonth; day++) {
+    var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    var isToday = dateStr === todayStr;
+    var cls = 'pulse-cal-day';
+    if (isToday) cls += ' is-today';
+    html += '<div class="' + cls + '">' + day + '</div>';
+  }
+  html += '</div>';
+  html += '</div>';
+
+  html += '</div>';
+
+  // v28.8: Today widget — pending tasks for today
+  var lifeMode = typeof isLifeMode === 'function' ? isLifeMode() : false;
+  var _todayPending = [];
+  var _todayDone = [];
+  for (var gi = 0; gi < pulseGoals.length; gi++) {
+    var g = pulseGoals[gi];
+    if (g.archived || g.completed) continue;
+    if (!pulseShowAllGoals) {
+      if (lifeMode && g.source !== 'lifeai') continue;
+      if (!lifeMode && g.source === 'lifeai') continue;
+    }
+    var gItems = (g.items || []).slice();
+    if (g.sections) {
+      for (var si = 0; si < g.sections.length; si++) {
+        gItems = gItems.concat(g.sections[si].items || []);
+      }
+    }
+    for (var ii = 0; ii < gItems.length; ii++) {
+      var it = gItems[ii];
+      if (!it.completed) {
+        _todayPending.push({ goal: g, item: it });
+      } else if (it.completedAt && String(it.completedAt).substring(0, 10) === todayStr) {
+        _todayDone.push({ goal: g, item: it });
+      }
+    }
+  }
+
+  html += '<div style="margin-top:16px;padding:16px 20px;background:var(--bg-secondary,rgba(255,255,255,0.04));border-radius:12px;border:1px solid var(--border-color,rgba(255,255,255,0.08));">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">';
+  html += '<div style="font-size:15px;font-weight:600;">Today</div>';
+  html += '<span style="font-size:12px;opacity:0.5;">' + _todayPending.length + ' pending, ' + _todayDone.length + ' done</span>';
+  html += '</div>';
+
+  if (_todayPending.length > 0) {
+    var _tGroups = {};
+    for (var ti = 0; ti < _todayPending.length; ti++) {
+      var p = _todayPending[ti];
+      var gId2 = p.goal.id;
+      if (!_tGroups[gId2]) _tGroups[gId2] = { name: p.goal.name || p.goal.title || 'Unassigned', items: [] };
+      _tGroups[gId2].items.push(p);
+    }
+    var _tKeys = Object.keys(_tGroups);
+    var _tShown = 0;
+    for (var tk = 0; tk < _tKeys.length && _tShown < 10; tk++) {
+      var tg = _tGroups[_tKeys[tk]];
+      html += '<div style="font-size:11px;font-weight:600;opacity:0.4;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;margin-top:' + (tk > 0 ? '8px' : '0') + ';">' + escapeHtml(tg.name) + '</div>';
+      for (var ti2 = 0; ti2 < tg.items.length && _tShown < 10; ti2++) {
+        var task = tg.items[ti2];
+        html += '<div style="padding:5px 8px;border-radius:6px;margin-bottom:3px;display:flex;align-items:center;gap:8px;font-size:13px;">';
+        html += '<div class="pulse-3-checkbox" onclick="togglePulseChecklistItem(\'' + task.goal.id + '\', \'' + task.item.id + '\'); renderPulseCalendar();">';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>';
+        html += '<span>' + escapeHtml(task.item.text) + '</span>';
+        html += '</div>';
+        _tShown++;
+      }
+    }
+    if (_todayPending.length > 10) {
+      html += '<div style="font-size:12px;opacity:0.4;margin-top:4px;">+ ' + (_todayPending.length - 10) + ' more</div>';
+    }
+  } else {
+    html += '<div style="font-size:13px;opacity:0.4;">No pending tasks. Nice work!</div>';
+  }
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+// v28.8: Calendar tab — mini calendar with task dots
+// v28.8: Completed Goals section — collapsed by default
+var _pulseCompletedExpanded = false;
+
+function renderPulseCompletedGoals() {
+  var container = document.getElementById('pulseCompletedGoalsSection');
+  if (!container) return;
+
+  var lifeMode = typeof isLifeMode === 'function' ? isLifeMode() : false;
+  var completedGoals = pulseGoals.filter(function(g) {
+    if (!pulseShowAllGoals) {
+      if (lifeMode && g.source !== 'lifeai') return false;
+      if (!lifeMode && g.source === 'lifeai') return false;
+    }
+    if (g.archived) return false;
+    // Goal explicitly marked complete, OR all items done
+    if (g.completed) return true;
+    var gItems = (g.items || []).slice();
+    if (g.sections) {
+      for (var si = 0; si < g.sections.length; si++) {
+        gItems = gItems.concat(g.sections[si].items || []);
+      }
+    }
+    return gItems.length > 0 && gItems.every(function(it) { return it.completed; });
+  });
+
+  if (completedGoals.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  var html = '<div style="cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:12px;" onclick="_pulseCompletedExpanded=!_pulseCompletedExpanded;renderPulseCompletedGoals();">';
+  html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.2s;transform:rotate(' + (_pulseCompletedExpanded ? '0' : '-90') + 'deg);"><path d="M6 9l6 6 6-6"/></svg>';
+  html += '<span style="font-size:13px;font-weight:600;opacity:0.5;">Completed Goals (' + completedGoals.length + ')</span>';
+  html += '</div>';
+
+  if (_pulseCompletedExpanded) {
+    if (!window._pulseExpandedCompleted) window._pulseExpandedCompleted = {};
+    html += '<div class="pulse-3-checklists" style="opacity:0.7;">';
+    for (var ci = 0; ci < completedGoals.length; ci++) {
+      var cg = completedGoals[ci];
+      var cgItems = (cg.items || []).slice();
+      if (cg.sections) {
+        for (var csi = 0; csi < cg.sections.length; csi++) {
+          cgItems = cgItems.concat(cg.sections[csi].items || []);
+        }
+      }
+      var cgExpanded = window._pulseExpandedCompleted[cg.id] || false;
+      html += '<div style="padding:12px 16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;">';
+      // Header — click to expand
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="window._pulseExpandedCompleted[\'' + cg.id + '\']=!window._pulseExpandedCompleted[\'' + cg.id + '\'];renderPulseCompletedGoals();">';
+      html += '<div style="display:flex;align-items:center;gap:8px;">';
+      html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.2s;transform:rotate(' + (cgExpanded ? '0' : '-90') + 'deg);opacity:0.4;"><path d="M6 9l6 6 6-6"/></svg>';
+      html += '<div>';
+      html += '<div style="font-size:14px;font-weight:600;text-decoration:line-through;opacity:0.7;">' + escapeHtml(cg.title || cg.name) + '</div>';
+      html += '<div style="font-size:11px;opacity:0.5;">' + cgItems.length + ' tasks completed</div>';
+      html += '</div>';
+      html += '</div>';
+      html += '<div style="display:flex;align-items:center;gap:12px;">';
+      html += '<span style="font-size:13px;font-weight:600;color:var(--accent);">100%</span>';
+      html += '<button onclick="event.stopPropagation();deleteCompletedGoal(\'' + cg.id + '\')" style="background:none;border:none;color:var(--error,#ef4444);cursor:pointer;font-size:11px;opacity:0.6;padding:2px 6px;" title="Delete goal">Delete</button>';
+      html += '</div>';
+      html += '</div>';
+      // Expanded items
+      if (cgExpanded) {
+        html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-color,rgba(255,255,255,0.06));">';
+        for (var cii = 0; cii < cgItems.length; cii++) {
+          var cItem = cgItems[cii];
+          html += '<div style="padding:4px 8px;font-size:13px;opacity:0.5;text-decoration:line-through;display:flex;align-items:center;gap:8px;">';
+          html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+          html += '<span>' + escapeHtml(cItem.text) + '</span>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    }
     html += '</div>';
   }
 
   container.innerHTML = html;
 }
 
-// v28.8: Calendar tab globals
-var _pulseCalendarDate = new Date();
-var _pulseSelectedDate = null;
+function deleteCompletedGoal(goalId) {
+  if (!confirm('Delete this completed goal?')) return;
+  pulseGoals = pulseGoals.filter(function(g) { return g.id !== goalId; });
+  savePulseGoals();
+  renderPulseCompletedGoals();
+  renderPulse3Overview();
+  showToast('Goal deleted', 'success');
+}
 
-// v28.8: Calendar tab — mini calendar with task dots
 function renderPulseCalendarTab() {
   var widget = document.getElementById('pulseCalendarWidget');
   if (!widget) return;
@@ -8092,7 +8304,7 @@ function renderPulseStreaksTab() {
     }
     allItems.forEach(function(item) {
       if (item.completed && item.completedAt) {
-        var dateKey = item.completedAt.substring(0, 10);
+        var dateKey = String(item.completedAt).substring(0, 10);
         if (!completionsByDate[dateKey]) completionsByDate[dateKey] = 0;
         completionsByDate[dateKey]++;
         allTimeCompletions++;
@@ -8168,15 +8380,34 @@ function renderPulseStreaksTab() {
 }
 
 // v28.8: Goals tab — clones checklists content
+// v28.8: Goals tab — renders all goals (including completed) with layout toggle
+var _pulseGoalGridLayout = localStorage.getItem('roweos_pulse_goal_layout') === 'grid';
+
 function renderPulseGoalsTab() {
   var container = document.getElementById('pulseGoalsList');
   if (!container) return;
-  // Re-render checklists first to ensure it's current
+  // Render into goals container directly (show ALL goals including completed)
   renderPulse3Checklists();
   var source = document.getElementById('pulse3Checklists');
   if (source) {
     container.innerHTML = source.innerHTML;
   }
+  // Apply grid layout if toggled
+  if (_pulseGoalGridLayout) {
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(380px, 1fr))';
+    container.style.gap = '16px';
+  } else {
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '16px';
+  }
+}
+
+function togglePulseGoalLayout() {
+  _pulseGoalGridLayout = !_pulseGoalGridLayout;
+  localStorage.setItem('roweos_pulse_goal_layout', _pulseGoalGridLayout ? 'grid' : 'list');
+  renderPulseGoalsTab();
 }
 
 /**
@@ -8217,15 +8448,30 @@ function renderPulse3Overview() {
   modeFilteredGoals.forEach(function(goal) {
     if (goal.items) {
       todayCompleted += goal.items.filter(function(i) {
-        return i.completed && i.completedAt && i.completedAt.startsWith(today);
+        return i.completed && i.completedAt && String(i.completedAt).indexOf(today) === 0;
       }).length;
     }
   });
   
   var html = '';
   
-  // Overall Progress Ring
-  html += createPulseRing(overallProgress, 'Overall Progress', completedItems + '/' + totalItems + ' tasks');
+  // v28.8: Clickable progress ring — toggles between active tasks vs all-time
+  var _allTimeTotal = 0;
+  var _allTimeCompleted = 0;
+  modeFilteredGoals.forEach(function(goal) {
+    if (goal.items && !goal.archived) {
+      _allTimeTotal += goal.items.length;
+      _allTimeCompleted += goal.items.filter(function(i) { return i.completed; }).length;
+    }
+  });
+  var _allTimeProgress = _allTimeTotal > 0 ? Math.round((_allTimeCompleted / _allTimeTotal) * 100) : 0;
+  var _showAllTime = window._pulseProgressAllTime || false;
+  var _ringPercent = _showAllTime ? _allTimeProgress : overallProgress;
+  var _ringLabel = _showAllTime ? 'All Goals' : 'Active Goals';
+  var _ringMeta = _showAllTime ? (_allTimeCompleted + '/' + _allTimeTotal + ' tasks') : (completedItems + '/' + totalItems + ' tasks');
+  html += '<div onclick="window._pulseProgressAllTime=!window._pulseProgressAllTime;renderPulse3Overview();" style="cursor:pointer;" title="Click to toggle active vs all goals">';
+  html += createPulseRing(_ringPercent, _ringLabel, _ringMeta);
+  html += '</div>';
   
   // Active Goals
   html += '<div class="pulse-3-stat-card">' +
@@ -8239,6 +8485,15 @@ function renderPulse3Overview() {
     '<div style="font-size: var(--text-5xl); font-weight: 700; color: var(--accent); margin-bottom: var(--space-2);">' + todayCompleted + '</div>' +
     '<div class="pulse-3-stat-label">Done Today</div>' +
     '<div class="pulse-3-stat-meta">Keep it up!</div>' +
+  '</div>';
+
+  // v28.8: Merged Focus stats — pending count + streak
+  var _pPending = totalItems - completedItems;
+  var _pStreak = parseInt(localStorage.getItem('roweosStreak') || '0', 10);
+  html += '<div class="pulse-3-stat-card">' +
+    '<div style="font-size: var(--text-5xl); font-weight: 700; color: var(--accent); margin-bottom: var(--space-2);">' + _pPending + '</div>' +
+    '<div class="pulse-3-stat-label">To Do</div>' +
+    '<div class="pulse-3-stat-meta">' + _pStreak + ' day streak</div>' +
   '</div>';
 
   // v22.41: Brand Activity Pulse — automations, emails, social posts
@@ -8325,9 +8580,17 @@ function renderPulse3Checklists() {
       if (lifeMode && g.source !== 'lifeai') return false;
       if (!lifeMode && g.source === 'lifeai') return false;
     }
+    // v28.8: Hide goals where ALL items are completed (effectively 100% done)
+    var gItems = (g.items || []).slice();
+    if (g.sections) {
+      for (var _si = 0; _si < g.sections.length; _si++) {
+        gItems = gItems.concat(g.sections[_si].items || []);
+      }
+    }
+    if (gItems.length > 0 && gItems.every(function(it) { return it.completed; })) return false;
     return true;
   });
-  
+
   if (activeGoals.length === 0) {
     container.innerHTML = '<div class="pulse-3-empty">' +
       '<div class="pulse-3-empty-icon">' +
@@ -8402,22 +8665,40 @@ function renderPulse3Checklists() {
       }).join('');
     }
     
-    var sourceLabel = goal.source === 'lifeai' ? 'From LifeAI' : (goal.source === 'brandai' ? 'From BrandAI' : (goal.source === 'studio' ? 'From Studio' : 'Manual'));
-    
+    // v28.8: "Created on" left, "Due on" right
+    var _createdLabel = '';
+    if (goal.createdAt) {
+      _createdLabel = 'Created on ' + new Date(goal.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    var _dueDateHtml = '';
+    if (goal.dueDate) {
+      var _dd = new Date(goal.dueDate + 'T12:00:00');
+      var _ddNow = new Date();
+      var _ddOverdue = _dd < _ddNow && _dd.toDateString() !== _ddNow.toDateString();
+      _dueDateHtml = '<span class="pulse-due-date-trigger" style="font-size:11px;color:' + (_ddOverdue ? 'var(--error,#ef4444)' : 'var(--text-muted)') + ';cursor:pointer;" onclick="event.stopPropagation();setGoalDueDate(\'' + goal.id + '\')" title="Change due date">' +
+        'Due on ' + _dd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</span>';
+    } else {
+      _dueDateHtml = '<span class="pulse-due-date-trigger" style="font-size:11px;color:var(--text-muted);cursor:pointer;opacity:0.4;" onclick="event.stopPropagation();setGoalDueDate(\'' + goal.id + '\')" title="Set due date">' +
+        'Set due date</span>';
+    }
+
     return '<div class="pulse-3-checklist-card' + (goal.collapsed ? ' collapsed' : '') + '" data-goal-id="' + goal.id + '">' +
       '<div class="pulse-3-checklist-header">' +
-        '<div style="display:flex;align-items:flex-start;gap:var(--space-2);">' +
+        '<div style="display:flex;align-items:flex-start;gap:var(--space-2);flex:1;min-width:0;">' +
           '<button class="pulse-3-collapse-toggle" onclick="event.stopPropagation();toggleGoalCollapse(\'' + goal.id + '\')" title="Toggle details">' +
             '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>' +
           '</button>' +
-          '<div>' +
+          '<div style="flex:1;min-width:0;">' +
             '<div class="pulse-3-checklist-title" onclick="editGoalTitleInline(this, \'' + goal.id + '\')" title="Click to edit">' + escapeHtml(goal.title) + '</div>' +
-            '<div class="pulse-3-checklist-meta">' + sourceLabel + ' &bull; ' + new Date(goal.createdAt).toLocaleDateString() + '</div>' +
+            '<div class="pulse-3-checklist-meta">' + _createdLabel + '</div>' +
           '</div>' +
         '</div>' +
-        '<div class="pulse-3-checklist-progress">' +
-          '<div class="pulse-3-checklist-progress-bar"><div class="pulse-3-checklist-progress-fill" style="width: ' + progress + '%;"></div></div>' +
-          '<div class="pulse-3-checklist-progress-text">' + progress + '%</div>' +
+        '<div class="pulse-3-checklist-progress" style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;width:100%;">' +
+            '<div class="pulse-3-checklist-progress-bar"><div class="pulse-3-checklist-progress-fill" style="width: ' + progress + '%;"></div></div>' +
+            '<div class="pulse-3-checklist-progress-text">' + progress + '%</div>' +
+          '</div>' +
+          _dueDateHtml +
         '</div>' +
       '</div>' +
       '<div class="pulse-3-checklist-items">' + itemsHtml + '</div>' +
@@ -9293,6 +9574,37 @@ function createNewGoal() {
 /**
  * v11.0.5: Delete a goal
  */
+// v28.8: Set due date for a goal via native date input
+function setGoalDueDate(goalId) {
+  var goal = null;
+  for (var i = 0; i < pulseGoals.length; i++) {
+    if (pulseGoals[i].id === goalId) { goal = pulseGoals[i]; break; }
+  }
+  if (!goal) return;
+  // Find the clicked element and replace it with an inline date input
+  var card = document.querySelector('.pulse-3-checklist-card[data-goal-id="' + goalId + '"]');
+  if (!card) return;
+  var dueDateEl = card.querySelector('.pulse-due-date-trigger');
+  if (!dueDateEl) return;
+  var input = document.createElement('input');
+  input.type = 'date';
+  input.value = goal.dueDate || '';
+  input.style.cssText = 'font-size:11px;background:var(--bg-tertiary,rgba(255,255,255,0.08));color:inherit;border:1px solid var(--border-color,rgba(255,255,255,0.15));border-radius:6px;padding:2px 6px;cursor:pointer;max-width:130px;';
+  dueDateEl.replaceWith(input);
+  input.focus();
+  input.addEventListener('change', function() {
+    goal.dueDate = input.value || null;
+    goal._modifiedAt = Date.now();
+    savePulseGoals();
+    renderPulse3Checklists();
+    showToast(input.value ? 'Due date set' : 'Due date removed', 'success');
+  });
+  input.addEventListener('blur', function() {
+    // If no change, re-render to restore the text
+    renderPulse3Checklists();
+  });
+}
+
 function deleteGoal(goalId) {
   if (!confirm('Delete this goal? This cannot be undone.')) return;
 
@@ -9733,7 +10045,8 @@ function saveInlineGoal(card) {
     createdAt: new Date().toISOString(),
     source: currentMode === 'life' ? 'lifeai' : 'manual',
     archived: false,
-    completed: false
+    completed: false,
+    _modifiedAt: Date.now() // v29.2: Stamp for Firebase sync merge
   };
 
   pulseGoals.unshift(newGoal);
