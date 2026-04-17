@@ -8715,6 +8715,56 @@ function renderPulse3Checklists() {
   container.innerHTML = html;
 }
 
+// v29.2: Targeted in-place update for a single goal card (used when inline goal is active)
+function updateGoalCardInPlace(goalId) {
+  var goal = pulseGoals.find(function(g) { return g.id === goalId; });
+  if (!goal) return;
+  var card = document.querySelector('.pulse-3-checklist-card[data-goal-id="' + goalId + '"]');
+  if (!card) return;
+
+  // Collect all items
+  var allItems = [];
+  if (goal.sections && goal.sections.length > 0) {
+    goal.sections.forEach(function(s) { if (s.items) allItems = allItems.concat(s.items); });
+  }
+  if ((!goal.sections || goal.sections.length === 0) && goal.items) {
+    allItems = allItems.concat(goal.items);
+  }
+
+  // Update checkbox and text states
+  allItems.forEach(function(item) {
+    var itemEls = card.querySelectorAll('.pulse-3-checklist-item');
+    for (var i = 0; i < itemEls.length; i++) {
+      var checkbox = itemEls[i].querySelector('.pulse-3-checkbox');
+      if (checkbox && checkbox.getAttribute('onclick') && checkbox.getAttribute('onclick').indexOf(item.id) !== -1) {
+        if (item.completed) {
+          checkbox.classList.add('checked');
+        } else {
+          checkbox.classList.remove('checked');
+        }
+        var textEl = itemEls[i].querySelector('.pulse-3-item-text');
+        if (textEl) {
+          if (item.completed) {
+            textEl.classList.add('completed');
+          } else {
+            textEl.classList.remove('completed');
+          }
+        }
+        break;
+      }
+    }
+  });
+
+  // Update progress bar
+  var total = allItems.length;
+  var completed = allItems.filter(function(i) { return i.completed; }).length;
+  var pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  var fillEl = card.querySelector('.pulse-3-checklist-progress-fill');
+  if (fillEl) fillEl.style.width = pct + '%';
+  var pctText = card.querySelector('.pulse-3-checklist-progress-text');
+  if (pctText) pctText.textContent = pct + '%';
+}
+
 // v15.37: Toggle goal card collapse
 function toggleGoalCollapse(goalId) {
   var goal = pulseGoals.find(function(g) { return g.id === goalId; });
@@ -8773,7 +8823,11 @@ function togglePulseChecklistItem(goalId, itemId) {
 
   savePulseGoals();
   renderPulse3Overview();
-  renderPulse3Checklists();
+  if (window._pulseInlineGoalActive) {
+    updateGoalCardInPlace(goalId); // v29.2: Don't wipe inline goal card
+  } else {
+    renderPulse3Checklists();
+  }
 }
 
 /**
@@ -9635,7 +9689,23 @@ function deleteGoalItem(goalId, itemId) {
 
   savePulseGoals();
   renderPulse3Overview();
-  renderPulse3Checklists();
+  if (window._pulseInlineGoalActive) {
+    // v29.2: Remove item from DOM directly instead of full re-render
+    var delCard = document.querySelector('.pulse-3-checklist-card[data-goal-id="' + goalId + '"]');
+    if (delCard) {
+      var delBtns = delCard.querySelectorAll('.pulse-3-item-delete');
+      for (var di = 0; di < delBtns.length; di++) {
+        if (delBtns[di].getAttribute('onclick') && delBtns[di].getAttribute('onclick').indexOf(itemId) !== -1) {
+          var delRow = delBtns[di].closest('.pulse-3-checklist-item');
+          if (delRow) delRow.remove();
+          break;
+        }
+      }
+    }
+    updateGoalCardInPlace(goalId);
+  } else {
+    renderPulse3Checklists();
+  }
 }
 
 /**
@@ -9966,6 +10036,7 @@ function createInlineGoal() {
   if (!container) return;
   // Don't add twice
   if (container.querySelector('.pulse-3-inline-goal')) return;
+  window._pulseInlineGoalActive = true; // v29.2: Suppress full re-renders while creating
 
   var card = document.createElement('div');
   card.className = 'pulse-3-inline-goal';
@@ -9974,7 +10045,7 @@ function createInlineGoal() {
     '<div style="display:flex;gap:8px;margin-top:12px;">' +
       '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="addInlineGoalTask(this.closest(\'.pulse-3-inline-goal\'))">+ Add Task</button>' +
       '<button class="pulse-3-btn pulse-3-btn-primary" onclick="saveInlineGoal(this.closest(\'.pulse-3-inline-goal\'))">Save Goal</button>' +
-      '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="this.closest(\'.pulse-3-inline-goal\').remove()">Cancel</button>' +
+      '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="window._pulseInlineGoalActive=false;this.closest(\'.pulse-3-inline-goal\').remove()">Cancel</button>' +
     '</div>';
 
   container.insertBefore(card, container.firstChild);
@@ -10051,6 +10122,7 @@ function saveInlineGoal(card) {
 
   pulseGoals.unshift(newGoal);
   savePulseGoals();
+  window._pulseInlineGoalActive = false; // v29.2: Clear before re-render
   renderPulse3Overview();
   renderPulse3Checklists();
   showToast('Goal created!', 'success');
