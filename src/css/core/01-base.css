@@ -47091,4 +47091,25 @@ html.light-mode .scribe-knowledge-toggle-btn:hover { color: var(--text-primary);
   .scribe-title-input { font-size: 16px; }
   .scribe-knowledge-panel { max-height: none; }
 }
+/* v29.3: AI Writing */
+.scribe-ai-btn, .scribe-voice-btn { color: var(--accent) !important; }
+.scribe-ai-btn:hover, .scribe-voice-btn:hover { background: rgba(168,152,120,0.15) !important; }
+.scribe-voice-popover { position: absolute; top: 100%; right: 0; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 4px 0; min-width: 140px; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+.scribe-voice-item { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-primary); transition: background 0.15s; }
+.scribe-voice-item:hover { background: rgba(168,152,120,0.1); }
+.scribe-ai-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 300; border-radius: inherit; }
+.scribe-ai-modal { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; max-width: 480px; width: 90%; }
+.scribe-ai-modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.scribe-ai-modal-hint { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+.scribe-ai-topic-input { width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 14px; font-family: inherit; resize: vertical; box-sizing: border-box; outline: none; }
+.scribe-ai-topic-input:focus { border-color: var(--accent); }
+.scribe-ai-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.scribe-ai-cancel-btn { padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 13px; }
+.scribe-ai-submit-btn { padding: 8px 20px; background: var(--accent, #a89878); border: none; border-radius: 8px; color: #fff; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; }
+.scribe-ai-submit-btn:hover { opacity: 0.85; }
+html.light-mode .scribe-voice-popover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+html.light-mode .scribe-voice-item:hover { background: rgba(0,0,0,0.04); }
+html.light-mode .scribe-ai-modal { background: #fff; }
+html.light-mode .scribe-ai-topic-input { background: #f5f5f5; }
+html.light-mode .scribe-ai-cancel-btn { background: #f0f0f0; }
 

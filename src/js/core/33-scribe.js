@@ -567,6 +567,241 @@ function saveActiveScribeNotebook() { // v29.0:
   if (listItem) listItem.textContent = nb.title || 'Untitled';
 }
 
+// === AI WRITING === // v29.3:
+
+function scribeAICompose() {
+  // v29.3: Open modal to ask what to write about
+  if (!_scribeActiveId) {
+    if (typeof showToast === 'function') showToast('Select or create a notebook first', 'warning');
+    return;
+  }
+  var overlay = document.getElementById('scribeAiOverlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  var input = document.getElementById('scribeAiTopicInput');
+  if (input) { input.value = ''; input.focus(); }
+}
+
+function scribeAiModalCancel() {
+  var overlay = document.getElementById('scribeAiOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function scribeAiModalSubmit() {
+  var input = document.getElementById('scribeAiTopicInput');
+  var topic = input ? input.value.trim() : '';
+  if (!topic) {
+    if (typeof showToast === 'function') showToast('Please enter a topic', 'warning');
+    return;
+  }
+  var overlay = document.getElementById('scribeAiOverlay');
+  if (overlay) overlay.style.display = 'none';
+
+  // Get existing content if any
+  var existingContent = '';
+  var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+  if (editor) existingContent = editor.getContent() || '';
+
+  scribeAIWriteExecute(topic, existingContent);
+}
+
+function _buildScribeBrandContext() {
+  var brandCtx = '';
+  try {
+    var idx = (typeof selectedBrand !== 'undefined') ? selectedBrand : 0;
+    var brand = (typeof brands !== 'undefined') ? brands[idx] : null;
+    if (brand) {
+      brandCtx += 'You are writing for ' + (brand.shortName || brand.name) + '.\n\n';
+      brandCtx += '===== BRAND: ' + brand.name + ' =====\n';
+      if (brand.tagline) brandCtx += 'TAGLINE: ' + brand.tagline + '\n';
+      if (brand.philosophy) brandCtx += 'PHILOSOPHY: ' + brand.philosophy + '\n';
+      if (brand.coreBelief) brandCtx += 'CORE BELIEF: ' + brand.coreBelief + '\n';
+      if (brand.mission) brandCtx += 'MISSION: ' + brand.mission + '\n';
+      if (brand.ethos) brandCtx += 'ETHOS: ' + brand.ethos + '\n';
+      if (brand.products || brand.positioning) brandCtx += 'PRODUCTS: ' + (brand.products || brand.positioning || '') + '\n';
+      if (brand.audience) brandCtx += 'TARGET AUDIENCE: ' + brand.audience + '\n';
+      if (brand.promise) brandCtx += 'BRAND PROMISE: ' + brand.promise + '\n';
+      if (brand.cta) brandCtx += 'PRIMARY CTA: ' + brand.cta + '\n';
+      if (brand.voice) brandCtx += 'VOICE: ' + brand.voice + '\n';
+      if (brand.tone) brandCtx += 'TONE: ' + brand.tone + '\n';
+      if (brand.approach) brandCtx += 'APPROACH: ' + brand.approach + '\n';
+      if (brand.vocabDo) brandCtx += 'VOCABULARY DO: ' + brand.vocabDo + '\n';
+      if (brand.vocabDont) brandCtx += 'VOCABULARY DONT: ' + brand.vocabDont + '\n';
+      if (brand.constraints) brandCtx += 'CONSTRAINTS: ' + brand.constraints + '\n';
+      if (brand.pricing) brandCtx += 'PRICING: ' + brand.pricing + '\n';
+      if (brand.services) brandCtx += 'SERVICES: ' + brand.services + '\n';
+      if (brand.experience) brandCtx += 'EXPERIENCE: ' + brand.experience + '\n';
+      if (brand.location) brandCtx += 'LOCATION: ' + brand.location + '\n';
+      if (brand.contacts) brandCtx += 'CONTACTS: ' + brand.contacts + '\n';
+      if (brand.deliverables) brandCtx += 'DELIVERABLES: ' + brand.deliverables + '\n';
+      if (brand.partnerships) brandCtx += 'PARTNERSHIPS: ' + brand.partnerships + '\n';
+      if (brand.identity) {
+        var id = brand.identity;
+        if (id.voiceTone) brandCtx += 'VOICE & TONE DETAIL: ' + id.voiceTone + '\n';
+        if (id.brandEssence) brandCtx += 'BRAND ESSENCE: ' + id.brandEssence + '\n';
+        if (id.messaging) brandCtx += 'MESSAGING: ' + id.messaging + '\n';
+        if (id.visualIdentity) brandCtx += 'VISUAL IDENTITY: ' + id.visualIdentity + '\n';
+        if (id.competitivePosition) brandCtx += 'COMPETITIVE POSITION: ' + id.competitivePosition + '\n';
+      }
+      brandCtx += '\n';
+      if (typeof getBrandIdentityIntelligence === 'function') {
+        var intel = getBrandIdentityIntelligence(brand);
+        if (intel) brandCtx += intel + '\n';
+      }
+    }
+  } catch(e) {}
+  return brandCtx;
+}
+
+function scribeAIWriteExecute(topic, existingContent) {
+  var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+  if (!editor) return;
+
+  var brandCtx = _buildScribeBrandContext();
+  var systemPrompt = brandCtx + 'You are a professional writer creating notebook content. ' +
+    'Write clear, well-structured content in the brand\'s voice. ' +
+    'Use HTML formatting: headings (h2, h3), paragraphs, lists, bold for emphasis. ' +
+    'Use hyphens instead of em-dashes or en-dashes in your writing. ' +
+    'Only use REAL data from the brand context - never fabricate details.';
+
+  var userPrompt = '';
+  if (existingContent && existingContent.replace(/<[^>]*>/g, '').trim()) {
+    userPrompt = 'Revise and improve this content based on the following direction: ' + topic + '\n\nExisting content:\n' + existingContent.replace(/<[^>]*>/g, '') + '\n\nReturn the full revised content as HTML.';
+  } else {
+    userPrompt = 'Write notebook content about: ' + topic + '\n\nReturn well-structured HTML content.';
+  }
+
+  // Show loading state
+  editor.setContent('<p style="color: var(--text-muted); opacity: 0.5;">Writing...</p>');
+
+  if (typeof callAnthropicStreaming === 'function' && typeof getApiKey === 'function') {
+    var accumulated = '';
+    getApiKey('anthropic').then(function(apiKey) {
+      if (!apiKey) {
+        editor.setContent('<p>API key not configured. Add your Anthropic API key in Settings.</p>');
+        return;
+      }
+      callAnthropicStreaming(
+        'claude-sonnet-4-20250514',
+        apiKey,
+        [{ role: 'user', content: userPrompt }],
+        systemPrompt,
+        function(chunk) {
+          accumulated += chunk;
+          editor.setContent(accumulated);
+        },
+        function() {
+          scheduleScribeAutoSave();
+          if (typeof showToast === 'function') showToast('Content generated', 'success');
+        },
+        function(err) {
+          editor.setContent('<p>Error: ' + (err.message || 'Failed to generate content') + '</p>');
+        }
+      );
+    }).catch(function(err) {
+      editor.setContent('<p>Error: ' + (err.message || 'Failed to get API key') + '</p>');
+    });
+  } else {
+    editor.setContent('<p>AI features require API key configuration in Settings.</p>');
+  }
+}
+
+// === VOICE TOOLS (Rewrite with AI) === // v29.3:
+
+function scribeShowVoiceTools() {
+  var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+  if (!editor) return;
+  var selectedText = editor.selection.getContent({ format: 'text' });
+  if (!selectedText || !selectedText.trim()) {
+    if (typeof showToast === 'function') showToast('Select text first to rewrite', 'warning');
+    return;
+  }
+  var popover = document.getElementById('scribeVoicePopover');
+  if (!popover) return;
+  popover.style.display = popover.style.display === 'block' ? 'none' : 'block';
+}
+
+function scribeVoiceAction(action) {
+  var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+  if (!editor) return;
+  var selectedText = editor.selection.getContent({ format: 'text' });
+  if (!selectedText || !selectedText.trim()) {
+    if (typeof showToast === 'function') showToast('Select text first', 'warning');
+    return;
+  }
+
+  var popover = document.getElementById('scribeVoicePopover');
+  if (popover) popover.style.display = 'none';
+
+  var actionPrompts = {
+    rewrite: 'Rewrite this text for improved clarity and flow, maintaining the same meaning',
+    professional: 'Rewrite this text in a professional, polished tone',
+    friendly: 'Rewrite this text in a warm, approachable, friendly tone',
+    concise: 'Make this text more concise - remove unnecessary words while keeping the meaning',
+    expand: 'Expand this text with more detail and context while keeping the same tone',
+    grammar: 'Fix any grammar, spelling, or punctuation errors in this text. Only fix errors, do not change the style',
+    brand_voice: 'Rewrite this text to perfectly match the brand voice described in the brand context'
+  };
+
+  var instruction = actionPrompts[action] || 'Rewrite this text';
+  var brandCtx = _buildScribeBrandContext();
+
+  var systemPrompt = brandCtx + instruction + '. ' +
+    'Return ONLY the rewritten text, no explanations or quotes around it. ' +
+    'Use hyphens instead of em-dashes or en-dashes.';
+
+  // Show loading in the selection
+  var originalContent = editor.selection.getContent();
+  editor.selection.setContent('<span style="opacity:0.5">Rewriting...</span>');
+
+  if (typeof getApiKey === 'function') {
+    getApiKey('anthropic').then(function(apiKey) {
+      if (!apiKey) {
+        editor.undoManager.undo();
+        if (typeof showToast === 'function') showToast('API key not configured', 'warning');
+        return;
+      }
+
+      var url = 'https://api.anthropic.com/v1/messages';
+      var body = JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: selectedText }]
+      });
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: body
+      }).then(function(resp) { return resp.json(); }).then(function(data) {
+        if (data.content && data.content[0] && data.content[0].text) {
+          var result = data.content[0].text;
+          // Undo the "Rewriting..." placeholder, then insert result
+          editor.undoManager.undo();
+          editor.selection.setContent(result);
+          scheduleScribeAutoSave();
+          if (typeof showToast === 'function') showToast('Text rewritten', 'success');
+        } else {
+          editor.undoManager.undo();
+          if (typeof showToast === 'function') showToast('AI returned empty response', 'warning');
+        }
+      }).catch(function(err) {
+        editor.undoManager.undo();
+        if (typeof showToast === 'function') showToast('Rewrite failed: ' + err.message, 'error');
+      });
+    }).catch(function(err) {
+      editor.undoManager.undo();
+      if (typeof showToast === 'function') showToast('API key error', 'error');
+    });
+  }
+}
+
 // === KNOWLEDGE MODE === // v29.0:
 
 function toggleScribeKnowledgeMode() { // v29.2:

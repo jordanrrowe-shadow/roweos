@@ -45,6 +45,23 @@
                 <div class="scribe-title-row">
                   <input type="text" class="scribe-title-input" id="scribeTitleInput" placeholder="Notebook title..." oninput="onScribeTitleChange()">
                   <div class="scribe-title-actions">
+                    <button onclick="scribeAICompose()" class="scribe-ai-btn" title="Write with AI">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2L11 6l4.5 1.5L11 9l-1.5 4.5L8 9l-4.5-1.5L8 6l1.5-4z"/><path d="M18 13l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5L14.5 16.5l2.5-1 1-2.5z"/></svg>
+                    </button>
+                    <div class="scribe-voice-wrap" style="position:relative;">
+                      <button onclick="scribeShowVoiceTools()" class="scribe-voice-btn" title="BrandAI Tools - select text first">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      </button>
+                      <div class="scribe-voice-popover" id="scribeVoicePopover" style="display:none;">
+                        <div class="scribe-voice-item" onclick="scribeVoiceAction('rewrite')">Rewrite</div>
+                        <div class="scribe-voice-item" onclick="scribeVoiceAction('professional')">Professional</div>
+                        <div class="scribe-voice-item" onclick="scribeVoiceAction('friendly')">Friendly</div>
+                        <div class="scribe-voice-item" onclick="scribeVoiceAction('concise')">Concise</div>
+                        <div class="scribe-voice-item" onclick="scribeVoiceAction('expand')">Expand</div>
+                        <div class="scribe-voice-item" onclick="scribeVoiceAction('grammar')">Fix Grammar</div>
+                        <div class="scribe-voice-item" onclick="scribeVoiceAction('brand_voice')">Brand Voice</div>
+                      </div>
+                    </div>
                     <button onclick="if(_scribeActiveId)createScribePage(_scribeActiveId)" class="scribe-page-btn" title="Add page to this notebook">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
                       Page
@@ -90,6 +107,18 @@
                     <button onclick="askScribeQuestion()" class="scribe-knowledge-send-btn">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
+                  </div>
+                </div>
+                <!-- v29.3: AI Write overlay -->
+                <div class="scribe-ai-overlay" id="scribeAiOverlay" style="display:none;">
+                  <div class="scribe-ai-modal">
+                    <div class="scribe-ai-modal-title">Write with AI</div>
+                    <div class="scribe-ai-modal-hint">Describe what you want to write about. AI will use your brand's voice and context.</div>
+                    <textarea id="scribeAiTopicInput" class="scribe-ai-topic-input" placeholder="e.g. Meeting notes for Q2 planning session..." rows="3" onkeypress="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();scribeAiModalSubmit();}"></textarea>
+                    <div class="scribe-ai-modal-actions">
+                      <button onclick="scribeAiModalCancel()" class="scribe-ai-cancel-btn">Cancel</button>
+                      <button onclick="scribeAiModalSubmit()" class="scribe-ai-submit-btn">Generate</button>
+                    </div>
                   </div>
                 </div>
               </div>
