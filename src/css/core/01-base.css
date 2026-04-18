@@ -3354,7 +3354,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      padding: 12px 20px 0;
+      padding: 24px 32px 0; /* v29.2: Match Studio padding for consistent breadcrumb alignment */
       box-sizing: border-box;
       overflow: hidden;
       border-radius: 0;
