@@ -3094,15 +3094,42 @@ function applyAccessibilityScale() {
   var zoomFactor = zoomLevel / 100;
   if (zoomLevel !== 100) {
     appContainer.style.zoom = zoomFactor.toString();
-    // v29.2: Compensate body dimensions so fixed-position views fill the actual viewport
-    // At 75% zoom, body is 133.33vw/vh — after zoom scaling, visually fills 100% of screen
-    var inverseScale = 100 / zoomLevel;
-    appContainer.style.width = (inverseScale * 100) + 'vw';
-    appContainer.style.minHeight = (inverseScale * 100) + 'vh';
+    // v29.2: Compensate viewport-relative dimensions so everything fills the actual screen
+    // CSS zoom scales rendered output but doesn't change CSS unit calculations.
+    // 100vh at 75% zoom renders as 75% of actual viewport. Fix: use (100/0.75)vh = 133vh.
+    var compensatedVh = (100 / zoomFactor) + 'vh';
+    var compensatedVw = (100 / zoomFactor) + 'vw';
+    appContainer.style.width = compensatedVw;
+    appContainer.style.minHeight = compensatedVh;
+    // Sidebar — position:fixed, height:100vh
+    var sidebar = document.querySelector('.sidebar');
+    if (sidebar) sidebar.style.height = compensatedVh;
+    // Main wrapper — min-height:100vh
+    var mainWrapper = document.querySelector('.main-wrapper');
+    if (mainWrapper) {
+      mainWrapper.style.minHeight = compensatedVh;
+      mainWrapper.style.width = compensatedVw;
+    }
+    // All fixed panel-views — bottom:0 doesn't compensate, need explicit height
+    var panelViews = document.querySelectorAll('.panel-view');
+    for (var pv = 0; pv < panelViews.length; pv++) {
+      panelViews[pv].style.minHeight = compensatedVh;
+    }
   } else {
     appContainer.style.zoom = '';
     appContainer.style.width = '';
     appContainer.style.minHeight = '';
+    var sidebar = document.querySelector('.sidebar');
+    if (sidebar) sidebar.style.height = '';
+    var mainWrapper = document.querySelector('.main-wrapper');
+    if (mainWrapper) {
+      mainWrapper.style.minHeight = '';
+      mainWrapper.style.width = '';
+    }
+    var panelViews = document.querySelectorAll('.panel-view');
+    for (var pv = 0; pv < panelViews.length; pv++) {
+      panelViews[pv].style.minHeight = '';
+    }
   }
 
   // Text-size scaling via font-size on root (independent of zoom)
