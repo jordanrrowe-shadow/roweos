@@ -77,8 +77,6 @@ function initScribe() { // v29.0:
   } else {
     _showScribeEmptyState();
   }
-  // v29.2: Initialize TinyMCE rich editor
-  initScribeTinymce();
 }
 
 // v29.2: Initialize TinyMCE for Scribe editor
@@ -211,7 +209,7 @@ function renderScribeNotebookList() { // v29.0:
   var html = '';
   for (var i = 0; i < visible.length; i++) {
     var nb = visible[i];
-    var isActive = (nb.id === _scribeActiveId) ? ' scribe-nb-active' : '';
+    var isActive = (nb.id === _scribeActiveId) ? ' active' : '';
     // v29.0: Strip HTML tags for preview snippet
     var snippet = (nb.content || '').replace(/<[^>]*>/g, '').substring(0, 80);
     if (snippet.length >= 80) snippet += '...';
@@ -259,7 +257,7 @@ function filterScribeNotebooks(query) { // v29.0:
   var html = '';
   for (var i = 0; i < visible.length; i++) {
     var nb = visible[i];
-    var isActive = (nb.id === _scribeActiveId) ? ' scribe-nb-active' : '';
+    var isActive = (nb.id === _scribeActiveId) ? ' active' : '';
     var snippet = (nb.content || '').replace(/<[^>]*>/g, '').substring(0, 80);
     if (snippet.length >= 80) snippet += '...';
     var dateStr = '';
@@ -292,6 +290,11 @@ function selectScribeNotebook(id) { // v29.0:
   var emptyState = document.getElementById('scribeEmptyState');
   if (editorArea) editorArea.style.display = '';
   if (emptyState) emptyState.style.display = 'none';
+
+  // v29.2: Defer TinyMCE init until editor is visible (can't init on hidden element)
+  if (!_scribeTinymceReady) {
+    initScribeTinymce();
+  }
 
   // v29.0: Populate title
   var titleInput = document.getElementById('scribeTitleInput');
@@ -402,8 +405,7 @@ function askScribeQuestion() { // v29.0:
   var systemPrompt = 'You are a knowledgeable assistant. Answer the user\'s question based on the following notebook content. ' +
     'Be concise and accurate. If the answer is not found in the content, say so.\n\n' +
     'NOTEBOOK TITLE: ' + (nb.title || 'Untitled') + '\n\n' +
-    'NOTEBOOK CONTENT:\n' + plainContent + sourcesText +
-    '\n\nCRITICAL: Never use em-dashes or en-dashes in your writing. Use commas, semicolons, colons, periods, or hyphens instead.';
+    'NOTEBOOK CONTENT:\n' + plainContent + sourcesText;
 
   // v29.0: Build messages for API call
   var messages = [];
@@ -481,8 +483,7 @@ function synthesizeScribeNotebook() { // v29.0:
   var systemPrompt = 'You are a helpful assistant. Provide a clear, well-structured summary of the following notebook content. ' +
     'Highlight key themes, insights, and action items.\n\n' +
     'NOTEBOOK TITLE: ' + (nb.title || 'Untitled') + '\n\n' +
-    'NOTEBOOK CONTENT:\n' + plainContent +
-    '\n\nCRITICAL: Never use em-dashes or en-dashes in your writing. Use commas, semicolons, colons, periods, or hyphens instead.';
+    'NOTEBOOK CONTENT:\n' + plainContent;
 
   var messages = [{ role: 'user', content: 'Please synthesize and summarize this notebook.' }];
 
@@ -532,9 +533,9 @@ function renderScribeKnowledgeThread() { // v29.0:
   var html = '';
   for (var i = 0; i < _scribeKnowledgeThread.length; i++) {
     var msg = _scribeKnowledgeThread[i];
-    var roleClass = msg.role === 'user' ? 'scribe-km-user' : 'scribe-km-assistant';
+    var roleClass = msg.role === 'user' ? 'user' : 'ai';
     var roleLabel = msg.role === 'user' ? 'You' : 'AI';
-    html += '<div class="scribe-km-msg ' + roleClass + '">';
+    html += '<div class="scribe-knowledge-msg ' + roleClass + '">';
     html += '<div class="scribe-km-role">' + roleLabel + '</div>';
     html += '<div class="scribe-km-content">' + _escapeScribeHtml(msg.content || '...') + '</div>';
     html += '</div>';
