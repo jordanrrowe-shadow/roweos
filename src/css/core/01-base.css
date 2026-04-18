@@ -46974,6 +46974,25 @@
 .scribe-nb-item-date { font-size: 11px; opacity: 0.4; }
 .scribe-nb-item-tags { font-size: 10px; opacity: 0.3; }
 .scribe-nb-item-snippet { font-size: 11px; opacity: 0.3; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scribe-nb-group { }
+.scribe-nb-item { display: flex; align-items: flex-start; gap: 4px; }
+.scribe-nb-item-content { flex: 1; min-width: 0; }
+.scribe-nb-expand { flex-shrink: 0; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.4; font-size: 10px; margin-top: 2px; }
+.scribe-nb-expand:hover { opacity: 0.8; }
+.scribe-pg-item { padding: 6px 12px 6px 28px; cursor: pointer; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); transition: background 0.15s; }
+.scribe-pg-item:hover { background: rgba(255,255,255,0.04); }
+.scribe-pg-item.active { background: rgba(168,152,120,0.12); color: var(--text-primary); }
+.scribe-pg-item-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scribe-pg-add { padding: 4px 12px 4px 28px; cursor: pointer; font-size: 11px; color: var(--text-muted); opacity: 0.5; }
+.scribe-pg-add:hover { opacity: 1; color: var(--accent); }
+.scribe-archive-toggle { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer; opacity: 0.4; padding: 4px; border-radius: 4px; }
+.scribe-archive-toggle:hover { opacity: 0.8; }
+.scribe-archive-toggle.active { opacity: 1; color: var(--accent); background: rgba(168,152,120,0.1); }
+.scribe-sidebar-header { position: relative; }
+.scribe-nb-archive-actions { display: flex; gap: 4px; padding: 4px 0 0; }
+.scribe-nb-restore-btn, .scribe-nb-perm-delete-btn { padding: 2px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-size: 10px; font-family: inherit; }
+.scribe-nb-restore-btn:hover { color: var(--accent); border-color: var(--accent); }
+.scribe-nb-perm-delete-btn:hover { color: var(--error, #ef4444); border-color: var(--error, #ef4444); }
 .scribe-main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); }
 .scribe-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; }
 .scribe-active-editor { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
@@ -47020,6 +47039,8 @@
 .scribe-knowledge-send-btn:hover { opacity: 0.85; }
 html.light-mode .scribe-nb-item:hover { background: rgba(0,0,0,0.03); }
 html.light-mode .scribe-nb-item.active { background: rgba(168,152,120,0.1); }
+html.light-mode .scribe-pg-item:hover { background: rgba(0,0,0,0.03); }
+html.light-mode .scribe-pg-item.active { background: rgba(168,152,120,0.1); }
 html.light-mode .scribe-title-actions button { background: rgba(0,0,0,0.03); }
 html.light-mode .scribe-title-actions button:hover { background: rgba(0,0,0,0.06); }
 html.light-mode .scribe-knowledge-send-btn { background: var(--accent, #a89878); color: #fff; }

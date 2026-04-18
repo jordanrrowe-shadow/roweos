@@ -13,6 +13,8 @@ var _scribeKnowledgeThread = []; // v29.0: Q&A thread messages
 var SCRIBE_STORAGE_KEY = 'roweos_scribe_notebooks'; // v29.0:
 var _scribeShowAllBrands = false; // v29.3: Brand filter toggle
 var _scribeArchiveMode = false; // v29.3: Archive view toggle (for later)
+var _scribeActivePageId = null; // v29.3: Currently editing page (null = notebook level)
+var _scribeExpandedNotebooks = {}; // v29.3: Track expanded notebooks in sidebar
 
 // === LOAD / SAVE === // v29.0:
 
@@ -118,7 +120,19 @@ function initScribeTinymce() {
           for (var i = 0; i < scribeNotebooks.length; i++) {
             if (scribeNotebooks[i].id === _scribeActiveId) { nb = scribeNotebooks[i]; break; }
           }
-          if (nb) editor.setContent(nb.content || '');
+          if (nb) {
+            // v29.3: Load page content if a page is active
+            if (_scribeActivePageId && nb.pages) {
+              for (var pi = 0; pi < nb.pages.length; pi++) {
+                if (nb.pages[pi].id === _scribeActivePageId) {
+                  editor.setContent(nb.pages[pi].content || '');
+                  break;
+                }
+              }
+            } else {
+              editor.setContent(nb.content || '');
+            }
+          }
         }
       });
     }
@@ -142,6 +156,7 @@ function createScribeNotebook() { // v29.0:
     id: 'nb_' + ts + '_' + Math.random().toString(36).substr(2, 6),
     title: 'Untitled Notebook',
     content: '',
+    pages: [],  // v29.3: Sub-pages array
     sources: [],
     linkedPeople: [],
     linkedLibraryItems: [],
@@ -206,6 +221,8 @@ function renderScribeNotebookList() { // v29.0:
 
   // v29.0: Filter out archived, sort by updatedAt descending
   var visible = scribeNotebooks.filter(function(nb) {
+    // v29.3: Archive mode shows only archived, normal mode hides archived
+    if (_scribeArchiveMode) return nb.archived === true;
     if (nb.archived) return false;
     // v29.3: Brand filtering — null brandIdx shows in all brands
     if (!_scribeShowAllBrands && typeof selectedBrand !== 'undefined') {
@@ -216,25 +233,30 @@ function renderScribeNotebookList() { // v29.0:
   visible.sort(function(a, b) { return (b.updatedAt || '').localeCompare(a.updatedAt || ''); });
 
   if (visible.length === 0) {
-    listEl.innerHTML = '<div class="scribe-list-empty" style="padding:20px;text-align:center;color:var(--text-secondary);font-size:13px;">No notebooks yet. Create one to get started.</div>';
+    listEl.innerHTML = '<div class="scribe-list-empty" style="padding:20px;text-align:center;color:var(--text-secondary);font-size:13px;">' + (_scribeArchiveMode ? 'No archived notebooks.' : 'No notebooks yet. Create one to get started.') + '</div>';
     return;
   }
 
   var html = '';
   for (var i = 0; i < visible.length; i++) {
     var nb = visible[i];
-    var isActive = (nb.id === _scribeActiveId) ? ' active' : '';
-    // v29.0: Strip HTML tags for preview snippet
+    var isNbActive = (nb.id === _scribeActiveId && !_scribeActivePageId) ? ' active' : '';
+    var isExpanded = _scribeExpandedNotebooks[nb.id];
+    var hasPages = nb.pages && nb.pages.length > 0;
     var snippet = (nb.content || '').replace(/<[^>]*>/g, '').substring(0, 80);
     if (snippet.length >= 80) snippet += '...';
-    // v29.0: Format date
     var dateStr = '';
     try {
       var d = new Date(nb.updatedAt);
       dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     } catch (e) { dateStr = ''; }
 
-    html += '<div class="scribe-nb-item' + isActive + '" data-nb-id="' + nb.id + '" onclick="selectScribeNotebook(\'' + nb.id + '\')">';
+    html += '<div class="scribe-nb-group">';
+    html += '<div class="scribe-nb-item' + isNbActive + '" data-nb-id="' + nb.id + '">';
+    if (hasPages) {
+      html += '<span class="scribe-nb-expand" onclick="event.stopPropagation();toggleScribeNotebookExpand(\'' + nb.id + '\')">' + (isExpanded ? '&#9662;' : '&#9656;') + '</span>';
+    }
+    html += '<div class="scribe-nb-item-content" onclick="selectScribeNotebook(\'' + nb.id + '\')">';
     html += '<div class="scribe-nb-item-title">' + _escapeScribeHtml(nb.title || 'Untitled') + '</div>';
     html += '<div class="scribe-nb-item-meta">';
     html += '<span class="scribe-nb-item-date">' + dateStr + '</span>';
@@ -242,8 +264,27 @@ function renderScribeNotebookList() { // v29.0:
       html += '<span class="scribe-nb-item-tags">' + nb.tags.length + ' tag' + (nb.tags.length !== 1 ? 's' : '') + '</span>';
     }
     html += '</div>';
-    if (snippet) {
-      html += '<div class="scribe-nb-item-snippet">' + _escapeScribeHtml(snippet) + '</div>';
+    if (snippet) html += '<div class="scribe-nb-item-snippet">' + _escapeScribeHtml(snippet) + '</div>';
+    html += '</div>';
+    if (_scribeArchiveMode) {
+      html += '<div class="scribe-nb-archive-actions">';
+      html += '<button class="scribe-nb-restore-btn" onclick="event.stopPropagation();archiveScribeNotebook(\'' + nb.id + '\')" title="Restore">Restore</button>';
+      html += '<button class="scribe-nb-perm-delete-btn" onclick="event.stopPropagation();deleteScribeNotebook(\'' + nb.id + '\')" title="Delete permanently">Delete</button>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    // v29.3: Render pages if expanded
+    if (isExpanded && hasPages) {
+      var activePages = nb.pages.filter(function(p) { return !p.archived; });
+      for (var pi = 0; pi < activePages.length; pi++) {
+        var pg = activePages[pi];
+        var isPgActive = (_scribeActiveId === nb.id && _scribeActivePageId === pg.id) ? ' active' : '';
+        html += '<div class="scribe-pg-item' + isPgActive + '" onclick="selectScribePage(\'' + nb.id + '\', \'' + pg.id + '\')">';
+        html += '<div class="scribe-pg-item-title">' + _escapeScribeHtml(pg.title || 'Untitled Page') + '</div>';
+        html += '</div>';
+      }
+      html += '<div class="scribe-pg-add" onclick="createScribePage(\'' + nb.id + '\')">+ New Page</div>';
     }
     html += '</div>';
   }
@@ -292,10 +333,135 @@ function filterScribeNotebooks(query) { // v29.0:
   listEl.innerHTML = html;
 }
 
+function toggleScribeArchiveMode() { // v29.3:
+  _scribeArchiveMode = !_scribeArchiveMode;
+  var btn = document.getElementById('scribeArchiveToggle');
+  if (btn) btn.classList.toggle('active', _scribeArchiveMode);
+  // Hide/show new notebook button
+  var newBtn = document.querySelector('.scribe-new-btn');
+  if (newBtn) newBtn.style.display = _scribeArchiveMode ? 'none' : '';
+  var brandFilter = document.querySelector('.scribe-brand-filter');
+  if (brandFilter) brandFilter.style.display = _scribeArchiveMode ? 'none' : '';
+  renderScribeNotebookList();
+}
+
 function toggleScribeBrandFilter() { // v29.3:
   _scribeShowAllBrands = !_scribeShowAllBrands;
   var checkbox = document.getElementById('scribeBrandFilterCheck');
   if (checkbox) checkbox.checked = _scribeShowAllBrands;
+  renderScribeNotebookList();
+}
+
+// === PAGES === // v29.3:
+
+function createScribePage(notebookId) {
+  var nb = null;
+  for (var i = 0; i < scribeNotebooks.length; i++) {
+    if (scribeNotebooks[i].id === notebookId) { nb = scribeNotebooks[i]; break; }
+  }
+  if (!nb) return;
+  if (!nb.pages) nb.pages = [];
+
+  var now = new Date().toISOString();
+  var ts = Date.now();
+  var page = {
+    id: 'pg_' + ts + '_' + Math.random().toString(36).substr(2, 6),
+    title: 'Untitled Page',
+    content: '',
+    createdAt: now,
+    updatedAt: now,
+    _modifiedAt: ts,
+    archived: false
+  };
+  nb.pages.push(page);
+  nb._modifiedAt = ts;
+  nb.updatedAt = now;
+  saveScribeNotebooks();
+
+  // Auto-expand this notebook and select the new page
+  _scribeExpandedNotebooks[notebookId] = true;
+  selectScribePage(notebookId, page.id);
+  renderScribeNotebookList();
+
+  var titleInput = document.getElementById('scribeTitleInput');
+  if (titleInput) {
+    titleInput.focus();
+    titleInput.select();
+  }
+}
+
+function deleteScribePage(notebookId, pageId) {
+  if (!confirm('Delete this page? This cannot be undone.')) return;
+  var nb = null;
+  for (var i = 0; i < scribeNotebooks.length; i++) {
+    if (scribeNotebooks[i].id === notebookId) { nb = scribeNotebooks[i]; break; }
+  }
+  if (!nb || !nb.pages) return;
+  nb.pages = nb.pages.filter(function(p) { return p.id !== pageId; });
+  nb._modifiedAt = Date.now();
+  nb.updatedAt = new Date().toISOString();
+  saveScribeNotebooks();
+
+  if (_scribeActivePageId === pageId) {
+    _scribeActivePageId = null;
+    selectScribeNotebook(notebookId);
+  }
+  renderScribeNotebookList();
+  if (typeof showToast === 'function') showToast('Page deleted', 'success');
+}
+
+function selectScribePage(notebookId, pageId) {
+  var nb = null;
+  for (var i = 0; i < scribeNotebooks.length; i++) {
+    if (scribeNotebooks[i].id === notebookId) { nb = scribeNotebooks[i]; break; }
+  }
+  if (!nb || !nb.pages) return;
+
+  var page = null;
+  for (var j = 0; j < nb.pages.length; j++) {
+    if (nb.pages[j].id === pageId) { page = nb.pages[j]; break; }
+  }
+  if (!page) return;
+
+  _scribeActiveId = notebookId;
+  _scribeActivePageId = pageId;
+
+  // Show editor, hide empty state
+  var editorArea = document.getElementById('scribeActiveEditor');
+  var emptyState = document.getElementById('scribeEmptyState');
+  if (editorArea) editorArea.style.display = '';
+  if (emptyState) emptyState.style.display = 'none';
+
+  // Populate title with page title
+  var titleInput = document.getElementById('scribeTitleInput');
+  if (titleInput) titleInput.value = page.title || '';
+
+  // Populate TinyMCE with page content
+  if (!_scribeTinymceReady) {
+    initScribeTinymce();
+  }
+  var _pgContent = page.content || '';
+  var tinymceEditor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+  if (tinymceEditor && _scribeTinymceReady) {
+    tinymceEditor.setContent(_pgContent);
+  } else {
+    setTimeout(function() {
+      var ed = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+      if (ed) ed.setContent(_pgContent);
+    }, 500);
+  }
+
+  // Render metadata (tags from parent notebook)
+  renderScribeMetadata(nb);
+  renderScribeNotebookList();
+
+  // Reset knowledge thread
+  _scribeKnowledgeThread = [];
+  renderScribeKnowledgeThread();
+}
+
+function toggleScribeNotebookExpand(notebookId) {
+  _scribeExpandedNotebooks[notebookId] = !_scribeExpandedNotebooks[notebookId];
   renderScribeNotebookList();
 }
 
@@ -309,6 +475,7 @@ function selectScribeNotebook(id) { // v29.0:
   if (!nb) return;
 
   _scribeActiveId = id;
+  _scribeActivePageId = null; // v29.3: Clear page selection when selecting notebook
 
   // v29.0: Show editor, hide empty state
   var editorArea = document.getElementById('scribeActiveEditor');
@@ -375,9 +542,21 @@ function saveActiveScribeNotebook() { // v29.0:
   var titleInput = document.getElementById('scribeTitleInput');
   var tinymceEditor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
 
-  if (titleInput) nb.title = titleInput.value || 'Untitled Notebook';
-  if (tinymceEditor) {
-    nb.content = tinymceEditor.getContent() || '';
+  // v29.3: Save to page or notebook depending on active selection
+  if (_scribeActivePageId && nb.pages) {
+    var page = null;
+    for (var pi = 0; pi < nb.pages.length; pi++) {
+      if (nb.pages[pi].id === _scribeActivePageId) { page = nb.pages[pi]; break; }
+    }
+    if (page) {
+      if (titleInput) page.title = titleInput.value || 'Untitled Page';
+      if (tinymceEditor) page.content = tinymceEditor.getContent() || '';
+      page.updatedAt = new Date().toISOString();
+      page._modifiedAt = Date.now();
+    }
+  } else {
+    if (titleInput) nb.title = titleInput.value || 'Untitled Notebook';
+    if (tinymceEditor) nb.content = tinymceEditor.getContent() || '';
   }
   nb.updatedAt = new Date().toISOString();
   nb._modifiedAt = Date.now();
