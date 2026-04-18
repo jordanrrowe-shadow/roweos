@@ -94,7 +94,7 @@ function initScribeTinymce() {
     height: '100%',
     min_height: 400,
     menubar: false,
-    statusbar: true,
+    statusbar: false,
     branding: false,
     promotion: false,
     resize: false,
