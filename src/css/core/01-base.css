@@ -3887,7 +3887,7 @@
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
     }
-
+    
     #rhythmView > .panel, #pulseView > .panel, #brandIntelView > .panel,
     #identityView > .panel, #scheduleView > .panel {
       max-width: none;
@@ -25770,17 +25770,6 @@
         height: 26px;
         line-height: 26px;
       }
-      /* v29.1: Center date card on mobile with divider below */
-      .pulse-date-calendar-card {
-        flex-direction: column !important;
-        align-items: stretch !important;
-      }
-      .pulse-date-card {
-        width: 100% !important;
-        border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08));
-        padding-bottom: 16px !important;
-        margin-bottom: 4px;
-      }
       .pulse-streak-cell {
         width: 16px;
         height: 16px;
@@ -30658,9 +30647,8 @@
         padding: 0 16px;
       }
       
-      /* Hide desktop-only elements on mobile */
-      .desktop-only-model,
-      .desktop-only-setting {
+      /* Hide desktop-only model selector on mobile */
+      .desktop-only-model {
         display: none !important;
       }
       
@@ -36396,8 +36384,7 @@
       html.light-mode #settingsView,
       html.light-mode #libraryView,
       html.light-mode #adminView,
-      html.light-mode #mailView,
-      html.light-mode #scribeView {
+      html.light-mode #mailView {
         background: #f8f8f8;
       }
     }
@@ -36464,7 +36451,7 @@
       align-items: center;
       justify-content: space-between;
       height: var(--mobile-header-height);
-      padding: 0 12px; /* v29.1: zoom-scalable */
+      padding: 0 12px;
     }
     
     .mobile-header-left,
@@ -37666,41 +37653,32 @@
       }
       
       
-      /* Main content adjustments — v29.0: sidebar-state prefixes match specificity of desktop rules */
-      .main-wrapper,
-      html.sidebar-pinned-collapsed .main-wrapper,
-      html.sidebar-pinned .main-wrapper,
-      html.sidebar-hover-expanded .main-wrapper {
+      /* Main content adjustments */
+      .main-wrapper {
         margin-left: 0;
         padding-top: calc(var(--mobile-header-height) + var(--mobile-safe-top));
-        padding-bottom: var(--mobile-safe-bottom); /* v29.1: No 64px hack — liquid-nav floats with z-index */
+        padding-bottom: calc(64px + var(--mobile-safe-bottom)); /* v15.43: Smaller nav */
         min-height: 100vh;
         min-height: 100dvh;
       }
-      .main-wrapper::before,
-      html.sidebar-pinned-collapsed .main-wrapper::before,
-      html.sidebar-pinned .main-wrapper::before,
-      html.sidebar-hover-expanded .main-wrapper::before {
-        left: 0;
-      }
       .main-content {
-        padding: var(--space-3) 0; /* v29.1: Edge-to-edge on mobile — zero horizontal padding */
-        padding-bottom: var(--mobile-safe-bottom);
+        padding: var(--space-3);
+        padding-bottom: calc(64px + var(--mobile-safe-bottom)); /* v15.43: Smaller nav */
       }
       
       /* All views - Mobile positioning - v11.0: Extend to bottom for floating nav - v14.0: Added syncView, commerceView */
       .panel-view,
-      #agentView, #studioView, #scribeView, #identityView, /* v29.1: added #scribeView */
+      #agentView, #studioView, #identityView, /* v28.8: removed #signalView */
       #rhythmView, #pulseView, #brandIntelView, #tuningView,
       #settingsView, #memoryView, #exportView, #libraryView,
       #analyticsView, #scheduleView, #inventoryView, #clientsView, #automationsView,
       #syncView, #commerceView, #adminView, #mailView, #folioView, #socialView, #sectionLandingView {
-        position: fixed !important;
-        left: 0 !important; /* v29.1: !important to override desktop sidebar-state rules (higher specificity) */
-        right: 0 !important;
-        top: calc(var(--mobile-header-height) + var(--mobile-safe-top)) !important;
-        bottom: 0 !important;
-        margin: 0 !important;
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: calc(var(--mobile-header-height) + var(--mobile-safe-top));
+        bottom: 0; /* v11.0: Extend to screen bottom */
+        margin: 0;
         overflow-y: auto;
         overscroll-behavior: contain;
         overflow-x: hidden;
@@ -37711,20 +37689,20 @@
         box-sizing: border-box !important;
       }
       
-      /* Panel base mobile styling — v29.1: Edge-to-edge on mobile */
+      /* Panel base mobile styling - v15.43: Reduced for smaller nav */
       .panel {
-        padding: var(--space-3) var(--space-4); /* v29.1: Horizontal padding for content, top spacing for breadcrumb */
-        padding-bottom: var(--space-4);
-        border-radius: 0; /* v29.1: No rounded corners on mobile — edge-to-edge */
-        margin-bottom: var(--space-2);
+        padding: var(--space-4);
+        padding-bottom: calc(64px + var(--mobile-safe-bottom)); /* v15.43: Smaller nav */
+        border-radius: var(--radius-xl);
+        margin-bottom: var(--space-3);
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
       }
 
-      /* v29.1: Last panel needs extra bottom padding so content scrolls above floating liquid-nav */
+      /* v15.43: Last panel gets extra bottom padding */
       .panel:last-child {
-        padding-bottom: calc(70px + var(--mobile-safe-bottom));
+        padding-bottom: calc(64px + var(--mobile-safe-bottom));
       }
       
       /* Panel headers — v24.26: Consistent left-aligned headers across all views */
@@ -37848,9 +37826,9 @@
       }
       
       #libraryView .finder-layout {
-        padding-bottom: var(--mobile-safe-bottom); /* v29.1: No 64px hack — liquid-nav floats with z-index */
+        padding-bottom: calc(64px + var(--mobile-safe-bottom));
       }
-
+      
 
       /* ═══════════════════════════════════════════════════════════════════════════
          RHYTHM VIEW - Mobile Optimized (v9.1.14)
@@ -37858,7 +37836,7 @@
       
       #rhythmView .panel {
         padding: 12px !important;
-        padding-bottom: var(--mobile-safe-bottom) !important; /* v29.1: No 64px hack */
+        padding-bottom: calc(64px + var(--mobile-safe-bottom)) !important;
         overflow-x: hidden !important;
       }
       
@@ -38601,7 +38579,7 @@
       
       #scheduleView .panel {
         padding: 12px !important;
-        padding-bottom: var(--mobile-safe-bottom) !important; /* v29.1: No 64px hack */
+        padding-bottom: calc(64px + var(--mobile-safe-bottom)) !important;
         overflow-x: hidden !important;
       }
       
@@ -39289,17 +39267,7 @@
         padding-bottom: 32px;
       }
       
-      /* v29.1: ALL view panels edge-to-edge on mobile — no horizontal padding on .panel wrapper */
-      .panel-view > .panel {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-      }
-      /* v29.1: ALL direct children of panel get consistent horizontal padding */
-      .panel-view > .panel > * {
-        padding-left: var(--space-4);
-        padding-right: var(--space-4);
-        box-sizing: border-box;
-      }
+      /* Settings and other list views */
       .settings-content,
       .settings-sections {
         padding-bottom: var(--space-6);
@@ -40221,7 +40189,7 @@
       #agentView #desktopPlatformTitle {
         display: block !important;
         font-size: var(--text-sm) !important;
-        margin-top: var(--blob-text-gap, -15px) !important; /* v29.1: Default -15px on mobile */
+        margin-top: var(--blob-text-gap, -10px) !important;
       }
 
       /* v24.24: Blob group moves up on mobile */
@@ -40253,7 +40221,7 @@
         bottom: env(safe-area-inset-bottom, 8px) !important;
       }
       
-      /* Rounded pill — v29.1: zoom-scalable */
+      /* Rounded pill */
       #agentView .chat-input-v2 {
         display: flex !important;
         flex-direction: row !important;
@@ -40982,7 +40950,7 @@
       #studioView,
       #settingsView,
       #identityView,
-      #scribeView, /* v29.1 */
+      /* v28.8: removed #signalView */
       #rhythmView,
       #pulseView,
       #memoryView,
@@ -40990,12 +40958,13 @@
       #syncView,
       #clientsView,
       #commerceView {
-        padding-bottom: calc(70px + var(--mobile-safe-bottom)) !important; /* v29.1: Scroll room above floating liquid-nav */
+        padding-bottom: calc(72px + var(--mobile-safe-bottom)) !important; /* v15.43: Above smaller nav */
       }
-
+      
+      /* v22.44: Removed #studioView .studio-layout — already has padding on #studioView itself */
       #settingsView .settings-content,
       .panel-view {
-        padding-bottom: calc(70px + var(--mobile-safe-bottom)) !important; /* v29.1: Scroll room above floating liquid-nav */
+        padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
       }
 
       /* v14.0: Sync Hub mobile-friendly overhaul */
@@ -46933,7 +46902,6 @@
   min-height: 0;
   overflow: hidden;
 }
-
 .scribe-sidebar {
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
@@ -46976,10 +46944,7 @@
   font-family: inherit;
   outline: none;
 }
-.scribe-notebook-list {
-  flex: 1;
-  overflow-y: auto;
-}
+.scribe-notebook-list { flex: 1; overflow-y: auto; }
 .scribe-nb-item {
   padding: 10px 12px;
   cursor: pointer;
@@ -46993,215 +46958,48 @@
 .scribe-nb-item-date { font-size: 11px; opacity: 0.4; }
 .scribe-nb-item-tags { font-size: 10px; opacity: 0.3; }
 .scribe-nb-item-snippet { font-size: 11px; opacity: 0.3; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* Scribe main editor area */
-.scribe-main {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg-primary);
-}
-.scribe-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 40px;
-}
-.scribe-active-editor {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-.scribe-title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px 4px;
-  flex-shrink: 0;
-}
-.scribe-title-input {
-  flex: 1;
-  padding: 4px 8px;
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  font-size: 18px;
-  font-weight: 700;
-  font-family: inherit;
-  outline: none;
-}
+.scribe-main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); }
+.scribe-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; }
+.scribe-active-editor { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.scribe-title-row { display: flex; align-items: center; gap: 8px; padding: 12px 16px 4px; flex-shrink: 0; }
+.scribe-title-input { flex: 1; padding: 4px 8px; background: transparent; border: none; color: var(--text-primary); font-size: 18px; font-weight: 700; font-family: inherit; outline: none; }
 .scribe-title-input::placeholder { color: var(--text-muted); }
-.scribe-title-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-.scribe-title-actions button {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 11px;
-  font-family: inherit;
-  transition: all 0.15s;
-}
+.scribe-title-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.scribe-title-actions button { display: flex; align-items: center; gap: 4px; padding: 6px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; transition: all 0.15s; }
 .scribe-title-actions button:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
 .scribe-save-btn { color: var(--accent) !important; }
 .scribe-delete-btn:hover { color: var(--error, #ef4444) !important; border-color: var(--error, #ef4444) !important; }
-
-/* Tags row */
-.scribe-tags-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px 16px 8px;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--border-color);
-}
+.scribe-tags-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 4px 16px 8px; flex-shrink: 0; border-bottom: 1px solid var(--border-color); }
 .scribe-tags-list { display: flex; flex-wrap: wrap; gap: 4px; }
-.scribe-tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  background: rgba(168,152,120,0.15);
-  border-radius: 10px;
-  font-size: 11px;
-}
-.scribe-tag-remove {
-  cursor: pointer;
-  opacity: 0.5;
-  font-size: 13px;
-}
+.scribe-tag-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: rgba(168,152,120,0.15); border-radius: 10px; font-size: 11px; }
+.scribe-tag-remove { cursor: pointer; opacity: 0.5; font-size: 13px; }
 .scribe-tag-remove:hover { opacity: 1; color: var(--error, #ef4444); }
-.scribe-tag-input {
-  padding: 2px 6px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  color: var(--text-primary);
-  font-size: 11px;
-  font-family: inherit;
-  outline: none;
-  width: 80px;
-}
+.scribe-tag-input { padding: 2px 6px; background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--text-primary); font-size: 11px; font-family: inherit; outline: none; width: 80px; }
 .scribe-tag-input:focus { border-color: var(--border-color); }
-
-/* TinyMCE wrapper */
-.scribe-tinymce-wrap {
-  flex: 1;
-  min-height: 200px;
-  overflow: hidden;
-}
+.scribe-tinymce-wrap { flex: 1; min-height: 200px; overflow: hidden; }
 .scribe-tinymce-wrap .tox.tox-tinymce { border: none !important; border-radius: 0 !important; }
 .scribe-tinymce-wrap .tox .tox-toolbar__primary { background: var(--bg-secondary) !important; border-bottom: 1px solid var(--border-color) !important; }
 .scribe-tinymce-wrap .tox .tox-toolbar__group { border-right-color: var(--border-color) !important; }
 .scribe-tinymce-wrap .tox .tox-tbtn { color: var(--text-secondary) !important; }
 .scribe-tinymce-wrap .tox .tox-tbtn:hover { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
-.scribe-tinymce-wrap .tox .tox-tbtn--enabled,
-.scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.2) !important; color: var(--accent) !important; }
+.scribe-tinymce-wrap .tox .tox-tbtn--enabled, .scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.2) !important; color: var(--accent) !important; }
 .scribe-tinymce-wrap .tox .tox-statusbar { background: var(--bg-secondary) !important; border-top: 1px solid var(--border-color) !important; color: var(--text-muted) !important; }
-.scribe-tinymce-wrap .tox .tox-statusbar__text-container { color: var(--text-muted) !important; }
-
-/* Knowledge panel */
-.scribe-knowledge-panel {
-  border-top: 1px solid var(--border-color);
-  padding: 12px 16px;
-  max-height: 300px;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease, padding 0.2s ease;
-}
-.scribe-knowledge-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  flex-shrink: 0;
-}
-.scribe-synth-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 11px;
-  font-family: inherit;
-}
+.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 12px 16px; max-height: 300px; display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
+.scribe-knowledge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0; }
+.scribe-synth-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; }
 .scribe-synth-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-.scribe-knowledge-toggle-btn {
-  padding: 4px 6px;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-family: inherit;
-}
+.scribe-knowledge-toggle-btn { padding: 4px 6px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
 .scribe-knowledge-toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-.scribe-knowledge-thread {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 8px;
-  min-height: 0;
-}
-.scribe-knowledge-msg {
-  padding: 8px 12px;
-  border-radius: 8px;
-  margin-bottom: 6px;
-  font-size: 13px;
-  line-height: 1.5;
-}
+.scribe-knowledge-thread { flex: 1; overflow-y: auto; margin-bottom: 8px; min-height: 0; }
+.scribe-knowledge-msg { padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; font-size: 13px; line-height: 1.5; }
 .scribe-knowledge-msg.user { background: rgba(168,152,120,0.1); text-align: right; }
 .scribe-knowledge-msg.ai { background: var(--bg-secondary); }
 .scribe-km-role { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.5; margin-bottom: 4px; }
 .scribe-km-content { white-space: pre-wrap; word-wrap: break-word; }
-.scribe-knowledge-input-row {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.scribe-knowledge-input-row input {
-  flex: 1;
-  padding: 8px 12px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-}
-.scribe-knowledge-send-btn {
-  padding: 8px 12px;
-  background: var(--accent, #a89878);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.15s;
-}
+.scribe-knowledge-input-row { display: flex; gap: 6px; flex-shrink: 0; }
+.scribe-knowledge-input-row input { flex: 1; padding: 8px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 13px; font-family: inherit; outline: none; }
+.scribe-knowledge-send-btn { padding: 8px 12px; background: var(--accent, #a89878); color: #fff; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .scribe-knowledge-send-btn:hover { opacity: 0.85; }
-
-/* Light mode */
 html.light-mode .scribe-nb-item:hover { background: rgba(0,0,0,0.03); }
 html.light-mode .scribe-nb-item.active { background: rgba(168,152,120,0.1); }
 html.light-mode .scribe-title-actions button { background: rgba(0,0,0,0.03); }
@@ -47209,23 +47007,11 @@ html.light-mode .scribe-title-actions button:hover { background: rgba(0,0,0,0.06
 html.light-mode .scribe-knowledge-send-btn { background: var(--accent, #a89878); color: #fff; }
 html.light-mode .scribe-knowledge-msg.ai { background: rgba(0,0,0,0.03); }
 html.light-mode .scribe-tag-pill { background: rgba(168,152,120,0.12); }
-html.light-mode .scribe-synth-btn:hover { color: var(--text-primary); }
-html.light-mode .scribe-knowledge-toggle-btn:hover { color: var(--text-primary); }
-
-/* Mobile */
 @media (max-width: 768px) {
-  .scribe-layout {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-  .scribe-sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
-    max-height: 200px;
-  }
+  .scribe-layout { grid-template-columns: 1fr; min-height: auto; }
+  .scribe-sidebar { border-right: none; border-bottom: 1px solid var(--border-color); max-height: 200px; }
   .scribe-title-row { padding: 8px 12px 4px; }
   .scribe-tags-row { padding: 4px 12px 8px; }
   .scribe-title-input { font-size: 16px; }
-  .scribe-title-actions button span { display: none; }
 }
 
