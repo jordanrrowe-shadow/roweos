@@ -46947,6 +46947,19 @@
   font-family: inherit;
   outline: none;
 }
+.scribe-brand-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 2px;
+}
+.scribe-brand-filter input[type="checkbox"] {
+  accent-color: var(--accent, #a89878);
+  margin: 0;
+}
 .scribe-notebook-list { flex: 1; overflow-y: auto; }
 .scribe-nb-item {
   padding: 10px 12px;

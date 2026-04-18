@@ -11,6 +11,8 @@ var _scribeKnowledgeMode = true; // v29.2: knowledge panel ON by default
 var _scribeKnowledgeThread = []; // v29.0: Q&A thread messages
 
 var SCRIBE_STORAGE_KEY = 'roweos_scribe_notebooks'; // v29.0:
+var _scribeShowAllBrands = false; // v29.3: Brand filter toggle
+var _scribeArchiveMode = false; // v29.3: Archive view toggle (for later)
 
 // === LOAD / SAVE === // v29.0:
 
@@ -144,7 +146,7 @@ function createScribeNotebook() { // v29.0:
     linkedPeople: [],
     linkedLibraryItems: [],
     tags: [],
-    brandIdx: (typeof currentBrandIdx !== 'undefined' ? currentBrandIdx : null),
+    brandIdx: (typeof selectedBrand !== 'undefined' ? selectedBrand : null),
     source: (typeof currentMode !== 'undefined' && currentMode === 'lifeai') ? 'lifeai' : 'brandai',
     createdAt: now,
     updatedAt: now,
@@ -203,7 +205,14 @@ function renderScribeNotebookList() { // v29.0:
   if (!listEl) return;
 
   // v29.0: Filter out archived, sort by updatedAt descending
-  var visible = scribeNotebooks.filter(function(nb) { return !nb.archived; });
+  var visible = scribeNotebooks.filter(function(nb) {
+    if (nb.archived) return false;
+    // v29.3: Brand filtering — null brandIdx shows in all brands
+    if (!_scribeShowAllBrands && typeof selectedBrand !== 'undefined') {
+      if (nb.brandIdx !== null && nb.brandIdx !== undefined && nb.brandIdx !== selectedBrand) return false;
+    }
+    return true;
+  });
   visible.sort(function(a, b) { return (b.updatedAt || '').localeCompare(a.updatedAt || ''); });
 
   if (visible.length === 0) {
@@ -251,6 +260,10 @@ function filterScribeNotebooks(query) { // v29.0:
   }
   var visible = scribeNotebooks.filter(function(nb) {
     if (nb.archived) return false;
+    // v29.3: Brand filtering
+    if (!_scribeShowAllBrands && typeof selectedBrand !== 'undefined') {
+      if (nb.brandIdx !== null && nb.brandIdx !== undefined && nb.brandIdx !== selectedBrand) return false;
+    }
     return (nb.title || '').toLowerCase().indexOf(q) !== -1;
   });
   visible.sort(function(a, b) { return (b.updatedAt || '').localeCompare(a.updatedAt || ''); });
@@ -277,6 +290,13 @@ function filterScribeNotebooks(query) { // v29.0:
     html += '</div>';
   }
   listEl.innerHTML = html;
+}
+
+function toggleScribeBrandFilter() { // v29.3:
+  _scribeShowAllBrands = !_scribeShowAllBrands;
+  var checkbox = document.getElementById('scribeBrandFilterCheck');
+  if (checkbox) checkbox.checked = _scribeShowAllBrands;
+  renderScribeNotebookList();
 }
 
 // === EDITOR === // v29.0:

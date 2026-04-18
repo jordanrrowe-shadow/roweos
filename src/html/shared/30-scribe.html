@@ -19,6 +19,9 @@
                   New Notebook
                 </button>
                 <input type="text" class="scribe-search" id="scribeSearchInput" placeholder="Search notebooks..." oninput="filterScribeNotebooks(this.value)">
+                <label class="scribe-brand-filter" onclick="toggleScribeBrandFilter()">
+                  <input type="checkbox" id="scribeBrandFilterCheck"> <span>Show all brands</span>
+                </label>
               </div>
               <div class="scribe-notebook-list" id="scribeNotebookList">
                 <!-- Populated by JS -->
