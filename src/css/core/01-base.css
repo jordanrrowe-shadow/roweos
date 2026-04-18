@@ -36380,13 +36380,15 @@
       html.light-mode .panel-view,
       html.light-mode #agentView, /* v28.8: removed #signalView */
       html.light-mode #studioView,
+      html.light-mode #scribeView, /* v29.2 */
       html.light-mode #identityView,
       html.light-mode #rhythmView,
       html.light-mode #pulseView,
       html.light-mode #settingsView,
       html.light-mode #libraryView,
       html.light-mode #adminView,
-      html.light-mode #mailView {
+      html.light-mode #mailView,
+      html.light-mode #researchView {
         background: #f8f8f8;
       }
     }
@@ -37670,17 +37672,17 @@
       
       /* All views - Mobile positioning - v11.0: Extend to bottom for floating nav - v14.0: Added syncView, commerceView */
       .panel-view,
-      #agentView, #studioView, #identityView, /* v28.8: removed #signalView */
+      #agentView, #studioView, #scribeView, #identityView, /* v29.2: added #scribeView */
       #rhythmView, #pulseView, #brandIntelView, #tuningView,
       #settingsView, #memoryView, #exportView, #libraryView,
       #analyticsView, #scheduleView, #inventoryView, #clientsView, #automationsView,
-      #syncView, #commerceView, #adminView, #mailView, #folioView, #socialView, #sectionLandingView {
-        position: fixed;
-        left: 0;
-        right: 0;
-        top: calc(var(--mobile-header-height) + var(--mobile-safe-top));
-        bottom: 0; /* v11.0: Extend to screen bottom */
-        margin: 0;
+      #syncView, #commerceView, #adminView, #mailView, #folioView, #socialView, #researchView, #sectionLandingView {
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: calc(var(--mobile-header-height) + var(--mobile-safe-top)) !important;
+        bottom: 0 !important;
+        margin: 0 !important;
         overflow-y: auto;
         overscroll-behavior: contain;
         overflow-x: hidden;
@@ -47025,6 +47027,9 @@ html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--bespoke .tox-tbtn__select-l
 html.light-mode .scribe-synth-btn:hover { color: var(--text-primary); }
 html.light-mode .scribe-knowledge-toggle-btn:hover { color: var(--text-primary); }
 @media (max-width: 768px) {
+  /* v29.2: Override desktop fixed positioning for mobile */
+  #scribeView { position: static !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; }
+  #scribeView > .panel { padding: var(--space-4) !important; border-radius: 0 !important; height: auto !important; overflow: visible !important; }
   .scribe-layout { grid-template-columns: 1fr; min-height: auto; }
   .scribe-sidebar { border-right: none; border-bottom: 1px solid var(--border-color); max-height: 200px; }
   .scribe-title-row { padding: 8px 12px 4px; }
