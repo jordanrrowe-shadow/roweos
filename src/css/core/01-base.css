@@ -47067,6 +47067,60 @@
   opacity: 0.5;
 }
 
+/* v29.2: TinyMCE dark theme overrides for Scribe */
+.scribe-tinymce-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.scribe-tinymce-wrap .tox.tox-tinymce {
+  border: none !important;
+  border-radius: 0 !important;
+}
+.scribe-tinymce-wrap .tox .tox-toolbar__primary {
+  background: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+.scribe-tinymce-wrap .tox .tox-toolbar__group {
+  border-right-color: var(--border-color) !important;
+}
+.scribe-tinymce-wrap .tox .tox-tbtn {
+  color: var(--text-secondary) !important;
+}
+.scribe-tinymce-wrap .tox .tox-tbtn:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+.scribe-tinymce-wrap .tox .tox-tbtn--enabled,
+.scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover {
+  background: rgba(168,152,120,0.2) !important;
+  color: var(--accent) !important;
+}
+.scribe-tinymce-wrap .tox .tox-statusbar {
+  background: var(--bg-secondary) !important;
+  border-top: 1px solid var(--border-color) !important;
+  color: var(--text-muted) !important;
+}
+.scribe-tinymce-wrap .tox .tox-statusbar__text-container {
+  color: var(--text-muted) !important;
+}
+/* v29.2: Make scribe-active-editor flex column for TinyMCE */
+.scribe-active-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.scribe-active-editor .scribe-title-input {
+  flex-shrink: 0;
+}
+.scribe-active-editor .scribe-editor-toolbar {
+  flex-shrink: 0;
+}
+.scribe-active-editor .scribe-tinymce-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
 /* v29.0: Scribe — Knowledge panel */
 .scribe-knowledge-panel {
   border-top: 1px solid var(--border-color);

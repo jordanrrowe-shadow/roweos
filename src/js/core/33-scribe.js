@@ -45,6 +45,9 @@ function saveScribeNotebooks() { // v29.0:
   }
 }
 
+// v29.2: TinyMCE state
+var _scribeTinymceReady = false;
+
 // === INIT === // v29.0:
 
 function initScribe() { // v29.0:
@@ -74,6 +77,47 @@ function initScribe() { // v29.0:
   } else {
     _showScribeEmptyState();
   }
+  // v29.2: Initialize TinyMCE rich editor
+  initScribeTinymce();
+}
+
+// v29.2: Initialize TinyMCE for Scribe editor
+function initScribeTinymce() {
+  if (_scribeTinymceReady) return;
+  if (typeof tinymce === 'undefined') return;
+
+  tinymce.init({
+    selector: '#scribeContentArea',
+    skin: 'oxide-dark',
+    content_css: 'dark',
+    height: '100%',
+    min_height: 400,
+    menubar: false,
+    statusbar: true,
+    branding: false,
+    promotion: false,
+    resize: false,
+    plugins: 'lists link image table code wordcount searchreplace fullscreen autolink autoresize preview',
+    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | hr blockquote | code fullscreen searchreplace wordcount',
+    toolbar_mode: 'wrap',
+    content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #e8e0d4; background: #1a1816; line-height: 1.7; padding: 16px; } a { color: #a89878; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #333; padding: 8px; } blockquote { border-left: 3px solid #a89878; margin: 12px 0; padding: 8px 16px; opacity: 0.85; } img { max-width: 100%; height: auto; } code { background: rgba(168,152,120,0.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; } pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto; }',
+    setup: function(editor) {
+      editor.on('change keyup', function() {
+        scheduleScribeAutoSave();
+      });
+      editor.on('init', function() {
+        _scribeTinymceReady = true;
+        // v29.2: If a notebook was selected before TinyMCE was ready, load its content now
+        if (_scribeActiveId) {
+          var nb = null;
+          for (var i = 0; i < scribeNotebooks.length; i++) {
+            if (scribeNotebooks[i].id === _scribeActiveId) { nb = scribeNotebooks[i]; break; }
+          }
+          if (nb) editor.setContent(nb.content || '');
+        }
+      });
+    }
+  });
 }
 
 function _showScribeEmptyState() { // v29.0:
@@ -253,9 +297,15 @@ function selectScribeNotebook(id) { // v29.0:
   var titleInput = document.getElementById('scribeTitleInput');
   if (titleInput) titleInput.value = nb.title || '';
 
-  // v29.0: Populate content
-  var contentEl = document.getElementById('scribeContentArea');
-  if (contentEl) contentEl.innerHTML = nb.content || '';
+  // v29.2: Populate TinyMCE content
+  var tinymceEditor = tinymce.get('scribeContentArea');
+  if (tinymceEditor) {
+    tinymceEditor.setContent(nb.content || '');
+  } else {
+    // Fallback if TinyMCE not ready yet
+    var contentEl = document.getElementById('scribeContentArea');
+    if (contentEl) contentEl.value = nb.content || '';
+  }
 
   // v29.0: Render metadata panel
   renderScribeMetadata(nb);
@@ -276,19 +326,6 @@ function onScribeContentChange() { // v29.0:
   scheduleScribeAutoSave();
 }
 
-function scribeExecCmd(cmd) { // v29.0:
-  document.execCommand(cmd, false, null);
-  var contentEl = document.getElementById('scribeContentArea');
-  if (contentEl) contentEl.focus();
-}
-
-function scribeInsertLink() { // v29.0:
-  var url = prompt('Enter URL:');
-  if (url) {
-    document.execCommand('createLink', false, url);
-  }
-}
-
 function scheduleScribeAutoSave() { // v29.0:
   if (_scribeAutoSaveTimer) clearTimeout(_scribeAutoSaveTimer);
   _scribeAutoSaveTimer = setTimeout(function() {
@@ -305,10 +342,12 @@ function saveActiveScribeNotebook() { // v29.0:
   if (!nb) return;
 
   var titleInput = document.getElementById('scribeTitleInput');
-  var contentEl = document.getElementById('scribeContentArea');
+  var tinymceEditor = tinymce.get('scribeContentArea');
 
   if (titleInput) nb.title = titleInput.value || 'Untitled Notebook';
-  if (contentEl) nb.content = contentEl.innerHTML || '';
+  if (tinymceEditor) {
+    nb.content = tinymceEditor.getContent() || '';
+  }
   nb.updatedAt = new Date().toISOString();
   nb._modifiedAt = Date.now();
 
