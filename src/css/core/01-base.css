@@ -1662,8 +1662,12 @@
       top: 0;
       z-index: 100;
       transition: width var(--sidebar-transition), background var(--transition-slow), border-color var(--transition-slow), box-shadow var(--sidebar-transition);
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
     }
+    .sidebar::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
     .sidebar.expanded {
       width: var(--sidebar-expanded-width);
       box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
