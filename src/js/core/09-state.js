@@ -2,7 +2,7 @@
 // DATA INITIALIZATION & MIGRATION - v4.8.0
 // ═══════════════════════════════════════════════════════════════
 
-var ROWEOS_VERSION = 'v28.5';
+var ROWEOS_VERSION = 'v29.2';
 var ROWEOS_DATA_VERSION_KEY = 'roweos_data_version';
 var ROWEOS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/YOUR-REPO/roweos-updates/main/latest-version.json';
 var ROWEOS_LAST_UPDATE_CHECK = 'roweos_last_update_check';
@@ -199,18 +199,36 @@ function writeDBAutomation(auto) {
 
 // v25.1: Write-through helpers for todos and calendar
 // Uses single-document pattern to avoid orphan docs on deletion
+// v29.1: Uses merge:false so cloud array is fully replaced (prevents zombie resurrection)
 function writeDBTodos() {
   var todosData = [];
   try { todosData = JSON.parse(localStorage.getItem(getTodosKey()) || '[]'); } catch(e) {}
-  writeDB('todos/main', { data: todosData }, { category: 'brand_todos' });
-  // v28.0: Write individual todo docs to v4
+  writeDB('todos/main', { data: todosData }, { category: 'brand_todos', merge: false });
+  // v29.1: Clean up orphaned V4 individual docs that no longer exist locally
   if (typeof syncEngine !== 'undefined' && syncEngine.isV4Active()) {
     try {
+      // Build set of current todo IDs
+      var _currentIds = {};
       for (var _ti = 0; _ti < todosData.length; _ti++) {
         var _todo = todosData[_ti];
         var _tid = String(_todo.id || ('todo_' + Date.now() + '_' + _ti));
         _todo.id = _tid;
+        _currentIds[_tid] = true;
         syncEngine.write('todos', _tid, _todo);
+      }
+      // Delete V4 docs for todos that were removed locally
+      var db = getDB();
+      if (db && firebaseUser) {
+        var _todosPath = 'roweos_users/' + firebaseUser.uid + '/todos';
+        db.collection(_todosPath).get().then(function(snap) {
+          snap.forEach(function(doc) {
+            if (doc.id !== 'main' && !_currentIds[doc.id]) {
+              doc.ref.delete().then(function() {
+                if (typeof ROWEOS_DEBUG !== 'undefined' && ROWEOS_DEBUG) console.log('[WriteDB] Cleaned orphan todo doc:', doc.id);
+              }).catch(function() {});
+            }
+          });
+        }).catch(function() {});
       }
     } catch(_v4e) {}
   }

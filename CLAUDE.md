@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v29.1
+Version:  v29.2
 File:     src/ (modular source) → builds to RoweOS/dist/index.html
 Live:     roweos.com
 ```
@@ -342,10 +342,18 @@ Pre-deployment validation, common errors, and known technical debt are in the **
 - **Duplicate function names:** Single-file means later definitions silently overwrite earlier ones. Before adding a function, grep for existing definitions with the same name.
 - **NEVER touch `* { }` margin:** The global reset is `* { padding: 0; box-sizing: border-box; }` — do NOT add `margin: 0` to it. Margin resets are on a separate explicit element list. Do NOT re-add `min-height: 100vh` or `padding-bottom: env(safe-area-inset-bottom)` to body.
 - **iOS box-sizing reflow hacks (CRITICAL — TWO locations):** (1) `DOMContentLoaded` handler toggles `box-sizing` off/on to fix initial render. (2) `visualViewport.resize` handler's keyboard-close branch does the same toggle after keyboard dismisses. BOTH hacks are required. NEVER remove either. Also NEVER remove `interactive-widget=resizes-content` from the viewport meta tag — it works with these hacks. The brief visual flash on load is acceptable.
-- **Mobile CSS debugging:** Connect Safari Web Inspector to the phone (`Develop > iPhone`) before guessing. Make ONE change per deploy to isolate fixes.
-- **Stale nav heights:** Legacy `mobile-nav` was 80px; current `liquid-nav` pill is ~50px. Use `calc(64px + var(--mobile-safe-bottom))` for content padding, `calc(50px + env(safe-area-inset-bottom, 0px))` for fixed inputs above nav.
+- **Mobile CSS debugging:** Connect Safari Web Inspector to the phone (`Develop > iPhone`) before guessing. Make ONE change per deploy to isolate fixes. Chromium/Playwright CANNOT reproduce iOS Safari layout bugs (safe area, viewport, zoom).
+- **Stale nav heights:** Legacy `mobile-nav` was 80px; current `liquid-nav` pill is ~50px. Use `calc(70px + var(--mobile-safe-bottom))` for scroll padding on views/panels, `calc(50px + env(safe-area-inset-bottom, 0px))` for fixed inputs above nav.
+- **NEVER use `height: -webkit-fill-available` on `html`:** Use `min-height: -webkit-fill-available; min-height: 100dvh` instead. The `height` version combined with `overflow: hidden` clips at the safe area boundary on iOS, creating a black/white bar at the bottom. This was the root cause of the v29.0 mobile bottom bar regression.
+- **Adding a new view (6 touch points):** `allViews` array, 8 CSS groups, sidebar nav HTML, `showView()` handler, mobile panel-view CSS selector (~L37688), light-mode mobile CSS selector (~L36374). Use `class="panel-view hidden"` (NOT `class="view hidden"` or `style="display:none"`).
+- **Interface Zoom (75-150%):** Uses `appContainer.style.zoom` on BOTH desktop and mobile. Works on iOS Safari. NEVER replace with CSS variable scaling or transform — those approaches don't scale everything uniformly. NEVER add `calc(Npx * var(--zoom-scale))` patterns — they double-scale when CSS zoom is active.
+- **PWA caching:** When mobile layout changes aren't showing after deploy, the user may need to delete and re-add the PWA. The installed web app caches aggressively.
 - **PWA icons:** Must be RGB (no alpha channel) or macOS dock adds white border. Use sharp to flatten: `.flatten({ background: { r: 10, g: 10, b: 10 } }).removeAlpha()`
 - **Keyboard handler:** `window.innerHeight` shifts on iOS with `interactive-widget=resizes-content`. Use a captured initial height for keyboard-close detection.
+- **Mobile panel edge-to-edge (v29.1):** `.panel-view > .panel` has `padding-left/right: 0` on mobile. Direct children get padding via `.panel-view > .panel > * { padding-left/right: var(--space-4) }`. New view content automatically inherits this pattern.
+- **deploy.sh minification:** `build.sh --minify` runs `html-minifier-terser` before Vercel deploy, then `build.sh --restore` restores unminified source. The deployed file is MINIFIED. The git repo has UNMINIFIED source.
+- **Focus/Signal retired (v28.8):** `showView('signal')` redirects to Pulse. Liquid nav uses `scribe` instead of `signal`. Saved user tabs with `signal` auto-migrate to `scribe` via `getLiquidNavTabs()`.
+- **Mobile nav default:** `'sidebar'` (liquid-nav off). User's saved preference in `roweos_mobile_nav` overrides.
 
 ---
 
