@@ -304,13 +304,13 @@ function selectScribeNotebook(id) { // v29.0:
 
   // v29.2: Populate TinyMCE content (with retry for init timing)
   var _nbContent = nb.content || '';
-  var tinymceEditor = tinymce.get('scribeContentArea');
+  var tinymceEditor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
   if (tinymceEditor && _scribeTinymceReady) {
     tinymceEditor.setContent(_nbContent);
   } else {
     // TinyMCE not ready yet — retry after init completes
     setTimeout(function() {
-      var ed = tinymce.get('scribeContentArea');
+      var ed = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
       if (ed) ed.setContent(_nbContent);
     }, 500);
   }
@@ -350,7 +350,7 @@ function saveActiveScribeNotebook() { // v29.0:
   if (!nb) return;
 
   var titleInput = document.getElementById('scribeTitleInput');
-  var tinymceEditor = tinymce.get('scribeContentArea');
+  var tinymceEditor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
 
   if (titleInput) nb.title = titleInput.value || 'Untitled Notebook';
   if (tinymceEditor) {
