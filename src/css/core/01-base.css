@@ -46903,7 +46903,6 @@
   overflow: hidden;
 }
 .scribe-sidebar {
-  background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -47007,6 +47006,21 @@ html.light-mode .scribe-title-actions button:hover { background: rgba(0,0,0,0.06
 html.light-mode .scribe-knowledge-send-btn { background: var(--accent, #a89878); color: #fff; }
 html.light-mode .scribe-knowledge-msg.ai { background: rgba(0,0,0,0.03); }
 html.light-mode .scribe-tag-pill { background: rgba(168,152,120,0.12); }
+html.light-mode .scribe-new-btn { color: #fff; }
+html.light-mode .scribe-search { background: rgba(0,0,0,0.03); color: var(--text-primary); }
+/* v29.2: TinyMCE light mode — override dark skin */
+html.light-mode .scribe-tinymce-wrap .tox .tox-toolbar__primary { background: #f5f5f5 !important; border-bottom-color: #e0e0e0 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-toolbar__group { border-right-color: #e0e0e0 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn { color: #444 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn:hover { background: rgba(0,0,0,0.06) !important; color: #222 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--enabled,
+html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.15) !important; color: #6d6352 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-statusbar { background: #f5f5f5 !important; border-top-color: #e0e0e0 !important; color: #888 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-statusbar__text-container { color: #888 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--select { color: #444 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--bespoke .tox-tbtn__select-label { color: #444 !important; }
+html.light-mode .scribe-synth-btn:hover { color: var(--text-primary); }
+html.light-mode .scribe-knowledge-toggle-btn:hover { color: var(--text-primary); }
 @media (max-width: 768px) {
   .scribe-layout { grid-template-columns: 1fr; min-height: auto; }
   .scribe-sidebar { border-right: none; border-bottom: 1px solid var(--border-color); max-height: 200px; }

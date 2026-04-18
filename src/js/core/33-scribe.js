@@ -86,10 +86,11 @@ function initScribeTinymce() {
   if (_scribeTinymceReady) return;
   if (typeof tinymce === 'undefined') return;
 
+  var _isLightMode = document.documentElement.classList.contains('light-mode');
   tinymce.init({
     selector: '#scribeContentArea',
-    skin: 'oxide-dark',
-    content_css: 'dark',
+    skin: _isLightMode ? 'oxide' : 'oxide-dark',
+    content_css: _isLightMode ? 'default' : 'dark',
     height: '100%',
     min_height: 400,
     menubar: false,
@@ -100,7 +101,9 @@ function initScribeTinymce() {
     plugins: 'lists link image table code wordcount searchreplace fullscreen autolink autoresize preview',
     toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | hr blockquote | code fullscreen searchreplace wordcount',
     toolbar_mode: 'wrap',
-    content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #e8e0d4; background: #1a1816; line-height: 1.7; padding: 16px; } a { color: #a89878; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #333; padding: 8px; } blockquote { border-left: 3px solid #a89878; margin: 12px 0; padding: 8px 16px; opacity: 0.85; } img { max-width: 100%; height: auto; } code { background: rgba(168,152,120,0.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; } pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto; }',
+    content_style: _isLightMode
+      ? 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #333; background: #fff; line-height: 1.7; padding: 16px; } a { color: #6d6352; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #ddd; padding: 8px; } blockquote { border-left: 3px solid #a89878; margin: 12px 0; padding: 8px 16px; opacity: 0.85; } img { max-width: 100%; height: auto; } code { background: rgba(168,152,120,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace; } pre { background: rgba(0,0,0,0.04); padding: 12px; border-radius: 8px; overflow-x: auto; }'
+      : 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #e8e0d4; background: #1a1816; line-height: 1.7; padding: 16px; } a { color: #a89878; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #333; padding: 8px; } blockquote { border-left: 3px solid #a89878; margin: 12px 0; padding: 8px 16px; opacity: 0.85; } img { max-width: 100%; height: auto; } code { background: rgba(168,152,120,0.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; } pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto; }',
     setup: function(editor) {
       editor.on('change keyup', function() {
         scheduleScribeAutoSave();

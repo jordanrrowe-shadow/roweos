@@ -939,6 +939,51 @@ function syncToFirebase() {
   return Promise.resolve();
 }
 
+// v28.7: Push brand logos to Firestore logos/ subcollection (extracted from deprecated syncToFirebaseV2)
+// Logos are too large for brand docs (stripped at 50KB), so they need their own push path.
+function pushBrandLogos() {
+  if (!firebaseUser || !firebase) return;
+  if (!shouldSyncCategory('logos')) return;
+  var db = firebase.firestore();
+  var basePath = 'roweos_users/' + firebaseUser.uid;
+  var MAX_LOGO_SYNC_SIZE = 900000;
+  var logoKeys = [];
+  try {
+    var lifeProfiles = JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]');
+    for (var lpi = 0; lpi < Math.max(lifeProfiles.length, 1); lpi++) {
+      var lpKey = (lifeProfiles[lpi] && lifeProfiles[lpi].logoKey) || ('roweos_lifeai_logo_profile_' + lpi);
+      logoKeys.push(lpKey);
+    }
+  } catch(e) {}
+  for (var li = 0; li < 10; li++) {
+    logoKeys.push('roweos_brand_' + li + '_logo');
+  }
+  var batch = db.batch();
+  var logoIndex = {};
+  var count = 0;
+  logoKeys.forEach(function(lk) {
+    var logoData = localStorage.getItem(lk);
+    if (logoData && logoData.length < MAX_LOGO_SYNC_SIZE) {
+      var docId = lk.replace(/[\/\.]/g, '_');
+      batch.set(db.doc(basePath + '/logos/' + docId), {
+        key: lk,
+        base64: logoData,
+        size: parseInt(localStorage.getItem(lk + '_size') || '100')
+      });
+      logoIndex[docId] = lk;
+      count++;
+    }
+  });
+  if (count > 0) {
+    batch.set(db.doc(basePath + '/profile/logos'), { _index: logoIndex, _version: 2 });
+    batch.commit().then(function() {
+      console.log('[pushBrandLogos] Pushed ' + count + ' logos to cloud');
+    }).catch(function(err) {
+      console.warn('[pushBrandLogos] Failed:', err.message);
+    });
+  }
+}
+
 async function syncToFirebaseV1_legacy() {
   console.log('[Firebase Sync V1] Starting legacy sync...');
   console.log('[Firebase Sync V1] firebaseUser:', firebaseUser ? firebaseUser.email : 'null');
@@ -2472,12 +2517,26 @@ function setupRealtimeSync() {
             for (var _pbi = 0; _pbi < brands.length; _pbi++) {
               if (brands[_pbi].id === profile.settings.primaryBrandId) {
                 localStorage.setItem('roweos_primary_brand', String(_pbi));
+                // v28.6: Also update selected brand if no explicit selection was made on this device
+                if (!localStorage.getItem('roweos_selected_brand_id')) {
+                  selectedBrand = _pbi;
+                  localStorage.setItem('roweos_selected_brand', String(_pbi));
+                  localStorage.setItem('roweos_selected_brand_id', profile.settings.primaryBrandId);
+                  if (typeof onBrandChange === 'function') try { onBrandChange(); } catch(e) {}
+                }
                 break;
               }
             }
           }
           console.log('[Firebase V3] Primary brand synced from cloud:', profile.settings.primaryBrandId);
         }
+      }
+      // v28.6: Real-time todoCategories sync (prevents Focus category resurrection)
+      if (profile.todoCategories && Array.isArray(profile.todoCategories)) {
+        var _catKey = typeof getTodoCategoriesKey === 'function' ? getTodoCategoriesKey() : 'roweos_todo_categories';
+        localStorage.setItem(_catKey, JSON.stringify(profile.todoCategories));
+        if (typeof window !== 'undefined') window.todoCategories = profile.todoCategories;
+        console.log('[Firebase V3] Todo categories synced from cloud:', profile.todoCategories.length);
       }
       // v19.0: Real-time social connection sync (desktop → mobile)
       if (profile.socialConnections) {
@@ -2542,6 +2601,10 @@ function setupRealtimeSync() {
       // v25.2: Cloud-authoritative -- empty snapshot means all automations deleted, safeSyncWrite handles it
       var cloudAutos = [];
       snapshot.forEach(function(doc) { cloudAutos.push(doc.data()); });
+      // v28.6: Filter out deleted automations before merge (prevents resurrection)
+      if (typeof _deletedAutomationIds !== 'undefined' && Object.keys(_deletedAutomationIds).length > 0) {
+        cloudAutos = cloudAutos.filter(function(a) { return !_deletedAutomationIds[String(a.id)]; });
+      }
       // v25.2: Use mergeByTimestamp for automations (per-item array needing merge)
       var _localAutos = [];
       try { _localAutos = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(e) {}
@@ -4060,6 +4123,10 @@ function showApiKeyReminderAfterRestore() {
 
 function proceedToApp() {
   hideAuthGate();
+  // v29.1: Mark this device as initialized (prevents false "restore from cloud" on refresh)
+  if (brands && brands.length > 0) {
+    localStorage.setItem('roweos_initialized', 'true');
+  }
   // v25.3: Migrate clients to unified people storage
   migratePeopleData();
   // v25.3: Schedule check-in reminders for direct reports
@@ -4105,7 +4172,21 @@ function handleAuthState(user) {
       .then(function(doc) {
         if (doc.exists && doc.data().brands && doc.data().brands.length > 0) {
           if (!brands || brands.length === 0) {
-            showDataRestorePrompt(doc.data());
+            // v29.1: If device was previously initialized, silently restore instead of scary prompt
+            var _wasInit = localStorage.getItem('roweos_initialized') === 'true';
+            if (_wasInit) {
+              console.log('[Auth] Previously initialized device - silent restore from cloud');
+              try {
+                applyCloudData(doc.data());
+                reloadAllData();
+              } catch(e) { console.warn('[Auth] Silent restore error:', e); }
+              hideAuthGate();
+              loadFromFirebase(false);
+              setupRealtimeSync();
+              showStartupScreen();
+            } else {
+              showDataRestorePrompt(doc.data());
+            }
           } else {
             hideAuthGate();
             loadFromFirebase(false);
@@ -4144,8 +4225,22 @@ function handleAuthState(user) {
         if (doc.exists && doc.data().brands && doc.data().brands.length > 0) {
           // Has cloud data
           if (!brands || brands.length === 0) {
-            // No local data - offer restore
-            showDataRestorePrompt(doc.data());
+            // v29.1: If device was previously initialized, silently restore instead of scary prompt
+            var _wasInit = localStorage.getItem('roweos_initialized') === 'true';
+            if (_wasInit) {
+              console.log('[Auth] Previously initialized device - silent restore from cloud');
+              try {
+                applyCloudData(doc.data());
+                reloadAllData();
+              } catch(e) { console.warn('[Auth] Silent restore error:', e); }
+              hideAuthGate();
+              loadFromFirebase(false);
+              setupRealtimeSync();
+              showStartupScreen();
+            } else {
+              // No local data, first visit — offer restore
+              showDataRestorePrompt(doc.data());
+            }
           } else {
             // Has local data - just proceed
             hideAuthGate();
@@ -6515,15 +6610,11 @@ function generateBrandedEmail(layout) {
   var logoMargin = logoPos === 'center' ? 'margin:0 auto;' : logoPos === 'right' ? 'margin:0 0 0 auto;' : '';
   // v28.4: Use base64 data URIs directly — they work in Apple Mail, Gmail, and most modern clients.
   // Firebase Storage URLs expire after ~1hr causing logos to show "?" placeholder.
-  var initial = brandName.charAt(0).toUpperCase();
-  var initialHtml = '<div style="width:48px;height:48px;border-radius:10px;background:' + accent + ';color:#fff;font-size:22px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;line-height:1;' + logoMargin + '">' + initial + '</div>';
   if (logo && (logo.indexOf('http') === 0 || logo.indexOf('data:') === 0)) {
     // v28.4: Accept both HTTP URLs and base64 data URIs — base64 never expires
     logoHtml = '<img src="' + logo + '" alt="' + escapeHtml(brandName) + '" width="' + logoSizePx + '" height="auto" style="display:block;' + logoMargin + 'max-width:' + logoSizePx + 'px;max-height:' + maxH + 'px;width:' + logoSizePx + 'px;border-radius:6px;object-fit:contain;">';
-  } else {
-    // No logo available — show brand initial circle
-    logoHtml = initialHtml;
   }
+  // v29.x: No logo = no logo section (no fallback initial/empty box)
   // v23.2: Store font family globally for template use
   window._mailEmailFont = fontFamily;
   if (layout === 'professional') return generateBrandedProfessional(content, brandName, accent, logoHtml, date, logoAlign);
@@ -6537,12 +6628,16 @@ function generateBrandedEmail(layout) {
 function generateBrandedProfessional(content, brandName, accent, logoHtml, date, logoAlign) {
   logoAlign = logoAlign || 'center';
   var headerHtml;
-  if (logoAlign === 'center') {
+  var hasLogo = logoHtml && logoHtml.length > 0;
+  if (!hasLogo) {
+    // No logo — just brand name + date, centered
+    headerHtml = '<div style="text-align:center;font-size:20px;font-weight:600;color:#1a1a1a;letter-spacing:0.5px;">' + escapeHtml(brandName) + '</div>'
+      + (date ? '<div style="text-align:center;font-size:12px;color:#888;margin-top:2px;">' + date + '</div>' : '');
+  } else if (logoAlign === 'center') {
     headerHtml = '<div style="text-align:center;margin-bottom:12px;">' + logoHtml + '</div>'
       + '<div style="text-align:center;font-size:20px;font-weight:600;color:#1a1a1a;letter-spacing:0.5px;">' + escapeHtml(brandName) + '</div>'
       + (date ? '<div style="text-align:center;font-size:12px;color:#888;margin-top:2px;">' + date + '</div>' : '');
   } else {
-    var cellOrder = logoAlign === 'right' ? 'flex-direction:row-reverse;' : '';
     headerHtml = '<table cellpadding="0" cellspacing="0" border="0" width="100%"><tr>'
       + (logoAlign === 'right' ? '<td style="vertical-align:middle;padding-right:16px;text-align:right;">'
         + '<div style="font-size:20px;font-weight:600;color:#1a1a1a;letter-spacing:0.5px;">' + escapeHtml(brandName) + '</div>'
@@ -6612,7 +6707,7 @@ function generateBrandedBold(content, brandName, accent, logoHtml, date, logoAli
     + '<div style="font-family:' + ff + ';max-width:600px;margin:0 auto;background:#0a0a0a;">'
     // Header band
     + '<div style="background:' + accent + ';padding:32px 40px;' + textAlign + '">'
-    + '<div style="margin-bottom:12px;">' + logoHtml.replace('border-radius:10px', 'border-radius:12px;border:2px solid rgba(255,255,255,0.3)') + '</div>'
+    + (logoHtml ? '<div style="margin-bottom:12px;">' + logoHtml.replace('border-radius:10px', 'border-radius:12px;border:2px solid rgba(255,255,255,0.3)') + '</div>' : '')
     + '<div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:1px;">' + escapeHtml(brandName) + '</div>'
     + (date ? '<div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:6px;">' + date + '</div>' : '')
     + '</div>'
@@ -6639,7 +6734,7 @@ function generateBrandedNewsletter(content, brandName, accent, logoHtml, date, l
     + '<div style="font-family:' + ff + ';max-width:600px;margin:0 auto;">'
     // Header
     + '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 100%);padding:36px 40px;' + textAlign + 'border-radius:8px 8px 0 0;">'
-    + '<div style="margin-bottom:10px;">' + logoHtml + '</div>'
+    + (logoHtml ? '<div style="margin-bottom:10px;">' + logoHtml + '</div>' : '')
     + '<div style="font-size:18px;font-weight:600;color:#fff;letter-spacing:0.5px;">' + escapeHtml(brandName) + '</div>'
     + (date ? '<div style="font-size:11px;color:#888;margin-top:6px;">' + date + '</div>' : '')
     + '</div>'
@@ -7480,6 +7575,73 @@ function clearFirestoreSubcollection(db, collectionPath) {
       batch.delete(doc.ref);
     });
     return batch.commit();
+  });
+}
+
+// v29.1: Purge cloud todos — force-replaces Firestore with current local todos
+// Use when deleted tasks have resurrected from cloud. Writes with set() (no merge)
+// and removes orphaned individual docs from the todos subcollection.
+function purgeCloudTodos() {
+  if (!firebaseUser || !firebase) {
+    showToast('Not connected to cloud', 'error');
+    return;
+  }
+  var db = getDB();
+  if (!db) { showToast('Database not available', 'error'); return; }
+
+  var todosData = [];
+  try { todosData = JSON.parse(localStorage.getItem(getTodosKey()) || '[]'); } catch(e) {}
+
+  var basePath = 'roweos_users/' + firebaseUser.uid;
+
+  // 1. Overwrite todos/main with current local array (no merge)
+  db.doc(basePath + '/todos/main').set({ data: todosData }).then(function() {
+    console.log('[purgeCloudTodos] Wrote', todosData.length, 'todos to cloud');
+
+    // 2. Build set of current IDs
+    var currentIds = {};
+    for (var i = 0; i < todosData.length; i++) {
+      if (todosData[i].id) currentIds[String(todosData[i].id)] = true;
+    }
+
+    // 3. Delete orphaned individual docs
+    db.collection(basePath + '/todos').get().then(function(snap) {
+      var deleted = 0;
+      var batch = db.batch();
+      snap.forEach(function(doc) {
+        if (doc.id !== 'main' && !currentIds[doc.id]) {
+          batch.delete(doc.ref);
+          deleted++;
+        }
+      });
+      if (deleted > 0) {
+        batch.commit().then(function() {
+          console.log('[purgeCloudTodos] Removed', deleted, 'orphaned cloud todo docs');
+          showToast('Cloud tasks purged and synced (' + deleted + ' orphans removed)', 'success');
+        }).catch(function(err) {
+          console.warn('[purgeCloudTodos] Batch delete failed:', err.message);
+          showToast('Cloud tasks synced but orphan cleanup failed', 'warning');
+        });
+      } else {
+        showToast('Cloud tasks purged and synced', 'success');
+      }
+    }).catch(function(err) {
+      console.warn('[purgeCloudTodos] Collection read failed:', err.message);
+      showToast('Cloud tasks synced (could not check for orphans)', 'warning');
+    });
+
+    // 4. Also clean V4 if active
+    if (typeof syncEngine !== 'undefined' && syncEngine.isV4Active()) {
+      try {
+        for (var j = 0; j < todosData.length; j++) {
+          var todo = todosData[j];
+          if (todo.id) syncEngine.write('todos', String(todo.id), todo);
+        }
+      } catch(e) {}
+    }
+  }).catch(function(err) {
+    console.error('[purgeCloudTodos] Write failed:', err.message);
+    showToast('Failed to purge cloud tasks: ' + err.message, 'error');
   });
 }
 
@@ -8412,7 +8574,9 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     db.doc(basePath + '/folio/main').get(),
     db.doc(basePath + '/profile/people').get(),
     db.doc(basePath + '/profile/inventory').get(),
-    db.doc(basePath + '/profile/researchHistory').get()
+    db.doc(basePath + '/profile/researchHistory').get(),
+    db.doc(basePath + '/profile/deletedAutomationIds').get(), // v28.6: Load deletion tombstones
+    db.doc(basePath + '/scribe/notebooks').get() // v29.2: Scribe notebooks
   ]).then(function(results) {
     var profileDoc = results[0];
     var brandsSnap = results[1];
@@ -8451,6 +8615,8 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     var peopleDoc = results[34]; // v25.3
     var inventoryV3Doc = results[35]; // v25.3
     var researchHistDoc = results[36]; // v27.0
+    var deletedAutoIdsDoc = results[37]; // v28.6
+    var scribeDoc = results[38]; // v29.2
 
     // Profile
     var cloudLastDevice = null;
@@ -8925,6 +9091,8 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             if (typeof brandMemory !== 'undefined') {
               Object.keys(bmLocal).forEach(function(bk) { brandMemory[bk] = bmLocal[bk]; });
             }
+            // v29.1: Migrate any restored index-based keys to ID-based
+            if (typeof migrateBrandMemoryKeys === 'function') migrateBrandMemoryKeys();
           } catch(e) { console.warn('[Firebase V2] brandMemory restore error:', e.message); }
         } else if (key === 'lifeMemory') {
           // v15.16: Restore life memory documents (metadata + insights)
@@ -9135,11 +9303,35 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       localStorage.setItem('roweos_runs', JSON.stringify(existingObj));
     }
 
+    // v28.6: Load deletion tombstones BEFORE automations (prevents resurrection)
+    if (deletedAutoIdsDoc && deletedAutoIdsDoc.exists) {
+      var _cloudDeleted = deletedAutoIdsDoc.data();
+      if (_cloudDeleted && _cloudDeleted.data && typeof _deletedAutomationIds !== 'undefined') {
+        var _delKeys = Object.keys(_cloudDeleted.data);
+        for (var _dk = 0; _dk < _delKeys.length; _dk++) {
+          if (!_deletedAutomationIds[_delKeys[_dk]]) {
+            _deletedAutomationIds[_delKeys[_dk]] = _cloudDeleted.data[_delKeys[_dk]];
+          }
+        }
+        console.log('[Firebase V3] Loaded ' + _delKeys.length + ' deleted automation tombstones from cloud');
+        // v28.7: Persist to localStorage so tombstones survive page refresh
+        if (typeof _persistDeletedIds === 'function') _persistDeletedIds();
+      }
+    }
+
     // v25.0: Automations — write-through, Firestore is truth
     var _automationsChain = db.collection(basePath + '/automations').get().then(function(autoSnap) {
       var cloudAutos = [];
       if (autoSnap && !autoSnap.empty) {
         autoSnap.forEach(function(doc) { cloudAutos.push(doc.data()); });
+      }
+      // v28.6: Filter out deleted automations before writing to local
+      if (typeof _deletedAutomationIds !== 'undefined' && Object.keys(_deletedAutomationIds).length > 0) {
+        var _beforeCount = cloudAutos.length;
+        cloudAutos = cloudAutos.filter(function(a) { return !_deletedAutomationIds[String(a.id)]; });
+        if (_beforeCount !== cloudAutos.length) {
+          console.log('[Firebase V3] Filtered ' + (_beforeCount - cloudAutos.length) + ' deleted automations from cloud pull');
+        }
       }
       if (cloudAutos.length > 0) {
         // v27.0: Use safeSyncWrite (now merges arrays) instead of blind overwrite
@@ -9886,6 +10078,21 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         }
       }
     }
+    // v29.2: Scribe notebooks — cloud-authoritative merge
+    if (scribeDoc && scribeDoc.exists) {
+      var _scribeCloud = scribeDoc.data();
+      var _cloudNbs = (_scribeCloud && _scribeCloud.notebooks) ? _scribeCloud.notebooks : [];
+      if (Array.isArray(_cloudNbs) && _cloudNbs.length > 0) {
+        var _localNbs = [];
+        try { _localNbs = JSON.parse(localStorage.getItem('roweos_scribe_notebooks') || '[]'); } catch(e) { _localNbs = []; }
+        if (!Array.isArray(_localNbs)) _localNbs = [];
+        var _mergedNbs = mergeByTimestamp(_localNbs, _cloudNbs, 'id');
+        localStorage.setItem('roweos_scribe_notebooks', JSON.stringify(_mergedNbs));
+        if (typeof scribeNotebooks !== 'undefined') scribeNotebooks = _mergedNbs;
+        console.log('[Firebase V3] Scribe notebooks synced: ' + _mergedNbs.length);
+      }
+    }
+
     // v25.2: Mark first sync completed for mergeByTimestamp offline detection
     localStorage.setItem('roweos_first_sync_completed', 'true');
     localStorage.setItem('roweos_last_sync', String(Date.now()));
