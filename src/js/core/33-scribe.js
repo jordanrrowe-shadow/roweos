@@ -83,6 +83,7 @@ function initScribe() { // v29.2:
   setTimeout(function() {
     initScribeTinymce();
   }, 200);
+  setTimeout(function() { initScribeResizeHandle(); }, 300); // v29.3:
 }
 
 // v29.2: Initialize TinyMCE for Scribe editor
@@ -111,6 +112,7 @@ function initScribeTinymce() {
     setup: function(editor) {
       editor.on('change keyup', function() {
         scheduleScribeAutoSave();
+        updateScribeWordCount(); // v29.3
       });
       editor.on('init', function() {
         _scribeTinymceReady = true;
@@ -450,6 +452,7 @@ function selectScribePage(notebookId, pageId) {
       if (ed) ed.setContent(_pgContent);
     }, 500);
   }
+  setTimeout(updateScribeWordCount, 600); // v29.3
 
   // Render metadata (tags from parent notebook)
   renderScribeMetadata(nb);
@@ -504,6 +507,7 @@ function selectScribeNotebook(id) { // v29.0:
       if (ed) ed.setContent(_nbContent);
     }, 500);
   }
+  setTimeout(updateScribeWordCount, 600); // v29.3
 
   // v29.0: Render metadata panel
   renderScribeMetadata(nb);
@@ -1108,6 +1112,67 @@ function unlinkScribeLibraryItem(idx) { // v29.0:
   nb._modifiedAt = Date.now();
   saveScribeNotebooks();
   renderScribeMetadata(nb);
+}
+
+// === RESIZE HANDLE === // v29.3:
+
+function initScribeResizeHandle() {
+  var handle = document.getElementById('scribeResizeHandle');
+  if (!handle) return;
+  var panel = document.getElementById('scribeKnowledgePanel');
+  if (!panel) return;
+
+  var startY = 0;
+  var startHeight = 0;
+  var isDragging = false;
+
+  function onStart(e) {
+    isDragging = true;
+    startY = e.touches ? e.touches[0].clientY : e.clientY;
+    startHeight = panel.offsetHeight;
+    handle.classList.add('dragging');
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'ns-resize';
+    e.preventDefault();
+  }
+
+  function onMove(e) {
+    if (!isDragging) return;
+    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    var delta = startY - clientY;
+    var newHeight = Math.max(80, Math.min(600, startHeight + delta));
+    panel.style.maxHeight = newHeight + 'px';
+    panel.style.height = newHeight + 'px';
+    e.preventDefault();
+  }
+
+  function onEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+  }
+
+  handle.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onEnd);
+  handle.addEventListener('touchstart', onStart, { passive: false });
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchend', onEnd);
+}
+
+// === WORD COUNT === // v29.3:
+
+function updateScribeWordCount() {
+  var el = document.getElementById('scribeWordCount');
+  if (!el) return;
+  var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+  if (!editor) { el.textContent = '0 words'; return; }
+  var text = editor.getContent({ format: 'text' }) || '';
+  var words = text.split(/\s+/).filter(function(s) { return s.length > 0; }).length;
+  var chars = text.length;
+  el.textContent = words + ' word' + (words !== 1 ? 's' : '') + '  |  ' + chars + ' characters';
 }
 
 // === HELPERS === // v29.0:
