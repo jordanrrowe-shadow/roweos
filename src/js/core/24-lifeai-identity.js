@@ -3101,34 +3101,53 @@ function applyAccessibilityScale() {
     var compensatedVw = (100 / zoomFactor) + 'vw';
     appContainer.style.width = compensatedVw;
     appContainer.style.minHeight = compensatedVh;
+    appContainer.style.maxWidth = compensatedVw;
+    // html element also has max-width:100vw — override it too
+    root.style.maxWidth = compensatedVw;
+    root.style.width = compensatedVw;
     // Sidebar — position:fixed, height:100vh
     var sidebar = document.querySelector('.sidebar');
-    if (sidebar) sidebar.style.height = compensatedVh;
+    if (sidebar) {
+      sidebar.style.height = compensatedVh;
+      sidebar.style.maxWidth = 'none';
+    }
     // Main wrapper — min-height:100vh
     var mainWrapper = document.querySelector('.main-wrapper');
     if (mainWrapper) {
       mainWrapper.style.minHeight = compensatedVh;
       mainWrapper.style.width = compensatedVw;
+      mainWrapper.style.maxWidth = compensatedVw;
     }
-    // All fixed panel-views — bottom:0 doesn't compensate, need explicit height
+    // All fixed panel-views — compensate both height and width
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
       panelViews[pv].style.minHeight = compensatedVh;
+      panelViews[pv].style.maxWidth = compensatedVw;
+      panelViews[pv].style.width = compensatedVw;
     }
   } else {
     appContainer.style.zoom = '';
     appContainer.style.width = '';
     appContainer.style.minHeight = '';
+    appContainer.style.maxWidth = '';
+    root.style.maxWidth = '';
+    root.style.width = '';
     var sidebar = document.querySelector('.sidebar');
-    if (sidebar) sidebar.style.height = '';
+    if (sidebar) {
+      sidebar.style.height = '';
+      sidebar.style.maxWidth = '';
+    }
     var mainWrapper = document.querySelector('.main-wrapper');
     if (mainWrapper) {
       mainWrapper.style.minHeight = '';
       mainWrapper.style.width = '';
+      mainWrapper.style.maxWidth = '';
     }
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
       panelViews[pv].style.minHeight = '';
+      panelViews[pv].style.maxWidth = '';
+      panelViews[pv].style.width = '';
     }
   }
 
