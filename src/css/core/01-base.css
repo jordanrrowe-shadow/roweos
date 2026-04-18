@@ -1589,8 +1589,7 @@
       max-width: 100vw;
     }
     html {
-      min-height: -webkit-fill-available; /* v29.1: Changed from height to min-height — height clips at safe area on iOS, leaving black/white bar */
-      min-height: 100dvh; /* v29.1: Fallback for browsers that don't support -webkit-fill-available */
+      height: -webkit-fill-available;
       overflow: hidden; /* v18.7: Prevent html scroll — panels handle their own */
       max-width: 100vw;
       background: var(--bg-primary); /* v22.33: Match body bg — prevents white/black bar in safe area */
