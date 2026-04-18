@@ -1343,7 +1343,7 @@ async function saveOnboardingApiKey() {
 function showModelPickerInOnboarding(provider) {
   var models = {
     anthropic: [
-      { id: 'claude-opus-4-6', name: 'Claude Opus 4.6', desc: 'Most capable, complex reasoning and analysis', color: '#a89878', recommended: true },
+      { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', desc: 'Most capable, complex reasoning and analysis', color: '#a89878', recommended: true },
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', desc: 'Fast, intelligent, great for most tasks', color: '#f97316', recommended: false },
       { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', desc: 'Fastest responses, cost-effective', color: '#22c55e', recommended: false }
     ],
@@ -1673,7 +1673,7 @@ function completeBrandSetup() {
 
   // Create new brand object with extracted data merged in
   var newBrand = {
-    id: 'brand_' + Date.now(),
+    id: 'brand_name_' + brandName.toLowerCase().replace(/[^a-z0-9]/g, '_'),
     _modifiedAt: Date.now(),
     _createdAt: Date.now(),
     name: brandName,
@@ -1737,16 +1737,36 @@ function completeBrandSetup() {
     google: 'gemini-3.1-pro-preview'
   };
   
-  // Add brand to brands array
-  brands.push(newBrand);
-  
+  // v29.1: Check if brand already exists (quick-add creates it before onboarding opens)
+  var existingIdx = -1;
+  for (var _ebi = 0; _ebi < brands.length; _ebi++) {
+    if ((brands[_ebi].name || '').toLowerCase() === brandName.toLowerCase()) {
+      existingIdx = _ebi;
+      break;
+    }
+  }
+
+  var newBrandIndex;
+  if (existingIdx >= 0) {
+    // v29.1: Update existing brand instead of creating duplicate
+    console.log('[Onboarding] v29.1: Updating existing brand at index', existingIdx, 'instead of creating duplicate');
+    // Preserve the existing id and _createdAt, merge all other fields
+    newBrand.id = brands[existingIdx].id;
+    newBrand._createdAt = brands[existingIdx]._createdAt || newBrand._createdAt;
+    brands[existingIdx] = newBrand;
+    newBrandIndex = existingIdx;
+  } else {
+    // Brand doesn't exist yet -- add it
+    brands.push(newBrand);
+    newBrandIndex = brands.length - 1;
+  }
+
   // Save brand settings - brandSettings is an object, not an array
-  var newBrandIndex = brands.length - 1;
   brandSettings[newBrandIndex] = {
     provider: selectedProvider,
     model: providerModels[selectedProvider]
   };
-  
+
   // Save to localStorage
   try {
     // v14.2: Use saveBrands() to set lastLocalSaveTime
@@ -2650,7 +2670,7 @@ function _quickAddBrandSubmit(useResearch) {
   var fullUrl = website ? (!/^https?:\/\//i.test(website) ? 'https://' + website : website) : '';
 
   var newBrand = {
-    id: 'brand_' + Date.now(), _modifiedAt: Date.now(), _createdAt: Date.now(),
+    id: 'brand_name_' + brandName.toLowerCase().replace(/[^a-z0-9]/g, '_'), _modifiedAt: Date.now(), _createdAt: Date.now(),
     name: brandName, tagline: '', voice: 'professional, warm, thoughtful',
     positioning: '', products: '', audience: '', location: '',
     website: fullUrl, vocabDo: '', vocabDont: '', mission: '',
@@ -3069,15 +3089,23 @@ function applyAccessibilityScale() {
   var root = document.documentElement;
 
   // v25.1: Apply interface zoom via CSS zoom on the main app container
-  // This zooms the entire interface (all elements), not just text
+  // This scales EVERYTHING proportionally — works on both desktop and iOS Safari
   var appContainer = document.getElementById('app') || document.body;
+  var zoomFactor = zoomLevel / 100;
   if (zoomLevel !== 100) {
-    appContainer.style.zoom = (zoomLevel / 100).toString();
+    appContainer.style.zoom = zoomFactor.toString();
+    // v29.2: Compensate body dimensions so fixed-position views fill the actual viewport
+    // At 75% zoom, body is 133.33vw/vh — after zoom scaling, visually fills 100% of screen
+    var inverseScale = 100 / zoomLevel;
+    appContainer.style.width = (inverseScale * 100) + 'vw';
+    appContainer.style.minHeight = (inverseScale * 100) + 'vh';
   } else {
     appContainer.style.zoom = '';
+    appContainer.style.width = '';
+    appContainer.style.minHeight = '';
   }
 
-  // Apply text-size scaling via font-size on root (separate from zoom)
+  // Text-size scaling via font-size on root (independent of zoom)
   if (textLevel !== 100) {
     root.style.webkitTextSizeAdjust = 'none';
     if (document.body) document.body.style.webkitTextSizeAdjust = 'none';
@@ -3089,7 +3117,7 @@ function applyAccessibilityScale() {
   }
 
   root.style.setProperty('--text-scale', String(textLevel / 100));
-  root.style.setProperty('--zoom-scale', String(zoomLevel / 100));
+  root.style.setProperty('--zoom-scale', String(zoomFactor));
 }
 
 // v23.7: Accessibility — Display Size (text scaling via Settings slider only)
@@ -3737,7 +3765,7 @@ async function checkApiConnection(forceRefresh) {
           name: 'Anthropic',
           models: [
             { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6' },
-            { id: 'claude-opus-4-6', name: 'Claude Opus 4.6' },
+            { id: 'claude-opus-4-7', name: 'Claude Opus 4.7' },
             { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5' }
           ]
         },
@@ -4677,9 +4705,48 @@ function buildBrandContext(brandIdx, brand) {
       if (brand.tone) context += 'TONE: ' + brand.tone + '\n';
       if (brand.website) context += 'WEBSITE: ' + brand.website + '\n';
     }
+
+    // v29.1: Include LIVE identity data (essence, voice, audience, etc.) -- always read current state
+    if (brand.identityData) {
+      var _idSections = ['essence', 'voice', 'audience', 'messaging', 'products', 'visual', 'competitive'];
+      var _idContent = '';
+      for (var _ids = 0; _ids < _idSections.length; _ids++) {
+        var _sec = _idSections[_ids];
+        var _secData = brand.identityData[_sec];
+        if (!_secData) continue;
+        var _owner = _secData.owner || '';
+        var _ai = _secData.ai || '';
+        if (Array.isArray(_ai)) _ai = _ai.map(function(item) { return typeof item === 'string' ? item : (item.text || ''); }).join('\n');
+        if (_owner || _ai) {
+          _idContent += '\n' + _sec.charAt(0).toUpperCase() + _sec.slice(1) + ':\n';
+          if (_owner) _idContent += _owner + '\n';
+          if (_ai) _idContent += _ai + '\n';
+        }
+      }
+      if (_idContent) {
+        context += '\n===== BRAND IDENTITY (Live) =====\n' + _idContent;
+      }
+    }
+
+    // v29.1: Include brand knowledge from per-brand knowledge store
+    if (typeof getBrandKnowledge === 'function') {
+      var _bk = getBrandKnowledge(brand.name);
+      if (_bk) {
+        if (_bk.systemPromptAdditions) {
+          context += '\n' + _bk.systemPromptAdditions + '\n';
+        }
+        if (_bk.insights && _bk.insights.length > 0) {
+          context += '\n===== BRAND KNOWLEDGE INSIGHTS =====\n';
+          for (var _ki = 0; _ki < _bk.insights.length; _ki++) {
+            var _ins = _bk.insights[_ki];
+            context += '- ' + (typeof _ins === 'string' ? _ins : (_ins.text || '')) + '\n';
+          }
+        }
+      }
+    }
     
     // === BRAND MEMORY (Uploaded Documents) ===
-    var brandKey = 'brand_' + brandIdx;
+    var brandKey = typeof getBrandMemoryKey === 'function' ? getBrandMemoryKey(brandIdx) : 'brand_' + brandIdx;
     if (typeof brandMemory !== 'undefined' && brandMemory && brandMemory[brandKey] && brandMemory[brandKey].documents && brandMemory[brandKey].documents.length > 0) {
       context += '\n===== UPLOADED DOCUMENTS =====\n';
       brandMemory[brandKey].documents.forEach(function(doc, idx) {
