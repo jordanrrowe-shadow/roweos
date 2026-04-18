@@ -7,7 +7,7 @@
 var scribeNotebooks = []; // v29.0: loaded from localStorage
 var _scribeActiveId = null; // v29.0: currently selected notebook ID
 var _scribeAutoSaveTimer = null; // v29.0: debounce timer for auto-save
-var _scribeKnowledgeMode = false; // v29.0: knowledge panel toggle
+var _scribeKnowledgeMode = true; // v29.2: knowledge panel ON by default
 var _scribeKnowledgeThread = []; // v29.0: Q&A thread messages
 
 var SCRIBE_STORAGE_KEY = 'roweos_scribe_notebooks'; // v29.0:
@@ -50,10 +50,9 @@ var _scribeTinymceReady = false;
 
 // === INIT === // v29.0:
 
-function initScribe() { // v29.0:
+function initScribe() { // v29.2:
   loadScribeNotebooks();
   renderScribeNotebookList();
-  // v29.0: Show empty state or last active notebook
   if (scribeNotebooks.length > 0) {
     var lastActive = _scribeActiveId;
     var found = false;
@@ -63,7 +62,6 @@ function initScribe() { // v29.0:
       }
     }
     if (!found) {
-      // v29.0: Select the most recently updated non-archived notebook
       var sorted = scribeNotebooks.filter(function(nb) { return !nb.archived; });
       sorted.sort(function(a, b) { return (b.updatedAt || '').localeCompare(a.updatedAt || ''); });
       if (sorted.length > 0) {
@@ -77,6 +75,10 @@ function initScribe() { // v29.0:
   } else {
     _showScribeEmptyState();
   }
+  // v29.2: Defer TinyMCE init — view needs to be fully visible first
+  setTimeout(function() {
+    initScribeTinymce();
+  }, 200);
 }
 
 // v29.2: Initialize TinyMCE for Scribe editor
@@ -300,14 +302,17 @@ function selectScribeNotebook(id) { // v29.0:
   var titleInput = document.getElementById('scribeTitleInput');
   if (titleInput) titleInput.value = nb.title || '';
 
-  // v29.2: Populate TinyMCE content
+  // v29.2: Populate TinyMCE content (with retry for init timing)
+  var _nbContent = nb.content || '';
   var tinymceEditor = tinymce.get('scribeContentArea');
-  if (tinymceEditor) {
-    tinymceEditor.setContent(nb.content || '');
+  if (tinymceEditor && _scribeTinymceReady) {
+    tinymceEditor.setContent(_nbContent);
   } else {
-    // Fallback if TinyMCE not ready yet
-    var contentEl = document.getElementById('scribeContentArea');
-    if (contentEl) contentEl.value = nb.content || '';
+    // TinyMCE not ready yet — retry after init completes
+    setTimeout(function() {
+      var ed = tinymce.get('scribeContentArea');
+      if (ed) ed.setContent(_nbContent);
+    }, 500);
   }
 
   // v29.0: Render metadata panel
@@ -362,15 +367,19 @@ function saveActiveScribeNotebook() { // v29.0:
 
 // === KNOWLEDGE MODE === // v29.0:
 
-function toggleScribeKnowledgeMode() { // v29.0:
+function toggleScribeKnowledgeMode() { // v29.2:
   _scribeKnowledgeMode = !_scribeKnowledgeMode;
   var panel = document.getElementById('scribeKnowledgePanel');
-  var toggleBtn = document.getElementById('scribeKnowledgeModeBtn');
   if (panel) {
-    panel.style.display = _scribeKnowledgeMode ? 'flex' : 'none';
-  }
-  if (toggleBtn) {
-    toggleBtn.classList.toggle('active', _scribeKnowledgeMode);
+    if (_scribeKnowledgeMode) {
+      panel.style.maxHeight = '300px';
+      panel.style.padding = '12px 16px';
+      panel.style.borderTop = '1px solid var(--border-color)';
+    } else {
+      panel.style.maxHeight = '0';
+      panel.style.padding = '0 16px';
+      panel.style.borderTop = 'none';
+    }
   }
 }
 
@@ -403,7 +412,8 @@ function askScribeQuestion() { // v29.0:
   }
 
   var systemPrompt = 'You are a knowledgeable assistant. Answer the user\'s question based on the following notebook content. ' +
-    'Be concise and accurate. If the answer is not found in the content, say so.\n\n' +
+    'Be concise and accurate. If the answer is not found in the content, say so. ' +
+    'Use hyphens instead of em-dashes or en-dashes in your writing.\n\n' +
     'NOTEBOOK TITLE: ' + (nb.title || 'Untitled') + '\n\n' +
     'NOTEBOOK CONTENT:\n' + plainContent + sourcesText;
 
@@ -481,7 +491,7 @@ function synthesizeScribeNotebook() { // v29.0:
   var threadIdx = _scribeKnowledgeThread.length - 1;
 
   var systemPrompt = 'You are a helpful assistant. Provide a clear, well-structured summary of the following notebook content. ' +
-    'Highlight key themes, insights, and action items.\n\n' +
+    'Highlight key themes, insights, and action items. Use hyphens instead of em-dashes or en-dashes.\n\n' +
     'NOTEBOOK TITLE: ' + (nb.title || 'Untitled') + '\n\n' +
     'NOTEBOOK CONTENT:\n' + plainContent;
 
@@ -547,16 +557,10 @@ function renderScribeKnowledgeThread() { // v29.0:
 
 // === METADATA PANEL === // v29.0:
 
-function renderScribeMetadata(notebook) { // v29.0:
-  var metaEl = document.getElementById('scribeMetadata');
-  if (!metaEl || !notebook) return;
-
+function renderScribeMetadata(notebook) { // v29.2: Render tags inline
+  var tagsEl = document.getElementById('scribeTagsList');
+  if (!tagsEl || !notebook) return;
   var html = '';
-
-  // v29.0: Tags section
-  html += '<div class="scribe-meta-section">';
-  html += '<div class="scribe-meta-label">Tags</div>';
-  html += '<div class="scribe-meta-tags" id="scribeTagsList">';
   if (notebook.tags && notebook.tags.length > 0) {
     for (var t = 0; t < notebook.tags.length; t++) {
       html += '<span class="scribe-tag-pill">' + _escapeScribeHtml(notebook.tags[t]);
@@ -564,80 +568,7 @@ function renderScribeMetadata(notebook) { // v29.0:
       html += '</span>';
     }
   }
-  html += '</div>';
-  html += '<div class="scribe-meta-add"><input type="text" id="scribeTagInput" placeholder="Add tag..." onkeydown="if(event.key===\'Enter\'){addScribeTag();}" style="flex:1;" />';
-  html += '<button onclick="addScribeTag()" class="scribe-meta-add-btn">+</button></div>';
-  html += '</div>';
-
-  // v29.0: Sources section
-  html += '<div class="scribe-meta-section">';
-  html += '<div class="scribe-meta-label">Sources</div>';
-  html += '<div id="scribeSourcesList">';
-  if (notebook.sources && notebook.sources.length > 0) {
-    for (var s = 0; s < notebook.sources.length; s++) {
-      html += '<div class="scribe-meta-list-item">';
-      html += '<span class="scribe-meta-list-text">' + _escapeScribeHtml(notebook.sources[s]) + '</span>';
-      html += '<span class="scribe-meta-remove" onclick="removeScribeSource(' + s + ')">&times;</span>';
-      html += '</div>';
-    }
-  } else {
-    html += '<div class="scribe-meta-empty">No sources added</div>';
-  }
-  html += '</div>';
-  html += '<button onclick="addScribeSource()" class="scribe-meta-add-btn scribe-meta-add-full">+ Add Source</button>';
-  html += '</div>';
-
-  // v29.0: Linked People section
-  html += '<div class="scribe-meta-section">';
-  html += '<div class="scribe-meta-label">Linked People</div>';
-  html += '<div id="scribePeopleList">';
-  if (notebook.linkedPeople && notebook.linkedPeople.length > 0) {
-    for (var p = 0; p < notebook.linkedPeople.length; p++) {
-      html += '<div class="scribe-meta-list-item">';
-      html += '<span class="scribe-meta-list-text">' + _escapeScribeHtml(notebook.linkedPeople[p]) + '</span>';
-      html += '<span class="scribe-meta-remove" onclick="unlinkScribePerson(' + p + ')">&times;</span>';
-      html += '</div>';
-    }
-  } else {
-    html += '<div class="scribe-meta-empty">No people linked</div>';
-  }
-  html += '</div>';
-  html += '<button onclick="linkScribePerson()" class="scribe-meta-add-btn scribe-meta-add-full">+ Link Person</button>';
-  html += '</div>';
-
-  // v29.0: Linked Library Items section
-  html += '<div class="scribe-meta-section">';
-  html += '<div class="scribe-meta-label">Library Items</div>';
-  html += '<div id="scribeLibraryList">';
-  if (notebook.linkedLibraryItems && notebook.linkedLibraryItems.length > 0) {
-    for (var l = 0; l < notebook.linkedLibraryItems.length; l++) {
-      html += '<div class="scribe-meta-list-item">';
-      html += '<span class="scribe-meta-list-text">' + _escapeScribeHtml(notebook.linkedLibraryItems[l]) + '</span>';
-      html += '<span class="scribe-meta-remove" onclick="unlinkScribeLibraryItem(' + l + ')">&times;</span>';
-      html += '</div>';
-    }
-  } else {
-    html += '<div class="scribe-meta-empty">No library items linked</div>';
-  }
-  html += '</div>';
-  html += '<button onclick="linkScribeLibraryItem()" class="scribe-meta-add-btn scribe-meta-add-full">+ Link Library Item</button>';
-  html += '</div>';
-
-  // v29.0: Notebook info
-  html += '<div class="scribe-meta-section scribe-meta-info">';
-  html += '<div class="scribe-meta-label">Info</div>';
-  html += '<div class="scribe-meta-info-row">Source: ' + (notebook.source === 'lifeai' ? 'LifeAI' : 'BrandAI') + '</div>';
-  html += '<div class="scribe-meta-info-row">Created: ' + _formatScribeDate(notebook.createdAt) + '</div>';
-  html += '<div class="scribe-meta-info-row">Updated: ' + _formatScribeDate(notebook.updatedAt) + '</div>';
-  html += '</div>';
-
-  // v29.0: Actions
-  html += '<div class="scribe-meta-section scribe-meta-actions">';
-  html += '<button onclick="archiveScribeNotebook(\'' + notebook.id + '\')" class="scribe-meta-action-btn">' + (notebook.archived ? 'Restore' : 'Archive') + '</button>';
-  html += '<button onclick="deleteScribeNotebook(\'' + notebook.id + '\')" class="scribe-meta-action-btn scribe-meta-action-danger">Delete</button>';
-  html += '</div>';
-
-  metaEl.innerHTML = html;
+  tagsEl.innerHTML = html;
 }
 
 function addScribeSource() { // v29.0:

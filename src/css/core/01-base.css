@@ -3338,28 +3338,7 @@
       height: 100%;
       width: 100%;
     }
-    /* v29.0: Scribe — desktop only fixed positioning (separate from studioView to avoid mobile conflicts) */
-    @media (min-width: 769px) {
-      #scribeView {
-        position: fixed;
-        top: 38px;
-        left: var(--sidebar-collapsed-width);
-        right: 0;
-        bottom: 0;
-        padding: 0;
-        background: var(--bg-primary);
-        z-index: 10;
-        transition: left var(--sidebar-transition);
-      }
-    }
-    #scribeView > .panel {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      padding: 12px 20px 0;
-      box-sizing: border-box;
-      overflow: hidden;
-    }
+    /* v29.2: Scribe uses standard panel layout — no fixed positioning */
     /* v28.8: #signalView desktop styles removed — Focus retired */
     /* v26.1: Focus Pill Layout */
     #focusPersistentHeader {
@@ -46927,23 +46906,24 @@
 
     /* v27.1: Welcome splash animations */
 
-/* v29.0: Scribe — Three-column notebook workspace */
+/* v29.2: Scribe — Two-panel notebook workspace */
 .scribe-layout {
   display: grid;
-  grid-template-columns: 260px 1fr 240px;
+  grid-template-columns: 280px 1fr;
   gap: 0;
-  flex: 1;
-  min-height: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
   overflow: hidden;
+  min-height: 600px;
+  margin-bottom: var(--space-5);
 }
 
-/* v29.0: Scribe — Left sidebar (notebook list) */
 .scribe-sidebar {
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
 }
 .scribe-sidebar-header {
   padding: 12px;
@@ -46951,6 +46931,7 @@
   flex-direction: column;
   gap: 8px;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 .scribe-new-btn {
   display: flex;
@@ -46977,6 +46958,7 @@
   color: var(--text-primary);
   font-size: 12px;
   font-family: inherit;
+  outline: none;
 }
 .scribe-notebook-list {
   flex: 1;
@@ -46989,16 +46971,19 @@
   transition: background 0.15s;
 }
 .scribe-nb-item:hover { background: rgba(255,255,255,0.04); }
-.scribe-nb-item.active { background: rgba(168,152,120,0.1); }
-.scribe-nb-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.scribe-nb-date { font-size: 11px; opacity: 0.4; }
-.scribe-nb-snippet { font-size: 11px; opacity: 0.3; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scribe-nb-item.active { background: rgba(168,152,120,0.12); }
+.scribe-nb-item-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scribe-nb-item-meta { display: flex; gap: 8px; align-items: center; }
+.scribe-nb-item-date { font-size: 11px; opacity: 0.4; }
+.scribe-nb-item-tags { font-size: 10px; opacity: 0.3; }
+.scribe-nb-item-snippet { font-size: 11px; opacity: 0.3; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* v29.0: Scribe — Center editor */
-.scribe-editor {
+/* Scribe main editor area */
+.scribe-main {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: var(--bg-primary);
 }
 .scribe-empty-state {
   display: flex;
@@ -47012,127 +46997,122 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden;
+}
+.scribe-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px 4px;
+  flex-shrink: 0;
 }
 .scribe-title-input {
-  padding: 16px 20px 8px;
+  flex: 1;
+  padding: 4px 8px;
   background: transparent;
   border: none;
   color: var(--text-primary);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   font-family: inherit;
   outline: none;
 }
 .scribe-title-input::placeholder { color: var(--text-muted); }
-.scribe-editor-toolbar {
+.scribe-title-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.scribe-title-actions button {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 6px 16px;
-  border-bottom: 1px solid var(--border-color);
-}
-.scribe-editor-toolbar button {
-  padding: 4px 8px;
-  background: transparent;
-  border: none;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   color: var(--text-secondary);
   cursor: pointer;
-  border-radius: 4px;
-  font-size: 13px;
+  font-size: 11px;
   font-family: inherit;
-  transition: background 0.15s;
+  transition: all 0.15s;
 }
-.scribe-editor-toolbar button:hover { background: rgba(255,255,255,0.06); }
-.scribe-toolbar-divider {
-  display: inline-block;
-  width: 1px;
-  height: 16px;
-  background: var(--border-color);
-  margin: 0 4px;
-}
-.scribe-content-area {
-  flex: 1;
-  padding: 16px 20px;
-  overflow-y: auto;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text-primary);
-  outline: none;
-  min-height: 300px;
-}
-.scribe-content-area:empty::before {
-  content: 'Start writing...';
-  color: var(--text-muted);
-  opacity: 0.5;
-}
+.scribe-title-actions button:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+.scribe-save-btn { color: var(--accent) !important; }
+.scribe-delete-btn:hover { color: var(--error, #ef4444) !important; border-color: var(--error, #ef4444) !important; }
 
-/* v29.2: TinyMCE dark theme overrides for Scribe */
+/* Tags row */
+.scribe-tags-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 16px 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+.scribe-tags-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.scribe-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(168,152,120,0.15);
+  border-radius: 10px;
+  font-size: 11px;
+}
+.scribe-tag-remove {
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 13px;
+}
+.scribe-tag-remove:hover { opacity: 1; color: var(--error, #ef4444); }
+.scribe-tag-input {
+  padding: 2px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  width: 80px;
+}
+.scribe-tag-input:focus { border-color: var(--border-color); }
+
+/* TinyMCE wrapper */
 .scribe-tinymce-wrap {
   flex: 1;
-  min-height: 0;
+  min-height: 200px;
   overflow: hidden;
 }
-.scribe-tinymce-wrap .tox.tox-tinymce {
-  border: none !important;
-  border-radius: 0 !important;
-}
-.scribe-tinymce-wrap .tox .tox-toolbar__primary {
-  background: var(--bg-secondary) !important;
-  border-bottom: 1px solid var(--border-color) !important;
-}
-.scribe-tinymce-wrap .tox .tox-toolbar__group {
-  border-right-color: var(--border-color) !important;
-}
-.scribe-tinymce-wrap .tox .tox-tbtn {
-  color: var(--text-secondary) !important;
-}
-.scribe-tinymce-wrap .tox .tox-tbtn:hover {
-  background: var(--bg-tertiary) !important;
-  color: var(--text-primary) !important;
-}
+.scribe-tinymce-wrap .tox.tox-tinymce { border: none !important; border-radius: 0 !important; }
+.scribe-tinymce-wrap .tox .tox-toolbar__primary { background: var(--bg-secondary) !important; border-bottom: 1px solid var(--border-color) !important; }
+.scribe-tinymce-wrap .tox .tox-toolbar__group { border-right-color: var(--border-color) !important; }
+.scribe-tinymce-wrap .tox .tox-tbtn { color: var(--text-secondary) !important; }
+.scribe-tinymce-wrap .tox .tox-tbtn:hover { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
 .scribe-tinymce-wrap .tox .tox-tbtn--enabled,
-.scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover {
-  background: rgba(168,152,120,0.2) !important;
-  color: var(--accent) !important;
-}
-.scribe-tinymce-wrap .tox .tox-statusbar {
-  background: var(--bg-secondary) !important;
-  border-top: 1px solid var(--border-color) !important;
-  color: var(--text-muted) !important;
-}
-.scribe-tinymce-wrap .tox .tox-statusbar__text-container {
-  color: var(--text-muted) !important;
-}
-/* v29.2: Make scribe-active-editor flex column for TinyMCE */
-.scribe-active-editor {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-.scribe-active-editor .scribe-title-input {
-  flex-shrink: 0;
-}
-.scribe-active-editor .scribe-editor-toolbar {
-  flex-shrink: 0;
-}
-.scribe-active-editor .scribe-tinymce-wrap {
-  flex: 1;
-  min-height: 0;
-}
+.scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.2) !important; color: var(--accent) !important; }
+.scribe-tinymce-wrap .tox .tox-statusbar { background: var(--bg-secondary) !important; border-top: 1px solid var(--border-color) !important; color: var(--text-muted) !important; }
+.scribe-tinymce-wrap .tox .tox-statusbar__text-container { color: var(--text-muted) !important; }
 
-/* v29.0: Scribe — Knowledge panel */
+/* Knowledge panel */
 .scribe-knowledge-panel {
   border-top: 1px solid var(--border-color);
   padding: 12px 16px;
   max-height: 300px;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease, padding 0.2s ease;
 }
 .scribe-knowledge-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+  flex-shrink: 0;
 }
 .scribe-synth-btn {
   display: flex;
@@ -47148,10 +47128,21 @@
   font-family: inherit;
 }
 .scribe-synth-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.scribe-knowledge-toggle-btn {
+  padding: 4px 6px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+.scribe-knowledge-toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
 .scribe-knowledge-thread {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 8px;
+  min-height: 0;
 }
 .scribe-knowledge-msg {
   padding: 8px 12px;
@@ -47162,9 +47153,12 @@
 }
 .scribe-knowledge-msg.user { background: rgba(168,152,120,0.1); text-align: right; }
 .scribe-knowledge-msg.ai { background: var(--bg-secondary); }
+.scribe-km-role { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.5; margin-bottom: 4px; }
+.scribe-km-content { white-space: pre-wrap; word-wrap: break-word; }
 .scribe-knowledge-input-row {
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
 }
 .scribe-knowledge-input-row input {
   flex: 1;
@@ -47175,213 +47169,47 @@
   color: var(--text-primary);
   font-size: 13px;
   font-family: inherit;
+  outline: none;
 }
-.scribe-knowledge-input-row button {
+.scribe-knowledge-send-btn {
   padding: 8px 12px;
   background: var(--accent, #a89878);
   color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-}
-
-/* v29.0: Scribe — Right metadata panel */
-.scribe-metadata {
-  background: var(--bg-secondary);
-  border-left: 1px solid var(--border-color);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  overflow-y: auto;
-}
-.scribe-meta-section { }
-.scribe-meta-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.5;
-  margin-bottom: 6px;
-}
-.scribe-meta-list { display: flex; flex-direction: column; gap: 4px; }
-.scribe-meta-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 8px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 6px;
-  font-size: 12px;
+  justify-content: center;
+  transition: opacity 0.15s;
 }
-.scribe-meta-item-remove {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  opacity: 0.4;
-  font-size: 14px;
-  padding: 0 4px;
-}
-.scribe-meta-item-remove:hover { opacity: 1; color: var(--error, #ef4444); }
-.scribe-meta-add {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 12px;
-  padding: 4px 0;
-  font-family: inherit;
-  opacity: 0.5;
-}
-.scribe-meta-add:hover { opacity: 1; color: var(--accent); }
-.scribe-tag-input {
-  padding: 4px 8px;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  color: var(--text-primary);
-  font-size: 11px;
-  font-family: inherit;
-  margin-top: 4px;
-}
-.scribe-tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  background: rgba(168,152,120,0.15);
-  border-radius: 10px;
-  font-size: 11px;
-  margin-right: 4px;
-  margin-bottom: 4px;
-}
-.scribe-tag-pill button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 12px;
-  padding: 0;
-  line-height: 1;
-}
-.scribe-tag-pill button:hover { color: var(--error, #ef4444); }
+.scribe-knowledge-send-btn:hover { opacity: 0.85; }
 
-/* v29.2: Scribe — Dynamically rendered metadata classes */
-.scribe-meta-list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 8px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 6px;
-  font-size: 12px;
-  margin-bottom: 4px;
-}
-.scribe-meta-list-text {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.scribe-meta-remove {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  opacity: 0.4;
-  font-size: 14px;
-  padding: 0 4px;
-  flex-shrink: 0;
-}
-.scribe-meta-remove:hover { opacity: 1; color: var(--error, #ef4444); }
-.scribe-meta-empty {
-  font-size: 11px;
-  color: var(--text-muted);
-  opacity: 0.5;
-  padding: 4px 0;
-}
-.scribe-meta-add-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 12px;
-  padding: 6px 0;
-  font-family: inherit;
-  opacity: 0.5;
-}
-.scribe-meta-add-btn:hover { opacity: 1; color: var(--accent); }
-.scribe-meta-add-full { display: block; width: 100%; text-align: left; }
-.scribe-meta-info-row {
-  font-size: 11px;
-  color: var(--text-muted);
-  padding: 2px 0;
-}
-.scribe-meta-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 8px;
-}
-.scribe-meta-action-btn {
-  flex: 1;
-  padding: 6px 10px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 11px;
-  font-family: inherit;
-  transition: all 0.15s;
-}
-.scribe-meta-action-btn:hover { background: rgba(255,255,255,0.06); }
-.scribe-meta-action-danger { color: var(--error, #ef4444); }
-.scribe-meta-action-danger:hover { background: rgba(239,68,68,0.1); border-color: var(--error, #ef4444); }
-
-/* v29.2: Scribe — Knowledge thread role/content */
-.scribe-km-role {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.5;
-  margin-bottom: 4px;
-}
-.scribe-km-content {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-/* v29.0: Scribe — Light mode */
+/* Light mode */
 html.light-mode .scribe-nb-item:hover { background: rgba(0,0,0,0.03); }
-html.light-mode .scribe-nb-item.active { background: rgba(168,152,120,0.08); }
-html.light-mode .scribe-editor-toolbar button:hover { background: rgba(0,0,0,0.05); }
-html.light-mode .scribe-meta-item { background: rgba(0,0,0,0.03); }
-html.light-mode .scribe-meta-list-item { background: rgba(0,0,0,0.03); }
-html.light-mode .scribe-meta-action-btn { background: rgba(0,0,0,0.03); }
-html.light-mode .scribe-content-area:empty::before { color: rgba(0,0,0,0.3); }
+html.light-mode .scribe-nb-item.active { background: rgba(168,152,120,0.1); }
+html.light-mode .scribe-title-actions button { background: rgba(0,0,0,0.03); }
+html.light-mode .scribe-title-actions button:hover { background: rgba(0,0,0,0.06); }
+html.light-mode .scribe-knowledge-send-btn { background: var(--accent, #a89878); color: #fff; }
+html.light-mode .scribe-knowledge-msg.ai { background: rgba(0,0,0,0.03); }
+html.light-mode .scribe-tag-pill { background: rgba(168,152,120,0.12); }
+html.light-mode .scribe-synth-btn:hover { color: var(--text-primary); }
+html.light-mode .scribe-knowledge-toggle-btn:hover { color: var(--text-primary); }
 
-/* v29.0: Scribe — Mobile */
+/* Mobile */
 @media (max-width: 768px) {
   .scribe-layout {
     grid-template-columns: 1fr;
     min-height: auto;
-    height: 100%; /* v29.1: Fill parent panel-view on mobile */
   }
   .scribe-sidebar {
     border-right: none;
     border-bottom: 1px solid var(--border-color);
     max-height: 200px;
   }
-  .scribe-metadata {
-    border-left: none;
-    border-top: 1px solid var(--border-color);
-  }
-  .scribe-content-area {
-    min-height: 200px;
-  }
+  .scribe-title-row { padding: 8px 12px 4px; }
+  .scribe-tags-row { padding: 4px 12px 8px; }
+  .scribe-title-input { font-size: 16px; }
+  .scribe-title-actions button span { display: none; }
 }
 

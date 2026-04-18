@@ -8,9 +8,8 @@
             <span class="breadcrumb-item active">Scribe</span>
           </div>
           <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;"><span>Scribe</span><button class="section-help-btn" onclick="showSectionHelp('scribe')" title="How to use Scribe">?</button></div>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Your knowledge workspace for notebooks, notes, and AI-powered synthesis.</p>
 
-          <!-- v29.0: Three-column Scribe layout -->
+          <!-- v29.2: Two-panel Scribe layout (notebook list + editor) -->
           <div class="scribe-layout" id="scribeLayout">
             <!-- Left: Notebook List -->
             <div class="scribe-sidebar" id="scribeSidebar">
@@ -26,8 +25,8 @@
               </div>
             </div>
 
-            <!-- Center: Editor -->
-            <div class="scribe-editor" id="scribeEditorPanel">
+            <!-- Right: Editor + Knowledge -->
+            <div class="scribe-main" id="scribeEditorPanel">
               <!-- Empty state (no notebook selected) -->
               <div class="scribe-empty-state" id="scribeEmptyState">
                 <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.3;margin-bottom:12px;"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
@@ -36,60 +35,53 @@
               </div>
               <!-- Active editor (hidden until notebook selected) -->
               <div class="scribe-active-editor" id="scribeActiveEditor" style="display:none;">
-                <input type="text" class="scribe-title-input" id="scribeTitleInput" placeholder="Notebook title..." oninput="onScribeTitleChange()">
-                <div class="scribe-editor-toolbar" id="scribeToolbar">
-                  <button onclick="toggleScribeKnowledgeMode()" id="scribeKnowledgeModeBtn" title="Toggle Knowledge Mode" style="display:flex;align-items:center;gap:4px;margin-left:auto;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                    <span style="font-size:11px;">Knowledge</span>
-                  </button>
+                <!-- Title + metadata row -->
+                <div class="scribe-title-row">
+                  <input type="text" class="scribe-title-input" id="scribeTitleInput" placeholder="Notebook title..." oninput="onScribeTitleChange()">
+                  <div class="scribe-title-actions">
+                    <button onclick="saveActiveScribeNotebook(); if(typeof showToast==='function') showToast('Notebook saved','success');" class="scribe-save-btn" title="Save notebook">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                      Save
+                    </button>
+                    <button onclick="archiveScribeNotebook(_scribeActiveId)" class="scribe-archive-btn" title="Archive notebook">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                    </button>
+                    <button onclick="deleteScribeNotebook(_scribeActiveId)" class="scribe-delete-btn" title="Delete notebook">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    </button>
+                  </div>
                 </div>
+                <!-- Tags row -->
+                <div class="scribe-tags-row" id="scribeTagsRow">
+                  <div class="scribe-tags-list" id="scribeTagsList"></div>
+                  <input type="text" class="scribe-tag-input" id="scribeTagInput" placeholder="Add tag..." onkeypress="if(event.key==='Enter'){addScribeTag();event.preventDefault();}">
+                </div>
+                <!-- TinyMCE Editor -->
                 <div class="scribe-tinymce-wrap" id="scribeTinymceWrap">
                   <textarea id="scribeContentArea" style="visibility:hidden;"></textarea>
                 </div>
-                <!-- v29.0: Knowledge mode chat (hidden by default) -->
-                <div class="scribe-knowledge-panel" id="scribeKnowledgePanel" style="display:none;">
+                <!-- Knowledge panel (shown by default) -->
+                <div class="scribe-knowledge-panel" id="scribeKnowledgePanel">
                   <div class="scribe-knowledge-header">
                     <span style="font-size:13px;font-weight:600;">Ask about this notebook</span>
-                    <button onclick="synthesizeScribeNotebook()" class="scribe-synth-btn" title="AI Synthesize">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2L11 6l4.5 1.5L11 9l-1.5 4.5L8 9l-4.5-1.5L8 6l1.5-4z"/></svg>
-                      Synthesize
-                    </button>
+                    <div style="display:flex;gap:6px;">
+                      <button onclick="synthesizeScribeNotebook()" class="scribe-synth-btn" title="AI Synthesize">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2L11 6l4.5 1.5L11 9l-1.5 4.5L8 9l-4.5-1.5L8 6l1.5-4z"/></svg>
+                        Synthesize
+                      </button>
+                      <button onclick="toggleScribeKnowledgeMode()" class="scribe-knowledge-toggle-btn" title="Toggle Knowledge Panel">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                      </button>
+                    </div>
                   </div>
                   <div class="scribe-knowledge-thread" id="scribeKnowledgeThread"></div>
                   <div class="scribe-knowledge-input-row">
                     <input type="text" id="scribeKnowledgeInput" placeholder="Ask a question about this notebook..." onkeypress="if(event.key==='Enter')askScribeQuestion()">
-                    <button onclick="askScribeQuestion()">
+                    <button onclick="askScribeQuestion()" class="scribe-knowledge-send-btn">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Right: Metadata Panel -->
-            <div class="scribe-metadata" id="scribeMetadata">
-              <div class="scribe-meta-section">
-                <div class="scribe-meta-label">Sources</div>
-                <div id="scribeSourcesList" class="scribe-meta-list"></div>
-                <button class="scribe-meta-add" onclick="addScribeSource()">+ Add Source</button>
-              </div>
-              <div class="scribe-meta-section">
-                <div class="scribe-meta-label">People</div>
-                <div id="scribePeopleList" class="scribe-meta-list"></div>
-                <button class="scribe-meta-add" onclick="linkScribePerson()">+ Link Person</button>
-              </div>
-              <div class="scribe-meta-section">
-                <div class="scribe-meta-label">Library</div>
-                <div id="scribeLibraryList" class="scribe-meta-list"></div>
-                <button class="scribe-meta-add" onclick="linkScribeLibraryItem()">+ Link Item</button>
-              </div>
-              <div class="scribe-meta-section">
-                <div class="scribe-meta-label">Tags</div>
-                <div id="scribeTagsList" class="scribe-meta-list"></div>
-                <input type="text" class="scribe-tag-input" id="scribeTagInput" placeholder="Add tag..." onkeypress="if(event.key==='Enter')addScribeTag()">
-              </div>
-              <div class="scribe-meta-section" style="margin-top:auto;opacity:0.5;font-size:11px;">
-                <div id="scribeMetaDates"></div>
               </div>
             </div>
           </div>
