@@ -3099,55 +3099,56 @@ function applyAccessibilityScale() {
     // 100vh at 75% zoom renders as 75% of actual viewport. Fix: use (100/0.75)vh = 133vh.
     var compensatedVh = (100 / zoomFactor) + 'vh';
     var compensatedVw = (100 / zoomFactor) + 'vw';
-    appContainer.style.width = compensatedVw;
-    appContainer.style.minHeight = compensatedVh;
-    appContainer.style.maxWidth = compensatedVw;
-    // html element also has max-width:100vw — override it too
-    root.style.maxWidth = compensatedVw;
-    root.style.width = compensatedVw;
+    // v29.2: Use setProperty with 'important' to override CSS !important rules
+    // Many mobile CSS rules use max-width:100vw !important which blocks inline styles
+    appContainer.style.setProperty('width', compensatedVw, 'important');
+    appContainer.style.setProperty('min-height', compensatedVh, 'important');
+    appContainer.style.setProperty('max-width', compensatedVw, 'important');
+    root.style.setProperty('max-width', compensatedVw, 'important');
+    root.style.setProperty('width', compensatedVw, 'important');
+    root.style.setProperty('overflow-x', 'hidden', 'important');
     // Sidebar — position:fixed, height:100vh
     var sidebar = document.querySelector('.sidebar');
     if (sidebar) {
-      sidebar.style.height = compensatedVh;
-      sidebar.style.maxWidth = 'none';
+      sidebar.style.setProperty('height', compensatedVh, 'important');
     }
     // Main wrapper — min-height:100vh
     var mainWrapper = document.querySelector('.main-wrapper');
     if (mainWrapper) {
-      mainWrapper.style.minHeight = compensatedVh;
-      mainWrapper.style.width = compensatedVw;
-      mainWrapper.style.maxWidth = compensatedVw;
+      mainWrapper.style.setProperty('min-height', compensatedVh, 'important');
+      mainWrapper.style.setProperty('width', compensatedVw, 'important');
+      mainWrapper.style.setProperty('max-width', compensatedVw, 'important');
     }
     // All fixed panel-views — compensate both height and width
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
-      panelViews[pv].style.minHeight = compensatedVh;
-      panelViews[pv].style.maxWidth = compensatedVw;
-      panelViews[pv].style.width = compensatedVw;
+      panelViews[pv].style.setProperty('min-height', compensatedVh, 'important');
+      panelViews[pv].style.setProperty('max-width', compensatedVw, 'important');
+      panelViews[pv].style.setProperty('width', compensatedVw, 'important');
     }
   } else {
     appContainer.style.zoom = '';
-    appContainer.style.width = '';
-    appContainer.style.minHeight = '';
-    appContainer.style.maxWidth = '';
-    root.style.maxWidth = '';
-    root.style.width = '';
+    appContainer.style.removeProperty('width');
+    appContainer.style.removeProperty('min-height');
+    appContainer.style.removeProperty('max-width');
+    root.style.removeProperty('max-width');
+    root.style.removeProperty('width');
+    root.style.removeProperty('overflow-x');
     var sidebar = document.querySelector('.sidebar');
     if (sidebar) {
-      sidebar.style.height = '';
-      sidebar.style.maxWidth = '';
+      sidebar.style.removeProperty('height');
     }
     var mainWrapper = document.querySelector('.main-wrapper');
     if (mainWrapper) {
-      mainWrapper.style.minHeight = '';
-      mainWrapper.style.width = '';
-      mainWrapper.style.maxWidth = '';
+      mainWrapper.style.removeProperty('min-height');
+      mainWrapper.style.removeProperty('width');
+      mainWrapper.style.removeProperty('max-width');
     }
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
-      panelViews[pv].style.minHeight = '';
-      panelViews[pv].style.maxWidth = '';
-      panelViews[pv].style.width = '';
+      panelViews[pv].style.removeProperty('min-height');
+      panelViews[pv].style.removeProperty('max-width');
+      panelViews[pv].style.removeProperty('width');
     }
   }
 
