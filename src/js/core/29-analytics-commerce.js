@@ -1008,7 +1008,7 @@ async function renderSyncInventory() {
     { name: 'Pulse Goals', syncKey: 'goals', localCount: function() { try { var raw = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]'); if (Array.isArray(raw)) return raw.length; if (raw && Array.isArray(raw.data)) return raw.data.length; if (raw && Array.isArray(raw.goals)) return raw.goals.length; return 0; } catch(e) { return 0; } } },
     { name: 'Automations', syncKey: 'automations', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_automations') || '[]').length; } catch(e) { return 0; } } },
     { name: 'Custom Ops', syncKey: 'custom_ops', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_custom_operations') || '[]').length; } catch(e) { return 0; } } },
-    { name: 'Clients', syncKey: 'clients', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_clients') || '[]').length; } catch(e) { return 0; } } },
+    { name: 'Clients', syncKey: 'clients', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_people') || '[]').filter(function(p) { return p.personType === 'client'; }).length; } catch(e) { return 0; } } },
     { name: 'LifeAI Profiles', syncKey: 'life_profiles', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]').length; } catch(e) { return 0; } } },
     { name: 'Brand Logos', syncKey: 'logos', localCount: function() { var c = 0; for (var i = 0; i < 10; i++) { if (localStorage.getItem('roweos_brand_' + i + '_logo')) c++; } for (var pi = 0; pi < 5; pi++) { if (localStorage.getItem('roweos_lifeai_logo_profile_' + pi)) c++; } return c; } },
     { name: 'Folio Items', syncKey: 'folio', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_folio_items') || '[]').length; } catch(e) { return 0; } } },
@@ -1098,13 +1098,13 @@ async function renderSyncInventory() {
         cloudCounts['Custom Ops'] = (rootData.customOps || []).length;
         // v28.3: Clients stored at profile/clients, fallback to root doc
         try {
-          var _clientsDoc = await db.doc(basePath + '/profile/clients').get();
-          if (_clientsDoc.exists && _clientsDoc.data().data) {
-            cloudCounts['Clients'] = _clientsDoc.data().data.length;
+          var _peopleDoc = await db.doc(basePath + '/profile/people').get();
+          if (_peopleDoc.exists && _peopleDoc.data().data) {
+            cloudCounts['Clients'] = _peopleDoc.data().data.filter(function(p) { return p.personType === 'client'; }).length;
           } else {
             cloudCounts['Clients'] = (rootData.clients || []).length;
           }
-        } catch(ce) { cloudCounts['Clients'] = (rootData.clients || []).length; }
+        } catch(ce) { cloudCounts['Clients'] = 0; }
         cloudCounts['LifeAI Profiles'] = lifeData.profiles ? lifeData.profiles.length : 0;
         // v28.3: Brand logos are stored IN brand docs (brand.logo field), not as separate rootData.logos
         // Count cloud brands that have a logo field
@@ -1448,7 +1448,7 @@ function loadSyncCategoryItems(catId, catName) {
     'Pulse Goals': { key: 'roweos_pulse_goals', extract: function(d) { return d.map(function(g) { return { name: g.title || g.name || 'Goal', id: g.id, date: g.createdAt || '' }; }); } },
     'Automations': { key: 'roweos_automations', extract: function(d) { return d.map(function(a) { return { name: a.name || 'Automation', id: a.id, date: a.createdAt || '' }; }); } },
     'Custom Ops': { key: 'roweos_custom_operations', extract: function(d) { return d.map(function(o) { return { name: o.name || 'Operation', id: o.id, date: o.createdAt || '' }; }); } },
-    'Clients': { key: 'roweos_clients', extract: function(d) { return d.map(function(c) { return { name: c.name || 'Client', id: c.id, date: c.createdAt || '' }; }); } },
+    'Clients': { key: 'roweos_people', filter: function(d) { return d.filter(function(p) { return p.personType === 'client'; }); }, extract: function(d) { return d.map(function(c) { return { name: c.name || c.companyName || 'Client', id: c.id, date: c.createdAt || '' }; }); } },
     'LifeAI Profiles': { key: 'roweos_life_profiles', extract: function(d) { return d.map(function(p) { return { name: p.name || 'Profile', id: p.id, date: p.createdAt || '' }; }); } },
     'Brand Logos': { key: null, deletable: true, extract: function() {
       var items = [];
@@ -1485,6 +1485,7 @@ function loadSyncCategoryItems(catId, catName) {
       var raw = localStorage.getItem(config.key);
       if (raw) {
         var parsed = JSON.parse(raw);
+        if (config.filter) parsed = config.filter(parsed);
         localItems = config.extract(parsed);
       }
     } else {
@@ -1558,6 +1559,45 @@ function _fetchCloudCategoryItems(catName) {
 }
 
 // v28.2: Render side-by-side comparison of local vs cloud items
+// v30.0: Delete a single item from a sync category by ID
+function deleteSyncCategoryItem(catName, itemId) {
+  if (!confirm('Permanently delete this item?')) return;
+  var configs = {
+    'Clients': { key: 'roweos_people', idField: 'id', cloudPath: 'profile/people', cloudDataKey: 'data' },
+    'Pulse Goals': { key: 'roweos_pulse_goals', idField: 'id', cloudPath: null },
+    'BrandAI To-Dos': { key: 'roweosTodos', idField: 'id', cloudPath: 'profile/main', cloudDataKey: 'todos' },
+    'Journal': { key: 'roweos_journal', idField: 'id', cloudPath: 'profile/main', cloudDataKey: 'journal' },
+    'Automations': { key: 'roweos_automations', idField: 'id', cloudPath: null }
+  };
+  var cfg = configs[catName];
+  if (!cfg) { showToast('Delete not supported for this category', 'error'); return; }
+  try {
+    var data = JSON.parse(localStorage.getItem(cfg.key) || '[]');
+    var before = data.length;
+    data = data.filter(function(d) { return String(d[cfg.idField]) !== String(itemId); });
+    if (data.length === before) { showToast('Item not found', 'error'); return; }
+    localStorage.setItem(cfg.key, JSON.stringify(data));
+    // Write to cloud
+    if (cfg.cloudPath && typeof writeDB === 'function') {
+      var payload = {};
+      payload[cfg.cloudDataKey] = data;
+      writeDB(cfg.cloudPath, payload);
+    }
+    // Special: pulse goals per-doc delete
+    if (catName === 'Pulse Goals' && typeof deleteDBDoc === 'function') {
+      deleteDBDoc('pulse_goals', itemId, 'goals');
+    }
+    // Special: clients — write full people array
+    if (catName === 'Clients' && typeof writeDB === 'function') {
+      var cleaned = JSON.parse(JSON.stringify(data));
+      cleaned.forEach(function(p) { if (p.logo && p.logo.length > 50000) p.logo = ''; });
+      writeDB('profile/people', { data: cleaned });
+    }
+    showToast('Item deleted', 'success');
+    if (typeof renderSyncInventory === 'function') renderSyncInventory();
+  } catch(e) { showToast('Delete failed', 'error'); }
+}
+
 function _renderSyncDetailComparison(container, catName, localItems, cloudItems, isDeletable) {
   if (!localItems.length && (!cloudItems || !cloudItems.length)) {
     container.innerHTML = '<div style="color:var(--text-muted);font-size:12px;">No items in this category.</div>';
@@ -1592,7 +1632,7 @@ function _renderSyncDetailComparison(container, catName, localItems, cloudItems,
     html += '<th style="text-align:center;padding:4px 8px;font-weight:500;width:60px;">Local</th>';
     html += '<th style="text-align:center;padding:4px 8px;font-weight:500;width:60px;">Cloud</th>';
     html += '<th style="text-align:right;padding:4px 8px;font-weight:500;">Date</th>';
-    if (isDeletable) html += '<th style="width:32px;"></th>';
+    html += '<th style="width:32px;"></th>';
     html += '</tr></thead><tbody>';
 
     // Show items in both
@@ -1604,7 +1644,7 @@ function _renderSyncDetailComparison(container, catName, localItems, cloudItems,
       html += '<td style="text-align:center;padding:4px 8px;color:#22c55e;">&#10003;</td>';
       html += '<td style="text-align:center;padding:4px 8px;color:#22c55e;">&#10003;</td>';
       html += '<td style="padding:4px 8px;text-align:right;color:var(--text-muted);">' + dateStr + '</td>';
-      if (isDeletable) html += '<td></td>';
+      html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
       html += '</tr>';
     });
 
@@ -1617,9 +1657,7 @@ function _renderSyncDetailComparison(container, catName, localItems, cloudItems,
       html += '<td style="text-align:center;padding:4px 8px;color:#f59e0b;">&#10003;</td>';
       html += '<td style="text-align:center;padding:4px 8px;color:#555;">-</td>';
       html += '<td style="padding:4px 8px;text-align:right;color:var(--text-muted);">' + dateStr + '</td>';
-      if (isDeletable && item.storageKey) {
-        html += '<td style="padding:4px 4px;text-align:center;"><button onclick="deleteSyncHubLogoEntry(\'' + escapeHtml(item.storageKey) + '\', \'' + escapeHtml(catName) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 6px;border-radius:4px;font-size:14px;line-height:1;" title="Delete">&times;</button></td>';
-      } else if (isDeletable) { html += '<td></td>'; }
+      html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || item.storageKey || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
       html += '</tr>';
     });
 
@@ -1630,7 +1668,7 @@ function _renderSyncDetailComparison(container, catName, localItems, cloudItems,
       html += '<td style="text-align:center;padding:4px 8px;color:#555;">-</td>';
       html += '<td style="text-align:center;padding:4px 8px;color:#3b82f6;">&#10003;</td>';
       html += '<td style="padding:4px 8px;text-align:right;color:var(--text-muted);"></td>';
-      if (isDeletable) html += '<td></td>';
+      html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
       html += '</tr>';
     });
 
