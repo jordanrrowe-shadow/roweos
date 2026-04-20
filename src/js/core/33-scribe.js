@@ -489,6 +489,8 @@ function selectScribeNotebook(id) { // v29.0:
 
   _scribeActiveId = id;
   _scribeActivePageId = null; // v29.3: Clear page selection when selecting notebook
+  // v29.5: Auto-expand pages in sidebar when notebook selected
+  if (nb.pages && nb.pages.length > 0) _scribeExpandedNotebooks[id] = true;
 
   // v29.0: Show editor, hide empty state
   var editorArea = document.getElementById('scribeActiveEditor');
