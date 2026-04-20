@@ -3121,9 +3121,13 @@ function applyAccessibilityScale() {
     }
     // All fixed panel-views — compensate height, remove max-width cap
     // Do NOT set explicit width — fixed views use left/right positioning to auto-stretch
+    // v29.5: Skip min-height for views that use position:fixed with bottom:0 (they fill viewport naturally)
+    var _fixedBottomViews = { scribeView: true, studioView: true, agentView: true };
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
-      panelViews[pv].style.setProperty('min-height', compensatedVh, 'important');
+      if (!_fixedBottomViews[panelViews[pv].id]) {
+        panelViews[pv].style.setProperty('min-height', compensatedVh, 'important');
+      }
       panelViews[pv].style.setProperty('max-width', 'none', 'important');
     }
   } else {
