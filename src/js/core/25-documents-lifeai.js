@@ -7443,7 +7443,7 @@ function savePulseGoals() {
   var dirtyIds = Object.keys(_dirtyPulseGoalIds);
   if (dirtyIds.length === 0) {
     pulseGoals.forEach(function(goal) {
-      if (goal.id) writeDBDoc('pulse/goals', goal.id, goal, 'goals');
+      if (goal.id) writeDBDoc('pulse_goals', goal.id, goal, 'goals');
     });
   } else {
     dirtyIds.forEach(function(id) {
@@ -7451,7 +7451,7 @@ function savePulseGoals() {
       for (var i = 0; i < pulseGoals.length; i++) {
         if (pulseGoals[i].id === id) { goal = pulseGoals[i]; break; }
       }
-      if (goal) writeDBDoc('pulse/goals', goal.id, goal, 'goals');
+      if (goal) writeDBDoc('pulse_goals', goal.id, goal, 'goals');
     });
   }
   _dirtyPulseGoalIds = {};
@@ -7493,7 +7493,7 @@ function migratePulseGoalsToPerDoc() {
     merged.forEach(function(goal) {
       if (!goal.id) goal.id = 'goal_' + now + '_' + Math.random().toString(36).substr(2, 6);
       if (!goal._modifiedAt) goal._modifiedAt = now;
-      writeDBDoc('pulse/goals', goal.id, goal, 'goals');
+      writeDBDoc('pulse_goals', goal.id, goal, 'goals');
     });
 
     // Update local state
@@ -9813,7 +9813,7 @@ function deleteGoal(goalId) {
   if (!confirm('Delete this goal? This cannot be undone.')) return;
   // v29.3: Delete Firestore doc immediately to prevent onSnapshot resurrection
   if (typeof deleteDBDoc === 'function') {
-    deleteDBDoc('pulse/goals', goalId, 'goals');
+    deleteDBDoc('pulse_goals', goalId, 'goals');
   }
   pulseGoals = pulseGoals.filter(function(g) { return g.id !== goalId; });
   savePulseGoals();

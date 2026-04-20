@@ -2628,7 +2628,7 @@ function setupRealtimeSync() {
     firebaseUnsubscribers.push(unsubAutomations);
 
     // v29.3: Pulse goals collection listener (per-goal documents)
-    var unsubPulseGoals = db.collection(basePath + '/pulse/goals').onSnapshot(function(snapshot) {
+    var unsubPulseGoals = db.collection(basePath + '/pulse_goals').onSnapshot(function(snapshot) {
       if (snapshot.metadata.hasPendingWrites) return;
       if (!shouldSyncCategory('goals')) return;
       var cloudGoals = [];
@@ -8109,7 +8109,7 @@ function _syncToFirebaseV2_DEPRECATED() {
     var _pushGoals = sp('roweos_pulse_goals', []);
     _pushGoals.forEach(function(goal) {
       if (goal && goal.id) {
-        writes.push(db.doc(basePath + '/pulse/goals/' + goal.id).set(goal, { merge: true }));
+        writes.push(db.doc(basePath + '/pulse_goals/' + goal.id).set(goal, { merge: true }));
       }
     });
   }
@@ -8560,7 +8560,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     db.doc(basePath + '/conversations/agentHistory').get(),
     db.collection(basePath + '/knowledge').get(),
     db.doc(basePath + '/lifeAI/main').get(),
-    db.collection(basePath + '/pulse/goals').get(), // v29.3: Per-goal collection
+    db.collection(basePath + '/pulse_goals').get(), // v29.3: Per-goal collection
     db.collection(basePath + '/todos').get(),
     db.collection(basePath + '/calendar').get(),
     db.collection(basePath + '/runs').get(),

@@ -1034,7 +1034,7 @@ async function renderSyncInventory() {
           db.doc(basePath + '/calendar/main').get(),
           db.collection(basePath + '/runs').get(),
           db.doc(basePath + '/profile/inventory').get(), // v28.3: Single doc, not collection
-          db.collection(basePath + '/pulse/goals').get(), // v29.3: Per-goal collection
+          db.collection(basePath + '/pulse_goals').get(), // v29.3: Per-goal collection
           db.doc(basePath + '/profile/main').get(),
           db.doc(basePath + '/library/brand').get(),
           db.doc(basePath + '/library/life').get(),
