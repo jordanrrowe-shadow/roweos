@@ -2,7 +2,7 @@
 // DATA INITIALIZATION & MIGRATION - v4.8.0
 // ═══════════════════════════════════════════════════════════════
 
-var ROWEOS_VERSION = 'v29.4';
+var ROWEOS_VERSION = 'v29.5';
 var ROWEOS_DATA_VERSION_KEY = 'roweos_data_version';
 var ROWEOS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/YOUR-REPO/roweos-updates/main/latest-version.json';
 var ROWEOS_LAST_UPDATE_CHECK = 'roweos_last_update_check';
