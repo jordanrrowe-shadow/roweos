@@ -3121,11 +3121,16 @@ function applyAccessibilityScale() {
     }
     // All fixed panel-views — compensate height, remove max-width cap
     // Do NOT set explicit width — fixed views use left/right positioning to auto-stretch
-    // v29.5: Skip min-height for views that use position:fixed with bottom:0 (they fill viewport naturally)
+    // v29.5: Fixed-position views (position:fixed + bottom:0) need explicit height
+    // because CSS zoom makes bottom:0 anchor to the zoomed container, not the viewport.
     var _fixedBottomViews = { scribeView: true, studioView: true, agentView: true };
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
-      if (!_fixedBottomViews[panelViews[pv].id]) {
+      if (_fixedBottomViews[panelViews[pv].id]) {
+        // Set explicit height = compensated viewport minus top bar, remove bottom:0
+        panelViews[pv].style.setProperty('height', 'calc(' + compensatedVh + ' - 38px)', 'important');
+        panelViews[pv].style.setProperty('bottom', 'auto', 'important');
+      } else {
         panelViews[pv].style.setProperty('min-height', compensatedVh, 'important');
       }
       panelViews[pv].style.setProperty('max-width', 'none', 'important');
@@ -3153,6 +3158,8 @@ function applyAccessibilityScale() {
       panelViews[pv].style.removeProperty('min-height');
       panelViews[pv].style.removeProperty('max-width');
       panelViews[pv].style.removeProperty('width');
+      panelViews[pv].style.removeProperty('height');
+      panelViews[pv].style.removeProperty('bottom');
     }
   }
 
