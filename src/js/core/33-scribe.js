@@ -983,9 +983,11 @@ function renderScribeKnowledgeThread() { // v29.3: Enhanced with markdown render
   if (!threadEl) return;
 
   if (_scribeKnowledgeThread.length === 0) {
-    threadEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;">Ask questions about this notebook\'s content</div>';
+    threadEl.innerHTML = '';
+    threadEl.style.display = 'none';
     return;
   }
+  threadEl.style.display = '';
 
   var html = '';
   for (var i = 0; i < _scribeKnowledgeThread.length; i++) {

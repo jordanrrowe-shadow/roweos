@@ -47035,7 +47035,7 @@
 .scribe-tinymce-wrap .tox .tox-tbtn:hover { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
 .scribe-tinymce-wrap .tox .tox-tbtn--enabled, .scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.2) !important; color: var(--accent) !important; }
 .scribe-tinymce-wrap .tox .tox-statusbar { background: var(--bg-secondary) !important; border-top: 1px solid var(--border-color) !important; color: var(--text-muted) !important; }
-.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 12px; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); }
+.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 12px; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); flex: 0 0 auto; }
 .scribe-knowledge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-shrink: 0; }
 .scribe-synth-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; }
 .scribe-synth-btn:hover { border-color: var(--accent); color: var(--text-primary); }
