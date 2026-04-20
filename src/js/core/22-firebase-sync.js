@@ -2641,16 +2641,17 @@ function setupRealtimeSync() {
       try { _localGoals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]'); } catch(e) {}
       // Merge cloud goals with local via timestamp
       var _mergedGoals = mergeByTimestamp(_localGoals, cloudGoals, 'id');
-      // Handle remote deletions: remove goals in local but not in cloud (with 10s grace for new local goals)
-      var cloudIdMap = {};
-      cloudGoals.forEach(function(g) { if (g.id) cloudIdMap[g.id] = true; });
-      var graceCutoff = Date.now() - 10000;
-      _mergedGoals = _mergedGoals.filter(function(g) {
-        if (cloudIdMap[g.id]) return true;
-        // Keep if recently modified locally (grace period)
-        if (g._modifiedAt && g._modifiedAt > graceCutoff) return true;
-        return false;
-      });
+      // v29.5: Only filter deletions if cloud has goals (empty collection = not yet migrated)
+      if (cloudGoals.length > 0) {
+        var cloudIdMap = {};
+        cloudGoals.forEach(function(g) { if (g.id) cloudIdMap[g.id] = true; });
+        var graceCutoff = Date.now() - 10000;
+        _mergedGoals = _mergedGoals.filter(function(g) {
+          if (cloudIdMap[g.id]) return true;
+          if (g._modifiedAt && g._modifiedAt > graceCutoff) return true;
+          return false;
+        });
+      }
       localStorage.setItem('roweos_pulse_goals', JSON.stringify(_mergedGoals));
       if (typeof pulseGoals !== 'undefined') pulseGoals = _mergedGoals;
       if (typeof renderPulseGoals === 'function') renderPulseGoals();
