@@ -47035,7 +47035,7 @@
 .scribe-tinymce-wrap .tox .tox-tbtn:hover { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
 .scribe-tinymce-wrap .tox .tox-tbtn--enabled, .scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.2) !important; color: var(--accent) !important; }
 .scribe-tinymce-wrap .tox .tox-statusbar { background: var(--bg-secondary) !important; border-top: 1px solid var(--border-color) !important; color: var(--text-muted) !important; }
-.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 12px; flex: 0 0 auto; max-height: 20vh; display: flex; flex-direction: column; overflow: hidden; }
+.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 6px 12px; flex: 0 1 auto; display: flex; flex-direction: column; overflow: hidden; }
 .scribe-knowledge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0; }
 .scribe-synth-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; }
 .scribe-synth-btn:hover { border-color: var(--accent); color: var(--text-primary); }
@@ -47128,7 +47128,7 @@ html.light-mode .scribe-ai-topic-input { background: #f5f5f5; }
 html.light-mode .scribe-ai-cancel-btn { background: #f0f0f0; }
 
 /* v29.3: Word count bar */
-.scribe-wordcount { position: absolute; bottom: 2px; right: 16px; font-size: 10px; color: var(--text-muted); opacity: 0.4; pointer-events: none; z-index: 2; }
+.scribe-wordcount { font-size: 10px; color: var(--text-muted); opacity: 0.5; padding: 2px 12px; text-align: right; flex-shrink: 0; }
 
 /* v29.3: Resize handle */
 .scribe-resize-handle { display: none; }

@@ -93,16 +93,11 @@
                 <div class="scribe-tinymce-wrap" id="scribeTinymceWrap">
                   <textarea id="scribeContentArea" style="visibility:hidden;"></textarea>
                 </div>
-                <!-- v29.3: Word count bar -->
-                <div class="scribe-wordcount" id="scribeWordCount">0 words</div>
-                <!-- v29.3: Resize handle -->
-                <div class="scribe-resize-handle" id="scribeResizeHandle" title="Drag to resize">
-                  <div class="scribe-resize-bar"></div>
-                </div>
                 <!-- Knowledge panel (shown by default) -->
                 <div class="scribe-knowledge-panel" id="scribeKnowledgePanel">
                   <div class="scribe-knowledge-header">
                     <span style="font-size:13px;font-weight:600;">Ask about this notebook</span>
+                    <span class="scribe-wordcount" id="scribeWordCount">0 words</span>
                     <div style="display:flex;gap:6px;">
                       <button onclick="synthesizeScribeNotebook()" class="scribe-synth-btn" title="AI Synthesize">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2L11 6l4.5 1.5L11 9l-1.5 4.5L8 9l-4.5-1.5L8 6l1.5-4z"/></svg>
