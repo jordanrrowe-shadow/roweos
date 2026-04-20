@@ -99,11 +99,15 @@
                     <span style="font-size:13px;font-weight:600;">Ask about this notebook</span>
                     <span class="scribe-wordcount" id="scribeWordCount">0 words</span>
                     <div style="display:flex;gap:6px;">
+                      <button onclick="clearScribeKnowledgeThread()" class="scribe-synth-btn" title="Clear chat">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                        Clear
+                      </button>
                       <button onclick="synthesizeScribeNotebook()" class="scribe-synth-btn" title="AI Synthesize">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2L11 6l4.5 1.5L11 9l-1.5 4.5L8 9l-4.5-1.5L8 6l1.5-4z"/></svg>
                         Synthesize
                       </button>
-                      <button onclick="toggleScribeKnowledgeMode()" class="scribe-knowledge-toggle-btn" title="Toggle Knowledge Panel">
+                      <button onclick="toggleScribeKnowledgeMode()" class="scribe-knowledge-toggle-btn" title="Minimize">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
                       </button>
                     </div>
@@ -115,6 +119,11 @@
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
                   </div>
+                </div>
+                <!-- v29.5: Collapsed knowledge bar (shown when panel is minimized) -->
+                <div class="scribe-knowledge-collapsed" id="scribeKnowledgeCollapsed" style="display:none;" onclick="toggleScribeKnowledgeMode()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+                  <span>Ask about this notebook</span>
                 </div>
                 <!-- v29.3: AI Write overlay -->
                 <div class="scribe-ai-overlay" id="scribeAiOverlay" style="display:none;">

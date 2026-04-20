@@ -821,13 +821,20 @@ function scribeVoiceAction(action) {
 function toggleScribeKnowledgeMode() { // v29.2:
   _scribeKnowledgeMode = !_scribeKnowledgeMode;
   var panel = document.getElementById('scribeKnowledgePanel');
+  var collapsed = document.getElementById('scribeKnowledgeCollapsed');
   if (panel) {
-    if (_scribeKnowledgeMode) {
-      panel.style.display = '';
-    } else {
-      panel.style.display = 'none';
-    }
+    panel.style.display = _scribeKnowledgeMode ? '' : 'none';
   }
+  if (collapsed) {
+    collapsed.style.display = _scribeKnowledgeMode ? 'none' : '';
+  }
+}
+
+// v29.5: Clear knowledge thread
+function clearScribeKnowledgeThread() {
+  _scribeKnowledgeThread = [];
+  renderScribeKnowledgeThread();
+  if (typeof showToast === 'function') showToast('Chat cleared', 'success');
 }
 
 function askScribeQuestion() { // v29.0:
