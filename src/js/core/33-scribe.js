@@ -196,6 +196,15 @@ function deleteScribeNotebook(id) { // v29.0:
   if (typeof showToast === 'function') showToast('Notebook deleted', 'success');
 }
 
+// v29.5: Context-aware delete — deletes page if viewing a page, notebook if at notebook level
+function deleteActiveScribeItem() {
+  if (_scribeActivePageId && _scribeActiveId) {
+    deleteScribePage(_scribeActiveId, _scribeActivePageId);
+  } else if (_scribeActiveId) {
+    deleteScribeNotebook(_scribeActiveId);
+  }
+}
+
 function archiveScribeNotebook(id) { // v29.0:
   for (var i = 0; i < scribeNotebooks.length; i++) {
     if (scribeNotebooks[i].id === id) {

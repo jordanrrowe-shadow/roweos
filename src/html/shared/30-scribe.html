@@ -7,15 +7,16 @@
             <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
             <span class="breadcrumb-item active">Scribe</span>
           </div>
-          <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;"><span>Scribe</span><button class="section-help-btn" onclick="showSectionHelp('scribe')" title="How to use Scribe">?</button></div>
+          <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;"><span>Notebooks</span><button class="section-help-btn" onclick="showSectionHelp('scribe')" title="How to use Notebooks">?</button></div>
 
           <!-- v29.2: Two-panel Scribe layout (notebook list + editor) -->
           <div class="scribe-layout" id="scribeLayout">
             <!-- Left: Notebook List -->
             <div class="scribe-sidebar" id="scribeSidebar">
               <div class="scribe-sidebar-header">
-                <button class="scribe-archive-toggle" id="scribeArchiveToggle" onclick="toggleScribeArchiveMode()" title="View archived notebooks">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                <button class="scribe-archive-toggle" id="scribeArchiveToggle" onclick="toggleScribeArchiveMode()" title="View archived notebooks" style="font-size:11px;display:flex;align-items:center;gap:4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                  Archived
                 </button>
                 <button class="scribe-new-btn" onclick="createScribeNotebook()">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
@@ -73,7 +74,7 @@
                     <button onclick="archiveScribeNotebook(_scribeActiveId)" class="scribe-archive-btn" title="Archive notebook">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
                     </button>
-                    <button onclick="deleteScribeNotebook(_scribeActiveId)" class="scribe-delete-btn" title="Delete notebook">
+                    <button onclick="deleteActiveScribeItem()" class="scribe-delete-btn" title="Delete">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                     </button>
                   </div>
