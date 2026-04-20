@@ -2923,7 +2923,7 @@ window.lifeOps = [
   // CREATIVITY & HOBBIES
   { id: 1060, name: 'Creative Project Plan', desc: 'Structure a creative endeavor', category: 'creativity', outputs: ['Project vision', 'Milestones', 'Resource needs', 'Time allocation', 'Sharing plan'] },
   { id: 1061, name: 'Hobby Exploration', desc: 'Discover and develop new interests', category: 'creativity', outputs: ['Interest assessment', 'Hobby options', 'Getting started guide', 'Resources list', 'Community connections'] },
-  { id: 1062, name: 'Travel Planning', desc: 'Plan trips and adventures', category: 'creativity', outputs: ['Destination ideas', 'Itinerary draft', 'Budget estimate', 'Booking checklist', 'Packing list'] },
+  { id: 1062, name: 'Quick Trip Plan', desc: 'Quick trip overview (for full planning, switch to Travel Planner agent)', category: 'creativity', agent: 'travel', outputs: ['Destination ideas', 'Itinerary draft', 'Budget estimate', 'Booking checklist', 'Packing list'] },
   { id: 1063, name: 'Bucket List', desc: 'Dreams and experiences to pursue', category: 'creativity', outputs: ['Life experiences', 'Categorized goals', 'Priority ranking', 'First steps', 'Timeline ideas'] },
   
   // REFLECTION & JOURNALING
@@ -2956,6 +2956,64 @@ window.lifeOps = [
   // v26.3: RESEARCH
   { id: 1140, name: 'Topic Deep Dive', desc: 'Research any personal interest topic', category: 'research', outputs: ['Key findings', 'Expert sources', 'Actionable takeaways', 'Further reading'] },
   { id: 1141, name: 'Local Services Research', desc: 'Find and compare local service providers', category: 'research', outputs: ['Provider list', 'Comparison matrix', 'Reviews summary', 'Recommendation'] },
-  { id: 1142, name: 'Health & Wellness Research', desc: 'Research health topics and treatments', category: 'research', outputs: ['Evidence summary', 'Expert opinions', 'Risks/benefits', 'Questions for doctor'] }
+  { id: 1142, name: 'Health & Wellness Research', desc: 'Research health topics and treatments', category: 'research', outputs: ['Evidence summary', 'Expert opinions', 'Risks/benefits', 'Questions for doctor'] },
+
+  // v30.0: TRAVEL PLANNER
+  { id: 1201, name: 'Plan a Trip', desc: 'Full trip planning with destination research, timing, and logistics', category: 'travel', agent: 'travel', outputs: ['Destination overview', 'Best time to visit', 'Trip duration recommendation', 'Logistics summary', 'Next steps checklist'], params: [
+    { id: 'destination', label: 'Destination', type: 'text', placeholder: 'e.g., Tokyo, Amalfi Coast, Iceland' },
+    { id: 'dates', label: 'Travel Dates (approx)', type: 'text', placeholder: 'e.g., July 2026, 2 weeks' },
+    { id: 'travelers', label: 'Number of Travelers', type: 'select', options: ['1 (Solo)', '2 (Couple)', '3-4 (Small Group)', '5+ (Large Group/Family)'], default: '2 (Couple)' },
+    { id: 'style', label: 'Travel Style', type: 'select', options: ['Budget', 'Mid-Range', 'Luxury', 'Adventure', 'Family-Friendly', 'Business'], default: 'Mid-Range' }
+  ]},
+  { id: 1202, name: 'Create Itinerary', desc: 'Day-by-day travel schedule with activities, meals, and transport', category: 'travel', agent: 'travel', outputs: ['Day-by-day schedule', 'Activity recommendations', 'Meal suggestions', 'Transport between stops', 'Timing and logistics'], params: [
+    { id: 'destination', label: 'Destination', type: 'text' },
+    { id: 'days', label: 'Number of Days', type: 'select', options: ['3', '5', '7', '10', '14', '21'], default: '7' },
+    { id: 'pace', label: 'Pace Preference', type: 'select', options: ['Relaxed (2-3 activities/day)', 'Moderate (3-4 activities/day)', 'Packed (5+ activities/day)'], default: 'Moderate (3-4 activities/day)' }
+  ]},
+  { id: 1203, name: 'Budget Estimate', desc: 'Detailed cost breakdown by category with money-saving tips', category: 'travel', agent: 'travel', outputs: ['Flights estimate', 'Accommodation estimate', 'Food and dining budget', 'Activities and entrance fees', 'Transport and miscellaneous', 'Total estimated cost', 'Money-saving tips'], params: [
+    { id: 'destination', label: 'Destination', type: 'text' },
+    { id: 'days', label: 'Number of Days', type: 'select', options: ['3', '5', '7', '10', '14', '21'], default: '7' },
+    { id: 'style', label: 'Budget Level', type: 'select', options: ['Backpacker', 'Budget', 'Mid-Range', 'Comfort', 'Luxury'], default: 'Mid-Range' },
+    { id: 'currency', label: 'Home Currency', type: 'select', options: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY'], default: 'USD' }
+  ]},
+  { id: 1204, name: 'Packing List', desc: 'Climate-based and activity-specific packing checklist', category: 'travel', agent: 'travel', outputs: ['Clothing essentials', 'Toiletries and personal care', 'Electronics and gear', 'Documents and money', 'Activity-specific items', 'Carry-on vs checked strategy'], params: [
+    { id: 'destination', label: 'Destination', type: 'text' },
+    { id: 'season', label: 'Season/Weather', type: 'select', options: ['Summer/Hot', 'Winter/Cold', 'Spring/Mild', 'Fall/Cool', 'Tropical/Humid', 'Mixed/Varied'], default: 'Summer/Hot' },
+    { id: 'duration', label: 'Trip Duration', type: 'select', options: ['Weekend (2-3 days)', '1 Week', '2 Weeks', '3+ Weeks'], default: '1 Week' },
+    { id: 'activities', label: 'Planned Activities', type: 'text', placeholder: 'e.g., hiking, beach, business meetings, formal dining' }
+  ]},
+  { id: 1205, name: 'Visa and Documents Check', desc: 'Entry requirements, visa needs, and travel document checklist', category: 'travel', agent: 'travel', outputs: ['Visa requirements', 'Passport validity check', 'Required documents list', 'Travel insurance recommendations', 'Health requirements', 'Application timeline'], params: [
+    { id: 'destination', label: 'Destination Country', type: 'text' },
+    { id: 'passport', label: 'Passport Country', type: 'text', placeholder: 'e.g., United States' },
+    { id: 'purpose', label: 'Purpose of Travel', type: 'select', options: ['Tourism', 'Business', 'Study', 'Transit', 'Work'], default: 'Tourism' }
+  ]},
+  { id: 1206, name: 'Restaurant and Food Guide', desc: 'Local cuisine recommendations, restaurant picks, and dietary tips', category: 'travel', agent: 'travel', outputs: ['Must-try local dishes', 'Restaurant recommendations by meal', 'Street food guide', 'Dietary accommodation tips', 'Food etiquette and customs', 'Budget dining options'], params: [
+    { id: 'destination', label: 'Destination', type: 'text' },
+    { id: 'dietary', label: 'Dietary Preferences', type: 'select', options: ['No Restrictions', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Halal', 'Kosher', 'Allergies (specify in notes)'], default: 'No Restrictions' },
+    { id: 'budget', label: 'Dining Budget', type: 'select', options: ['Street Food/Budget', 'Mid-Range', 'Fine Dining', 'Mixed'], default: 'Mixed' }
+  ]},
+  { id: 1207, name: 'Local Culture and Safety Brief', desc: 'Cultural norms, safety tips, and practical local knowledge', category: 'travel', agent: 'travel', outputs: ['Cultural norms and etiquette', 'Safety considerations', 'Common scams to avoid', 'Tipping customs', 'Useful local phrases', 'Emergency contacts and resources'], params: [
+    { id: 'destination', label: 'Destination', type: 'text' }
+  ]},
+  { id: 1208, name: 'Flight and Hotel Research', desc: 'Best booking strategies, airline and hotel recommendations', category: 'travel', agent: 'travel', outputs: ['Best time to book', 'Recommended airlines', 'Hotel area recommendations', 'Accommodation alternatives', 'Price comparison tips', 'Loyalty program advice'], params: [
+    { id: 'origin', label: 'Departing From', type: 'text', placeholder: 'e.g., Austin, TX' },
+    { id: 'destination', label: 'Destination', type: 'text' },
+    { id: 'dates', label: 'Travel Dates', type: 'text', placeholder: 'e.g., July 10-20, 2026' },
+    { id: 'class', label: 'Preferred Class', type: 'select', options: ['Economy', 'Premium Economy', 'Business', 'First', 'Flexible'], default: 'Economy' }
+  ]},
+  { id: 1209, name: 'Activity Recommendations', desc: 'Curated activities, excursions, and experiences for your destination', category: 'travel', agent: 'travel', outputs: ['Top attractions', 'Hidden gems and local favorites', 'Outdoor and adventure activities', 'Cultural experiences', 'Family-friendly options', 'Evening and nightlife'], params: [
+    { id: 'destination', label: 'Destination', type: 'text' },
+    { id: 'interests', label: 'Interests', type: 'text', placeholder: 'e.g., history, nature, art, nightlife, adventure sports' },
+    { id: 'travelers', label: 'Group Type', type: 'select', options: ['Solo', 'Couple', 'Family with Kids', 'Friends Group', 'Seniors'], default: 'Couple' }
+  ]},
+  { id: 1210, name: 'Travel Checklist', desc: 'Pre-departure preparation checklist with timeline', category: 'travel', agent: 'travel', outputs: ['4 weeks before', '2 weeks before', '1 week before', 'Day before departure', 'Day of travel', 'At destination arrival'], params: [
+    { id: 'destination', label: 'Destination', type: 'text' },
+    { id: 'type', label: 'Trip Type', type: 'select', options: ['Domestic', 'International', 'Cruise', 'Road Trip'], default: 'International' }
+  ]},
+  { id: 1211, name: 'Emergency Travel Help', desc: 'Handling flight delays, lost luggage, medical emergencies, and travel disruptions', category: 'travel', agent: 'travel', outputs: ['Immediate action steps', 'Contact information', 'Rights and compensation', 'Alternative arrangements', 'Insurance claim guidance'], params: [
+    { id: 'situation', label: 'Situation', type: 'select', options: ['Flight Delayed/Cancelled', 'Lost/Delayed Luggage', 'Medical Emergency', 'Lost Passport', 'Natural Disaster/Disruption', 'Missed Connection', 'Other Emergency'], default: 'Flight Delayed/Cancelled' },
+    { id: 'location', label: 'Current Location', type: 'text' }
+  ]},
+  { id: 1212, name: 'Trip Summary and Export', desc: 'Compile all trip details into a shareable travel brief', category: 'travel', agent: 'travel', outputs: ['Trip overview', 'Key dates and bookings', 'Daily highlights', 'Budget summary', 'Important contacts', 'Shareable travel brief'] }
 ];
 

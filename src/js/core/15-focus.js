@@ -4426,6 +4426,7 @@ function showFocusGlobalAutomationForm() {
     html += '<option value="coach">Life Coach</option>';
     html += '<option value="wellness">Wellness Coach</option>';
     html += '<option value="taxintelligence">Tax Intelligence</option>';
+    html += '<option value="travel">Travel Planner</option>';
     html += '<option value="personal">Personal AI</option>';
   } else {
     html += '<option value="strategy">Strategy</option>';

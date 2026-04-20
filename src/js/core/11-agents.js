@@ -401,7 +401,7 @@ function getAccentFallback(fallback) {
 var AGENT_COLORS = {
   strategy: '#a78bfa', marketing: '#f472b6', operations: '#4ade80', documents: '#fbbf24',
   intelligence: '#22d3ee',
-  coach: '#4ade80', wellness: '#60a5fa', taxintelligence: '#fbbf24', personal: '#a78bfa',
+  coach: '#4ade80', wellness: '#60a5fa', taxintelligence: '#fbbf24', travel: '#f97316', personal: '#a78bfa',
   image: '#a89878', research: '#3b82f6', social: '#1DA1F2', video: '#06b6d4', infographic: '#06b6d4'
 };
 // v26.3: Sidebar icon lookup (viewId -> icon markup)
@@ -4710,6 +4710,7 @@ function populateBrandDropdown(dropdown) {
       { name: 'Life Coach', value: 'coach' },
       { name: 'Wellness Guide', value: 'wellness' },
       { name: 'Tax Intelligence', value: 'taxintelligence' },
+      { name: 'Travel Planner', value: 'travel' },
       { name: 'StandardAI', value: 'standard' }
     ];
     

@@ -375,6 +375,7 @@ var CONST = {
     LIFE: { id: 'coach', name: 'Life Coach' },
     WELLNESS: { id: 'wellness', name: 'Wellness Coach' },
     TAX: { id: 'taxintelligence', name: 'Tax Intelligence' },
+    TRAVEL: { id: 'travel', name: 'Travel Planner' },
     PERSONAL: { id: 'personal', name: 'Personal AI' },
     STANDARD: { id: 'standard', name: 'Standard AI' }
   },

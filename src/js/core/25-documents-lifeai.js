@@ -13,7 +13,8 @@ function renderCoachPrompts() {
     { id: 'personal', name: 'Personal Assistant', icon: '◇', desc: 'General life organization and task management' },
     { id: 'coach', name: 'Life Coach', icon: '◆', desc: 'Goal achievement, motivation, and accountability' },
     { id: 'wellness', name: 'Wellness Guide', icon: '❤', desc: 'Health, fitness, nutrition, and mental wellness' },
-    { id: 'taxintelligence', name: 'Tax Intelligence', icon: '$', desc: 'Tax preparation, deductions, and compliance' }
+    { id: 'taxintelligence', name: 'Tax Intelligence', icon: '$', desc: 'Tax preparation, deductions, and compliance' },
+    { id: 'travel', name: 'Travel Planner', icon: '>', desc: 'Trip planning, itineraries, budgets, and travel logistics' }
   ];
   
   var customPrompts = JSON.parse(localStorage.getItem('roweos_life_coach_prompts') || '{}');
@@ -119,7 +120,11 @@ function getDefaultCoachPrompt(coachId) {
   if (coachId === 'taxintelligence') {
     return 'You are Tax Intelligence for ' + userName + '.\n\nYour only goal is to maximize ' + userName + '\'s legal tax outcome while staying fully compliant.\n\nCORE PRINCIPLES:\n- Evidence-first: Never invent expenses or facts\n- Reconciliation: Cross-check totals across forms and statements\n- Explainability: Cite IRS rules for every recommendation\n- Optimization within the rules\n\nCOMPLIANCE GUARDRAILS:\n- No invented or backfilled expenses\n- No suppression of income\n- Business and personal tracked distinctly\n\nGUIDELINES:\n- Be thorough but clear\n- Produce audit-ready workpapers\n- Never use emojis in your responses';
   }
-  
+
+  if (coachId === 'travel') {
+    return 'You are the Travel Planner AI for ' + userName + '.\n\nYOUR ROLE:\nYou are an expert travel planning assistant helping ' + userName + ' plan trips, create itineraries, estimate budgets, and handle all travel preparation.\n\nPLANNING APPROACH:\n- Ask about dates, budget, group size, and travel style\n- Consider seasonality, weather, and local events\n- Balance highlights with hidden gems\n- Provide realistic time estimates\n- Include backup plans\n\nBUDGET GUIDANCE:\n- Break costs down by category\n- Provide budget/mid-range/luxury ranges\n- Flag currency and tipping customs\n\nGUIDELINES:\n- Be enthusiastic but practical\n- Cite specific places by name when possible\n- Never use emojis in your responses';
+  }
+
   return '';
 }
 

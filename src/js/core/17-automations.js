@@ -1729,7 +1729,7 @@ function renderAutoLabTargetConfig(action, existing) {
     // v13.9: Agent + Operation cascade picker for Studio ops
     var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
     var agentList = mode === 'life'
-      ? [['all','All'],['planning','Planning'],['development','Development'],['wellness','Wellness'],['relationships','Relationships'],['finances','Analytics'],['taxes','Taxes'],['home','Home'],['creativity','Creativity'],['reflection','Reflection'],['image','Image']]
+      ? [['all','All'],['planning','Planning'],['development','Development'],['wellness','Wellness'],['relationships','Relationships'],['finances','Analytics'],['taxes','Taxes'],['home','Home'],['creativity','Creativity'],['travel','Travel'],['reflection','Reflection'],['image','Image']]
       : [['all','All'],['strategy','Strategy'],['marketing','Marketing'],['operations','Operations'],['documents','Documents'],['social','Social Media'],['research','Research'],['image','Image']];
     html += '<div class="auto-lab-form-field"><label>Agent</label>';
     html += '<select id="autoLabWfTargetAgent" onchange="updateAutoLabWfOperations(this.value)">';
@@ -4649,7 +4649,7 @@ function renderPipelineStepConfig(step, index) {
   if (step.action === 'studio') {
     var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
     var agentList = mode === 'life'
-      ? [['all','All'],['planning','Planning'],['development','Development'],['wellness','Wellness'],['finances','Analytics'],['taxes','Taxes'],['creativity','Creativity']]
+      ? [['all','All'],['planning','Planning'],['development','Development'],['wellness','Wellness'],['finances','Analytics'],['taxes','Taxes'],['travel','Travel'],['creativity','Creativity']]
       : [['all','All'],['strategy','Strategy'],['marketing','Marketing'],['operations','Operations'],['documents','Documents'],['intelligence','Intelligence'],['social','Social Media'],['research','Research']];
     html += '<div class="auto-lab-form-field"><label>Agent</label>';
     html += '<select id="pipelineStepAgent_' + index + '" onchange="updatePipelineStepOps(' + index + ', this.value)">';
@@ -6805,7 +6805,7 @@ function renderAutoLabAgents() {
   html += '</div></div>';
 
   // v18.5: Category display map for agent badges
-  var agentCatMap = {strategy:'Strategy',marketing:'Marketing',operations:'Operations',documents:'Documents',social:'Social',coach:'Coach',research:'Research',image:'Image',planning:'Planning',wellness:'Wellness',taxes:'Taxes',development:'Development',custom:'Custom'};
+  var agentCatMap = {strategy:'Strategy',marketing:'Marketing',operations:'Operations',documents:'Documents',social:'Social',coach:'Coach',research:'Research',image:'Image',planning:'Planning',wellness:'Wellness',taxes:'Taxes',travel:'Travel',development:'Development',custom:'Custom'};
   customAgents.forEach(function(agent, idx) {
     var num = (idx + 1) < 10 ? '0' + (idx + 1) : '' + (idx + 1);
     var catLabel = agentCatMap[agent.category] || 'Custom';
@@ -6838,7 +6838,7 @@ function renderAutoLabAgents() {
   var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
   // v13.9: Added Image agent to both modes
   var builtInAgents = mode === 'life'
-    ? [{ name: 'Life Coach', id: 'coach', color: '#4ade80' }, { name: 'Wellness Coach', id: 'wellness', color: '#60a5fa' }, { name: 'Tax Intelligence', id: 'taxintelligence', color: '#fbbf24' }, { name: 'Personal AI', id: 'personal', color: '#a78bfa' }, { name: 'Image', id: 'image', color: '#a89878' }]
+    ? [{ name: 'Life Coach', id: 'coach', color: '#4ade80' }, { name: 'Wellness Coach', id: 'wellness', color: '#60a5fa' }, { name: 'Tax Intelligence', id: 'taxintelligence', color: '#fbbf24' }, { name: 'Travel Planner', id: 'travel', color: '#f97316' }, { name: 'Personal AI', id: 'personal', color: '#a78bfa' }, { name: 'Image', id: 'image', color: '#a89878' }]
     : [{ name: 'Strategy', id: 'strategy', color: '#a78bfa' }, { name: 'Marketing', id: 'marketing', color: '#f472b6' }, { name: 'Operations', id: 'operations', color: '#4ade80' }, { name: 'Documents', id: 'documents', color: '#fbbf24' }, { name: 'Social Media', id: 'social', color: '#1DA1F2' }, { name: 'Image', id: 'image', color: '#a89878' }];
 
   builtInAgents.forEach(function(agent) {
@@ -6896,7 +6896,7 @@ function showAutoLabAgentForm(agentId) {
   html += '<div class="auto-lab-form-row">';
   html += '<div class="auto-lab-form-field"><label>Category</label>';
   html += '<select id="autoLabAgentCategory" onchange="onAgentCategoryChange(this.value)">';
-  var categories = [['strategy','Strategy'],['marketing','Marketing'],['operations','Operations'],['documents','Documents'],['image','Image'],['planning','Planning'],['wellness','Wellness'],['taxes','Taxes'],['development','Development'],['social','Social Media'],['custom','Custom']];
+  var categories = [['strategy','Strategy'],['marketing','Marketing'],['operations','Operations'],['documents','Documents'],['image','Image'],['planning','Planning'],['wellness','Wellness'],['taxes','Taxes'],['travel','Travel'],['development','Development'],['social','Social Media'],['custom','Custom']];
   categories.forEach(function(c) {
     html += '<option value="' + c[0] + '"' + (existing && existing.category === c[0] ? ' selected' : '') + '>' + c[1] + '</option>';
   });
