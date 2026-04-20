@@ -47015,7 +47015,10 @@
 .scribe-tag-remove:hover { opacity: 1; color: var(--error, #ef4444); }
 .scribe-tag-input { padding: 2px 6px; background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--text-primary); font-size: 11px; font-family: inherit; outline: none; width: 80px; }
 .scribe-tag-input:focus { border-color: var(--border-color); }
-.scribe-tinymce-wrap { flex: 1; min-height: 200px; overflow: hidden; }
+.scribe-tinymce-wrap { flex: 1; min-height: 200px; overflow: hidden; position: relative; }
+.scribe-tinymce-wrap .tox.tox-tinymce { height: 100% !important; }
+.scribe-tinymce-wrap .tox .tox-edit-area { flex: 1; overflow: hidden; }
+.scribe-tinymce-wrap .tox .tox-edit-area__iframe { height: 100% !important; }
 .scribe-tinymce-wrap .tox.tox-tinymce { border: none !important; border-radius: 0 !important; outline: none !important; box-shadow: none !important; }
 .scribe-tinymce-wrap .tox .tox-edit-area { border: none !important; outline: none !important; }
 .scribe-tinymce-wrap .tox .tox-edit-area__iframe { border: none !important; outline: none !important; }
@@ -47087,9 +47090,9 @@ html.light-mode .scribe-knowledge-toggle-btn:hover { color: var(--text-primary);
     max-height: 200px;
     overflow-y: auto;
   }
-  .scribe-main { overflow: visible; }
-  .scribe-active-editor { height: auto; overflow: visible; }
-  .scribe-tinymce-wrap { min-height: 300px; }
+  .scribe-main { overflow: hidden; }
+  .scribe-active-editor { height: 100%; overflow: hidden; }
+  .scribe-tinymce-wrap { min-height: 300px; flex: 1; }
   .scribe-title-row { padding: 8px 12px 4px; }
   .scribe-tags-row { padding: 4px 12px 8px; }
   .scribe-title-input { font-size: 16px; }
@@ -47186,4 +47189,13 @@ html.light-mode .scribe-mention-item:hover { background:rgba(0,0,0,0.05); }
 html.light-mode .scribe-knowledge-assistant { background:rgba(0,0,0,0.03); }
 html.light-mode .scribe-knowledge-assistant code { background:rgba(0,0,0,0.06); }
 html.light-mode .scribe-knowledge-assistant pre { background:rgba(0,0,0,0.04); }
+
+/* v29.4: Voice dictation mic button */
+.voice-mic-btn { width:36px; height:36px; border-radius:50%; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; color:var(--text-secondary); flex-shrink:0; }
+.voice-mic-btn:hover { background:rgba(255,255,255,0.1); }
+.voice-mic-btn.recording { background:#ef4444; color:#fff; animation:mic-pulse 1.5s ease-in-out infinite; }
+.voice-mic-btn.processing { background:var(--accent, #a89878); color:#fff; }
+.voice-mic-btn-sm { width:28px; height:28px; }
+@keyframes mic-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);} 50%{box-shadow:0 0 0 8px rgba(239,68,68,0);} }
+html.light-mode .voice-mic-btn:hover { background:rgba(0,0,0,0.05); }
 
