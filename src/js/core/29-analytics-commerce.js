@@ -4628,141 +4628,282 @@ function saveDashboardScreenshots(shots) {
   if (typeof scheduleAutoSync === 'function') scheduleAutoSync();
 }
 
+// v29.4: KPI Dashboard data aggregation
+
+function getDashboardRevenue(brandIdx) {
+  var invoices = [];
+  try { invoices = JSON.parse(localStorage.getItem('roweos_invoices') || '[]'); } catch(e) {}
+  if (!Array.isArray(invoices)) invoices = [];
+
+  var total = 0, outstanding = 0, paidCount = 0;
+  var thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+  var monthlyRevenue = 0;
+
+  invoices.forEach(function(inv) {
+    var amount = parseFloat(inv.amount) || 0;
+    total += amount;
+    if (inv.status === 'paid') {
+      paidCount++;
+      var paidDate = inv.paidDate ? new Date(inv.paidDate).getTime() : 0;
+      if (paidDate > thirtyDaysAgo) monthlyRevenue += amount;
+    }
+    if (inv.status === 'pending' || inv.status === 'overdue') outstanding += amount;
+  });
+
+  return { total: total, outstanding: outstanding, monthlyRevenue: monthlyRevenue, paidCount: paidCount, invoiceCount: invoices.length };
+}
+
+function getDashboardClients() {
+  var clients = [];
+  if (typeof getClients === 'function') clients = getClients();
+  if (!Array.isArray(clients)) clients = [];
+
+  var stages = { lead: 0, prospect: 0, active: 0, churned: 0, other: 0 };
+  var totalDealValue = 0;
+  var thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+  var newThisMonth = 0;
+
+  clients.forEach(function(c) {
+    var stage = (c.pipelineStage || c.stage || 'other').toLowerCase();
+    if (stages[stage] !== undefined) stages[stage]++;
+    else stages.other++;
+    if (c.dealValue) totalDealValue += parseFloat(c.dealValue) || 0;
+    if (c.createdAt && new Date(c.createdAt).getTime() > thirtyDaysAgo) newThisMonth++;
+  });
+
+  return { total: clients.length, stages: stages, totalDealValue: totalDealValue, newThisMonth: newThisMonth, avgDealValue: clients.length > 0 ? totalDealValue / clients.length : 0 };
+}
+
+function getDashboardAIUsage(days) {
+  days = days || 30;
+  var analytics = [];
+  try { analytics = JSON.parse(localStorage.getItem('roweos_analytics') || '[]'); } catch(e) {}
+  if (!Array.isArray(analytics)) analytics = [];
+
+  var cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+  var totalCost = 0, sessions = 0, cacheHits = 0, totalSessions = 0;
+  var byModel = {};
+
+  analytics.forEach(function(entry) {
+    if (!entry.timestamp || entry.timestamp < cutoff) return;
+    var cost = parseFloat(entry.cost) || 0;
+    totalCost += cost;
+    totalSessions++;
+    if (entry.cached) cacheHits++;
+    var model = entry.model || 'unknown';
+    if (!byModel[model]) byModel[model] = { cost: 0, count: 0 };
+    byModel[model].cost += cost;
+    byModel[model].count++;
+  });
+
+  return { totalCost: totalCost, sessions: totalSessions, cacheHitRate: totalSessions > 0 ? Math.round((cacheHits / totalSessions) * 100) : 0, byModel: byModel };
+}
+
+function getDashboardBrandHealth(brandIdx) {
+  var score = 0;
+  var factors = [];
+
+  // Identity completeness (0-25)
+  var brand = (typeof brands !== 'undefined' && brands[brandIdx]) ? brands[brandIdx] : null;
+  if (brand) {
+    var fields = ['name', 'tagline', 'voice', 'positioning', 'products', 'audience', 'mission', 'website'];
+    var filled = 0;
+    fields.forEach(function(f) { if (brand[f] && brand[f].trim()) filled++; });
+    var identityScore = Math.round((filled / fields.length) * 25);
+    score += identityScore;
+    factors.push({ label: 'Identity', score: identityScore, max: 25 });
+  }
+
+  // Content activity (0-25) - library files
+  var lib = null;
+  if (typeof getCurrentBrandLibrary === 'function') lib = getCurrentBrandLibrary();
+  var fileCount = (lib && lib.files) ? lib.files.length : 0;
+  var contentScore = Math.min(25, Math.round(fileCount * 2.5));
+  score += contentScore;
+  factors.push({ label: 'Content', score: contentScore, max: 25 });
+
+  // Client growth (0-25)
+  var clientData = getDashboardClients();
+  var clientScore = Math.min(25, Math.round(clientData.total * 2.5));
+  score += clientScore;
+  factors.push({ label: 'Clients', score: clientScore, max: 25 });
+
+  // AI engagement (0-25)
+  var aiData = getDashboardAIUsage(30);
+  var aiScore = Math.min(25, Math.round(aiData.sessions * 0.5));
+  score += aiScore;
+  factors.push({ label: 'AI Usage', score: aiScore, max: 25 });
+
+  return { score: Math.min(100, score), factors: factors };
+}
+
+// v29.4: Inline SVG chart helpers (no external library)
+
+function renderSVGSparkline(values, width, height, color) {
+  if (!values || values.length < 2) return '';
+  var max = Math.max.apply(null, values);
+  if (max === 0) max = 1;
+  var step = width / (values.length - 1);
+  var points = '';
+  for (var i = 0; i < values.length; i++) {
+    var x = Math.round(i * step);
+    var y = Math.round(height - (values[i] / max) * (height - 4));
+    points += x + ',' + y + ' ';
+  }
+  return '<svg width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">' +
+    '<polyline points="' + points.trim() + '" fill="none" stroke="' + (color || 'var(--accent)') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
+function renderSVGDonut(value, max, size, color) {
+  var pct = max > 0 ? Math.min(1, value / max) : 0;
+  var r = (size / 2) - 4;
+  var circ = 2 * Math.PI * r;
+  var offset = circ * (1 - pct);
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' +
+    '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"/>' +
+    '<circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + r + '" fill="none" stroke="' + (color || 'var(--accent)') + '" stroke-width="6" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 ' + (size/2) + ' ' + (size/2) + ')" stroke-linecap="round"/>' +
+    '<text x="' + (size/2) + '" y="' + (size/2 + 5) + '" text-anchor="middle" fill="var(--text-primary)" font-size="14" font-weight="600">' + Math.round(pct * 100) + '%</text></svg>';
+}
+
+function renderTrendArrow(current, previous) {
+  if (previous === 0 || current === previous) return '<span style="color:var(--text-muted);">--</span>';
+  var up = current > previous;
+  var pct = Math.round(Math.abs((current - previous) / previous) * 100);
+  var color = up ? '#4ade80' : '#ef4444';
+  var arrow = up ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M19 12l-7 7-7-7';
+  return '<span style="display:inline-flex;align-items:center;gap:2px;color:' + color + ';font-size:11px;">' +
+    '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="' + arrow + '"/></svg>' +
+    pct + '%</span>';
+}
+
 // --- Main render ---
 function renderAnalyticsDashboard() {
-  var container = document.getElementById('dashboardContainer');
+  var container = document.getElementById('commerceTabDashboard');
   if (!container) return;
 
-  var html = '';
+  var brandIdx = (typeof selectedBrand !== 'undefined') ? selectedBrand : 0;
+  var revenue = getDashboardRevenue(brandIdx);
+  var clients = getDashboardClients();
+  var aiUsage = getDashboardAIUsage(30);
+  var health = getDashboardBrandHealth(brandIdx);
 
-  // --- Team & Direct Reports Section ---
-  var team = typeof getPeople === 'function' ? getPeople('team') : [];
-  var reports = typeof getPeople === 'function' ? getPeople('report') : [];
-  var people = team.concat(reports);
-  // Filter to current brand if not showing all
-  if (!clientsShowAllBrands && typeof selectedBrand !== 'undefined') {
-    var bIdx = selectedBrand;
-    people = people.filter(function(p) { return p.brandIndex == null || String(p.brandIndex) === String(bIdx); });
+  // Top row: 5 stat cards
+  var html = '<div class="kpi-grid kpi-grid-5">';
+
+  // Revenue card
+  html += '<div class="kpi-card">' +
+    '<div class="kpi-card-label">Revenue (30d)</div>' +
+    '<div class="kpi-card-value">$' + revenue.monthlyRevenue.toLocaleString() + '</div>' +
+    '<div class="kpi-card-sub">$' + revenue.outstanding.toLocaleString() + ' outstanding</div>' +
+    '</div>';
+
+  // Clients card
+  html += '<div class="kpi-card">' +
+    '<div class="kpi-card-label">Total Clients</div>' +
+    '<div class="kpi-card-value">' + clients.total + '</div>' +
+    '<div class="kpi-card-sub">' + clients.newThisMonth + ' new this month</div>' +
+    '</div>';
+
+  // Pipeline value card
+  html += '<div class="kpi-card">' +
+    '<div class="kpi-card-label">Pipeline Value</div>' +
+    '<div class="kpi-card-value">$' + Math.round(clients.totalDealValue).toLocaleString() + '</div>' +
+    '<div class="kpi-card-sub">Avg $' + Math.round(clients.avgDealValue).toLocaleString() + '/client</div>' +
+    '</div>';
+
+  // Brand Health card with donut
+  html += '<div class="kpi-card">' +
+    '<div class="kpi-card-label">Brand Health</div>' +
+    '<div style="display:flex;align-items:center;gap:8px;">' +
+    renderSVGDonut(health.score, 100, 48, health.score >= 75 ? '#4ade80' : health.score >= 50 ? 'var(--accent)' : '#fbbf24') +
+    '<div>' + health.factors.map(function(f) { return '<div style="font-size:10px;color:var(--text-muted);">' + f.label + ': ' + f.score + '/' + f.max + '</div>'; }).join('') + '</div>' +
+    '</div></div>';
+
+  // AI Spend card
+  html += '<div class="kpi-card">' +
+    '<div class="kpi-card-label">AI Spend (30d)</div>' +
+    '<div class="kpi-card-value">$' + aiUsage.totalCost.toFixed(2) + '</div>' +
+    '<div class="kpi-card-sub">' + aiUsage.sessions + ' sessions, ' + aiUsage.cacheHitRate + '% cache</div>' +
+    '</div>';
+
+  html += '</div>'; // close kpi-grid-5
+
+  // Client pipeline funnel
+  html += '<div class="kpi-section-title">Client Pipeline</div>';
+  html += '<div class="kpi-grid kpi-grid-4">';
+  var stageColors = { lead: '#60a5fa', prospect: '#a78bfa', active: '#4ade80', churned: '#ef4444' };
+  var stageNames = ['lead', 'prospect', 'active', 'churned'];
+  for (var si = 0; si < stageNames.length; si++) {
+    var sn = stageNames[si];
+    var count = clients.stages[sn] || 0;
+    html += '<div class="kpi-card kpi-card-sm">' +
+      '<div class="kpi-card-label" style="text-transform:capitalize;">' + sn + '</div>' +
+      '<div class="kpi-card-value" style="color:' + stageColors[sn] + ';">' + count + '</div>' +
+      '</div>';
   }
-
-  html += '<div style="margin-bottom:32px;">';
-  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
-  html += '<h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0;">Team & Direct Reports</h3>';
-  html += '<span style="font-size:12px;color:var(--text-muted);">' + people.length + ' people</span>';
   html += '</div>';
 
-  if (people.length === 0) {
-    html += '<div style="text-align:center;padding:32px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);color:var(--text-muted);font-size:13px;">';
-    html += 'No team members or direct reports yet. Add them from <a href="#" onclick="showView(\'clients\');return false;" style="color:var(--accent);">People</a>.';
-    html += '</div>';
-  } else {
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
-    people.forEach(function(p) {
-      var lastCheckIn = '';
-      var checkIns = p.checkIns || [];
-      if (checkIns.length > 0) {
-        var last = checkIns[checkIns.length - 1];
-        lastCheckIn = last.date ? new Date(last.date).toLocaleDateString() : '';
-      }
-      var isReport = p.personType === 'report';
-      var typeLabel = isReport ? 'Direct Report' : 'Team Member';
-      var avatar = p.logo ? '<img src="' + p.logo + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="">' :
-        '<div style="width:36px;height:36px;border-radius:50%;background:var(--brand-accent-10,rgba(168,152,120,0.1));display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent);font-weight:700;font-size:14px;">' + (p.name ? p.name.charAt(0).toUpperCase() : '?') + '</div>';
-
-      html += '<div onclick="' + (isReport ? 'openReportDetail' : 'openTeamDetail') + '(\'' + p.id + '\')" style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border-color)\'">';
-      html += avatar;
-      html += '<div style="flex:1;min-width:0;">';
-      html += '<div style="font-weight:600;font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(p.name || 'Unnamed') + '</div>';
-      html += '<div style="font-size:11px;color:var(--text-muted);">' + escapeHtml(p.role || typeLabel) + '</div>';
-      html += '</div>';
-      html += '<div style="text-align:right;flex-shrink:0;">';
-      if (lastCheckIn) {
-        html += '<div style="font-size:11px;color:var(--text-muted);">Last check-in</div>';
-        html += '<div style="font-size:12px;color:var(--text-secondary);font-weight:500;">' + lastCheckIn + '</div>';
-      } else if (p.nextCheckIn) {
-        html += '<div style="font-size:11px;color:var(--text-muted);">Next check-in</div>';
-        html += '<div style="font-size:12px;color:var(--accent);">' + new Date(p.nextCheckIn).toLocaleDateString() + '</div>';
-      } else {
-        html += '<div style="font-size:11px;color:var(--text-muted);">No check-ins</div>';
-      }
-      html += '</div></div>';
-    });
-    html += '</div>';
+  // AI model breakdown
+  html += '<div class="kpi-section-title">AI Model Usage</div>';
+  html += '<div class="kpi-model-table">';
+  var models = Object.keys(aiUsage.byModel);
+  models.sort(function(a, b) { return aiUsage.byModel[b].cost - aiUsage.byModel[a].cost; });
+  for (var mi = 0; mi < Math.min(models.length, 6); mi++) {
+    var m = models[mi];
+    var md = aiUsage.byModel[m];
+    var pct = aiUsage.totalCost > 0 ? Math.round((md.cost / aiUsage.totalCost) * 100) : 0;
+    html += '<div class="kpi-model-row">' +
+      '<span class="kpi-model-name">' + m + '</span>' +
+      '<span class="kpi-model-bar"><span style="width:' + pct + '%;background:var(--accent);height:100%;display:block;border-radius:3px;"></span></span>' +
+      '<span class="kpi-model-cost">$' + md.cost.toFixed(2) + '</span>' +
+      '<span class="kpi-model-count">' + md.count + ' calls</span>' +
+      '</div>';
+  }
+  if (models.length === 0) {
+    html += '<div style="padding:12px;color:var(--text-muted);font-size:12px;text-align:center;">No AI usage data yet</div>';
   }
   html += '</div>';
 
-  // --- Custom KPIs Section ---
+  // Custom KPIs (existing, but upgraded UI)
+  html += '<div class="kpi-section-title">Custom KPIs <button class="kpi-add-btn" onclick="addDashboardKPI()">+ Add</button></div>';
   var kpis = getDashboardKPIs();
-  html += '<div style="margin-bottom:32px;">';
-  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
-  html += '<h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0;">Custom KPIs</h3>';
-  html += '<button onclick="addDashboardKPI()" style="padding:6px 14px;border-radius:var(--radius-md);border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">';
-  html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add KPI</button>';
-  html += '</div>';
-
-  if (kpis.length === 0) {
-    html += '<div style="text-align:center;padding:32px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);color:var(--text-muted);font-size:13px;">';
-    html += 'No KPIs defined yet. Add custom metrics to track your key performance indicators.';
-    html += '</div>';
-  } else {
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
-    kpis.forEach(function(kpi, idx) {
-      var pct = kpi.target > 0 ? Math.min(100, Math.round((kpi.value / kpi.target) * 100)) : 0;
-      var barColor = pct >= 100 ? '#4ade80' : pct >= 60 ? 'var(--accent)' : '#fbbf24';
-      html += '<div style="padding:16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);position:relative;">';
-      // Delete button
-      html += '<button onclick="event.stopPropagation();deleteDashboardKPI(' + idx + ')" style="position:absolute;top:8px;right:8px;border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:2px 4px;" title="Remove">x</button>';
-      html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">' + escapeHtml(kpi.title || 'Untitled') + '</div>';
-      html += '<div style="display:flex;align-items:baseline;gap:4px;margin-bottom:8px;">';
-      html += '<span style="font-size:28px;font-weight:700;color:var(--text-primary);">' + escapeHtml(String(kpi.value || 0)) + '</span>';
-      if (kpi.unit) html += '<span style="font-size:13px;color:var(--text-muted);">' + escapeHtml(kpi.unit) + '</span>';
-      if (kpi.target > 0) html += '<span style="font-size:11px;color:var(--text-muted);margin-left:auto;">/ ' + kpi.target + '</span>';
-      html += '</div>';
-      // Progress bar
-      if (kpi.target > 0) {
-        html += '<div style="height:4px;background:var(--bg-primary);border-radius:2px;overflow:hidden;">';
-        html += '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:2px;transition:width 0.3s;"></div>';
-        html += '</div>';
-        html += '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;text-align:right;">' + pct + '%</div>';
-      }
-      // Edit button
-      html += '<button onclick="event.stopPropagation();editDashboardKPI(' + idx + ')" style="margin-top:8px;padding:4px 10px;border-radius:6px;border:1px solid var(--border-color);background:var(--bg-primary);color:var(--text-muted);font-size:11px;cursor:pointer;font-family:inherit;">Edit</button>';
-      html += '</div>';
-    });
+  if (kpis.length > 0) {
+    html += '<div class="kpi-grid kpi-grid-3">';
+    for (var ki = 0; ki < kpis.length; ki++) {
+      var kpi = kpis[ki];
+      var kpiPct = kpi.target > 0 ? Math.min(100, Math.round((kpi.value / kpi.target) * 100)) : 0;
+      var kpiColor = kpiPct >= 100 ? '#4ade80' : kpiPct >= 60 ? 'var(--accent)' : '#fbbf24';
+      html += '<div class="kpi-card">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<div class="kpi-card-label">' + escapeHtml(kpi.title) + '</div>' +
+        '<div style="display:flex;gap:4px;">' +
+        '<button onclick="editDashboardKPI(' + ki + ')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px;" title="Edit"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+        '<button onclick="deleteDashboardKPI(' + ki + ')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px;" title="Delete"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+        '</div></div>' +
+        '<div class="kpi-card-value">' + kpi.value + '<span style="font-size:12px;color:var(--text-muted);"> / ' + kpi.target + ' ' + (kpi.unit || '') + '</span></div>' +
+        '<div class="kpi-progress-bar"><div class="kpi-progress-fill" style="width:' + kpiPct + '%;background:' + kpiColor + ';"></div></div>' +
+        '</div>';
+    }
     html += '</div>';
   }
-  html += '</div>';
 
-  // --- Screenshots Section ---
-  var shots = getDashboardScreenshots();
-  html += '<div style="margin-bottom:32px;">';
-  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">';
-  html += '<h3 style="font-size:16px;font-weight:700;color:var(--text-primary);margin:0;">Screenshots</h3>';
-  html += '<label style="padding:6px 14px;border-radius:var(--radius-md);border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">';
-  html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload';
-  html += '<input type="file" accept="image/*" multiple onchange="handleDashboardScreenshots(this)" style="display:none;">';
-  html += '</label>';
-  html += '</div>';
-
-  if (shots.length === 0) {
-    html += '<div style="text-align:center;padding:32px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);color:var(--text-muted);font-size:13px;">';
-    html += 'No screenshots uploaded. Upload screenshots to track visual progress and share with your team.';
-    html += '</div>';
-  } else {
-    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">';
-    shots.forEach(function(s, idx) {
-      html += '<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);overflow:hidden;position:relative;">';
-      html += '<img src="' + s.data + '" style="width:100%;height:140px;object-fit:cover;display:block;cursor:pointer;" onclick="window.open(this.src)">';
-      // Delete
-      html += '<button onclick="event.stopPropagation();deleteDashboardScreenshot(' + idx + ')" style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;border:none;font-size:12px;cursor:pointer;line-height:22px;text-align:center;">x</button>';
-      html += '<div style="padding:8px 10px;">';
-      html += '<div style="font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" contenteditable="true" onblur="updateDashboardScreenshotTitle(' + idx + ',this.textContent)">' + escapeHtml(s.title || 'Screenshot') + '</div>';
-      html += '<div style="font-size:10px;color:var(--text-muted);">' + (s.date ? new Date(s.date).toLocaleDateString() : '') + '</div>';
-      html += '</div></div>';
-    });
+  // Team section
+  var teamPeople = typeof getPeople === 'function' ? getPeople('team') : [];
+  var reportPeople = typeof getPeople === 'function' ? getPeople('report') : [];
+  var allTeam = (Array.isArray(teamPeople) ? teamPeople : []).concat(Array.isArray(reportPeople) ? reportPeople : []);
+  if (allTeam.length > 0) {
+    html += '<div class="kpi-section-title">Team</div>';
+    html += '<div class="kpi-grid kpi-grid-3">';
+    for (var ti = 0; ti < allTeam.length; ti++) {
+      var tm = allTeam[ti];
+      html += '<div class="kpi-card kpi-card-sm" style="display:flex;align-items:center;gap:8px;">' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">' + ((tm.name || '?')[0] || '?').toUpperCase() + '</div>' +
+        '<div><div style="font-size:12px;color:var(--text-primary);">' + escapeHtml(tm.name || 'Unknown') + '</div>' +
+        '<div style="font-size:10px;color:var(--text-muted);">' + escapeHtml(tm.role || tm.personType || '') + '</div></div>' +
+        '</div>';
+    }
     html += '</div>';
   }
-  html += '</div>';
 
   container.innerHTML = html;
 }
