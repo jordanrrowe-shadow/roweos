@@ -47007,15 +47007,16 @@
 .scribe-main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); min-height: 0; height: 100%; }
 .scribe-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; }
 .scribe-active-editor { display: flex; flex-direction: column; height: 100%; overflow: hidden; min-height: 0; }
-.scribe-title-row { display: flex; align-items: center; gap: 8px; padding: 12px 16px 4px; flex-shrink: 0; }
+.scribe-title-row { display: flex; align-items: center; gap: 8px; padding: 8px 8px 4px; flex-shrink: 0; }
 .scribe-title-input { flex: 1; padding: 4px 8px; background: transparent; border: none; color: var(--text-primary); font-size: 18px; font-weight: 700; font-family: inherit; outline: none; }
 .scribe-title-input::placeholder { color: var(--text-muted); }
 .scribe-title-actions { display: flex; gap: 4px; flex-shrink: 0; }
 .scribe-title-actions button { display: flex; align-items: center; gap: 4px; padding: 6px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; transition: all 0.15s; }
 .scribe-title-actions button:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
 .scribe-save-btn { color: var(--accent) !important; }
-.scribe-delete-btn:hover { color: var(--error, #ef4444) !important; border-color: var(--error, #ef4444) !important; }
-.scribe-tags-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 4px 16px 8px; flex-shrink: 0; border-bottom: 1px solid var(--border-color); }
+.scribe-delete-btn { color: var(--error, #ef4444) !important; }
+.scribe-delete-btn:hover { border-color: var(--error, #ef4444) !important; }
+.scribe-tags-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 4px 8px 6px; flex-shrink: 0; border-bottom: 1px solid var(--border-color); }
 .scribe-tags-list { display: flex; flex-wrap: wrap; gap: 4px; }
 .scribe-tag-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: rgba(168,152,120,0.15); border-radius: 10px; font-size: 11px; }
 .scribe-tag-remove { cursor: pointer; opacity: 0.5; font-size: 13px; }
@@ -47035,7 +47036,7 @@
 .scribe-tinymce-wrap .tox .tox-tbtn:hover { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
 .scribe-tinymce-wrap .tox .tox-tbtn--enabled, .scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.2) !important; color: var(--accent) !important; }
 .scribe-tinymce-wrap .tox .tox-statusbar { background: var(--bg-secondary) !important; border-top: 1px solid var(--border-color) !important; color: var(--text-muted) !important; }
-.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 12px; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); flex: 0 0 auto; }
+.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 8px; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); flex: 0 0 auto; }
 .scribe-knowledge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-shrink: 0; }
 .scribe-synth-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; }
 .scribe-synth-btn:hover { border-color: var(--accent); color: var(--text-primary); }
