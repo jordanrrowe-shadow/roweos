@@ -46998,9 +46998,7 @@
 .scribe-pg-item-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .scribe-pg-add { padding: 4px 12px 4px 28px; cursor: pointer; font-size: 11px; color: var(--text-muted); opacity: 0.5; }
 .scribe-pg-add:hover { opacity: 1; color: var(--accent); }
-.scribe-archive-toggle { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer; opacity: 0.4; padding: 4px; border-radius: 4px; }
-.scribe-archive-toggle:hover { opacity: 0.8; }
-.scribe-archive-toggle.active { opacity: 1; color: var(--accent); background: rgba(168,152,120,0.1); }
+/* v29.5: archive-toggle styles moved to .scribe-sidebar-filters scope */
 .scribe-sidebar-header { position: relative; }
 .scribe-nb-archive-actions { display: flex; gap: 4px; padding: 4px 0 0; }
 .scribe-nb-restore-btn, .scribe-nb-perm-delete-btn { padding: 2px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-size: 10px; font-family: inherit; }
@@ -47037,7 +47035,7 @@
 .scribe-tinymce-wrap .tox .tox-tbtn:hover { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
 .scribe-tinymce-wrap .tox .tox-tbtn--enabled, .scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.2) !important; color: var(--accent) !important; }
 .scribe-tinymce-wrap .tox .tox-statusbar { background: var(--bg-secondary) !important; border-top: 1px solid var(--border-color) !important; color: var(--text-muted) !important; }
-.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 12px; height: 120px; display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
+.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 12px; flex: 0 0 auto; max-height: 20vh; display: flex; flex-direction: column; overflow: hidden; }
 .scribe-knowledge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0; }
 .scribe-synth-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; }
 .scribe-synth-btn:hover { border-color: var(--accent); color: var(--text-primary); }
