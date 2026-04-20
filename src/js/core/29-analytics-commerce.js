@@ -6698,10 +6698,12 @@ function _renderPeopleSelectCheckbox(personId) {
 }
 
 // v25.3: People type switching
-var _activePeopleType = 'client';
+var _activePeopleType = localStorage.getItem('roweos_people_active_type') || 'client';
 
 function switchPeopleType(type) {
   _activePeopleType = type;
+  // v29.3: Remember last-used people type pill
+  try { localStorage.setItem('roweos_people_active_type', type); } catch(e) {}
   // v29: Clear selections on tab switch but keep select mode active
   _selectedPeople = {};
   _updatePeopleSelectBar();
@@ -9479,6 +9481,23 @@ function clientBulkExport() {
   a.click();
   URL.revokeObjectURL(url);
   showToast('Exported ' + clients.length + ' client(s)', 'success');
+}
+
+// v29.3: Bulk delete selected clients
+function clientBulkDelete() {
+  if (_clientBulkSelected.length === 0) return;
+  if (!confirm('Delete ' + _clientBulkSelected.length + ' client(s)? This cannot be undone.')) return;
+  var clients = getClients();
+  var remaining = clients.filter(function(c) {
+    return _clientBulkSelected.indexOf(String(c.id)) === -1;
+  });
+  var deletedCount = clients.length - remaining.length;
+  saveClients(remaining);
+  clientClearBulkSelection();
+  renderClientsView();
+  if (typeof renderClientsList === 'function') renderClientsList();
+  if (typeof updatePeopleTypeCounts === 'function') updatePeopleTypeCounts();
+  showToast('Deleted ' + deletedCount + ' client(s)', 'success');
 }
 
 // --- 4.3: Dialogue History ---

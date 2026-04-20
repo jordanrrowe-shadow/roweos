@@ -2961,17 +2961,23 @@ function showView(view) {
   // v16.11: Clients view // v25.3: 'people' alias routes to clients
   if (view === 'people') { view = 'clients'; originalView = 'clients'; }
   if (view === 'clients') {
-    // v26.1: Render pill nav for People
+    // v29.3: Restore last-used people type pill
+    var _savedPeopleType = (typeof _activePeopleType !== 'undefined') ? _activePeopleType : 'client';
     renderPillNav('peoplePillNav', [
       { id: 'client', label: 'Clients' },
       { id: 'team', label: 'Team' },
       { id: 'report', label: 'Reports' }
-    ], 'client', function(tabId) { showPeopleType(tabId); }, { viewId: 'clients' });
+    ], _savedPeopleType, function(tabId) { showPeopleType(tabId); }, { viewId: 'clients' });
     if (typeof initClientsTabDrag === 'function') initClientsTabDrag();
     // v28.6: Ensure team/report container is hidden on init
     var _ptc = document.getElementById('peopleTypeContent');
     if (_ptc) _ptc.style.display = 'none';
-    switchClientsTab(_clientsActiveTab || 'pipeline');
+    // v29.3: Switch to saved people type (handles sub-tab restore internally)
+    if (typeof switchPeopleType === 'function') {
+      switchPeopleType(_savedPeopleType);
+    } else {
+      switchClientsTab(_clientsActiveTab || 'pipeline');
+    }
     if (typeof updatePeopleTypeCounts === 'function') updatePeopleTypeCounts();
   }
   // v25.3: Commerce/Analytics view - render overview + costs on open
