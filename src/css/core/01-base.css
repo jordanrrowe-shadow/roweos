@@ -47167,3 +47167,23 @@ html.light-mode .studio-results-panel { background:rgba(0,0,0,0.02); }
 .pulse-drag-handle { display:inline-flex; align-items:center; opacity:0.3; transition:opacity 0.2s; }
 .pulse-3-checklist-card:hover .pulse-drag-handle { opacity:0.7; }
 
+/* v29.3: Scribe @-mention dropdown */
+.scribe-mention-dropdown { display:none; background:var(--glass-bg, rgba(30,30,30,0.95)); backdrop-filter:blur(20px); border:1px solid var(--border-color); border-radius:8px; padding:4px; min-width:200px; max-height:240px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+.scribe-mention-item { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px; }
+.scribe-mention-item:hover { background:rgba(255,255,255,0.08); }
+.scribe-mention-name { color:var(--text-primary); }
+.scribe-mention-type { color:var(--text-muted); font-size:10px; }
+.scribe-mention { background:rgba(168,152,120,0.15); color:var(--accent); padding:1px 4px; border-radius:3px; font-size:inherit; }
+html.light-mode .scribe-mention-dropdown { background:rgba(255,255,255,0.95); }
+html.light-mode .scribe-mention-item:hover { background:rgba(0,0,0,0.05); }
+/* v29.3: Scribe knowledge thread messages */
+.scribe-knowledge-msg { padding:8px 12px; margin:4px 0; border-radius:6px; font-size:13px; line-height:1.5; }
+.scribe-knowledge-user { background:rgba(168,152,120,0.1); color:var(--text-primary); text-align:right; }
+.scribe-knowledge-assistant { background:rgba(255,255,255,0.05); color:var(--text-secondary); }
+.scribe-knowledge-assistant h1,.scribe-knowledge-assistant h2,.scribe-knowledge-assistant h3 { font-size:14px; margin:8px 0 4px; color:var(--text-primary); }
+.scribe-knowledge-assistant code { background:rgba(255,255,255,0.1); padding:1px 4px; border-radius:3px; font-size:12px; }
+.scribe-knowledge-assistant pre { background:rgba(0,0,0,0.2); padding:8px; border-radius:6px; overflow-x:auto; margin:8px 0; }
+html.light-mode .scribe-knowledge-assistant { background:rgba(0,0,0,0.03); }
+html.light-mode .scribe-knowledge-assistant code { background:rgba(0,0,0,0.06); }
+html.light-mode .scribe-knowledge-assistant pre { background:rgba(0,0,0,0.04); }
+

@@ -260,6 +260,7 @@ function renderFolderContents(folderId, lib) {
     html += '<span class="file-name">' + escapeHtml(file.name) + '</span>';
     html += '<span class="file-date">' + dateStr + '</span>';
     html += '<div class="file-actions">';
+    html += '<button class="file-action-btn" onclick="event.stopPropagation(); if(typeof openLibraryFileInScribe===\'function\') openLibraryFileInScribe(\'' + file.id + '\')" title="Open in Scribe"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.25278V19.2528M12 6.25278C10.8321 5.47686 9.24649 5 7.5 5C5.75351 5 4.16789 5.47686 3 6.25278V19.2528C4.16789 18.4769 5.75351 18 7.5 18C9.24649 18 10.8321 18.4769 12 19.2528M12 6.25278C13.1679 5.47686 14.7535 5 16.5 5C18.2465 5 19.8321 5.47686 21 6.25278V19.2528C19.8321 18.4769 18.2465 18 16.5 18C14.7535 18 13.1679 18.4769 12 19.2528"/></svg></button>';
     html += '<button class="file-action-btn" onclick="event.stopPropagation(); renameFile(\'' + file.id + '\')" title="Rename">✏️</button>';
     html += '<button class="file-action-btn" onclick="event.stopPropagation(); deleteFile(\'' + file.id + '\')" title="Delete">🗑️</button>';
     html += '</div>';
@@ -8568,3 +8569,36 @@ function scanSelectedGDriveToIdentity() {
   });
 }
 
+// v29.3: Open library file in Scribe
+function openLibraryFileInScribe(fileId) {
+  var lib = getCurrentBrandLibrary();
+  if (!lib || !lib.files) return;
+  var file = null;
+  for (var i = 0; i < lib.files.length; i++) {
+    if (lib.files[i].id === fileId) { file = lib.files[i]; break; }
+  }
+  if (!file) return;
+
+  if (typeof createScribeNotebook === 'function') {
+    createScribeNotebook();
+    var nb = null;
+    if (typeof scribeNotebooks !== 'undefined' && scribeNotebooks.length > 0) {
+      nb = scribeNotebooks[0]; // createScribeNotebook unshifts the new one
+    }
+    if (nb) {
+      nb.title = file.name || 'From Library';
+      if (!nb.linkedLibraryItems) nb.linkedLibraryItems = [];
+      nb.linkedLibraryItems.push(fileId);
+      if (typeof saveScribeNotebooks === 'function') saveScribeNotebooks();
+      setTimeout(function() {
+        var editor = typeof tinymce !== 'undefined' ? tinymce.get('scribeContentArea') : null;
+        if (editor && file.content) {
+          editor.setContent(file.content);
+          if (typeof saveActiveScribeNotebook === 'function') saveActiveScribeNotebook();
+        }
+      }, 500);
+      showView('scribe');
+      if (typeof showToast === 'function') showToast('Opened in Scribe', 'success');
+    }
+  }
+}

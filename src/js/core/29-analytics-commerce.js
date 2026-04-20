@@ -8696,6 +8696,11 @@ function openClientDetail(clientId) {
   }
 
   panel.innerHTML = html;
+
+  // v29.3: Show Scribe backlinks
+  if (typeof renderScribeBacklinks === 'function') {
+    renderScribeBacklinks(client.id, client.name || client.companyName, panel);
+  }
 }
 
 function closeClientDetail() {
@@ -10551,5 +10556,48 @@ function mailSyncClientToAddressBook(clientId) {
   }
   saveMailAddressBook(book);
   showToast('Address book synced with "' + client.name + '"', 'success');
+}
+
+// v29.3: Scribe backlinks for People
+function getScribeBacklinksForPerson(personId, personName) {
+  var backlinks = [];
+  if (typeof scribeNotebooks === 'undefined' || !Array.isArray(scribeNotebooks)) return backlinks;
+  for (var i = 0; i < scribeNotebooks.length; i++) {
+    var nb = scribeNotebooks[i];
+    var found = false;
+    // Check linkedPeople array
+    if (nb.linkedPeople && nb.linkedPeople.indexOf(personId) !== -1) found = true;
+    // Check content for name mention
+    if (!found && personName && nb.content && nb.content.toLowerCase().indexOf(personName.toLowerCase()) !== -1) found = true;
+    // Check pages
+    if (!found && nb.pages) {
+      for (var j = 0; j < nb.pages.length; j++) {
+        if (nb.pages[j].content && nb.pages[j].content.toLowerCase().indexOf(personName.toLowerCase()) !== -1) {
+          found = true;
+          break;
+        }
+      }
+    }
+    if (found) {
+      backlinks.push({ id: nb.id, title: nb.title || 'Untitled', updatedAt: nb.updatedAt });
+    }
+  }
+  return backlinks;
+}
+
+function renderScribeBacklinks(personId, personName, containerEl) {
+  var backlinks = getScribeBacklinksForPerson(personId, personName);
+  if (backlinks.length === 0) return;
+  var html = '<div style="margin-top:var(--space-4);">';
+  html += '<div style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-3);">Referenced in Notebooks</div>';
+  for (var i = 0; i < backlinks.length; i++) {
+    var bl = backlinks[i];
+    html += '<div style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg-tertiary);border-radius:var(--radius-md);margin-bottom:4px;cursor:pointer;border:1px solid var(--border-color);" onclick="showView(\'scribe\'); if(typeof selectScribeNotebook===\'function\') selectScribeNotebook(\'' + bl.id + '\');">';
+    html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;"><path d="M12 6.25278V19.2528M12 6.25278C10.8321 5.47686 9.24649 5 7.5 5C5.75351 5 4.16789 5.47686 3 6.25278V19.2528C4.16789 18.4769 5.75351 18 7.5 18C9.24649 18 10.8321 18.4769 12 19.2528M12 6.25278C13.1679 5.47686 14.7535 5 16.5 5C18.2465 5 19.8321 5.47686 21 6.25278V19.2528C19.8321 18.4769 18.2465 18 16.5 18C14.7535 18 13.1679 18.4769 12 19.2528"/></svg>';
+    html += '<span style="font-size:13px;color:var(--text-primary);">' + escapeHtml(bl.title) + '</span>';
+    html += '</div>';
+  }
+  html += '</div>';
+  if (containerEl) containerEl.insertAdjacentHTML('beforeend', html);
 }
 

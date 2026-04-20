@@ -136,6 +136,8 @@ function initScribeTinymce() {
             }
           }
         }
+        // v29.3: Initialize @-mention autocomplete
+        initScribeMentions();
       });
     }
   });
@@ -972,27 +974,27 @@ function synthesizeScribeNotebook() { // v29.0:
   }
 }
 
-function renderScribeKnowledgeThread() { // v29.0:
+function renderScribeKnowledgeThread() { // v29.3: Enhanced with markdown rendering
   var threadEl = document.getElementById('scribeKnowledgeThread');
   if (!threadEl) return;
 
   if (_scribeKnowledgeThread.length === 0) {
-    threadEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary);font-size:13px;">Ask a question about this notebook, or synthesize its contents.</div>';
+    threadEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px;">Ask questions about this notebook\'s content</div>';
     return;
   }
 
   var html = '';
   for (var i = 0; i < _scribeKnowledgeThread.length; i++) {
     var msg = _scribeKnowledgeThread[i];
-    var roleClass = msg.role === 'user' ? 'user' : 'ai';
-    var roleLabel = msg.role === 'user' ? 'You' : 'AI';
-    html += '<div class="scribe-knowledge-msg ' + roleClass + '">';
-    html += '<div class="scribe-km-role">' + roleLabel + '</div>';
-    html += '<div class="scribe-km-content">' + _escapeScribeHtml(msg.content || '...') + '</div>';
-    html += '</div>';
+    var content = msg.content || '';
+    if (msg.role === 'assistant' && typeof marked !== 'undefined') {
+      try { content = marked.parse(content); } catch(e) { content = _escapeScribeHtml(content); }
+    } else {
+      content = _escapeScribeHtml(content);
+    }
+    html += '<div class="scribe-knowledge-msg scribe-knowledge-' + (msg.role || 'user') + '">' + content + '</div>';
   }
   threadEl.innerHTML = html;
-  // v29.0: Auto-scroll to bottom
   threadEl.scrollTop = threadEl.scrollHeight;
 }
 
@@ -1203,4 +1205,183 @@ function _formatScribeDate(isoStr) { // v29.0:
   } catch (e) {
     return isoStr;
   }
+}
+
+// v29.3: @-mention autocomplete system
+var _scribeMentionDropdown = null;
+var _scribeMentionQuery = '';
+var _scribeMentionActive = false;
+
+function initScribeMentions() {
+  var editor = typeof tinymce !== 'undefined' ? tinymce.get('scribeContentArea') : null;
+  if (!editor) return;
+
+  editor.on('keyup', function(e) {
+    if (_scribeMentionActive) {
+      if (e.key === 'Escape') { hideScribeMentionDropdown(); return; }
+      if (e.key === 'Enter') { e.preventDefault(); selectScribeMention(0); return; }
+    }
+    checkForMentionTrigger(editor);
+  });
+
+  editor.on('keydown', function(e) {
+    if (_scribeMentionActive && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
+      e.preventDefault();
+    }
+  });
+}
+
+function checkForMentionTrigger(editor) {
+  var rng = editor.selection.getRng();
+  var container = rng.startContainer;
+  if (container.nodeType !== 3) { hideScribeMentionDropdown(); return; }
+  var text = container.textContent;
+  var cursorPos = rng.startOffset;
+
+  var beforeCursor = text.substring(0, cursorPos);
+  var atIdx = beforeCursor.lastIndexOf('@');
+  if (atIdx === -1) { hideScribeMentionDropdown(); return; }
+
+  var query = beforeCursor.substring(atIdx + 1);
+  if (query.length > 30) { hideScribeMentionDropdown(); return; }
+
+  _scribeMentionQuery = query.toLowerCase();
+  _scribeMentionActive = true;
+  showScribeMentionDropdown(editor, query);
+}
+
+function showScribeMentionDropdown(editor, query) {
+  var results = [];
+
+  // Search People
+  if (typeof getPeople === 'function') {
+    var people = getPeople();
+    if (Array.isArray(people)) {
+      for (var pi = 0; pi < people.length; pi++) {
+        var p = people[pi];
+        var name = p.name || p.companyName || '';
+        if (name.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+          results.push({ type: 'person', id: p.id, name: name, sub: p.personType || 'contact' });
+        }
+      }
+    }
+  }
+
+  // Search Library files
+  if (typeof getCurrentBrandLibrary === 'function') {
+    var lib = getCurrentBrandLibrary();
+    if (lib && lib.files) {
+      for (var fi = 0; fi < lib.files.length; fi++) {
+        var f = lib.files[fi];
+        var fname = f.name || f.title || '';
+        if (fname.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+          results.push({ type: 'library', id: f.id, name: fname, sub: 'library' });
+        }
+      }
+    }
+  }
+
+  results = results.slice(0, 8);
+
+  if (results.length === 0) { hideScribeMentionDropdown(); return; }
+
+  if (!_scribeMentionDropdown) {
+    _scribeMentionDropdown = document.createElement('div');
+    _scribeMentionDropdown.className = 'scribe-mention-dropdown';
+    document.body.appendChild(_scribeMentionDropdown);
+  }
+
+  var html = '';
+  for (var i = 0; i < results.length; i++) {
+    var r = results[i];
+    html += '<div class="scribe-mention-item" data-idx="' + i + '" onclick="selectScribeMention(' + i + ')">' +
+      '<span class="scribe-mention-name">' + _escapeScribeHtml(r.name) + '</span>' +
+      '<span class="scribe-mention-type">' + _escapeScribeHtml(r.sub) + '</span></div>';
+  }
+  _scribeMentionDropdown.innerHTML = html;
+  _scribeMentionDropdown._results = results;
+
+  // Position near cursor
+  var editorContainer = document.getElementById('scribeContentArea');
+  if (editorContainer) {
+    var iframe = editorContainer.closest('.tox-tinymce');
+    if (iframe) {
+      var rect = iframe.getBoundingClientRect();
+      _scribeMentionDropdown.style.display = 'block';
+      _scribeMentionDropdown.style.position = 'fixed';
+      _scribeMentionDropdown.style.left = (rect.left + 40) + 'px';
+      _scribeMentionDropdown.style.top = (rect.top + 60) + 'px';
+      _scribeMentionDropdown.style.zIndex = '100000';
+    }
+  }
+}
+
+function hideScribeMentionDropdown() {
+  _scribeMentionActive = false;
+  _scribeMentionQuery = '';
+  if (_scribeMentionDropdown) _scribeMentionDropdown.style.display = 'none';
+}
+
+function selectScribeMention(idx) {
+  if (!_scribeMentionDropdown || !_scribeMentionDropdown._results) return;
+  var item = _scribeMentionDropdown._results[idx];
+  if (!item) return;
+
+  var editor = typeof tinymce !== 'undefined' ? tinymce.get('scribeContentArea') : null;
+  if (!editor) return;
+
+  var rng = editor.selection.getRng();
+  var container = rng.startContainer;
+  if (container.nodeType === 3) {
+    var text = container.textContent;
+    var cursorPos = rng.startOffset;
+    var beforeCursor = text.substring(0, cursorPos);
+    var atIdx = beforeCursor.lastIndexOf('@');
+    if (atIdx !== -1) {
+      container.textContent = text.substring(0, atIdx) + text.substring(cursorPos);
+      var mentionHtml = '<span class="scribe-mention" data-type="' + item.type + '" data-id="' + item.id + '" contenteditable="false">@' + _escapeScribeHtml(item.name) + '</span>&nbsp;';
+      rng.setStart(container, atIdx);
+      rng.setEnd(container, atIdx);
+      editor.selection.setRng(rng);
+      editor.insertContent(mentionHtml);
+    }
+  }
+
+  // Track linked item
+  if (item.type === 'person') {
+    addScribeLinkedPerson(item.id, item.name);
+  } else if (item.type === 'library') {
+    addScribeLinkedLibraryItem(item.id, item.name);
+  }
+
+  hideScribeMentionDropdown();
+  if (typeof saveActiveScribeNotebook === 'function') saveActiveScribeNotebook();
+}
+
+function addScribeLinkedPerson(id, name) {
+  var nb = getActiveScribeNotebook();
+  if (!nb) return;
+  if (!nb.linkedPeople) nb.linkedPeople = [];
+  if (nb.linkedPeople.indexOf(id) === -1) {
+    nb.linkedPeople.push(id);
+    saveScribeNotebooks();
+  }
+}
+
+function addScribeLinkedLibraryItem(id, name) {
+  var nb = getActiveScribeNotebook();
+  if (!nb) return;
+  if (!nb.linkedLibraryItems) nb.linkedLibraryItems = [];
+  if (nb.linkedLibraryItems.indexOf(id) === -1) {
+    nb.linkedLibraryItems.push(id);
+    saveScribeNotebooks();
+  }
+}
+
+function getActiveScribeNotebook() {
+  if (!_scribeActiveId) return null;
+  for (var i = 0; i < scribeNotebooks.length; i++) {
+    if (scribeNotebooks[i].id === _scribeActiveId) return scribeNotebooks[i];
+  }
+  return null;
 }
