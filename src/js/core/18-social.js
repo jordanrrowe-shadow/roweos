@@ -3087,6 +3087,11 @@ function executeWorkflow(workflow) {
 
     var step = workflow.steps[stepIndex];
     // v22.46: Highlight current step dot on the running card
+    // v29.x: Re-find the card in case DOM was re-rendered (tab switch)
+    if (workflow.id) {
+      var freshCard = document.querySelector('.auto-lab-card[data-auto-id="' + workflow.id + '"]');
+      if (freshCard) _runningCard = freshCard;
+    }
     if (_runningCard) {
       var _dots = _runningCard.querySelectorAll('.pipeline-step-dot');
       for (var d = 0; d < _dots.length; d++) {
@@ -3096,6 +3101,10 @@ function executeWorkflow(workflow) {
       if (_dots[stepIndex]) {
         _dots[stepIndex].classList.add('step-dot-active');
       }
+    }
+    // v29.x: Persist step index so glow survives tab switches
+    if (workflow.id && typeof updateRunningStepIndex === 'function') {
+      updateRunningStepIndex(workflow.id, stepIndex);
     }
     stepIndex++;
 
@@ -4174,35 +4183,50 @@ function executeWorkflowStep(step, context) {
     var outboxTo = resolveTemplateVars(target.emailTo || '', context);
     var outboxSubject = resolveTemplateVars(target.emailSubject || '', context);
     var outboxBody = '';
-    // Gather previous step output as email body
-    if (context) {
-      var _obKeys = Object.keys(context);
-      for (var _obk = _obKeys.length - 1; _obk >= 0; _obk--) {
-        var _obv = context[_obKeys[_obk]];
-        if (typeof _obv === 'string' && _obv.length > 0 && _obKeys[_obk] !== 'brandName' && _obKeys[_obk].indexOf('_brandIdx') === -1) {
-          outboxBody = _obv;
-          break;
+    // v29.x: Use contentRef to get the specific step's output (not just the last one)
+    if (target.contentRef && context) {
+      outboxBody = resolveTemplateVars(target.contentRef, context);
+    }
+    // Fallback: gather previous step output as email body (last non-meta string in context)
+    if (!outboxBody && context) {
+      // v29.x: If step has an outputKey reference from the immediately previous step, use that
+      var _prevStepKey = 'step' + (step.stepId - 1) + '_content';
+      if (context[_prevStepKey] && typeof context[_prevStepKey] === 'string') {
+        outboxBody = context[_prevStepKey];
+      } else {
+        var _obKeys = Object.keys(context);
+        for (var _obk = _obKeys.length - 1; _obk >= 0; _obk--) {
+          var _obv = context[_obKeys[_obk]];
+          if (typeof _obv === 'string' && _obv.length > 0 && _obKeys[_obk] !== 'brandName' && _obKeys[_obk].indexOf('_brandIdx') === -1) {
+            outboxBody = _obv;
+            break;
+          }
         }
       }
     }
-    // Auto-extract email addresses from all previous step outputs if To is empty
+    // Auto-extract email addresses from the referenced step output first, then all outputs
     if (!outboxTo && context) {
       var _emailRegex = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+      // v29.x: Check the specific body content first for email extraction
+      var _sourceTexts = [];
+      if (outboxBody) _sourceTexts.push(outboxBody);
       var _ctxKeys = Object.keys(context);
       for (var _ei = 0; _ei < _ctxKeys.length; _ei++) {
         var _ctxVal = context[_ctxKeys[_ei]];
         if (typeof _ctxVal === 'string' && _ctxKeys[_ei] !== 'brandName') {
-          var _foundEmails = _ctxVal.match(_emailRegex);
-          if (_foundEmails && _foundEmails.length > 0) {
-            // Filter out common non-person emails
-            var _filtered = _foundEmails.filter(function(em) {
-              var lower = em.toLowerCase();
-              return lower.indexOf('noreply') === -1 && lower.indexOf('no-reply') === -1 && lower.indexOf('example.com') === -1 && lower.indexOf('test@') === -1;
-            });
-            if (_filtered.length > 0) {
-              outboxTo = _filtered[0];
-              break;
-            }
+          _sourceTexts.push(_ctxVal);
+        }
+      }
+      for (var _si = 0; _si < _sourceTexts.length; _si++) {
+        var _foundEmails = _sourceTexts[_si].match(_emailRegex);
+        if (_foundEmails && _foundEmails.length > 0) {
+          var _filtered = _foundEmails.filter(function(em) {
+            var lower = em.toLowerCase();
+            return lower.indexOf('noreply') === -1 && lower.indexOf('no-reply') === -1 && lower.indexOf('example.com') === -1 && lower.indexOf('test@') === -1;
+          });
+          if (_filtered.length > 0) {
+            outboxTo = _filtered[0];
+            break;
           }
         }
       }
@@ -4245,7 +4269,9 @@ function executeWorkflowStep(step, context) {
       var _obAccent = '#a89878';
       try { _obAccent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
       var _obLogo = '';
-      try { var _obLogoEl = document.querySelector('.brand-logo-img'); if (_obLogoEl) _obLogo = _obLogoEl.src; } catch(e) {}
+      var _obBrandIdx = (context && context._brandIdx !== undefined) ? context._brandIdx : (typeof selectedBrand !== 'undefined' ? selectedBrand : 0);
+      try { _obLogo = localStorage.getItem('roweos_brand_' + _obBrandIdx + '_logo') || ''; } catch(e) {}
+      if (!_obLogo) { try { var _obLogoEl = document.querySelector('.brand-logo-img'); if (_obLogoEl) _obLogo = _obLogoEl.src; } catch(e) {} }
       window._studioEmailContext = {
         contentHtml: '<div style="font-size:15px;line-height:1.7;">' + _obRendered + '</div>',
         brandName: _obBrand,
@@ -4476,7 +4502,8 @@ function executeWorkflowStep(step, context) {
 
   // v22.8: Deep Research step
   if (action === 'research') {
-    var researchQuery = resolveTemplateVars(target.researchQuery || '', context);
+    // v29.0: Fall back to contextRef/text if researchQuery not set (AI may use any field)
+    var researchQuery = resolveTemplateVars(target.researchQuery || target.contextRef || target.text || '', context);
     if (!researchQuery) {
       return Promise.reject(new Error('Research step failed: No query'));
     }

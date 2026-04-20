@@ -16,10 +16,10 @@ var liquidNavTabs = {
     label: 'Studio',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'
   },
-  signal: {
-    id: 'signal',
-    label: 'Focus',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'
+  scribe: {
+    id: 'scribe',
+    label: 'Scribe',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>'
   },
   rhythm: {
     id: 'rhythm',
@@ -67,7 +67,7 @@ var liquidNavTabs = {
 var liquidGridViews = {
   agent: { label: 'Chat', lifeLabel: 'LifeAI', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>', section: 'Core' },
   studio: { label: 'Studio', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>', section: 'Core' },
-  signal: { label: 'Focus', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>', section: 'Core' },
+  scribe: { label: 'Scribe', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>', section: 'Core' },
   pulse: { label: 'Pulse', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>', section: 'Core' },
   rhythm: { label: 'Rhythm', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>', section: 'Orchestration' },
   library: { label: 'Library', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>', section: 'Orchestration' },
@@ -83,7 +83,7 @@ var liquidGridViews = {
 };
 
 // v15.43: Default nav tabs — 4 primary, no more 'more'
-var defaultLiquidNavTabs = ['agent', 'studio', 'signal', 'pulse'];
+var defaultLiquidNavTabs = ['agent', 'studio', 'scribe', 'pulse']; // v29.1: Replaced signal (Focus retired v28.8) with scribe
 
 // Get user's selected tabs from localStorage or use defaults
 // v15.43: Max 4 tabs, auto-migrate old configs with 'more'
@@ -94,6 +94,8 @@ function getLiquidNavTabs() {
       var tabs = JSON.parse(saved);
       if (Array.isArray(tabs) && tabs.length >= 3) {
         // v15.43: Remove 'more' — FAB replaces it
+        // v29.1: Replace 'signal' (Focus retired) with 'scribe'
+        tabs = tabs.map(function(t) { return t === 'signal' ? 'scribe' : t; });
         tabs = tabs.filter(function(t) { return t !== 'more'; });
         // Cap at 4
         if (tabs.length > 4) tabs = tabs.slice(0, 4);
@@ -1174,7 +1176,7 @@ function handleSwipe() {
 
 // v12.2.4: Mobile Navigation Preference
 function getMobileNavPreference() {
-  return localStorage.getItem('roweos_mobile_nav') || 'both';
+  return localStorage.getItem('roweos_mobile_nav') || 'sidebar'; // v29.1: Default to sidebar-only (no liquid-nav)
 }
 
 function changeMobileNavPreference(value) {

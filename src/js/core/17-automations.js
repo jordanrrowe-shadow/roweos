@@ -1451,6 +1451,10 @@ function renderAutoLabWorkflows() {
   }
 
   el.innerHTML = html;
+
+  // v29.x: Restore pulsing glow on active step dots for running pipelines
+  // Use requestAnimationFrame to ensure DOM is painted before querying dots
+  requestAnimationFrame(function() { restoreRunningStepDots(); });
 }
 
 // v22.46: Drag-and-drop for automation/pipeline cards on main grid
@@ -2400,7 +2404,9 @@ function buildAutoAgentSystemPrompt() {
     '13. If the request is unclear, ask a clarifying question instead of guessing.\n' +
     '14. After showing the automation, tell the user they can click "Add" to save it or ask you to modify it.\n' +
     '15. ALWAYS wrap the JSON in ```automation and ``` markers (not ```json).\n' +
-    '16. For email steps, if no recipient specified, leave emailTo empty and note the user should fill it in.';
+    '16. For email steps, if no recipient specified, leave emailTo empty and note the user should fill it in.\n' +
+    '16b. For outbox steps, ALWAYS set target.contentRef to reference the specific studio step output (e.g., "{{step3_content}}"). This is critical when a pipeline has multiple studio+outbox pairs — each outbox must reference its own studio step, not just the last one.\n' +
+    '17. NEVER suggest or mention integrations that do not exist in RoweOS. There is NO Slack, Discord, Zapier, webhook, or SMS integration. Only suggest capabilities from the available step types listed above.';
 }
 
 function buildAutoAgentApiMessages() {
@@ -2735,11 +2741,16 @@ function addAutoAgentAutomation(cardId) {
         stepConfig.includeImage = 'custom';
         stepConfig._hasUserImage = true;
       }
-      // v28.4: For research steps, ensure contextRef maps to researchQuery (AI may use either)
+      // v28.4/v29.0: For research steps, ensure main query maps to researchQuery (AI may use text, contextRef, or researchQuery)
       var stepTarget = s.target || {};
-      if (s.action === 'research' && !stepTarget.researchQuery && stepTarget.contextRef) {
-        stepTarget.researchQuery = stepTarget.contextRef;
-        delete stepTarget.contextRef;
+      if (s.action === 'research' && !stepTarget.researchQuery) {
+        if (stepTarget.contextRef) {
+          stepTarget.researchQuery = stepTarget.contextRef;
+          delete stepTarget.contextRef;
+        } else if (stepTarget.text) {
+          stepTarget.researchQuery = stepTarget.text;
+          delete stepTarget.text;
+        }
       }
       return {
         stepId: s.stepId || 1,
@@ -2845,11 +2856,16 @@ function editAutoAgentAutomation(cardId) {
       if (!s.target) s.target = {};
       s.target.uploadedImage = userImage;
     }
-    // v28.4: For research steps, map contextRef to researchQuery for correct field routing
+    // v28.4/v29.0: For research steps, map to researchQuery (AI may use text, contextRef, or researchQuery)
     var editTarget = s.target || {};
-    if ((s.action || 'studio') === 'research' && !editTarget.researchQuery && editTarget.contextRef) {
-      editTarget.researchQuery = editTarget.contextRef;
-      delete editTarget.contextRef;
+    if ((s.action || 'studio') === 'research' && !editTarget.researchQuery) {
+      if (editTarget.contextRef) {
+        editTarget.researchQuery = editTarget.contextRef;
+        delete editTarget.contextRef;
+      } else if (editTarget.text) {
+        editTarget.researchQuery = editTarget.text;
+        delete editTarget.text;
+      }
     }
     return {
       stepId: s.stepId || (idx + 1),
@@ -2863,9 +2879,32 @@ function editAutoAgentAutomation(cardId) {
 
   showAutoLabTab('workflows');
   setTimeout(function() {
-    // v24.4: Use showPipelineBuilder without editId — it resets _pipelineSteps to default
-    // Instead, render the form directly and then set our steps
-    renderPipelineForm(null, null);
+    // v29.0: Save temp pipeline to localStorage BEFORE opening builder so editId is set
+    // This prevents duplication on save (was calling renderPipelineForm(null, null) which always created new)
+    var tempId = Date.now();
+    var tempPipeline = {
+      id: tempId,
+      name: data.name || 'Chat Pipeline',
+      type: 'pipeline',
+      action: 'pipeline',
+      scheduledDate: '',
+      time: '09:00',
+      recurType: 'none',
+      enabled: true,
+      mode: typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand',
+      brandIdx: typeof selectedBrand !== 'undefined' ? selectedBrand : 0,
+      steps: _pipelineSteps,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      source: 'chat'
+    };
+    var _tempAutos = [];
+    try { _tempAutos = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(e) {}
+    _tempAutos.push(tempPipeline);
+    try { localStorage.setItem('roweos_automations', JSON.stringify(_tempAutos)); } catch(e) {}
+
+    // Open builder with editId so Save updates instead of duplicates
+    showPipelineBuilder(tempId);
     var nameEl = document.getElementById('pipelineName');
     if (nameEl) nameEl.value = data.name || '';
     var descEl = document.getElementById('pipelineDescription');
@@ -5859,10 +5898,15 @@ function createAutomationFromChat(cardIndex) {
           if (s.target.goalId) stepTarget.goalId = s.target.goalId;
           if (s.target.imageRef) stepTarget.imageRef = s.target.imageRef;
         }
-        // v28.4: For research steps, map contextRef to researchQuery if researchQuery is missing
-        if ((s.action || 'studio') === 'research' && !stepTarget.researchQuery && stepTarget.contextRef) {
-          stepTarget.researchQuery = stepTarget.contextRef;
-          delete stepTarget.contextRef;
+        // v28.4/v29.0: For research steps, map to researchQuery if missing (AI may use text or contextRef)
+        if ((s.action || 'studio') === 'research' && !stepTarget.researchQuery) {
+          if (stepTarget.contextRef) {
+            stepTarget.researchQuery = stepTarget.contextRef;
+            delete stepTarget.contextRef;
+          } else if (stepTarget.text) {
+            stepTarget.researchQuery = stepTarget.text;
+            delete stepTarget.text;
+          }
         }
         steps.push({
           stepId: i + 1,
@@ -6332,14 +6376,27 @@ function saveAutoLabWorkflow() {
     updatedAt: new Date().toISOString()
   };
 
+  // v29.0: Preserve original createdAt when editing (matches savePipeline v24.6 fix)
+  if (editId) {
+    try {
+      var _origAutos = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+      var _orig = _origAutos.find(function(a) { return String(a.id) === String(editId); });
+      if (_orig && _orig.createdAt) automation.createdAt = _orig.createdAt;
+    } catch(e) {}
+  }
+
   // Save to roweos_automations
   var automations = [];
   try { automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(e) { console.warn('[Automations] Parse error:', e.message); }
   if (editId) {
+    // v29.0: Use found flag pattern (matches savePipeline) — more reliable than map+some
     var idStr = String(editId);
-    automations = automations.map(function(a) { return String(a.id) === idStr ? automation : a; });
-    // If not found (was only in scheduled), add it
-    if (!automations.some(function(a) { return String(a.id) === idStr; })) automations.push(automation);
+    var found = false;
+    automations = automations.map(function(a) {
+      if (String(a.id) === idStr) { found = true; return automation; }
+      return a;
+    });
+    if (!found) automations.push(automation);
   } else {
     automations.push(automation);
   }
@@ -6394,9 +6451,14 @@ function saveAutoLabWorkflow() {
 
 // v21.13: Persistent deletion guard — survives page refresh, prevents zombie restoration
 // v22.8: Extended expiry from 48h to 30 days
-// v25.0: DEPRECATED -- _deletedAutomationIds tombstone tracking removed (write-through handles deletions)
+// v28.7: Restored tombstone persistence — write-through alone can't prevent zombie
+// restoration because cloud scheduler writes lastRun back to the doc, and sync inventory
+// reads the subcollection raw. Tombstones must survive page refresh.
 var _deletedAutomationIds = {};
-function _persistDeletedIds() { /* v25.0: no-op */ }
+try { _deletedAutomationIds = JSON.parse(localStorage.getItem('roweos_deleted_automation_ids') || '{}'); } catch(e) {}
+function _persistDeletedIds() {
+  try { localStorage.setItem('roweos_deleted_automation_ids', JSON.stringify(_deletedAutomationIds)); } catch(e) {}
+}
 
 // v22.32: Track running automation IDs globally so animation persists across tab switches
 // Map of id -> { type: 'standard'|'research'|'thinking', startTime: timestamp }
@@ -6433,8 +6495,8 @@ function _startRunningTimer() {
   }, 1000);
 }
 
-function markAutomationRunning(id, type) {
-  _runningAutomationIds[String(id)] = { type: type || 'standard', startTime: Date.now() };
+function markAutomationRunning(id, type, stepIndex) {
+  _runningAutomationIds[String(id)] = { type: type || 'standard', startTime: Date.now(), stepIndex: typeof stepIndex === 'number' ? stepIndex : -1 };
   _startRunningTimer();
   // v23.10: Update card button to show Stop
   _updateAutoCardStopBtn(id, true);
@@ -6462,6 +6524,34 @@ function markAutomationDone(id) {
 
 function isAutomationRunning(id) {
   return _runningAutomationIds[String(id)] || null;
+}
+
+// v29.x: Update which step is active for a running automation
+function updateRunningStepIndex(id, stepIndex) {
+  var info = _runningAutomationIds[String(id)];
+  if (info) info.stepIndex = stepIndex;
+}
+
+// v29.x: Restore step-dot-active glow on cards after re-render (tab switch, etc.)
+function restoreRunningStepDots() {
+  var keys = Object.keys(_runningAutomationIds);
+  console.log('[StepDots] restoreRunningStepDots called, running:', keys.length, JSON.stringify(_runningAutomationIds));
+  for (var k = 0; k < keys.length; k++) {
+    var info = _runningAutomationIds[keys[k]];
+    if (!info || info.stepIndex < 0) {
+      console.log('[StepDots] Skipping', keys[k], '- stepIndex:', info ? info.stepIndex : 'no info');
+      continue;
+    }
+    var cards = document.querySelectorAll('.auto-lab-card[data-auto-id="' + keys[k] + '"]');
+    console.log('[StepDots] ID:', keys[k], 'stepIndex:', info.stepIndex, 'cards found:', cards.length);
+    for (var c = 0; c < cards.length; c++) {
+      var dots = cards[c].querySelectorAll('.pipeline-step-dot');
+      console.log('[StepDots] Card', c, 'dots found:', dots.length, 'target dot:', dots[info.stepIndex] ? 'exists' : 'MISSING');
+      if (dots[info.stepIndex]) {
+        dots[info.stepIndex].classList.add('step-dot-active');
+      }
+    }
+  }
 }
 
 // v23.10: Stop automation — sets flag checked by workflow runner
@@ -6579,6 +6669,16 @@ function _cleanupDeletedFromFirestore() {
 function deleteAutoLabWorkflow(id) {
   if (!confirm('Delete this workflow?')) return;
   var idStr = String(id);
+
+  // v28.7: Track deletion in tombstone registry (prevents resurrection on sync)
+  if (typeof _deletedAutomationIds !== 'undefined') {
+    _deletedAutomationIds[idStr] = Date.now();
+    _persistDeletedIds();
+    // Push tombstone to cloud immediately
+    if (typeof writeDB === 'function') {
+      writeDB('profile/deletedAutomationIds', { data: _deletedAutomationIds });
+    }
+  }
 
   // v25.1: Write-through delete — remove from localStorage + Firestore immediately
   var automations = [];
@@ -6861,7 +6961,7 @@ function updateAutoLabAgentModels(preselect) {
   var modelsByProvider = {
     gemini: ['gemini-3-flash-preview', 'gemini-3.1-pro-preview'],
     nanobanana: ['gemini-2.5-flash-image', 'gemini-3-pro-image-preview', 'gemini-2.0-flash-exp-image-generation'],
-    anthropic: ['claude-sonnet-4-6', 'claude-haiku-4-20250514', 'claude-opus-4-6'],
+    anthropic: ['claude-sonnet-4-6', 'claude-haiku-4-20250514', 'claude-opus-4-7'],
     openai: ['gpt-5.4', 'gpt-5.4-pro', 'gpt-5.4-thinking']
   };
   var models = modelsByProvider[provider] || modelsByProvider.gemini;

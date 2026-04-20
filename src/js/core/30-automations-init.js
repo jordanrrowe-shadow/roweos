@@ -944,7 +944,7 @@ var MODEL_TIERS = {
     label: 'Pro Only',
     desc: 'Highest-tier models only',
     models: {
-      anthropic: ['claude-opus-4-6', 'claude-sonnet-4-6'],
+      anthropic: ['claude-opus-4-7', 'claude-sonnet-4-6'],
       openai: ['gpt-5.4-pro', 'gpt-5.4', 'gpt-5.4-thinking'],
       google: ['gemini-3.1-pro-preview']
     }
@@ -953,7 +953,7 @@ var MODEL_TIERS = {
     label: 'Balanced',
     desc: 'Pro for complex, standard for simple',
     models: {
-      anthropic: ['claude-sonnet-4-6', 'claude-opus-4-6', 'claude-haiku-4-5-20251001'],
+      anthropic: ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001'],
       openai: ['gpt-5.4', 'gpt-5.4-pro', 'gpt-5.4-thinking'],
       google: ['gemini-3.1-pro-preview', 'gemini-3-flash-preview']
     }
@@ -2415,13 +2415,22 @@ function addCompletedAutomation(task, success) {
   if (typeof updateSidebarBadges === 'function') updateSidebarBadges(); // v24.13
   // v15.3: Toast notification when automation completes
   // v25.1: Clickable toast — click to view result modal
+  // v28.7: Deduplicate — skip if a toast with the same message already exists
+  var _a1Msg = (success ? 'Automation completed: ' : 'Automation failed: ') + escapeHtml(task.name || 'Unknown');
+  var _a1Existing = document.getElementById('toastContainer');
+  if (_a1Existing) {
+    var _a1Dupes = _a1Existing.querySelectorAll('.toast-message');
+    for (var _a1i = 0; _a1i < _a1Dupes.length; _a1i++) {
+      if (_a1Dupes[_a1i].textContent === _a1Msg) return; // already showing this toast
+    }
+  }
   if (success) {
     var _a1TaskId = task.id;
     var _a1El = document.createElement('div');
     _a1El.className = 'toast success show';
     _a1El.style.cssText = 'cursor:pointer;';
     _a1El.innerHTML = '<svg class="toast-icon" style="color:var(--success);" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none"/></svg>' +
-      '<div class="toast-content"><div class="toast-message">Automation completed: ' + escapeHtml(task.name || 'Unknown') + '</div>' +
+      '<div class="toast-content"><div class="toast-message">' + _a1Msg + '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">Tap to view result</div></div>';
     _a1El.onclick = function() {
       _a1El.remove();
@@ -2437,7 +2446,7 @@ function addCompletedAutomation(task, success) {
     _a1FailEl.className = 'toast error show';
     _a1FailEl.style.cssText = 'cursor:pointer;';
     _a1FailEl.innerHTML = '<svg class="toast-icon" style="color:var(--error);" viewBox="0 0 24 24"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none"/></svg>' +
-      '<div class="toast-content"><div class="toast-message">Automation failed: ' + escapeHtml(task.name || 'Unknown') + '</div>' +
+      '<div class="toast-content"><div class="toast-message">' + _a1Msg + '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">Tap to view error</div></div>';
     _a1FailEl.onclick = function() {
       _a1FailEl.remove();
@@ -3300,7 +3309,8 @@ async function executeScheduledTask(task, idx) {
         var accent = '#a89878';
         try { accent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
         var logo = '';
-        try { var logoEl = document.querySelector('.brand-logo-img'); if (logoEl) logo = logoEl.src; } catch(e) {}
+        try { logo = localStorage.getItem('roweos_brand_' + brandIdx + '_logo') || ''; } catch(e) {}
+        if (!logo) { try { var logoEl = document.querySelector('.brand-logo-img'); if (logoEl) logo = logoEl.src; } catch(e) {} }
         window._studioEmailContext = {
           contentHtml: '<div style="font-size:15px;line-height:1.7;white-space:pre-wrap;">' + escapeHtml(emailBody).replace(/\n/g, '<br>') + '</div>',
           brandName: brandName,

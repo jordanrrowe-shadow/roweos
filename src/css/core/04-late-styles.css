@@ -212,6 +212,7 @@
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  align-items: center;
   margin: 16px 0 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border-color);
@@ -244,12 +245,67 @@
 .pill-nav-item.secondary {
   font-size: 12px;
   color: var(--text-tertiary);
-  border-color: var(--bg-tertiary);
+  border-color: rgba(255,255,255,0.06);
+  background: transparent;
+}
+.pill-nav-item.secondary.active {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
 }
 .pill-nav-item.secondary:hover {
   border-color: var(--accent);
   color: var(--text-secondary);
 }
+/* v28.9: Studio Action Bar Buttons */
+.studio-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.studio-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+.studio-action-btn.active {
+  border-color: var(--accent);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+html.light-mode .studio-action-btn {
+  border-color: rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.5);
+}
+html.light-mode .studio-action-btn:hover,
+html.light-mode .studio-action-btn.active {
+  border-color: var(--accent);
+  color: rgba(0,0,0,0.8);
+}
+/* v28.9: AI Generate glow animation */
+.studio-action-btn.studio-ai-generating {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(168,152,120,0.4), 0 0 24px rgba(168,152,120,0.2);
+  animation: studio-ai-glow 1.5s ease-in-out infinite;
+}
+@keyframes studio-ai-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(168,152,120,0.3); }
+  50% { box-shadow: 0 0 20px rgba(168,152,120,0.6), 0 0 40px rgba(168,152,120,0.2); }
+}
+@keyframes studio-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.studio-spin { animation: studio-spin 1s linear infinite; }
 @media (max-width: 768px) {
   .pill-nav {
     flex-wrap: nowrap;

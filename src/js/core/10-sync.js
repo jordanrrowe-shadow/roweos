@@ -1653,6 +1653,8 @@ function loadBrands() {
 
       // v28.1: Resolve selectedBrand by stable brand ID (survives reorder)
       var _savedBrandId = localStorage.getItem('roweos_selected_brand_id');
+      // v28.6: Fall back to primary brand if no selected brand saved on this device
+      if (!_savedBrandId) _savedBrandId = localStorage.getItem('roweos_primary_brand_id');
       if (_savedBrandId && brands.length > 0) {
         var _resolvedIdx = -1;
         for (var _ri = 0; _ri < brands.length; _ri++) {
@@ -2563,10 +2565,9 @@ function saveToLocalStorage(key, value) {
       // Brands array - save to roweosBrands
       localStorage.setItem(USER_DATA_KEYS.brands, JSON.stringify(value));
     } else if (key.startsWith('brand_')) {
-      // Individual brand memory - save to roweos_brand_memory
-      var brandIdx = parseInt(key.replace('brand_', ''));
+      // Individual brand memory - save to roweos_brand_memory using brand key directly
       var brandMemory = JSON.parse(localStorage.getItem('roweos_brand_memory') || '{}');
-      brandMemory[brandIdx] = value;
+      brandMemory[key] = value;
       localStorage.setItem('roweos_brand_memory', JSON.stringify(brandMemory));
     } else if (key.startsWith('model_')) {
       // Model configuration - save to roweos_brand_settings

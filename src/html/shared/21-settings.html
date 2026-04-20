@@ -69,34 +69,8 @@
             </div>
           </div>
 
-            <!-- v26.2: Dark/Light Mode Logos -->
-            <div class="logo-upload-section">
-              <div class="settings-row-label">Brand Logo</div>
-              <div class="settings-row-desc" style="margin-bottom:var(--space-2);">Upload logos for dark and light mode themes</div>
-              <label style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-3);cursor:pointer;">
-                <input type="checkbox" id="logoSameForBoth" onchange="toggleLogoSameMode()" checked>
-                <span style="font-size:12px;color:var(--text-secondary);">Use same logo for both modes</span>
-              </label>
-              <div class="logo-upload-slots" id="logoUploadSlots">
-                <div class="logo-upload-slot">
-                  <div class="logo-upload-slot-label">Dark Mode</div>
-                  <div class="logo-upload-preview" id="logoDarkPreview">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                  </div>
-                  <button class="logo-upload-btn" onclick="uploadBrandLogo('dark')">Upload</button>
-                  <button class="logo-upload-btn" onclick="removeBrandLogo('dark')" style="color:var(--text-muted);">Remove</button>
-                </div>
-                <div class="logo-upload-slot" id="logoLightSlot" style="display:none;">
-                  <div class="logo-upload-slot-label">Light Mode</div>
-                  <div class="logo-upload-preview" id="logoLightPreview">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                  </div>
-                  <button class="logo-upload-btn" onclick="uploadBrandLogo('light')">Upload</button>
-                  <button class="logo-upload-btn" onclick="removeBrandLogo('light')" style="color:var(--text-muted);">Remove</button>
-                </div>
-              </div>
-              <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml" style="display:none;" onchange="handleLogoFileSelect(event)">
-            </div>
+            <!-- v29.1: Dark/Light Mode Logos — consolidated into renderBrandLogoPicker -->
+            <!-- (removed duplicate standalone section; dark/light toggle now renders inside the logo picker) -->
 
           <!-- Appearance Section -->
           <div class="settings-section">
@@ -872,6 +846,81 @@
               </div>
             </div>
             <div id="calendarListContainer" style="padding: 0 var(--space-3) var(--space-2);"></div>
+          </div>
+
+          <!-- v28.7: Google Drive Integration Section -->
+          <div class="settings-section">
+            <div class="settings-section-title">Google Drive</div>
+
+            <!-- Connect/Disconnect -->
+            <div class="settings-row">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M12 2L2 19h20L12 2z" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+                  <path d="M7.5 19l4.5-8 4.5 8" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+                  <path d="M9.5 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Google Drive</div>
+                  <div class="settings-row-desc" id="gdriveConnStatus">Not connected</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <button class="btn btn-small" id="gdriveConnectBtn" onclick="connectGoogleDrive()">Connect</button>
+              </div>
+            </div>
+
+            <!-- Auto-Sync Toggle (hidden until connected) -->
+            <div class="settings-row" id="gdriveAutoSyncRow" style="display: none;">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M23 4v6h-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M1 20v-6h6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Auto-Sync Library to Drive</div>
+                  <div class="settings-row-desc" id="gdriveAutoSyncDesc">Mirrors Library saves to roweOS/ folder</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="gdriveAutoSyncToggle" onchange="toggleGDriveAutoSync(this.checked)">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Default Format (hidden until auto-sync enabled) -->
+            <div class="settings-row" id="gdriveFormatRow" style="display: none;">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Default Format</div>
+                  <div class="settings-row-desc" id="gdriveFormatDesc">PDF</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <button class="btn btn-small btn-secondary" onclick="openGDriveFormatPicker()">Change</button>
+              </div>
+            </div>
+
+            <!-- Last Sync (hidden until auto-sync enabled) -->
+            <div class="settings-row" id="gdriveSyncStatusRow" style="display: none;">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Last Synced</div>
+                  <div class="settings-row-desc" id="gdriveLastSync">Never</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- v17.0: Social Media Accounts -->

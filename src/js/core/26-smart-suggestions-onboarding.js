@@ -3100,44 +3100,61 @@ function saveWebSearchResults() {
     var brandIdx = (typeof selectedBrand !== 'undefined' && selectedBrand >= 0) ? selectedBrand : parseInt(localStorage.getItem('roweos_selected_brand') || '0');
     var brand = (typeof brands !== 'undefined' && brands[brandIdx]) ? brands[brandIdx] : null;
 
-    // If no brand exists yet (web search path skips completeBrandSetup), create one
+    // v29.1: If brand not found at selectedBrand index, search by name before creating
     if (!brand) {
       var brandName = state.brandName || localStorage.getItem('roweos_brand_name') || 'My Brand';
-      var selectedProvider = (typeof onboardingSelectedProvider !== 'undefined' && onboardingSelectedProvider) ? onboardingSelectedProvider : 'anthropic';
-      var providerModels = { anthropic: 'claude-sonnet-4-6', openai: 'gpt-5.4', google: 'gemini-3.1-pro-preview' };
-      brand = {
-        id: 'brand_' + Date.now(),
-        _modifiedAt: Date.now(),
-        _createdAt: Date.now(),
-        name: brandName,
-        tagline: '',
-        voice: 'professional, warm, thoughtful',
-        positioning: '',
-        products: '',
-        audience: '',
-        location: '',
-        website: state.url || '',
-        vocabDo: '',
-        vocabDont: '',
-        mission: '',
-        brandColor: '#a89878',
-        brandColorLight: '#a89878',
-        importMethod: 'web-search',
-        identityData: {}
-      };
+      // Search for existing brand by name (quick-add may have created it already)
       if (typeof brands !== 'undefined') {
-        brands.push(brand);
-        brandIdx = brands.length - 1;
-        selectedBrand = brandIdx;
-        try { localStorage.setItem('roweos_selected_brand', String(brandIdx)); } catch(e) {}
-        if (typeof brandSettings !== 'undefined') {
-          brandSettings[brandIdx] = { provider: selectedProvider, model: providerModels[selectedProvider] || 'claude-sonnet-4-6' };
-          try { localStorage.setItem(USER_DATA_KEYS.brandSettings, JSON.stringify(brandSettings)); } catch(e) {}
+        for (var _sbi = 0; _sbi < brands.length; _sbi++) {
+          if ((brands[_sbi].name || '').toLowerCase() === brandName.toLowerCase()) {
+            brand = brands[_sbi];
+            brandIdx = _sbi;
+            selectedBrand = brandIdx;
+            try { localStorage.setItem('roweos_selected_brand', String(brandIdx)); } catch(e) {}
+            console.log('[saveWebSearchResults] v29.1: Found existing brand "' + brandName + '" at index', brandIdx);
+            break;
+          }
         }
       }
-      // Merge ownership data if available
-      if (window.onboardingOwnershipData) {
-        brand.identityData.role = window.onboardingOwnershipData;
+
+      // Only create if truly doesn't exist anywhere
+      if (!brand) {
+        var selectedProvider = (typeof onboardingSelectedProvider !== 'undefined' && onboardingSelectedProvider) ? onboardingSelectedProvider : 'anthropic';
+        var providerModels = { anthropic: 'claude-sonnet-4-6', openai: 'gpt-5.4', google: 'gemini-3.1-pro-preview' };
+        brand = {
+          id: 'brand_' + Date.now(),
+          _modifiedAt: Date.now(),
+          _createdAt: Date.now(),
+          name: brandName,
+          tagline: '',
+          voice: 'professional, warm, thoughtful',
+          positioning: '',
+          products: '',
+          audience: '',
+          location: '',
+          website: state.url || '',
+          vocabDo: '',
+          vocabDont: '',
+          mission: '',
+          brandColor: '#a89878',
+          brandColorLight: '#a89878',
+          importMethod: 'web-search',
+          identityData: {}
+        };
+        if (typeof brands !== 'undefined') {
+          brands.push(brand);
+          brandIdx = brands.length - 1;
+          selectedBrand = brandIdx;
+          try { localStorage.setItem('roweos_selected_brand', String(brandIdx)); } catch(e) {}
+          if (typeof brandSettings !== 'undefined') {
+            brandSettings[brandIdx] = { provider: selectedProvider, model: providerModels[selectedProvider] || 'claude-sonnet-4-6' };
+            try { localStorage.setItem(USER_DATA_KEYS.brandSettings, JSON.stringify(brandSettings)); } catch(e) {}
+          }
+        }
+        // Merge ownership data if available
+        if (window.onboardingOwnershipData) {
+          brand.identityData.role = window.onboardingOwnershipData;
+        }
       }
     }
 
@@ -4040,11 +4057,28 @@ function generateBrandFromTemplate() {
     contacts: contact || ''
   };
   
-  // Add brand to array
-  brands.push(newBrand);
-  var newBrandIdx = brands.length - 1;
+  // v29.1: Check if brand already exists (prevent duplicate from quick-add + template)
+  var _tmplExistIdx = -1;
+  for (var _tei = 0; _tei < brands.length; _tei++) {
+    if ((brands[_tei].name || '').toLowerCase() === brandName.toLowerCase()) {
+      _tmplExistIdx = _tei;
+      break;
+    }
+  }
+
+  var newBrandIdx;
+  if (_tmplExistIdx >= 0) {
+    console.log('[Template] v29.1: Updating existing brand at index', _tmplExistIdx, 'instead of creating duplicate');
+    newBrand.id = brands[_tmplExistIdx].id;
+    newBrand._createdAt = brands[_tmplExistIdx]._createdAt || newBrand._createdAt;
+    brands[_tmplExistIdx] = newBrand;
+    newBrandIdx = _tmplExistIdx;
+  } else {
+    brands.push(newBrand);
+    newBrandIdx = brands.length - 1;
+  }
   selectedBrandIdx = newBrandIdx;
-  
+
   localStorage.setItem(USER_DATA_KEYS.brands, JSON.stringify(brands));
   console.log('[Template] Brand saved, total brands:', brands.length);
   

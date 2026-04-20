@@ -106,6 +106,12 @@
       <!-- v22.9: Free beta CTA -->
       <a href="/info" class="launch-beta-link" style="display:inline-block;margin-top:16px;padding:4px 14px;border:1px solid rgba(168,152,120,0.2);border-radius:6px;color:rgba(168,152,120,0.6);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;text-decoration:none;font-weight:400;transition:all 0.3s ease;" onmouseover="this.style.borderColor='rgba(168,152,120,0.5)';this.style.background='rgba(168,152,120,0.06)'" onmouseout="this.style.borderColor='rgba(168,152,120,0.2)';this.style.background='transparent'">Early Access</a>
 
+      <!-- v28.9: Google for Startups badge -->
+      <div style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 16px;border:1px solid rgba(168,152,120,0.25);border-radius:20px;">
+        <img src="/images/promo/google-for-startups.png" style="height:16px;width:auto;opacity:0.7;" alt="Google for Startups">
+        <span style="font-size:9px;color:rgba(168,152,120,0.6);letter-spacing:1.2px;text-transform:uppercase;">Cloud Program</span>
+      </div>
+
       <!-- v10.5.25: Version indicator -->
       <div class="launch-version" id="launchVersionTag">v24.26</div>
     </div>
@@ -150,7 +156,7 @@
           <optgroup label="Anthropic, Claude">
             <option value="anthropic|claude-sonnet-4-6|Sonnet 4.6">Sonnet 4.6</option>
             <option value="anthropic|claude-haiku-4-5-20251001|Haiku 4.5">Haiku 4.5</option>
-            <option value="anthropic|claude-opus-4-6|Opus 4.6">Opus 4.6</option>
+            <option value="anthropic|claude-opus-4-7|Opus 4.7">Opus 4.7</option>
           </optgroup>
           <optgroup label="OpenAI, ChatGPT">
             <option value="openai|gpt-5.4|GPT-5.4">GPT-5.4</option>
@@ -488,7 +494,7 @@
       </div>
       
       <!-- Mobile Version Display -->
-      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v28.5</div>
+      <div class="mobile-version" id="mobileVersionDisplay">RoweOS v29.1</div>
       
     </div>
   </div>
@@ -881,20 +887,70 @@
     </div>
   </div>
   <div class="save-library-modal" id="saveLibraryModal">
-    <div class="save-library-dialog">
-      <div class="save-library-title">Save to Library</div>
-      <input type="text" class="save-library-input" id="saveFileName" placeholder="Enter file name...">
-      <div style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-2); display: flex; justify-content: space-between; align-items: center;">
-        <span>Select a folder:</span>
-        <button onclick="createNewFolderInSaveModal()" style="background: none; border: none; color: var(--accent); font-size: var(--text-sm); cursor: pointer; display: flex; align-items: center; gap: var(--space-1);">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-          New Folder
-        </button>
+    <div class="save-library-dialog" style="width: 440px;">
+      <!-- v28.7: Save destination tabs -->
+      <div class="save-modal-tabs" id="saveModalTabs">
+        <button class="save-modal-tab active" data-tab="library" onclick="switchSaveTab('library')">Library</button>
+        <button class="save-modal-tab" data-tab="folio" onclick="switchSaveTab('folio')">Folio</button>
+        <button class="save-modal-tab" data-tab="gdrive" onclick="switchSaveTab('gdrive')" id="saveTabGDrive" style="display:none;">Google Drive</button>
       </div>
-      <div class="save-library-folders" id="saveFolderList"></div>
-      <div class="save-library-actions">
-        <button class="btn btn-secondary" onclick="closeSaveLibraryModal()">Cancel</button>
-        <button class="btn" onclick="confirmSaveToLibrary()">Save</button>
+
+      <!-- Library Tab (existing content) -->
+      <div class="save-tab-content active" id="saveTabLibrary">
+        <input type="text" class="save-library-input" id="saveFileName" placeholder="Enter file name...">
+        <div style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-2); display: flex; justify-content: space-between; align-items: center;">
+          <span>Select a folder:</span>
+          <button onclick="createNewFolderInSaveModal()" style="background: none; border: none; color: var(--accent); font-size: var(--text-sm); cursor: pointer; display: flex; align-items: center; gap: var(--space-1);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New Folder
+          </button>
+        </div>
+        <div class="save-library-folders" id="saveFolderList"></div>
+        <div class="save-library-actions">
+          <button class="btn btn-secondary" onclick="closeSaveLibraryModal()">Cancel</button>
+          <button class="btn" onclick="confirmSaveToLibrary()">Save</button>
+        </div>
+      </div>
+
+      <!-- Folio Tab -->
+      <div class="save-tab-content" id="saveTabFolio">
+        <input type="text" class="save-library-input" id="saveFolioFileName" placeholder="Enter canvas name...">
+        <div style="font-size:var(--text-sm);color:var(--text-muted);margin-bottom:var(--space-4);">Saves as an interactive canvas in your Folio.</div>
+        <div class="save-library-actions">
+          <button class="btn btn-secondary" onclick="closeSaveLibraryModal()">Cancel</button>
+          <button class="btn" onclick="confirmSaveToFolioFromModal()">Save to Folio</button>
+        </div>
+      </div>
+
+      <!-- Google Drive Tab -->
+      <div class="save-tab-content" id="saveTabGDrive">
+        <input type="text" class="save-library-input" id="saveGDriveFileName" placeholder="Enter file name...">
+        <!-- Format Picker -->
+        <div style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-2);">Format:</div>
+        <div class="gdrive-save-formats" id="gdriveSaveFormats">
+          <button class="gdrive-fmt-pill active" data-fmt="pdf" onclick="selectGDriveSaveFmt(this)">PDF</button>
+          <button class="gdrive-fmt-pill" data-fmt="docx" onclick="selectGDriveSaveFmt(this)">DOCX</button>
+          <button class="gdrive-fmt-pill" data-fmt="txt" onclick="selectGDriveSaveFmt(this)">TXT</button>
+          <button class="gdrive-fmt-pill" data-fmt="html" onclick="selectGDriveSaveFmt(this)">HTML</button>
+        </div>
+        <!-- Folder Browser -->
+        <div style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-2); margin-top: var(--space-3); display: flex; justify-content: space-between; align-items: center;">
+          <span>Save to:</span>
+          <button onclick="gdriveCreateFolderInBrowser()" style="background: none; border: none; color: var(--accent); font-size: var(--text-sm); cursor: pointer; display: flex; align-items: center; gap: var(--space-1);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New Folder
+          </button>
+        </div>
+        <div class="gdrive-breadcrumb" id="gdriveSaveBreadcrumb">
+          <span class="gdrive-crumb" onclick="gdriveSaveBrowseFolder('root')">My Drive</span>
+        </div>
+        <div class="gdrive-folder-browser" id="gdriveFolderBrowser">
+          <div style="text-align:center;padding:var(--space-6);color:var(--text-muted);">Loading folders...</div>
+        </div>
+        <div class="save-library-actions">
+          <button class="btn btn-secondary" onclick="closeSaveLibraryModal()">Cancel</button>
+          <button class="btn" onclick="confirmSaveToGDrive()">Save to Drive</button>
+        </div>
       </div>
     </div>
   </div>

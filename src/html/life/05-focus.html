@@ -25,7 +25,7 @@
 
           <!-- Dashboard Content (existing widget grid) -->
           <div id="focusDashboardContent" class="active">
-            <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;"><span>Focus</span><span id="focus2CustomizeBtn" onclick="toggleFocus2Customize()" style="font-size: var(--text-sm); color: var(--text-muted); cursor: pointer; user-select: none; margin-left: auto; margin-right: 8px;">Customize</span><button class="section-help-btn" onclick="showSectionHelp('signal')" title="How to use Focus">?</button></div>
+            <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;justify-content:flex-start;"><span style="flex:1;">Focus</span><span id="focus2CustomizeBtn" onclick="toggleFocus2Customize()" style="font-size: var(--text-sm); color: var(--text-muted); cursor: pointer; user-select: none; margin-left: auto; margin-right: 8px;">Customize</span><button class="section-help-btn" onclick="showSectionHelp('signal')" title="How to use Focus">?</button></div>
 
           <!-- v10.5.25: Focus 2.0 - Unified Draggable Grid (all cards customizable) -->
           <div id="focus2Container" class="focus-2-unified-grid">
@@ -376,6 +376,10 @@
                     <select id="focus2TaskDetailBrand" onchange="updateFocus2TaskBrand()"></select>
                   </div>
                   <div class="focus-2-task-detail-row">
+                    <label>Assign To</label>
+                    <select id="focus2TaskDetailAssignee" onchange="updateFocus2TaskAssignee()"></select>
+                  </div>
+                  <div class="focus-2-task-detail-row">
                     <label>Due Date</label>
                     <input type="date" id="focus2TaskDetailDate" onchange="updateFocus2TaskDate()">
                   </div>
@@ -426,7 +430,8 @@
                     <textarea id="focus2TaskDetailNotes" placeholder="Additional notes..." onchange="updateFocus2TaskNotes()"></textarea>
                   </div>
                 </div>
-                <div class="focus-2-task-detail-footer">
+                <div class="focus-2-task-detail-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                  <button class="focus-2-btn focus-2-btn-pulse" id="focus2AddToPulseBtn" onclick="addFocusTaskToPulse(focus2CurrentTaskId)" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-secondary);">Add to Pulse</button>
                   <button class="focus-2-btn focus-2-btn-danger" onclick="deleteFocus2Task()">Delete Task</button>
                 </div>
               </div>

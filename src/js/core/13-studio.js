@@ -599,7 +599,7 @@ function handleNativeModelSelect(sel) {
   if (parts.length === 2) {
     var displayNames = {
       'auto': 'RoweOS AI', 'claude-sonnet-4-6': 'Sonnet 4.6', 'claude-haiku-4-20250514': 'Haiku 4.5',
-      'claude-opus-4-6': 'Opus 4.6', 'gpt-5.4': 'GPT-5.4', 'gpt-5.4-pro': 'GPT-5.4 Pro',
+      'claude-opus-4-7': 'Opus 4.7', 'gpt-5.4': 'GPT-5.4', 'gpt-5.4-pro': 'GPT-5.4 Pro',
       'gpt-5.4-thinking': 'GPT-5.4 Thinking', 'gemini-3.1-pro-preview': '3.1 Pro',
       'gemini-3-flash-preview': '3.0 Flash', 'gemini-3-pro-image-preview': 'Nano Banana Pro 3',
       'gemini-2.5-flash-image': 'Nano Banana 3.0', 'gemini-2.0-flash-exp-image-generation': 'Flash Image',
@@ -698,7 +698,7 @@ function showStudioModelActionSheet() {
       '<div class="studio-mobile-model-label">Anthropic</div>' +
       '<div class="studio-mobile-model-item' + (currentModel === 'claude-sonnet-4-6' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'anthropic\', \'claude-sonnet-4-6\', \'Sonnet 4.6\')">Sonnet 4.6</div>' +
       '<div class="studio-mobile-model-item' + (currentModel === 'claude-haiku-4-20250514' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'anthropic\', \'claude-haiku-4-20250514\', \'Haiku 4.5\')">Haiku 4.5</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'claude-opus-4-6' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'anthropic\', \'claude-opus-4-6\', \'Opus 4.6\')">Opus 4.6</div>' +
+      '<div class="studio-mobile-model-item' + (currentModel === 'claude-opus-4-7' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'anthropic\', \'claude-opus-4-7\', \'Opus 4.7\')">Opus 4.7</div>' +
     '</div>' +
     '<div class="studio-mobile-model-section">' +
       '<div class="studio-mobile-model-label">OpenAI</div>' +
@@ -1171,13 +1171,19 @@ async function generateBrandAIRecommendations() {
   var settings = brandSettings[studioSelectedBrand] || {};
   var provider = settings.provider || brand.provider || 'anthropic';
   var model = settings.model || brand.model || 'claude-sonnet-4-6';
+  // v28.8: Resolve 'roweos'/'auto' smart routing to actual provider/model
+  if (model === 'auto' || provider === 'roweos') {
+    var _resolved = (typeof resolveRoweOSAI === 'function') ? resolveRoweOSAI({ userMessage: 'brand strategy recommendations' }) : null;
+    if (_resolved) { provider = _resolved.provider; model = _resolved.model; }
+    else { provider = 'anthropic'; model = 'claude-sonnet-4-6'; }
+  }
   var apiKey = await getApiKey(provider);
-  
+
   if (!apiKey) {
     showToast('API key not configured', 'error');
     return;
   }
-  
+
   btn.classList.add('generating');
   btn.querySelector('span').textContent = 'Generating...';
   
@@ -1298,13 +1304,19 @@ async function createCustomBrandOperation() {
   // Get API key
   var provider = brand.provider || 'anthropic';
   var model = brand.model || 'claude-sonnet-4-6';
+  // v28.8: Resolve 'roweos'/'auto' smart routing to actual provider/model
+  if (model === 'auto' || provider === 'roweos') {
+    var _resolved = (typeof resolveRoweOSAI === 'function') ? resolveRoweOSAI({ userMessage: userRequest }) : null;
+    if (_resolved) { provider = _resolved.provider; model = _resolved.model; }
+    else { provider = 'anthropic'; model = 'claude-sonnet-4-6'; }
+  }
   var apiKey = await getApiKey(provider);
-  
+
   if (!apiKey) {
     showToast('API key not configured', 'error');
     return;
   }
-  
+
   if (btn) {
     btn.classList.add('creating');
     btn.disabled = true;
@@ -1783,6 +1795,90 @@ function toggleShowAllOps() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// v28.9: Studio Action Bar — expandable panels
+// ═══════════════════════════════════════════════════════════════
+
+var _studioExpanderActive = null;
+
+function toggleStudioExpander(type) {
+  var panel = document.getElementById('studioExpanderPanel');
+  if (!panel) return;
+
+  // Toggle off if same type clicked again
+  if (_studioExpanderActive === type) {
+    panel.style.display = 'none';
+    _studioExpanderActive = null;
+    // Remove active state from all buttons
+    var btns = document.querySelectorAll('.studio-action-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+    return;
+  }
+
+  _studioExpanderActive = type;
+  panel.style.display = 'block';
+
+  // Update active button state
+  var btns2 = document.querySelectorAll('.studio-action-btn');
+  for (var j = 0; j < btns2.length; j++) btns2[j].classList.remove('active');
+  // Find the clicked button by matching the type
+  var allBtns = document.querySelectorAll('.studio-action-btn');
+  var typeMap = ['search', 'recommend', 'generate', 'custom'];
+  for (var k = 0; k < allBtns.length && k < typeMap.length; k++) {
+    if (typeMap[k] === type) allBtns[k].classList.add('active');
+  }
+
+  var html = '';
+  if (type === 'search') {
+    html = '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>' +
+      '<input type="text" id="opsSearch" placeholder="Search operations..." oninput="searchOperations(this.value)" style="flex:1;padding:8px 12px;background:transparent;border:none;color:var(--text-primary);font-size:14px;outline:none;">' +
+    '</div>';
+  } else if (type === 'custom') {
+    html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+      '<span style="font-size:13px;font-weight:600;">Create Custom</span>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<input type="text" id="brandAICreatorInput" placeholder="Describe a specific operation to create..." onkeypress="if(event.key===\'Enter\'){createCustomBrandOperation();toggleStudioExpander(\'custom\');}" style="flex:1;padding:8px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-size:13px;">' +
+      '<button onclick="createCustomBrandOperation();toggleStudioExpander(\'custom\');" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;">Create</button>' +
+    '</div>';
+  }
+
+  panel.innerHTML = html;
+
+  // Auto-focus search input
+  if (type === 'search') {
+    var searchInput = document.getElementById('opsSearch');
+    if (searchInput) searchInput.focus();
+  }
+  if (type === 'custom') {
+    var customInput = document.getElementById('brandAICreatorInput');
+    if (customInput) customInput.focus();
+  }
+}
+
+// v28.9: AI Generate — runs generation with glow animation on button
+function runStudioAIGenerate(btn) {
+  if (!btn) return;
+  // Add glow animation
+  btn.classList.add('studio-ai-generating');
+  btn.disabled = true;
+  var origHTML = btn.innerHTML;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="studio-spin"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span>Generating...</span>';
+
+  // Call the actual generation function
+  if (typeof generateBrandAIRecommendations === 'function') {
+    generateBrandAIRecommendations();
+  }
+
+  // Restore button after a delay (generation is async, this is a visual indicator)
+  setTimeout(function() {
+    btn.innerHTML = origHTML;
+    btn.classList.remove('studio-ai-generating');
+    btn.disabled = false;
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
 // AGENT SELECTION v10.0
 // ═══════════════════════════════════════════════════════════════
 function selectAgent(agentId) {
@@ -1790,6 +1886,41 @@ function selectAgent(agentId) {
 
   // v26.2: Update unified pill nav
   updatePillNavActive('studioPillNav', agentId);
+
+  // v28.9: Image Chat and Blog show special panels instead of operations
+  var studioContent = document.getElementById('studioV2Content');
+  var studioMediaPanel = document.getElementById('studioMediaPanel');
+  // v28.9: Hide/show action bar based on panel type
+  var studioActionBar = document.getElementById('studioActionBar');
+  var studioExpander = document.getElementById('studioExpanderPanel');
+  if (agentId === 'imagechat' || agentId === 'videochat' || agentId === 'blog') {
+    // Hide normal operations + action bar, show media panel
+    if (studioContent) studioContent.style.display = 'none';
+    if (studioActionBar) studioActionBar.style.display = 'none';
+    if (studioExpander) studioExpander.style.display = 'none';
+    if (!studioMediaPanel) {
+      studioMediaPanel = document.createElement('div');
+      studioMediaPanel.id = 'studioMediaPanel';
+      studioMediaPanel.style.cssText = 'margin-top:var(--space-4);';
+      if (studioContent && studioContent.parentNode) {
+        studioContent.parentNode.insertBefore(studioMediaPanel, studioContent.nextSibling);
+      }
+    }
+    studioMediaPanel.style.display = 'block';
+    if (agentId === 'imagechat') {
+      renderStudioImageChat(studioMediaPanel);
+    } else if (agentId === 'videochat') {
+      renderStudioVideoChat(studioMediaPanel);
+    } else {
+      renderStudioBlog(studioMediaPanel);
+    }
+    return;
+  }
+
+  // Normal agent/category selection — show operations + action bar, hide media panel
+  if (studioContent) studioContent.style.display = '';
+  if (studioMediaPanel) studioMediaPanel.style.display = 'none';
+  if (studioActionBar) studioActionBar.style.display = '';
 
   // If an agent is selected (not 'all'), auto-filter to that category
   if (agentId !== 'all') {
@@ -1817,15 +1948,54 @@ function selectAgent(agentId) {
   renderOperations();
 
   // v10.5.25: Scroll to top of content area
-  var contentArea = document.getElementById('studioV2Content');
-  if (contentArea) {
-    contentArea.scrollTo({ top: 0, behavior: 'smooth' });
+  var contentArea2 = document.getElementById('studioV2Content');
+  if (contentArea2) {
+    contentArea2.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 
 /**
  * v13.1: Toggle Studio system prompt preview visibility
  */
+// v28.9: Image Chat panel in Studio — reuses existing renderAutoLabImageLab
+function renderStudioImageChat(container) {
+  if (!container) return;
+  container.innerHTML = '<div id="studioImageLabPanel"></div>';
+  if (typeof renderAutoLabImageLab === 'function') {
+    renderAutoLabImageLab('studioImageLabPanel');
+  } else {
+    container.innerHTML = '<div style="padding:40px;text-align:center;opacity:0.5;">Image Chat loading...</div>';
+  }
+}
+
+// v28.9: Video Chat panel in Studio — reuses existing video lab
+function renderStudioVideoChat(container) {
+  if (!container) return;
+  container.innerHTML = '<div id="studioVideoLabPanel"></div>';
+  if (typeof renderAutoLabVideoLab === 'function') {
+    renderAutoLabVideoLab('studioVideoLabPanel');
+  } else {
+    container.innerHTML = '<div style="padding:40px;text-align:center;opacity:0.5;">Video Chat not available.</div>';
+  }
+}
+
+// v28.9: Blog panel in Studio — renders blog editor inline
+function renderStudioBlog(container) {
+  if (!container) return;
+  // Show the existing blog tab content by cloning it from socialTabBlog
+  var blogSource = document.getElementById('socialTabBlog');
+  if (blogSource) {
+    // Make the original visible temporarily so we can use it
+    container.innerHTML = '';
+    // Move the blog tab content to studio temporarily
+    blogSource.style.display = 'block';
+    container.appendChild(blogSource);
+    if (typeof initBlogTab === 'function') initBlogTab();
+  } else {
+    container.innerHTML = '<div style="padding:40px;text-align:center;opacity:0.5;">Blog editor not available. Open Media Lab first to initialize.</div>';
+  }
+}
+
 function toggleStudioPromptPreview() {
   var body = document.getElementById('studioPromptPreviewBody');
   var icon = document.getElementById('studioPromptToggleIcon');
@@ -2173,7 +2343,7 @@ function getBrandIdentityIntelligence(brand) {
     if (brandIdx === -1) {
       brandIdx = brands.findIndex(function(b) { return b.name === brand.name; });
     }
-    var memKey = 'brand_' + brandIdx;
+    var memKey = typeof getBrandMemoryKey === 'function' ? getBrandMemoryKey(brandIdx) : 'brand_' + brandIdx;
     if (typeof brandMemory !== 'undefined' && brandMemory[memKey] && brandMemory[memKey].documents) {
       var docs = brandMemory[memKey].documents;
       if (docs.length > 0) {
@@ -5981,8 +6151,14 @@ function handleChatSuccess(response, brand, btnId, btn) {
 async function generateConversationTitle(conversation, brand, commandId) {
   try {
     var provider = brand.provider || 'anthropic';
+    // v28.8: Resolve 'roweos'/'auto' smart routing to actual provider/model
+    if (provider === 'roweos') {
+      var _resolved = (typeof resolveRoweOSAI === 'function') ? resolveRoweOSAI({ userMessage: 'title generation' }) : null;
+      if (_resolved) { provider = _resolved.provider; }
+      else { provider = 'anthropic'; }
+    }
     var apiKey = await getApiKey(provider);
-    
+
     if (!apiKey) {
       console.log('[Title Gen] No API key, using fallback title');
       return;
@@ -6357,6 +6533,12 @@ async function executeWorkflowOperation(op, brand, context, params) {
   var settings = brandSettings[studioSelectedBrand] || {};
   var provider = settings.provider || 'anthropic';
   var model = settings.model || 'claude-sonnet-4-6';
+  // v28.8: Resolve 'roweos'/'auto' smart routing to actual provider/model
+  if (model === 'auto' || provider === 'roweos') {
+    var _resolved = (typeof resolveRoweOSAI === 'function') ? resolveRoweOSAI({ userMessage: aiPrompt.substring(0, 200) }) : null;
+    if (_resolved) { provider = _resolved.provider; model = _resolved.model; }
+    else { provider = 'anthropic'; model = 'claude-sonnet-4-6'; }
+  }
   var apiKey = await getApiKey(provider); // v24.27: was missing await — passed Promise as key
 
   if (!apiKey) {

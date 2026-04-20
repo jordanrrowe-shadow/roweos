@@ -2857,20 +2857,20 @@ function showView(view) {
     showSettings();
     if (typeof initBlobSettings === 'function') initBlobSettings();
     // v26.2: Render pill nav for System settings
-    renderPillNav('systemPillNav', [
-      { id: 'feedback', label: 'Feedback' },
-      { id: 'appearance', label: 'Appearance' },
+    renderPillNav('systemPillNav', [ // v29.1: Alphabetized
+      { id: 'about', label: 'About' },
+      { id: 'accessibility', label: 'Accessibility' },
+      { id: 'account', label: 'Account' },
       { id: 'ai', label: 'AI & Models' },
+      { id: 'appearance', label: 'Appearance' },
       { id: 'cloud', label: 'Cloud & Sync' },
       { id: 'connections', label: 'Connections' },
+      { id: 'data', label: 'Data & Storage' },
+      { id: 'feedback', label: 'Feedback' },
       { id: 'intelligence', label: 'Intelligence' },
       { id: 'preferences', label: 'Preferences' },
-      { id: 'accessibility', label: 'Accessibility' },
-      { id: 'data', label: 'Data & Storage' },
-      { id: 'account', label: 'Account' },
-      { id: 'update', label: 'Update' },
-      { id: 'about', label: 'About' }
-    ], 'appearance', function(tabId) { openSettingsFolder(tabId); }, { viewId: 'settings' });
+      { id: 'update', label: 'Update' }
+    ], 'about', function(tabId) { openSettingsFolder(tabId); }, { viewId: 'settings' }); // v29.1: Default to About
     // v26.0: Auto-open appearance (not feedback) as default, skip if entering specific sub-section
     // v27.3: Only check _wasSubSectionEntry (now correctly excludes landing-disabled redirects)
     if (!_wasSubSectionEntry) openSettingsFolder('appearance');

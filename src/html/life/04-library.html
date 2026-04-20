@@ -171,6 +171,21 @@
                   </button>
                 </div>
               </div>
+              <!-- v29.0: Selection bar for multi-select -->
+              <div class="gdrive-selection-bar hidden" id="gdriveSelectionBar">
+                <span id="gdriveSelectedCount">0 files selected</span>
+                <div class="gdrive-selection-actions">
+                  <button class="library-header-btn" onclick="toggleGDriveSelectAll()" style="font-size:11px;">Select All</button>
+                  <button class="library-header-btn" onclick="showGdriveImportFolderPickerBatch()" style="font-size:11px;background:var(--brand-accent-10, rgba(168,152,120,0.1));border-color:var(--brand-accent, #a89878);color:var(--brand-accent, #a89878);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Import Selected
+                  </button>
+                  <button class="library-header-btn" onclick="scanSelectedGDriveToIdentity()" style="font-size:11px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+                    Scan to Identity
+                  </button>
+                </div>
+              </div>
               <div class="gdrive-file-list" id="gdriveFileList">
                 <!-- Drive files rendered here -->
               </div>
@@ -180,6 +195,25 @@
               </div>
               <div class="gdrive-empty hidden" id="gdriveEmpty">
                 <p style="color:var(--text-muted);font-size:13px;">No files found in this folder</p>
+              </div>
+            </div>
+          </div>
+          <!-- v29.x: Google Drive Import Folder Picker -->
+          <div class="save-library-modal" id="gdriveImportFolderModal" style="display:none;">
+            <div class="save-library-dialog">
+              <div class="save-library-title">Import to Library</div>
+              <div id="gdriveImportFileName" style="font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:var(--space-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+              <div style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-2); display: flex; justify-content: space-between; align-items: center;">
+                <span>Select a folder:</span>
+                <button onclick="createNewFolderInGdriveImportModal()" style="background: none; border: none; color: var(--accent); font-size: var(--text-sm); cursor: pointer; display: flex; align-items: center; gap: var(--space-1);">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  New Folder
+                </button>
+              </div>
+              <div class="save-library-folders" id="gdriveImportFolderList"></div>
+              <div class="save-library-actions">
+                <button class="btn btn-secondary" onclick="closeGdriveImportFolderModal()">Cancel</button>
+                <button class="btn" onclick="confirmGdriveImportWithFolder()">Import</button>
               </div>
             </div>
           </div>
@@ -242,6 +276,10 @@
                 <button class="btn btn-secondary library-upload-btn hidden" id="libraryUploadBtn" onclick="uploadLibraryFileToChat()">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                   Upload to Chat
+                </button>
+                <button class="btn btn-secondary" onclick="exportLibraryFileToDrive()">
+                  <svg width="14" height="14" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg"><path d="M6.6 66.85L15.7 78h55.9l9.1-11.15z" fill="currentColor" opacity="0.6"/><path d="M29.58 0L0 51.04l15.01 18.43L58.56 0z" fill="currentColor" opacity="0.4"/><path d="M58.56 0L29.58 0 72.3 69.47l15-18.43z" fill="currentColor" opacity="0.5"/></svg>
+                  Save to Drive
                 </button>
                 <button class="btn btn-secondary" onclick="moveLibraryFile()">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>

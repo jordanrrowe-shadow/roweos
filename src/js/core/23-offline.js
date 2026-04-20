@@ -948,7 +948,7 @@ function renderModelConfigList() {
 function splitModelName(fullName) {
   // Claude Sonnet 4 → { provider: "Claude", model: "Sonnet 4" }
   // GPT-5.4 → { provider: "GPT", model: "5.4" }
-  // Claude Opus 4.6 → { provider: "Claude", model: "Opus 4.6" }
+  // Claude Opus 4.7 → { provider: "Claude", model: "Opus 4.7" }
   
   var parts = fullName.split(' ');
   

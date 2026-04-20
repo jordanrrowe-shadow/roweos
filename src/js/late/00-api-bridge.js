@@ -18,7 +18,7 @@
   var PROVIDERS = {
     anthropic: {
       baseUrl: 'https://api.anthropic.com/v1/messages',
-      models: ['claude-sonnet-4-6', 'claude-opus-4-6', 'claude-haiku-4-5-20251001']
+      models: ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001']
     },
     openai: {
       baseUrl: 'https://api.openai.com/v1/responses',
@@ -1193,13 +1193,17 @@ function processCloudOutbox() {
           status: 'processing',
           processingAt: firebase.firestore.FieldValue.serverTimestamp()
         }).then(function() {
-          // v25.6: Build HTML body from markdown or plain text
-          var htmlBody = item.html || '';
-          if (!htmlBody && item.body) {
+          // v28.7: Build HTML body from markdown or plain text (check bodyMarkdown + body)
+          var rawBody = item.html || '';
+          var mdSource = item.bodyMarkdown || item.body || '';
+          var htmlBody = rawBody;
+          if (!htmlBody && mdSource) {
             if (typeof marked !== 'undefined' && marked.parse) {
-              try { htmlBody = marked.parse(item.body); } catch(e) { htmlBody = item.body.replace(/\n/g, '<br>'); }
+              try { htmlBody = marked.parse(mdSource); } catch(e) { htmlBody = mdSource.replace(/\n/g, '<br>'); }
+            } else if (typeof markdownToHtml === 'function') {
+              try { htmlBody = markdownToHtml(mdSource); } catch(e) { htmlBody = mdSource.replace(/\n/g, '<br>'); }
             } else {
-              htmlBody = item.body.replace(/\n/g, '<br>');
+              htmlBody = mdSource.replace(/\n/g, '<br>');
             }
           }
 
@@ -7082,9 +7086,13 @@ function mailGenerateAiTemplate() {
   mailShowComposeLoading(true);
   var canvas = document.getElementById('mailComposeBody');
 
-  // v28.4: Wait for logo then generate — prefer base64 (permanent) over HTTP URL (expires)
+  // v28.4/v29.0: Wait for logo then generate — use placeholder so AI doesn't need to reproduce base64
   logoReady.then(function(resolvedLogoUrl) {
   var logoUrl = window._mailLogoBase64 || resolvedLogoUrl || window._mailLogoUrl || '';
+  // v29.0: Use a short placeholder in the AI prompt instead of the actual logo URL/base64.
+  // LLMs can't reliably reproduce long base64 strings, causing broken logos.
+  // We replace the placeholder with the real logo after AI returns.
+  var hasLogo = !!logoUrl;
 
   var sys = 'You are an expert HTML email template designer. Create a professional, email-safe HTML template. Requirements:\n' +
     '- Complete HTML document with ALL styles inline (no <style> blocks, no CSS classes)\n' +
@@ -7092,13 +7100,13 @@ function mailGenerateAiTemplate() {
     '- Use dark text (#333 or similar) on the light background\n' +
     '- Brand accent color: ' + accent + ' (use for headers, borders, buttons, decorative elements)\n' +
     '- Brand name: ' + brandName + '\n' +
-    (logoUrl ? '- Brand logo image: <img src="' + logoUrl + '" alt="' + brandName + '" style="max-width:200px;max-height:80px;">\n' : '') +
+    (hasLogo ? '- Brand logo: Include this exact img tag in the header: <img src="{{LOGO_PLACEHOLDER}}" alt="' + brandName + '" style="max-width:200px;max-height:80px;">\n' : '') +
     '- Place the email content inside the main content area\n' +
     '- IMPORTANT: Wrap the content area with a comment marker. Put <!-- EMAIL_CONTENT_START --> before the content and <!-- EMAIL_CONTENT_END --> after it.\n' +
     '- Use max-width: 600px centered layout (standard email width)\n' +
     '- The template should have: a branded header area, the content area, and a minimal footer\n' +
     '- Return ONLY the raw HTML. No markdown, no code fences, no explanation.\n' +
-    '- CRITICAL: Use ONLY the exact logo image tag provided above if one was given.' + (!logoUrl ? ' Do NOT include any logo image.' : '');
+    '- CRITICAL: Use ONLY the exact logo img tag with {{LOGO_PLACEHOLDER}} as the src if a logo was specified.' + (!hasLogo ? ' Do NOT include any logo image.' : '');
 
   var user = 'Template style: ' + desc + '\n\nEmail content to wrap in this template:\n' + canvasContent;
 
@@ -7107,6 +7115,10 @@ function mailGenerateAiTemplate() {
     if (!result) { showToast('Template generation failed - try again', 'error'); return; }
     // v22.44: Strip markdown code fences if AI wraps HTML in them
     result = result.replace(/^[\s\S]*?```html?\s*\n?/i, '').replace(/\n?\s*```[\s\S]*$/, '').trim();
+    // v29.0: Replace logo placeholder with actual base64/URL (AI can't reproduce long base64 strings)
+    if (hasLogo && logoUrl) {
+      result = result.replace(/\{\{LOGO_PLACEHOLDER\}\}/g, logoUrl);
+    }
     // Show in preview
     var preview = document.getElementById('mailTemplatePreview');
     var frame = document.getElementById('mailTemplatePreviewFrame');
@@ -7864,7 +7876,13 @@ function mailToggleSelect(msgId, provider, accountEmail, isUnread, ev) {
   mailUpdateBulkBar();
   // Toggle visual state
   var card = document.querySelector('.mail-inbox-card[data-msg-id="' + msgId + '"]');
-  if (card) card.classList.toggle('mail-selected', !!_mailSelectedIds[msgId]);
+  if (card) {
+    var isNowSelected = !!_mailSelectedIds[msgId];
+    card.classList.toggle('mail-selected', isNowSelected);
+    // v29.0: Also update the checkbox checked state
+    var cb = card.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = isNowSelected;
+  }
 }
 
 function mailSelectAll() {
@@ -11323,7 +11341,7 @@ function setBlobShape(shapeName) {
     else if (!_helixAnimId) { if (typeof startHelixAnimation === 'function') startHelixAnimation(); }
     if (title) { title.style.marginTop = ''; title.style.fontSize = ''; }
     var savedOffset = localStorage.getItem('roweos_blob_vertical_offset');
-    if (group) group.style.marginTop = (savedOffset !== null ? savedOffset : (window.innerWidth <= 768 ? -500 : -350)) + 'px';
+    if (group) group.style.marginTop = (savedOffset !== null ? savedOffset : (window.innerWidth <= 768 ? -400 : -350)) + 'px';
   } else {
     if (blobC) blobC.style.display = '';
     // v24.27: Keep helix visible in "both" mode
@@ -11344,7 +11362,7 @@ function setBlobShape(shapeName) {
     }
     if (title) { title.style.marginTop = ''; title.style.fontSize = ''; }
     var savedOffset = localStorage.getItem('roweos_blob_vertical_offset');
-    if (group) group.style.marginTop = (savedOffset !== null ? savedOffset : (window.innerWidth <= 768 ? -500 : -350)) + 'px';
+    if (group) group.style.marginTop = (savedOffset !== null ? savedOffset : (window.innerWidth <= 768 ? -400 : -350)) + 'px';
   }
   // Update settings UI — blob shape buttons
   var btns = document.querySelectorAll('#blobShapeSelector .blob-shape-btn');
@@ -11423,7 +11441,7 @@ function setBothAmbient() {
   if (!_helixInitialized) { if (typeof initHelix === 'function') initHelix(); }
   else if (!_helixAnimId) { if (typeof startHelixAnimation === 'function') startHelixAnimation(); }
   var savedOffset = localStorage.getItem('roweos_blob_vertical_offset');
-  if (group) group.style.marginTop = (savedOffset !== null ? savedOffset : (window.innerWidth <= 768 ? -500 : -350)) + 'px';
+  if (group) group.style.marginTop = (savedOffset !== null ? savedOffset : (window.innerWidth <= 768 ? -400 : -350)) + 'px';
   updateAmbientSubPanels();
   writeDB('profile/main', { blobShape: 'both' }); // v25.1
 }

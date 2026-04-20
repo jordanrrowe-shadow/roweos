@@ -385,7 +385,17 @@ function renameFile(fileId) {
 // Delete file
 function deleteFile(fileId) {
   if (!confirm('Delete this file?')) return;
-  
+
+  // v28.7: Also delete from Google Drive if synced
+  if (_gdriveAutoSync && _gdriveSyncMap && _gdriveSyncMap[fileId]) {
+    if (typeof gdriveDeleteFile === 'function') {
+      gdriveDeleteFile(_gdriveSyncMap[fileId].driveFileId, function() {
+        delete _gdriveSyncMap[fileId];
+        localStorage.setItem('roweos_gdrive_sync_map', JSON.stringify(_gdriveSyncMap));
+      });
+    }
+  }
+
   var lib = getCurrentBrandLibrary();
   lib.files = lib.files.filter(function(f) { return f.id !== fileId; });
   saveLibrary();
@@ -561,6 +571,10 @@ function openSaveLibraryModal() {
   document.getElementById('saveFileName').value = defaultName;
   refreshLibraryFromStorage(); // v15.33: Pick up sync changes
   renderSaveFolderList(); // This will now be mode-aware
+  // v28.7: Show Google Drive tab if connected
+  var gdriveTab = document.getElementById('saveTabGDrive');
+  if (gdriveTab) gdriveTab.style.display = _gdriveConnected ? '' : 'none';
+  if (typeof switchSaveTab === 'function') switchSaveTab('library');
   document.getElementById('saveLibraryModal').classList.add('open');
 }
 
@@ -938,6 +952,8 @@ function confirmSaveToLibrary() {
     lifeLib.files.push(file);
     fileLibrary['_life'] = lifeLib;
     if (typeof saveLifeLibrary === 'function') { saveLifeLibrary(); } else { localStorage.setItem('roweos_life_library', JSON.stringify(lifeLib)); }
+    // v28.7: Auto-sync to Google Drive (LifeAI)
+    if (typeof gdriveAutoSyncFile === 'function') gdriveAutoSyncFile(file, 'life');
     console.log('[SaveToLibrary] Saved to LifeAI library:', name, 'in folder:', folderId);
     console.log('[SaveToLibrary] AFTER save - Life library has', lifeLib.files.length, 'files');
     
@@ -953,6 +969,8 @@ function confirmSaveToLibrary() {
     file.brand = sourceName;
     lib.files.push(file);
     saveLibrary();
+    // v28.7: Auto-sync to Google Drive
+    if (typeof gdriveAutoSyncFile === 'function') gdriveAutoSyncFile(file, brandIdx);
     console.log('[SaveToLibrary] Saved to BrandAI library:', name, 'in folder:', folderId);
   }
   
@@ -2094,7 +2112,7 @@ function renderLibraryBrandCards() {
     var totalFiles = lib && lib.files ? lib.files.length : 0;
     
     // v9.1.14: Add documents count
-    var brandKey = 'brand_' + brandIdx;
+    var brandKey = typeof getBrandMemoryKey === 'function' ? getBrandMemoryKey(brandIdx) : 'brand_' + brandIdx;
     if (brandMemory && brandMemory[brandKey] && brandMemory[brandKey].documents) {
       totalFiles += brandMemory[brandKey].documents.length;
     }
@@ -2189,7 +2207,7 @@ function getLibraryFolderCount(brandIdx, folderId) {
   var fileCount = lib && lib.files ? lib.files.length : 0;
   
   // v9.1.14: Count documents from brandMemory for this brand
-  var brandKey = 'brand_' + brandIdx;
+  var brandKey = typeof getBrandMemoryKey === 'function' ? getBrandMemoryKey(brandIdx) : 'brand_' + brandIdx;
   var docsCount = 0;
   if (brandMemory && brandMemory[brandKey] && brandMemory[brandKey].documents) {
     docsCount = brandMemory[brandKey].documents.length;
@@ -2272,7 +2290,7 @@ function renderLibraryFilesForBrand(brandIdx, folderId) {
   
   // v9.1.14: Handle documents folder - show files from brandMemory
   if (folderId === 'documents') {
-    var brandKey = 'brand_' + brandIdx;
+    var brandKey = typeof getBrandMemoryKey === 'function' ? getBrandMemoryKey(brandIdx) : 'brand_' + brandIdx;
     var docs = [];
     if (brandMemory && brandMemory[brandKey] && brandMemory[brandKey].documents) {
       docs = brandMemory[brandKey].documents;
@@ -2318,7 +2336,7 @@ function renderLibraryFilesForBrand(brandIdx, folderId) {
   if (folderId === 'all') {
     // v9.1.14: Include ALL files (notes, outputs, docs) in All Files view
     files = lib.files.slice();
-    var brandKey = 'brand_' + brandIdx;
+    var brandKey = typeof getBrandMemoryKey === 'function' ? getBrandMemoryKey(brandIdx) : 'brand_' + brandIdx;
     if (brandMemory && brandMemory[brandKey] && brandMemory[brandKey].documents) {
       brandMemory[brandKey].documents.forEach(function(doc, idx) {
         files.push({
@@ -2502,7 +2520,7 @@ function toggleFileStorageMode(fileId, brandIdx) {
  * v9.1.14: Open Identity document preview
  */
 function openIdentityDocPreview(brandIdx, docIndex) {
-  var brandKey = 'brand_' + brandIdx;
+  var brandKey = typeof getBrandMemoryKey === 'function' ? getBrandMemoryKey(brandIdx) : 'brand_' + brandIdx;
   if (!brandMemory || !brandMemory[brandKey] || !brandMemory[brandKey].documents) {
     showToast('Document not found', 'error');
     return;
@@ -7782,7 +7800,8 @@ var _gdriveAccessToken = null;
 var _gdriveConnected = false;
 var _gdriveTokenClient = null;
 var _gdriveFolderStack = [{ id: 'root', name: 'My Drive' }];
-var GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+var _gdriveSelectedFiles = []; // v29.0: Multi-select state
+var GDRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly';
 var GDRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 
 function initGoogleDriveAuth() {
@@ -7799,9 +7818,9 @@ function initGoogleDriveAuth() {
         showToast('Google Drive: Sign-in error (' + errType + ')', 'error');
       }
     });
-    if (localStorage.getItem('roweos_gdrive_connected') === 'true') {
-      _gdriveTokenClient.requestAccessToken({ prompt: '' });
-    }
+    // v29.0: Do NOT auto-reconnect on startup — Drive tokens are short-lived
+    // and silent re-auth opens a popup. Only connect when user explicitly clicks.
+    // The flag is kept so the UI shows the browser (not connect card) when they navigate to the tab.
   } catch(e) {
     console.warn('[GDrive] Init error:', e.message);
   }
@@ -7857,7 +7876,7 @@ function updateGoogleDriveUI() {
   var connectCard = document.getElementById('gdriveConnectCard');
   var browser = document.getElementById('gdriveBrowser');
   if (!connectCard || !browser) return;
-  if (_gdriveConnected) {
+  if (_gdriveConnected && _gdriveAccessToken) {
     connectCard.classList.add('hidden');
     browser.classList.remove('hidden');
   } else {
@@ -7941,22 +7960,34 @@ function navigateGDriveBreadcrumb(idx) {
 function renderGDriveFiles(files) {
   var container = document.getElementById('gdriveFileList');
   if (!container) return;
+  // Store files for multi-select
+  window._gdriveCurrentFiles = files;
+  _gdriveSelectedFiles = [];
+  updateGDriveSelectionBar();
+
   var html = '';
-  files.forEach(function(file) {
+  files.forEach(function(file, idx) {
     var isFolder = file.mimeType === 'application/vnd.google-apps.folder';
-    var isGoogleDoc = file.mimeType.indexOf('application/vnd.google-apps.') === 0;
     var fileIcon = getGDriveFileIcon(file.mimeType);
     var sizeStr = file.size ? formatGDriveFileSize(parseInt(file.size)) : '';
     var dateStr = file.modifiedTime ? new Date(file.modifiedTime).toLocaleDateString() : '';
 
-    html += '<div class="gdrive-file-row' + (isFolder ? ' gdrive-folder-row' : '') + '" ' + (isFolder ? 'onclick="openGDriveFolder(\'' + file.id + '\', \'' + escapeHtml(file.name).replace(/'/g, "\\'") + '\')"' : '') + '>';
-    html += '<div class="gdrive-file-icon">' + fileIcon + '</div>';
-    html += '<div class="gdrive-file-info">';
+    html += '<div class="gdrive-file-row' + (isFolder ? ' gdrive-folder-row' : '') + '" data-idx="' + idx + '">';
+    if (!isFolder) {
+      html += '<label class="gdrive-checkbox" onclick="event.stopPropagation();"><input type="checkbox" onchange="toggleGDriveSelect(' + idx + ', this.checked)" /><span class="gdrive-checkmark"></span></label>';
+    }
+    if (isFolder) {
+      html += '<div class="gdrive-file-icon" onclick="openGDriveFolder(\'' + file.id + '\', \'' + escapeHtml(file.name).replace(/'/g, "\\'") + '\')" style="cursor:pointer;">' + fileIcon + '</div>';
+      html += '<div class="gdrive-file-info" onclick="openGDriveFolder(\'' + file.id + '\', \'' + escapeHtml(file.name).replace(/'/g, "\\'") + '\')" style="cursor:pointer;">';
+    } else {
+      html += '<div class="gdrive-file-icon">' + fileIcon + '</div>';
+      html += '<div class="gdrive-file-info">';
+    }
     html += '<div class="gdrive-file-name">' + escapeHtml(file.name) + '</div>';
     html += '<div class="gdrive-file-meta">' + (sizeStr ? sizeStr + ' &middot; ' : '') + dateStr + '</div>';
     html += '</div>';
     if (!isFolder) {
-      html += '<button class="gdrive-import-btn" onclick="event.stopPropagation(); importGDriveFile(\'' + file.id + '\', \'' + escapeHtml(file.name).replace(/'/g, "\\'") + '\', \'' + file.mimeType + '\', this)" title="Import to Library">';
+      html += '<button class="gdrive-import-btn" id="gdriveImportBtn_' + idx + '" onclick="event.stopPropagation(); showGdriveImportFolderPicker(\'' + file.id + '\', \'' + escapeHtml(file.name).replace(/'/g, "\\'") + '\', \'' + file.mimeType + '\', this)" title="Import to Library">';
       html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
       html += ' Import';
       html += '</button>';
@@ -7964,6 +7995,41 @@ function renderGDriveFiles(files) {
     html += '</div>';
   });
   container.innerHTML = html;
+}
+
+function toggleGDriveSelect(idx, checked) {
+  if (checked) {
+    if (_gdriveSelectedFiles.indexOf(idx) === -1) _gdriveSelectedFiles.push(idx);
+  } else {
+    _gdriveSelectedFiles = _gdriveSelectedFiles.filter(function(i) { return i !== idx; });
+  }
+  updateGDriveSelectionBar();
+}
+
+function toggleGDriveSelectAll() {
+  var files = window._gdriveCurrentFiles || [];
+  var nonFolders = [];
+  files.forEach(function(f, idx) {
+    if (f.mimeType !== 'application/vnd.google-apps.folder') nonFolders.push(idx);
+  });
+  var allSelected = _gdriveSelectedFiles.length === nonFolders.length;
+  _gdriveSelectedFiles = allSelected ? [] : nonFolders.slice();
+  // Update checkboxes
+  var checkboxes = document.querySelectorAll('#gdriveFileList .gdrive-checkbox input[type="checkbox"]');
+  checkboxes.forEach(function(cb) { cb.checked = !allSelected; });
+  updateGDriveSelectionBar();
+}
+
+function updateGDriveSelectionBar() {
+  var bar = document.getElementById('gdriveSelectionBar');
+  if (!bar) return;
+  if (_gdriveSelectedFiles.length > 0) {
+    bar.classList.remove('hidden');
+    var countEl = document.getElementById('gdriveSelectedCount');
+    if (countEl) countEl.textContent = _gdriveSelectedFiles.length + ' file' + (_gdriveSelectedFiles.length > 1 ? 's' : '') + ' selected';
+  } else {
+    bar.classList.add('hidden');
+  }
 }
 
 function openGDriveFolder(folderId, folderName) {
@@ -7987,15 +8053,198 @@ function formatGDriveFileSize(bytes) {
   return (bytes / 1048576).toFixed(1) + ' MB';
 }
 
-function importGDriveFile(fileId, fileName, mimeType, btn) {
-  if (!_gdriveAccessToken) { showToast('Not connected to Google Drive', 'error'); return; }
+// v29.x: Pending GDrive import state for folder picker
+var _pendingGdriveImport = null;
+var _pendingGdriveBatchImport = null;
+var _gdriveImportSelectedFolder = 'root';
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="gdrive-spinner-sm"></span> Importing...';
+function showGdriveImportFolderPicker(fileId, fileName, mimeType, btn) {
+  _pendingGdriveImport = { fileId: fileId, fileName: fileName, mimeType: mimeType, btn: btn };
+  _pendingGdriveBatchImport = null;
+  var modal = document.getElementById('gdriveImportFolderModal');
+  if (!modal) { importGDriveFile(fileId, fileName, mimeType, btn); return; }
+  document.getElementById('gdriveImportFileName').textContent = fileName;
+  _gdriveImportSelectedFolder = 'root';
+  renderGdriveImportFolderList();
+  modal.style.display = '';
+  modal.classList.add('open');
+}
+
+function showGdriveImportFolderPickerBatch() {
+  var files = window._gdriveCurrentFiles || [];
+  if (_gdriveSelectedFiles.length === 0) { showToast('No files selected', 'info'); return; }
+  var toImport = _gdriveSelectedFiles.map(function(idx) { return files[idx]; }).filter(Boolean);
+  _pendingGdriveImport = null;
+  _pendingGdriveBatchImport = toImport;
+  var modal = document.getElementById('gdriveImportFolderModal');
+  if (!modal) { importSelectedGDriveFilesToFolder('root'); return; }
+  document.getElementById('gdriveImportFileName').textContent = toImport.length + ' file' + (toImport.length > 1 ? 's' : '') + ' selected';
+  _gdriveImportSelectedFolder = 'root';
+  renderGdriveImportFolderList();
+  modal.style.display = '';
+  modal.classList.add('open');
+}
+
+function renderGdriveImportFolderList() {
+  var container = document.getElementById('gdriveImportFolderList');
+  if (!container) return;
+  var currentMode = localStorage.getItem('roweos_app_mode') || 'brand';
+  var isLifeMode = currentMode === 'life';
+  var lib, libraryName;
+  if (isLifeMode) {
+    lib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : JSON.parse(localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}');
+    var profile = typeof getLifeAIProfile === 'function' ? getLifeAIProfile() : null;
+    libraryName = profile && profile.name ? profile.name + "'s Library" : 'My Life Library';
+  } else {
+    lib = typeof getLibraryForBrandIndex === 'function' ? getLibraryForBrandIndex(selectedBrand) : getCurrentBrandLibrary();
+    var brand = brands[selectedBrand];
+    libraryName = brand ? (brand.shortName || brand.name) : 'Library';
+  }
+  var folderSvg = icon('folder', {size: 16, strokeWidth: 1.5, style: 'vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;'});
+  var html = '<div class="save-library-folder root selected" data-id="root" onclick="selectGdriveImportFolder(\'root\')">' + folderSvg + escapeHtml(libraryName) + ' (All Files)</div>';
+  var defaultFolders;
+  if (isLifeMode) {
+    defaultFolders = [
+      { id: 'journals', icon: 'note', name: 'Journals' },
+      { id: 'notes', icon: 'document', name: 'Notes' },
+      { id: 'reflections', icon: 'chat', name: 'Reflections' },
+      { id: 'goals', icon: 'lightning', name: 'Goals' },
+      { id: 'ideas', icon: 'sparkles', name: 'Ideas' },
+      { id: 'plans', icon: 'chart', name: 'Plans' }
+    ];
+  } else {
+    defaultFolders = [
+      { id: 'brandai-chats', icon: 'chat', name: 'BrandAI Chats' },
+      { id: 'documents', icon: 'document', name: 'Documents' },
+      { id: 'presentations', icon: 'sparkles', name: 'Presentations' },
+      { id: 'emails', icon: 'envelope', name: 'Emails' },
+      { id: 'social', icon: 'phone', name: 'Social Media' },
+      { id: 'strategy', icon: 'chart', name: 'Strategy' },
+      { id: 'scheduled-outputs', icon: 'lightning', name: 'Scheduled Outputs' }
+    ];
+  }
+  var saveFolderIcons = {
+    'folder': folderSvg,
+    'chat': icon('chat', {size: 16, strokeWidth: 1.5, style: 'vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;'}),
+    'sparkles': icon('sparkles', {size: 16, strokeWidth: 1.5, style: 'vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;'}),
+    'envelope': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>',
+    'phone': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/></svg>',
+    'chart': icon('chart', {size: 16, strokeWidth: 1.5, style: 'vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;'}),
+    'lightning': icon('lightning', {size: 16, strokeWidth: 1.5, style: 'vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;'}),
+    'document': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>',
+    'note': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align: middle; margin-right: var(--space-2); flex-shrink: 0;"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h8l6-6V5a2 2 0 00-2-2z"/><path d="M13 21v-6h6M7 7h10M7 11h10M7 15h4"/></svg>'
+  };
+  var customFolderNames = [];
+  if (lib && lib.folders) {
+    lib.folders.filter(function(f) { return f.id !== 'root'; }).forEach(function(f) {
+      customFolderNames.push(f.name.toLowerCase());
+    });
+  }
+  defaultFolders.forEach(function(folder) {
+    if (customFolderNames.indexOf(folder.name.toLowerCase()) !== -1) return;
+    var iconSvg = saveFolderIcons[folder.icon] || saveFolderIcons['folder'];
+    html += '<div class="save-library-folder" data-id="' + folder.id + '" onclick="selectGdriveImportFolder(\'' + folder.id + '\')" style="padding-left: 32px; display: flex; align-items: center;">' + iconSvg + escapeHtml(folder.name) + '</div>';
+  });
+  if (lib && lib.folders) {
+    lib.folders.forEach(function(folder) {
+      if (folder.id === 'root') return;
+      var iconSvg = saveFolderIcons[folder.icon] || saveFolderIcons['folder'];
+      html += '<div class="save-library-folder" data-id="' + folder.id + '" onclick="selectGdriveImportFolder(\'' + folder.id + '\')" style="padding-left: 32px; display: flex; align-items: center;">' + iconSvg + escapeHtml(folder.name) + '</div>';
+    });
+  }
+  container.innerHTML = html;
+}
+
+function selectGdriveImportFolder(folderId) {
+  _gdriveImportSelectedFolder = folderId;
+  var modal = document.getElementById('gdriveImportFolderModal');
+  if (!modal) return;
+  modal.querySelectorAll('.save-library-folder').forEach(function(el) {
+    el.classList.remove('selected');
+  });
+  var sel = modal.querySelector('.save-library-folder[data-id="' + folderId + '"]');
+  if (sel) sel.classList.add('selected');
+}
+
+function closeGdriveImportFolderModal() {
+  var modal = document.getElementById('gdriveImportFolderModal');
+  if (modal) { modal.classList.remove('open'); modal.style.display = 'none'; }
+  _pendingGdriveImport = null;
+  _pendingGdriveBatchImport = null;
+}
+
+function confirmGdriveImportWithFolder() {
+  var folderId = _gdriveImportSelectedFolder || 'root';
+  if (_pendingGdriveImport) {
+    var p = _pendingGdriveImport;
+    closeGdriveImportFolderModal();
+    importGDriveFile(p.fileId, p.fileName, p.mimeType, p.btn, folderId);
+  } else if (_pendingGdriveBatchImport) {
+    var batch = _pendingGdriveBatchImport;
+    closeGdriveImportFolderModal();
+    importSelectedGDriveFilesToFolder(folderId);
+  }
+}
+
+function createNewFolderInGdriveImportModal() {
+  var container = document.getElementById('gdriveImportFolderList');
+  if (!container) return;
+  var existingInput = container.querySelector('.new-folder-inline-input');
+  if (existingInput) { existingInput.querySelector('input').focus(); return; }
+  var inputHtml = '<div class="new-folder-inline-input" style="display:flex;gap:var(--space-2);padding:var(--space-2) var(--space-2) var(--space-2) 32px;align-items:center;">';
+  inputHtml += '<input type="text" placeholder="Folder name..." style="flex:1;padding:var(--space-1) var(--space-2);border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);color:var(--text-primary);font-size:var(--text-sm);" onkeydown="if(event.key===\'Enter\')confirmNewGdriveImportFolder();if(event.key===\'Escape\')this.parentElement.remove();">';
+  inputHtml += '<button onclick="confirmNewGdriveImportFolder()" style="background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:var(--space-1) var(--space-2);font-size:var(--text-sm);cursor:pointer;">Add</button>';
+  inputHtml += '</div>';
+  container.insertAdjacentHTML('beforeend', inputHtml);
+  container.querySelector('.new-folder-inline-input input').focus();
+}
+
+function confirmNewGdriveImportFolder() {
+  var container = document.getElementById('gdriveImportFolderList');
+  var input = container.querySelector('.new-folder-inline-input input');
+  if (!input) return;
+  var name = input.value.trim();
+  if (!name) { showToast('Enter a folder name', 'error'); return; }
+  var currentMode = localStorage.getItem('roweos_app_mode') || 'brand';
+  var isLifeMode = currentMode === 'life';
+  var lib;
+  if (isLifeMode) {
+    lib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : JSON.parse(localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}');
+  } else {
+    lib = typeof getLibraryForBrandIndex === 'function' ? getLibraryForBrandIndex(selectedBrand) : getCurrentBrandLibrary();
+  }
+  if (!lib.folders) lib.folders = [{ id: 'root', name: 'Root', parentId: null }];
+  var newId = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  lib.folders.push({ id: newId, name: name, parentId: 'root', icon: 'folder' });
+  if (isLifeMode) {
+    if (typeof saveLifeLibrary === 'function') saveLifeLibrary();
+  } else {
+    saveLibrary();
+  }
+  renderGdriveImportFolderList();
+  selectGdriveImportFolder(newId);
+}
+
+function importGDriveFile(fileId, fileName, mimeType, btn, targetFolderId) {
+  if (!_gdriveAccessToken) { showToast('Not connected to Google Drive', 'error'); return; }
+  var folderId = targetFolderId || 'root';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="gdrive-spinner-sm"></span> Importing...';
+  }
 
   var isGoogleDoc = mimeType.indexOf('application/vnd.google-apps.') === 0;
   var downloadUrl;
   var exportMime;
+  // Binary formats that need blob download (not text)
+  var isBinary = mimeType.indexOf('image/') === 0 ||
+    mimeType === 'application/pdf' ||
+    mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+    mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+    mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+    mimeType === 'application/msword' ||
+    mimeType === 'application/vnd.ms-excel';
 
   if (mimeType === 'application/vnd.google-apps.document') {
     exportMime = 'text/plain';
@@ -8007,35 +8256,38 @@ function importGDriveFile(fileId, fileName, mimeType, btn) {
     exportMime = 'text/plain';
     downloadUrl = GDRIVE_API_BASE + '/files/' + fileId + '/export?mimeType=' + encodeURIComponent(exportMime);
   } else if (isGoogleDoc) {
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Import';
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Import';
+    }
     showToast('This Google file type is not supported for import', 'info');
-    return;
+    return Promise.resolve(false);
   } else {
     downloadUrl = GDRIVE_API_BASE + '/files/' + fileId + '?alt=media';
   }
 
   var isImage = mimeType.indexOf('image/') === 0;
 
-  fetch(downloadUrl, {
+  return fetch(downloadUrl, {
     headers: { 'Authorization': 'Bearer ' + _gdriveAccessToken }
   })
   .then(function(r) {
     if (!r.ok) throw new Error('Download failed: ' + r.status);
-    if (isImage) return r.blob();
+    if (isBinary) return r.blob();
     return r.text();
   })
   .then(function(data) {
-    if (isImage) {
+    if (isBinary) {
       return new Promise(function(resolve) {
         var reader = new FileReader();
-        reader.onload = function() { resolve({ content: reader.result, type: 'image', fileType: mimeType }); };
+        reader.onload = function() {
+          var type = isImage ? 'image' : 'document';
+          resolve({ content: reader.result, type: type, fileType: mimeType });
+        };
         reader.readAsDataURL(data);
       });
     }
-    var detectedType = 'text';
-    if (mimeType === 'application/pdf') detectedType = 'document';
-    return { content: data, type: detectedType, fileType: exportMime || mimeType };
+    return { content: data, type: 'text', fileType: exportMime || mimeType };
   })
   .then(function(result) {
     var currentMode = localStorage.getItem('roweos_app_mode') || 'brand';
@@ -8050,7 +8302,7 @@ function importGDriveFile(fileId, fileName, mimeType, btn) {
       type: result.type,
       content: result.content,
       fileType: result.fileType,
-      folderId: 'root',
+      folderId: folderId,
       savedAt: new Date().toISOString(),
       isUploaded: true,
       storageMode: 'local',
@@ -8064,16 +8316,255 @@ function importGDriveFile(fileId, fileName, mimeType, btn) {
       if (typeof writeDB === 'function') writeDB('library/brand', { data: JSON.stringify(fileLibrary) });
     }
 
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Imported';
-    btn.style.color = '#22c55e';
-    btn.style.borderColor = '#22c55e';
+    if (btn) {
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Imported';
+      btn.style.color = '#22c55e';
+      btn.style.borderColor = '#22c55e';
+    }
     showToast(fileName + ' imported to Library', 'success');
+    return true;
   })
   .catch(function(err) {
     console.warn('[GDrive] Import error:', err);
-    btn.disabled = false;
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Import';
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Import';
+    }
     showToast('Failed to import: ' + err.message, 'error');
+    return false;
+  });
+}
+
+// v29.0: Batch import selected files (legacy, now routes through folder picker)
+function importSelectedGDriveFiles() {
+  showGdriveImportFolderPickerBatch();
+}
+
+// v29.x: Batch import with folder target
+function importSelectedGDriveFilesToFolder(targetFolderId) {
+  var files = window._gdriveCurrentFiles || [];
+  var toImport = (_pendingGdriveBatchImport && _pendingGdriveBatchImport.length > 0)
+    ? _pendingGdriveBatchImport
+    : _gdriveSelectedFiles.map(function(idx) { return files[idx]; }).filter(Boolean);
+  var total = toImport.length;
+  var done = 0;
+
+  showToast('Importing ' + total + ' file' + (total > 1 ? 's' : '') + '...', 'info');
+
+  function importNext(i) {
+    if (i >= toImport.length) {
+      showToast(done + ' of ' + total + ' files imported', 'success');
+      _gdriveSelectedFiles = [];
+      updateGDriveSelectionBar();
+      var checkboxes = document.querySelectorAll('#gdriveFileList .gdrive-checkbox input[type="checkbox"]');
+      checkboxes.forEach(function(cb) { cb.checked = false; });
+      return;
+    }
+    var file = toImport[i];
+    var btn = document.getElementById('gdriveImportBtn_' + _gdriveSelectedFiles[i]);
+    importGDriveFile(file.id, file.name, file.mimeType, btn, targetFolderId).then(function(success) {
+      if (success) done++;
+      setTimeout(function() { importNext(i + 1); }, 300);
+    });
+  }
+  importNext(0);
+}
+
+// v29.0: Export a library file to Google Drive
+function exportLibraryFileToDrive() {
+  if (!_gdriveConnected || !_gdriveAccessToken) {
+    showToast('Connect Google Drive first (Library > Google Drive tab)', 'info');
+    return;
+  }
+  // Get current preview file
+  var file = null;
+  var currentMode = localStorage.getItem('roweos_app_mode') || 'brand';
+  if (currentMode === 'life') {
+    var lifeLib = getLifeLibrary();
+    if (lifeLib && lifeLib.files) {
+      file = lifeLib.files.find(function(f) { return f.id === libraryPreviewFileId; });
+    }
+  } else {
+    var key = (typeof brands !== 'undefined' && typeof selectedBrand !== 'undefined' && brands[selectedBrand]) ? (brands[selectedBrand].shortName || brands[selectedBrand].name) : 'default';
+    if (fileLibrary[key] && fileLibrary[key].files) {
+      file = fileLibrary[key].files.find(function(f) { return f.id === libraryPreviewFileId; });
+    }
+  }
+  if (!file || !file.content) { showToast('No file content to export', 'error'); return; }
+
+  var fileName = file.name || 'RoweOS Export';
+  var content = file.content;
+  var mimeType = 'text/plain';
+  var isBase64 = content.indexOf('data:') === 0;
+
+  if (isBase64) {
+    // Extract MIME from dataURL
+    var match = content.match(/^data:([^;]+);base64,/);
+    mimeType = match ? match[1] : 'application/octet-stream';
+  } else if (file.fileType) {
+    mimeType = file.fileType;
+  }
+
+  // Use multipart upload for metadata + content
+  var metadata = { name: fileName, mimeType: mimeType };
+  var boundary = 'roweos_drive_upload_' + Date.now();
+  var body;
+
+  if (isBase64) {
+    var base64Data = content.split(',')[1];
+    body = '--' + boundary + '\r\n' +
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+      JSON.stringify(metadata) + '\r\n' +
+      '--' + boundary + '\r\n' +
+      'Content-Type: ' + mimeType + '\r\n' +
+      'Content-Transfer-Encoding: base64\r\n\r\n' +
+      base64Data + '\r\n' +
+      '--' + boundary + '--';
+  } else {
+    body = '--' + boundary + '\r\n' +
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+      JSON.stringify(metadata) + '\r\n' +
+      '--' + boundary + '\r\n' +
+      'Content-Type: ' + mimeType + '\r\n\r\n' +
+      content + '\r\n' +
+      '--' + boundary + '--';
+  }
+
+  showToast('Uploading to Google Drive...', 'info');
+
+  fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + _gdriveAccessToken,
+      'Content-Type': 'multipart/related; boundary=' + boundary
+    },
+    body: body
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Upload failed: ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    showToast(fileName + ' saved to Google Drive', 'success');
+  })
+  .catch(function(err) {
+    console.warn('[GDrive] Export error:', err);
+    if (err.message.indexOf('401') !== -1 || err.message.indexOf('403') !== -1) {
+      showToast('Drive access expired. Please reconnect in Library > Google Drive.', 'error');
+    } else {
+      showToast('Failed to save to Drive: ' + err.message, 'error');
+    }
+  });
+}
+
+// v29.0: Scan selected Drive files and add content to brand identity
+function scanSelectedGDriveToIdentity() {
+  var files = window._gdriveCurrentFiles || [];
+  if (_gdriveSelectedFiles.length === 0) { showToast('No files selected', 'info'); return; }
+  if (!_gdriveAccessToken) { showToast('Not connected to Google Drive', 'error'); return; }
+
+  var toScan = _gdriveSelectedFiles.map(function(idx) { return files[idx]; }).filter(function(f) {
+    return f && f.mimeType !== 'application/vnd.google-apps.folder';
+  });
+  if (toScan.length === 0) { showToast('No scannable files selected', 'info'); return; }
+
+  showToast('Scanning ' + toScan.length + ' file' + (toScan.length > 1 ? 's' : '') + ' for brand identity...', 'info');
+
+  // Download all file contents as text — use export for Office/Google docs, skip binary
+  var downloads = toScan.map(function(file) {
+    var mime = file.mimeType;
+    var isGoogleDoc = mime.indexOf('application/vnd.google-apps.') === 0;
+    var isOfficeDoc = mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      mime === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      mime === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      mime === 'application/msword' || mime === 'application/vnd.ms-excel';
+    var isImage = mime.indexOf('image/') === 0;
+    var isPdf = mime === 'application/pdf';
+    // Skip images and PDFs (can't extract text in browser)
+    if (isImage) return Promise.resolve({ name: file.name, content: '' });
+    var url;
+    if (mime === 'application/vnd.google-apps.document' || mime === 'application/vnd.google-apps.presentation') {
+      url = GDRIVE_API_BASE + '/files/' + file.id + '/export?mimeType=text/plain';
+    } else if (mime === 'application/vnd.google-apps.spreadsheet') {
+      url = GDRIVE_API_BASE + '/files/' + file.id + '/export?mimeType=text/csv';
+    } else if (isGoogleDoc) {
+      url = GDRIVE_API_BASE + '/files/' + file.id + '/export?mimeType=text/plain';
+    } else if (isOfficeDoc) {
+      // Office docs (.docx, .xlsx) must be exported via Google's conversion
+      var exportMime = mime.indexOf('spreadsheet') !== -1 ? 'text/csv' : 'text/plain';
+      url = GDRIVE_API_BASE + '/files/' + file.id + '/export?mimeType=' + encodeURIComponent(exportMime);
+    } else if (isPdf) {
+      // PDFs: try alt=media as text (will be garbled but better than nothing)
+      return Promise.resolve({ name: file.name, content: '[PDF file - cannot extract text in browser]' });
+    } else {
+      // Plain text, CSV, markdown, etc.
+      url = GDRIVE_API_BASE + '/files/' + file.id + '?alt=media';
+    }
+    return fetch(url, { headers: { 'Authorization': 'Bearer ' + _gdriveAccessToken } })
+      .then(function(r) {
+        if (!r.ok && isOfficeDoc) {
+          // Export failed (file not uploaded via Google, can't convert) — try direct download
+          return fetch(GDRIVE_API_BASE + '/files/' + file.id + '?alt=media', {
+            headers: { 'Authorization': 'Bearer ' + _gdriveAccessToken }
+          }).then(function(r2) { return r2.ok ? r2.text() : ''; });
+        }
+        return r.ok ? r.text() : '';
+      })
+      .then(function(text) {
+        // Filter out binary garbage (if text has too many non-printable chars, it's binary)
+        if (text && text.length > 50) {
+          var nonPrintable = 0;
+          for (var ci = 0; ci < Math.min(text.length, 500); ci++) {
+            var cc = text.charCodeAt(ci);
+            if (cc < 32 && cc !== 10 && cc !== 13 && cc !== 9) nonPrintable++;
+          }
+          if (nonPrintable > 50) return { name: file.name, content: '' }; // binary, skip
+        }
+        return { name: file.name, content: text || '' };
+      })
+      .catch(function() { return { name: file.name, content: '' }; });
+  });
+
+  Promise.all(downloads).then(function(results) {
+    var combined = results.filter(function(r) { return r.content && r.content.length > 10; });
+    if (combined.length === 0) {
+      showToast('No readable text content found in selected files', 'info');
+      return;
+    }
+
+    // v29.0: Attach files as proper document entries (shows as file chip thumbnails)
+    // instead of pasting raw text into the input
+    if (typeof currentAgentFiles === 'undefined') window.currentAgentFiles = [];
+    combined.forEach(function(doc) {
+      var fileId = 'gdrive_scan_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+      currentAgentFiles.push({
+        id: fileId,
+        name: doc.name,
+        type: 'text/plain',
+        content: doc.content,
+        status: 'ready',
+        pages: null
+      });
+    });
+    if (typeof renderAgentFileChips === 'function') renderAgentFileChips();
+
+    var brandName = (typeof brands !== 'undefined' && typeof selectedBrand !== 'undefined' && brands[selectedBrand]) ? (brands[selectedBrand].shortName || brands[selectedBrand].name) : 'this brand';
+    var prompt = 'Scan the attached documents and extract information relevant to the brand identity of ' + brandName + '. For each relevant identity section, output a ```roweos-identity-update block. Only include sections where the documents contain directly relevant, factual information. Be precise and do not extrapolate.';
+
+    // Navigate to BrandAI chat and send with attached files
+    if (typeof showView === 'function') showView('agent');
+    setTimeout(function() {
+      var input = document.getElementById('followupCommand') || document.getElementById('agentCommand');
+      if (input) {
+        input.value = prompt;
+        if (typeof autoResizeTextarea === 'function') autoResizeTextarea(input);
+        if (document.getElementById('followupCommand') && typeof sendFollowup === 'function') {
+          sendFollowup();
+        } else if (typeof sendAgentMessage === 'function') {
+          sendAgentMessage();
+        }
+      }
+    }, 500);
   });
 }
 

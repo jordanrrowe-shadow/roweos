@@ -19,6 +19,8 @@
               <label style="display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); color: var(--text-muted); cursor: pointer; white-space: nowrap; margin-right: var(--space-2);">
                 <input type="checkbox" id="clientsShowAllBrands" onchange="toggleClientsBrandFilter()"> All Brands
               </label>
+              <!-- v29: People Select mode toggle -->
+              <button id="peopleSelectModeBtn" class="identity-action-btn" onclick="togglePeopleSelectMode()" style="margin-right:6px;">Select</button>
               <!-- v25.3: Add Person dropdown -->
               <div style="position:relative;display:inline-block;" id="addPersonDropdownWrap">
                 <button class="identity-action-btn primary" onclick="toggleAddPersonDropdown()">
@@ -136,6 +138,8 @@
             </div>
             <div id="clientsAbList"></div>
           </div>
+          <!-- v28.6: Dedicated container for Team/Report views (prevents destroying pipeline HTML) -->
+          <div id="peopleTypeContent" style="display:none;"></div>
           <div id="clientDetailPanel" class="client-detail-panel" style="display: none;"></div>
         </div>
       </div>
