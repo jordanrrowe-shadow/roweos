@@ -14,9 +14,19 @@
             <!-- Left: Notebook List -->
             <div class="scribe-sidebar" id="scribeSidebar">
               <div class="scribe-sidebar-header">
-                <button class="scribe-new-btn" onclick="createScribeNotebook()">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                  New Notebook
+                <div class="scribe-sidebar-actions">
+                  <button class="scribe-new-btn" onclick="createScribeNotebook()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    New Notebook
+                  </button>
+                  <button class="scribe-new-page-btn" onclick="if(_scribeActiveId)createScribePage(_scribeActiveId);else showToast('Select a notebook first','info');">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    New Page
+                  </button>
+                </div>
+                <button class="scribe-archive-toggle" id="scribeArchiveToggle" onclick="toggleScribeArchiveMode()" title="View archived notebooks">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                  Archived Notebooks
                 </button>
                 <input type="text" class="scribe-search" id="scribeSearchInput" placeholder="Search notebooks..." oninput="filterScribeNotebooks(this.value)">
                 <label class="scribe-brand-filter" onclick="toggleScribeBrandFilter()">
@@ -25,12 +35,6 @@
               </div>
               <div class="scribe-notebook-list" id="scribeNotebookList">
                 <!-- Populated by JS -->
-              </div>
-              <div class="scribe-sidebar-footer">
-                <button class="scribe-archive-toggle" id="scribeArchiveToggle" onclick="toggleScribeArchiveMode()" title="View archived notebooks">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-                  Archived Notebooks
-                </button>
               </div>
             </div>
 
