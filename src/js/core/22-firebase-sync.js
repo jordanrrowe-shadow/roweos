@@ -25,7 +25,7 @@ var SNAPSHOT_KEYS = [
   'roweos_mail_signatures', 'roweos_mail_drafts', 'roweos_mail_address_book',
   'roweos_auto_lab_history', 'roweos_completed_automations', 'roweos_task_history',
   'roweos_custom_operations', 'roweos_custom_agents', 'roweos_generated_brand_ops',
-  'roweos_clients', 'roweos_social_posts', 'roweos_social_workflows',
+  'roweos_social_posts', 'roweos_social_workflows',
   'roweos_notifications', 'roweos_guardrails', 'roweos_identity_config',
   'roweos_theme', 'roweos_primary_brand', 'roweos_calendar_scope',
   'roweos_bloom_default_source', 'roweos_bloom_content_mode', 'roweos_bloom_length',
@@ -1837,7 +1837,7 @@ function applyCloudData(data) {
     localStorage.setItem('roweos_runs', JSON.stringify(existingRunsObj));
   }
   if (data.customOps) localStorage.setItem('roweos_custom_operations', JSON.stringify(data.customOps));
-  if (data.clients) localStorage.setItem('roweos_clients', JSON.stringify(data.clients)); // v16.11
+  // v30.0: Legacy roweos_clients restore disabled — data now in roweos_people
   if (data.pinnedOps) localStorage.setItem('roweos_pinnedOps', JSON.stringify(data.pinnedOps));
   if (data.recentOps) localStorage.setItem('roweos_recentOps', JSON.stringify(data.recentOps));
   
@@ -7921,15 +7921,10 @@ function _syncToFirebaseV2_DEPRECATED() {
   if (customOps.length > 0) {
     writes.push(db.doc(basePath + '/profile/customOps').set({ data: customOps }));
   }
-  // v16.11: Sync clients (strip logos to save space)
-  var clientsData = sp('roweos_clients', []);
-  if (clientsData.length > 0) {
-    var clientsForSync = clientsData.map(function(c) {
-      var copy = {};
-      for (var k in c) { if (c.hasOwnProperty(k) && k !== 'logo') copy[k] = c[k]; }
-      return copy;
-    });
-    writes.push(db.doc(basePath + '/profile/clients').set({ data: clientsForSync, deletedIds: sp('roweos_deleted_clients', []) }));
+  // v30.0: Legacy profile/clients push disabled — people data pushed via manualSyncNow
+  // Clean up stale profile/clients doc if roweos_clients is empty
+  if (sp('roweos_clients', []).length === 0) {
+    writes.push(db.doc(basePath + '/profile/clients').set({ data: [], deletedIds: [] }));
   }
   // v16.8: Sync AI-generated brand ops (were missing from V2 sync)
   // v24.12: Always write even when empty so deletions sync
@@ -9545,14 +9540,8 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         localStorage.setItem('roweos_custom_operations', JSON.stringify(co.data));
       }
     }
-    // v16.11: Restore clients from Firebase (v24.9: deletion tracking)
-    // v25.0: Clients — Firestore is truth, simple cloud-wins
-    if (clientsDoc && clientsDoc.exists) {
-      var cd = clientsDoc.data();
-      if (cd && cd.data && cd.data.length > 0) {
-        safeSyncWrite('roweos_clients', cd.data);
-      }
-    }
+    // v30.0: Legacy roweos_clients restore DISABLED — all client data now in roweos_people
+    // profile/clients cloud doc is stale. getClients() reads from roweos_people.
     // v25.3: Restore people from Firebase (unified people storage)
     if (peopleDoc && peopleDoc.exists) {
       var pd = peopleDoc.data();
