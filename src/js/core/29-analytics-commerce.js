@@ -4783,32 +4783,25 @@ function renderAnalyticsDashboard() {
 
   var brandIdx = (typeof selectedBrand !== 'undefined') ? selectedBrand : 0;
   var revenue = getDashboardRevenue(brandIdx);
-  var clients = getDashboardClients();
   var aiUsage = getDashboardAIUsage(30);
   var health = getDashboardBrandHealth(brandIdx);
 
-  // Top row: 5 stat cards
-  var html = '<div class="kpi-grid kpi-grid-5">';
+  // v30.0: People type selector for pipeline section
+  var _dashPeopleType = localStorage.getItem('roweos_dash_people_type') || 'client';
+
+  // Get people based on selected type
+  var dashPeople = typeof getPeople === 'function' ? getPeople(_dashPeopleType) : [];
+  if (!Array.isArray(dashPeople)) dashPeople = [];
+  var peopleTotal = dashPeople.length;
+
+  // Top row: 4 stat cards (no client-specific cards — people section handles that)
+  var html = '<div class="kpi-grid kpi-grid-4">';
 
   // Revenue card
   html += '<div class="kpi-card">' +
     '<div class="kpi-card-label">Revenue (30d)</div>' +
     '<div class="kpi-card-value">$' + revenue.monthlyRevenue.toLocaleString() + '</div>' +
     '<div class="kpi-card-sub">$' + revenue.outstanding.toLocaleString() + ' outstanding</div>' +
-    '</div>';
-
-  // Clients card
-  html += '<div class="kpi-card">' +
-    '<div class="kpi-card-label">Total Clients</div>' +
-    '<div class="kpi-card-value">' + clients.total + '</div>' +
-    '<div class="kpi-card-sub">' + clients.newThisMonth + ' new this month</div>' +
-    '</div>';
-
-  // Pipeline value card
-  html += '<div class="kpi-card">' +
-    '<div class="kpi-card-label">Pipeline Value</div>' +
-    '<div class="kpi-card-value">$' + Math.round(clients.totalDealValue).toLocaleString() + '</div>' +
-    '<div class="kpi-card-sub">Avg $' + Math.round(clients.avgDealValue).toLocaleString() + '/client</div>' +
     '</div>';
 
   // Brand Health card with donut
@@ -4826,46 +4819,58 @@ function renderAnalyticsDashboard() {
     '<div class="kpi-card-sub">' + aiUsage.sessions + ' sessions, ' + aiUsage.cacheHitRate + '% cache</div>' +
     '</div>';
 
-  html += '</div>'; // close kpi-grid-5
+  // People count card
+  html += '<div class="kpi-card">' +
+    '<div class="kpi-card-label" style="text-transform:capitalize;">' + _dashPeopleType + 's</div>' +
+    '<div class="kpi-card-value">' + peopleTotal + '</div>' +
+    '</div>';
 
-  // Client pipeline funnel
-  html += '<div class="kpi-section-title">Client Pipeline</div>';
-  html += '<div class="kpi-grid kpi-grid-4">';
-  var stageColors = { lead: '#60a5fa', prospect: '#a78bfa', active: '#4ade80', churned: '#ef4444' };
-  var stageNames = ['lead', 'prospect', 'active', 'churned'];
-  for (var si = 0; si < stageNames.length; si++) {
-    var sn = stageNames[si];
-    var count = clients.stages[sn] || 0;
-    html += '<div class="kpi-card kpi-card-sm">' +
-      '<div class="kpi-card-label" style="text-transform:capitalize;">' + sn + '</div>' +
-      '<div class="kpi-card-value" style="color:' + stageColors[sn] + ';">' + count + '</div>' +
-      '</div>';
-  }
-  html += '</div>';
+  html += '</div>'; // close kpi-grid
 
-  // AI model breakdown
-  html += '<div class="kpi-section-title">AI Model Usage</div>';
-  html += '<div class="kpi-model-table">';
-  var models = Object.keys(aiUsage.byModel);
-  models.sort(function(a, b) { return aiUsage.byModel[b].cost - aiUsage.byModel[a].cost; });
-  for (var mi = 0; mi < Math.min(models.length, 6); mi++) {
-    var m = models[mi];
-    var md = aiUsage.byModel[m];
-    var pct = aiUsage.totalCost > 0 ? Math.round((md.cost / aiUsage.totalCost) * 100) : 0;
-    html += '<div class="kpi-model-row">' +
-      '<span class="kpi-model-name">' + m + '</span>' +
-      '<span class="kpi-model-bar"><span style="width:' + pct + '%;background:var(--accent);height:100%;display:block;border-radius:3px;"></span></span>' +
-      '<span class="kpi-model-cost">$' + md.cost.toFixed(2) + '</span>' +
-      '<span class="kpi-model-count">' + md.count + ' calls</span>' +
-      '</div>';
-  }
-  if (models.length === 0) {
-    html += '<div style="padding:12px;color:var(--text-muted);font-size:12px;text-align:center;">No AI usage data yet</div>';
-  }
-  html += '</div>';
+  // People section with type selector
+  html += '<div class="kpi-section-title">' +
+    '<span>People</span>' +
+    '<select onchange="localStorage.setItem(\'roweos_dash_people_type\',this.value);renderAnalyticsDashboard();" style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);font-size:11px;padding:2px 6px;font-family:inherit;cursor:pointer;">' +
+    '<option value="client"' + (_dashPeopleType === 'client' ? ' selected' : '') + '>Clients</option>' +
+    '<option value="team"' + (_dashPeopleType === 'team' ? ' selected' : '') + '>Team</option>' +
+    '<option value="report"' + (_dashPeopleType === 'report' ? ' selected' : '') + '>Direct Reports</option>' +
+    '</select></div>';
 
-  // Custom KPIs (existing, but upgraded UI)
-  html += '<div class="kpi-section-title">Custom KPIs <button class="kpi-add-btn" onclick="addDashboardKPI()">+ Add</button></div>';
+  if (dashPeople.length > 0) {
+    html += '<div class="kpi-grid kpi-grid-3">';
+    for (var pi = 0; pi < dashPeople.length; pi++) {
+      var p = dashPeople[pi];
+      var pName = p.name || p.companyName || 'Unknown';
+      html += '<div class="kpi-card kpi-card-sm" style="display:flex;align-items:center;gap:8px;">' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">' + (pName[0] || '?').toUpperCase() + '</div>' +
+        '<div><div style="font-size:12px;color:var(--text-primary);">' + escapeHtml(pName) + '</div>' +
+        '<div style="font-size:10px;color:var(--text-muted);">' + escapeHtml(p.role || p.pipelineStage || '') + '</div></div>' +
+        '</div>';
+    }
+    html += '</div>';
+  } else {
+    html += '<div style="padding:12px;color:var(--text-muted);font-size:12px;text-align:center;">No ' + _dashPeopleType + 's yet</div>';
+  }
+
+  // Custom KPIs with inline creation form
+  html += '<div class="kpi-section-title">Custom KPIs <button class="kpi-add-btn" onclick="showInlineKPIForm()">+ Add</button></div>';
+  html += '<div id="inlineKPIForm" style="display:none;margin-bottom:12px;">' +
+    '<div class="kpi-card" style="padding:12px;">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">' +
+    '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px;">Title</label>' +
+    '<input type="text" id="kpiFormTitle" placeholder="e.g. Monthly Revenue" style="width:100%;padding:6px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:12px;font-family:inherit;box-sizing:border-box;"></div>' +
+    '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px;">Unit</label>' +
+    '<input type="text" id="kpiFormUnit" placeholder="$, %, pts" style="width:100%;padding:6px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:12px;font-family:inherit;box-sizing:border-box;"></div>' +
+    '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px;">Current Value</label>' +
+    '<input type="number" id="kpiFormValue" placeholder="0" style="width:100%;padding:6px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:12px;font-family:inherit;box-sizing:border-box;"></div>' +
+    '<div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px;">Target</label>' +
+    '<input type="number" id="kpiFormTarget" placeholder="0" style="width:100%;padding:6px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:12px;font-family:inherit;box-sizing:border-box;"></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end;">' +
+    '<button onclick="hideInlineKPIForm()" style="padding:4px 12px;background:none;border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:11px;font-family:inherit;">Cancel</button>' +
+    '<button onclick="submitInlineKPI()" style="padding:4px 12px;background:var(--accent);border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:11px;font-family:inherit;">Add KPI</button>' +
+    '</div></div></div>';
+
   var kpis = getDashboardKPIs();
   if (kpis.length > 0) {
     html += '<div class="kpi-grid kpi-grid-3">';
@@ -4887,25 +4892,30 @@ function renderAnalyticsDashboard() {
     html += '</div>';
   }
 
-  // Team section
-  var teamPeople = typeof getPeople === 'function' ? getPeople('team') : [];
-  var reportPeople = typeof getPeople === 'function' ? getPeople('report') : [];
-  var allTeam = (Array.isArray(teamPeople) ? teamPeople : []).concat(Array.isArray(reportPeople) ? reportPeople : []);
-  if (allTeam.length > 0) {
-    html += '<div class="kpi-section-title">Team</div>';
-    html += '<div class="kpi-grid kpi-grid-3">';
-    for (var ti = 0; ti < allTeam.length; ti++) {
-      var tm = allTeam[ti];
-      html += '<div class="kpi-card kpi-card-sm" style="display:flex;align-items:center;gap:8px;">' +
-        '<div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">' + ((tm.name || '?')[0] || '?').toUpperCase() + '</div>' +
-        '<div><div style="font-size:12px;color:var(--text-primary);">' + escapeHtml(tm.name || 'Unknown') + '</div>' +
-        '<div style="font-size:10px;color:var(--text-muted);">' + escapeHtml(tm.role || tm.personType || '') + '</div></div>' +
-        '</div>';
-    }
-    html += '</div>';
-  }
-
   container.innerHTML = html;
+}
+
+// v30.0: Inline KPI form helpers
+function showInlineKPIForm() {
+  var form = document.getElementById('inlineKPIForm');
+  if (form) form.style.display = '';
+}
+function hideInlineKPIForm() {
+  var form = document.getElementById('inlineKPIForm');
+  if (form) form.style.display = 'none';
+}
+function submitInlineKPI() {
+  var title = document.getElementById('kpiFormTitle');
+  var value = document.getElementById('kpiFormValue');
+  var target = document.getElementById('kpiFormTarget');
+  var unit = document.getElementById('kpiFormUnit');
+  if (!title || !title.value.trim()) { showToast('Enter a KPI title', 'error'); return; }
+  var kpis = getDashboardKPIs();
+  kpis.push({ id: Date.now(), title: title.value.trim(), value: parseFloat(value.value) || 0, target: parseFloat(target.value) || 0, unit: unit.value.trim() });
+  saveDashboardKPIs(kpis);
+  hideInlineKPIForm();
+  renderAnalyticsDashboard();
+  showToast('KPI added', 'success');
 }
 
 // --- KPI CRUD ---
