@@ -1011,7 +1011,8 @@ async function renderSyncInventory() {
     { name: 'Clients', syncKey: 'clients', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_clients') || '[]').length; } catch(e) { return 0; } } },
     { name: 'LifeAI Profiles', syncKey: 'life_profiles', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]').length; } catch(e) { return 0; } } },
     { name: 'Brand Logos', syncKey: 'logos', localCount: function() { var c = 0; for (var i = 0; i < 10; i++) { if (localStorage.getItem('roweos_brand_' + i + '_logo')) c++; } for (var pi = 0; pi < 5; pi++) { if (localStorage.getItem('roweos_lifeai_logo_profile_' + pi)) c++; } return c; } },
-    { name: 'Folio Items', syncKey: 'folio', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_folio_items') || '[]').length; } catch(e) { return 0; } } }
+    { name: 'Folio Items', syncKey: 'folio', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_folio_items') || '[]').length; } catch(e) { return 0; } } },
+    { name: 'Notebooks', syncKey: 'scribe', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_scribe_notebooks') || '[]').length; } catch(e) { return 0; } } }
   ];
 
   // v15.12: Always fetch real cloud counts from V2 subcollections
@@ -1143,6 +1144,16 @@ async function renderSyncInventory() {
             cloudCounts['Possessions'] = 0;
           }
         } catch(pe) { cloudCounts['Possessions'] = 0; }
+        // v29.3: Notebooks cloud count
+        try {
+          var scribeDoc = await db.doc(basePath + '/scribe/notebooks').get();
+          if (scribeDoc.exists) {
+            var sd = scribeDoc.data();
+            cloudCounts['Notebooks'] = sd.notebooks ? sd.notebooks.length : 0;
+          } else {
+            cloudCounts['Notebooks'] = 0;
+          }
+        } catch(se) { cloudCounts['Notebooks'] = 0; }
       } catch (e) { console.warn('[SyncHub] Cloud fetch error:', e); }
     }
   }
