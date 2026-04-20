@@ -24,13 +24,13 @@
                     New Page
                   </button>
                 </div>
-                <input type="text" class="scribe-search" id="scribeSearchInput" placeholder="Search notebooks..." oninput="filterScribeNotebooks(this.value)">
                 <div class="scribe-sidebar-filters">
                   <label class="scribe-brand-filter" onclick="toggleScribeBrandFilter()">
-                    <input type="checkbox" id="scribeBrandFilterCheck"> <span>Show all brands</span>
+                    <input type="checkbox" id="scribeBrandFilterCheck"> <span>All brands</span>
                   </label>
-                  <button class="scribe-archive-toggle" id="scribeArchiveToggle" onclick="toggleScribeArchiveMode()" title="View archived notebooks">Archived Notebooks</button>
+                  <button class="scribe-archive-toggle" id="scribeArchiveToggle" onclick="toggleScribeArchiveMode()">Archived</button>
                 </div>
+                <input type="text" class="scribe-search" id="scribeSearchInput" placeholder="Search..." oninput="filterScribeNotebooks(this.value)">
               </div>
               <div class="scribe-notebook-list" id="scribeNotebookList">
                 <!-- Populated by JS -->

@@ -46969,9 +46969,9 @@
 .scribe-sidebar-actions .scribe-new-btn { flex: 1; }
 .scribe-new-page-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; white-space: nowrap; }
 .scribe-new-page-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-.scribe-sidebar-filters { display: flex; align-items: center; gap: 0; }
-.scribe-sidebar-filters .scribe-brand-filter { flex: 1; margin: 0; }
-.scribe-sidebar-filters .scribe-archive-toggle { flex: 1; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; font-family: inherit; padding: 0; text-align: right; white-space: nowrap; }
+.scribe-sidebar-filters { display: flex; align-items: center; justify-content: space-between; }
+.scribe-sidebar-filters .scribe-brand-filter { margin: 0; font-size: 11px; }
+.scribe-sidebar-filters .scribe-archive-toggle { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; font-family: inherit; padding: 2px 0; }
 .scribe-sidebar-filters .scribe-archive-toggle:hover { color: var(--text-secondary); }
 .scribe-sidebar-filters .scribe-archive-toggle.active { color: var(--accent); }
 .scribe-nb-item {
@@ -47037,7 +47037,7 @@
 .scribe-tinymce-wrap .tox .tox-tbtn:hover { background: var(--bg-tertiary) !important; color: var(--text-primary) !important; }
 .scribe-tinymce-wrap .tox .tox-tbtn--enabled, .scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.2) !important; color: var(--accent) !important; }
 .scribe-tinymce-wrap .tox .tox-statusbar { background: var(--bg-secondary) !important; border-top: 1px solid var(--border-color) !important; color: var(--text-muted) !important; }
-.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 16px; max-height: 200px; display: flex; flex-direction: column; flex-shrink: 1; overflow: hidden; min-height: 0; }
+.scribe-knowledge-panel { border-top: 1px solid var(--border-color); padding: 8px 12px; height: 120px; display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
 .scribe-knowledge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0; }
 .scribe-synth-btn { display: flex; align-items: center; gap: 4px; padding: 4px 10px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; }
 .scribe-synth-btn:hover { border-color: var(--accent); color: var(--text-primary); }

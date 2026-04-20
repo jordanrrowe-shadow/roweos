@@ -255,7 +255,7 @@ function renderScribeNotebookList() { // v29.0:
     var isNbActive = (nb.id === _scribeActiveId && !_scribeActivePageId) ? ' active' : '';
     var isExpanded = _scribeExpandedNotebooks[nb.id];
     var hasPages = nb.pages && nb.pages.length > 0;
-    var snippet = (nb.content || '').replace(/<[^>]*>/g, '').substring(0, 80);
+    var snippet = (nb.content || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim().substring(0, 80);
     if (snippet.length >= 80) snippet += '...';
     var dateStr = '';
     try {
@@ -329,7 +329,7 @@ function filterScribeNotebooks(query) { // v29.0:
   for (var i = 0; i < visible.length; i++) {
     var nb = visible[i];
     var isActive = (nb.id === _scribeActiveId) ? ' active' : '';
-    var snippet = (nb.content || '').replace(/<[^>]*>/g, '').substring(0, 80);
+    var snippet = (nb.content || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim().substring(0, 80);
     if (snippet.length >= 80) snippet += '...';
     var dateStr = '';
     try {
@@ -823,13 +823,9 @@ function toggleScribeKnowledgeMode() { // v29.2:
   var panel = document.getElementById('scribeKnowledgePanel');
   if (panel) {
     if (_scribeKnowledgeMode) {
-      panel.style.maxHeight = '300px';
-      panel.style.padding = '12px 16px';
-      panel.style.borderTop = '1px solid var(--border-color)';
+      panel.style.display = '';
     } else {
-      panel.style.maxHeight = '0';
-      panel.style.padding = '0 16px';
-      panel.style.borderTop = 'none';
+      panel.style.display = 'none';
     }
   }
 }
