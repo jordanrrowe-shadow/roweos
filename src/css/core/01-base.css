@@ -47126,3 +47126,27 @@ html.light-mode .scribe-ai-cancel-btn { background: #f0f0f0; }
 .scribe-resize-bar { width: 40px; height: 3px; border-radius: 2px; background: var(--border-color); transition: background 0.15s; }
 .scribe-resize-handle:hover .scribe-resize-bar, .scribe-resize-handle.dragging .scribe-resize-bar { background: var(--accent); }
 
+/* v29.3: Chat selection toolbar */
+.chat-sel-toolbar { display:flex; gap:4px; background:var(--glass-bg, rgba(30,30,30,0.95)); backdrop-filter:blur(20px); border:1px solid var(--border-color, rgba(255,255,255,0.1)); border-radius:8px; padding:4px 6px; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+.chat-sel-toolbar button { background:none; border:none; color:var(--text-secondary, #999); font-size:11px; padding:4px 8px; cursor:pointer; border-radius:4px; white-space:nowrap; }
+.chat-sel-toolbar button:hover { background:rgba(255,255,255,0.1); color:var(--text-primary, #ece4d8); }
+html.light-mode .chat-sel-toolbar { background:rgba(255,255,255,0.95); border-color:rgba(0,0,0,0.1); box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+html.light-mode .chat-sel-toolbar button { color:#666; }
+html.light-mode .chat-sel-toolbar button:hover { background:rgba(0,0,0,0.05); color:#1a1a1a; }
+
+/* v29.3: Chat section markers */
+.chat-section-wrap { position:relative; padding-left:24px; }
+.chat-section-check { position:absolute; left:0; top:4px; opacity:0; transition:opacity 0.2s; cursor:pointer; accent-color:var(--accent, #a89878); }
+.chat-section-wrap:hover .chat-section-check { opacity:0.6; }
+.chat-section-check:checked { opacity:1 !important; }
+.chat-section-export-bar { display:flex; align-items:center; gap:8px; padding:6px 10px; margin-top:8px; background:rgba(168,152,120,0.1); border:1px solid rgba(168,152,120,0.2); border-radius:6px; font-size:11px; color:var(--text-secondary); }
+.chat-section-export-bar button { background:var(--accent, #a89878); color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer; }
+
+/* v29.3: Chat clip tool */
+.chat-clip-overlay { position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; z-index:5; }
+.chat-clip-handle { position:absolute; left:0; right:0; height:4px; background:var(--accent, #a89878); cursor:ns-resize; pointer-events:all; border-radius:2px; }
+.chat-clip-handle:hover { height:6px; background:var(--accent, #a89878); }
+.chat-clip-region { position:absolute; left:0; right:0; background:rgba(168,152,120,0.15); border-left:2px solid var(--accent, #a89878); border-right:2px solid var(--accent, #a89878); pointer-events:none; }
+.chat-clip-actions { position:absolute; bottom:-36px; right:0; display:flex; gap:6px; pointer-events:all; }
+.chat-clip-actions button { background:var(--accent, #a89878); color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer; }
+

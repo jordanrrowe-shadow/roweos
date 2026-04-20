@@ -4667,6 +4667,20 @@ function appendStreamingMsgActions() {
   actionsDiv.innerHTML = '<button onclick="exportChatMsg(this,\'copy\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy</button><button onclick="exportChatMsg(this,\'docx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Word</button><button onclick="exportChatMsg(this,\'xlsx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg> Excel</button><button onclick="exportChatMsg(this,\'pptx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Slides</button><button onclick="exportChatMsg(this,\'pdf\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13h4M10 17h4M8 9h1"/></svg> PDF</button><button onclick="chatSendAsEmail(this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg> Email</button><button onclick="openChatSaveMenu(this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg> Save</button>';
   bubble.appendChild(actionsDiv);
 
+  // v29.3: Clip tool button
+  var clipBtn = document.createElement('button');
+  clipBtn.className = 'chat-msg-action-btn';
+  clipBtn.title = 'Clip content';
+  clipBtn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg> Clip';
+  clipBtn.onclick = function() { enterClipMode(clipBtn); };
+  actionsDiv.appendChild(clipBtn);
+
+  // v29.3: Section markers for structured content
+  var contentEl = bubble.querySelector('.conversation-message-content');
+  if (contentEl && typeof addSectionMarkers === 'function') {
+    addSectionMarkers(contentEl);
+  }
+
   // v24.27: On mobile, add toggle buttons for code blocks
   if (window.innerWidth <= 768) {
     bubble.querySelectorAll('pre').forEach(function(pre) {
@@ -8302,5 +8316,301 @@ function toggleModeFromGrid() {
   updateMobileModeLabel();
   // Re-render liquid nav since Chat label may change
   renderLiquidNav();
+}
+
+// v29.3: Chat text selection toolbar
+(function() {
+  var _selToolbar = null;
+  var _selRange = null;
+
+  function createSelToolbar() {
+    if (_selToolbar) return _selToolbar;
+    var div = document.createElement('div');
+    div.id = 'chatSelectionToolbar';
+    div.className = 'chat-sel-toolbar';
+    div.style.display = 'none';
+    div.innerHTML = '<button onclick="chatSelAction(\'copy\')">Copy</button>' +
+      '<button onclick="chatSelAction(\'pdf\')">PDF</button>' +
+      '<button onclick="chatSelAction(\'scribe\')">Scribe</button>' +
+      '<button onclick="chatSelAction(\'library\')">Library</button>' +
+      '<button onclick="chatSelAction(\'word\')">Word</button>' +
+      '<button onclick="chatSelAction(\'email\')">Email</button>';
+    document.body.appendChild(div);
+    _selToolbar = div;
+    return div;
+  }
+
+  function showSelToolbar(rect) {
+    var tb = createSelToolbar();
+    tb.style.display = 'flex';
+    tb.style.position = 'fixed';
+    tb.style.left = Math.max(10, rect.left + (rect.width / 2) - 150) + 'px';
+    tb.style.top = Math.max(10, rect.top - 44) + 'px';
+    tb.style.zIndex = '10000';
+  }
+
+  function hideSelToolbar() {
+    if (_selToolbar) _selToolbar.style.display = 'none';
+    _selRange = null;
+  }
+
+  document.addEventListener('mouseup', function(e) {
+    setTimeout(function() {
+      var sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+        hideSelToolbar();
+        return;
+      }
+      var node = sel.anchorNode;
+      while (node && node !== document.body) {
+        if (node.classList && node.classList.contains('conversation-message-content')) break;
+        node = node.parentElement;
+      }
+      if (!node || !node.classList || !node.classList.contains('conversation-message-content')) {
+        hideSelToolbar();
+        return;
+      }
+      _selRange = sel.getRangeAt(0).cloneRange();
+      var rect = sel.getRangeAt(0).getBoundingClientRect();
+      showSelToolbar(rect);
+    }, 50);
+  });
+
+  document.addEventListener('mousedown', function(e) {
+    if (_selToolbar && !_selToolbar.contains(e.target)) {
+      hideSelToolbar();
+    }
+  });
+
+  window.chatSelAction = function(action) {
+    if (!_selRange) return;
+    var sel = window.getSelection();
+    var text = sel ? sel.toString() : '';
+    var container = document.createElement('div');
+    container.appendChild(_selRange.cloneContents());
+    var html = container.innerHTML;
+    hideSelToolbar();
+
+    if (action === 'copy') {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('Copied to clipboard', 'success');
+      });
+    } else if (action === 'pdf') {
+      if (typeof roweosPDF === 'function') {
+        var pdfDiv = document.createElement('div');
+        pdfDiv.innerHTML = html;
+        pdfDiv.style.padding = '20px';
+        document.body.appendChild(pdfDiv);
+        roweosPDF(pdfDiv, 'chat-selection.pdf');
+        document.body.removeChild(pdfDiv);
+      }
+    } else if (action === 'scribe') {
+      if (typeof createScribeNotebook === 'function') {
+        var nb = createScribeNotebook();
+        if (nb && typeof selectScribeNotebook === 'function') {
+          selectScribeNotebook(nb.id);
+          setTimeout(function() {
+            var editor = typeof tinymce !== 'undefined' ? tinymce.get('scribeContentArea') : null;
+            if (editor) editor.setContent(html);
+            if (typeof saveActiveScribeNotebook === 'function') saveActiveScribeNotebook();
+          }, 500);
+          showView('scribe');
+          showToast('Saved to new Scribe notebook', 'success');
+        }
+      }
+    } else if (action === 'library') {
+      if (typeof openSaveConversationToLibrary === 'function') {
+        window._chatSelectionContent = html;
+        openSaveConversationToLibrary();
+      }
+    } else if (action === 'word') {
+      if (typeof exportContentAsDocx === 'function') {
+        exportContentAsDocx(html, 'chat-selection');
+      } else {
+        var blob = new Blob(['<html><body>' + html + '</body></html>'], { type: 'application/msword' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'chat-selection.doc';
+        a.click();
+        showToast('Downloaded as Word doc', 'success');
+      }
+    } else if (action === 'email') {
+      if (typeof chatSendAsEmail === 'function') {
+        window._chatSelectionContent = html;
+        chatSendAsEmail();
+      }
+    }
+  };
+})();
+
+// v29.3: Section markers for structured content export
+function addSectionMarkers(contentEl) {
+  if (!contentEl) return;
+  var sections = contentEl.querySelectorAll('h1, h2, h3, h4, h5, h6, table, pre');
+  if (sections.length < 2) return;
+
+  for (var i = 0; i < sections.length; i++) {
+    var sec = sections[i];
+    if (sec.parentElement && sec.parentElement.classList.contains('chat-section-wrap')) continue;
+    var wrap = document.createElement('div');
+    wrap.className = 'chat-section-wrap';
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'chat-section-check';
+    cb.setAttribute('data-section-idx', String(i));
+    cb.onchange = function() { updateSectionExportBar(contentEl); };
+    sec.parentElement.insertBefore(wrap, sec);
+    wrap.appendChild(cb);
+    wrap.appendChild(sec);
+  }
+}
+
+function updateSectionExportBar(contentEl) {
+  var msgBubble = contentEl.closest('.conversation-message-bubble');
+  if (!msgBubble) return;
+  var checked = contentEl.querySelectorAll('.chat-section-check:checked');
+  var bar = msgBubble.querySelector('.chat-section-export-bar');
+  if (checked.length > 0) {
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'chat-section-export-bar';
+      bar.innerHTML = '<span class="chat-section-export-count"></span>' +
+        '<button onclick="exportCheckedSections(this)">Export Selected</button>';
+      msgBubble.appendChild(bar);
+    }
+    bar.querySelector('.chat-section-export-count').textContent = checked.length + ' section(s) selected';
+    bar.style.display = 'flex';
+  } else if (bar) {
+    bar.style.display = 'none';
+  }
+}
+
+function exportCheckedSections(btn) {
+  var bubble = btn.closest('.conversation-message-bubble');
+  if (!bubble) return;
+  var contentEl = bubble.querySelector('.conversation-message-content');
+  if (!contentEl) return;
+  var checked = contentEl.querySelectorAll('.chat-section-check:checked');
+  var html = '';
+  for (var i = 0; i < checked.length; i++) {
+    var wrap = checked[i].closest('.chat-section-wrap');
+    if (wrap) {
+      var clone = wrap.cloneNode(true);
+      var cbEl = clone.querySelector('.chat-section-check');
+      if (cbEl) cbEl.remove();
+      html += clone.innerHTML;
+    }
+  }
+  if (!html) return;
+  var blob = new Blob(['<html><body>' + html + '</body></html>'], { type: 'application/msword' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'chat-sections.doc';
+  a.click();
+  showToast('Exported ' + checked.length + ' section(s)', 'success');
+}
+
+// v29.3: Clip mode for precise content selection
+var _clipModeActive = false;
+var _clipOverlay = null;
+
+function enterClipMode(btn) {
+  if (_clipModeActive) { exitClipMode(); return; }
+  var bubble = btn.closest('.conversation-message-bubble');
+  if (!bubble) return;
+  var content = bubble.querySelector('.conversation-message-content');
+  if (!content) return;
+
+  _clipModeActive = true;
+  content.style.position = 'relative';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'chat-clip-overlay';
+  overlay.innerHTML = '<div class="chat-clip-handle chat-clip-start" style="top:0"></div>' +
+    '<div class="chat-clip-region"></div>' +
+    '<div class="chat-clip-handle chat-clip-end" style="bottom:0"></div>' +
+    '<div class="chat-clip-actions">' +
+    '<button onclick="exportClipContent(this)">Export Clip</button>' +
+    '<button onclick="exitClipMode()" style="background:none;color:var(--text-muted);">Cancel</button>' +
+    '</div>';
+  content.appendChild(overlay);
+  _clipOverlay = overlay;
+
+  var startHandle = overlay.querySelector('.chat-clip-start');
+  var endHandle = overlay.querySelector('.chat-clip-end');
+  var region = overlay.querySelector('.chat-clip-region');
+
+  function updateRegion() {
+    var startY = parseInt(startHandle.style.top) || 0;
+    var endY = parseInt(endHandle.style.top) || content.scrollHeight;
+    region.style.top = startY + 'px';
+    region.style.height = Math.max(0, endY - startY) + 'px';
+  }
+
+  function makeDraggable(handle) {
+    var startPageY = 0;
+    var startTop = 0;
+    handle.onmousedown = function(e) {
+      e.preventDefault();
+      startPageY = e.pageY;
+      startTop = parseInt(handle.style.top) || 0;
+      function onMove(ev) {
+        var newTop = Math.max(0, Math.min(content.scrollHeight, startTop + (ev.pageY - startPageY)));
+        handle.style.top = newTop + 'px';
+        updateRegion();
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    };
+  }
+
+  makeDraggable(startHandle);
+  endHandle.style.top = content.scrollHeight + 'px';
+  makeDraggable(endHandle);
+  updateRegion();
+}
+
+function exitClipMode() {
+  _clipModeActive = false;
+  if (_clipOverlay && _clipOverlay.parentElement) {
+    _clipOverlay.parentElement.removeChild(_clipOverlay);
+  }
+  _clipOverlay = null;
+}
+
+function exportClipContent(btn) {
+  var overlay = btn.closest('.chat-clip-overlay');
+  if (!overlay) return;
+  var content = overlay.parentElement;
+  if (!content) return;
+
+  var startY = parseInt(overlay.querySelector('.chat-clip-start').style.top) || 0;
+  var endY = parseInt(overlay.querySelector('.chat-clip-end').style.top) || content.scrollHeight;
+
+  var children = content.children;
+  var html = '';
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
+    if (child === overlay) continue;
+    var top = child.offsetTop;
+    var bottom = top + child.offsetHeight;
+    if (bottom > startY && top < endY) {
+      html += child.outerHTML;
+    }
+  }
+
+  exitClipMode();
+  if (!html) { showToast('No content in clip region', 'error'); return; }
+
+  var blob = new Blob(['<html><body>' + html + '</body></html>'], { type: 'application/msword' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'chat-clip.doc';
+  a.click();
+  showToast('Clip exported', 'success');
 }
 
