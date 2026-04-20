@@ -2385,6 +2385,10 @@ function initializeFirebase(shouldSignIn) {
         });
       }
         if (!window._v4MigrationRunning && typeof reconcileOnStartup === 'function') reconcileOnStartup();
+        // v29.3: Trigger per-goal migration after auth resolves
+        if (typeof migratePulseGoalsToPerDoc === 'function') {
+          setTimeout(function() { migratePulseGoalsToPerDoc(); }, 3000);
+        }
 
         // Only complete login if not already done by getRedirectResult
         if (!firebaseLoginCompleted) {

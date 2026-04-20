@@ -2627,40 +2627,50 @@ function setupRealtimeSync() {
     }, function() {});
     firebaseUnsubscribers.push(unsubAutomations);
 
-    // v25.2: Pulse real-time listener -- cloud-authoritative
-    var unsubPulse = db.doc(basePath + '/pulse/main').onSnapshot(function(doc) {
-      if (doc.metadata.hasPendingWrites) return;
+    // v29.3: Pulse goals collection listener (per-goal documents)
+    var unsubPulseGoals = db.collection(basePath + '/pulse/goals').onSnapshot(function(snapshot) {
+      if (snapshot.metadata.hasPendingWrites) return;
       if (!shouldSyncCategory('goals')) return;
-      if (!doc.exists) {
-        // v25.2: Document deleted from cloud -- clear local
-        localStorage.setItem('roweos_pulse_goals', '[]');
-        localStorage.setItem('roweos_pulse_journal', '[]');
-        localStorage.setItem('roweos_pulse2_entries', '[]');
-        localStorage.setItem('roweos_reminders', '[]');
-        if (typeof pulseGoals !== 'undefined') pulseGoals = [];
-        if (typeof renderPulseGoals === 'function') renderPulseGoals();
-        return;
-      }
+      var cloudGoals = [];
+      snapshot.forEach(function(doc) {
+        var g = doc.data();
+        if (!g.id) g.id = doc.id;
+        cloudGoals.push(g);
+      });
+      var _localGoals = [];
+      try { _localGoals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]'); } catch(e) {}
+      // Merge cloud goals with local via timestamp
+      var _mergedGoals = mergeByTimestamp(_localGoals, cloudGoals, 'id');
+      // Handle remote deletions: remove goals in local but not in cloud (with 10s grace for new local goals)
+      var cloudIdMap = {};
+      cloudGoals.forEach(function(g) { if (g.id) cloudIdMap[g.id] = true; });
+      var graceCutoff = Date.now() - 10000;
+      _mergedGoals = _mergedGoals.filter(function(g) {
+        if (cloudIdMap[g.id]) return true;
+        // Keep if recently modified locally (grace period)
+        if (g._modifiedAt && g._modifiedAt > graceCutoff) return true;
+        return false;
+      });
+      localStorage.setItem('roweos_pulse_goals', JSON.stringify(_mergedGoals));
+      if (typeof pulseGoals !== 'undefined') pulseGoals = _mergedGoals;
+      if (typeof renderPulseGoals === 'function') renderPulseGoals();
+      if (typeof renderPulse3Overview === 'function') renderPulse3Overview();
+      if (typeof renderPulse3Checklists === 'function') renderPulse3Checklists();
+      console.log('[Firebase V3.1] Pulse goals collection update:', cloudGoals.length, 'docs');
+    }, function() {});
+    firebaseUnsubscribers.push(unsubPulseGoals);
+
+    // v29.3: Pulse/main doc listener for non-goal data (journal, entries, reminders)
+    var unsubPulseMain = db.doc(basePath + '/pulse/main').onSnapshot(function(doc) {
+      if (doc.metadata.hasPendingWrites) return;
+      if (!doc.exists) return;
       var pulse = doc.data();
-      // v25.2: Use !== undefined to accept empty arrays
-      // v25.2: Use mergeByTimestamp for goals (per-item array needing merge)
-      if (pulse.goals !== undefined) {
-        var _localGoals = [];
-        try { _localGoals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]'); } catch(e) {}
-        var _mergedGoals = mergeByTimestamp(_localGoals, pulse.goals, 'id');
-        localStorage.setItem('roweos_pulse_goals', JSON.stringify(_mergedGoals));
-        if (typeof pulseGoals !== 'undefined') pulseGoals = _mergedGoals;
-      }
-      // Keep safeSyncWrite for non-per-item data
       if (pulse.journal !== undefined) safeSyncWrite('roweos_pulse_journal', pulse.journal);
       if (pulse.entries !== undefined) safeSyncWrite('roweos_pulse2_entries', pulse.entries);
       if (pulse.reminders !== undefined) safeSyncWrite('roweos_reminders', pulse.reminders);
-      // v25.2: Reload in-memory goals from what was just written
-      try { pulseGoals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]'); } catch(e) {}
-      if (typeof renderPulseGoals === 'function') renderPulseGoals();
-      console.log('[Firebase V3.1] Pulse real-time update');
+      console.log('[Firebase V3.1] Pulse/main non-goal update');
     }, function() {});
-    firebaseUnsubscribers.push(unsubPulse);
+    firebaseUnsubscribers.push(unsubPulseMain);
 
     console.log('[Firebase] Real-time sync V3 active (root + library + brands + profile + todos + calendar + automations + pulse listeners)');
   } catch (error) {
@@ -8094,11 +8104,16 @@ function _syncToFirebaseV2_DEPRECATED() {
     writes.push(db.doc(basePath + '/library/life').set({ data: JSON.stringify(lifeLibProfiles) }));
   }
 
-  // Pulse — also sync journal here
-  // v23.17: Sync deleted goals list so deletions persist across devices
+  // v29.3: Pulse — write goals to per-goal subcollection, non-goal data to pulse/main
+  if (shouldSyncCategory('goals')) {
+    var _pushGoals = sp('roweos_pulse_goals', []);
+    _pushGoals.forEach(function(goal) {
+      if (goal && goal.id) {
+        writes.push(db.doc(basePath + '/pulse/goals/' + goal.id).set(goal, { merge: true }));
+      }
+    });
+  }
   writes.push(db.doc(basePath + '/pulse/main').set({
-    goals: shouldSyncCategory('goals') ? sp('roweos_pulse_goals', []) : [],
-    deletedGoals: sp('roweos_deleted_pulse_goals', []),
     journal: sp('roweos_pulse_journal', []),
     insights: sp('roweos_pulse_insights', []),
     entries: sp('roweos_pulse2_entries', []),
@@ -8545,7 +8560,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     db.doc(basePath + '/conversations/agentHistory').get(),
     db.collection(basePath + '/knowledge').get(),
     db.doc(basePath + '/lifeAI/main').get(),
-    db.doc(basePath + '/pulse/main').get(),
+    db.collection(basePath + '/pulse/goals').get(), // v29.3: Per-goal collection
     db.collection(basePath + '/todos').get(),
     db.collection(basePath + '/calendar').get(),
     db.collection(basePath + '/runs').get(),
@@ -8576,7 +8591,8 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     db.doc(basePath + '/profile/inventory').get(),
     db.doc(basePath + '/profile/researchHistory').get(),
     db.doc(basePath + '/profile/deletedAutomationIds').get(), // v28.6: Load deletion tombstones
-    db.doc(basePath + '/scribe/notebooks').get() // v29.2: Scribe notebooks
+    db.doc(basePath + '/scribe/notebooks').get(), // v29.2: Scribe notebooks
+    db.doc(basePath + '/pulse/main').get() // v29.3: Legacy pulse/main for non-goal data + migration fallback
   ]).then(function(results) {
     var profileDoc = results[0];
     var brandsSnap = results[1];
@@ -8585,7 +8601,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     var convAgentDoc = results[4];
     var knowledgeSnap = results[5];
     var lifeDoc = results[6];
-    var pulseDoc = results[7];
+    var pulseGoalsSnap = results[7]; // v29.3: Per-goal collection snapshot
     var todosSnap = results[8];
     var calendarSnap = results[9];
     var runsSnap = results[10];
@@ -8617,6 +8633,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     var researchHistDoc = results[36]; // v27.0
     var deletedAutoIdsDoc = results[37]; // v28.6
     var scribeDoc = results[38]; // v29.2
+    var pulseMainDoc = results[39]; // v29.3: Legacy pulse/main for non-goal data
 
     // Profile
     var cloudLastDevice = null;
@@ -9231,31 +9248,38 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       }
     }
 
-    // Pulse — v25.2: Use mergeByTimestamp for goals, safeSyncWrite for rest
-    if (pulseDoc.exists) {
-      var pulse = pulseDoc.data();
-      // v28.1: v4 stores goals as { data: [...] }, old format stores as { goals: "..." }
-      var _cloudGoals = pulse.goals;
-      if (_cloudGoals === undefined && pulse.data !== undefined) _cloudGoals = pulse.data;
-      if (typeof _cloudGoals === 'string') { try { _cloudGoals = JSON.parse(_cloudGoals); } catch(e) { _cloudGoals = undefined; } }
-      // v25.2: Use mergeByTimestamp for goals (per-item array needing merge)
-      if (_cloudGoals !== undefined && Array.isArray(_cloudGoals)) {
-        var _localGoals2 = [];
-        try {
-          var _lgRaw = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
-          _localGoals2 = Array.isArray(_lgRaw) ? _lgRaw : (Array.isArray(_lgRaw.data) ? _lgRaw.data : []);
-        } catch(e) {}
-        var _mergedGoals2 = mergeByTimestamp(_localGoals2, _cloudGoals, 'id');
-        localStorage.setItem('roweos_pulse_goals', JSON.stringify(_mergedGoals2));
-        if (typeof pulseGoals !== 'undefined') pulseGoals = _mergedGoals2;
-      }
-      if (pulse.journal !== undefined) safeSyncWrite('roweos_pulse_journal', pulse.journal);
-      if (pulse.insights !== undefined) safeSyncWrite('roweos_pulse_insights', pulse.insights);
-      if (pulse.entries !== undefined) safeSyncWrite('roweos_pulse2_entries', pulse.entries);
-      if (pulse.reminders !== undefined) safeSyncWrite('roweos_reminders', pulse.reminders);
-    } else {
-      // v25.2: Pulse doc deleted from cloud -- clear local
-      safeSyncWrite('roweos_pulse_goals', []);
+    // v29.3: Pulse goals — read from per-goal collection, fallback to legacy pulse/main
+    var _cloudGoalsFromCollection = [];
+    pulseGoalsSnap.forEach(function(doc) {
+      var g = doc.data();
+      if (!g.id) g.id = doc.id;
+      _cloudGoalsFromCollection.push(g);
+    });
+    if (_cloudGoalsFromCollection.length === 0 && pulseMainDoc && pulseMainDoc.exists) {
+      // Fallback to legacy pulse/main document for goals
+      var _legacyPulse = pulseMainDoc.data();
+      var _legacyGoals = _legacyPulse.goals;
+      if (_legacyGoals === undefined && _legacyPulse.data !== undefined) _legacyGoals = _legacyPulse.data;
+      if (typeof _legacyGoals === 'string') { try { _legacyGoals = JSON.parse(_legacyGoals); } catch(e) { _legacyGoals = undefined; } }
+      if (_legacyGoals && Array.isArray(_legacyGoals)) _cloudGoalsFromCollection = _legacyGoals;
+    }
+    if (_cloudGoalsFromCollection.length > 0) {
+      var _localGoals2 = [];
+      try {
+        var _lgRaw = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+        _localGoals2 = Array.isArray(_lgRaw) ? _lgRaw : (Array.isArray(_lgRaw.data) ? _lgRaw.data : []);
+      } catch(e) {}
+      var _mergedGoals2 = mergeByTimestamp(_localGoals2, _cloudGoalsFromCollection, 'id');
+      localStorage.setItem('roweos_pulse_goals', JSON.stringify(_mergedGoals2));
+      if (typeof pulseGoals !== 'undefined') pulseGoals = _mergedGoals2;
+    }
+    // v29.3: Non-goal data from pulse/main doc
+    if (pulseMainDoc && pulseMainDoc.exists) {
+      var _pulseMain = pulseMainDoc.data();
+      if (_pulseMain.journal !== undefined) safeSyncWrite('roweos_pulse_journal', _pulseMain.journal);
+      if (_pulseMain.insights !== undefined) safeSyncWrite('roweos_pulse_insights', _pulseMain.insights);
+      if (_pulseMain.entries !== undefined) safeSyncWrite('roweos_pulse2_entries', _pulseMain.entries);
+      if (_pulseMain.reminders !== undefined) safeSyncWrite('roweos_reminders', _pulseMain.reminders);
     }
 
     // v27.3: Todos -- use already-fetched collection snapshot (no second async fetch needed)

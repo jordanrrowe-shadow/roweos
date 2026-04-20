@@ -1034,7 +1034,7 @@ async function renderSyncInventory() {
           db.doc(basePath + '/calendar/main').get(),
           db.collection(basePath + '/runs').get(),
           db.doc(basePath + '/profile/inventory').get(), // v28.3: Single doc, not collection
-          db.doc(basePath + '/pulse/main').get(),
+          db.collection(basePath + '/pulse/goals').get(), // v29.3: Per-goal collection
           db.doc(basePath + '/profile/main').get(),
           db.doc(basePath + '/library/brand').get(),
           db.doc(basePath + '/library/life').get(),
@@ -1075,8 +1075,7 @@ async function renderSyncInventory() {
         } else {
           cloudCounts['Inventory'] = 0;
         }
-        var pulseData = results[7].exists ? results[7].data() : {};
-        cloudCounts['Pulse Goals'] = pulseData.goals ? pulseData.goals.length : 0;
+        cloudCounts['Pulse Goals'] = results[7].size || 0; // v29.3: Collection size
         var profileData = results[8].exists ? results[8].data() : {};
         cloudCounts['Journal'] = profileData.journal ? profileData.journal.length : 0;
         // Library

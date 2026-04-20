@@ -109,7 +109,7 @@ function writeDB(docPath, data, options) {
         'conversations/current': 'conversations/current',
         'conversations/history': 'conversations/history',
         'conversations/agentHistory': 'agent_history/main',
-        'pulse/main': 'pulse/goals',
+        'pulse/main': 'pulse/main', // v29.3: pulse/main no longer carries goals
         'library/brand': 'library/brand',
         'library/life': 'library/life',
         'folio/main': 'folio/main',

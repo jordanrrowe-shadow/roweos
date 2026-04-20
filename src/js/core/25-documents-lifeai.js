@@ -7391,21 +7391,29 @@ var pulseGoals = (function() {
   } catch(e) { return []; }
 })();
 
+// v29.3: Dirty-goal tracking for per-doc sync
+var _dirtyPulseGoalIds = {};
+
+function markGoalDirty(goalId) {
+  if (goalId) _dirtyPulseGoalIds[goalId] = true;
+}
+
 /**
  * v10.6: Save goals to localStorage and sync
  */
 function savePulseGoals() {
-  // v25.2: Backfill id and _modifiedAt for merge support
+  // v29.3: Per-goal document sync
   var now = Date.now();
   pulseGoals.forEach(function(g) {
-    if (!g.id) g.id = 'goal_' + now + '_' + Math.random().toString(36).substr(2, 6);
+    if (!g.id) {
+      g.id = 'goal_' + now + '_' + Math.random().toString(36).substr(2, 6);
+      markGoalDirty(g.id);
+    }
     if (!g._modifiedAt) g._modifiedAt = now;
-    // v28.8: Backfill new goal-level fields
     if (typeof g.isDefault === 'undefined') g.isDefault = false;
     if (typeof g.color === 'undefined') g.color = null;
     if (typeof g.icon === 'undefined') g.icon = null;
     if (typeof g.brandIdx === 'undefined') g.brandIdx = null;
-    // v28.8: Backfill new item-level fields on flat items
     if (g.items && Array.isArray(g.items)) {
       g.items.forEach(function(item) {
         if (typeof item.date === 'undefined') item.date = null;
@@ -7416,7 +7424,6 @@ function savePulseGoals() {
         if (!item._modifiedAt) item._modifiedAt = now;
       });
     }
-    // v28.8: Backfill new item-level fields on section items
     if (g.sections && Array.isArray(g.sections)) {
       g.sections.forEach(function(sec) {
         if (sec.items && Array.isArray(sec.items)) {
@@ -7432,10 +7439,71 @@ function savePulseGoals() {
       });
     }
   });
-  // v25.1: Write-through — localStorage + immediate Firestore
   localStorage.setItem('roweos_pulse_goals', JSON.stringify(pulseGoals));
-  // Only write the goals field — merge:true preserves journal/insights/entries/reminders
-  writeDB('pulse/main', { goals: pulseGoals }, { category: 'goals' });
+  var dirtyIds = Object.keys(_dirtyPulseGoalIds);
+  if (dirtyIds.length === 0) {
+    pulseGoals.forEach(function(goal) {
+      if (goal.id) writeDBDoc('pulse/goals', goal.id, goal, 'goals');
+    });
+  } else {
+    dirtyIds.forEach(function(id) {
+      var goal = null;
+      for (var i = 0; i < pulseGoals.length; i++) {
+        if (pulseGoals[i].id === id) { goal = pulseGoals[i]; break; }
+      }
+      if (goal) writeDBDoc('pulse/goals', goal.id, goal, 'goals');
+    });
+  }
+  _dirtyPulseGoalIds = {};
+}
+
+// v29.3: One-time migration from pulse/main single-doc to per-goal documents
+function migratePulseGoalsToPerDoc() {
+  if (localStorage.getItem('roweos_pulse_goals_v2_migrated') === 'true') return;
+  var db = (typeof getDB === 'function') ? getDB() : null;
+  if (!db || typeof firebaseUser === 'undefined' || !firebaseUser) return;
+  var basePath = 'roweos_users/' + firebaseUser.uid;
+
+  // Read local goals
+  var localGoals = [];
+  try {
+    var raw = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+    localGoals = Array.isArray(raw) ? raw : (Array.isArray(raw.data) ? raw.data : []);
+  } catch(e) {}
+
+  // Read cloud goals from pulse/main (legacy)
+  db.doc(basePath + '/pulse/main').get().then(function(doc) {
+    var cloudGoals = [];
+    if (doc.exists) {
+      var data = doc.data();
+      if (data.goals && Array.isArray(data.goals)) cloudGoals = data.goals;
+      else if (data.data && Array.isArray(data.data)) cloudGoals = data.data;
+    }
+
+    // Merge local and cloud
+    var merged = (typeof mergeByTimestamp === 'function') ? mergeByTimestamp(localGoals, cloudGoals, 'id') : localGoals;
+    if (merged.length === 0) {
+      localStorage.setItem('roweos_pulse_goals_v2_migrated', 'true');
+      console.log('[Pulse Migration] No goals to migrate');
+      return;
+    }
+
+    // Write each goal to its own Firestore doc
+    var now = Date.now();
+    merged.forEach(function(goal) {
+      if (!goal.id) goal.id = 'goal_' + now + '_' + Math.random().toString(36).substr(2, 6);
+      if (!goal._modifiedAt) goal._modifiedAt = now;
+      writeDBDoc('pulse/goals', goal.id, goal, 'goals');
+    });
+
+    // Update local state
+    localStorage.setItem('roweos_pulse_goals', JSON.stringify(merged));
+    if (typeof pulseGoals !== 'undefined') pulseGoals = merged;
+    localStorage.setItem('roweos_pulse_goals_v2_migrated', 'true');
+    console.log('[Pulse Migration] Migrated ' + merged.length + ' goals to per-doc format');
+  }).catch(function(err) {
+    console.warn('[Pulse Migration] Failed:', err.message);
+  });
 }
 
 // v28.8: Get or create a default "Unassigned" goal for the current mode
@@ -7466,6 +7534,7 @@ function getUnassignedGoal() {
     _modifiedAt: now
   };
   pulseGoals.push(goal);
+  markGoalDirty(goal.id); // v29.3
   savePulseGoals();
   return goal;
 }
@@ -7494,6 +7563,7 @@ function addItemToPulseGoal(goalId, itemData) {
   };
   goal.items.push(item);
   goal._modifiedAt = now;
+  markGoalDirty(goal.id); // v29.3
   savePulseGoals();
   return item;
 }
@@ -7518,6 +7588,7 @@ function removeItemFromPulseGoal(goalId, itemId) {
     });
   }
   goal._modifiedAt = Date.now();
+  markGoalDirty(goalId); // v29.3
   savePulseGoals();
 }
 
@@ -8770,6 +8841,7 @@ function toggleGoalCollapse(goalId) {
   var goal = pulseGoals.find(function(g) { return g.id === goalId; });
   if (!goal) return;
   goal.collapsed = !goal.collapsed;
+  markGoalDirty(goalId); // v29.3
   savePulseGoals();
   var card = document.querySelector('.pulse-3-checklist-card[data-goal-id="' + goalId + '"]');
   if (card) card.classList.toggle('collapsed', goal.collapsed);
@@ -8821,6 +8893,7 @@ function togglePulseChecklistItem(goalId, itemId) {
     }
   }
 
+  markGoalDirty(goalId); // v29.3
   savePulseGoals();
   renderPulse3Overview();
   if (window._pulseInlineGoalActive) {
@@ -9448,14 +9521,15 @@ function createGoalFromAI() {
   };
   
   pulseGoals.unshift(newGoal);
+  markGoalDirty(newGoal.id); // v29.3
   savePulseGoals();
   closeNewGoalModal();
-  
+
   // Refresh views
   if (typeof renderPulse3Overview === 'function') renderPulse3Overview();
   if (typeof renderPulse3Checklists === 'function') renderPulse3Checklists();
   if (typeof renderFocus2Categories === 'function') renderFocus2Categories();
-  
+
   showToast('Goal "' + title + '" created with ' + tasks.length + ' tasks!', 'success');
 }
 
@@ -9618,6 +9692,7 @@ function createNewGoal() {
   };
   
   pulseGoals.unshift(newGoal);
+  markGoalDirty(newGoal.id); // v29.3
   savePulseGoals();
   closeNewGoalModal();
   renderPulse3Overview();
@@ -9649,6 +9724,7 @@ function setGoalDueDate(goalId) {
   input.addEventListener('change', function() {
     goal.dueDate = input.value || null;
     goal._modifiedAt = Date.now();
+    markGoalDirty(goalId); // v29.3
     savePulseGoals();
     renderPulse3Checklists();
     showToast(input.value ? 'Due date set' : 'Due date removed', 'success');
@@ -9661,10 +9737,12 @@ function setGoalDueDate(goalId) {
 
 function deleteGoal(goalId) {
   if (!confirm('Delete this goal? This cannot be undone.')) return;
-
-  // v25.1: Write-through delete — remove from array, save immediately
+  // v29.3: Delete Firestore doc immediately to prevent onSnapshot resurrection
+  if (typeof deleteDBDoc === 'function') {
+    deleteDBDoc('pulse/goals', goalId, 'goals');
+  }
   pulseGoals = pulseGoals.filter(function(g) { return g.id !== goalId; });
-  savePulseGoals(); // This now writes to both localStorage and Firestore
+  savePulseGoals();
   renderPulse3Overview();
   renderPulse3Checklists();
   showToast('Goal deleted', 'success');
@@ -9687,6 +9765,7 @@ function deleteGoalItem(goalId, itemId) {
   }
   goal._modifiedAt = Date.now(); // v25.2: Stamp for merge
 
+  markGoalDirty(goalId); // v29.3
   savePulseGoals();
   renderPulse3Overview();
   if (window._pulseInlineGoalActive) {
@@ -9765,6 +9844,7 @@ function addItemToGoal(goalId) {
     });
     goal._modifiedAt = Date.now(); // v25.2: Stamp for merge
 
+    markGoalDirty(goalId); // v29.3
     savePulseGoals();
     renderPulse3Checklists();
   }
@@ -10121,6 +10201,7 @@ function saveInlineGoal(card) {
   };
 
   pulseGoals.unshift(newGoal);
+  markGoalDirty(newGoal.id); // v29.3
   savePulseGoals();
   window._pulseInlineGoalActive = false; // v29.2: Clear before re-render
   renderPulse3Overview();
@@ -10165,6 +10246,7 @@ function createPulseGoalFromAutomation(goalData) {
     completed: false
   };
   pulseGoals.unshift(newGoal);
+  markGoalDirty(newGoal.id); // v29.3
   savePulseGoals();
   if (typeof renderPulse3Overview === 'function') renderPulse3Overview();
   if (typeof renderPulse3Checklists === 'function') renderPulse3Checklists();
@@ -10416,6 +10498,7 @@ function editGoalTitleInline(el, goalId) {
     var newTitle = el.textContent.trim();
     if (newTitle && newTitle !== goal.title) {
       goal.title = newTitle;
+      markGoalDirty(goalId); // v29.3
       savePulseGoals();
     } else {
       el.textContent = goal.title;
@@ -10465,6 +10548,7 @@ function editTaskInline(el, goalId, itemId) {
     var newText = el.textContent.trim();
     if (newText && newText !== item.text) {
       item.text = newText;
+      markGoalDirty(goalId); // v29.3
       savePulseGoals();
     } else {
       el.textContent = item.text;
@@ -10571,6 +10655,7 @@ function editGoal(goalId) {
   var newTitle = prompt('Edit goal title:', goal.title);
   if (newTitle && newTitle.trim()) {
     goal.title = newTitle.trim();
+    markGoalDirty(goalId); // v29.3
     savePulseGoals();
     renderPulse3Checklists();
   }
@@ -10582,11 +10667,12 @@ function editGoal(goalId) {
 function completeGoal(goalId) {
   var goal = pulseGoals.find(function(g) { return g.id === goalId; });
   if (!goal) return;
-  
+
   goal.completed = true;
   goal.completedAt = new Date().toISOString();
   goal._modifiedAt = Date.now(); // v25.2: Stamp for merge
 
+  markGoalDirty(goalId); // v29.3
   savePulseGoals();
   renderPulse3Overview();
   renderPulse3Checklists();
@@ -10637,9 +10723,10 @@ function importChecklistFromChat(title, items, source, rawText) {
   };
   
   pulseGoals.unshift(newGoal);
+  markGoalDirty(newGoal.id); // v29.3
   savePulseGoals();
   showToast('Checklist added to Pulse!', 'success');
-  
+
   // Refresh if on Pulse view
   if (currentView === 'pulse') {
     renderPulse3Overview();
