@@ -3119,12 +3119,12 @@ function applyAccessibilityScale() {
       mainWrapper.style.setProperty('width', compensatedVw, 'important');
       mainWrapper.style.setProperty('max-width', compensatedVw, 'important');
     }
-    // All fixed panel-views — compensate both height and width
+    // All fixed panel-views — compensate height, remove max-width cap
+    // Do NOT set explicit width — fixed views use left/right positioning to auto-stretch
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
       panelViews[pv].style.setProperty('min-height', compensatedVh, 'important');
-      panelViews[pv].style.setProperty('max-width', compensatedVw, 'important');
-      panelViews[pv].style.setProperty('width', compensatedVw, 'important');
+      panelViews[pv].style.setProperty('max-width', 'none', 'important');
     }
   } else {
     appContainer.style.zoom = '';
