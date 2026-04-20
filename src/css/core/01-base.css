@@ -47006,7 +47006,7 @@
 .scribe-nb-perm-delete-btn:hover { color: var(--error, #ef4444); border-color: var(--error, #ef4444); }
 .scribe-main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); min-height: 0; height: 100%; }
 .scribe-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; }
-.scribe-active-editor { display: grid; grid-template-rows: auto auto 1fr auto; height: 100%; overflow: hidden; min-height: 0; }
+.scribe-active-editor { display: grid; grid-template-rows: auto auto 1fr minmax(auto, 20%); height: 100%; overflow: hidden; min-height: 0; }
 .scribe-title-row { display: flex; align-items: center; gap: 8px; padding: 12px 16px 4px; flex-shrink: 0; }
 .scribe-title-input { flex: 1; padding: 4px 8px; background: transparent; border: none; color: var(--text-primary); font-size: 18px; font-weight: 700; font-family: inherit; outline: none; }
 .scribe-title-input::placeholder { color: var(--text-muted); }
@@ -47041,7 +47041,7 @@
 .scribe-synth-btn:hover { border-color: var(--accent); color: var(--text-primary); }
 .scribe-knowledge-toggle-btn { padding: 4px 6px; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
 .scribe-knowledge-toggle-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-.scribe-knowledge-thread { flex: 1; overflow-y: auto; margin-bottom: 8px; min-height: 0; }
+.scribe-knowledge-thread { overflow-y: auto; margin-bottom: 4px; min-height: 0; flex: 0 1 auto; }
 .scribe-knowledge-msg { padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; font-size: 13px; line-height: 1.5; }
 .scribe-knowledge-msg.user { background: rgba(168,152,120,0.1); text-align: right; }
 .scribe-knowledge-msg.ai { background: var(--bg-secondary); }
