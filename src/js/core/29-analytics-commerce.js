@@ -2338,20 +2338,23 @@ function manualSyncNow() {
     if (typeof writeDBConversations === 'function') writeDBConversations();
     if (typeof writeDBTodos === 'function') writeDBTodos();
     if (typeof writeDBCalendar === 'function') writeDBCalendar();
-    if (typeof pulseGoals !== 'undefined' && typeof writeDB === 'function') {
-      writeDB('pulse/main', { goals: pulseGoals }, { category: 'goals' });
+    // v30.0: Pulse goals — write per-doc (not single array to pulse/main)
+    if (typeof pulseGoals !== 'undefined' && typeof writeDBDoc === 'function') {
+      pulseGoals.forEach(function(g) {
+        if (g && g.id) writeDBDoc('pulse_goals', g.id, g, 'goals');
+      });
     }
     // Automations
     var _syncAutos = [];
     try { _syncAutos = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(ae) {}
     _syncAutos.forEach(function(a) { if (a && a.id && typeof writeDBAutomation === 'function') writeDBAutomation(a); });
-    // Clients
-    var _syncClients = [];
-    try { _syncClients = JSON.parse(localStorage.getItem('roweos_clients') || '[]'); } catch(ce) {}
-    if (_syncClients.length > 0 && typeof writeDB === 'function') {
-      var _cd = JSON.parse(JSON.stringify(_syncClients));
-      _cd.forEach(function(c) { if (c.logo && c.logo.length > 50000) c.logo = ''; });
-      writeDB('profile/clients', { data: _cd });
+    // v30.0: People (unified) — replaces legacy roweos_clients push
+    var _syncPeople = [];
+    try { _syncPeople = JSON.parse(localStorage.getItem('roweos_people') || '[]'); } catch(pe) {}
+    if (typeof writeDB === 'function') {
+      var _pd = JSON.parse(JSON.stringify(_syncPeople));
+      _pd.forEach(function(p) { if (p.logo && p.logo.length > 50000) p.logo = ''; });
+      writeDB('profile/people', { data: _pd });
     }
     // Inventory
     try {
