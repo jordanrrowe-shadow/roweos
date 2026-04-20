@@ -1009,6 +1009,8 @@ async function renderSyncInventory() {
     { name: 'Automations', syncKey: 'automations', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_automations') || '[]').length; } catch(e) { return 0; } } },
     { name: 'Custom Ops', syncKey: 'custom_ops', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_custom_operations') || '[]').length; } catch(e) { return 0; } } },
     { name: 'Clients', syncKey: 'clients', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_people') || '[]').filter(function(p) { return p.personType === 'client'; }).length; } catch(e) { return 0; } } },
+    { name: 'Team', syncKey: 'team', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_people') || '[]').filter(function(p) { return p.personType === 'team'; }).length; } catch(e) { return 0; } } },
+    { name: 'Direct Reports', syncKey: 'reports', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_people') || '[]').filter(function(p) { return p.personType === 'report'; }).length; } catch(e) { return 0; } } },
     { name: 'LifeAI Profiles', syncKey: 'life_profiles', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]').length; } catch(e) { return 0; } } },
     { name: 'Brand Logos', syncKey: 'logos', localCount: function() { var c = 0; for (var i = 0; i < 10; i++) { if (localStorage.getItem('roweos_brand_' + i + '_logo')) c++; } for (var pi = 0; pi < 5; pi++) { if (localStorage.getItem('roweos_lifeai_logo_profile_' + pi)) c++; } return c; } },
     { name: 'Folio Items', syncKey: 'folio', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_folio_items') || '[]').length; } catch(e) { return 0; } } },
@@ -1100,11 +1102,16 @@ async function renderSyncInventory() {
         try {
           var _peopleDoc = await db.doc(basePath + '/profile/people').get();
           if (_peopleDoc.exists && _peopleDoc.data().data) {
-            cloudCounts['Clients'] = _peopleDoc.data().data.filter(function(p) { return p.personType === 'client'; }).length;
+            var _allCloudPeople = _peopleDoc.data().data;
+            cloudCounts['Clients'] = _allCloudPeople.filter(function(p) { return p.personType === 'client'; }).length;
+            cloudCounts['Team'] = _allCloudPeople.filter(function(p) { return p.personType === 'team'; }).length;
+            cloudCounts['Direct Reports'] = _allCloudPeople.filter(function(p) { return p.personType === 'report'; }).length;
           } else {
-            cloudCounts['Clients'] = (rootData.clients || []).length;
+            cloudCounts['Clients'] = 0;
+            cloudCounts['Team'] = 0;
+            cloudCounts['Direct Reports'] = 0;
           }
-        } catch(ce) { cloudCounts['Clients'] = 0; }
+        } catch(ce) { cloudCounts['Clients'] = 0; cloudCounts['Team'] = 0; cloudCounts['Direct Reports'] = 0; }
         cloudCounts['LifeAI Profiles'] = lifeData.profiles ? lifeData.profiles.length : 0;
         // v28.3: Brand logos are stored IN brand docs (brand.logo field), not as separate rootData.logos
         // Count cloud brands that have a logo field
@@ -1449,6 +1456,8 @@ function loadSyncCategoryItems(catId, catName) {
     'Automations': { key: 'roweos_automations', extract: function(d) { return d.map(function(a) { return { name: a.name || 'Automation', id: a.id, date: a.createdAt || '' }; }); } },
     'Custom Ops': { key: 'roweos_custom_operations', extract: function(d) { return d.map(function(o) { return { name: o.name || 'Operation', id: o.id, date: o.createdAt || '' }; }); } },
     'Clients': { key: 'roweos_people', filter: function(d) { return d.filter(function(p) { return p.personType === 'client'; }); }, extract: function(d) { return d.map(function(c) { return { name: c.name || c.companyName || 'Client', id: c.id, date: c.createdAt || '' }; }); } },
+    'Team': { key: 'roweos_people', filter: function(d) { return d.filter(function(p) { return p.personType === 'team'; }); }, extract: function(d) { return d.map(function(t) { return { name: t.name || 'Team Member', id: t.id, date: t.createdAt || '' }; }); } },
+    'Direct Reports': { key: 'roweos_people', filter: function(d) { return d.filter(function(p) { return p.personType === 'report'; }); }, extract: function(d) { return d.map(function(r) { return { name: r.name || 'Report', id: r.id, date: r.createdAt || '' }; }); } },
     'LifeAI Profiles': { key: 'roweos_life_profiles', extract: function(d) { return d.map(function(p) { return { name: p.name || 'Profile', id: p.id, date: p.createdAt || '' }; }); } },
     'Brand Logos': { key: null, deletable: true, extract: function() {
       var items = [];
@@ -1564,6 +1573,8 @@ function deleteSyncCategoryItem(catName, itemId) {
   if (!confirm('Permanently delete this item?')) return;
   var configs = {
     'Clients': { key: 'roweos_people', idField: 'id', cloudPath: 'profile/people', cloudDataKey: 'data' },
+    'Team': { key: 'roweos_people', idField: 'id', cloudPath: 'profile/people', cloudDataKey: 'data' },
+    'Direct Reports': { key: 'roweos_people', idField: 'id', cloudPath: 'profile/people', cloudDataKey: 'data' },
     'Pulse Goals': { key: 'roweos_pulse_goals', idField: 'id', cloudPath: null },
     'BrandAI To-Dos': { key: 'roweosTodos', idField: 'id', cloudPath: 'profile/main', cloudDataKey: 'todos' },
     'Journal': { key: 'roweos_journal', idField: 'id', cloudPath: 'profile/main', cloudDataKey: 'journal' },
