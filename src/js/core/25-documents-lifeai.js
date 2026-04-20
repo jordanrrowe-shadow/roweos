@@ -8636,6 +8636,72 @@ function createPulseRing(percent, label, meta) {
   '</div>';
 }
 
+// v29.3: Pulse goal drag-and-drop reordering
+var _pulseDragGoalId = null;
+
+function onPulseGoalDragStart(e, goalId) {
+  _pulseDragGoalId = goalId;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', goalId);
+  var card = e.target.closest('.pulse-3-checklist-card');
+  if (card) {
+    setTimeout(function() { card.classList.add('pulse-drag-active'); }, 0);
+  }
+}
+
+function onPulseGoalDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  var card = e.target.closest('.pulse-3-checklist-card');
+  if (card && card.getAttribute('data-goal-id') !== _pulseDragGoalId) {
+    var allCards = document.querySelectorAll('.pulse-3-checklist-card');
+    for (var i = 0; i < allCards.length; i++) {
+      allCards[i].classList.remove('pulse-drag-over');
+    }
+    card.classList.add('pulse-drag-over');
+  }
+}
+
+function onPulseGoalDragLeave(e) {
+  var card = e.target.closest('.pulse-3-checklist-card');
+  if (card) card.classList.remove('pulse-drag-over');
+}
+
+function onPulseGoalDrop(e, targetGoalId) {
+  e.preventDefault();
+  if (!_pulseDragGoalId || _pulseDragGoalId === targetGoalId) return;
+
+  var fromIdx = -1;
+  var toIdx = -1;
+  for (var i = 0; i < pulseGoals.length; i++) {
+    if (pulseGoals[i].id === _pulseDragGoalId) fromIdx = i;
+    if (pulseGoals[i].id === targetGoalId) toIdx = i;
+  }
+  if (fromIdx === -1 || toIdx === -1) return;
+
+  var moved = pulseGoals.splice(fromIdx, 1)[0];
+  pulseGoals.splice(toIdx, 0, moved);
+
+  for (var j = 0; j < pulseGoals.length; j++) {
+    pulseGoals[j]._sortOrder = j;
+    pulseGoals[j]._modifiedAt = Date.now();
+    markGoalDirty(pulseGoals[j].id);
+  }
+
+  savePulseGoals();
+  renderPulse3Checklists();
+  showToast('Goals reordered', 'success');
+}
+
+function onPulseGoalDragEnd(e) {
+  _pulseDragGoalId = null;
+  var allCards = document.querySelectorAll('.pulse-3-checklist-card');
+  for (var i = 0; i < allCards.length; i++) {
+    allCards[i].classList.remove('pulse-drag-active');
+    allCards[i].classList.remove('pulse-drag-over');
+  }
+}
+
 /**
  * v10.6: Render active checklists
  */
@@ -8660,6 +8726,13 @@ function renderPulse3Checklists() {
     }
     if (gItems.length > 0 && gItems.every(function(it) { return it.completed; })) return false;
     return true;
+  });
+
+  // v29.3: Sort by custom order
+  activeGoals.sort(function(a, b) {
+    var aOrder = typeof a._sortOrder === 'number' ? a._sortOrder : 999;
+    var bOrder = typeof b._sortOrder === 'number' ? b._sortOrder : 999;
+    return aOrder - bOrder;
   });
 
   if (activeGoals.length === 0) {
@@ -8753,9 +8826,10 @@ function renderPulse3Checklists() {
         'Set due date</span>';
     }
 
-    return '<div class="pulse-3-checklist-card' + (goal.collapsed ? ' collapsed' : '') + '" data-goal-id="' + goal.id + '">' +
+    return '<div class="pulse-3-checklist-card' + (goal.collapsed ? ' collapsed' : '') + '" data-goal-id="' + goal.id + '" draggable="true" ondragstart="onPulseGoalDragStart(event, \'' + goal.id + '\')" ondragover="onPulseGoalDragOver(event)" ondragleave="onPulseGoalDragLeave(event)" ondrop="onPulseGoalDrop(event, \'' + goal.id + '\')" ondragend="onPulseGoalDragEnd(event)">' +
       '<div class="pulse-3-checklist-header">' +
         '<div style="display:flex;align-items:flex-start;gap:var(--space-2);flex:1;min-width:0;">' +
+          '<span class="pulse-drag-handle" style="cursor:grab;color:var(--text-muted);margin-right:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg></span>' +
           '<button class="pulse-3-collapse-toggle" onclick="event.stopPropagation();toggleGoalCollapse(\'' + goal.id + '\')" title="Toggle details">' +
             '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>' +
           '</button>' +

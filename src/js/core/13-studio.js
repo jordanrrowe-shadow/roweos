@@ -1273,15 +1273,42 @@ async function generateBrandAIRecommendations() {
       // Save and re-render
       saveBrandAIGeneratedOps();
       renderOperations();
+      // v29.3: Show inline results panel with summary
+      var summaryText = '## Generated ' + operations.length + ' Operations for ' + brand.name + '\n\n';
+      operations.forEach(function(op, i) {
+        summaryText += '### ' + (i + 1) + '. ' + op.name + '\n';
+        summaryText += op.desc + '\n\n';
+        if (op.outputs && op.outputs.length > 0) {
+          summaryText += '**Deliverables:**\n';
+          op.outputs.forEach(function(o) { summaryText += '- ' + o + '\n'; });
+          summaryText += '\n';
+        }
+      });
+      showStudioResultsPanel(summaryText);
       showToast('Generated ' + operations.length + ' recommendations for ' + brand.name, 'success');
     }
   } catch (err) {
     console.error('BrandAI generation error:', err);
     showToast('Failed to generate recommendations', 'error');
   }
-  
+
   btn.classList.remove('generating');
   btn.querySelector('span').textContent = 'Generate BrandAI Operations';
+}
+
+// v29.3: Show AI recommendations in an inline results panel
+function showStudioResultsPanel(content) {
+  var panel = document.getElementById('studioResultsPanel');
+  if (!panel) return;
+
+  var html = '<div class="studio-results-header">' +
+    '<span style="font-size:12px;font-weight:600;color:var(--text-primary);">AI Recommendations</span>' +
+    '<button onclick="document.getElementById(\'studioResultsPanel\').style.display=\'none\'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;">&times;</button>' +
+    '</div>' +
+    '<div class="studio-results-content">' + (typeof marked !== 'undefined' ? marked.parse(content) : escapeHtml(content)) + '</div>';
+
+  panel.innerHTML = html;
+  panel.style.display = 'block';
 }
 
 async function createCustomBrandOperation() {

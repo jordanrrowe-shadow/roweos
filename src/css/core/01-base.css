@@ -47150,3 +47150,20 @@ html.light-mode .chat-sel-toolbar button:hover { background:rgba(0,0,0,0.05); co
 .chat-clip-actions { position:absolute; bottom:-36px; right:0; display:flex; gap:6px; pointer-events:all; }
 .chat-clip-actions button { background:var(--accent, #a89878); color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer; }
 
+/* v29.3: Studio inline results panel */
+.studio-results-panel { margin:var(--space-3) 0; background:rgba(255,255,255,0.03); border:1px solid var(--border-color, rgba(255,255,255,0.08)); border-radius:8px; overflow:hidden; max-height:400px; overflow-y:auto; }
+.studio-results-header { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-bottom:1px solid var(--border-color, rgba(255,255,255,0.08)); }
+.studio-results-content { padding:12px; font-size:13px; line-height:1.6; color:var(--text-secondary); }
+.studio-results-content h1,.studio-results-content h2,.studio-results-content h3 { font-size:14px; color:var(--text-primary); margin:12px 0 4px; }
+.studio-results-content ul,.studio-results-content ol { padding-left:20px; margin:8px 0; }
+.studio-results-content li { margin:4px 0; }
+.studio-results-content code { background:rgba(255,255,255,0.08); padding:1px 4px; border-radius:3px; }
+html.light-mode .studio-results-panel { background:rgba(0,0,0,0.02); }
+
+/* v29.3: Pulse goal drag-and-drop */
+.pulse-3-checklist-card[draggable="true"] { transition:opacity 0.2s, box-shadow 0.2s; }
+.pulse-drag-active { opacity:0.4; }
+.pulse-drag-over { box-shadow:0 0 0 2px var(--accent, #a89878); }
+.pulse-drag-handle { display:inline-flex; align-items:center; opacity:0.3; transition:opacity 0.2s; }
+.pulse-3-checklist-card:hover .pulse-drag-handle { opacity:0.7; }
+
