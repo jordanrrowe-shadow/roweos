@@ -4585,6 +4585,10 @@ function newConversation() {
   _nanobananaLastImage = null; // v15.10: Clear multi-turn image history
   _nanobananaImageHistory = []; // v15.10: Clear multi-turn image history
   window._villainousMode = false; // v29.0: Reset Villainous mode on new chat
+  window._chatModelOverride = null; // v30.1: Reset session-only model overrides (e.g. Nanobanana)
+  if (typeof syncChatModelDisplay === 'function') syncChatModelDisplay(); // v30.1: Refresh pill text
+  if (typeof updateProviderPills === 'function') updateProviderPills(); // v30.1: Refresh active pill
+  if (typeof updateStarButtonProvider === 'function') updateStarButtonProvider(); // v30.1: Refresh star button
   expandChatInput(); // v15.43: Reset collapsed chat input
 
   // v11.0.5: Reset "Add to Pulse" shown flag for new conversation
@@ -6447,6 +6451,12 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       || localStorage.getItem('selectedProvider') || 'anthropic';
     var model = localStorage.getItem('roweos_life_model') || 'claude-sonnet-4-6';
 
+    // v30.1: Session override (Nanobanana image chat) takes precedence
+    if (window._chatModelOverride && window._chatModelOverride.provider) {
+      provider = window._chatModelOverride.provider;
+      model = window._chatModelOverride.model;
+    }
+
     // v20.5: RoweOS AI — resolve to actual provider/model
     if (provider === 'roweos') {
       try {
@@ -7168,6 +7178,12 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
   var settings = brandSettings[brandIdx] || {};
   var provider = settings.provider || brand.provider || 'anthropic';
   var model = settings.model || brand.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.4' : 'gemini-3.1-pro-preview'));
+
+  // v30.1: Session override (Nanobanana image chat) takes precedence over persisted brandSettings
+  if (window._chatModelOverride && window._chatModelOverride.provider) {
+    provider = window._chatModelOverride.provider;
+    model = window._chatModelOverride.model;
+  }
 
   // v20.5: RoweOS AI — resolve to actual provider/model before dispatch
   if (provider === 'roweos') {

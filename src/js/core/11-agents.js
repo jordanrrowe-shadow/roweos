@@ -2759,6 +2759,8 @@ function showView(view) {
     // Just sync the UI to match current mode
     syncBrandDropdowns();
     if (typeof syncMobileBrandV2 === 'function') syncMobileBrandV2(); // v10.5.25: Update mobile dropdown
+    // v30.1: Ensure the mobile/landing model pill text reflects the actual active model
+    if (typeof syncChatModelDisplay === 'function') syncChatModelDisplay();
     // v24.26: Resize helix after view is visible to fix bottom gap
     if (typeof resizeHelix === 'function') { setTimeout(resizeHelix, 50); setTimeout(resizeHelix, 300); }
   }
@@ -3522,14 +3524,18 @@ function updateStarButtonProvider() {
   
   var settings = brandSettings[brandIdx] || { provider: 'anthropic', model: 'claude-sonnet-4-6' };
   var provider = settings.provider || 'anthropic';
-  
+  // v30.1: Session override (Nanobanana) wins over persisted brandSettings
+  var _override = window._chatModelOverride;
+  if (_override && _override.provider) provider = _override.provider;
+
   // Update all star buttons
+  var _effectiveModel = (_override && _override.model) ? _override.model : settings.model;
   document.querySelectorAll('.model-star-btn').forEach(function(btn) {
     btn.classList.remove('provider-anthropic', 'provider-openai', 'provider-google', 'provider-nanobanana', 'provider-roweos');
     btn.classList.add('provider-' + provider);
-    
+
     // Set title to current model
-    var displayName = getModelDisplayName(provider, settings.model);
+    var displayName = (_override && _override.displayName) ? _override.displayName : getModelDisplayName(provider, _effectiveModel);
     btn.title = displayName || 'Select AI Model';
   });
 }
@@ -3547,27 +3553,38 @@ function selectModel(provider, model, displayName) {
     brandIdx = parseInt(brandSelect.value);
   }
   if (isNaN(brandIdx)) brandIdx = 0;
-  
+
   if (!brands[brandIdx]) return;
-  
-  // Update brand settings (not brands array)
-  if (!brandSettings[brandIdx]) {
-    brandSettings[brandIdx] = {};
+
+  // v30.1: Nanobanana is an image-chat tool — treat as session-only override so it
+  // doesn't clobber the brand's persistent Model Configuration default.
+  if (provider === 'nanobanana') {
+    window._chatModelOverride = { provider: provider, model: model, displayName: displayName };
+  } else {
+    window._chatModelOverride = null;
+
+    // Update brand settings (not brands array)
+    if (!brandSettings[brandIdx]) {
+      brandSettings[brandIdx] = {};
+    }
+    brandSettings[brandIdx].provider = provider;
+    brandSettings[brandIdx].model = model;
+
+    // v14.2: Save to localStorage
+    saveBrandModelConfig();
   }
-  brandSettings[brandIdx].provider = provider;
-  brandSettings[brandIdx].model = model;
 
-  // v14.2: Save to localStorage
-  saveBrandModelConfig();
-
-  // v15.18: Also save to LifeAI-specific storage when in life mode
+  // v15.18: Also save to LifeAI-specific storage when in life mode (skip for nanobanana session override)
   var currentAppMode = localStorage.getItem('roweos_app_mode') || 'brand';
-  if (currentAppMode === 'life') {
+  if (currentAppMode === 'life' && provider !== 'nanobanana') {
     localStorage.setItem('roweos_life_provider', provider);
     localStorage.setItem('roweos_life_model', model);
   }
   // Always update selectedProvider for backward compat
   localStorage.setItem('selectedProvider', provider);
+
+  // v30.1: Sync the visible model pill text so users see what model is actually active
+  if (typeof updateModelNameDisplay === 'function') updateModelNameDisplay(displayName);
 
   // Close all dropdowns
   document.querySelectorAll('.provider-dropdown').forEach(function(dropdown) {
@@ -3686,6 +3703,9 @@ function updateModelDropdownCheckmarks(dropdown) {
   if (isNaN(brandIdx)) brandIdx = parseInt(document.getElementById('brand').value) || 0;
   var settings = brandSettings[brandIdx] || {};
   var currentModel = settings.model || 'claude-sonnet-4-6';
+  // v30.1: Session override (Nanobanana) wins over persisted brandSettings
+  var _override = window._chatModelOverride;
+  if (_override && _override.model) currentModel = _override.model;
   
   // Update each dropdown item
   dropdown.querySelectorAll('.model-dropdown-item').forEach(function(item) {
@@ -6585,11 +6605,41 @@ document.addEventListener('click', function(e) {
 
 
 function updateModelNameDisplay(modelName) {
-  var displays = ['currentModelName', 'landingModelName'];
+  // v30.1: Include mobile pill (#mobileModelName) so mobile users see the actual model
+  var displays = ['currentModelName', 'landingModelName', 'mobileModelName'];
   displays.forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.textContent = modelName;
   });
+}
+
+// v30.1: Sync the model pill display to the currently active model (session override or brandSettings)
+function syncChatModelDisplay() {
+  try {
+    var override = window._chatModelOverride;
+    if (override && override.displayName) {
+      updateModelNameDisplay(override.displayName);
+      return;
+    }
+    var currentAppMode = localStorage.getItem('roweos_app_mode') || 'brand';
+    var provider, model;
+    if (currentAppMode === 'life') {
+      provider = localStorage.getItem('roweos_life_provider') || 'anthropic';
+      model = localStorage.getItem('roweos_life_model') || 'claude-sonnet-4-6';
+    } else {
+      var brandSelect = document.getElementById('brand');
+      var brandIdx = brandSelect ? parseInt(brandSelect.value) : 0;
+      if (isNaN(brandIdx)) brandIdx = 0;
+      var settings = (typeof brandSettings !== 'undefined' && brandSettings[brandIdx]) || { provider: 'anthropic', model: 'claude-sonnet-4-6' };
+      provider = settings.provider || 'anthropic';
+      model = settings.model || 'claude-sonnet-4-6';
+    }
+    var displayName = (typeof getModelDisplayName === 'function') ? getModelDisplayName(provider, model) : model;
+    if (!displayName) displayName = model;
+    updateModelNameDisplay(displayName);
+  } catch (e) {
+    console.warn('[syncChatModelDisplay] error:', e);
+  }
 }
 
 
@@ -6599,7 +6649,12 @@ function updateProviderPills() {
   var currentAppMode = localStorage.getItem('roweos_app_mode') || 'brand';
   var currentModel, currentProvider;
 
-  if (currentAppMode === 'life') {
+  // v30.1: Session override (e.g. Nanobanana image chat) takes precedence
+  var override = window._chatModelOverride;
+  if (override && override.provider) {
+    currentProvider = override.provider;
+    currentModel = override.model;
+  } else if (currentAppMode === 'life') {
     currentProvider = localStorage.getItem('roweos_life_provider') || 'anthropic';
     currentModel = localStorage.getItem('roweos_life_model') || 'claude-sonnet-4-6';
   } else {
