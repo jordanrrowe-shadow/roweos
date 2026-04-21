@@ -5236,25 +5236,17 @@ function scheduleCheckInReminders() {
 }
 
 // v25.3: Backward-compatible wrappers for existing client code
+// v30.0: Always nuke legacy roweos_clients on every load — data lives in roweos_people
 function getClients() {
-  var fromPeople = getPeople('client');
-  // v25.3: Fallback to roweos_clients if migration hasn't run
-  // v28.7: Only migrate once — flag prevents resurrection when user deletes all clients
-  if (fromPeople.length === 0 && !localStorage.getItem('roweos_clients_migrated')) {
-    try {
-      var legacy = JSON.parse(localStorage.getItem('roweos_clients') || '[]');
-      if (legacy.length > 0) {
-        legacy.forEach(function(c) { if (!c.personType) c.personType = 'client'; });
-        var all = getPeople();
-        savePeople(all.concat(legacy));
-        localStorage.removeItem('roweos_clients');
-        localStorage.setItem('roweos_clients_migrated', '1');
-        return legacy;
-      }
-    } catch(e) {}
-    localStorage.setItem('roweos_clients_migrated', '1');
-  }
-  return fromPeople;
+  // v30.0: Force-clear legacy key on every call to prevent resurrection on any device
+  try {
+    var _legacyClients = localStorage.getItem('roweos_clients');
+    if (_legacyClients && _legacyClients !== '[]') {
+      localStorage.setItem('roweos_clients', '[]');
+      localStorage.setItem('roweos_clients_migrated', '1');
+    }
+  } catch(e) {}
+  return getPeople('client');
 }
 
 function saveClients(clients) {

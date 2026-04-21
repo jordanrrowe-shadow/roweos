@@ -7921,11 +7921,8 @@ function _syncToFirebaseV2_DEPRECATED() {
   if (customOps.length > 0) {
     writes.push(db.doc(basePath + '/profile/customOps').set({ data: customOps }));
   }
-  // v30.0: Legacy profile/clients push disabled — people data pushed via manualSyncNow
-  // Clean up stale profile/clients doc if roweos_clients is empty
-  if (sp('roweos_clients', []).length === 0) {
-    writes.push(db.doc(basePath + '/profile/clients').set({ data: [], deletedIds: [] }));
-  }
+  // v30.0: Always clear legacy profile/clients cloud doc — all data via profile/people
+  writes.push(db.doc(basePath + '/profile/clients').set({ data: [], deletedIds: [] }));
   // v16.8: Sync AI-generated brand ops (were missing from V2 sync)
   // v24.12: Always write even when empty so deletions sync
   var genBrandOps = sp('roweos_generated_brand_ops', []);
