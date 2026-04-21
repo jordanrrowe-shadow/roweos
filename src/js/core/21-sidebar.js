@@ -1248,6 +1248,24 @@ function initBrandSettings() {
       };
     }
   }
+
+  // v30.1: Nanobanana is an image-chat tool — never a brand's persistent default.
+  // Migrate any legacy persisted nanobanana selection back to RoweOS AI.
+  try {
+    var migrated = false;
+    for (var k in brandSettings) {
+      if (!brandSettings.hasOwnProperty(k) || k === '_modifiedAt') continue;
+      var entry = brandSettings[k];
+      if (entry && entry.provider === 'nanobanana') {
+        entry.provider = 'roweos';
+        entry.model = 'auto';
+        migrated = true;
+      }
+    }
+    if (migrated) saveBrandModelConfig();
+  } catch (mErr) {
+    console.warn('[Storage] brandSettings nanobanana migration error:', mErr);
+  }
 }
 
 // v14.2: Renamed from saveBrandSettings() to avoid collision with Identity page function

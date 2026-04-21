@@ -8442,6 +8442,17 @@ function _mergeCloudBrandSettings(cloudSettings) {
   }
   // Cloud is newer or same -- use cloud
   cloudSettings._modifiedAt = cloudTs || Date.now();
+  // v30.1: Strip legacy persisted nanobanana selections — it's an image-chat tool, never a brand default
+  try {
+    for (var _k in cloudSettings) {
+      if (!cloudSettings.hasOwnProperty(_k) || _k === '_modifiedAt') continue;
+      var _entry = cloudSettings[_k];
+      if (_entry && _entry.provider === 'nanobanana') {
+        _entry.provider = 'roweos';
+        _entry.model = 'auto';
+      }
+    }
+  } catch (_e) {}
   localStorage.setItem(USER_DATA_KEYS.brandSettings, JSON.stringify(cloudSettings));
   console.log('[Sync v23] BrandSettings: cloud newer (' + cloudTs + ' > ' + localTs + '), using cloud');
 }
