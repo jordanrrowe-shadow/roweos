@@ -358,7 +358,20 @@ export default async function handler(req, res) {
 
     var email = (body.email || '').trim().toLowerCase();
     var name = (body.name || '').trim();
-    var source = (body.source || 'unknown').trim();
+    // v30.1: Auto-detect source from Referer when not provided
+    var source = (body.source || '').trim();
+    if (!source) {
+      var referer = (req.headers.referer || req.headers.referrer || '').toLowerCase();
+      if (referer.indexOf('/info') !== -1 || referer.indexOf('roweoswebsite') !== -1 || referer.indexOf('roweos.website') !== -1) {
+        source = 'info_page';
+      } else if (referer.indexOf('/newsletter') !== -1) {
+        source = 'newsletter_page';
+      } else if (referer.indexOf('roweos.com') !== -1) {
+        source = 'main_app';
+      } else {
+        source = 'direct';
+      }
+    }
     // v22.4: New fields for typed signups
     var signupType = (body.type || 'individual').trim().toLowerCase();
     var companyName = (body.companyName || '').trim();
