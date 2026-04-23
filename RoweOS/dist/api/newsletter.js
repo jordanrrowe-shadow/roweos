@@ -424,7 +424,8 @@ export default async function handler(req, res) {
       usedBy: { nullValue: null },
       usedAt: { nullValue: null },
       email: { stringValue: email },
-      note: { stringValue: signupType === 'company' ? ((source === 'info_page' ? 'Info Page' : 'Newsletter') + ' signup: ' + companyName) : ((source === 'info_page' ? 'Info Page' : 'Newsletter') + ' signup') },
+      // v30.1: Source-aware note label
+      note: { stringValue: (function() { var _sl = { info_page: 'Info Page', newsletter_page: 'Newsletter', main_app: 'App', direct: 'Direct' }; var _label = _sl[source] || source; return signupType === 'company' ? (_label + ' signup: ' + companyName) : (_label + ' signup'); })() },
       source: { stringValue: 'newsletter_auto' }
     };
 
@@ -512,7 +513,9 @@ export default async function handler(req, res) {
     // v22.4: Admin push notification (non-fatal)
     var adminUid = 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
     try {
-      var sourceLabel = source === 'info_page' ? 'Info' : 'Newsletter';
+      // v30.1: Source-aware push label
+      var _pushLabels = { info_page: 'Info', newsletter_page: 'Newsletter', main_app: 'App', direct: 'Direct' };
+      var sourceLabel = _pushLabels[source] || source;
       var pushTitle = 'New Signup (' + sourceLabel + '): ' + (signupType === 'company' ? companyName : (name || email));
       var pushBody = (signupType === 'company' ? 'Company' : 'Individual') + ' | ' + email + ' | ' + tier + ' key: ' + accessKeyString;
       await fetch('https://roweos.com/api/push', {
