@@ -234,7 +234,7 @@ export default async function handler(req, res) {
     }
 
     // --- Threads Token Exchange ---
-    if (platform === 'threads') {
+    if (platform === 'threads' && action !== 'refresh') { // v30.1: Exclude refresh so handler at ~315 is reachable
       var tCode = body.code;
       var tRedirectUri = body.redirectUri;
       var tAppId = (body.appId || process.env.ROWEOS_THREADS_APP_ID || '').trim();
