@@ -12,7 +12,9 @@
     "api/create-api-key-checkout.js": { "maxDuration": 15 },
     "api/fetch-site-meta.js": { "maxDuration": 15 },
     "api/gmail-proxy.js": { "maxDuration": 30 },
-    "api/caldav-proxy.js": { "maxDuration": 30 }
+    "api/caldav-proxy.js": { "maxDuration": 30 },
+    "api/email-response.js": { "maxDuration": 15 },
+    "api/send-template-email.js": { "maxDuration": 30 }
   },
   "routes": [
     { "src": "/overview", "dest": "/overview.html" },
