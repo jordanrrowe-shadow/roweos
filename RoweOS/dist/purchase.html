@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS - Purchase</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0a0a0a;
+  --bg-elevated: #141414;
+  --bg-card: #1a1a1a;
+  --gold: #a89878;
+  --gold-dim: rgba(168, 152, 120, 0.3);
+  --gold-subtle: rgba(168, 152, 120, 0.08);
+  --gold-glow: rgba(168, 152, 120, 0.15);
+  --text: #e8e8e8;
+  --text-secondary: #999;
+  --text-muted: #666;
+  --border: rgba(255,255,255,0.08);
+  --border-gold: rgba(168, 152, 120, 0.2);
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Layout ── */
+
+.purchase-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+section {
+  padding: 80px 0;
+}
+
+section + section {
+  border-top: 1px solid var(--border);
+}
+
+/* ── Navigation ── */
+
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.top-nav-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--gold);
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+
+.nav-link {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--gold);
+}
+
+/* ── Hero ── */
+
+.hero {
+  padding-top: 140px;
+  padding-bottom: 80px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 52px;
+  font-weight: 300;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+  line-height: 1.15;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero .subline {
+  font-size: 17px;
+  color: var(--text-secondary);
+  font-weight: 300;
+  margin-bottom: 24px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero .note {
+  font-size: 13px;
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ── Tier Cards ── */
+
+.tiers-section {
+  padding-top: 40px;
+}
+
+.tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.tier-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px 28px 32px;
+  position: relative;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.tier-card:hover {
+  border-color: var(--border-gold);
+}
+
+.tier-card.popular {
+  border-color: var(--gold-dim);
+  box-shadow: 0 0 40px var(--gold-subtle), 0 0 80px rgba(168, 152, 120, 0.04);
+}
+
+.tier-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: var(--gold-subtle);
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.popular .tier-badge {
+  background: var(--gold-dim);
+}
+
+.popular-label {
+  position: absolute;
+  top: -10px;
+  right: 24px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--gold);
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+.tier-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.tier-price {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.tier-price strong {
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.tier-price span {
+  color: var(--text-muted);
+}
+
+.tier-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.tier-features {
+  list-style: none;
+  margin-bottom: 28px;
+}
+
+.tier-features li {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+}
+
+.tier-features li::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  margin-top: 1px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a89878' stroke-width='2'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.tier-features .section-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-top: 10px;
+  padding-bottom: 2px;
+}
+
+.tier-features .section-label::before {
+  display: none;
+}
+
+.tier-cta {
+  width: 100%;
+  padding: 13px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--border-gold);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tier-cta:hover {
+  background: var(--gold-subtle);
+}
+
+.tier-cta:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.popular .tier-cta {
+  background: var(--gold);
+  color: var(--bg);
+  border-color: var(--gold);
+}
+
+.popular .tier-cta:hover {
+  background: #b8a888;
+  border-color: #b8a888;
+}
+
+.tier-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 14px;
+  line-height: 1.5;
+}
+
+/* ── How It Works ── */
+
+.how-section {
+  text-align: center;
+}
+
+.section-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.section-sub {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+}
+
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  text-align: center;
+}
+
+.how-step-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.how-step h3 {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.how-step p {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ── API Keys ── */
+
+.api-section {
+  text-align: center;
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.provider-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 24px;
+  text-align: left;
+  transition: border-color 0.3s;
+}
+
+.provider-card:hover {
+  border-color: var(--border-gold);
+}
+
+.provider-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.provider-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.provider-models {
+  list-style: none;
+  margin-bottom: 20px;
+}
+
+.provider-models li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 3px 0;
+}
+
+.credit-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.credit-btn {
+  flex: 1;
+  padding: 9px 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.credit-btn:hover {
+  border-color: var(--gold-dim);
+  color: var(--gold);
+}
+
+.credit-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.api-note {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── RoweOS AI ── */
+
+.ai-section {
+  text-align: center;
+}
+
+.ai-callout {
+  background: var(--bg-card);
+  border: 1px solid var(--border-gold);
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.ai-callout p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Footer ── */
+
+.purchase-footer {
+  padding: 40px 0;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.footer-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.footer-tagline {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  letter-spacing: 0.3px;
+}
+
+.footer-link {
+  font-size: 13px;
+  color: var(--gold);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.footer-link:hover {
+  opacity: 0.8;
+}
+
+/* ── Mobile ── */
+
+@media (max-width: 860px) {
+  .tiers-grid,
+  .how-steps,
+  .provider-grid {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero h1 {
+    font-size: 38px;
+  }
+
+  section {
+    padding: 56px 0;
+  }
+
+  .hero {
+    padding-top: 110px;
+    padding-bottom: 56px;
+  }
+
+  .purchase-page {
+    padding: 0 20px;
+  }
+
+  .top-nav-inner {
+    padding: 0 20px;
+  }
+
+  .ai-callout {
+    padding: 28px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 30px;
+  }
+
+  .section-heading {
+    font-size: 26px;
+  }
+
+  .tier-card {
+    padding: 28px 22px 26px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <a href="/" class="nav-logo">RoweOS</a>
+    <a href="/" class="nav-link">Back to RoweOS</a>
+  </div>
+</nav>
+
+<div class="purchase-page">
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Intelligence, <em>accessible.</em></h1>
+    <p class="subline">Simple plans. No hidden fees. Start building today.</p>
+    <p class="note">All plans include a free trial with card required. Early adopters lock in pricing permanently.</p>
+  </section>
+
+  <!-- Tier Cards -->
+  <section class="tiers-section">
+    <div class="tiers-grid">
+
+      <!-- Solo -->
+      <div class="tier-card">
+        <div class="tier-badge">Solo</div>
+        <div class="tier-name">Essentials</div>
+        <div class="tier-price"><strong>$29</strong><span>/mo</span></div>
+        <p class="tier-desc">Everything you need to get started with AI-powered brand and life intelligence.</p>
+        <ul class="tier-features">
+          <li>1 Brand profile (Brand Intelligence)</li>
+          <li>1 LifeAI profile (Life Intelligence)</li>
+          <li>Chat with all AI agents</li>
+          <li>Library and Memory</li>
+          <li>Pulse goal tracking</li>
+          <li>Rhythm scheduling</li>
+          <li>Basic Automations</li>
+          <li>Community support</li>
+        </ul>
+        <button class="tier-cta" onclick="purchaseTier('solo')">Start 7-Day Free Trial</button>
+      </div>
+
+      <!-- Founder -->
+      <div class="tier-card popular">
+        <div class="popular-label">Most Popular</div>
+        <div class="tier-badge">Founder</div>
+        <div class="tier-name">Full Access</div>
+        <div class="tier-price"><strong>$59</strong><span>/mo</span></div>
+        <p class="tier-desc">The complete RoweOS experience. Full platform access for brands and life.</p>
+        <ul class="tier-features">
+          <li class="section-label">Everything in Solo, plus:</li>
+          <li>Up to 5 Brand and LifeAI profiles</li>
+          <li>Studio operations and pipelines</li>
+          <li>Full automations and Agent chat</li>
+          <li>Mail and social publishing</li>
+          <li>Focus, Analytics and Identity</li>
+          <li>Cloud sync across devices</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="tier-cta" onclick="purchaseTier('founder')">Start 14-Day Free Trial</button>
+        <p class="tier-note">$59/mo locked in permanently. Yours for life, as long as your subscription stays active.</p>
+      </div>
+
+      <!-- Premium -->
+      <div class="tier-card">
+        <div class="tier-badge">Premium</div>
+        <div class="tier-name">Professional</div>
+        <div class="tier-price"><strong>$79</strong><span>/mo</span></div>
+        <p class="tier-desc">For power users and teams who need advanced features and dedicated support.</p>
+        <ul class="tier-features">
+          <li class="section-label">Everything in Founder, plus:</li>
+          <li>Up to 15 Brand and LifeAI profiles</li>
+          <li>Bloom</li>
+          <li>Brand sharing and config export</li>
+          <li>Private onboarding session</li>
+          <li>24/7 Priority support</li>
+        </ul>
+        <button class="tier-cta" onclick="purchaseTier('premium')">Start 14-Day Free Trial</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-section">
+    <h2 class="section-heading">How It Works</h2>
+    <p class="section-sub">Sign up and start your free trial. When your trial ends, continue at your locked-in price.</p>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-number">1</div>
+        <h3>Choose Your Plan</h3>
+        <p>Select the tier that fits your needs. Every plan includes a free trial.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">2</div>
+        <h3>Set Up Your Workspace</h3>
+        <p>Configure your brands, connect your AI providers, and start building with intelligence.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-number">3</div>
+        <h3>Lock In Your Price</h3>
+        <p>Early adopters keep their rate forever. Your price never increases as long as you stay subscribed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- API Keys -->
+  <section class="api-section">
+    <h2 class="section-heading">AI API Keys</h2>
+    <p class="section-sub">Bring your own keys and pay only for what you use. Or purchase pre-loaded keys from The Rowe Collection.</p>
+
+    <div class="provider-grid">
+
+      <!-- Anthropic -->
+      <div class="provider-card">
+        <div class="provider-name">Anthropic</div>
+        <div class="provider-label">Claude</div>
+        <ul class="provider-models">
+          <li>Sonnet 4.6</li>
+          <li>Opus 4.7</li>
+          <li>Haiku 4.5</li>
+        </ul>
+        <div class="credit-buttons">
+          <button class="credit-btn" onclick="purchaseApiKey('anthropic', 5)">$5</button>
+          <button class="credit-btn" onclick="purchaseApiKey('anthropic', 10)">$10</button>
+          <button class="credit-btn" onclick="purchaseApiKey('anthropic', 20)">$20</button>
+        </div>
+      </div>
+
+      <!-- OpenAI -->
+      <div class="provider-card">
+        <div class="provider-name">OpenAI</div>
+        <div class="provider-label">ChatGPT</div>
+        <ul class="provider-models">
+          <li>GPT-5.4</li>
+          <li>GPT-5.4 Pro</li>
+          <li>GPT-5.4 Thinking</li>
+        </ul>
+        <div class="credit-buttons">
+          <button class="credit-btn" onclick="purchaseApiKey('openai', 5)">$5</button>
+          <button class="credit-btn" onclick="purchaseApiKey('openai', 10)">$10</button>
+          <button class="credit-btn" onclick="purchaseApiKey('openai', 20)">$20</button>
+        </div>
+      </div>
+
+      <!-- Google -->
+      <div class="provider-card">
+        <div class="provider-name">Google</div>
+        <div class="provider-label">Gemini</div>
+        <ul class="provider-models">
+          <li>Gemini 3.1 Pro</li>
+          <li>Deep Research</li>
+          <li>NanoBanana 3 Pro</li>
+        </ul>
+        <div class="credit-buttons">
+          <button class="credit-btn" onclick="purchaseApiKey('google', 5)">$5</button>
+          <button class="credit-btn" onclick="purchaseApiKey('google', 10)">$10</button>
+          <button class="credit-btn" onclick="purchaseApiKey('google', 20)">$20</button>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="api-note">Pay as you go. Purchase pre-loaded API keys and they will be delivered to your RoweOS account automatically on next login.</p>
+  </section>
+
+  <!-- RoweOS AI -->
+  <section class="ai-section">
+    <h2 class="section-heading">RoweOS AI</h2>
+    <div class="ai-callout">
+      <p>When you have all three AI providers configured, RoweOS AI automatically selects the best model for each task. Strategy, research, creative, operations - each request is routed to the model that performs best for that specific operation.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- Footer -->
+<footer class="purchase-footer">
+  <div class="footer-brand">RoweOS</div>
+  <p class="footer-tagline">Operating intelligence, built for brands and life.</p>
+  <a href="/" class="footer-link">roweos.com</a>
+</footer>
+
+<script>
+function purchaseTier(tier) {
+  var btn = event.target;
+  var originalText = btn.textContent;
+  btn.textContent = 'Redirecting...';
+  btn.disabled = true;
+  fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tier: tier, email: null })
+  }).then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  })
+  .catch(function() {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  });
+}
+
+function purchaseApiKey(provider, amount) {
+  var btn = event.target;
+  var originalText = btn.textContent;
+  btn.textContent = '...';
+  btn.disabled = true;
+  fetch('/api/create-api-key-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ provider: provider, amount: amount, email: null })
+  }).then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  })
+  .catch(function() {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  });
+}
+</script>
+
+</body>
+</html>

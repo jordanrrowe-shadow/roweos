@@ -391,7 +391,7 @@ function buildSubscriptionInfo(userName) {
   var providers = [
     { name: 'Anthropic (Claude)', models: 'Sonnet 4.6, Opus 4.7, Haiku 4.5' },
     { name: 'OpenAI (ChatGPT)', models: 'GPT-5.4, GPT-5.4 Pro, GPT-5.4 Thinking' },
-    { name: 'Google (Gemini)', models: 'Gemini 2.5 Pro, Gemini 2.5 Flash' }
+    { name: 'Google (Gemini)', models: 'Gemini 3.1 Pro, Deep Research, NanoBanana 3 Pro' }
   ];
   for (var i = 0; i < providers.length; i++) {
     parts.push('<div style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:14px 16px;margin:0 0 10px;">');

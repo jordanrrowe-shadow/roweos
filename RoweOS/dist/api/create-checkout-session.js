@@ -76,7 +76,7 @@ export default async function handler(req, res) {
     mode: 'subscription',
     line_items: lineItems,
     success_url: 'https://roweos.com/?' + successParams + '&session_id={CHECKOUT_SESSION_ID}',
-    cancel_url: 'https://roweos.com/info#pricing',
+    cancel_url: 'https://roweos.com/purchase',
     metadata: metadata,
     subscription_data: {
       trial_period_days: trialDays[tier] || 7,

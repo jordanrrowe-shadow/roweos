@@ -42,6 +42,7 @@
     { "src": "/executive-summary", "dest": "/executive-summary.html" },
     { "src": "/blake", "dest": "/blake.html" },
     { "src": "/blake-studio", "dest": "/blake-studio.html" },
+    { "src": "/purchase", "dest": "/purchase.html" },
     { "src": "/tinymce/(.*)", "dest": "/tinymce/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
