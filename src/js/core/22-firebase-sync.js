@@ -4506,6 +4506,9 @@ function renderAccountFolder() {
   }
   html += '<button onclick="openManageSubscription()" style="padding:10px 16px;background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);font-size:13px;cursor:pointer;">Manage Billing</button>';
   html += '<button onclick="showAccessKeyInput()" style="padding:10px 16px;background:var(--bg-tertiary);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);font-size:13px;cursor:pointer;">Enter Access Key</button>';
+  html += '<button onclick="signOutFirebase()" style="padding:10px 16px;background:var(--bg-tertiary);color:#ef4444;border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-md);font-size:13px;cursor:pointer;margin-left:auto;">';
+  html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+  html += 'Sign Out</button>';
   html += '</div>';
 
   // Show/hide locked features toggle
