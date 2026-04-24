@@ -124,7 +124,7 @@ function wrapEmail(subtitle, bodyHtml) {
   parts.push('<p style="font-family:\'DM Sans\',sans-serif;font-size:13px;color:#888;margin:0 0 16px;">Simple plans. No hidden fees.</p>');
   parts.push('<table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>');
   parts.push('<td style="padding-right:8px;"><a href="https://roweos.com/purchase" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">View Plans</a></td>');
-  parts.push('<td style="padding-left:8px;"><a href="https://roweos.com/info" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">Get API Keys</a></td>');
+  parts.push('<td style="padding-left:8px;"><a href="https://roweos.com/purchase" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">Get API Keys</a></td>');
   parts.push('</tr></table>');
   parts.push('</td></tr>');
   // Footer
@@ -413,7 +413,7 @@ function buildSubscriptionInfo(userName) {
 
   // CTA: Get API Keys
   parts.push('<div style="text-align:center;margin:0 0 32px;">');
-  parts.push(ctaButton('https://roweos.com/info', 'Get API Keys'));
+  parts.push(ctaButton('https://roweos.com/purchase', 'Get API Keys'));
   parts.push('</div>');
 
   // Divider
