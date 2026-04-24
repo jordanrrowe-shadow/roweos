@@ -45,6 +45,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid tier. Use: solo, founder, or premium' });
   }
 
+  // v30.5: Trial periods for all tiers (card captured upfront)
+  var trialDays = { founder: 14, solo: 7, premium: 14 };
+
   // API key one-time price IDs (same as create-api-key-checkout.js)
   var apiKeyPriceMap = {
     google: { 5: 'price_1T4SF40XfMh3c11xcycUdSNl', 10: 'price_1T4S950XfMh3c11xUV4rwuWp', 20: 'price_1T4SEq0XfMh3c11xjOPXw3qa' },
@@ -75,7 +78,11 @@ export default async function handler(req, res) {
     success_url: 'https://roweos.com/?' + successParams + '&session_id={CHECKOUT_SESSION_ID}',
     cancel_url: 'https://roweos.com/info#pricing',
     metadata: metadata,
-    subscription_data: { metadata: { tier: tier } },
+    subscription_data: {
+      trial_period_days: trialDays[tier] || 7,
+      metadata: { tier: tier }
+    },
+    payment_method_collection: 'always',
     allow_promotion_codes: true
   };
 

@@ -1,5 +1,5 @@
-// v30.0: Template email sender serverless function
-// Sends one of 5 email templates to a user via Resend API
+// v30.4: Template email sender serverless function
+// Sends one of 6 email templates to a user via Resend API
 // POST { template, userId, userEmail, userName, callerUid, metadata }
 // Admin-only: callerUid must match hardcoded admin UID
 
@@ -319,6 +319,108 @@ function buildCheckin(userId, userName) {
   };
 }
 
+// v30.4: Subscription Info email template
+function buildSubscriptionInfo(userName) {
+  var greeting = userName ? ('Hi ' + escapeHtml(userName) + ',') : 'Hi there,';
+  var parts = [];
+
+  parts.push('<p style="margin:0 0 16px;font-size:15px;color:#e0e0e0;line-height:1.6;">' + greeting + '</p>');
+  parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.6;">Here is everything you need to know about RoweOS plans, AI API keys, and smart model routing.</p>');
+
+  // --- Section 1: Choose Your Plan ---
+  parts.push('<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">Choose Your Plan</h2>');
+
+  // Tier comparison table (email-safe table layout)
+  parts.push('<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-collapse:separate;border-spacing:0;">');
+
+  // Header row
+  parts.push('<tr>');
+  parts.push('<td style="padding:10px 8px;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #2a2a2a;"></td>');
+  parts.push('<td style="padding:10px 8px;font-size:11px;color:#a89878;text-transform:uppercase;letter-spacing:1px;font-weight:600;border-bottom:1px solid #2a2a2a;text-align:center;">Solo</td>');
+  parts.push('<td style="padding:10px 8px;font-size:11px;color:#a89878;text-transform:uppercase;letter-spacing:1px;font-weight:600;border-bottom:1px solid #2a2a2a;text-align:center;">Founder</td>');
+  parts.push('<td style="padding:10px 8px;font-size:11px;color:#a89878;text-transform:uppercase;letter-spacing:1px;font-weight:600;border-bottom:1px solid #2a2a2a;text-align:center;">Premium</td>');
+  parts.push('</tr>');
+
+  // Price row
+  parts.push('<tr>');
+  parts.push('<td style="padding:10px 8px;font-size:12px;color:#888;border-bottom:1px solid #1e1e1e;">Price</td>');
+  parts.push('<td style="padding:10px 8px;font-size:14px;color:#e0e0e0;font-weight:600;text-align:center;border-bottom:1px solid #1e1e1e;">$29/mo</td>');
+  parts.push('<td style="padding:10px 8px;font-size:14px;color:#e0e0e0;font-weight:600;text-align:center;border-bottom:1px solid #1e1e1e;">$59/mo</td>');
+  parts.push('<td style="padding:10px 8px;font-size:14px;color:#e0e0e0;font-weight:600;text-align:center;border-bottom:1px solid #1e1e1e;">$79/mo</td>');
+  parts.push('</tr>');
+
+  // Trial row
+  parts.push('<tr>');
+  parts.push('<td style="padding:10px 8px;font-size:12px;color:#888;border-bottom:1px solid #1e1e1e;">Trial</td>');
+  parts.push('<td style="padding:10px 8px;font-size:13px;color:#ccc;text-align:center;border-bottom:1px solid #1e1e1e;">7 days free</td>');
+  parts.push('<td style="padding:10px 8px;font-size:13px;color:#ccc;text-align:center;border-bottom:1px solid #1e1e1e;">14 days free</td>');
+  parts.push('<td style="padding:10px 8px;font-size:13px;color:#ccc;text-align:center;border-bottom:1px solid #1e1e1e;">14 days free</td>');
+  parts.push('</tr>');
+
+  // Brands row
+  parts.push('<tr>');
+  parts.push('<td style="padding:10px 8px;font-size:12px;color:#888;border-bottom:1px solid #1e1e1e;">Brands</td>');
+  parts.push('<td style="padding:10px 8px;font-size:13px;color:#ccc;text-align:center;border-bottom:1px solid #1e1e1e;">1 Brand</td>');
+  parts.push('<td style="padding:10px 8px;font-size:13px;color:#ccc;text-align:center;border-bottom:1px solid #1e1e1e;">Up to 5</td>');
+  parts.push('<td style="padding:10px 8px;font-size:13px;color:#ccc;text-align:center;border-bottom:1px solid #1e1e1e;">Up to 15</td>');
+  parts.push('</tr>');
+
+  // Features row
+  parts.push('<tr>');
+  parts.push('<td style="padding:10px 8px;font-size:12px;color:#888;">Features</td>');
+  parts.push('<td style="padding:10px 8px;font-size:12px;color:#ccc;text-align:center;line-height:1.5;">Studio, Identity, Analytics, Mail</td>');
+  parts.push('<td style="padding:10px 8px;font-size:12px;color:#ccc;text-align:center;line-height:1.5;">+ Automations, Pipelines, Social, Cloud Sync</td>');
+  parts.push('<td style="padding:10px 8px;font-size:12px;color:#ccc;text-align:center;line-height:1.5;">+ Bloom, Brand Sharing, Priority Support</td>');
+  parts.push('</tr>');
+
+  parts.push('</table>');
+
+  // CTA: Choose Your Plan
+  parts.push('<div style="text-align:center;margin:0 0 32px;">');
+  parts.push(ctaButton('https://roweos.com', 'Choose Your Plan'));
+  parts.push('</div>');
+
+  // Divider
+  parts.push('<div style="border-top:1px solid #2a2a2a;margin:0 0 24px;"></div>');
+
+  // --- Section 2: AI API Keys ---
+  parts.push('<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">AI API Keys - Pay As You Go</h2>');
+  parts.push('<p style="margin:0 0 20px;font-size:14px;color:#ccc;line-height:1.6;">RoweOS works with your own API keys from three providers:</p>');
+
+  // Provider cards
+  var providers = [
+    { name: 'Anthropic (Claude)', models: 'Sonnet 4.6, Opus 4.7, Haiku 4.5' },
+    { name: 'OpenAI (ChatGPT)', models: 'GPT-5.4, GPT-5.4 Pro, GPT-5.4 Thinking' },
+    { name: 'Google (Gemini)', models: 'Gemini 2.5 Pro, Gemini 2.5 Flash' }
+  ];
+  for (var i = 0; i < providers.length; i++) {
+    parts.push('<div style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:14px 16px;margin:0 0 10px;">');
+    parts.push('<p style="margin:0 0 4px;font-size:14px;color:#e0e0e0;font-weight:500;">' + escapeHtml(providers[i].name) + '</p>');
+    parts.push('<p style="margin:0;font-size:12px;color:#888;">Latest: ' + escapeHtml(providers[i].models) + '</p>');
+    parts.push('</div>');
+  }
+
+  parts.push('<p style="margin:16px 0 20px;font-size:14px;color:#ccc;line-height:1.6;">Bring your own keys and pay only for what you use. Or purchase pre-loaded keys from The Rowe Collection.</p>');
+
+  // CTA: Get API Keys
+  parts.push('<div style="text-align:center;margin:0 0 32px;">');
+  parts.push(ctaButton('https://roweos.com/info', 'Get API Keys'));
+  parts.push('</div>');
+
+  // Divider
+  parts.push('<div style="border-top:1px solid #2a2a2a;margin:0 0 24px;"></div>');
+
+  // --- Section 3: RoweOS AI - Smart Routing ---
+  parts.push('<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">RoweOS AI - Unlock Smart Routing</h2>');
+  parts.push('<p style="margin:0 0 16px;font-size:14px;color:#ccc;line-height:1.7;">When you have all three AI providers configured, RoweOS AI automatically selects the best model for each task. Strategy questions route to Claude. Creative content routes to GPT. Research and analysis routes to Gemini.</p>');
+  parts.push('<p style="margin:0;font-size:14px;color:#ccc;line-height:1.7;">One prompt, the right model, every time.</p>');
+
+  return {
+    subject: 'RoweOS Plans, API Keys, and AI Routing',
+    html: wrapEmail('Subscription', parts.join('\n'))
+  };
+}
+
 // --- Template router ---
 
 function buildTemplate(template, userId, userName, metadata) {
@@ -333,6 +435,8 @@ function buildTemplate(template, userId, userName, metadata) {
       return buildAccessKeyDelivery(metadata, userName);
     case 'checkin':
       return buildCheckin(userId, userName);
+    case 'subscription_info':
+      return buildSubscriptionInfo(userName);
     default:
       return null;
   }
@@ -416,7 +520,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Validate template
-    var validTemplates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin'];
+    var validTemplates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info'];
     if (validTemplates.indexOf(template) === -1) {
       return res.status(400).json({ error: 'Invalid template. Must be one of: ' + validTemplates.join(', ') });
     }
