@@ -1949,10 +1949,10 @@ function renderDayStackView() {
       var isSelected = selectedDayItem && selectedDayItem.type === 'event' && selectedDayItem.id === event.id;
       html += '<div class="day-stack-item event ' + (isSelected ? 'selected' : '') + '" style="border-left-color: ' + brandColor + ';" onclick="selectDayItem(\'event\', ' + event.id + ')">';
       html += '<div class="day-stack-content">';
-      html += '<div class="day-stack-title">' + event.title + '</div>';
+      html += '<div class="day-stack-title">' + escapeHtml(event.title || '') + '</div>'; // v30.1: XSS fix
       html += '<div class="day-stack-meta">';
-      html += '<span class="day-stack-brand"><span class="day-stack-brand-dot" style="background:' + brandColor + '"></span>' + event.brand + '</span>';
-      html += '<span style="text-transform:capitalize">' + event.status + '</span>';
+      html += '<span class="day-stack-brand"><span class="day-stack-brand-dot" style="background:' + brandColor + '"></span>' + escapeHtml(event.brand || '') + '</span>'; // v30.1: XSS fix
+      html += '<span style="text-transform:capitalize">' + escapeHtml(event.status || '') + '</span>'; // v30.1: XSS fix
       html += '</div>';
       html += '</div>';
       html += '</div>';
@@ -1969,7 +1969,7 @@ function renderDayStackView() {
       html += '<div class="day-stack-item task ' + (task.completed ? 'completed' : '') + ' ' + (isSelected ? 'selected' : '') + '" onclick="selectDayItem(\'task\', ' + task.id + ')">';
       html += '<div class="day-stack-check" onclick="event.stopPropagation();toggleDayTaskComplete(' + task.id + ')">' + (task.completed ? '✓' : '') + '</div>';
       html += '<div class="day-stack-content">';
-      html += '<div class="day-stack-title">' + task.text + '</div>';
+      html += '<div class="day-stack-title">' + escapeHtml(task.text || '') + '</div>'; // v30.1: XSS fix
       if (task.subtasks && task.subtasks.length > 0) {
         var completedSubs = task.subtasks.filter(function(s) { return s.done; }).length;
         html += '<div class="day-stack-meta">' + completedSubs + '/' + task.subtasks.length + ' subtasks</div>';
@@ -2023,7 +2023,7 @@ function renderDayHourView() {
     eventEl.style.background = brandColor + '25';
     eventEl.style.borderLeftColor = brandColor;
     eventEl.onclick = function() { selectDayItem('event', event.id); };
-    eventEl.innerHTML = '<div style="font-weight:600">' + event.title + '</div><div style="font-size:11px;opacity:0.7">' + event.brand + '</div>';
+    eventEl.innerHTML = '<div style="font-weight:600">' + escapeHtml(event.title || '') + '</div><div style="font-size:11px;opacity:0.7">' + escapeHtml(event.brand || '') + '</div>'; // v30.1: XSS fix
     
     var eventsContainer = container.querySelector('.day-hour-row-item[data-hour="' + startHour + '"] .day-hour-events');
     if (eventsContainer) {
@@ -2037,7 +2037,7 @@ function renderDayHourView() {
   var allDayHtml = '';
   dayTasks.forEach(function(task) {
     allDayHtml += '<div class="day-allday-event" style="background: rgba(201,168,108,0.15); color: var(--accent); cursor: pointer;" onclick="selectDayItem(\'task\', ' + task.id + ')">';
-    allDayHtml += (task.completed ? '✓ ' : '○ ') + task.text;
+    allDayHtml += (task.completed ? '✓ ' : '○ ') + escapeHtml(task.text || ''); // v30.1: XSS fix
     allDayHtml += '</div>';
   });
   if (allDayHtml === '') {
@@ -2082,14 +2082,14 @@ function renderEventSidebar(eventId) {
   var brandColor = getBrandColor(event.brand);
   var html = '<div class="day-sidebar-detail">';
   html += '<div class="day-sidebar-color-bar" style="background: ' + brandColor + ';"></div>';
-  html += '<div class="day-sidebar-title">' + event.title + '</div>';
-  html += '<div class="day-sidebar-brand"><span style="width:8px;height:8px;border-radius:50%;background:' + brandColor + ';"></span>' + event.brand + ' • ' + event.status + '</div>';
-  
+  html += '<div class="day-sidebar-title">' + escapeHtml(event.title || '') + '</div>'; // v30.1: XSS fix
+  html += '<div class="day-sidebar-brand"><span style="width:8px;height:8px;border-radius:50%;background:' + brandColor + ';"></span>' + escapeHtml(event.brand || '') + ' • ' + escapeHtml(event.status || '') + '</div>'; // v30.1: XSS fix
+
   // Notes
   html += '<div class="day-sidebar-section">';
   html += '<div class="day-sidebar-section-header">Notes</div>';
   html += '<div class="day-sidebar-notes">';
-  html += '<textarea placeholder="Add notes..." onchange="updateEventNotes(' + eventId + ', this.value)">' + (event.notes || '') + '</textarea>';
+  html += '<textarea placeholder="Add notes..." onchange="updateEventNotes(' + eventId + ', this.value)">' + escapeHtml(event.notes || '') + '</textarea>'; // v30.1: XSS fix
   html += '</div></div>';
   
   // AI Suggestions
@@ -2120,7 +2120,7 @@ function renderTaskSidebar(taskId) {
   
   var html = '<div class="day-sidebar-detail">';
   html += '<div class="day-sidebar-color-bar" style="background: var(--accent);"></div>';
-  html += '<div class="day-sidebar-title">' + task.text + '</div>';
+  html += '<div class="day-sidebar-title">' + escapeHtml(task.text || '') + '</div>'; // v30.1: XSS fix
   // v10.5.25: Show "Life" instead of "_life"
   var brandDisplay = task.brand === '_life' ? 'Life' : (task.brand || 'General Task');
   html += '<div class="day-sidebar-brand">' + brandDisplay + ' • ' + (task.completed ? 'Completed' : 'Pending') + '</div>';
@@ -5804,6 +5804,186 @@ function addMessageToThread(role, content) {
   thread.scrollTop = thread.scrollHeight;
 }
 
+// v30.1: SmartAI image generation handler — auto-detects image requests and routes to best available provider
+async function handleSmartImageGeneration(userMessage, btnId) {
+  var btn = btnId ? document.getElementById(btnId) : null;
+  try {
+    var hasNanobanana = !!getNanobananaKey();
+    var hasOpenAI = false;
+    try {
+      var _keys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}');
+      hasOpenAI = !!_keys.openai;
+    } catch(e) {}
+    if (!hasOpenAI) hasOpenAI = !!localStorage.getItem('openaiApiKey');
+
+    if (!hasNanobanana && !hasOpenAI) {
+      showToast('No image generation API key available. Configure a Google or OpenAI key in Settings.', 'error');
+      if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
+      setAgentStatus('ready');
+      return;
+    }
+
+    // Set up conversation UI
+    showConversationView();
+    renderConversation();
+
+    var visibleBtn = document.getElementById('followupBtn');
+    if (visibleBtn) { visibleBtn.disabled = true; visibleBtn.classList.add('sending'); }
+    setAgentStatus('executing');
+
+    // Create streaming bubble
+    var convThread = document.getElementById('conversationThread');
+    var streamingDiv = document.createElement('div');
+    streamingDiv.className = 'conversation-message assistant';
+    streamingDiv.id = 'streamingMessage';
+    streamingDiv.innerHTML = '<div class="conversation-avatar"><span class="avatar-icon">&#9670;</span><span class="avatar-label">BrandAI</span></div><div class="conversation-message-bubble"><div class="conversation-message-content" id="streamingContent"><span class="streaming-cursor"></span></div></div>';
+    if (convThread) { convThread.appendChild(streamingDiv); convThread.scrollTop = convThread.scrollHeight; }
+
+    // Show progress
+    var sc = document.getElementById('streamingContent');
+    if (sc) sc.innerHTML = formatMessageContent('Generating image...') + '<span class="streaming-cursor"></span>';
+
+    if (typeof setBlobState === 'function') setBlobState('responding');
+
+    var result;
+    var provider;
+
+    // Prefer Nano Banana (Google) — generally faster and included with Google key
+    if (hasNanobanana) {
+      provider = 'nanobanana';
+      try {
+        result = await generateImageWithNanobanana(userMessage, { suppressToasts: true });
+      } catch(nbErr) {
+        console.warn('[SmartImage] Nano Banana failed, trying GPT Image 2:', nbErr.message);
+        if (hasOpenAI) {
+          provider = 'openai';
+          result = await generateImageWithGPT2(userMessage);
+        } else {
+          throw nbErr;
+        }
+      }
+    } else {
+      provider = 'openai';
+      result = await generateImageWithGPT2(userMessage);
+    }
+
+    if (!result || !result.images || result.images.length === 0) {
+      throw new Error('Image generation returned no results. Try rephrasing your request.');
+    }
+
+    // Render image inline in chat (same pattern as handleNanobananaChatImage)
+    var img = result.images[0];
+    var base64Data = img.base64;
+    var mimeType = img.mimeType || 'image/png';
+    var imgSrc = 'data:' + mimeType + ';base64,' + base64Data;
+    var providerLabel = provider === 'nanobanana' ? 'Nano Banana 3 Pro' : 'GPT Image 2';
+
+    // Store image URL for conversation history persistence
+    window._lastChatImageUrl = imgSrc;
+
+    var responseHtml = '![Generated Image](' + imgSrc + ')\n\n*Image generated with ' + providerLabel + '*';
+
+    // Update streaming content with final result
+    if (sc) {
+      try {
+        sc.innerHTML = formatMessageContent(responseHtml);
+      } catch(fmtErr) {
+        sc.innerHTML = '<div style="margin:12px 0;">'
+          + '<img src="' + imgSrc + '" style="max-width:100%;border-radius:12px;border:1px solid var(--border-color);" alt="Generated image">'
+          + '<div style="font-size:11px;color:var(--text-tertiary);margin-top:8px;">Generated with ' + providerLabel + '</div>'
+          + '</div>';
+      }
+    }
+
+    // Append export actions
+    appendStreamingMsgActions();
+
+    if (typeof setBlobState === 'function') setBlobState('idle');
+
+    // Save assistant message to conversation
+    var msgObj = { role: 'assistant', content: responseHtml };
+    if (window._lastChatImageUrl) {
+      msgObj.imageUrl = window._lastChatImageUrl;
+      window._lastChatImageUrl = null;
+    }
+    currentConversation.push(msgObj);
+
+    // Save to history
+    if (currentConversation.length === 2) {
+      var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
+      var lifeProfile = currentMode === 'life' && typeof getCurrentLifeProfile === 'function' ? getCurrentLifeProfile() : null;
+      var brandName = 'BrandAI';
+      try {
+        if (currentMode === 'life' && lifeProfile) {
+          brandName = lifeProfile.name || 'LifeAI';
+        } else if (typeof brands !== 'undefined' && typeof selectedBrand !== 'undefined' && brands[selectedBrand]) {
+          brandName = brands[selectedBrand].shortName || brands[selectedBrand].name;
+        }
+      } catch(e) {}
+
+      var commandRecord = {
+        id: Date.now(),
+        brand: brandName,
+        mode: currentMode,
+        lifeName: lifeProfile ? lifeProfile.name : null,
+        command: currentConversation[0].displayContent || (typeof currentConversation[0].content === 'string' ? currentConversation[0].content : '[Image]'),
+        conversation: JSON.parse(JSON.stringify(currentConversation)),
+        time: new Date().toLocaleString()
+      };
+      var _prelimIdx3 = window._currentPreliminaryIndex;
+      if (_prelimIdx3 !== null && _prelimIdx3 !== undefined && agentCommands[_prelimIdx3] && agentCommands[_prelimIdx3].preliminary) {
+        Object.keys(commandRecord).forEach(function(k) { agentCommands[_prelimIdx3][k] = commandRecord[k]; });
+        delete agentCommands[_prelimIdx3].preliminary;
+      } else {
+        agentCommands.push(commandRecord);
+      }
+      saveRuns();
+      renderAgentHistory();
+
+      if (typeof syncToFirebase === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
+        syncToFirebase();
+      }
+    } else {
+      var targetCmd = null;
+      if (window._continuedHistoryIndex !== null && window._continuedHistoryIndex !== undefined && agentCommands[window._continuedHistoryIndex]) {
+        targetCmd = agentCommands[window._continuedHistoryIndex];
+      } else {
+        targetCmd = agentCommands[agentCommands.length - 1];
+      }
+      if (targetCmd) {
+        targetCmd.conversation = JSON.parse(JSON.stringify(currentConversation));
+        saveRuns();
+      }
+    }
+
+    // Track Nanobanana usage if applicable
+    if (provider === 'nanobanana' && typeof trackNanobananaCall === 'function') {
+      try { trackNanobananaCall(); } catch(e) {}
+    }
+
+    // Restore UI
+    _streamAbortController = null;
+    restoreSendButton('followupBtn');
+    if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
+    if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
+    if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
+    setAgentStatus('ready');
+
+  } catch (err) {
+    console.error('[SmartImage] Error:', err);
+    if (typeof setBlobState === 'function') setBlobState('idle');
+    var streamingMsg = document.getElementById('streamingMessage');
+    if (streamingMsg) streamingMsg.remove();
+    showToast('Image generation failed: ' + err.message, 'error');
+    _streamAbortController = null;
+    restoreSendButton('followupBtn');
+    if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
+    if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
+    if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
+    setAgentStatus('ready');
+  }
+}
+
 function runAgent() {
   // v24.20: Blob thinking state
   if (typeof setBlobState === 'function') setBlobState('thinking');
@@ -6227,7 +6407,8 @@ function buildMessagesForAPI(conversation) {
       var content = msg.content;
       // Inject URL context into the last user message for the API only
       if (msg.role === 'user' && msg._urlContext) {
-        content = (typeof content === 'string' ? content : '') + msg._urlContext;
+        // v30.1: Handle multimodal content arrays for URL context
+        if (Array.isArray(content)) { content = content.concat([{ type: 'text', text: msg._urlContext }]); } else { content = content + msg._urlContext; }
       }
       return { role: msg.role, content: content };
     });
@@ -6344,6 +6525,11 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     if (_vVisibleBtn) { _vVisibleBtn.disabled = true; _vVisibleBtn.classList.add('sending'); }
     setAgentStatus('executing');
 
+    // v30.1: Add abort controller for Villainous streaming
+    _streamAbortController = new AbortController();
+    setSendButtonStopping('followupBtn');
+    var _vSignal = _streamAbortController.signal;
+
     var _vConvThread = document.getElementById('conversationThread');
     var _vStreamDiv = document.createElement('div');
     _vStreamDiv.className = 'conversation-message assistant villainous-response';
@@ -6416,18 +6602,19 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       setAgentStatus('error');
     }
 
+    // v30.1: Fix streaming arg order (model, apiKey, messages, systemPrompt, ...) and pass abort signal
     try {
       if (_vProvider === 'anthropic') {
-        callAnthropicStreaming(_vApiKey, _vModel, _vPrompt, _vMessages, _vOnChunk, _vOnComplete, _vOnError);
+        callAnthropicStreaming(_vModel, _vApiKey, _vMessages, _vPrompt, _vOnChunk, _vOnComplete, _vOnError, _vSignal);
       } else if (_vProvider === 'openai') {
-        callOpenAIStreaming(_vApiKey, _vModel, _vPrompt, _vMessages, _vOnChunk, _vOnComplete, _vOnError);
+        callOpenAIStreaming(_vModel, _vApiKey, _vMessages, _vPrompt, _vOnChunk, _vOnComplete, _vOnError, _vSignal);
       } else if (_vProvider === 'google') {
-        callGoogleStreaming(_vApiKey, _vModel, _vPrompt, _vMessages, _vOnChunk, _vOnComplete, _vOnError);
+        callGoogleStreaming(_vModel, _vApiKey, _vMessages, _vPrompt, _vOnChunk, _vOnComplete, _vOnError, _vSignal);
       } else if (_vProvider === 'nanobanana') {
         var _nbKey = getNanobananaKey();
-        callNanobananaStreaming(_nbKey, _vModel, _vPrompt, _vMessages, _vOnChunk, _vOnComplete, _vOnError);
+        callNanobananaStreaming(_vModel, _nbKey, _vMessages, _vPrompt, _vOnChunk, _vOnComplete, _vOnError, _vSignal);
       } else {
-        callAnthropicStreaming(_vApiKey, _vModel, _vPrompt, _vMessages, _vOnChunk, _vOnComplete, _vOnError);
+        callAnthropicStreaming(_vModel, _vApiKey, _vMessages, _vPrompt, _vOnChunk, _vOnComplete, _vOnError, _vSignal);
       }
     } catch(apiErr) { _vOnError(apiErr); }
     return;
@@ -6445,7 +6632,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     // v15.18: Read LifeAI-specific provider and model (not hardcoded)
     var provider = localStorage.getItem('roweos_life_provider')
       || localStorage.getItem('selectedProvider') || 'anthropic';
-    var model = localStorage.getItem('roweos_life_model') || 'claude-sonnet-4-6';
+    var model = localStorage.getItem('roweos_life_model') || (provider === 'openai' ? 'gpt-5.4' : (provider === 'google' ? 'gemini-3.1-pro-preview' : 'claude-sonnet-4-6')); // v30.1: Match default model to provider
 
     // v20.5: RoweOS AI — resolve to actual provider/model
     if (provider === 'roweos') {
@@ -6453,6 +6640,11 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
         var _hasImg = false;
         try { _hasImg = currentConversation.some(function(m) { return Array.isArray(m.content); }); } catch(e) {}
         var _resolved = resolveRoweOSAI({ userMessage: userMessage, systemPrompt: prompt, hasImages: _hasImg });
+        // v30.1: SmartAI image generation intercept
+        if (_resolved.taskType === 'image_generation') {
+          handleSmartImageGeneration(userMessage, 'followupBtn');
+          return;
+        }
         provider = _resolved.provider;
         model = _resolved.model;
       } catch(routeErr) {
@@ -6669,6 +6861,8 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       // v16.4: Clear abort controller and restore button
       _streamAbortController = null;
       restoreSendButton('followupBtn');
+      // v30.1: Ensure followup btn is fully restored
+      if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
       // v22.39: Safety — always hide progress bars on completion
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
@@ -6682,6 +6876,8 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       showToast('Error: ' + errorMsg, 'error');
       _streamAbortController = null;
       restoreSendButton('followupBtn');
+      // v30.1: Ensure followup btn is fully restored
+      if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
       // v22.39: Safety — always hide progress bars on error
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
@@ -6724,7 +6920,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
   }
 
   // v8.0: Check for "No BrandAI" mode - use standard chat without brand system prompt
-  var agentBrandValue = document.getElementById('agentBrand').value;
+  var _abEl = document.getElementById('agentBrand'); var agentBrandValue = _abEl ? _abEl.value : ''; // v30.1: Null check
   if (agentBrandValue === 'none') {
     prompt = 'You are a helpful, intelligent assistant. Respond naturally and helpfully to the user\'s request. Be concise, accurate, and conversational.';
     
@@ -6741,6 +6937,11 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     if (provider === 'roweos') {
       try {
         var _resolved = resolveRoweOSAI({ userMessage: userMessage, systemPrompt: prompt });
+        // v30.1: SmartAI image generation intercept
+        if (_resolved.taskType === 'image_generation') {
+          handleSmartImageGeneration(userMessage, 'followupBtn');
+          return;
+        }
         provider = _resolved.provider;
         model = _resolved.model;
       } catch(routeErr) {
@@ -6843,7 +7044,14 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
           conversation: JSON.parse(JSON.stringify(currentConversation)),
           time: new Date().toLocaleString()
         };
-        agentCommands.push(commandRecord);
+        // v30.1: Check for preliminary entry from runAgent — update in place instead of pushing duplicate
+        var _prelimIdx2 = window._currentPreliminaryIndex;
+        if (_prelimIdx2 !== null && _prelimIdx2 !== undefined && agentCommands[_prelimIdx2] && agentCommands[_prelimIdx2].preliminary) {
+          Object.keys(commandRecord).forEach(function(k) { agentCommands[_prelimIdx2][k] = commandRecord[k]; });
+          delete agentCommands[_prelimIdx2].preliminary;
+        } else {
+          agentCommands.push(commandRecord);
+        }
         saveRuns();
         renderAgentHistory();
       } else {
@@ -6863,6 +7071,8 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       // v16.4: Clear abort controller and restore button
       _streamAbortController = null;
       restoreSendButton('followupBtn');
+      // v30.1: Ensure followup btn is fully restored
+      if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
       // v22.39: Safety — always hide progress bars on completion
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
@@ -6898,6 +7108,8 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       showToast('Error: ' + error, 'error');
       _streamAbortController = null;
       restoreSendButton('followupBtn');
+      // v30.1: Ensure followup btn is fully restored
+      if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
       // v22.39: Safety — always hide progress bars on error
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
@@ -7166,8 +7378,9 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
   // Use IPC handler for API call
   var brandIdx = brands.indexOf(brand);
   var settings = brandSettings[brandIdx] || {};
-  var provider = settings.provider || brand.provider || 'anthropic';
-  var model = settings.model || brand.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.4' : 'gemini-3.1-pro-preview'));
+  // v30.1: Only read from brandSettings — brand.provider/brand.model are stale fields that cause nanobanana defaulting bug
+  var provider = settings.provider || 'anthropic';
+  var model = settings.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.4' : (provider === 'nanobanana' ? 'gemini-3-pro-image-preview' : 'gemini-3.1-pro-preview')));
 
   // v20.5: RoweOS AI — resolve to actual provider/model before dispatch
   if (provider === 'roweos') {
@@ -7175,6 +7388,11 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       var _hasImg = false;
       try { _hasImg = currentConversation.some(function(m) { return Array.isArray(m.content); }); } catch(e) {}
       var _resolved = resolveRoweOSAI({ userMessage: userMessage, systemPrompt: prompt, hasImages: _hasImg, agentCategory: (brand.agents && brand.agents[0]) || '' });
+      // v30.1: SmartAI image generation intercept
+      if (_resolved.taskType === 'image_generation') {
+        handleSmartImageGeneration(userMessage, 'followupBtn');
+        return;
+      }
       provider = _resolved.provider;
       model = _resolved.model;
     } catch(routeErr) {
@@ -7296,10 +7514,17 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
           conversation: JSON.parse(JSON.stringify(currentConversation)),
           time: new Date().toLocaleString()
         };
-        agentCommands.push(commandRecord);
+        // v30.1: Check for preliminary entry from runAgent — update in place instead of pushing duplicate
+        var _prelimIdx = window._currentPreliminaryIndex;
+        if (_prelimIdx !== null && _prelimIdx !== undefined && agentCommands[_prelimIdx] && agentCommands[_prelimIdx].preliminary) {
+          Object.keys(commandRecord).forEach(function(k) { agentCommands[_prelimIdx][k] = commandRecord[k]; });
+          delete agentCommands[_prelimIdx].preliminary;
+        } else {
+          agentCommands.push(commandRecord);
+        }
         saveRuns();
         renderAgentHistory();
-        
+
         // Generate AI title in background
         generateConversationTitle(currentConversation, brand, commandRecord.id);
       } else {
@@ -7415,14 +7640,14 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
         brand: brand.name,
         mode: currentMode,
         lifeName: lifeProfile ? lifeProfile.name : null,
-        command: currentConversation[0].content,
+        command: currentConversation[0].displayContent || (typeof currentConversation[0].content === 'string' ? currentConversation[0].content : '[Image]'), // v30.1: Handle multimodal content
         conversation: JSON.parse(JSON.stringify(currentConversation)),
         time: new Date().toLocaleString()
       };
       agentCommands.push(commandRecord);
       saveRuns();
       renderAgentHistory();
-      
+
       // v9.1.14: Generate AI title in background
       generateConversationTitle(currentConversation, brand, commandRecord.id);
     } else {
@@ -7486,7 +7711,8 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     messages: messages,
     systemPrompt: prompt,
     provider: provider,
-    model: brand.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.4' : 'gemini-3.1-pro-preview')),
+    // v30.1: Use brandSettings model, not brand.model (stale field)
+    model: model,
     deepResearch: deepResearchActive
   }).then(function(result) {
     if (!result || !result.success) {
@@ -7541,7 +7767,7 @@ function renderAgentHistory() {
     item.className = 'history-item';
     var turnCount = cmd.conversation ? Math.floor(cmd.conversation.length / 2) : 1;
     // v9.1.14: Use AI-generated title if available, otherwise truncate command
-    var displayTitle = cmd.title || ((cmd.command || '').substring(0, 60) + ((cmd.command || '').length > 60 ? '...' : ''));
+    var displayTitle = escapeHtml(cmd.title || ((cmd.command || '').substring(0, 60) + ((cmd.command || '').length > 60 ? '...' : ''))); // v30.1: XSS fix
     
     // v10.5.31: Mode badge
     var isLifeMode = cmd.mode === 'life';
@@ -7557,7 +7783,7 @@ function renderAgentHistory() {
     
     item.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
       '<div><div style="font-weight:600">' + modeBadge + displayTitle + '</div>' +
-      '<div style="font-size:13px;color:#888">' + (cmd.brand || 'Unknown') + ' • ' + turnCount + ' turn' + (turnCount > 1 ? 's' : '') + ' • ' + cmd.time + '</div></div>' +
+      '<div style="font-size:13px;color:#888">' + escapeHtml(cmd.brand || 'Unknown') + ' • ' + turnCount + ' turn' + (turnCount > 1 ? 's' : '') + ' • ' + cmd.time + '</div></div>' // v30.1: XSS fix +
       '<button class="history-expand-btn" onclick="event.stopPropagation(); toggleHistoryActions(this)" style="background:none;border:none;cursor:pointer;padding:4px 8px;color:#888;font-size:16px;">⋮</button>' +
       '</div>' + actionsRow;
     
@@ -7622,7 +7848,7 @@ function uploadHistoryToStudio(index) {
     // Format conversation as context
     cmd.conversation.forEach(function(msg) {
       var role = msg.role === 'user' ? 'User' : 'AI';
-      content += role + ': ' + (msg.content || '') + '\n\n';
+      content += role + ': ' + (msg.displayContent || (typeof msg.content === 'string' ? msg.content : '[Image]')) + '\n\n'; // v30.1: Handle multimodal content
     });
   } else if (cmd.response) {
     content = cmd.response;
@@ -7882,7 +8108,7 @@ function recoverConversation(minMessages) {
       if (msgCount >= minMessages) {
         var lastContent = cmd.conversation && cmd.conversation.length > 0 ? 
           cmd.conversation[cmd.conversation.length - 1].content : '';
-        console.log('  [' + idx + '] ' + msgCount + ' msgs | ' + (cmd.mode || 'brand') + ' | ' + (cmd.title || cmd.command?.substring(0, 40) || 'Untitled'));
+        console.log('  [' + idx + '] ' + msgCount + ' msgs | ' + (cmd.mode || 'brand') + ' | ' + (cmd.title || (cmd.command ? cmd.command.substring(0, 40) : '') || 'Untitled')); // v30.1: ES5 fix
         console.log('       Brand: ' + (cmd.brand || '?') + ' | Time: ' + (cmd.time || '?'));
         console.log('       Last msg: ' + (lastContent ? lastContent.substring(0, 100) : '(empty)'));
       }
@@ -8329,9 +8555,10 @@ function toggleModeFromGrid() {
     div.id = 'chatSelectionToolbar';
     div.className = 'chat-sel-toolbar';
     div.style.display = 'none';
+    // v30.1: Renamed Scribe to Notebook
     div.innerHTML = '<button onclick="chatSelAction(\'copy\')">Copy</button>' +
       '<button onclick="chatSelAction(\'pdf\')">PDF</button>' +
-      '<button onclick="chatSelAction(\'scribe\')">Scribe</button>' +
+      '<button onclick="chatSelAction(\'scribe\')">Notebook</button>' +
       '<button onclick="chatSelAction(\'library\')">Library</button>' +
       '<button onclick="chatSelAction(\'word\')">Word</button>' +
       '<button onclick="chatSelAction(\'email\')">Email</button>';
@@ -8405,17 +8632,22 @@ function toggleModeFromGrid() {
         document.body.removeChild(pdfDiv);
       }
     } else if (action === 'scribe') {
+      // v30.1: Save content directly to notebook object BEFORE showView
+      // showView('scribe') triggers initScribe() which re-selects the notebook,
+      // so the content must be on the notebook object, not injected via setTimeout
       if (typeof createScribeNotebook === 'function') {
         var nb = createScribeNotebook();
-        if (nb && typeof selectScribeNotebook === 'function') {
-          selectScribeNotebook(nb.id);
-          setTimeout(function() {
-            var editor = typeof tinymce !== 'undefined' ? tinymce.get('scribeContentArea') : null;
-            if (editor) editor.setContent(html);
-            if (typeof saveActiveScribeNotebook === 'function') saveActiveScribeNotebook();
-          }, 500);
+        if (nb) {
+          // Write content to the notebook object and save to localStorage
+          nb.content = html;
+          nb.title = text.split('\n')[0].substring(0, 60) || 'Chat Selection';
+          if (typeof saveScribeNotebooks === 'function') saveScribeNotebooks();
+          // Now show the view — initScribe will load the notebook with content already in it
           showView('scribe');
-          showToast('Saved to new Scribe notebook', 'success');
+          if (typeof selectScribeNotebook === 'function') {
+            setTimeout(function() { selectScribeNotebook(nb.id); }, 300);
+          }
+          showToast('Saved to Notebook', 'success');
         }
       }
     } else if (action === 'library') {
@@ -8435,9 +8667,22 @@ function toggleModeFromGrid() {
         showToast('Downloaded as Word doc', 'success');
       }
     } else if (action === 'email') {
-      if (typeof chatSendAsEmail === 'function') {
-        window._chatSelectionContent = html;
-        chatSendAsEmail();
+      // v30.1: chatSendAsEmail(btn) expects a button inside a message bubble.
+      // From selection toolbar we don't have that context — open Mail compose with content instead.
+      if (typeof showView === 'function') {
+        showView('mail');
+        setTimeout(function() {
+          // Try to open compose tab and pre-fill
+          if (typeof switchMailTab === 'function') switchMailTab('compose');
+          var subjectInput = document.getElementById('mailComposeSubject');
+          var bodyEl = document.getElementById('mailComposeBody') || document.getElementById('mailComposeEditor');
+          if (subjectInput) subjectInput.value = text.split('\n')[0].substring(0, 80);
+          if (bodyEl) {
+            if (bodyEl.tagName === 'TEXTAREA') bodyEl.value = text;
+            else bodyEl.innerHTML = html;
+          }
+          showToast('Content loaded into Mail compose', 'success');
+        }, 400);
       }
     }
   };

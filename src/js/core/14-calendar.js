@@ -72,7 +72,7 @@ async function callNanobananaStreaming(model, apiKey, messages, systemPrompt, on
               var nbInputTokens = data.usageMetadata.promptTokenCount || 0;
               var nbOutputTokens = data.usageMetadata.candidatesTokenCount || 0;
               if (nbInputTokens > 0 || nbOutputTokens > 0) {
-                trackAPIUsage('nanobanana', useModel, nbInputTokens, nbOutputTokens, false, false, 'image');
+                trackAPIUsage('nanobanana', useModel, nbInputTokens, nbOutputTokens, false, false, 'text'); // v30.1: Fix — nanobanana text gen, not image
               }
             }
           } catch (e) { /* skip invalid JSON */ }
@@ -463,6 +463,78 @@ async function generateImage(prompt, options) {
   };
 }
 
+// v30.1: GPT Image 2 via OpenAI Images API
+async function generateImageWithGPT2(prompt, options) {
+  if (!options) options = {};
+  var apiKey = await getApiKey('openai');
+  if (!apiKey) {
+    throw new Error('OpenAI API key not configured.');
+  }
+
+  var size = options.size || '1024x1024';
+  var quality = options.quality || 'auto';
+
+  console.log('[GPT-Image-2] Generating image...');
+  console.log('[GPT-Image-2] Prompt:', prompt.substring(0, 100) + '...');
+
+  var response = await fetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + apiKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-image-2-2026-04-21',
+      prompt: prompt,
+      n: 1,
+      size: size,
+      quality: quality,
+      output_format: 'png',
+      response_format: 'b64_json'
+    })
+  });
+
+  if (!response.ok) {
+    var errorData = await response.json().catch(function() { return {}; });
+    var errorMsg = errorData.error ? errorData.error.message : response.statusText;
+    console.error('[GPT-Image-2] Error:', errorMsg);
+    throw new Error('GPT Image 2 Error: ' + errorMsg);
+  }
+
+  var data = await response.json();
+
+  var images = [];
+  if (data.data && data.data.length > 0) {
+    for (var i = 0; i < data.data.length; i++) {
+      if (data.data[i].b64_json) {
+        images.push({
+          base64: data.data[i].b64_json,
+          mimeType: 'image/png'
+        });
+      }
+    }
+  }
+
+  if (images.length === 0) {
+    throw new Error('No image generated');
+  }
+
+  // Track usage
+  try {
+    if (typeof trackAPIUsage === 'function') {
+      trackAPIUsage('openai', 'gpt-image-2', 0, 0, false, false, 'image');
+    }
+  } catch(e) {}
+
+  return {
+    images: images,
+    model: 'gpt-image-2-2026-04-21',
+    provider: 'openai',
+    size: size,
+    quality: quality
+  };
+}
+
 // v21.15: Video Operation Handler for Studio
 async function runVideoOperation() {
   var btn = document.getElementById('studioRunBtn') || document.getElementById('runBtn');
@@ -719,7 +791,8 @@ async function runImageOperation() {
     // v10.5.25: Use selected image provider
     if (selectedImageProvider === 'nanobanana') {
       // Nanobanana API
-      var aspectRatio = document.getElementById('geminiAspectRatio')?.value || '1:1';
+      var _arEl1 = document.getElementById('geminiAspectRatio'); // v30.1: ES5 safe
+      var aspectRatio = (_arEl1 ? _arEl1.value : null) || '1:1';
       providerName = 'Nano Banana';
       
       if (outputContent) {
@@ -747,7 +820,8 @@ async function runImageOperation() {
       }
     } else if (selectedImageProvider === 'gemini') {
       // Gemini
-      var aspectRatio = document.getElementById('geminiAspectRatio')?.value || '1:1';
+      var _arEl2 = document.getElementById('geminiAspectRatio'); // v30.1: ES5 safe
+      var aspectRatio = (_arEl2 ? _arEl2.value : null) || '1:1';
       providerName = 'Gemini';
       
       if (outputContent) {
@@ -759,7 +833,8 @@ async function runImageOperation() {
       });
     } else {
       // OpenAI DALL-E (default)
-      var size = document.getElementById('dalleSize')?.value || '1024x1024';
+      var _szEl = document.getElementById('dalleSize'); // v30.1: ES5 safe
+      var size = (_szEl ? _szEl.value : null) || '1024x1024';
       providerName = 'GPT Image';
       
       if (outputContent) {
@@ -2017,7 +2092,7 @@ function addUserMessage(text) {
   
   var msgDiv = document.createElement('div');
   msgDiv.className = 'guided-message user';
-  msgDiv.innerHTML = '<div class="guided-message-label">You</div><div class="guided-message-bubble">' + text + '</div>';
+  msgDiv.innerHTML = '<div class="guided-message-label">You</div><div class="guided-message-bubble">' + escapeHtml(text) + '</div>'; // v30.1: XSS fix
   
   chatHistory.appendChild(msgDiv);
   chatHistory.scrollTop = chatHistory.scrollHeight;
@@ -2475,8 +2550,10 @@ async function runSelectedOperation() {
   
   // Include attached content if any
   if (window.studioAttachedContent) {
-    var attachedContent = window.studioAttachedContent.content || 
-                          window.studioAttachedContent.messages?.map(m => m.content).join('\n') ||
+    // v30.1: ES5 safe — no optional chaining or arrow functions
+    var _sacMsgs = window.studioAttachedContent.messages;
+    var attachedContent = window.studioAttachedContent.content ||
+                          (_sacMsgs ? _sacMsgs.map(function(m) { return m.content; }).join('\n') : null) ||
                           window.studioAttachedContent.title || '';
     context += '\n\n--- ATTACHED CONTENT: ' + (window.studioAttachedContent.title || 'Document') + ' ---\n' + attachedContent + '\n--- END ---';
   }
@@ -2594,7 +2671,7 @@ async function runSelectedOperation() {
     }
 
     // v22.20: Preferred model override for intelligence ops (web search requires GPT-5.4)
-    var currentOp = ops.filter(function(o) { return o.id === selectedOp; })[0];
+    var currentOp = ops.filter(function(o) { return o.id === selectedOp.id; })[0]; // v30.1: Fix comparison — selectedOp is object, not ID
     if (currentOp && currentOp.preferredProvider && currentOp.preferredModel) {
       if (!studioProviderOverride && !studioModelOverride) {
         provider = currentOp.preferredProvider;
@@ -2847,10 +2924,8 @@ async function runOp() {
     return openGuidedBuilder(selectedOp);
   }
 
-  var btn = document.getElementById('runBtn');
-  btn.disabled = true;
-  btn.textContent = 'Running...';
-  btn.classList.add('running');
+  var btn = document.getElementById('studioRunBtn') || document.getElementById('runBtn'); // v30.1: Try new ID first, null guard
+  if (btn) { btn.disabled = true; btn.textContent = 'Running...'; btn.classList.add('running'); }
   
   // Add thinking animation to entire Studio layout and sidebar
   var studioLayout = document.querySelector('.studio-layout');
@@ -2897,7 +2972,7 @@ async function runOp() {
   plan += '\n';
   
   plan += 'Deliverables:\n';
-  selectedOp.outputs.forEach(function(o) { plan += '• ' + o + '\n'; });
+  (selectedOp.outputs || []).forEach(function(o) { plan += '• ' + o + '\n'; }); // v30.1: Guard null outputs
   
   if (context) plan += '\nContext: ' + context;
   
@@ -2915,7 +2990,7 @@ async function runOp() {
   
   aiPrompt += 'TASK: ' + selectedOp.name + '\n';
   aiPrompt += 'DELIVERABLES:\n';
-  selectedOp.outputs.forEach(function(o) { aiPrompt += '• ' + o + '\n'; });
+  (selectedOp.outputs || []).forEach(function(o) { aiPrompt += '• ' + o + '\n'; }); // v30.1: Guard null outputs
   aiPrompt += '\n';
   
   // v13.3: Cross-system context injection
@@ -2981,14 +3056,21 @@ async function runOp() {
     editablePrompt.value = aiPrompt;
   }
   
-  // v9.1.14: Get API settings - use override if set, otherwise use brand defaults
-  var provider = brand.provider || 'anthropic';
-  var model = brand.model || 'claude-sonnet-4-6';
-  
-  // Apply model override from controls if set
-  if (studioModelOverride && studioProviderOverride) {
-    model = studioModelOverride;
-    provider = studioProviderOverride;
+  // v30.1: Check LifeAI mode like runSelectedOperation does
+  var _runOpMode = localStorage.getItem('roweos_app_mode') || 'brand';
+  if (_runOpMode === 'life') {
+    var provider = (typeof studioProviderOverride !== 'undefined' && studioProviderOverride) || (typeof lifeAISelectedProvider !== 'undefined' && lifeAISelectedProvider) || 'anthropic';
+    var model = (typeof studioModelOverride !== 'undefined' && studioModelOverride) || 'claude-sonnet-4-6';
+  } else {
+    // v9.1.14: Get API settings - use override if set, otherwise use brand defaults
+    var provider = brand.provider || 'anthropic';
+    var model = brand.model || 'claude-sonnet-4-6';
+
+    // Apply model override from controls if set
+    if (studioModelOverride && studioProviderOverride) {
+      model = studioModelOverride;
+      provider = studioProviderOverride;
+    }
   }
 
   // v20.5: RoweOS AI — resolve to actual provider/model
@@ -3044,7 +3126,11 @@ async function runOp() {
   
   var streamStartTime = Date.now();
   
-  callStudioAPIStreaming(provider, model, apiKey, aiPrompt, 
+  // v30.1: Declare in outer scope so both onComplete and onError can access
+  var runMode = localStorage.getItem('roweos_app_mode') || 'brand';
+  var _brandLabel2 = brand ? (brand.shortName || brand.name) : 'Unknown';
+
+  callStudioAPIStreaming(provider, model, apiKey, aiPrompt,
     // onChunk - update UI progressively
     function(chunk, fullText) {
       var canvas = document.getElementById('studioStreamingCanvas');
@@ -3071,11 +3157,11 @@ async function runOp() {
         outputContent.innerHTML = metaHtml + '<div class="studio-output-canvas">' + markdownToHtml(generatedContent) + '</div>';
       }
       
-      // v11.0.5: Track mode for separating History outputs
-      var runMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
-      
-      // Create run record
-      var _brandLabel2 = brand ? (brand.shortName || brand.name) : 'Unknown';
+      // v11.0.5: Track mode for separating History outputs (v30.1: moved var to outer scope)
+      runMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
+
+      // Create run record (v30.1: _brandLabel2 declared in outer scope)
+      _brandLabel2 = brand ? (brand.shortName || brand.name) : 'Unknown';
       var run = {
         id: Date.now(),
         op: selectedOp.name,
@@ -3092,7 +3178,7 @@ async function runOp() {
         mode: runMode  // v11.0.5: Track mode for History separation
       };
       runs.push(run);
-      saveRuns();
+      // v30.1: Removed duplicate saveRuns() — kept only the one inside history try block below
 
       // v15.15: Also save to agentCommands for History view + Firebase sync
       try {
@@ -3117,10 +3203,16 @@ async function runOp() {
         }
       } catch(histErr) { console.warn('[Studio] History save error:', histErr); }
 
+      // v30.1: Write to auto lab history (was missing from runOp path)
+      if (typeof addAutoLabHistory === 'function') {
+        addAutoLabHistory({ name: selectedOp.name, action: 'studio-run' }, true, (generatedContent || '').substring(0, 500));
+      }
+
       // Update hidden elements for compatibility
-      document.getElementById('plan').textContent = run.plan;
-      document.getElementById('deliv').value = run.deliv;
-      document.getElementById('delivCanvas').innerHTML = markdownToHtml(run.deliv);
+      // v30.1: Null guard hidden elements
+      var _planEl = document.getElementById('plan'); if (_planEl) _planEl.textContent = run.plan;
+      var _delivEl = document.getElementById('deliv'); if (_delivEl) _delivEl.value = run.deliv;
+      var _delivCanvas = document.getElementById('delivCanvas'); if (_delivCanvas) _delivCanvas.innerHTML = markdownToHtml(run.deliv);
       window.currentRun = run;
 
       // Show actions
@@ -3144,14 +3236,15 @@ async function runOp() {
       if (studioLayout) studioLayout.classList.remove('agent-thinking');
       if (mainSidebar) mainSidebar.classList.remove('shimmer-active');
 
-      btn.disabled = false;
-      btn.classList.remove('running');
-    // v9.1.14: Different button text for image operations
-    if (selectedOp.isImageOp) {
-      btn.textContent = 'Generate Image: ' + selectedOp.name;
-    } else {
-      btn.textContent = 'Execute: ' + selectedOp.name;
-    }
+      if (btn) { // v30.1: Null guard
+        btn.disabled = false;
+        btn.classList.remove('running');
+        if (selectedOp.isImageOp) {
+          btn.textContent = 'Generate Image: ' + selectedOp.name;
+        } else {
+          btn.textContent = 'Execute: ' + selectedOp.name;
+        }
+      }
       showToast('Agent task completed in ' + genTime + 's', 'success');
     },
     // onError - handle failure
@@ -3183,14 +3276,15 @@ async function runOp() {
       if (studioLayout) studioLayout.classList.remove('agent-thinking');
       if (mainSidebar) mainSidebar.classList.remove('shimmer-active');
       
-      btn.disabled = false;
-      btn.classList.remove('running');
-    // v9.1.14: Different button text for image operations
-    if (selectedOp.isImageOp) {
-      btn.textContent = 'Generate Image: ' + selectedOp.name;
-    } else {
-      btn.textContent = 'Execute: ' + selectedOp.name;
-    }
+      if (btn) { // v30.1: Null guard
+        btn.disabled = false;
+        btn.classList.remove('running');
+        if (selectedOp.isImageOp) {
+          btn.textContent = 'Generate Image: ' + selectedOp.name;
+        } else {
+          btn.textContent = 'Execute: ' + selectedOp.name;
+        }
+      }
     }
   );
 }
@@ -3498,13 +3592,17 @@ function studioExtractIdentityInsights(content, opName, callback) {
     var fallbackInsights = [];
     var contentLower = content.toLowerCase();
     if (/brand voice|tone|language|style of communication/i.test(content)) {
-      fallbackInsights.push({ section: 'voice', insight: content.match(/[^.]*(?:voice|tone|language)[^.]*/i)?.[0]?.trim() || 'Voice insights extracted from ' + opName });
+      // v30.1: ES5 safe — no optional chaining
+      var _voiceMatch = content.match(/[^.]*(?:voice|tone|language)[^.]*/i);
+      fallbackInsights.push({ section: 'voice', insight: (_voiceMatch && _voiceMatch[0] ? _voiceMatch[0].trim() : null) || 'Voice insights extracted from ' + opName });
     }
     if (/target audience|customer|demographic|market segment/i.test(content)) {
-      fallbackInsights.push({ section: 'audience', insight: content.match(/[^.]*(?:audience|customer|demographic)[^.]*/i)?.[0]?.trim() || 'Audience insights extracted from ' + opName });
+      var _audMatch = content.match(/[^.]*(?:audience|customer|demographic)[^.]*/i);
+      fallbackInsights.push({ section: 'audience', insight: (_audMatch && _audMatch[0] ? _audMatch[0].trim() : null) || 'Audience insights extracted from ' + opName });
     }
     if (/product|service|offering/i.test(content)) {
-      fallbackInsights.push({ section: 'products', insight: content.match(/[^.]*(?:product|service|offering)[^.]*/i)?.[0]?.trim() || 'Product insights extracted from ' + opName });
+      var _prodMatch = content.match(/[^.]*(?:product|service|offering)[^.]*/i);
+      fallbackInsights.push({ section: 'products', insight: (_prodMatch && _prodMatch[0] ? _prodMatch[0].trim() : null) || 'Product insights extracted from ' + opName });
     }
     callback(fallbackInsights);
     return;
@@ -4141,7 +4239,8 @@ function renderRhythmAutomations() {
   tasks.forEach(function(task) {
     // v10.5.25: Extract date and time from scheduledDate
     var taskDate = task.scheduledDate ? task.scheduledDate.split('T')[0] : '';
-    var taskTime = task.time || (task.scheduledDate ? task.scheduledDate.split('T')[1]?.substring(0, 5) : '');
+    var _tParts = task.scheduledDate ? task.scheduledDate.split('T') : []; // v30.1: ES5 safe
+    var taskTime = task.time || (_tParts[1] ? _tParts[1].substring(0, 5) : '');
     
     var scheduleText = task.frequency === 'daily' ? 'Daily @ ' + taskTime :
                        task.frequency === 'weekly' ? 'Weekly on ' + (task.dayOfWeek || 'Monday') + ' @ ' + taskTime :
@@ -4296,7 +4395,7 @@ function renderCalendar() {
         if (dayItemCount >= MAX_DAY_ITEMS) return;
         dayItemCount++;
         var taskClass = task.completed ? 'completed' : '';
-        html += '<div class="calendar-item task-item ' + taskClass + '" onclick="event.stopPropagation(); toggleRhythmTask(' + task.id + ')" style="padding:4px 8px;font-size:11px;cursor:pointer;border-left:3px solid #6ab894;margin-top:4px;' + (task.completed ? 'opacity:0.5;' : '') + '">';
+        html += '<div class="calendar-item task-item ' + taskClass + '" onclick="event.stopPropagation(); toggleRhythmTask(' + task.id + ')" style="padding:4px 8px;font-size:11px;cursor:pointer;background:rgba(106,184,148,0.1);border:1px solid rgba(106,184,148,0.3);border-radius:4px;margin-top:4px;' + (task.completed ? 'opacity:0.5;' : '') + '">'; // v30.1: No one-sided border
         html += '<div style="font-weight:500;display:flex;align-items:center;gap:4px;' + (task.completed ? 'text-decoration:line-through;' : '') + '"><span style="color:#6ab894">' + (task.completed ? '\u2611' : '\u2610') + '</span>' + escapeHtml((task.text || '').substring(0, 15)) + '</div>';
         html += '</div>';
       });
@@ -4305,7 +4404,7 @@ function renderCalendar() {
       dayAutos.forEach(function(automation) {
         if (dayItemCount >= MAX_DAY_ITEMS) return;
         dayItemCount++;
-        html += '<div class="calendar-item automation-item" onclick="event.stopPropagation(); openScheduledTaskDetails(' + automation.id + ')" style="padding:4px 8px;font-size:11px;cursor:pointer;border-left:3px solid #a89878;margin-top:4px;">';
+        html += '<div class="calendar-item automation-item" onclick="event.stopPropagation(); openScheduledTaskDetails(' + automation.id + ')" style="padding:4px 8px;font-size:11px;cursor:pointer;background:rgba(168,152,120,0.1);border:1px solid rgba(168,152,120,0.3);border-radius:4px;margin-top:4px;">'; // v30.1: No one-sided border
         html += '<div style="font-weight:500;display:flex;align-items:center;gap:4px;"><span style="color:#a89878">\u26A1</span>' + escapeHtml((automation.name || '').substring(0, 15)) + '</div>';
         html += '</div>';
       });
