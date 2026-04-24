@@ -444,7 +444,7 @@ function adminShowEmailUserDetail(uid, userName, userEmail) {
   var templates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin'];
   templates.forEach(function(tmpl) {
     var composerTmpl = templateMap[tmpl] || tmpl;
-    html += '<button onclick="adminOpenComposerForUser(\'' + escapeHtml(composerTmpl) + '\',\'' + escapeHtml(userEmail).replace(/'/g, "\\'") + '\')" style="padding:6px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);font-weight:500;transition:all 0.15s;">';
+    html += '<button onclick="adminOpenComposerForUser(\'' + escapeHtml(composerTmpl) + '\',\'' + escapeHtml(userEmail).replace(/'/g, "\\'") + '\',\'' + escapeHtml(userName).replace(/'/g, "\\'") + '\')" style="padding:6px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);font-weight:500;transition:all 0.15s;">';
     html += escapeHtml(formatTemplateName(tmpl));
     html += '</button>';
   });
@@ -562,10 +562,12 @@ function adminRenderEmailStats(responses) {
 }
 
 // v30.1: Open Compose Email modal pre-filled with a template and recipient
-function adminOpenComposerForUser(templateName, recipientEmail) {
-  // Set a dummy key so openEmailComposer doesn't complain
+function adminOpenComposerForUser(templateName, recipientEmail, recipientName) {
+  // Set key and tier for templates that need them
   window._composerKey = window._composerKey || 'ROWE-XXXX-XXXX';
   window._composerTier = window._composerTier || 'founder';
+  // v30.1: Store recipient name for template auto-fill
+  window._composerRecipientName = recipientName || '';
   // Pre-fill To field and template
   var toEl = document.getElementById('composerTo');
   var templateSelect = document.getElementById('composerTemplate');

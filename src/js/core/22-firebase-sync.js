@@ -29,7 +29,7 @@ var SNAPSHOT_KEYS = [
   'roweos_notifications', 'roweos_guardrails', 'roweos_identity_config',
   'roweos_theme', 'roweos_primary_brand', 'roweos_calendar_scope',
   'roweos_bloom_default_source', 'roweos_bloom_content_mode', 'roweos_bloom_length',
-  'roweos_api_routing', 'roweos_sidebar_order', 'roweos_app_zoom', 'roweos_text_size',
+  'roweos_api_routing', 'roweos_sidebar_order', 'roweos_sidebar_mode', 'roweos_app_zoom', 'roweos_text_size',
   'roweosLibrary', 'roweos_life_library',
   'roweos_commerce', 'roweos_analytics',
   'roweos_api_budget_claude', 'roweos_api_budget_openai', 'roweos_api_budget_gemini',
@@ -417,7 +417,7 @@ var RESTORE_CATEGORIES = {
   social: { label: 'Social', keys: ['roweos_social_posts', 'roweos_social_workflows', 'roweos_social_outbox'] },
   customOps: { label: 'Custom Operations', keys: ['roweos_custom_operations', 'roweos_custom_agents', 'roweos_generated_brand_ops'] },
   clients: { label: 'Clients', keys: ['roweos_clients'] },
-  settings: { label: 'Settings', keys: ['roweos_theme', 'roweos_sidebar_order', 'roweos_app_zoom', 'roweos_text_size', 'roweos_api_routing', 'roweos_sync_settings', 'roweos_default_view'] },
+  settings: { label: 'Settings', keys: ['roweos_theme', 'roweos_sidebar_order', 'roweos_sidebar_mode', 'roweos_app_zoom', 'roweos_text_size', 'roweos_api_routing', 'roweos_sync_settings', 'roweos_default_view'] },
   life: { label: 'LifeAI Profiles', keys: ['roweos_life_profiles', 'roweos_current_life_profile_idx', 'roweos_life_profile', 'roweos_life_main_prompt', 'roweos_generated_life_ops', 'roweos_life_goals', 'roweos_life_routines', 'roweos_life_habits'] }
 };
 
@@ -1193,7 +1193,8 @@ async function syncToFirebaseV1_legacy() {
         responseCache: localStorage.getItem('roweos_feature_responseCache') === 'true',
         crossModeEnabled: localStorage.getItem('roweos_cross_mode_enabled') !== 'false',
         sidebarOrder: localStorage.getItem('roweos_sidebar_order') || null,
-        appZoom: localStorage.getItem('roweos_app_zoom') || '100',
+        sidebarMode: localStorage.getItem('roweos_sidebar_mode') || 'expanded', // v30.1
+        appZoom: localStorage.getItem('roweos_app_zoom') || '75', // v30.1: default 75%
         textSize: localStorage.getItem('roweos_text_size') || '100'
       },
 
@@ -1976,6 +1977,11 @@ function applyCloudData(data) {
       var sidebarVal = typeof data.settings.sidebarOrder === 'string' ? data.settings.sidebarOrder : JSON.stringify(data.settings.sidebarOrder);
       localStorage.setItem('roweos_sidebar_order', sidebarVal);
       if (typeof applySidebarOrder === 'function') applySidebarOrder();
+    }
+    // v30.1: Restore sidebar mode preference
+    if (data.settings.sidebarMode) {
+      localStorage.setItem('roweos_sidebar_mode', data.settings.sidebarMode);
+      if (typeof applySidebarMode === 'function') applySidebarMode();
     }
     // v22.39: App zoom level
     if (data.settings.appZoom) {
@@ -6182,23 +6188,34 @@ function loadComposerTemplate(name) {
   }
 }
 
-// v30.1: Onboarding Survey email preview (client-side preview of server template)
+// v30.1: Shared email preview wrapper with logo and dark background
+function _emailPreviewWrap(subtitle, body) {
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
+    + '<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;"><tr><td align="center">'
+    + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
+    + '<tr><td style="background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;border-radius:12px 12px 0 0;">'
+    + '<img src="https://roweos.com/logo.png" alt="RoweOS" style="width:64px;height:64px;border-radius:12px;margin-bottom:12px;">'
+    + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>'
+    + (subtitle ? '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1.5px;text-transform:uppercase;">' + subtitle + '</p>' : '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1.5px;text-transform:uppercase;">Operating intelligence, built for brands &amp; life</p>')
+    + '</td></tr><tr><td style="padding:32px;background:#111;">' + body + '</td></tr>'
+    + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
+    + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p>'
+    + '<p style="margin:6px 0 0;font-size:11px;color:#444;">Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color:#a89878;text-decoration:none;">jordan@therowecollection.com</a></p>'
+    + '</td></tr></table></td></tr></table></body></html>';
+}
+
+// v30.1: Get auto-filled greeting from stored recipient name
+function _emailGreeting() {
+  var name = window._composerRecipientName || '';
+  var firstName = name ? name.split(' ')[0] : '';
+  return firstName ? 'Hi ' + firstName + ',' : 'Hi there,';
+}
+
+// v30.1: Onboarding Survey email preview
 function generateOnboardingSurveyPreview() {
-  var wrap = function(body) {
-    return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
-      + '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
-      + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;"><tr><td align="center">'
-      + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
-      + '<tr><td style="padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">'
-      + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>'
-      + '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1px;text-transform:uppercase;">Onboarding</p>'
-      + '</td></tr><tr><td style="padding:32px;">' + body + '</td></tr>'
-      + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
-      + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p></td></tr>'
-      + '</table></td></tr></table></body></html>';
-  };
   var btn = function(label) { return '<a href="#" style="display:inline-block;padding:10px 20px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:8px;color:#e0e0e0;text-decoration:none;font-size:13px;font-weight:500;margin:0 6px 8px 0;">' + label + '</a>'; };
-  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">Hi [Name],</p>'
+  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">' + _emailGreeting() + '</p>'
     + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">We\'d love to learn about your experience with RoweOS so far. A few quick questions (just click your answer):</p>'
     + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">Do you need a beta API key?</p>'
     + '<div>' + btn('Yes, I need one') + btn('No, I have my own') + btn('Not sure what this means') + '</div></div>'
@@ -6207,85 +6224,47 @@ function generateOnboardingSurveyPreview() {
     + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How has your experience been so far?</p>'
     + '<div>' + btn('Smooth, love it') + btn('Good, some questions') + btn('Hit some bumps') + btn('Need help') + '</div></div>'
     + '<p style="color:#888;font-size:13px;line-height:1.6;margin:0;">Have more to share? Just reply to this email. We read every response.</p>';
-  return wrap(body);
+  return _emailPreviewWrap('Onboarding', body);
 }
 
 // v30.1: Re-engagement email preview
 function generateReengagementPreview() {
-  var wrap = function(body) {
-    return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
-      + '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
-      + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;"><tr><td align="center">'
-      + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
-      + '<tr><td style="padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">'
-      + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1></td></tr>'
-      + '<tr><td style="padding:32px;">' + body + '</td></tr>'
-      + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
-      + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p></td></tr>'
-      + '</table></td></tr></table></body></html>';
-  };
   var card = function(title, desc) {
     return '<div style="padding:16px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;margin-bottom:10px;">'
       + '<p style="color:#e0e0e0;font-size:14px;font-weight:500;margin:0 0 4px;">' + title + '</p>'
       + '<p style="color:#888;font-size:12px;margin:0;">' + desc + '</p></div>';
   };
-  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">Hi [Name],</p>'
+  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">' + _emailGreeting() + '</p>'
     + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">We noticed you haven\'t been back in a while. Here are a few things you can try in under 5 minutes:</p>'
     + card('Run a Studio operation', '200+ pre-built AI operations for strategy, marketing, content, and more.')
     + card('Set up your brand identity', 'Give your AI agents the context they need to write in your voice.')
     + card('Ask BLAKE anything', 'Your brand\'s AI is ready. Start a conversation in Chat.')
     + '<div style="text-align:center;margin:28px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Open RoweOS</a></div>'
     + '<p style="color:#888;font-size:13px;text-align:center;margin:0;">Need help getting started? Just reply to this email.</p>';
-  return wrap(body);
+  return _emailPreviewWrap(null, body);
 }
 
 // v30.1: Feature Announcement email preview
 function generateFeatureAnnouncementPreview() {
-  var wrap = function(body) {
-    return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
-      + '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
-      + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;"><tr><td align="center">'
-      + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
-      + '<tr><td style="padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">'
-      + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>'
-      + '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1px;text-transform:uppercase;">What\'s New</p>'
-      + '</td></tr><tr><td style="padding:32px;">' + body + '</td></tr>'
-      + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
-      + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p></td></tr>'
-      + '</table></td></tr></table></body></html>';
-  };
-  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">Hi [Name],</p>'
+  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">' + _emailGreeting() + '</p>'
     + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 24px;">We just shipped something new:</p>'
     + '<div style="padding:24px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:12px;margin-bottom:24px;">'
     + '<h2 style="color:#a89878;font-size:20px;font-weight:500;margin:0 0 12px;">[Feature Name]</h2>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0;">[Feature description goes here. Edit this text to describe the new capability.]</p></div>'
     + '<div style="text-align:center;margin:28px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Try it now</a></div>';
-  return wrap(body);
+  return _emailPreviewWrap('What\'s New', body);
 }
 
 // v30.1: Check-in Rating email preview
 function generateCheckinRatingPreview() {
-  var wrap = function(body) {
-    return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
-      + '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
-      + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;"><tr><td align="center">'
-      + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
-      + '<tr><td style="padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">'
-      + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>'
-      + '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1px;text-transform:uppercase;">Check-In</p>'
-      + '</td></tr><tr><td style="padding:32px;">' + body + '</td></tr>'
-      + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
-      + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p></td></tr>'
-      + '</table></td></tr></table></body></html>';
-  };
   var btn = function(label) { return '<a href="#" style="display:inline-block;padding:10px 20px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:8px;color:#e0e0e0;text-decoration:none;font-size:13px;font-weight:500;margin:0 6px 8px 0;">' + label + '</a>'; };
-  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">Hi [Name],</p>'
+  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">' + _emailGreeting() + '</p>'
     + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">How\'s everything going with RoweOS? We\'d love a quick pulse check:</p>'
     + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How would you rate your experience?</p>'
     + '<div>' + btn('Loving it') + btn('It\'s good') + btn('Could be better') + btn('Having issues') + '</div></div>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 24px;">What would make RoweOS better for you? Just reply to this email with your thoughts.</p>'
     + '<div style="text-align:center;margin:20px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Open RoweOS</a></div>';
-  return wrap(body);
+  return _emailPreviewWrap('Check-In', body);
 }
 
 // v21.14: Beta Welcome Email Generator
