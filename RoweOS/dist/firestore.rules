@@ -58,5 +58,24 @@ service cloud.firestore {
     match /admin_notifications/{notifId} {
       allow read, update: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
     }
+    // v30.1: Email log — admin read, server writes via service account
+    match /email_log/{docId} {
+      allow read, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+    }
+    // v30.1: Onboarding responses — admin read, server writes via email-response endpoint
+    match /onboarding_responses/{userId} {
+      allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      match /responses/{responseId} {
+        allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      }
+    }
+    // v30.1: Email settings — admin read/write
+    match /email_settings/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+    }
+    // v30.1: Signups — admin read (server writes via service account)
+    match /signups/{docId} {
+      allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+    }
   }
 }

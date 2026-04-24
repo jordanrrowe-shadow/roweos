@@ -6177,7 +6177,7 @@ function loadComposerTemplate(name) {
       }, 100);
     }
     setTimeout(function() {
-      try { iframe.style.height = Math.min(Math.max(doc.body.scrollHeight + 20, 300), 600) + 'px'; } catch(e) { iframe.style.height = '400px'; }
+      try { iframe.style.height = Math.min(Math.max(doc.body.scrollHeight + 20, 300), 900) + 'px'; } catch(e) { iframe.style.height = '500px'; }
     }, 250);
   }
 }
@@ -6425,7 +6425,7 @@ function openEmailComposer(accessKey, tier, recipientEmail) {
       } catch(e) {}
     });
     setTimeout(function() {
-      try { iframe.style.height = Math.min(Math.max(doc.body.scrollHeight + 20, 300), 600) + 'px'; } catch(e) { iframe.style.height = '400px'; }
+      try { iframe.style.height = Math.min(Math.max(doc.body.scrollHeight + 20, 300), 900) + 'px'; } catch(e) { iframe.style.height = '500px'; }
     }, 150);
   }
   openModal('betaEmailPreviewModal');
