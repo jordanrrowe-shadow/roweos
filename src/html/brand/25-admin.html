@@ -17,6 +17,7 @@
         <button class="admin-tab" onclick="showAdminTab('pool')" data-tab="pool" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Pool</button>
         <button class="admin-tab" onclick="showAdminTab('feedback')" data-tab="feedback" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Feedback</button>
         <button class="admin-tab" onclick="showAdminTab('signups')" data-tab="signups" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Signups</button>
+        <button class="admin-tab" onclick="showAdminTab('emails')" data-tab="emails" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Emails</button>
       </div>
       <!-- Keys tab -->
       <div class="admin-tab-content" id="adminTabKeys" style="display:block;">
@@ -191,6 +192,72 @@
                   <button onclick="adminLoadSignups()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>
                 </div>
                 <div id="adminSignupsList" style="font-size:var(--text-sm);color:var(--text-secondary);">Click Refresh to load</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Emails tab -->
+      <div class="admin-tab-content" id="adminTabEmails" style="display:none;">
+        <div class="settings-section">
+          <!-- Stats bar -->
+          <div id="adminEmailStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;"></div>
+          <!-- Controls row -->
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                  <div style="font-weight:600;color:var(--text-primary);">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    Email Management
+                  </div>
+                  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                    <select id="adminEmailTemplate" style="padding:6px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-xs);">
+                      <option value="onboarding_survey">Onboarding Survey</option>
+                      <option value="reengagement">Re-engagement</option>
+                      <option value="feature_announcement">Feature Announcement</option>
+                      <option value="access_key_delivery">Access Key Delivery</option>
+                      <option value="checkin">Check-in</option>
+                    </select>
+                    <button onclick="adminSendSelectedTemplate()" style="padding:6px 14px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:var(--text-xs);white-space:nowrap;">Send to Selected</button>
+                    <button onclick="adminLoadEmailData()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>
+                  </div>
+                </div>
+                <!-- Content area -->
+                <div id="adminEmailContent" style="font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:16px;">Click Refresh to load</div>
+              </div>
+            </div>
+          </div>
+          <!-- Auto-Send Settings -->
+          <div class="settings-row">
+            <div class="settings-row-left" style="flex:1;">
+              <div style="width:100%;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                  <div style="font-weight:600;color:var(--text-primary);">Auto-Send Settings</div>
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:var(--text-xs);color:var(--text-secondary);">
+                    <input type="checkbox" id="adminAutoSendToggle" onchange="adminToggleAutoSend(this.checked)" style="accent-color:var(--accent);">
+                    Enable Auto-Send
+                  </label>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                  <div style="padding:8px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+                    <div style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:4px;">Onboarding survey (days after signup)</div>
+                    <input type="number" id="autoSendOnboardDays" value="3" min="1" style="width:60px;padding:4px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-sm);">
+                  </div>
+                  <div style="padding:8px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+                    <div style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:4px;">Re-engagement (days inactive)</div>
+                    <input type="number" id="autoSendReengageDays" value="7" min="1" style="width:60px;padding:4px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-sm);">
+                  </div>
+                  <div style="padding:8px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+                    <div style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:4px;">Check-in (days after onboarding)</div>
+                    <input type="number" id="autoSendCheckinDays" value="14" min="1" style="width:60px;padding:4px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-sm);">
+                  </div>
+                  <div style="padding:8px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+                    <div style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:4px;">Repeat check-in (days interval)</div>
+                    <input type="number" id="autoSendRepeatDays" value="30" min="1" style="width:60px;padding:4px 8px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-sm);">
+                  </div>
+                </div>
+                <button onclick="adminSaveAutoSendSettings()" style="padding:8px 16px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:var(--text-sm);">Save Settings</button>
               </div>
             </div>
           </div>
