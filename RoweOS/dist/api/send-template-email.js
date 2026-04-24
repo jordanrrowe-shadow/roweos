@@ -139,7 +139,14 @@ function buildOnboardingSurvey(userId, userName) {
   parts.push('<p style="margin:0 0 20px;font-size:15px;color:#e0e0e0;line-height:1.6;">' + greeting + '</p>');
   parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.6;">We would love to learn a bit about your experience so far. A few quick questions:</p>');
 
-  // Question 1: Beta API key
+  // Question 1: API key setup
+  parts.push('<div style="margin:0 0 24px;">');
+  parts.push('<p style="margin:0 0 10px;font-size:14px;color:#e0e0e0;font-weight:500;">Do you know how to set up your own AI API key?</p>');
+  parts.push(optionButton(buildResponseUrl(userId, 'api_key_setup', 'own_key', 'onboarding_survey'), 'Yes, I have my own'));
+  parts.push('<a href="https://roweos.com/info" style="display:inline-block;padding:10px 20px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:8px;color:#e0e0e0;text-decoration:none;font-size:13px;font-weight:500;margin:0 6px 8px 0;">No, help me get one</a>');
+  parts.push('</div>');
+
+  // Question 2: Beta API key
   parts.push('<div style="margin:0 0 24px;">');
   parts.push('<p style="margin:0 0 10px;font-size:14px;color:#e0e0e0;font-weight:500;">Do you need a beta API key?</p>');
   parts.push(optionButton(buildResponseUrl(userId, 'api_key_need', 'yes', 'onboarding_survey'), 'Yes, I need one'));
@@ -147,7 +154,7 @@ function buildOnboardingSurvey(userId, userName) {
   parts.push(optionButton(buildResponseUrl(userId, 'api_key_need', 'unsure', 'onboarding_survey'), 'Not sure what this means'));
   parts.push('</div>');
 
-  // Question 2: How did you hear about RoweOS
+  // Question 3: How did you hear about RoweOS
   parts.push('<div style="margin:0 0 24px;">');
   parts.push('<p style="margin:0 0 10px;font-size:14px;color:#e0e0e0;font-weight:500;">How did you hear about RoweOS?</p>');
   var sources = ['Twitter/X', 'Google Search', 'Friend/Referral', 'LinkedIn', 'Product Hunt', 'Other'];
@@ -156,7 +163,7 @@ function buildOnboardingSurvey(userId, userName) {
   }
   parts.push('</div>');
 
-  // Question 3: Experience so far
+  // Question 4: Experience so far
   parts.push('<div style="margin:0 0 24px;">');
   parts.push('<p style="margin:0 0 10px;font-size:14px;color:#e0e0e0;font-weight:500;">How has your experience been so far?</p>');
   var experiences = [
