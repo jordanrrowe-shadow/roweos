@@ -3277,28 +3277,28 @@ function getUserTier(forceRefresh) {
 }
 
 function hasFeatureAccess(feature) {
-  // v20.7: Tier alignment to match pricing page
-  // Solo ($29): 1 brand, 1 life, chat, library, memory, pulse, rhythm
-  // Founder ($59): Everything in Solo + 5 brands, 5 life, studio, automations, social, focus, analytics, identity, sync
+  // v30.1: Tier alignment update — studio, identity, analytics, mail moved to Solo
+  // Solo ($29): 1 brand, 1 life, chat, library, memory, pulse, rhythm, studio, identity, analytics, mail
+  // Founder ($59): Everything in Solo + 5 brands, 5 life, automations agent, pipelines, social, pulse, sync
   // Premium ($79): Everything in Founder + 15 brands, 15 life, private onboarding, white-label, multi-user
   // Backwards compat: 'basic' = solo (rank 1), 'pro' = founder (rank 2), 'enterprise' = premium (rank 3)
   var tierRank = { free: 0, basic: 1, solo: 1, founder: 2, pro: 2, premium: 3, enterprise: 3 };
   var featureMinTier = {
-    // Solo tier — basic access, basic automations (no agent chat, no pipelines)
+    // Solo tier — basic access, basic automations, studio, identity, analytics, mail
     export: 'solo',
     basicAutomations: 'solo',
-    // Founder tier — full feature set
+    studio: 'solo',       // v30.1: moved from founder
+    identity: 'solo',     // v30.1: moved from founder
+    analytics: 'solo',    // v30.1: moved from founder
+    mail: 'solo',         // v30.1: moved from founder
+    // Founder tier — advanced automation, social, sync
     sync: 'founder',
-    studio: 'founder',
     brandConfig: 'founder',
     automations: 'founder',
     automationsAgent: 'founder',
     pipelines: 'founder',
     social: 'founder',
     focus: 'founder',
-    analytics: 'founder',
-    identity: 'founder',
-    mail: 'founder',
     // Premium tier — expensive/exclusive features
     bloom: 'premium',
     brandSharing: 'premium',
@@ -3332,7 +3332,7 @@ function getMaxLifeProfiles() {
 // v24.11: Feature-friendly display names
 var FEATURE_DISPLAY_NAMES = {
   bloom: 'Bloom', studio: 'Studio', automations: 'Automations', automationsAgent: 'Automations Agent',
-  pipelines: 'Pipelines', social: 'Social Publishing', focus: 'Focus', analytics: 'Analytics',
+  pipelines: 'Pipelines', social: 'Social Publishing', focus: 'Pulse', analytics: 'Analytics', // v30.1: Focus renamed to Pulse
   identity: 'Identity', mail: 'Mail', sync: 'Cloud Sync', brandSharing: 'Brand Sharing',
   whiteLabel: 'White Label', multiUser: 'Multi-User', privateOnboarding: 'Private Onboarding'
 };
@@ -3361,7 +3361,7 @@ function showUpgradeModal(feature, requiredTier) {
       '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;">Recommended</div>' +
       '<div style="font-size:20px;font-weight:700;color:#a89878;margin-bottom:4px;">Founder</div>' +
       '<div style="font-size:24px;font-weight:700;color:var(--text-primary);">$59<span style="font-size:13px;font-weight:400;color:var(--text-muted);">/mo</span></div>' +
-      '<div style="font-size:12px;color:var(--text-muted);margin-top:10px;line-height:1.6;">Studio, Automations, Mail, Social, Focus, Analytics, Identity, Cloud Sync</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-top:10px;line-height:1.6;">Automations Agent, Pipelines, Social, Pulse, Cloud Sync</div>' + // v30.1: updated for tier changes
       '<div style="margin-top:14px;padding:10px;background:linear-gradient(135deg,#a89878,#d4b896);color:#0a0a0a;border-radius:var(--radius-md);text-align:center;font-size:13px;font-weight:600;">Upgrade to Founder</div>' +
       '</div>';
   }
@@ -3413,7 +3413,8 @@ function checkViewAccess(viewName) {
   if (!feature) return false; // no gate for this view
   if (hasFeatureAccess(feature)) return false; // user has access
   // Blocked — show upgrade modal
-  var featureMinTier = { bloom: 'premium', brandSharing: 'premium', studio: 'founder', automations: 'founder', automationsAgent: 'founder', pipelines: 'founder', social: 'founder', focus: 'founder', analytics: 'founder', identity: 'founder', mail: 'founder', sync: 'founder' };
+  // v30.1: studio, analytics, identity, mail moved to solo
+  var featureMinTier = { bloom: 'premium', brandSharing: 'premium', studio: 'solo', automations: 'founder', automationsAgent: 'founder', pipelines: 'founder', social: 'founder', focus: 'founder', analytics: 'solo', identity: 'solo', mail: 'solo', sync: 'founder' };
   var requiredTier = featureMinTier[feature] || 'founder';
   showUpgradeModal(feature, requiredTier);
   return true; // blocked
@@ -3421,7 +3422,8 @@ function checkViewAccess(viewName) {
 
 // v24.11: Update sidebar lock icons based on tier
 function updateSidebarTierLocks() {
-  var showLocked = localStorage.getItem('roweos_show_locked_features') !== 'false'; // default true
+  // v30.1: Default to hidden - locked features shown only when user enables
+  var showLocked = localStorage.getItem('roweos_show_locked_features') === 'true';
   var navItems = document.querySelectorAll('.sidebar-nav .nav-item[data-view]');
   for (var i = 0; i < navItems.length; i++) {
     var item = navItems[i];
@@ -4448,7 +4450,8 @@ function renderAccountFolder() {
     }
   }
 
-  var showLocked = localStorage.getItem('roweos_show_locked_features') !== 'false';
+  // v30.1: Default to hidden - locked features shown only when user enables
+  var showLocked = localStorage.getItem('roweos_show_locked_features') === 'true';
 
   var html = '';
 
@@ -4506,7 +4509,8 @@ function renderAccountFolder() {
   html += '<div style="font-size:11px;color:var(--text-muted);">Display locked views in sidebar with a lock icon</div>';
   html += '</div>';
   html += '<label style="position:relative;display:inline-block;width:40px;height:22px;cursor:pointer;">';
-  html += '<input type="checkbox" ' + (showLocked ? 'checked' : '') + ' onchange="localStorage.setItem(\'roweos_show_locked_features\', this.checked ? \'true\' : \'false\'); if(typeof updateSidebarTierLocks===\'function\') updateSidebarTierLocks();" style="opacity:0;width:0;height:0;">';
+  // v30.1: Toggle onchange now updates visual state (slider dot + background) immediately
+  html += '<input type="checkbox" ' + (showLocked ? 'checked' : '') + ' onchange="var on=this.checked;localStorage.setItem(\'roweos_show_locked_features\', on ? \'true\' : \'false\'); var bg=this.nextElementSibling; var dot=bg.nextElementSibling; bg.style.background=on?\'var(--brand-accent, #a89878)\':\'var(--bg-tertiary)\'; dot.style.left=on?\'20px\':\'2px\'; if(typeof updateSidebarTierLocks===\'function\') updateSidebarTierLocks();" style="opacity:0;width:0;height:0;">';
   html += '<span style="position:absolute;inset:0;background:' + (showLocked ? 'var(--brand-accent, #a89878)' : 'var(--bg-tertiary)') + ';border-radius:11px;transition:0.2s;border:1px solid var(--border-color);"></span>';
   html += '<span style="position:absolute;top:2px;left:' + (showLocked ? '20px' : '2px') + ';width:16px;height:16px;background:white;border-radius:50%;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></span>';
   html += '</label>';
@@ -4529,7 +4533,8 @@ function renderAccountFolder() {
   html += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);">Essentials</div>';
   html += '<div style="font-size:18px;font-weight:700;color:#60a5fa;margin:4px 0;">Solo</div>';
   html += '<div style="font-size:20px;font-weight:700;color:var(--text-primary);">$29<span style="font-size:12px;color:var(--text-muted);font-weight:400;">/mo</span></div>';
-  html += '<div style="font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.7;">1 Brand, 1 Life profile<br>Chat with all AI agents<br>Library, Memory, Pulse, Rhythm<br>Basic automations</div>';
+  // v30.1: Solo now includes studio, identity, analytics, mail
+  html += '<div style="font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.7;">1 Brand, 1 Life profile<br>Studio, Identity, Analytics, Mail<br>Library, Pulse, Rhythm<br>Basic automations</div>';
   if (isSolo) {
     html += '<div style="margin-top:12px;padding:8px;text-align:center;border-radius:var(--radius-md);background:rgba(96,165,250,0.1);color:#60a5fa;font-size:12px;font-weight:600;">Current Plan</div>';
   } else if (currentRank > 1) {
@@ -4545,7 +4550,8 @@ function renderAccountFolder() {
   html += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);">Full Access</div>';
   html += '<div style="font-size:18px;font-weight:700;color:#a89878;margin:4px 0;">Founder</div>';
   html += '<div style="font-size:20px;font-weight:700;color:var(--text-primary);">$59<span style="font-size:12px;color:var(--text-muted);font-weight:400;">/mo</span></div>';
-  html += '<div style="font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.7;">Up to 5 Brands & Life profiles<br>Studio, Automations Agent, Pipelines<br>Mail, Social, Focus, Analytics<br>Identity, Cloud Sync</div>';
+  // v30.1: Updated for tier changes - studio/analytics/identity/mail now in Solo
+  html += '<div style="font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.7;">Up to 5 Brands & Life profiles<br>Automations Agent, Pipelines<br>Social, Pulse, Cloud Sync</div>';
   if (isFounder) {
     html += '<div style="margin-top:12px;padding:8px;text-align:center;border-radius:var(--radius-md);background:rgba(168,152,120,0.15);color:#a89878;font-size:12px;font-weight:600;">Current Plan</div>';
   } else if (currentRank > 2) {
@@ -5252,7 +5258,7 @@ function exportFeedbackByStatus(status) {
       Promise.all(ssPromises).then(function() {
         var categoryLabels = { bug: 'Bug', feature: 'Feature', general: 'General', ui_ux: 'UI/UX' };
         var areaLabels = {
-          chat: 'Chat', studio: 'Studio', focus: 'Focus', pulse: 'Pulse', rhythm: 'Rhythm',
+          chat: 'Chat', studio: 'Studio', focus: 'Pulse', pulse: 'Pulse', rhythm: 'Rhythm', // v30.1: Focus renamed to Pulse
           library: 'Library', automations: 'Automations', identity: 'Identity', memory: 'Memory',
           inventory: 'Inventory', clients: 'Clients', analytics: 'Analytics', settings: 'Settings',
           notifications: 'Notifications', other: 'Other', _uncategorized: 'Uncategorized'
@@ -5530,12 +5536,14 @@ function openTierPicker() {
 
   var tiers = [
     {
+      // v30.1: Solo now includes studio, identity, analytics, mail
       id: 'solo', name: 'Solo', price: '$29', period: '/mo', stage: 'Essentials',
-      features: ['1 Brand profile', '1 LifeAI profile', 'Chat with all AI agents', 'Library & Memory', 'Pulse goal tracking', 'Rhythm scheduling']
+      features: ['1 Brand profile', '1 LifeAI profile', 'Studio, Identity, Analytics, Mail', 'Library, Pulse, Rhythm', 'Chat with all AI agents', 'Basic automations']
     },
     {
+      // v30.1: Founder updated - studio/analytics/identity/mail moved to Solo, Focus renamed to Pulse
       id: 'founder', name: 'Founder', price: '$59', period: '/mo', stage: 'Full Access',
-      features: ['Everything in Solo', 'Up to 5 Brand profiles', 'Up to 5 LifeAI profiles', 'Studio & pipelines', 'Automations & scheduling', 'Social publishing', 'Focus & Analytics', 'Identity & voice tuning', 'Cloud sync']
+      features: ['Everything in Solo', 'Up to 5 Brand profiles', 'Up to 5 LifeAI profiles', 'Automations Agent & Pipelines', 'Social publishing', 'Pulse & Cloud Sync']
     },
     {
       id: 'premium', name: 'Premium', price: '$79', period: '/mo', stage: 'Professional',
@@ -6091,6 +6099,18 @@ function loadComposerTemplate(name) {
   } else if (name === 'check-in') {
     html = generateCheckInEmail(key);
     if (subjectEl) subjectEl.value = 'How\'s RoweOS working for you?';
+  } else if (name === 'onboarding_survey') {
+    html = generateOnboardingSurveyPreview();
+    if (subjectEl) subjectEl.value = 'Quick questions about your RoweOS experience';
+  } else if (name === 'reengagement') {
+    html = generateReengagementPreview();
+    if (subjectEl) subjectEl.value = 'Your AI brand team is waiting for you';
+  } else if (name === 'feature_announcement') {
+    html = generateFeatureAnnouncementPreview();
+    if (subjectEl) subjectEl.value = 'New in RoweOS: [Feature Name]';
+  } else if (name === 'checkin_new') {
+    html = generateCheckinRatingPreview();
+    if (subjectEl) subjectEl.value = 'How\'s RoweOS working for you?';
   } else if (name === 'individual') {
     html = generateBetaWelcomeEmail(key, 'solo');
     if (subjectEl) subjectEl.value = 'Welcome to RoweOS Solo - Your Access Key';
@@ -6160,6 +6180,112 @@ function loadComposerTemplate(name) {
       try { iframe.style.height = Math.min(Math.max(doc.body.scrollHeight + 20, 300), 600) + 'px'; } catch(e) { iframe.style.height = '400px'; }
     }, 250);
   }
+}
+
+// v30.1: Onboarding Survey email preview (client-side preview of server template)
+function generateOnboardingSurveyPreview() {
+  var wrap = function(body) {
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
+      + '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
+      + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;"><tr><td align="center">'
+      + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
+      + '<tr><td style="padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">'
+      + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>'
+      + '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1px;text-transform:uppercase;">Onboarding</p>'
+      + '</td></tr><tr><td style="padding:32px;">' + body + '</td></tr>'
+      + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
+      + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p></td></tr>'
+      + '</table></td></tr></table></body></html>';
+  };
+  var btn = function(label) { return '<a href="#" style="display:inline-block;padding:10px 20px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:8px;color:#e0e0e0;text-decoration:none;font-size:13px;font-weight:500;margin:0 6px 8px 0;">' + label + '</a>'; };
+  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">Hi [Name],</p>'
+    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">We\'d love to learn about your experience with RoweOS so far. A few quick questions (just click your answer):</p>'
+    + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">Do you need a beta API key?</p>'
+    + '<div>' + btn('Yes, I need one') + btn('No, I have my own') + btn('Not sure what this means') + '</div></div>'
+    + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How did you hear about RoweOS?</p>'
+    + '<div>' + btn('Twitter / X') + btn('Google Search') + btn('Friend / Referral') + btn('LinkedIn') + btn('Product Hunt') + btn('Other') + '</div></div>'
+    + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How has your experience been so far?</p>'
+    + '<div>' + btn('Smooth, love it') + btn('Good, some questions') + btn('Hit some bumps') + btn('Need help') + '</div></div>'
+    + '<p style="color:#888;font-size:13px;line-height:1.6;margin:0;">Have more to share? Just reply to this email. We read every response.</p>';
+  return wrap(body);
+}
+
+// v30.1: Re-engagement email preview
+function generateReengagementPreview() {
+  var wrap = function(body) {
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
+      + '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
+      + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;"><tr><td align="center">'
+      + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
+      + '<tr><td style="padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">'
+      + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1></td></tr>'
+      + '<tr><td style="padding:32px;">' + body + '</td></tr>'
+      + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
+      + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p></td></tr>'
+      + '</table></td></tr></table></body></html>';
+  };
+  var card = function(title, desc) {
+    return '<div style="padding:16px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;margin-bottom:10px;">'
+      + '<p style="color:#e0e0e0;font-size:14px;font-weight:500;margin:0 0 4px;">' + title + '</p>'
+      + '<p style="color:#888;font-size:12px;margin:0;">' + desc + '</p></div>';
+  };
+  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">Hi [Name],</p>'
+    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">We noticed you haven\'t been back in a while. Here are a few things you can try in under 5 minutes:</p>'
+    + card('Run a Studio operation', '200+ pre-built AI operations for strategy, marketing, content, and more.')
+    + card('Set up your brand identity', 'Give your AI agents the context they need to write in your voice.')
+    + card('Ask BLAKE anything', 'Your brand\'s AI is ready. Start a conversation in Chat.')
+    + '<div style="text-align:center;margin:28px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Open RoweOS</a></div>'
+    + '<p style="color:#888;font-size:13px;text-align:center;margin:0;">Need help getting started? Just reply to this email.</p>';
+  return wrap(body);
+}
+
+// v30.1: Feature Announcement email preview
+function generateFeatureAnnouncementPreview() {
+  var wrap = function(body) {
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
+      + '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
+      + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;"><tr><td align="center">'
+      + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
+      + '<tr><td style="padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">'
+      + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>'
+      + '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1px;text-transform:uppercase;">What\'s New</p>'
+      + '</td></tr><tr><td style="padding:32px;">' + body + '</td></tr>'
+      + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
+      + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p></td></tr>'
+      + '</table></td></tr></table></body></html>';
+  };
+  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">Hi [Name],</p>'
+    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 24px;">We just shipped something new:</p>'
+    + '<div style="padding:24px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:12px;margin-bottom:24px;">'
+    + '<h2 style="color:#a89878;font-size:20px;font-weight:500;margin:0 0 12px;">[Feature Name]</h2>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0;">[Feature description goes here. Edit this text to describe the new capability.]</p></div>'
+    + '<div style="text-align:center;margin:28px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Try it now</a></div>';
+  return wrap(body);
+}
+
+// v30.1: Check-in Rating email preview
+function generateCheckinRatingPreview() {
+  var wrap = function(body) {
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
+      + '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
+      + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;"><tr><td align="center">'
+      + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
+      + '<tr><td style="padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;">'
+      + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>'
+      + '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1px;text-transform:uppercase;">Check-In</p>'
+      + '</td></tr><tr><td style="padding:32px;">' + body + '</td></tr>'
+      + '<tr><td style="padding:16px 32px 24px;border-top:1px solid #1e1e1e;text-align:center;">'
+      + '<p style="margin:0;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p></td></tr>'
+      + '</table></td></tr></table></body></html>';
+  };
+  var btn = function(label) { return '<a href="#" style="display:inline-block;padding:10px 20px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:8px;color:#e0e0e0;text-decoration:none;font-size:13px;font-weight:500;margin:0 6px 8px 0;">' + label + '</a>'; };
+  var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">Hi [Name],</p>'
+    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">How\'s everything going with RoweOS? We\'d love a quick pulse check:</p>'
+    + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How would you rate your experience?</p>'
+    + '<div>' + btn('Loving it') + btn('It\'s good') + btn('Could be better') + btn('Having issues') + '</div></div>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 24px;">What would make RoweOS better for you? Just reply to this email with your thoughts.</p>'
+    + '<div style="text-align:center;margin:20px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Open RoweOS</a></div>';
+  return wrap(body);
 }
 
 // v21.14: Beta Welcome Email Generator
