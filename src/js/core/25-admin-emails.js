@@ -195,6 +195,8 @@ function adminLoadEmailData() {
 function adminRenderEmailUserList(users, emailLogs, responses) {
   var contentEl = document.getElementById('adminEmailContent');
   if (!contentEl) return;
+  // v30.1: Clear detail user context
+  window._adminEmailDetailUser = null;
 
   // Store data globally so detail view can use it
   window._adminEmailUsers = users;
@@ -303,6 +305,8 @@ function adminShowEmailUserDetail(uid, userName, userEmail) {
   if (!isAdmin()) return;
   var contentEl = document.getElementById('adminEmailContent');
   if (!contentEl) return;
+  // v30.1: Track current user for "Send to Selected" context
+  window._adminEmailDetailUser = userEmail;
 
   var emailLogs = window._adminEmailLogs || [];
   var responses = window._adminEmailResponses || [];
@@ -430,9 +434,17 @@ function adminShowEmailUserDetail(uid, userName, userEmail) {
   html += '</div>';
   html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
 
+  var templateMap = {
+    'onboarding_survey': 'onboarding_survey',
+    'reengagement': 'reengagement',
+    'feature_announcement': 'feature_announcement',
+    'access_key_delivery': 'default',
+    'checkin': 'checkin_new'
+  };
   var templates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin'];
   templates.forEach(function(tmpl) {
-    html += '<button onclick="adminSendTemplateToUser(\'' + escapeHtml(tmpl) + '\',\'' + escapeHtml(uid) + '\',\'' + escapeHtml(userEmail).replace(/'/g, "\\'") + '\',\'' + escapeHtml(userName).replace(/'/g, "\\'") + '\')" style="padding:6px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);font-weight:500;transition:all 0.15s;">';
+    var composerTmpl = templateMap[tmpl] || tmpl;
+    html += '<button onclick="adminOpenComposerForUser(\'' + escapeHtml(composerTmpl) + '\',\'' + escapeHtml(userEmail).replace(/'/g, "\\'") + '\')" style="padding:6px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);font-weight:500;transition:all 0.15s;">';
     html += escapeHtml(formatTemplateName(tmpl));
     html += '</button>';
   });
@@ -549,6 +561,33 @@ function adminRenderEmailStats(responses) {
   statsEl.innerHTML = heardHtml + expHtml + apiHtml + ratingHtml;
 }
 
+// v30.1: Open Compose Email modal pre-filled with a template and recipient
+function adminOpenComposerForUser(templateName, recipientEmail) {
+  // Set a dummy key so openEmailComposer doesn't complain
+  window._composerKey = window._composerKey || 'ROWE-XXXX-XXXX';
+  window._composerTier = window._composerTier || 'founder';
+  // Pre-fill To field and template
+  var toEl = document.getElementById('composerTo');
+  var templateSelect = document.getElementById('composerTemplate');
+  var fromEl = document.getElementById('composerFrom');
+  if (toEl) toEl.value = recipientEmail || '';
+  if (fromEl && typeof buildFromOptionsHtml === 'function') {
+    var _defFrom = (typeof getDefaultFromAddress === 'function' ? getDefaultFromAddress() : '');
+    fromEl.innerHTML = buildFromOptionsHtml(_defFrom);
+    fromEl.value = _defFrom;
+  }
+  // Set the template dropdown and load it
+  if (templateSelect) {
+    templateSelect.value = templateName || 'default';
+  }
+  if (typeof loadComposerTemplate === 'function') {
+    loadComposerTemplate(templateName || 'default');
+  }
+  if (typeof openModal === 'function') {
+    openModal('betaEmailPreviewModal');
+  }
+}
+
 function adminSendSelectedTemplate() {
   if (!isAdmin()) return;
   var templateEl = document.getElementById('adminEmailTemplate');
@@ -559,7 +598,19 @@ function adminSendSelectedTemplate() {
     return;
   }
 
+  // v30.1: If inside user detail view, use that user's info
+  var detailEmail = window._adminEmailDetailUser;
   var checkboxes = document.querySelectorAll('.admin-email-user-cb:checked');
+
+  if (detailEmail) {
+    // Inside user detail view, open composer for this user
+    var composerTemplate = template;
+    if (template === 'access_key_delivery') composerTemplate = 'default';
+    if (template === 'checkin') composerTemplate = 'checkin_new';
+    adminOpenComposerForUser(composerTemplate, detailEmail);
+    return;
+  }
+
   if (!checkboxes || checkboxes.length === 0) {
     showToast('Select at least one user', 'error');
     return;
