@@ -371,9 +371,12 @@ async function writeEmailLog(projectId, accessToken, logData) {
     if (!resp.ok) {
       var errText = await resp.text();
       console.error('[send-template-email] Firestore log write failed:', resp.status, errText);
+      return false;
     }
+    return true;
   } catch (err) {
     console.error('[send-template-email] Firestore log error:', err.message);
+    return false;
   }
 }
 
@@ -480,8 +483,9 @@ module.exports = async function handler(req, res) {
     }
 
     // Write to Firestore email_log
+    var logged = false;
     if (projectId) {
-      await writeEmailLog(projectId, accessToken, {
+      logged = await writeEmailLog(projectId, accessToken, {
         userId: userId,
         userEmail: userEmail,
         template: template,
@@ -497,7 +501,8 @@ module.exports = async function handler(req, res) {
         success: true,
         template: template,
         userEmail: userEmail,
-        subject: emailData.subject
+        subject: emailData.subject,
+        logged: logged
       });
     } else {
       return res.status(500).json({
