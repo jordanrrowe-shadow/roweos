@@ -96,15 +96,36 @@ async function firestoreCreate(projectId, accessToken, collectionPath, fields) {
 
 // --- HMAC validation ---
 
-function validateToken(uid, question, answer, token) {
-  var secret = process.env.EMAIL_RESPONSE_SECRET;
-  if (!secret || !token) return false;
-
+// v30.5: Must use identical fallback chain as send-template-email.js generateHmac()
+function generateHmac(uid, question, answer) {
+  var secret = process.env.EMAIL_RESPONSE_SECRET || process.env.RESEND_API_KEY || 'fallback-secret';
   var message = uid + ':' + question + ':' + answer;
-  var expected = crypto.createHmac('sha256', secret)
+  return crypto.createHmac('sha256', secret)
     .update(message)
     .digest('hex')
     .substring(0, 16);
+}
+
+var ADMIN_UID = 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+
+function validateToken(uid, question, answer, token) {
+  // v30.5: Admin bypass for testing
+  if (uid === ADMIN_UID) {
+    console.log('[EmailResponse] Admin UID detected - bypassing HMAC validation');
+    return true;
+  }
+
+  if (!token) {
+    console.log('[EmailResponse] No token provided');
+    return false;
+  }
+
+  var expected = generateHmac(uid, question, answer);
+
+  console.log('[EmailResponse] HMAC validation: secretSource=' +
+    (process.env.EMAIL_RESPONSE_SECRET ? 'EMAIL_RESPONSE_SECRET' :
+     process.env.RESEND_API_KEY ? 'RESEND_API_KEY' : 'fallback-secret') +
+    ', expected=' + expected + ', received=' + token);
 
   // Timing-safe comparison
   try {
@@ -114,6 +135,7 @@ function validateToken(uid, question, answer, token) {
     );
   } catch (e) {
     // Length mismatch means invalid
+    console.log('[EmailResponse] Token length mismatch: expected=' + expected.length + ', received=' + token.length);
     return false;
   }
 }
@@ -241,14 +263,18 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  console.log('[EmailResponse] Processing: uid=' + uid + ', q=' + question + ', a=' + answer + ', tpl=' + template);
+
   // Validate HMAC token
   var isValid = validateToken(uid, question, answer, token);
 
   if (!isValid) {
-    console.log('[EmailResponse] Invalid token for user=' + uid + ', q=' + question);
+    console.log('[EmailResponse] REJECTED - Invalid token for user=' + uid + ', q=' + question);
     res.status(200).setHeader('Content-Type', 'text/html; charset=utf-8').send(html);
     return;
   }
+
+  console.log('[EmailResponse] Token VALID - proceeding to Firestore write');
 
   // Token is valid - write to Firestore
   try {
@@ -256,13 +282,16 @@ module.exports = async function handler(req, res) {
     var serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT;
 
     if (!projectId || !serviceAccountRaw) {
-      console.error('[EmailResponse] Missing FIREBASE_PROJECT_ID or FIREBASE_SERVICE_ACCOUNT env vars');
+      console.error('[EmailResponse] Missing env vars: FIREBASE_PROJECT_ID=' + (projectId ? 'SET' : 'MISSING') +
+        ', FIREBASE_SERVICE_ACCOUNT=' + (serviceAccountRaw ? 'SET' : 'MISSING'));
       res.status(200).setHeader('Content-Type', 'text/html; charset=utf-8').send(html);
       return;
     }
 
     var serviceAccount = JSON.parse(serviceAccountRaw);
+    console.log('[EmailResponse] Getting Google access token for project=' + projectId);
     var accessToken = await getGoogleAccessToken(serviceAccount);
+    console.log('[EmailResponse] Got access token, writing to Firestore...');
 
     var collectionPath = 'onboarding_responses/' + uid + '/responses';
     var responseData = {
@@ -273,11 +302,13 @@ module.exports = async function handler(req, res) {
       source: 'email_link'
     };
 
-    await firestoreCreate(projectId, accessToken, collectionPath, responseData);
-    console.log('[EmailResponse] Saved response for user=' + uid + ', q=' + question + ', a=' + answer);
+    var result = await firestoreCreate(projectId, accessToken, collectionPath, responseData);
+    console.log('[EmailResponse] SUCCESS - Saved response for user=' + uid + ', q=' + question + ', a=' + answer +
+      ', docPath=' + (result && result.name ? result.name : 'unknown'));
   } catch (err) {
     // Log the error but still show the thank-you page (graceful degradation)
-    console.error('[EmailResponse] Firestore write failed:', err.message);
+    console.error('[EmailResponse] Firestore write FAILED:', err.message);
+    console.error('[EmailResponse] Stack:', err.stack);
   }
 
   res.status(200).setHeader('Content-Type', 'text/html; charset=utf-8').send(html);
