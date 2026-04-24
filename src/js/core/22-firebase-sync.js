@@ -6615,6 +6615,7 @@ function sendComposedEmail() {
       if (!data) return;
       if (data.error) { showToast('Gmail send failed: ' + data.error, 'error'); return; }
       showToast('Email sent to ' + to + ' via Gmail', 'success');
+      _logSentEmail(to, subject, (document.getElementById('composerTemplate') || {}).value || 'custom');
     }).catch(function(err) {
       showToast('Gmail send failed: ' + err.message, 'error');
     });
@@ -6637,6 +6638,7 @@ function sendComposedEmail() {
       }).then(function(r) { return r.json(); }).then(function(data) {
         if (data.error) { showToast('Outlook send failed: ' + data.error, 'error'); return; }
         showToast('Email sent to ' + to + ' via Outlook', 'success');
+        _logSentEmail(to, subject, (document.getElementById('composerTemplate') || {}).value || 'custom');
       }).catch(function(err) {
         showToast('Outlook send failed: ' + err.message, 'error');
       });
@@ -6670,12 +6672,33 @@ function sendComposedEmail() {
     }).then(function(data) {
       if (data.success) {
         showToast('Email sent to ' + to, 'success');
+        _logSentEmail(to, subject, (document.getElementById('composerTemplate') || {}).value || 'custom');
       } else {
         showToast('Failed: ' + (data.error || 'Unknown error'), 'error');
       }
     }).catch(function(err) {
       showToast('Error: ' + err.message, 'error');
     });
+  }
+}
+
+// v30.1: Log sent email to Firestore email_log for admin Email Management tracking
+function _logSentEmail(recipientEmail, subject, templateName) {
+  if (!firebase || !isAdmin()) return;
+  try {
+    var db = firebase.firestore();
+    db.collection('email_log').add({
+      userId: '',
+      userEmail: recipientEmail || '',
+      template: templateName || 'custom',
+      subject: subject || '',
+      sentAt: new Date().toISOString(),
+      status: 'sent',
+      error: '',
+      sentBy: 'admin_composer'
+    });
+  } catch (e) {
+    console.warn('[email_log] Write failed (non-fatal):', e.message);
   }
 }
 
