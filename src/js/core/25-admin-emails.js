@@ -115,58 +115,64 @@ function _fsDocId(doc) {
 // ---- Main Functions ----
 
 function adminLoadEmailData() {
-  if (!isAdmin()) return;
+  if (!isAdmin() || !firebase) return;
   var contentEl = document.getElementById('adminEmailContent');
   var statsEl = document.getElementById('adminEmailStats');
   if (contentEl) contentEl.innerHTML = '<div style="color:var(--text-muted);padding:8px 0;">Loading email data...</div>';
   if (statsEl) statsEl.innerHTML = '';
 
+  var db = firebase.firestore();
+
+  // v30.1: Use Firebase client SDK (same pattern as adminLoadSignups)
   Promise.all([
-    _adminFirestoreGet('signups'),
-    _adminFirestoreGet('email_log'),
-    _adminFirestoreGet('onboarding_responses')
+    db.collection('newsletter_subscribers').orderBy('subscribedAt', 'desc').limit(200).get(),
+    db.collection('email_log').orderBy('sentAt', 'desc').limit(500).get(),
+    db.collection('onboarding_responses').limit(500).get()
   ]).then(function(results) {
-    var signupDocs = (results[0] && results[0].documents) ? results[0].documents : [];
-    var emailLogDocs = (results[1] && results[1].documents) ? results[1].documents : [];
-    var responseDocs = (results[2] && results[2].documents) ? results[2].documents : [];
+    var signupSnap = results[0];
+    var emailLogSnap = results[1];
+    var responseSnap = results[2];
 
     // Parse signups into user objects
-    var users = signupDocs.map(function(doc) {
-      var f = doc.fields || {};
-      return {
-        uid: _fsDocId(doc),
-        email: _fsVal(f.email) || '',
-        name: _fsVal(f.name) || _fsVal(f.displayName) || '',
-        signupDate: _fsVal(f.signupDate) || _fsVal(f.createdAt) || _fsVal(f.subscribedAt) || ''
-      };
+    var users = [];
+    signupSnap.docs.forEach(function(doc) {
+      var d = doc.data();
+      users.push({
+        uid: d.uid || doc.id,
+        email: d.email || '',
+        name: d.name || d.displayName || '',
+        signupDate: d.subscribedAt || d.createdAt || d.signupDate || ''
+      });
     });
 
     // Parse email logs
-    var emailLogs = emailLogDocs.map(function(doc) {
-      var f = doc.fields || {};
-      return {
-        id: _fsDocId(doc),
-        userId: _fsVal(f.userId) || '',
-        userEmail: _fsVal(f.userEmail) || _fsVal(f.email) || '',
-        template: _fsVal(f.template) || '',
-        subject: _fsVal(f.subject) || '',
-        sentAt: _fsVal(f.sentAt) || _fsVal(f.createdAt) || '',
-        status: _fsVal(f.status) || 'sent'
-      };
+    var emailLogs = [];
+    emailLogSnap.docs.forEach(function(doc) {
+      var d = doc.data();
+      emailLogs.push({
+        id: doc.id,
+        userId: d.userId || '',
+        userEmail: d.userEmail || d.email || '',
+        template: d.template || '',
+        subject: d.subject || '',
+        sentAt: d.sentAt || d.createdAt || '',
+        status: d.status || 'sent'
+      });
     });
 
     // Parse responses
-    var responses = responseDocs.map(function(doc) {
-      var f = doc.fields || {};
-      return {
-        id: _fsDocId(doc),
-        userId: _fsVal(f.userId) || '',
-        userEmail: _fsVal(f.userEmail) || _fsVal(f.email) || '',
-        question: _fsVal(f.question) || _fsVal(f.field) || '',
-        answer: _fsVal(f.answer) || _fsVal(f.value) || _fsVal(f.response) || '',
-        template: _fsVal(f.template) || _fsVal(f.source) || '',
-        timestamp: _fsVal(f.timestamp) || _fsVal(f.createdAt) || _fsVal(f.submittedAt) || ''
-      };
+    var responses = [];
+    responseSnap.docs.forEach(function(doc) {
+      var d = doc.data();
+      responses.push({
+        id: doc.id,
+        userId: d.userId || '',
+        userEmail: d.userEmail || d.email || '',
+        question: d.question || d.field || '',
+        answer: d.answer || d.value || d.response || '',
+        template: d.template || d.source || '',
+        timestamp: d.timestamp || d.createdAt || d.submittedAt || ''
+      });
     });
 
     adminRenderEmailUserList(users, emailLogs, responses);
@@ -611,40 +617,37 @@ function adminSendTemplateToUser(template, userId, userEmail, userName, metadata
 }
 
 function adminToggleAutoSend(enabled) {
-  if (!isAdmin()) return;
-  var fields = {
-    autoSendEnabled: { booleanValue: !!enabled }
-  };
-  _adminFirestorePatch('email_settings/config', fields, ['autoSendEnabled']).then(function() {
+  if (!isAdmin() || !firebase) return;
+  firebase.firestore().collection('email_settings').doc('config').set(
+    { autoSendEnabled: !!enabled },
+    { merge: true }
+  ).then(function() {
     showToast('Auto-send ' + (enabled ? 'enabled' : 'disabled'), 'success');
   }).catch(function(err) {
     showToast('Failed to toggle auto-send: ' + err.message, 'error');
     console.error('[Admin Emails] Toggle error:', err);
-    // Revert checkbox
     var toggle = document.getElementById('adminAutoSendToggle');
     if (toggle) toggle.checked = !enabled;
   });
 }
 
 function adminSaveAutoSendSettings() {
-  if (!isAdmin()) return;
+  if (!isAdmin() || !firebase) return;
   var toggleEl = document.getElementById('adminAutoSendToggle');
   var onboardEl = document.getElementById('autoSendOnboardDays');
   var reengageEl = document.getElementById('autoSendReengageDays');
   var checkinEl = document.getElementById('autoSendCheckinDays');
   var repeatEl = document.getElementById('autoSendRepeatDays');
 
-  var fields = {
-    autoSendEnabled: { booleanValue: !!(toggleEl && toggleEl.checked) },
-    onboardingSurveyDays: { integerValue: String(onboardEl ? parseInt(onboardEl.value, 10) || 3 : 3) },
-    reEngagementDays: { integerValue: String(reengageEl ? parseInt(reengageEl.value, 10) || 7 : 7) },
-    checkInDays: { integerValue: String(checkinEl ? parseInt(checkinEl.value, 10) || 14 : 14) },
-    checkInRepeatDays: { integerValue: String(repeatEl ? parseInt(repeatEl.value, 10) || 30 : 30) }
+  var settings = {
+    autoSendEnabled: !!(toggleEl && toggleEl.checked),
+    onboardingSurveyDays: onboardEl ? parseInt(onboardEl.value, 10) || 3 : 3,
+    reEngagementDays: reengageEl ? parseInt(reengageEl.value, 10) || 7 : 7,
+    checkInDays: checkinEl ? parseInt(checkinEl.value, 10) || 14 : 14,
+    checkInRepeatDays: repeatEl ? parseInt(repeatEl.value, 10) || 30 : 30
   };
 
-  _adminFirestorePatch('email_settings/config', fields, [
-    'autoSendEnabled', 'onboardingSurveyDays', 'reEngagementDays', 'checkInDays', 'checkInRepeatDays'
-  ]).then(function() {
+  firebase.firestore().collection('email_settings').doc('config').set(settings, { merge: true }).then(function() {
     showToast('Auto-send settings saved', 'success');
   }).catch(function(err) {
     showToast('Failed to save settings: ' + err.message, 'error');
@@ -653,10 +656,10 @@ function adminSaveAutoSendSettings() {
 }
 
 function adminLoadAutoSendSettings() {
-  if (!isAdmin()) return;
-  _adminFirestoreGetDoc('email_settings/config').then(function(doc) {
-    if (!doc || !doc.fields) return;
-    var f = doc.fields;
+  if (!isAdmin() || !firebase) return;
+  firebase.firestore().collection('email_settings').doc('config').get().then(function(doc) {
+    if (!doc.exists) return;
+    var d = doc.data();
 
     var toggleEl = document.getElementById('adminAutoSendToggle');
     var onboardEl = document.getElementById('autoSendOnboardDays');
@@ -664,23 +667,12 @@ function adminLoadAutoSendSettings() {
     var checkinEl = document.getElementById('autoSendCheckinDays');
     var repeatEl = document.getElementById('autoSendRepeatDays');
 
-    if (toggleEl && f.autoSendEnabled) {
-      toggleEl.checked = !!_fsVal(f.autoSendEnabled);
-    }
-    if (onboardEl && f.onboardingSurveyDays) {
-      onboardEl.value = _fsVal(f.onboardingSurveyDays) || 3;
-    }
-    if (reengageEl && f.reEngagementDays) {
-      reengageEl.value = _fsVal(f.reEngagementDays) || 7;
-    }
-    if (checkinEl && f.checkInDays) {
-      checkinEl.value = _fsVal(f.checkInDays) || 14;
-    }
-    if (repeatEl && f.checkInRepeatDays) {
-      repeatEl.value = _fsVal(f.checkInRepeatDays) || 30;
-    }
+    if (toggleEl && d.autoSendEnabled !== undefined) toggleEl.checked = !!d.autoSendEnabled;
+    if (onboardEl && d.onboardingSurveyDays) onboardEl.value = d.onboardingSurveyDays;
+    if (reengageEl && d.reEngagementDays) reengageEl.value = d.reEngagementDays;
+    if (checkinEl && d.checkInDays) checkinEl.value = d.checkInDays;
+    if (repeatEl && d.checkInRepeatDays) repeatEl.value = d.checkInRepeatDays;
   }).catch(function(err) {
-    // Settings doc may not exist yet, that's OK
     console.log('[Admin Emails] No auto-send settings found (may need first save):', err.message);
   });
 }
