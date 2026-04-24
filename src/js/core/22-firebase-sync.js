@@ -2075,8 +2075,11 @@ function applyCloudData(data) {
       localStorage.setItem('roweos_user_name', data.lifeAI.userName);
     }
     // v24.4: Don't overwrite mode if user explicitly selected one from welcome screen or cross-device sync
-    // v28.1: skipModeSync only exists in loadFromFirebaseV2 scope, not here
-    if (data.lifeAI.appMode && !window._userSelectedMode) {
+    // v30.1: App mode is DEVICE-LOCAL — cloud never overwrites it (like theme)
+    // Each device remembers its own last mode. Cloud mode caused cross-device mode switching
+    // (e.g. iOS in LifeAI mode would force desktop to LifeAI on next load)
+    if (data.lifeAI.appMode && !localStorage.getItem('roweos_app_mode')) {
+      // Only seed on first load (no local preference yet)
       localStorage.setItem('roweos_app_mode', data.lifeAI.appMode);
       localStorage.setItem('roweos_mode', data.lifeAI.appMode);
     }
@@ -6533,6 +6536,40 @@ function sendComposedEmail() {
   var bcc = parseEmailList(document.getElementById('composerBcc') ? document.getElementById('composerBcc').value : '');
   if (!to) { showToast('Enter a recipient email', 'error'); return; }
   if (!subject) { showToast('Enter a subject', 'error'); return; }
+
+  // v30.1: For interactive templates (onboarding_survey, checkin_new), use the API endpoint
+  // which generates HMAC-signed response links. The compose preview is just a preview.
+  var selectedTemplate = (document.getElementById('composerTemplate') || {}).value || '';
+  var apiTemplates = { 'onboarding_survey': 'onboarding_survey', 'checkin_new': 'checkin', 'reengagement': 'reengagement', 'feature_announcement': 'feature_announcement' };
+  if (apiTemplates[selectedTemplate] && isAdmin()) {
+    if (!confirm('Send ' + selectedTemplate.replace(/_/g, ' ') + ' email to ' + to + '?')) return;
+    var recipientName = window._composerRecipientName || '';
+    showToast('Sending via template API...', 'info');
+    fetch('/api/send-template-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        template: apiTemplates[selectedTemplate],
+        userId: '',
+        userEmail: to,
+        userName: recipientName,
+        callerUid: firebaseUser ? firebaseUser.uid : '',
+        metadata: {}
+      })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.success) {
+        showToast('Email sent to ' + to, 'success');
+        _logSentEmail(to, subject, selectedTemplate);
+        closeModal('betaEmailPreviewModal');
+      } else {
+        showToast('Failed: ' + (data.error || 'Unknown error'), 'error');
+      }
+    }).catch(function(err) {
+      showToast('Error: ' + err.message, 'error');
+    });
+    return;
+  }
+
   var bodyHtml = getComposerBodyHTML();
   if (!bodyHtml) { showToast('Email body is empty', 'error'); return; }
   var confirmMsg = 'Send email to ' + to;
@@ -9351,11 +9388,8 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       }
       if (life.currentProfile) safeSyncWrite('roweos_life_profile', life.currentProfile);
       if (life.userName) localStorage.setItem('roweos_user_name', life.userName);
-      // v24.4: Don't overwrite mode if user explicitly selected one from welcome screen or cross-device sync
-      if (life.appMode && !skipModeSync && !window._userSelectedMode) {
-        localStorage.setItem('roweos_app_mode', life.appMode);
-        localStorage.setItem('roweos_mode', life.appMode);
-      }
+      // v30.1: App mode is DEVICE-LOCAL — cloud/onSnapshot never overwrites it
+      // Only seed if no local preference exists (first load on new device)
       if (life.mainSystemPrompt) localStorage.setItem('roweos_life_main_prompt', life.mainSystemPrompt);
       if (life.generatedOps) safeSyncWrite('roweos_generated_life_ops', life.generatedOps);
       if (life.goals) safeSyncWrite('roweos_life_goals', life.goals);
