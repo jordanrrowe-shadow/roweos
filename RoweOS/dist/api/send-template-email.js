@@ -118,6 +118,15 @@ function wrapEmail(subtitle, bodyHtml) {
   parts.push('<tr><td style="padding:24px 32px;">');
   parts.push(bodyHtml);
   parts.push('</td></tr>');
+  // v30.5: Intelligence, accessible promo section
+  parts.push('<tr><td style="padding:24px 32px 0;text-align:center;border-top:1px solid #2a2a2a;">');
+  parts.push('<p style="font-family:\'DM Sans\',sans-serif;font-size:20px;font-weight:300;color:#a89878;letter-spacing:1px;margin:0 0 4px;">Intelligence, accessible.</p>');
+  parts.push('<p style="font-family:\'DM Sans\',sans-serif;font-size:13px;color:#888;margin:0 0 16px;">Simple plans. No hidden fees.</p>');
+  parts.push('<table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>');
+  parts.push('<td style="padding-right:8px;"><a href="https://roweos.com/purchase" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">View Plans</a></td>');
+  parts.push('<td style="padding-left:8px;"><a href="https://roweos.com/info" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">Get API Keys</a></td>');
+  parts.push('</tr></table>');
+  parts.push('</td></tr>');
   // Footer
   parts.push('<tr><td style="padding:16px 32px;border-top:1px solid #2a2a2a;text-align:center;">');
   parts.push('<p style="margin:0 0 6px;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p>');
