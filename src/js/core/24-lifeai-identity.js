@@ -2007,19 +2007,18 @@ function completeOnboarding() {
 var TOUR_STEPS = [
   { id: 'welcome', type: 'center', target: null, title: 'Welcome to RoweOS', description: 'Your brand is set up and B.L.A.K.E. is ready. Let us show you around.', icon: 'sparkles' },
   { id: 'brandai', type: 'deep-dive', target: 'agent', title: 'BrandAI Chat', description: 'Your AI chat assistant, tailored to your brand.', icon: 'chat', features: ['Claude, GPT, and Gemini in one conversation', 'Attach images and documents for AI analysis', 'Conversations auto-save to History'], helpHint: true },
-  { id: 'focus', type: 'deep-dive', target: 'signal', title: 'Focus', description: 'Your daily command center.', icon: 'target', features: ['Tasks organized by category', 'Calendar events and schedule at a glance', 'Automation status and streak tracking'] },
   { id: 'pulse', type: 'deep-dive', target: 'pulse', title: 'Pulse', description: 'Goal tracking with visual timelines.', icon: 'target', features: ['Short-term and long-term goal tracking', 'Progress visualization and completion rates', 'Quick-add goals from any view'] },
   { id: 'studio', type: 'deep-dive', target: 'studio', title: 'Studio', description: '150+ operations across 5 AI agents.', icon: 'edit', features: ['Strategy, Marketing, Operations, Documents, Intelligence', 'Image generation with Nano Banana 3.0 Pro', 'Video generation with Veo 3.1', 'Export results as PDF, Word, or Excel'] },
   { id: 'rhythm', type: 'deep-dive', target: 'rhythm', title: 'Rhythm', description: 'Calendar and time management.', icon: 'calendar', features: ['Sync with Google Calendar, iCloud, or Outlook', 'Day, week, and month views', 'Create events and set reminders'] },
-  { id: 'automations', type: 'deep-dive', target: 'automations', title: 'Automations', description: 'Build automated workflows.', icon: 'calendar', features: ['Automations Agent builds pipelines conversationally', 'Schedule recurring AI tasks', 'Multi-step pipelines with email, social, and more'] },
+  { id: 'automations', type: 'deep-dive', target: 'automations', title: 'Automations', description: 'Build automated workflows.', icon: 'zap', features: ['Automations Agent builds pipelines conversationally', 'Schedule recurring AI tasks', 'Multi-step pipelines with email, social, and more'] },
   { id: 'library', type: 'deep-dive', target: 'library', title: 'Library', description: 'Your content archive.', icon: 'library', features: ['Save conversations, documents, and AI outputs', 'Folder organization and search', 'Attach library items to emails or posts'] },
   { id: 'mail', type: 'deep-dive', target: 'mail', title: 'Mail', description: 'AI-powered email.', icon: 'mail', features: ['Compose emails in your brand voice', 'Outbox, sent, and draft management', 'Connect Gmail or Outlook for full inbox access'] },
-  { id: 'identity', type: 'deep-dive', target: 'memory', title: 'Identity', description: 'Your brand knowledge base.', icon: 'database', features: ['Voice, positioning, audience, and brand context', 'Powers every AI interaction automatically', 'Edit brand details anytime'] },
-  { id: 'history', type: 'deep-dive', target: 'tuning', title: 'History', description: 'Browse and search past conversations.', icon: 'database', features: ['Search by keyword, date, or agent', 'Resume any previous conversation', 'Syncs across all devices'] },
+  { id: 'identity', type: 'deep-dive', target: 'memory', title: 'Identity', description: 'Your brand knowledge base.', icon: 'diamond', features: ['Voice, positioning, audience, and brand context', 'Powers every AI interaction automatically', 'Edit brand details anytime'] },
+  { id: 'history', type: 'deep-dive', target: 'tuning', title: 'History', description: 'Browse and search past conversations.', icon: 'clock', features: ['Search by keyword, date, or agent', 'Resume any previous conversation', 'Syncs across all devices'] },
   { id: 'bloom', type: 'deep-dive', target: 'bloom', title: 'Bloom', description: 'Your content discovery feed.', icon: 'sparkles', features: ['Browse generated content from Studio and chat', 'Filter by type, category, and date', 'Revisit and refine past creations'] },
   { id: 'analytics', type: 'deep-dive', target: 'commerce', title: 'Analytics', description: 'Track usage and costs.', icon: 'chart', features: ['API costs across Claude, GPT, and Gemini', 'Budget tracking with countdown display', 'Per-provider spending alerts'] },
-  { id: 'clients', type: 'deep-dive', target: 'clients', title: 'Clients', description: 'Client relationship management.', icon: 'database', features: ['Track client details and interactions', 'Link conversations and documents to clients', 'Export client data'] },
-  { id: 'inventory', type: 'deep-dive', target: 'inventory', title: 'Inventory', description: 'Asset and inventory tracking.', icon: 'database', features: ['Track products, assets, and supplies', 'Organize by category with search', 'Link to operations and automations'] },
+  { id: 'people', type: 'deep-dive', target: 'clients', title: 'People', description: 'Manage clients, team, and contacts.', icon: 'users', features: ['Track clients, team members, and contacts', 'Link conversations and documents to people', 'Export contact data'] },
+  { id: 'inventory', type: 'deep-dive', target: 'inventory', title: 'Inventory', description: 'Asset and inventory tracking.', icon: 'package', features: ['Track products, assets, and supplies', 'Organize by category with search', 'Link to operations and automations'] },
   { id: 'social-posting', type: 'center', target: null, title: 'Social Publishing', description: 'Publish to X, Threads, and Instagram directly from RoweOS.', icon: 'share' },
   { id: 'help-tip', type: 'center', target: null, title: 'Quick Help', description: 'Every view has a ? button in the header. Press it anytime for a quick guide to that view, with key features and tips.', icon: 'sparkles' },
   { id: 'settings', type: 'sidebar', target: 'settings', title: 'System', description: 'API keys, cloud sync, themes, B.L.A.K.E., and all preferences.', icon: 'settings' },
@@ -2030,17 +2029,16 @@ var TOUR_STEPS = [
 var LIFE_TOUR_STEPS = [
   { id: 'welcome', type: 'center', target: null, title: 'Welcome to LifeAI', description: 'Your personal AI coach is configured. Let us show you everything.', icon: 'sparkles' },
   { id: 'lifeai', type: 'deep-dive', target: 'agent', title: 'LifeAI Chat', description: 'Your personal AI coach.', icon: 'chat', features: ['Claude, GPT, or Gemini in one conversation', 'Attach images for AI analysis', 'Conversations auto-save to History'], helpHint: true },
-  { id: 'focus', type: 'deep-dive', target: 'signal', title: 'Focus', description: 'Your daily command center.', icon: 'target', features: ['Tasks organized by your life areas', 'Calendar events and upcoming schedule', 'Daily streaks and habit tracking'] },
   { id: 'pulse', type: 'deep-dive', target: 'pulse', title: 'Pulse', description: 'Track personal goals over time.', icon: 'target', features: ['Visual progress timelines', 'Short-term and long-term goal tracking', 'Quick-add goals from any view'] },
   { id: 'studio', type: 'deep-dive', target: 'studio', title: 'Studio', description: '70+ personal AI operations.', icon: 'edit', features: ['Meal plans, workout routines, budgets, journaling', 'Tax preparation with Tax Intelligence', 'Travel planning, home organization, creative projects', 'Decision frameworks and priority matrices'] },
   { id: 'rhythm', type: 'deep-dive', target: 'rhythm', title: 'Rhythm', description: 'Calendar and time management.', icon: 'calendar', features: ['Sync with Google Calendar, iCloud, or Outlook', 'Day, week, and month views', 'Create events and set reminders'] },
-  { id: 'automations', type: 'deep-dive', target: 'automations', title: 'Automations', description: 'Automated routines and check-ins.', icon: 'calendar', features: ['Schedule recurring AI tasks', 'Multi-step pipelines with triggers', 'Workflow presets for common routines'] },
+  { id: 'automations', type: 'deep-dive', target: 'automations', title: 'Automations', description: 'Automated routines and check-ins.', icon: 'zap', features: ['Schedule recurring AI tasks', 'Multi-step pipelines with triggers', 'Workflow presets for common routines'] },
   { id: 'library', type: 'deep-dive', target: 'library', title: 'Library', description: 'Save and organize everything.', icon: 'library', features: ['Notes, documents, and uploads', 'Searchable and folder-organized', 'Attach files to conversations or emails'] },
   { id: 'mail', type: 'deep-dive', target: 'mail', title: 'Mail', description: 'AI-powered email composition.', icon: 'mail', features: ['Compose emails in your personal voice', 'Manage outbox and sent messages', 'Connect Gmail or Outlook'] },
-  { id: 'identity', type: 'deep-dive', target: 'memory', title: 'Identity', description: 'Your personal knowledge base.', icon: 'database', features: ['LifeAI learns your preferences over time', 'Communication style and daily rhythm stored here', 'Edit life areas and goals anytime'] },
-  { id: 'history', type: 'deep-dive', target: 'tuning', title: 'History', description: 'Browse past conversations.', icon: 'database', features: ['Search by keyword or date', 'Resume any previous conversation', 'Syncs across devices with Cloud Sync'] },
+  { id: 'identity', type: 'deep-dive', target: 'memory', title: 'Identity', description: 'Your personal knowledge base.', icon: 'diamond', features: ['LifeAI learns your preferences over time', 'Communication style and daily rhythm stored here', 'Edit life areas and goals anytime'] },
+  { id: 'history', type: 'deep-dive', target: 'tuning', title: 'History', description: 'Browse past conversations.', icon: 'clock', features: ['Search by keyword or date', 'Resume any previous conversation', 'Syncs across devices with Cloud Sync'] },
   { id: 'analytics', type: 'deep-dive', target: 'commerce', title: 'Analytics', description: 'Track AI usage and costs.', icon: 'chart', features: ['API usage across all providers', 'Budget tracking and spending alerts', 'Per-provider cost breakdown'] },
-  { id: 'inventory', type: 'deep-dive', target: 'inventory', title: 'Possessions', description: 'Personal inventory management.', icon: 'database', features: ['Track items, warranties, and valuables', 'Organize by category', 'Link to insurance or maintenance records'] },
+  { id: 'inventory', type: 'deep-dive', target: 'inventory', title: 'Possessions', description: 'Personal inventory management.', icon: 'package', features: ['Track items, warranties, and valuables', 'Organize by category', 'Link to insurance or maintenance records'] },
   { id: 'guardrails', type: 'deep-dive', target: 'guardrails', title: 'Guardrails', description: 'Content safety and preferences.', icon: 'settings', features: ['Set content review preferences', 'Approval workflows for automated content', 'Control AI response boundaries'] },
   { id: 'bloom', type: 'deep-dive', target: 'bloom', title: 'Bloom', description: 'Content discovery feed.', icon: 'sparkles', features: ['Browse generated content from Studio', 'Filter by type and category', 'Revisit and refine past creations'] },
   { id: 'help-tip', type: 'center', target: null, title: 'Quick Help', description: 'Every view has a ? button in the header. Press it anytime for a quick guide to that view, with key features and tips.', icon: 'sparkles' },
@@ -2193,7 +2191,16 @@ function renderTourStep(stepIndex) {
 }
 
 function positionTourSpotlight(viewName) {
-  var navItem = document.querySelector('.nav-item[data-view="' + viewName + '"]');
+  // v30.1: Check both grouped (nav-subitem) and expanded (nav-item) sidebar modes
+  var navItem = document.querySelector('.nav-subitem[data-view="' + viewName + '"]') || document.querySelector('.nav-item[data-view="' + viewName + '"]');
+  // v30.1: If spotlighting a grouped subitem, expand parent group
+  if (navItem && navItem.classList.contains('nav-subitem')) {
+    var _parentGroup = navItem.closest('.nav-item');
+    if (_parentGroup) {
+      var _subitems = _parentGroup.querySelector('.nav-subitems');
+      if (_subitems) _subitems.style.display = 'block';
+    }
+  }
   var spotlight = tourState.spotlightEl;
   var card = tourState.cardEl;
 
@@ -3094,46 +3101,66 @@ function applyAccessibilityScale() {
   var zoomFactor = zoomLevel / 100;
   if (zoomLevel !== 100) {
     appContainer.style.zoom = zoomFactor.toString();
-    // v29.2: Compensate viewport-relative dimensions so everything fills the actual screen
-    // CSS zoom scales rendered output but doesn't change CSS unit calculations.
-    // 100vh at 75% zoom renders as 75% of actual viewport. Fix: use (100/0.75)vh = 133vh.
-    var compensatedVh = (100 / zoomFactor) + 'vh';
-    var compensatedVw = (100 / zoomFactor) + 'vw';
-    // v29.2: Use setProperty with 'important' to override CSS !important rules
-    // Many mobile CSS rules use max-width:100vw !important which blocks inline styles
-    appContainer.style.setProperty('width', compensatedVw, 'important');
-    appContainer.style.setProperty('min-height', compensatedVh, 'important');
-    appContainer.style.setProperty('max-width', compensatedVw, 'important');
-    root.style.setProperty('max-width', compensatedVw, 'important');
-    root.style.setProperty('width', compensatedVw, 'important');
+    // v30.1: Use PIXELS not vw/vh — Safari double-compensates vw/vh units when body has CSS zoom.
+    // 133.33vw at 75% zoom in Safari = 2327px instead of 1745px because Safari's vw already
+    // accounts for zoom. Using pixels from window.innerWidth/innerHeight avoids this.
+    var compensatedW = Math.round(window.innerWidth / zoomFactor) + 'px';
+    var compensatedH = Math.round(window.innerHeight / zoomFactor) + 'px';
+    var compensatedVh = (100 / zoomFactor) + 'vh'; // Keep vh for height (works in both browsers)
+    appContainer.style.setProperty('width', compensatedW, 'important');
+    appContainer.style.setProperty('min-height', compensatedH, 'important');
+    appContainer.style.setProperty('max-width', compensatedW, 'important');
+    root.style.setProperty('max-width', compensatedW, 'important');
+    root.style.setProperty('width', compensatedW, 'important');
     root.style.setProperty('overflow-x', 'hidden', 'important');
-    // Sidebar — position:fixed, height:100vh
-    var sidebar = document.querySelector('.sidebar');
-    if (sidebar) {
-      sidebar.style.setProperty('height', compensatedVh, 'important');
-    }
-    // Main wrapper — min-height:100vh
+    // Main wrapper
     var mainWrapper = document.querySelector('.main-wrapper');
     if (mainWrapper) {
-      mainWrapper.style.setProperty('min-height', compensatedVh, 'important');
-      mainWrapper.style.setProperty('width', compensatedVw, 'important');
-      mainWrapper.style.setProperty('max-width', compensatedVw, 'important');
+      mainWrapper.style.setProperty('min-height', compensatedH, 'important');
     }
+    // v30.1: TEMP DEBUG — log centering measurements for Safari diagnosis
+    setTimeout(function() {
+      var _s = document.querySelector('.sidebar');
+      var _b = document.getElementById('blobContainer');
+      var _mw = document.querySelector('.main-wrapper');
+      var _mc = document.querySelector('.main-content');
+      var _av = document.getElementById('agentView');
+      var _lc = document.getElementById('agentLandingContent');
+      if (_s && _b) {
+        var _sr = _s.getBoundingClientRect().right;
+        var _br = _b.getBoundingClientRect();
+        var _bc = Math.round(_br.left + _br.width / 2);
+        var _ec = Math.round(_sr + (window.innerWidth - _sr) / 2);
+        console.log('[BLOB DEBUG] sidebar right=' + _sr + ' expected=' + _ec + ' actual=' + _bc + ' offset=' + (_bc - _ec) +
+          ' | wrapper: ' + (_mw ? Math.round(_mw.getBoundingClientRect().left) + '-' + Math.round(_mw.getBoundingClientRect().right) : 'N/A') +
+          ' | mainContent maxW=' + (_mc ? window.getComputedStyle(_mc).maxWidth : 'N/A') +
+          ' | agentView w=' + (_av ? Math.round(_av.getBoundingClientRect().width) : 'N/A') +
+          ' | landing w=' + (_lc ? Math.round(_lc.getBoundingClientRect().width) + ' maxW=' + window.getComputedStyle(_lc).maxWidth : 'N/A') +
+          ' | zoom=' + zoomFactor + ' viewport=' + window.innerWidth);
+      }
+    }, 500);
     // All fixed panel-views — compensate height, remove max-width cap
     // Do NOT set explicit width — fixed views use left/right positioning to auto-stretch
     // v29.5: Fixed-position views (position:fixed + bottom:0) need explicit height
     // because CSS zoom makes bottom:0 anchor to the zoomed container, not the viewport.
-    var _fixedBottomViews = { scribeView: true, studioView: true, agentView: true };
+    // v30.1: ALL fixed panel-views with bottom:0 need explicit height at zoom
+    var _fixedBottomViews = { scribeView: true, studioView: true, agentView: true, adminView: true, settingsView: true, mailView: true, commerceView: true, clientsView: true, memoryView: true, tuningView: true, inventoryView: true, automationsView: true, bloomView: true, folioView: true, socialView: true, researchView: true, libraryView: true, syncView: true, guardrailsView: true, sectionLandingView: true };
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
       if (_fixedBottomViews[panelViews[pv].id]) {
         // Set explicit height = compensated viewport minus top bar, remove bottom:0
-        panelViews[pv].style.setProperty('height', 'calc(' + compensatedVh + ' - 38px)', 'important');
+        // v30.1: Use px not vh to avoid Safari double-compensation
+        // v30.1: Use max-height instead of height so content can scroll naturally
+        panelViews[pv].style.setProperty('height', (parseInt(compensatedH) - 38) + 'px', 'important');
         panelViews[pv].style.setProperty('bottom', 'auto', 'important');
+        panelViews[pv].style.setProperty('overflow-y', 'auto', 'important');
       } else {
-        panelViews[pv].style.setProperty('min-height', compensatedVh, 'important');
+        panelViews[pv].style.setProperty('min-height', compensatedH, 'important');
       }
       panelViews[pv].style.setProperty('max-width', 'none', 'important');
+      // v30.1: Do NOT set explicit width on agentView or agentLandingContent.
+      // The CSS centering (max-width:600px + align-items:center) is mathematically correct
+      // at all zoom levels. JS overrides with stale offsetWidth measurements BREAK centering.
     }
   } else {
     appContainer.style.zoom = '';
@@ -3150,8 +3177,7 @@ function applyAccessibilityScale() {
     var mainWrapper = document.querySelector('.main-wrapper');
     if (mainWrapper) {
       mainWrapper.style.removeProperty('min-height');
-      mainWrapper.style.removeProperty('width');
-      mainWrapper.style.removeProperty('max-width');
+      mainWrapper.style.removeProperty('overflow-x');
     }
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
@@ -3176,6 +3202,35 @@ function applyAccessibilityScale() {
 
   root.style.setProperty('--text-scale', String(textLevel / 100));
   root.style.setProperty('--zoom-scale', String(zoomFactor));
+
+  // v30.1: Resize helix/blob after zoom change so WebGL canvas fills correctly
+  if (typeof resizeHelix === 'function') { setTimeout(resizeHelix, 100); setTimeout(resizeHelix, 500); }
+  if (typeof resizeBlob === 'function') { setTimeout(resizeBlob, 100); }
+
+  // v30.1: TEMP DEBUG — fires at ALL zoom levels including 100%
+  setTimeout(function() {
+    var _s = document.querySelector('.sidebar');
+    var _b = document.getElementById('blobContainer');
+    if (_s && _b) {
+      var _sr = Math.round(_s.getBoundingClientRect().right);
+      var _br = _b.getBoundingClientRect();
+      var _bc = Math.round(_br.left + _br.width / 2);
+      var _ec = Math.round(_sr + (window.innerWidth - _sr) / 2);
+      var _mw = document.querySelector('.main-wrapper');
+      var _mc = document.querySelector('.main-content');
+      var _av = document.getElementById('agentView');
+      var _lc = document.getElementById('agentLandingContent');
+      console.log('[BLOB DEBUG] zoom=' + zoomFactor + ' viewport=' + window.innerWidth +
+        ' | sidebar right=' + _sr +
+        ' | expected center=' + _ec + ' actual center=' + _bc + ' OFFSET=' + (_bc - _ec) +
+        ' | wrapper: ' + (_mw ? Math.round(_mw.getBoundingClientRect().left) + '-' + Math.round(_mw.getBoundingClientRect().right) + ' w=' + Math.round(_mw.getBoundingClientRect().width) : 'N/A') +
+        ' | mainContent maxW=' + (_mc ? window.getComputedStyle(_mc).maxWidth : 'N/A') + ' w=' + (_mc ? Math.round(_mc.getBoundingClientRect().width) : 'N/A') +
+        ' | agentView w=' + (_av ? Math.round(_av.getBoundingClientRect().width) : 'N/A') + ' align=' + (_av ? window.getComputedStyle(_av).alignItems : 'N/A') +
+        ' | landing w=' + (_lc ? Math.round(_lc.getBoundingClientRect().width) : 'N/A') + ' maxW=' + (_lc ? window.getComputedStyle(_lc).maxWidth : 'N/A'));
+    } else {
+      console.log('[BLOB DEBUG] sidebar=' + !!_s + ' blob=' + !!_b + ' (elements not found)');
+    }
+  }, 1000);
 }
 
 // v23.7: Accessibility — Display Size (text scaling via Settings slider only)
@@ -3210,6 +3265,8 @@ function initAppZoom() {
   document.documentElement.style.zoom = '';
   try {
     var saved = parseInt(localStorage.getItem('roweos_app_zoom'));
+    // v30.1: Default to 75% zoom for all users (mobile + desktop)
+    if (!saved && saved !== 0) saved = 75;
     if (saved && saved >= 75 && saved <= 150 && saved !== 100) {
       setAppZoom(saved);
     }
@@ -3522,13 +3579,15 @@ function updateModeUI(mode) {
     if (isLife) {
       // Show user's name in LifeAI mode
       var arrow = sidebarName.querySelector('.sidebar-brand-arrow');
-      sidebarName.innerHTML = userName + (arrow ? arrow.outerHTML : '<span class="sidebar-brand-arrow">▾</span>');
+      sidebarName.innerHTML = escapeHtml(userName) + (arrow ? arrow.outerHTML : '<span class="sidebar-brand-arrow">▾</span>'); // v30.1: XSS fix
     } else {
       // v11.5.4: Show brand name in BrandAI mode — use shortName if available
-      var currentBrandIdx = parseInt(document.getElementById('brand')?.value || '0');
+      // v30.1: Replace optional chaining with ES5
+      var _brandEl = document.getElementById('brand');
+      var currentBrandIdx = parseInt(_brandEl ? _brandEl.value : '0');
       var currentBrand = window.brands && window.brands[currentBrandIdx] ? (window.brands[currentBrandIdx].shortName || window.brands[currentBrandIdx].name) : 'BrandAI';
       var arrow = sidebarName.querySelector('.sidebar-brand-arrow');
-      sidebarName.innerHTML = currentBrand + (arrow ? arrow.outerHTML : '<span class="sidebar-brand-arrow">▾</span>');
+      sidebarName.innerHTML = escapeHtml(currentBrand) + (arrow ? arrow.outerHTML : '<span class="sidebar-brand-arrow">▾</span>'); // v30.1: XSS fix
     }
   }
   
@@ -4469,8 +4528,8 @@ runAgent = async function() {
     if (brandKnowledge && brandKnowledge.systemPromptAdditions) {
       systemPrompt += brandKnowledge.systemPromptAdditions;
       console.log('[BrandAI/runAgent] Added document knowledge:', 
-        brandKnowledge.documents?.length || 0, 'documents,',
-        brandKnowledge.insights?.length || 0, 'insights');
+        (brandKnowledge.documents ? brandKnowledge.documents.length : 0), 'documents,', // v30.1: ES5 fix
+        (brandKnowledge.insights ? brandKnowledge.insights.length : 0), 'insights'); // v30.1: ES5 fix
     }
   }
   

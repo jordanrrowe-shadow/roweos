@@ -3796,11 +3796,12 @@
       max-width: none;
       width: 100%;
       margin: 0;
-      padding: 24px 32px 120px;
+      padding: 24px 32px 80px;
       background: transparent;
       border: none;
       box-shadow: none;
       border-radius: 0;
+      overflow: visible; /* v30.1: Ensure panel child doesn't clip content — parent view handles scroll */
     }
     
     /* v11.5.4: Orchestration views — default to collapsed sidebar */
