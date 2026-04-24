@@ -199,7 +199,8 @@ function _purgeOldSnapshots(uid) {
     results.sort(function(a, b) { return b.timestamp - a.timestamp; });
     var cutoff = Date.now() - (30 * 24 * 60 * 60 * 1000);
     for (var i = 10; i < results.length; i++) {
-      if (results[i].timestamp < cutoff || i >= 10) {
+      // v30.1: Remove redundant i >= 10 (loop already starts at 10, and this deleted ALL older snapshots)
+      if (results[i].timestamp < cutoff) {
         _syncIdbDelete('snapshots', results[i].id);
       }
     }
@@ -463,11 +464,11 @@ function renderRestoreModal(backup) {
     var brandNames = backupBrands.map(function(b) { return b.shortName || b.name || 'Unknown'; }).join(', ');
     info.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +
       '<div>' +
-        '<div style="font-weight:600;font-size:14px;color:var(--text-primary);">' + (backup.version || 'Unknown') + ' Backup</div>' +
+        '<div style="font-weight:600;font-size:14px;color:var(--text-primary);">' + escapeHtml(backup.version || 'Unknown') + ' Backup</div>' +
         '<div style="font-size:12px;color:var(--text-muted);">' + dateStr + ' - ' + keyCount + ' data keys</div>' +
       '</div>' +
       '<div style="font-size:12px;color:var(--text-muted);">' +
-        '<span style="font-weight:500;">Brands:</span> ' + (brandNames || 'None') +
+        '<span style="font-weight:500;">Brands:</span> ' + escapeHtml(brandNames || 'None') +
       '</div>' +
     '</div>';
   }
@@ -1681,17 +1682,18 @@ function collectKnowledge() {
   var knowledge = {};
 
   // Brand knowledge
+  // v30.1: Wrap JSON.parse in try/catch with type guard to prevent malformed data crashes
   for (var i = 0; i < 5; i++) {
     var brandKnowledge = localStorage.getItem('roweos_knowledge_' + i);
     if (brandKnowledge) {
-      knowledge['brand_' + i] = JSON.parse(brandKnowledge);
+      try { var _bk = JSON.parse(brandKnowledge); if (typeof _bk === 'object') knowledge['brand_' + i] = _bk; } catch(e) { console.warn('[collectKnowledge] malformed brand_' + i); }
     }
   }
 
   // Global user knowledge
   var userKnowledge = localStorage.getItem('roweos_user_knowledge');
   if (userKnowledge) {
-    knowledge.user = JSON.parse(userKnowledge);
+    try { var _uk = JSON.parse(userKnowledge); if (typeof _uk === 'object') knowledge.user = _uk; } catch(e) { console.warn('[collectKnowledge] malformed user knowledge'); }
   }
   
   return knowledge;
@@ -1940,10 +1942,14 @@ function applyCloudData(data) {
 
   // Settings
   if (data.settings) {
-    if (data.settings.theme === 'light' && !document.documentElement.classList.contains('light-mode')) {
-      toggleTheme();
-    } else if (data.settings.theme === 'dark' && document.documentElement.classList.contains('light-mode')) {
-      toggleTheme();
+    // v30.1: Respect device-local theme preference (matches V3 guard)
+    var _hasLocalTheme = localStorage.getItem('roweos-theme') || localStorage.getItem('roweos_theme');
+    if (!_hasLocalTheme) {
+      if (data.settings.theme === 'light' && !document.documentElement.classList.contains('light-mode')) {
+        toggleTheme();
+      } else if (data.settings.theme === 'dark' && document.documentElement.classList.contains('light-mode')) {
+        toggleTheme();
+      }
     }
     // v12.0.2: Restore advanced feature settings
     if (data.settings.webSearchPrefs) {
@@ -2747,7 +2753,7 @@ function updateSyncIndicator(status) {
   switch(status) {
     case 'connected':
       dotEl.style.background = '#22c55e';
-      if (statusEl) statusEl.textContent = 'Connected • ' + (firebaseUser?.email || 'Synced');
+      if (statusEl) statusEl.textContent = 'Connected • ' + ((firebaseUser ? firebaseUser.email : 'Synced')) // v30.1: ES5 fix;
       break;
     case 'syncing':
       dotEl.style.background = '#f59e0b';
@@ -3085,17 +3091,24 @@ function sendEarlyAccessEmail(user, accessKey) {
   });
 }
 
+// v30.1: Use Firestore transaction to prevent TOCTOU race on access key claim
 function validateAccessKey(keyString) {
   if (!keyString || !firebase) return Promise.resolve({ valid: false, error: 'No key provided' });
 
-  return firebase.firestore().collection('access_keys').doc(keyString).get()
-    .then(function(doc) {
-      if (!doc.exists) return { valid: false, error: 'Invalid access key' };
+  var db = firebase.firestore();
+  var keyRef = db.collection('access_keys').doc(keyString);
+  return db.runTransaction(function(tx) {
+    return tx.get(keyRef).then(function(doc) {
+      if (!doc.exists) throw { valid: false, error: 'Invalid access key' };
       var data = doc.data();
-      if (data.status === 'revoked') return { valid: false, error: 'This key has been revoked' };
-      if (data.usedBy && data.usedBy !== firebaseUser.uid) return { valid: false, error: 'This key is already in use' };
+      if (data.status === 'revoked') throw { valid: false, error: 'This key has been revoked' };
+      if (data.usedBy && data.usedBy !== firebaseUser.uid) throw { valid: false, error: 'This key is already in use' };
       return { valid: true, data: data };
     });
+  }).catch(function(err) {
+    if (err && err.valid === false) return err;
+    return { valid: false, error: 'Validation failed: ' + (err.message || err) };
+  });
 }
 
 function linkAccessKeyToUser(keyString) {
@@ -4192,17 +4205,21 @@ function handleAuthState(user) {
                 reloadAllData();
               } catch(e) { console.warn('[Auth] Silent restore error:', e); }
               hideAuthGate();
-              loadFromFirebase(false);
-              setupRealtimeSync();
-              showStartupScreen();
+              // v30.1: Chain setupRealtimeSync after loadFromFirebase to prevent concurrent writers
+              loadFromFirebase(false).then(function() {
+                setupRealtimeSync();
+                showStartupScreen();
+              });
             } else {
               showDataRestorePrompt(doc.data());
             }
           } else {
             hideAuthGate();
-            loadFromFirebase(false);
-            setupRealtimeSync();
-            showStartupScreen();
+            // v30.1: Chain setupRealtimeSync after loadFromFirebase to prevent concurrent writers
+            loadFromFirebase(false).then(function() {
+              setupRealtimeSync();
+              showStartupScreen();
+            });
           }
         } else {
           hideAuthGate();
@@ -4245,9 +4262,11 @@ function handleAuthState(user) {
                 reloadAllData();
               } catch(e) { console.warn('[Auth] Silent restore error:', e); }
               hideAuthGate();
-              loadFromFirebase(false);
-              setupRealtimeSync();
-              showStartupScreen();
+              // v30.1: Chain setupRealtimeSync after loadFromFirebase to prevent concurrent writers
+              loadFromFirebase(false).then(function() {
+                setupRealtimeSync();
+                showStartupScreen();
+              });
             } else {
               // No local data, first visit — offer restore
               showDataRestorePrompt(doc.data());
@@ -4255,9 +4274,11 @@ function handleAuthState(user) {
           } else {
             // Has local data - just proceed
             hideAuthGate();
-            loadFromFirebase(false);
-            setupRealtimeSync();
-            showStartupScreen();
+            // v30.1: Chain setupRealtimeSync after loadFromFirebase to prevent concurrent writers
+            loadFromFirebase(false).then(function() {
+              setupRealtimeSync();
+              showStartupScreen();
+            });
           }
         } else {
           // No cloud data
@@ -5771,7 +5792,7 @@ function showAdminTab(tabName) {
     b.classList.remove('active');
   });
   // Show selected tab
-  var tabMap = { keys: 'adminTabKeys', users: 'adminTabUsers', configs: 'adminTabConfigs', pool: 'adminTabPool', feedback: 'adminTabFeedback', signups: 'adminTabSignups' };
+  var tabMap = { keys: 'adminTabKeys', users: 'adminTabUsers', configs: 'adminTabConfigs', pool: 'adminTabPool', feedback: 'adminTabFeedback', signups: 'adminTabSignups', emails: 'adminTabEmails' };
   var targetId = tabMap[tabName];
   if (targetId) {
     var el = document.getElementById(targetId);
@@ -5788,6 +5809,7 @@ function showAdminTab(tabName) {
   // Load data for the selected tab
   if (tabName === 'feedback' && typeof renderAdminFeedback === 'function') renderAdminFeedback();
   if (tabName === 'signups' && typeof adminLoadSignups === 'function') adminLoadSignups();
+  if (tabName === 'emails' && typeof adminLoadEmailData === 'function') adminLoadEmailData();
 }
 
 // v22.1: Show/hide admin nav based on admin status
@@ -5835,6 +5857,35 @@ function adminLoadSignups() {
   if (!listEl) return;
   listEl.innerHTML = '<div style="color:var(--text-muted);padding:8px 0;">Loading signups...</div>';
 
+  // v30.1: One-time migration — flip existing 'unknown' sources to 'info_page'
+  var _migKey = 'roweos_signup_source_migrated';
+  var _migDone = localStorage.getItem(_migKey);
+  var _migPromise = Promise.resolve();
+  if (!_migDone) {
+    _migPromise = firebase.firestore().collection('newsletter_subscribers')
+      .where('source', '==', 'unknown')
+      .get()
+      .then(function(migSnap) {
+        if (migSnap.empty) { localStorage.setItem(_migKey, 'true'); return; }
+        var db = firebase.firestore();
+        var batch = db.batch();
+        migSnap.docs.forEach(function(d) {
+          batch.update(d.ref, { source: 'info_page' });
+          // v30.1: Also fix the access key note from "Newsletter signup" to "Info Page signup"
+          var ak = d.data().accessKey;
+          if (ak) {
+            var akRef = db.collection('access_keys').doc(ak);
+            batch.update(akRef, { note: 'Info Page signup' });
+          }
+        });
+        return batch.commit().then(function() {
+          console.log('[Admin] Migrated ' + migSnap.size + ' signups from unknown to info_page (+ access key notes)');
+          localStorage.setItem(_migKey, 'true');
+        });
+      }).catch(function(e) { console.warn('[Admin] Source migration failed:', e.message); });
+  }
+
+  _migPromise.then(function() {
   firebase.firestore().collection('newsletter_subscribers')
     .orderBy('subscribedAt', 'desc')
     .limit(100)
@@ -5857,14 +5908,14 @@ function adminLoadSignups() {
         var date = d.subscribedAt ? new Date(d.subscribedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
         var time = d.subscribedAt ? new Date(d.subscribedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
 
-        // v22.5: Source badge
+        // v30.1: Source badge with expanded labels
         var sourceBadge = '';
-        if (srcField === 'info_page') {
-          sourceBadge = ' <span style="display:inline-block;padding:2px 8px;background:rgba(45,212,191,0.15);border:1px solid rgba(45,212,191,0.3);border-radius:4px;font-size:10px;font-weight:600;color:#2dd4bf;text-transform:uppercase;letter-spacing:0.5px;">Info Page</span>';
-        } else if (srcField === 'newsletter_page') {
-          sourceBadge = ' <span style="display:inline-block;padding:2px 8px;background:rgba(251,146,60,0.15);border:1px solid rgba(251,146,60,0.3);border-radius:4px;font-size:10px;font-weight:600;color:#fb923c;text-transform:uppercase;letter-spacing:0.5px;">Newsletter</span>';
-        } else if (srcField) {
-          sourceBadge = ' <span style="display:inline-block;padding:2px 8px;background:rgba(148,163,184,0.15);border:1px solid rgba(148,163,184,0.3);border-radius:4px;font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">' + escapeHtml(srcField) + '</span>';
+        var _srcLabels = { info_page: 'Info Page', newsletter_page: 'Newsletter', main_app: 'App', direct: 'Direct', unknown: 'Unknown Source' };
+        var _srcColors = { info_page: '#2dd4bf', newsletter_page: '#fb923c', main_app: '#a78bfa', direct: '#94a3b8', unknown: '#94a3b8' };
+        var _srcLabel = _srcLabels[srcField] || (srcField || 'Unknown Source');
+        var _srcColor = _srcColors[srcField] || '#94a3b8';
+        if (srcField || true) {
+          sourceBadge = ' <span style="display:inline-block;padding:2px 8px;background:' + _srcColor + '22;border:1px solid ' + _srcColor + '44;border-radius:4px;font-size:10px;font-weight:600;color:' + _srcColor + ';text-transform:uppercase;letter-spacing:0.5px;">' + escapeHtml(_srcLabel) + '</span>';
         }
 
         // Type badge
@@ -5913,12 +5964,18 @@ function adminLoadSignups() {
         }
         html += '</div>';
       });
-      listEl.innerHTML = html;
+      // v30.1: Add total count header
+      var countHtml = '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;margin-bottom:12px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);">';
+      countHtml += '<div style="font-size:14px;font-weight:600;color:var(--text-primary);">' + snap.size + ' Total Signups</div>';
+      countHtml += '<button onclick="adminLoadSignups()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>';
+      countHtml += '</div>';
+      listEl.innerHTML = countHtml + html;
     })
     .catch(function(err) {
       console.error('[Admin] Load signups error:', err);
       listEl.innerHTML = '<div style="color:#dc6464;padding:8px 0;">Error loading signups: ' + escapeHtml(err.message) + '</div>';
     });
+  }); // v30.1: close _migPromise.then
 }
 
 // v22.5: Delete signup — removes subscriber doc + access key doc
@@ -7721,9 +7778,9 @@ function _syncToFirebaseV2_DEPRECATED() {
     },
     // v16.15: Calendar integration credentials (synced across devices)
     // v23.2: gcalClientId removed — hardcoded in app
+    // v30.1: icloudAppPassword excluded — device-local only, NEVER pushed to Firestore
     calendarIntegration: {
       icloudAppleId: localStorage.getItem('roweos_icloud_apple_id') || '',
-      icloudAppPassword: localStorage.getItem('roweos_icloud_app_password') || '',
       icloudCalHome: localStorage.getItem('roweos_icloud_cal_home') || '',
       icloudCalendars: localStorage.getItem('roweos_icloud_calendars') || ''
     },
@@ -8493,11 +8550,13 @@ function safeSyncWrite(key, cloudData) {
         var now = Date.now();
         for (var _mi = 0; _mi < localArr.length; _mi++) {
           if (!localArr[_mi]._modifiedAt) localArr[_mi]._modifiedAt = localArr[_mi].createdAt || localArr[_mi].updatedAt || now;
-          if (!localArr[_mi][idField]) localArr[_mi][idField] = key + '_' + now + '_' + _mi;
+          // v30.1: Skip items missing id instead of assigning synthetic IDs that corrupt merges
+          if (!localArr[_mi][idField]) { console.warn('[safeSyncWrite] item missing id in', key, '- skipping merge for this item'); continue; }
         }
         for (var _ci = 0; _ci < cloudArr.length; _ci++) {
           if (!cloudArr[_ci]._modifiedAt) cloudArr[_ci]._modifiedAt = cloudArr[_ci].createdAt || cloudArr[_ci].updatedAt || 0;
-          if (!cloudArr[_ci][idField]) cloudArr[_ci][idField] = key + '_cloud_' + _ci;
+          // v30.1: Skip items missing id instead of assigning synthetic IDs that corrupt merges
+          if (!cloudArr[_ci][idField]) { console.warn('[safeSyncWrite] cloud item missing id in', key, '- skipping merge for this item'); continue; }
         }
         var merged = mergeByTimestamp(localArr, cloudArr, idField);
         localStorage.setItem(key, JSON.stringify(merged));
@@ -8639,7 +8698,8 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       // v28.3: Cloud theme only applies on first load (no local preference yet)
       // Theme is device-local — user's toggle is always authoritative
       if (profile.settings && profile.settings.theme) {
-        var _hasLocalTheme = localStorage.getItem('roweos-theme');
+        // v30.1: Check both hyphen and underscore variants of theme key
+        var _hasLocalTheme = localStorage.getItem('roweos-theme') || localStorage.getItem('roweos_theme');
         if (!_hasLocalTheme) {
           localStorage.setItem('roweos_theme', profile.settings.theme);
           localStorage.setItem('roweos-theme', profile.settings.theme);
@@ -8726,6 +8786,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         var calInt = profile.calendarIntegration;
         // v23.2: gcalClientId no longer synced — hardcoded in app
         if (calInt.icloudAppleId) localStorage.setItem('roweos_icloud_apple_id', calInt.icloudAppleId);
+        // v30.1: iCloud app password is device-local only — NEVER sync to Firestore
         if (calInt.icloudAppPassword) localStorage.setItem('roweos_icloud_app_password', calInt.icloudAppPassword);
         if (calInt.icloudCalHome) localStorage.setItem('roweos_icloud_cal_home', calInt.icloudCalHome);
         // v17.3: Restore calendar list from Firebase
