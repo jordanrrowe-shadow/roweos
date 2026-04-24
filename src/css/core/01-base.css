@@ -1648,6 +1648,9 @@
     }
     
     /* Sidebar — v11.5.4 Collapsible Glass */
+    /* v30.1: Sidebar pinned top:0 + bottom:0 — NO explicit height.
+       Let the browser calculate from anchors. Explicit height fights with
+       bottom:0 and breaks on iOS where 100dvh shifts with URL bar. */
     .sidebar {
       width: var(--sidebar-collapsed-width);
       background: var(--glass-bg-dark);
@@ -1656,10 +1659,10 @@
       border-right: 1px solid var(--glass-border-dark);
       display: flex;
       flex-direction: column;
-      height: 100vh;
       position: fixed;
       left: 0;
       top: 0;
+      bottom: 0;
       z-index: 100;
       transition: width var(--sidebar-transition), background var(--transition-slow), border-color var(--transition-slow), box-shadow var(--sidebar-transition);
       overflow-x: hidden;
@@ -2537,6 +2540,14 @@
       justify-content: center;
       width: 100%;
     }
+    /* v30.1: Remove max-width cap on main-content when landing view is active.
+       The blob must center within the FULL wrapper width, not a constrained block.
+       Without this, at zoomed-out levels the 1400px block floats off-center. */
+    body[data-view="agent"] .main-content,
+    html.sidebar-pinned-collapsed body[data-view="agent"] .main-content,
+    html.sidebar-pinned body[data-view="agent"] .main-content {
+      max-width: none !important;
+    }
     .landing-logo {
       margin-bottom: var(--space-2);
       overflow: hidden;
@@ -2779,9 +2790,13 @@
     html.sidebar-pinned-collapsed #helixContainer { left: var(--sidebar-collapsed-width, 64px); }
     #helixContainer canvas { display: block; width: 100%; height: 100%; margin: 0; }
     #agentView { position: relative; }
-    /* v24.24: Light mode — reduce ambient shape opacity for readability */
-    html.light-mode #helixContainer { opacity: 0.35; }
-    html.light-mode #blobContainer { opacity: 0.4; }
+    /* v30.1: Light mode — helix must be very subtle, ribbons are opaque in shader */
+    html.light-mode #helixContainer { opacity: 0.08; }
+    html.light-mode #blobContainer { opacity: 0.5; }
+    /* v30.1: Light mode — ensure title text is visible against light background */
+    html.light-mode .landing-platform-title {
+      opacity: 0.7;
+    }
     /* v24.25: Reduce transparency mode — dims helix/blob for readability */
     html.reduce-ambient #helixContainer { opacity: 0.08; }
     html.reduce-ambient.light-mode #helixContainer { opacity: 0.1; }
@@ -2803,8 +2818,9 @@
       }
       #helixContainer { left: 0 !important; top: 0 !important; }
       /* v24.25: Removed solid white background — message bubbles have their own backgrounds */
-      html.light-mode #helixContainer { opacity: 0.25; }
-      html.light-mode #blobContainer { opacity: 0.3; }
+      /* v30.1: Mobile light mode — even more subtle */
+      html.light-mode #helixContainer { opacity: 0.08; }
+      html.light-mode #blobContainer { opacity: 0.25; }
     }
     .landing-platform-title {
       font-size: var(--text-base);
@@ -3780,7 +3796,7 @@
       max-width: none;
       width: 100%;
       margin: 0;
-      padding: 24px 32px;
+      padding: 24px 32px 120px;
       background: transparent;
       border: none;
       box-shadow: none;
@@ -27992,6 +28008,10 @@
     html.light-mode .tour-btn-skip {
       color: var(--text-faint);
     }
+    /* v30.1: Tour card text readability in light mode */
+    html.light-mode .tour-card-title { color: var(--text-primary); }
+    html.light-mode .tour-card-description, html.light-mode .tour-deep-dive-features li { color: var(--text-primary); opacity: 0.8; }
+    html.light-mode .tour-step-counter, html.light-mode .tour-card-footer { color: var(--text-secondary); }
 
     /* v14.1: Tour mobile */
     @media (max-width: 768px) {
@@ -30980,10 +31000,29 @@
         width: 64px !important;
       }
 
-      /* v12.2.4: Condensed mobile sidebar - no scrolling needed */
+      /* v30.1: Mobile sidebar — pinned top+bottom, scrollable nav, no explicit height */
       .sidebar.mobile-open {
         width: 260px !important;
         transform: translateX(0) !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+      }
+      .sidebar.mobile-open .sidebar-header {
+        flex-shrink: 0 !important;
+      }
+      .sidebar.mobile-open .sidebar-nav {
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      .sidebar.mobile-open .sidebar-footer {
+        flex-shrink: 0 !important;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
       }
 
       /* v12.2.4: Condensed header with smaller logo */
