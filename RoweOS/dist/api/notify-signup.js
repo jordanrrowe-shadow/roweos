@@ -191,6 +191,33 @@ export default async function handler(req, res) {
           if (welcomeResp.ok) {
             welcomeEmailSent = true;
             console.log('[notify-signup] Welcome email sent to:', email);
+
+            // v30.1: Log welcome email to email_log collection
+            try {
+              var logToken = await getFirebaseAccessToken();
+              if (logToken && process.env.FIREBASE_PROJECT_ID) {
+                var logUrl = 'https://firestore.googleapis.com/v1/projects/' + process.env.FIREBASE_PROJECT_ID +
+                  '/databases/(default)/documents/email_log';
+                await fetch(logUrl, {
+                  method: 'POST',
+                  headers: { 'Authorization': 'Bearer ' + logToken, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    fields: {
+                      userId: { stringValue: uid },
+                      userEmail: { stringValue: email },
+                      template: { stringValue: 'welcome' },
+                      subject: { stringValue: 'Welcome to RoweOS - Get Your Access Key' },
+                      sentAt: { stringValue: new Date().toISOString() },
+                      status: { stringValue: 'sent' },
+                      error: { stringValue: '' }
+                    }
+                  })
+                });
+                console.log('[notify-signup] email_log entry written for:', email);
+              }
+            } catch (logErr) {
+              console.log('[notify-signup] email_log write failed (non-fatal):', logErr.message);
+            }
           } else {
             var wErr = await welcomeResp.text();
             console.error('[notify-signup] Welcome email error:', wErr);
