@@ -181,6 +181,26 @@ function adminLoadEmailData() {
       });
     }
 
+    // v30.1: Merge in any users from email_log who aren't in newsletter_subscribers
+    var existingEmails = {};
+    for (var eu = 0; eu < users.length; eu++) {
+      if (users[eu].email) existingEmails[users[eu].email.toLowerCase()] = true;
+    }
+    if (emailLogs && emailLogs.length) {
+      emailLogs.forEach(function(log) {
+        var logEmail = (log.userEmail || '').toLowerCase();
+        if (logEmail && !existingEmails[logEmail]) {
+          existingEmails[logEmail] = true;
+          users.push({
+            uid: log.userId || '',
+            email: log.userEmail || '',
+            name: '',
+            signupDate: log.sentAt || ''
+          });
+        }
+      });
+    }
+
     adminRenderEmailUserList(users, emailLogs, responses);
     adminRenderEmailStats(responses);
 
