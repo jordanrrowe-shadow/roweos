@@ -123,57 +123,63 @@ function adminLoadEmailData() {
 
   var db = firebase.firestore();
 
-  // v30.1: Use Firebase client SDK (same pattern as adminLoadSignups)
-  Promise.all([
-    db.collection('newsletter_subscribers').orderBy('subscribedAt', 'desc').limit(200).get(),
-    db.collection('email_log').orderBy('sentAt', 'desc').limit(500).get(),
-    db.collection('onboarding_responses').limit(500).get()
-  ]).then(function(results) {
+  // v30.1: Use Firebase client SDK. Each query wrapped in catch so one missing collection doesn't break all.
+  var signupsP = db.collection('newsletter_subscribers').orderBy('subscribedAt', 'desc').limit(200).get().catch(function(e) { console.warn('[Admin Emails] signups query failed:', e.message); return null; });
+  var emailLogP = db.collection('email_log').limit(500).get().catch(function(e) { console.warn('[Admin Emails] email_log query failed:', e.message); return null; });
+  var responsesP = db.collection('onboarding_responses').limit(500).get().catch(function(e) { console.warn('[Admin Emails] onboarding_responses query failed:', e.message); return null; });
+
+  Promise.all([signupsP, emailLogP, responsesP]).then(function(results) {
     var signupSnap = results[0];
     var emailLogSnap = results[1];
     var responseSnap = results[2];
 
     // Parse signups into user objects
     var users = [];
-    signupSnap.docs.forEach(function(doc) {
-      var d = doc.data();
-      users.push({
-        uid: d.uid || doc.id,
-        email: d.email || '',
-        name: d.name || d.displayName || '',
-        signupDate: d.subscribedAt || d.createdAt || d.signupDate || ''
+    if (signupSnap && signupSnap.docs) {
+      signupSnap.docs.forEach(function(doc) {
+        var d = doc.data();
+        users.push({
+          uid: d.uid || doc.id,
+          email: d.email || '',
+          name: d.name || d.displayName || '',
+          signupDate: d.subscribedAt || d.createdAt || d.signupDate || ''
+        });
       });
-    });
+    }
 
     // Parse email logs
     var emailLogs = [];
-    emailLogSnap.docs.forEach(function(doc) {
-      var d = doc.data();
-      emailLogs.push({
-        id: doc.id,
-        userId: d.userId || '',
-        userEmail: d.userEmail || d.email || '',
-        template: d.template || '',
-        subject: d.subject || '',
-        sentAt: d.sentAt || d.createdAt || '',
-        status: d.status || 'sent'
+    if (emailLogSnap && emailLogSnap.docs) {
+      emailLogSnap.docs.forEach(function(doc) {
+        var d = doc.data();
+        emailLogs.push({
+          id: doc.id,
+          userId: d.userId || '',
+          userEmail: d.userEmail || d.email || '',
+          template: d.template || '',
+          subject: d.subject || '',
+          sentAt: d.sentAt || d.createdAt || '',
+          status: d.status || 'sent'
+        });
       });
-    });
+    }
 
-    // Parse responses
+    // Parse responses (may not exist yet)
     var responses = [];
-    responseSnap.docs.forEach(function(doc) {
-      var d = doc.data();
-      responses.push({
-        id: doc.id,
-        userId: d.userId || '',
-        userEmail: d.userEmail || d.email || '',
-        question: d.question || d.field || '',
-        answer: d.answer || d.value || d.response || '',
-        template: d.template || d.source || '',
-        timestamp: d.timestamp || d.createdAt || d.submittedAt || ''
+    if (responseSnap && responseSnap.docs) {
+      responseSnap.docs.forEach(function(doc) {
+        var d = doc.data();
+        responses.push({
+          id: doc.id,
+          userId: d.userId || '',
+          userEmail: d.userEmail || d.email || '',
+          question: d.question || d.field || '',
+          answer: d.answer || d.value || d.response || '',
+          template: d.template || d.source || '',
+          timestamp: d.timestamp || d.createdAt || d.submittedAt || ''
+        });
       });
-    });
+    }
 
     adminRenderEmailUserList(users, emailLogs, responses);
     adminRenderEmailStats(responses);
