@@ -6721,9 +6721,11 @@ function sendComposedEmail() {
 
 // v30.1: Log sent email to Firestore email_log for admin Email Management tracking
 function _logSentEmail(recipientEmail, subject, templateName) {
-  if (!firebase || !isAdmin()) return;
+  if (!firebase) { console.warn('[email_log] No firebase'); return; }
+  if (!isAdmin()) { console.warn('[email_log] Not admin'); return; }
   try {
     var db = firebase.firestore();
+    console.log('[email_log] Writing:', recipientEmail, templateName);
     db.collection('email_log').add({
       userId: '',
       userEmail: recipientEmail || '',
@@ -6733,9 +6735,13 @@ function _logSentEmail(recipientEmail, subject, templateName) {
       status: 'sent',
       error: '',
       sentBy: 'admin_composer'
+    }).then(function(docRef) {
+      console.log('[email_log] Written successfully:', docRef.id);
+    }).catch(function(err) {
+      console.error('[email_log] Firestore write FAILED:', err.message, err.code);
     });
   } catch (e) {
-    console.warn('[email_log] Write failed (non-fatal):', e.message);
+    console.error('[email_log] Exception:', e.message);
   }
 }
 

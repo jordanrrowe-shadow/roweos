@@ -149,9 +149,11 @@ function adminLoadEmailData() {
 
     // Parse email logs
     var emailLogs = [];
+    console.log('[Admin Emails] email_log snap:', emailLogSnap ? (emailLogSnap.docs ? emailLogSnap.docs.length + ' docs' : 'no docs array') : 'null');
     if (emailLogSnap && emailLogSnap.docs) {
       emailLogSnap.docs.forEach(function(doc) {
         var d = doc.data();
+        console.log('[Admin Emails] email_log entry:', d.userEmail, d.template, d.sentAt);
         emailLogs.push({
           id: doc.id,
           userId: d.userId || '',
