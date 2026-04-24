@@ -98,21 +98,20 @@ function ctaButton(url, label) {
 }
 
 function wrapEmail(subtitle, bodyHtml) {
+  var tagline = subtitle || 'Operating intelligence, built for brands and life';
   var parts = [
     '<!DOCTYPE html>',
     '<html><head><meta charset="utf-8"></head>',
-    '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">',
-    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;">',
+    '<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">',
+    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">',
     '<tr><td align="center">',
     '<table width="560" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:12px;border:1px solid #2a2a2a;">',
     // Header
-    '<tr><td style="padding:32px 32px 16px;border-bottom:1px solid #2a2a2a;">',
-    '<h1 style="margin:0;font-size:20px;font-weight:600;color:#a89878;letter-spacing:0.5px;">RoweOS</h1>'
+    '<tr><td style="padding:32px 32px 16px;border-bottom:1px solid #2a2a2a;background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);text-align:center;border-radius:12px 12px 0 0;">',
+    '<img src="https://roweos.com/logo.png" alt="RoweOS" style="width:64px;height:64px;border-radius:12px;margin-bottom:12px;">',
+    '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>',
+    '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1.5px;text-transform:uppercase;">' + escapeHtml(tagline) + '</p>'
   ];
-
-  if (subtitle) {
-    parts.push('<p style="margin:8px 0 0;font-size:13px;color:#888;">' + escapeHtml(subtitle) + '</p>');
-  }
 
   parts.push('</td></tr>');
   // Body
@@ -120,7 +119,7 @@ function wrapEmail(subtitle, bodyHtml) {
   parts.push(bodyHtml);
   parts.push('</td></tr>');
   // Footer
-  parts.push('<tr><td style="padding:16px 32px;border-top:1px solid #2a2a2a;">');
+  parts.push('<tr><td style="padding:16px 32px;border-top:1px solid #2a2a2a;text-align:center;">');
   parts.push('<p style="margin:0 0 6px;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p>');
   parts.push('<p style="margin:0;font-size:11px;color:#555;">Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color:#a89878;text-decoration:none;">jordan@therowecollection.com</a></p>');
   parts.push('</td></tr>');

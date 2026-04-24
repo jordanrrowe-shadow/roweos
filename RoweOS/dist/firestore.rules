@@ -69,6 +69,10 @@ service cloud.firestore {
         allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
       }
     }
+    // v30.1: collectionGroup query for responses subcollections — admin read
+    match /{path=**}/responses/{responseId} {
+      allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+    }
     // v30.1: Email settings — admin read/write
     match /email_settings/{docId} {
       allow read, write: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
