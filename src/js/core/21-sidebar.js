@@ -1302,9 +1302,9 @@ var PROVIDER_CONFIG = {
     docsLabel: 'platform.openai.com',
     icon: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#4ade80" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>',
     models: [
-      { id: 'gpt-5.4', name: 'GPT-5.4', desc: 'Latest flagship model' },
-      { id: 'gpt-5.4-pro', name: 'GPT-5.4 Pro', desc: 'Extended reasoning' },
-      { id: 'gpt-5.4-thinking', name: 'GPT-5.4 Thinking', desc: 'Deep analytical tasks' }
+      { id: 'gpt-5.5', name: 'GPT-5.5', desc: 'Latest flagship model' },
+      { id: 'gpt-5.5-pro', name: 'GPT-5.5 Pro', desc: 'Extended reasoning' },
+      { id: 'gpt-5.5-thinking', name: 'GPT-5.5 Thinking', desc: 'Deep analytical tasks' }
     ],
     features: []
   },
@@ -1746,9 +1746,9 @@ function showModelPickerInModal(provider) {
       { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', desc: 'Fastest responses, cost-effective', color: '#22c55e', recommended: false }
     ],
     openai: [
-      { id: 'gpt-5.4', name: 'GPT-5.4', desc: 'Most capable frontier model for professional work', color: '#22c55e', recommended: true },
-      { id: 'gpt-5.4-pro', name: 'GPT-5.4 Pro', desc: 'Maximum performance on complex tasks', color: '#4ade80', recommended: false },
-      { id: 'gpt-5.4-thinking', name: 'GPT-5.4 Thinking', desc: 'Extended reasoning for complex analysis', color: '#86efac', recommended: false }
+      { id: 'gpt-5.5', name: 'GPT-5.5', desc: 'Most capable frontier model for professional work', color: '#22c55e', recommended: true },
+      { id: 'gpt-5.5-pro', name: 'GPT-5.5 Pro', desc: 'Maximum performance on complex tasks', color: '#4ade80', recommended: false },
+      { id: 'gpt-5.5-thinking', name: 'GPT-5.5 Thinking', desc: 'Extended reasoning for complex analysis', color: '#86efac', recommended: false }
     ],
     google: [
       { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro', desc: 'Advanced reasoning and multimodal capabilities', color: '#3b82f6', recommended: true },

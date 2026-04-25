@@ -413,7 +413,7 @@ async function generateImage(prompt, options) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'gpt-5.4',
+      model: 'gpt-5.5', // v31.0
       input: prompt,
       tools: [{ type: 'image_generation', quality: quality === 'hd' ? 'high' : quality, size: size }],
       store: false
@@ -451,13 +451,13 @@ async function generateImage(prompt, options) {
   try {
     var usg = data.usage || {};
     if (typeof trackAPIUsage === 'function') {
-      trackAPIUsage('openai', 'gpt-5.4', usg.input_tokens || 0, usg.output_tokens || 0, false, false, 'image');
+      trackAPIUsage('openai', 'gpt-5.5', usg.input_tokens || 0, usg.output_tokens || 0, false, false, 'image'); // v31.0
     }
   } catch(e) {}
 
   return {
     images: images,
-    model: 'gpt-5.4',
+    model: 'gpt-5.5', // v31.0
     size: size,
     quality: quality
   };

@@ -2251,7 +2251,7 @@ var WORKFLOW_PRESETS = [
     name: 'Competitor Analysis Report',
     desc: 'Intelligence Agent researches a competitor using web search, then Strategy Agent writes a SWOT analysis and strategic recommendations',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Research Competitor', target: { operationId: 1101, agentId: 'intelligence', contextRef: 'Research this competitor thoroughly. Cover: market position, pricing, recent product launches, marketing strategy, strengths, and weaknesses. Use current data.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_research' },
+      { stepId: 1, action: 'studio', name: 'Research Competitor', target: { operationId: 1101, agentId: 'intelligence', contextRef: 'Research this competitor thoroughly. Cover: market position, pricing, recent product launches, marketing strategy, strengths, and weaknesses. Use current data.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_research' },
       { stepId: 2, action: 'studio', name: 'SWOT + Strategy', target: { operationId: 6, agentId: 'strategy', contextRef: 'Based on this competitor research, write a SWOT analysis and 5 actionable strategic recommendations for how our brand can differentiate and win. Be specific.\n\n{{step1_research}}' }, outputKey: 'step2_swot' },
       { stepId: 3, action: 'library', name: 'Save Report', target: { libraryTitle: 'Competitor Analysis', libraryTags: 'research,competitor,strategy,swot' } }
     ]
@@ -2261,7 +2261,7 @@ var WORKFLOW_PRESETS = [
     name: 'Weekly Market Intelligence',
     desc: 'Intelligence Agent scans your industry for latest news, trends, and competitor moves, then emails you the brief. Great as a weekly recurring automation',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Scan Industry', target: { operationId: 1103, agentId: 'intelligence', contextRef: 'Generate this week latest intelligence brief. Cover: industry news, competitor moves, regulatory changes, emerging trends, and any opportunities or threats. Be specific with company names and dates.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_brief' },
+      { stepId: 1, action: 'studio', name: 'Scan Industry', target: { operationId: 1103, agentId: 'intelligence', contextRef: 'Generate this week latest intelligence brief. Cover: industry news, competitor moves, regulatory changes, emerging trends, and any opportunities or threats. Be specific with company names and dates.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_brief' },
       { stepId: 2, action: 'email', name: 'Email Brief to Me', target: { emailTo: 'me', emailSubject: 'Weekly Intelligence Brief - {{brandName}}', emailBody: '{{step1_brief}}' }, config: { emailTemplate: 'professional', emailFrom: '' } }
     ]
   },
@@ -2270,7 +2270,7 @@ var WORKFLOW_PRESETS = [
     name: 'Pricing & Positioning Study',
     desc: 'Intelligence researches competitor pricing and market rates, then Strategy Agent recommends optimal pricing with positioning rationale',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Research Pricing', target: { operationId: 1104, agentId: 'intelligence', contextRef: 'Research competitor pricing strategies and market rates in our industry. Compare pricing tiers, packaging, and positioning. Include specific numbers where possible.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_pricing' },
+      { stepId: 1, action: 'studio', name: 'Research Pricing', target: { operationId: 1104, agentId: 'intelligence', contextRef: 'Research competitor pricing strategies and market rates in our industry. Compare pricing tiers, packaging, and positioning. Include specific numbers where possible.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_pricing' },
       { stepId: 2, action: 'studio', name: 'Pricing Strategy', target: { operationId: 503, agentId: 'strategy', contextRef: 'Based on this competitive pricing research, recommend an optimal pricing strategy. Include: suggested price points, tier structure, positioning rationale, and how to communicate value. Be specific with numbers.\n\n{{step1_pricing}}' }, outputKey: 'step2_strategy' },
       { stepId: 3, action: 'library', name: 'Save Analysis', target: { libraryTitle: 'Pricing & Positioning Analysis', libraryTags: 'pricing,research,strategy,competitive' } }
     ]
@@ -2280,7 +2280,7 @@ var WORKFLOW_PRESETS = [
     name: 'Local Market Report',
     desc: 'Intelligence researches your local market - demographics, competitors, foot traffic patterns, and opportunities specific to your area',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Local Intel', target: { operationId: 1112, agentId: 'intelligence', contextRef: 'Research the local market in our area. Cover: demographics, local competitors, market saturation, foot traffic patterns, seasonal trends, and underserved opportunities. Be specific to our location.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_local' },
+      { stepId: 1, action: 'studio', name: 'Local Intel', target: { operationId: 1112, agentId: 'intelligence', contextRef: 'Research the local market in our area. Cover: demographics, local competitors, market saturation, foot traffic patterns, seasonal trends, and underserved opportunities. Be specific to our location.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_local' },
       { stepId: 2, action: 'library', name: 'Save Report', target: { libraryTitle: 'Local Market Report', libraryTags: 'research,local,market,demographics' } },
       { stepId: 3, action: 'notify', name: 'Done', target: { notifyMessage: 'Local market report generated and saved to Library.' } }
     ]
@@ -2294,8 +2294,8 @@ var WORKFLOW_PRESETS = [
     name: 'Find + Research Prospects',
     desc: 'Intelligence Agent identifies potential clients matching your ideal customer profile, then researches each one with company details and outreach angles',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Find Prospects', target: { operationId: 1105, agentId: 'intelligence', contextRef: 'Find 5-7 potential clients that match our ideal customer profile. For each, include: company name, what they do, why they are a good fit, key decision maker if identifiable, and estimated company size. Prioritize by fit quality.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_prospects' },
-      { stepId: 2, action: 'studio', name: 'Deep Dive Top 3', target: { operationId: 1106, agentId: 'intelligence', contextRef: 'Take the top 3 prospects from this list and do a deeper dive on each. For each: recent news, social media presence, pain points we could solve, and a specific angle for outreach.\n\n{{step1_prospects}}' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step2_deepdive' },
+      { stepId: 1, action: 'studio', name: 'Find Prospects', target: { operationId: 1105, agentId: 'intelligence', contextRef: 'Find 5-7 potential clients that match our ideal customer profile. For each, include: company name, what they do, why they are a good fit, key decision maker if identifiable, and estimated company size. Prioritize by fit quality.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_prospects' },
+      { stepId: 2, action: 'studio', name: 'Deep Dive Top 3', target: { operationId: 1106, agentId: 'intelligence', contextRef: 'Take the top 3 prospects from this list and do a deeper dive on each. For each: recent news, social media presence, pain points we could solve, and a specific angle for outreach.\n\n{{step1_prospects}}' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step2_deepdive' },
       { stepId: 3, action: 'library', name: 'Save Research', target: { libraryTitle: 'Prospect Research', libraryTags: 'prospects,clients,research,outreach' } }
     ]
   },
@@ -2304,7 +2304,7 @@ var WORKFLOW_PRESETS = [
     name: 'Partnership Proposal Pipeline',
     desc: 'Intelligence scouts partners, Documents writes a personalized proposal email with specific partnership benefits, queues to Outbox for your review before sending',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Scout Partners', target: { operationId: 1108, agentId: 'intelligence', contextRef: 'Find potential business partners or strategic alliances. Look for companies with complementary services, shared audience, or mutual benefit opportunities. Provide 3-5 candidates with fit analysis.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_output' },
+      { stepId: 1, action: 'studio', name: 'Scout Partners', target: { operationId: 1108, agentId: 'intelligence', contextRef: 'Find potential business partners or strategic alliances. Look for companies with complementary services, shared audience, or mutual benefit opportunities. Provide 3-5 candidates with fit analysis.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_output' },
       { stepId: 2, action: 'studio', name: 'Write Proposal', target: { operationId: 508, agentId: 'documents', contextRef: 'Using the partner research from step 1, write a compelling partnership proposal email to the top candidate. Include specific details about why this partnership makes sense for both sides. Reference their business specifically. Professional but enthusiastic tone. Under 300 words. No em-dashes.\n\n{{step1_output}}' }, outputKey: 'step2_output' },
       { stepId: 3, action: 'outbox', name: 'Queue for Review', target: { emailTo: '', emailSubject: 'Partnership Opportunity' }, config: { emailTemplate: 'professional', emailFrom: '', bccSelf: true } }
     ]
@@ -2314,7 +2314,7 @@ var WORKFLOW_PRESETS = [
     name: 'Batch Client Outreach',
     desc: 'Researches potential clients, writes a unique personalized email for each prospect referencing their specific business, then batch queues all to Outbox',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Research Clients', target: { operationId: 1105, agentId: 'intelligence', contextRef: 'Find 3-5 potential clients matching our ideal customer profile. For each, provide: company name, industry, what they do, key person to contact, and why they need our services.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_output' },
+      { stepId: 1, action: 'studio', name: 'Research Clients', target: { operationId: 1105, agentId: 'intelligence', contextRef: 'Find 3-5 potential clients matching our ideal customer profile. For each, provide: company name, industry, what they do, key person to contact, and why they need our services.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_output' },
       { stepId: 2, action: 'studio', name: 'Write Personalized Emails', target: { operationId: 508, agentId: 'documents', contextRef: 'Using the research from step 1, write a personalized outreach email for EACH potential client. Each email must reference their specific business, industry challenges, and how we can help. No generic templates. For each email, use EXACTLY this format:\n\n---EMAIL---\nTO: [their name or company]\nSUBJECT: [personalized subject - not generic]\nBODY:\n[personalized email, 150-200 words, professional but warm, specific CTA]\n---END---\n\nWrite one email per prospect. No em-dashes.\n\n{{step1_output}}' }, outputKey: 'step2_output' },
       { stepId: 3, action: 'batch_email', name: 'Queue All to Outbox', target: {}, config: { emailTemplate: 'professional' } }
     ]
@@ -2324,7 +2324,7 @@ var WORKFLOW_PRESETS = [
     name: 'Client Pitch Packet + Email',
     desc: 'Full pipeline: researches a client, generates a branded pitch PDF document, writes a personalized cover email, and queues everything to Outbox with PDF attached',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Research Client', target: { operationId: 1106, agentId: 'intelligence', contextRef: 'Thoroughly research this potential client. Cover: what they do, recent news, key challenges, decision makers, and specific ways our services would benefit them.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_research' },
+      { stepId: 1, action: 'studio', name: 'Research Client', target: { operationId: 1106, agentId: 'intelligence', contextRef: 'Thoroughly research this potential client. Cover: what they do, recent news, key challenges, decision makers, and specific ways our services would benefit them.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_research' },
       { stepId: 2, action: 'studio', name: 'Generate Pitch Doc', target: { operationId: 510, agentId: 'documents', contextRef: 'Create a branded pitch document for this client. Reference their specific business throughout. Structure: Executive Summary, Our Services, Strategic Approach (tailored to them), Key Differentiators, Engagement Model. Under 1200 words.\n\n{{step1_research}}' }, outputKey: 'step2_pitch' },
       { stepId: 3, action: 'pdf_generate', name: 'Create PDF', target: {}, config: { sourceStep: 'step2_pitch', pdfTitle: '{{brandName}} - Client Pitch', orientation: 'portrait' }, outputKey: 'step3_pdf' },
       { stepId: 4, action: 'studio', name: 'Write Cover Email', target: { operationId: 508, agentId: 'documents', contextRef: 'Write a concise cover email for the attached pitch document. Personalize with references to their business. Mention 2-3 specific benefits. Include CTA to schedule a call. 150-200 words. Mention the attached document. No em-dashes.\n\nFormat EXACTLY as:\n---EMAIL---\nTO: [their name]\nSUBJECT: [personalized subject]\nBODY:\n[email body]\n---END---\n\nClient Research:\n{{step1_research|truncate:1500}}\n\nPitch highlights:\n{{step2_pitch|truncate:1000}}' }, outputKey: 'step4_email' },
@@ -2336,7 +2336,7 @@ var WORKFLOW_PRESETS = [
     name: 'Smart Outreach (Research + Message)',
     desc: 'Intelligence Agent researches a specific prospect and generates multiple personalized outreach messages - email, LinkedIn, and a follow-up sequence',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Research Prospect', target: { operationId: 1107, agentId: 'intelligence', contextRef: 'Research this prospect and generate personalized outreach. Include: background research, 3 conversation starters, an initial outreach email, a LinkedIn message, and a 3-step follow-up sequence. Make everything specific to their business and role.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_outreach' },
+      { stepId: 1, action: 'studio', name: 'Research Prospect', target: { operationId: 1107, agentId: 'intelligence', contextRef: 'Research this prospect and generate personalized outreach. Include: background research, 3 conversation starters, an initial outreach email, a LinkedIn message, and a 3-step follow-up sequence. Make everything specific to their business and role.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_outreach' },
       { stepId: 2, action: 'outbox', name: 'Queue Initial Email', target: { emailTo: '', emailSubject: '' }, config: { emailTemplate: 'minimal', emailFrom: '', bccSelf: true } },
       { stepId: 3, action: 'library', name: 'Save Full Sequence', target: { libraryTitle: 'Outreach Sequence', libraryTags: 'outreach,prospect,follow-up,sales' } }
     ]
@@ -2397,8 +2397,8 @@ var WORKFLOW_PRESETS = [
     name: 'Grant Search + Application Prep',
     desc: 'Intelligence finds matching grants and funding opportunities, then helps prepare application materials and narratives',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Find Grants', target: { operationId: 1109, agentId: 'intelligence', contextRef: 'Search for grants and funding opportunities matching our business. Include federal, state, local, and private grants. For each: name, amount, deadline, eligibility requirements, and application URL if available.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_grants' },
-      { stepId: 2, action: 'studio', name: 'Prep Application', target: { operationId: 1110, agentId: 'intelligence', contextRef: 'For the top 2 most relevant grants from this list, prepare application content. Include: an impact statement, budget justification narrative, and a project description tailored to each grant requirements.\n\n{{step1_grants}}' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step2_app' },
+      { stepId: 1, action: 'studio', name: 'Find Grants', target: { operationId: 1109, agentId: 'intelligence', contextRef: 'Search for grants and funding opportunities matching our business. Include federal, state, local, and private grants. For each: name, amount, deadline, eligibility requirements, and application URL if available.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_grants' },
+      { stepId: 2, action: 'studio', name: 'Prep Application', target: { operationId: 1110, agentId: 'intelligence', contextRef: 'For the top 2 most relevant grants from this list, prepare application content. Include: an impact statement, budget justification narrative, and a project description tailored to each grant requirements.\n\n{{step1_grants}}' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step2_app' },
       { stepId: 3, action: 'library', name: 'Save Materials', target: { libraryTitle: 'Grant Research + Application Materials', libraryTags: 'grants,funding,application' } }
     ]
   },
@@ -2432,7 +2432,7 @@ var WORKFLOW_PRESETS = [
     name: 'Vendor Research + Comparison',
     desc: 'Intelligence Agent researches and compares vendors/suppliers for a specific need, with pricing, reviews, and a recommendation',
     steps: [
-      { stepId: 1, action: 'studio', name: 'Research Vendors', target: { operationId: 1111, agentId: 'intelligence', contextRef: 'Find and evaluate 5-7 vendors or service providers. For each include: company name, services offered, estimated pricing, notable clients, pros, cons, and overall rating (1-5). Organize in a comparison table format.' }, config: { provider: 'openai', model: 'gpt-5.4' }, outputKey: 'step1_vendors' },
+      { stepId: 1, action: 'studio', name: 'Research Vendors', target: { operationId: 1111, agentId: 'intelligence', contextRef: 'Find and evaluate 5-7 vendors or service providers. For each include: company name, services offered, estimated pricing, notable clients, pros, cons, and overall rating (1-5). Organize in a comparison table format.' }, config: { provider: 'openai', model: 'gpt-5.5' }, outputKey: 'step1_vendors' },
       { stepId: 2, action: 'studio', name: 'Recommendation', target: { operationId: 503, agentId: 'strategy', contextRef: 'Based on this vendor research, provide a clear recommendation. Rank the top 3, explain why, and suggest negotiation points. Include a decision matrix.\n\n{{step1_vendors}}' }, outputKey: 'step2_rec' },
       { stepId: 3, action: 'library', name: 'Save Comparison', target: { libraryTitle: 'Vendor Comparison', libraryTags: 'vendors,research,comparison,procurement' } }
     ]
@@ -2990,10 +2990,10 @@ function executeWorkflow(workflow) {
   showToast('Running workflow: ' + (workflow.name || 'Untitled') + '...', 'info');
 
   // v22.37: Determine running animation type and register globally
-  // GPT-5.4 thinking takes priority over deep research glow
+  // GPT-5.5 thinking takes priority over deep research glow
   var _runningCard = null;
   var _isThinkingWorkflow = workflow.steps && workflow.steps.some(function(s) {
-    return s.config && (s.config.model === 'gpt-5.4' || (s.config.model && s.config.model.indexOf('gpt-5') === 0));
+    return s.config && (s.config.model === 'gpt-5.5' || (s.config.model && s.config.model.indexOf('gpt-5') === 0));
   });
   var _isResearchWorkflow = !_isThinkingWorkflow && typeof automationHasDeepResearch === 'function' && automationHasDeepResearch(workflow);
   var _runType = _isThinkingWorkflow ? 'thinking' : (_isResearchWorkflow ? 'research' : 'standard');
@@ -3667,7 +3667,7 @@ function executeWorkflowStep(step, context) {
       provider = step.config.provider;
       // Pick a sensible default model for the overridden provider
       if (provider === 'anthropic') model = 'claude-sonnet-4-6';
-      else if (provider === 'openai') model = 'gpt-5.4';
+      else if (provider === 'openai') model = 'gpt-5.5';
       else if (provider === 'google') model = 'gemini-2.0-flash';
     }
     // v18.7: Per-step model override

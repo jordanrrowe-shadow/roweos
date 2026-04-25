@@ -2133,7 +2133,7 @@ async function startOnboardingWebSearch() {
   }
   if (!model) {
     if (provider === 'anthropic') model = 'claude-sonnet-4-6';
-    else if (provider === 'openai') model = 'gpt-5.4';
+    else if (provider === 'openai') model = 'gpt-5.5';
     else model = 'gemini-3.1-pro-preview';
   }
   // Use the proper getApiKey function (handles both new and old storage formats)
@@ -2371,7 +2371,7 @@ function startResearchFromView() {
   }
   // v27.0: Force valid model names -- always use the primary model per provider
   if (provider === 'anthropic') model = 'claude-sonnet-4-6';
-  else if (provider === 'openai') model = 'gpt-5.4';
+  else if (provider === 'openai') model = 'gpt-5.5';
   else if (provider === 'google') model = 'gemini-3.1-pro-preview';
 
   // Get research context if provided
@@ -3120,7 +3120,7 @@ function saveWebSearchResults() {
       // Only create if truly doesn't exist anywhere
       if (!brand) {
         var selectedProvider = (typeof onboardingSelectedProvider !== 'undefined' && onboardingSelectedProvider) ? onboardingSelectedProvider : 'anthropic';
-        var providerModels = { anthropic: 'claude-sonnet-4-6', openai: 'gpt-5.4', google: 'gemini-3.1-pro-preview' };
+        var providerModels = { anthropic: 'claude-sonnet-4-6', openai: 'gpt-5.5', google: 'gemini-3.1-pro-preview' };
         brand = {
           id: 'brand_' + Date.now(),
           _modifiedAt: Date.now(),
@@ -3707,7 +3707,7 @@ async function extractBrandInfoWithAI(content) {
           'Authorization': 'Bearer ' + openaiKey
         },
         body: JSON.stringify({
-          model: 'gpt-5.4',
+          model: 'gpt-5.5',
           max_output_tokens: 4000,
           input: [{ role: 'user', content: promptText }],
           store: false

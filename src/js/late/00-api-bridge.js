@@ -22,7 +22,7 @@
     },
     openai: {
       baseUrl: 'https://api.openai.com/v1/responses',
-      models: ['gpt-5.4', 'gpt-5.4-pro', 'gpt-5.4-thinking']
+      models: ['gpt-5.5', 'gpt-5.5-pro', 'gpt-5.5-thinking']
     },
     google: {
       baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
@@ -160,7 +160,7 @@
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: model || 'gpt-5.4',
+        model: model || 'gpt-5.5',
         messages: allMessages,
         stream: true
       })
@@ -3574,7 +3574,7 @@ function _streamCreateResponse(apiMessages) {
 
   var model;
   if (provider === 'anthropic') model = localStorage.getItem('claudeModel') || 'claude-sonnet-4-6';
-  else if (provider === 'openai') model = localStorage.getItem('openaiModel') || 'gpt-5.4';
+  else if (provider === 'openai') model = localStorage.getItem('openaiModel') || 'gpt-5.5';
   else model = localStorage.getItem('googleModel') || 'gemini-2.0-flash';
 
   var apiKey = provider === 'anthropic' ? anthropicKey : provider === 'openai' ? openaiKey : googleKey;
@@ -5361,7 +5361,7 @@ function generateAIInsights() {
 
   var model;
   if (provider === 'anthropic') model = localStorage.getItem('claudeModel') || 'claude-sonnet-4-6';
-  else if (provider === 'openai') model = localStorage.getItem('openaiModel') || 'gpt-5.4';
+  else if (provider === 'openai') model = localStorage.getItem('openaiModel') || 'gpt-5.5';
   else model = localStorage.getItem('googleModel') || 'gemini-2.0-flash';
 
   var apiKey = provider === 'anthropic' ? anthropicKey : provider === 'openai' ? openaiKey : googleKey;
@@ -10965,7 +10965,7 @@ async function _wsCallAI(prompt, enableWebSearch, _retryCount) {
   // v27.0: Force known-good model names at call time
   var model;
   if (provider === 'anthropic') model = 'claude-sonnet-4-6';
-  else if (provider === 'openai') model = 'gpt-5.4';
+  else if (provider === 'openai') model = 'gpt-5.5';
   else if (provider === 'google') model = 'gemini-3.1-pro-preview';
   else model = _webSearchState.model;
   _retryCount = _retryCount || 0;
@@ -11033,7 +11033,7 @@ async function _wsCallClaude(prompt, apiKey, model, enableWebSearch) {
 }
 
 async function _wsCallGPT(prompt, apiKey, model, enableWebSearch) {
-  var body = { model: model || 'gpt-5.4', messages: [{ role: 'user', content: prompt }], max_tokens: 8192 };
+  var body = { model: model || 'gpt-5.5', messages: [{ role: 'user', content: prompt }], max_tokens: 8192 };
   if (enableWebSearch) body.tools = [{ type: 'web_search_preview' }];
   var resp = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

@@ -6632,7 +6632,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     // v15.18: Read LifeAI-specific provider and model (not hardcoded)
     var provider = localStorage.getItem('roweos_life_provider')
       || localStorage.getItem('selectedProvider') || 'anthropic';
-    var model = localStorage.getItem('roweos_life_model') || (provider === 'openai' ? 'gpt-5.4' : (provider === 'google' ? 'gemini-3.1-pro-preview' : 'claude-sonnet-4-6')); // v30.1: Match default model to provider
+    var model = localStorage.getItem('roweos_life_model') || (provider === 'openai' ? 'gpt-5.5' : (provider === 'google' ? 'gemini-3.1-pro-preview' : 'claude-sonnet-4-6')); // v30.1: Match default model to provider
 
     // v20.5: RoweOS AI — resolve to actual provider/model
     if (provider === 'roweos') {
@@ -7380,7 +7380,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
   var settings = brandSettings[brandIdx] || {};
   // v30.1: Only read from brandSettings — brand.provider/brand.model are stale fields that cause nanobanana defaulting bug
   var provider = settings.provider || 'anthropic';
-  var model = settings.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.4' : (provider === 'nanobanana' ? 'gemini-3-pro-image-preview' : 'gemini-3.1-pro-preview')));
+  var model = settings.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.5' : (provider === 'nanobanana' ? 'gemini-3-pro-image-preview' : 'gemini-3.1-pro-preview')));
 
   // v20.5: RoweOS AI — resolve to actual provider/model before dispatch
   if (provider === 'roweos') {

@@ -756,9 +756,9 @@ function populateRevealScreen() {
     'claude-sonnet-4-6': 'Claude Sonnet 4.6',
     'claude-opus-4-7': 'Claude Opus 4.7',
     'claude-haiku-4-5-20251001': 'Claude Haiku 4.5',
-    'gpt-5.4': 'GPT-5.4',
-    'gpt-5.4-pro': 'GPT-5.4 Pro',
-    'gpt-5.4-thinking': 'GPT-5.4 Thinking',
+    'gpt-5.5': 'GPT-5.5',
+    'gpt-5.5-pro': 'GPT-5.5 Pro',
+    'gpt-5.5-thinking': 'GPT-5.5 Thinking',
     'gpt-5-nano': 'GPT-5 Nano',
     'gemini-3.1-pro-preview': 'Gemini 3.1 Pro',
     'gemini-3-flash-preview': 'Gemini 3 Flash'

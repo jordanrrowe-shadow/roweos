@@ -947,7 +947,7 @@ function renderModelConfigList() {
 // Helper function to split model names for display
 function splitModelName(fullName) {
   // Claude Sonnet 4 → { provider: "Claude", model: "Sonnet 4" }
-  // GPT-5.4 → { provider: "GPT", model: "5.4" }
+  // GPT-5.5 → { provider: "GPT", model: "5.4" }
   // Claude Opus 4.7 → { provider: "Claude", model: "Opus 4.7" }
   
   var parts = fullName.split(' ');
@@ -4152,7 +4152,7 @@ async function executeLifeAIAnalysis(prompt, section) {
           'Authorization': 'Bearer ' + apiKey
         },
         body: JSON.stringify({
-          model: 'gpt-5.4',
+          model: 'gpt-5.5',
           input: [{ role: 'user', content: prompt }],
           max_output_tokens: 1024,
           store: false
@@ -4356,7 +4356,7 @@ async function generateLifeApplyPreview(section, sectionName) {
       var res = await fetch('https://api.openai.com/v1/responses', { // v22.18: Responses API
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify({ model: 'gpt-5.4', input: [{ role: 'user', content: summaryPrompt }], max_output_tokens: 1024, store: false })
+        body: JSON.stringify({ model: 'gpt-5.5', input: [{ role: 'user', content: summaryPrompt }], max_output_tokens: 1024, store: false })
       });
       var data = await res.json();
       if (data.output_text) response = data.output_text; // v22.18: Responses API

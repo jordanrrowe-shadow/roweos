@@ -6159,7 +6159,7 @@ function generateGoalTasks(forceRefresh) {
     model = localStorage.getItem('roweos_anthropic_model') || 'claude-sonnet-4-20250514';
   } else if (provider === 'openai') {
     apiKey = localStorage.getItem('roweos_openai_key') || '';
-    model = localStorage.getItem('roweos_openai_model') || 'gpt-5.4';
+    model = localStorage.getItem('roweos_openai_model') || 'gpt-5.5';
   } else if (provider === 'google') {
     apiKey = localStorage.getItem('roweos_google_key') || '';
     model = localStorage.getItem('roweos_google_model') || 'gemini-2.0-flash';

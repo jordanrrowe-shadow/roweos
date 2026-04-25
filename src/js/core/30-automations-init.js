@@ -945,7 +945,7 @@ var MODEL_TIERS = {
     desc: 'Highest-tier models only',
     models: {
       anthropic: ['claude-opus-4-7', 'claude-sonnet-4-6'],
-      openai: ['gpt-5.4-pro', 'gpt-5.4', 'gpt-5.4-thinking'],
+      openai: ['gpt-5.5-pro', 'gpt-5.5', 'gpt-5.5-thinking'],
       google: ['gemini-3.1-pro-preview']
     }
   },
@@ -954,7 +954,7 @@ var MODEL_TIERS = {
     desc: 'Pro for complex, standard for simple',
     models: {
       anthropic: ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001'],
-      openai: ['gpt-5.4', 'gpt-5.4-pro', 'gpt-5.4-thinking'],
+      openai: ['gpt-5.5', 'gpt-5.5-pro', 'gpt-5.5-thinking'],
       google: ['gemini-3.1-pro-preview', 'gemini-3-flash-preview']
     }
   },
@@ -963,7 +963,7 @@ var MODEL_TIERS = {
     desc: 'Faster, cheaper models',
     models: {
       anthropic: ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6'],
-      openai: ['gpt-5.4'],
+      openai: ['gpt-5.5'],
       google: ['gemini-3-flash-preview', 'gemini-3.1-pro-preview']
     }
   }
@@ -1009,7 +1009,7 @@ function getModelForTier(provider, requestedModel) {
     if (tierConfig && tierConfig.models[provider]) return tierConfig.models[provider][0];
     if (provider === 'google') return 'gemini-3.1-pro-preview';
     if (provider === 'anthropic') return 'claude-sonnet-4-6';
-    if (provider === 'openai') return 'gpt-5.4';
+    if (provider === 'openai') return 'gpt-5.5';
   }
 
   if (tier === 'balanced') return requestedModel; // No filtering in balanced mode
@@ -3735,7 +3735,7 @@ async function executeScheduledTask(task, idx) {
     if (task.config && task.config.provider && _validSchedProvs.indexOf(task.config.provider) !== -1) {
       provider = task.config.provider;
       if (provider === 'anthropic') model = 'claude-sonnet-4-6';
-      else if (provider === 'openai') model = 'gpt-5.4';
+      else if (provider === 'openai') model = 'gpt-5.5';
       else if (provider === 'google') model = 'gemini-2.0-flash';
     }
     if (task.config && task.config.model) model = task.config.model;
@@ -3989,7 +3989,7 @@ async function makeScheduledTaskAPICall(provider, model, apiKey, systemPrompt, u
       oaiBody.max_output_tokens = Math.max(_tokLimit, 16384);
     }
     // v31.0: web_search_preview supported on gpt-5.5* and legacy gpt-5.4* models
-    if (typeof _modelSupportsWebSearch === 'function' ? _modelSupportsWebSearch(model) : (model && (model.indexOf('gpt-5.5') === 0 || model.indexOf('gpt-5.4') === 0))) {
+    if (typeof _modelSupportsWebSearch === 'function' ? _modelSupportsWebSearch(model) : (model && (model.indexOf('gpt-5.5') === 0 || model.indexOf('gpt-5.5') === 0))) {
       oaiBody.tools = [{ type: 'web_search_preview' }];
     }
     // Stream and collect full response (same as callOpenAIStreaming)

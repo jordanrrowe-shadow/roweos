@@ -149,7 +149,7 @@ var agents = [
       '### 1. BRANDAI (Intelligent Chat)\n' +
       '- **What it is**: AI-powered chat interface for brand-aligned conversations\n' +
       '- **How to use**: Click "BrandAI" in sidebar, select your brand, start chatting\n' +
-      '- **Features**: Brand-aware responses, model selection (Claude Sonnet 4.6, GPT-5.4, Gemini), web search integration, streaming, file attachments, multimodal image input\n' +
+      '- **Features**: Brand-aware responses, model selection (Claude Sonnet 4.6, GPT-5.5, Gemini), web search integration, streaming, file attachments, multimodal image input\n' +
       '- **Deep Research**: Toggle the magnifying glass icon for extended 5-30 minute research reports (requires Google/Gemini API key). Best for market research, competitor analysis, industry reports.\n' +
       '\n' +
       '### 2. FOCUS (Daily Hub)\n' +
@@ -321,7 +321,7 @@ var agents = [
       '4. **Create custom ops**: Build reusable operations for repeated tasks\n' +
       '5. **Schedule routine tasks**: Use Rhythm or Automations for weekly content, monthly reports\n' +
       '6. **Leverage Guardrails**: Customize agent behavior per brand\n' +
-      '7. **Try different models**: Claude Sonnet 4.6 for reasoning, GPT-5.4 for creativity, Gemini for research & images\n' +
+      '7. **Try different models**: Claude Sonnet 4.6 for reasoning, GPT-5.5 for creativity, Gemini for research & images\n' +
       '\n' +
       '## COMMON QUESTIONS\n' +
       '**Q: Why aren\'t my operations running?**\n' +
@@ -6681,35 +6681,35 @@ var ROWEOS_AI_ROUTING = {
       { provider: 'anthropic', model: 'claude-sonnet-4-6' }
     ]},
     { provider: 'google', model: 'gemini-3.1-pro-preview' },
-    { provider: 'openai', model: 'gpt-5.4' }
+    { provider: 'openai', model: 'gpt-5.5' }
   ],
   strategic: [
     { provider: 'anthropic', model: 'claude-opus-4-7' },
     { provider: 'google', model: 'gemini-3.1-pro-preview' },
     { provider: 'anthropic', model: 'claude-sonnet-4-6' },
-    { provider: 'openai', model: 'gpt-5.4' }
+    { provider: 'openai', model: 'gpt-5.5' }
   ],
   code: [
     { provider: 'anthropic', model: 'claude-sonnet-4-6' },
     { provider: 'google', model: 'gemini-3.1-pro-preview' },
-    { provider: 'openai', model: 'gpt-5.4' }
+    { provider: 'openai', model: 'gpt-5.5' }
   ],
   multimodal: [
     { provider: 'google', model: 'gemini-3.1-pro-preview' },
     { provider: 'anthropic', model: 'claude-sonnet-4-6' },
-    { provider: 'openai', model: 'gpt-5.4' }
+    { provider: 'openai', model: 'gpt-5.5' }
   ],
   quick: [
     { provider: 'google', model: 'gemini-3-flash-preview' },
     { provider: 'anthropic', model: 'claude-haiku-4-5-20251001' },
-    { provider: 'openai', model: 'gpt-5.4' }
+    { provider: 'openai', model: 'gpt-5.5' }
   ],
   general: [
     { provider: '_alternate', models: [
       { provider: 'anthropic', model: 'claude-sonnet-4-6' },
       { provider: 'google', model: 'gemini-3.1-pro-preview' }
     ]},
-    { provider: 'openai', model: 'gpt-5.4' }
+    { provider: 'openai', model: 'gpt-5.5' }
   ]
 };
 var _roweosAIAlternateCounter = 0;

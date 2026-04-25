@@ -1348,9 +1348,9 @@ function showModelPickerInOnboarding(provider) {
       { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', desc: 'Fastest responses, cost-effective', color: '#22c55e', recommended: false }
     ],
     openai: [
-      { id: 'gpt-5.4', name: 'GPT-5.4', desc: 'Most capable frontier model for professional work', color: '#22c55e', recommended: true },
-      { id: 'gpt-5.4-pro', name: 'GPT-5.4 Pro', desc: 'Maximum performance on complex tasks', color: '#4ade80', recommended: false },
-      { id: 'gpt-5.4-thinking', name: 'GPT-5.4 Thinking', desc: 'Extended reasoning for complex analysis', color: '#86efac', recommended: false }
+      { id: 'gpt-5.5', name: 'GPT-5.5', desc: 'Most capable frontier model for professional work', color: '#22c55e', recommended: true },
+      { id: 'gpt-5.5-pro', name: 'GPT-5.5 Pro', desc: 'Maximum performance on complex tasks', color: '#4ade80', recommended: false },
+      { id: 'gpt-5.5-thinking', name: 'GPT-5.5 Thinking', desc: 'Extended reasoning for complex analysis', color: '#86efac', recommended: false }
     ],
     google: [
       { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro', desc: 'Advanced reasoning and multimodal capabilities', color: '#3b82f6', recommended: true },
@@ -1733,7 +1733,7 @@ function completeBrandSetup() {
   var selectedProvider = window.onboardingSelectedProvider || 'anthropic';
   var providerModels = {
     anthropic: 'claude-sonnet-4-6',
-    openai: 'gpt-5.4',
+    openai: 'gpt-5.5',
     google: 'gemini-3.1-pro-preview'
   };
   
@@ -2673,7 +2673,7 @@ function _quickAddBrandSubmit(useResearch) {
     else if (keys.openai) provider = 'openai';
     else if (keys.google) provider = 'google';
   } catch(e) {}
-  var providerModels = { anthropic: 'claude-sonnet-4-6', openai: 'gpt-5.4', google: 'gemini-3.1-pro-preview' };
+  var providerModels = { anthropic: 'claude-sonnet-4-6', openai: 'gpt-5.5', google: 'gemini-3.1-pro-preview' };
   var fullUrl = website ? (!/^https?:\/\//i.test(website) ? 'https://' + website : website) : '';
 
   var newBrand = {
@@ -3889,9 +3889,9 @@ async function checkApiConnection(forceRefresh) {
         openai: {
           name: 'OpenAI',
           models: [
-            { id: 'gpt-5.4', name: 'GPT 5.4' },
-            { id: 'gpt-5.4-pro', name: 'GPT 5.4 Pro' },
-            { id: 'gpt-5.4-thinking', name: 'GPT 5.4 Thinking' }
+            { id: 'gpt-5.5', name: 'GPT 5.5' },
+            { id: 'gpt-5.5-pro', name: 'GPT 5.5 Pro' },
+            { id: 'gpt-5.5-thinking', name: 'GPT 5.5 Thinking' }
           ]
         },
         google: {

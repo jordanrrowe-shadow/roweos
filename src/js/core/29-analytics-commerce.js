@@ -512,9 +512,9 @@ function calculateCost(provider, model, inputTokens, outputTokens, webSearchEnab
       'gpt-4o': { input: 2.50, output: 10.00 },
       'gpt-4.1': { input: 2.00, output: 8.00 },
       'gpt-4o-mini': { input: 0.15, output: 0.60 },
-      'gpt-5.4': { input: 2.50, output: 15.00 },
-      'gpt-5.4-pro': { input: 30.00, output: 180.00 },
-      'gpt-5.4-thinking': { input: 2.50, output: 15.00 },
+      'gpt-5.5': { input: 2.50, output: 15.00 },
+      'gpt-5.5-pro': { input: 30.00, output: 180.00 },
+      'gpt-5.5-thinking': { input: 2.50, output: 15.00 },
       // v31.0: gpt-5.5 family pricing per https://developers.openai.com/api/docs/models/gpt-5.5
       'gpt-5.5': { input: 5.00, output: 30.00 },
       'gpt-5.5-pro': { input: 30.00, output: 180.00 },
@@ -2824,7 +2824,7 @@ function callStorageAssistantAPI(provider, apiKey, systemPrompt, userMsg, onSucc
     };
     xhr2.onerror = function() { onError('Network error'); };
     xhr2.send(JSON.stringify({
-      model: 'gpt-5.4',
+      model: 'gpt-5.5',
       instructions: systemPrompt,
       max_output_tokens: 1024,
       input: [{ role: 'user', content: userMsg }],
@@ -4248,7 +4248,7 @@ function renderApiProviderStatus() {
 
   var providers = [
     { key: 'anthropic', name: 'Anthropic', models: 'Claude Opus 4.7, Sonnet 4.6, Haiku 4.5', color: '#d4a574', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>' },
-    { key: 'openai', name: 'OpenAI', models: 'GPT-5.4, GPT-5.4 Pro, Thinking', color: '#10b981', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' },
+    { key: 'openai', name: 'OpenAI', models: 'GPT-5.5, GPT-5.5 Pro, Thinking', color: '#10b981', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' },
     { key: 'google', name: 'Google', models: 'Gemini 3.1 Pro, 3 Flash, 2.5 Pro', color: '#3b82f6', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>' },
     { key: 'nanobanana', name: 'Nano Banana', models: 'Image Gen, Deep Research', color: '#f59e0b', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' }
   ];
@@ -4629,9 +4629,9 @@ function getModelDisplayName(modelId) {
     'gpt-4o': 'GPT-4o',
     'gpt-4.1': 'GPT-4.1',
     'gpt-4o-mini': 'GPT-4o Mini',
-    'gpt-5.4': 'GPT-5.4',
-    'gpt-5.4-pro': 'GPT-5.4 Pro',
-    'gpt-5.4-thinking': 'GPT-5.4 Thinking',
+    'gpt-5.5': 'GPT-5.5',
+    'gpt-5.5-pro': 'GPT-5.5 Pro',
+    'gpt-5.5-thinking': 'GPT-5.5 Thinking',
     // v31.0: gpt-5.5 family display names
     'gpt-5.5': 'GPT-5.5',
     'gpt-5.5-pro': 'GPT-5.5 Pro',

@@ -525,13 +525,13 @@ async function bloomComment(postId) {
     if (provider === 'nanobanana') {
       var sp = localStorage.getItem('selectedProvider') || 'google';
       provider = sp !== 'nanobanana' ? sp : 'google';
-      model = provider === 'google' ? 'gemini-3.1-pro-preview' : provider === 'openai' ? 'gpt-5.4' : 'claude-sonnet-4-6';
+      model = provider === 'google' ? 'gemini-3.1-pro-preview' : provider === 'openai' ? 'gpt-5.5' : 'claude-sonnet-4-6';
     }
     var apiKey = await getApiKey(provider);
     if (!apiKey) {
       var available = getAvailableProviders();
       if (available.google) { provider = 'google'; model = 'gemini-3.1-pro-preview'; apiKey = await getApiKey('google'); }
-      else if (available.openai) { provider = 'openai'; model = 'gpt-5.4'; apiKey = await getApiKey('openai'); }
+      else if (available.openai) { provider = 'openai'; model = 'gpt-5.5'; apiKey = await getApiKey('openai'); }
       else if (available.anthropic) { provider = 'anthropic'; model = 'claude-sonnet-4-6'; apiKey = await getApiKey('anthropic'); }
     }
 
@@ -6962,7 +6962,7 @@ function updateAutoLabAgentModels(preselect) {
     gemini: ['gemini-3-flash-preview', 'gemini-3.1-pro-preview'],
     nanobanana: ['gemini-2.5-flash-image', 'gemini-3-pro-image-preview', 'gemini-2.0-flash-exp-image-generation'],
     anthropic: ['claude-sonnet-4-6', 'claude-haiku-4-20250514', 'claude-opus-4-7'],
-    openai: ['gpt-5.4', 'gpt-5.4-pro', 'gpt-5.4-thinking']
+    openai: ['gpt-5.5', 'gpt-5.5-pro', 'gpt-5.5-thinking']
   };
   var models = modelsByProvider[provider] || modelsByProvider.gemini;
   var html = '';

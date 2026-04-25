@@ -1277,13 +1277,13 @@ async function generateBloomBatch(count) {
       if (selProv !== 'nanobanana') { provider = selProv; }
       else { provider = 'google'; }
       var bs2 = brandSettings[brandIdx];
-      model = (bs2 && bs2.model) || (provider === 'google' ? 'gemini-3.1-pro-preview' : provider === 'openai' ? 'gpt-5.4' : 'claude-sonnet-4-6');
+      model = (bs2 && bs2.model) || (provider === 'google' ? 'gemini-3.1-pro-preview' : provider === 'openai' ? 'gpt-5.5' : 'claude-sonnet-4-6');
     }
     apiKey = await getApiKey(provider);
     if (!apiKey) {
       var available = getAvailableProviders();
       if (available.google) { provider = 'google'; model = 'gemini-3.1-pro-preview'; apiKey = await getApiKey('google'); }
-      else if (available.openai) { provider = 'openai'; model = 'gpt-5.4'; apiKey = await getApiKey('openai'); }
+      else if (available.openai) { provider = 'openai'; model = 'gpt-5.5'; apiKey = await getApiKey('openai'); }
       else if (available.anthropic) { provider = 'anthropic'; model = 'claude-sonnet-4-6'; apiKey = await getApiKey('anthropic'); }
     }
   } catch(e) { console.warn('[Bloom] API key error:', e); }
@@ -1878,13 +1878,13 @@ async function bloomGenerateCustomContent() {
     if (provider === 'nanobanana') {
       var selProv = localStorage.getItem('selectedProvider') || 'google';
       provider = selProv !== 'nanobanana' ? selProv : 'google';
-      model = provider === 'google' ? 'gemini-3.1-pro-preview' : provider === 'openai' ? 'gpt-5.4' : 'claude-sonnet-4-6';
+      model = provider === 'google' ? 'gemini-3.1-pro-preview' : provider === 'openai' ? 'gpt-5.5' : 'claude-sonnet-4-6';
     }
     apiKey = await getApiKey(provider);
     if (!apiKey) {
       var available = getAvailableProviders();
       if (available.google) { provider = 'google'; model = 'gemini-3.1-pro-preview'; apiKey = await getApiKey('google'); }
-      else if (available.openai) { provider = 'openai'; model = 'gpt-5.4'; apiKey = await getApiKey('openai'); }
+      else if (available.openai) { provider = 'openai'; model = 'gpt-5.5'; apiKey = await getApiKey('openai'); }
       else if (available.anthropic) { provider = 'anthropic'; model = 'claude-sonnet-4-6'; apiKey = await getApiKey('anthropic'); }
     }
   } catch(e) { console.warn('[Bloom Create] API key error:', e); }
