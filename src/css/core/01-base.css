@@ -44072,7 +44072,7 @@
       animation: autoRunGlowPurple 1.5s ease-in-out infinite;
       border-color: #a78bfa;
     }
-    /* v22.32: Cyan glow for GPT 5.4 thinking (Intelligence agent) */
+    /* v22.32 / v31.0: Cyan glow for GPT 5.5 thinking (Intelligence agent) */
     .auto-lab-card.is-running-thinking {
       animation: autoRunGlowCyan 1.5s ease-in-out infinite;
       border-color: #22d3ee;
