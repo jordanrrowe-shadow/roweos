@@ -266,24 +266,7 @@
           </div>
         </div>
       </div>
-      <!-- v31.0: Campaigns tab -->
-      <div class="admin-tab-content" id="adminTabCampaigns" style="display:none;">
-        <div style="padding:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="margin:0;font-size:16px;color:var(--text)">Campaigns &amp; Responses</h3>
-            <div style="display:flex;gap:8px">
-              <select id="campaignsTemplateFilter" onchange="adminLoadCampaigns()" style="padding:6px 10px;background:var(--bg-2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
-                <option value="">All templates</option>
-              </select>
-              <button onclick="adminLoadCampaigns()" style="padding:6px 12px;background:var(--accent);color:#0a0a0a;border:none;border-radius:6px;font-size:12px;cursor:pointer">Refresh</button>
-              <button onclick="adminExportCampaignsCSV()" style="padding:6px 12px;background:var(--bg-2);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">Export CSV</button>
-            </div>
-          </div>
-          <div id="campaignsStats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"></div>
-          <div id="campaignsContent" style="background:var(--bg-2);border:1px solid var(--border);border-radius:8px;padding:0;overflow:hidden">
-            <div style="padding:24px;text-align:center;color:var(--text-2);font-size:13px">Loading…</div>
-          </div>
-        </div>
-      </div>
+      <!-- v31.0: Campaigns tab — content rendered by adminRenderCampaigns() in 25-admin-emails.js -->
+      <div class="admin-tab-content" id="adminTabCampaigns" style="display:none;"></div>
     </div>
   </div>

@@ -6199,13 +6199,14 @@ function showAdminTab(tabName) {
   if (tabName === 'feedback' && typeof renderAdminFeedback === 'function') renderAdminFeedback();
   if (tabName === 'signups' && typeof adminLoadSignups === 'function') adminLoadSignups();
   if (tabName === 'emails' && typeof adminLoadEmailData === 'function') adminLoadEmailData();
-  // v31.0: Auto-load Campaigns tab — prefer modular adminLoadCampaigns (25-admin-campaigns.js),
-  // fall back to legacy adminRenderCampaigns (25-admin-emails.js) if the modular file isn't loaded.
+  // v31.0: Auto-load Campaigns tab — adminRenderCampaigns (25-admin-emails.js) owns the panel
+  // and renders the rich green-stat dashboard via innerHTML. Falls back to modular
+  // adminLoadCampaigns (25-admin-campaigns.js) only if the legacy renderer isn't loaded.
   if (tabName === 'campaigns') {
-    if (typeof adminLoadCampaigns === 'function') {
-      adminLoadCampaigns();
-    } else if (typeof adminRenderCampaigns === 'function') {
+    if (typeof adminRenderCampaigns === 'function') {
       adminRenderCampaigns();
+    } else if (typeof adminLoadCampaigns === 'function') {
+      adminLoadCampaigns();
     }
   }
 }
