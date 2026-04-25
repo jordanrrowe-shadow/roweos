@@ -28,6 +28,7 @@ export default async function handler(req, res) {
     var method = body.method || 'unknown';
     var uid = body.uid || 'unknown';
     var createdAt = body.createdAt || new Date().toISOString();
+    var source = body.source || 'Unknown';
 
     var timestamp = new Date(createdAt);
     var formattedDate = timestamp.toLocaleString('en-US', {
@@ -54,7 +55,7 @@ export default async function handler(req, res) {
       // Header
       '<tr><td style="padding:32px 32px 16px;border-bottom:1px solid #2a2a2a;">',
       '<h1 style="margin:0;font-size:20px;font-weight:600;color:#a89878;letter-spacing:0.5px;">RoweOS</h1>',
-      '<p style="margin:8px 0 0;font-size:13px;color:#888;">New User Signup</p>',
+      '<p style="margin:8px 0 0;font-size:13px;color:#888;">New User Signup via ' + escapeHtml(source) + '</p>',
       '</td></tr>',
       // Body
       '<tr><td style="padding:24px 32px;">',
@@ -73,6 +74,11 @@ export default async function handler(req, res) {
       '<tr>',
       '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Sign-in Method</td>',
       '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;">' + escapeHtml(methodLabel) + '</td>',
+      '</tr>',
+      // Source
+      '<tr>',
+      '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Source</td>',
+      '<td style="padding:8px 0;font-size:14px;color:#a89878;font-weight:500;">' + escapeHtml(source) + '</td>',
       '</tr>',
       // UID
       '<tr>',
@@ -247,6 +253,7 @@ export default async function handler(req, res) {
             uid: { stringValue: uid },
             createdAt: { stringValue: createdAt },
             emailSent: { booleanValue: emailSent },
+            source: { stringValue: source },
             notifiedAt: { stringValue: new Date().toISOString() }
           }
         };
