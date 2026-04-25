@@ -599,8 +599,9 @@ function handleNativeModelSelect(sel) {
   if (parts.length === 2) {
     var displayNames = {
       'auto': 'RoweOS AI', 'claude-sonnet-4-6': 'Sonnet 4.6', 'claude-haiku-4-20250514': 'Haiku 4.5',
-      'claude-opus-4-7': 'Opus 4.7', 'gpt-5.4': 'GPT-5.4', 'gpt-5.4-pro': 'GPT-5.4 Pro',
-      'gpt-5.4-thinking': 'GPT-5.4 Thinking', 'gemini-3.1-pro-preview': '3.1 Pro',
+      // v31.0: gpt-5.5 family display labels
+      'claude-opus-4-7': 'Opus 4.7', 'gpt-5.5': 'GPT-5.5', 'gpt-5.5-pro': 'GPT-5.5 Pro',
+      'gpt-5.5-thinking': 'GPT-5.5 Thinking', 'gemini-3.1-pro-preview': '3.1 Pro',
       'gemini-3-flash-preview': '3.0 Flash', 'gemini-3-pro-image-preview': 'Nano Banana Pro 3',
       'gemini-2.5-flash-image': 'Nano Banana 3.0', 'gemini-2.0-flash-exp-image-generation': 'Flash Image',
       'veo-3.1-fast-generate-preview': 'Veo 3.1 Fast', 'veo-3.1-generate-preview': 'Veo 3.1',
@@ -702,9 +703,10 @@ function showStudioModelActionSheet() {
     '</div>' +
     '<div class="studio-mobile-model-section">' +
       '<div class="studio-mobile-model-label">OpenAI</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'gpt-5.4' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'openai\', \'gpt-5.4\', \'GPT-5.4\')">GPT-5.4</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'gpt-5.4-pro' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'openai\', \'gpt-5.4-pro\', \'GPT-5.4 Pro\')">GPT-5.4 Pro</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'gpt-5.4-thinking' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'openai\', \'gpt-5.4-thinking\', \'GPT-5.4 Thinking\')">GPT-5.4 Thinking</div>' +
+      // v31.0: gpt-5.5 family
+      '<div class="studio-mobile-model-item' + (currentModel === 'gpt-5.5' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'openai\', \'gpt-5.5\', \'GPT-5.5\')">GPT-5.5</div>' +
+      '<div class="studio-mobile-model-item' + (currentModel === 'gpt-5.5-pro' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'openai\', \'gpt-5.5-pro\', \'GPT-5.5 Pro\')">GPT-5.5 Pro</div>' +
+      '<div class="studio-mobile-model-item' + (currentModel === 'gpt-5.5-thinking' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'openai\', \'gpt-5.5-thinking\', \'GPT-5.5 Thinking\')">GPT-5.5 Thinking</div>' +
     '</div>' +
     '<div class="studio-mobile-model-section">' +
       '<div class="studio-mobile-model-label">Google</div>' +
@@ -4906,7 +4908,40 @@ async function callAnthropicStudioStreaming(model, apiKey, prompt, onChunk, onCo
   }
 }
 
-// v22.19: GPT-5.4 Thinking model helpers
+// v31.0: Backwards-compat shim — maps deprecated gpt-5.4* model IDs to gpt-5.5* UI labels.
+// ~10 active users have preferredModel:'gpt-5.4' saved in localStorage / Firestore brand configs.
+// Without normalization their next API call would 404.
+function _normalizeModel(modelId) {
+  if (!modelId || typeof modelId !== 'string') return modelId;
+  if (modelId === 'gpt-5.4') return 'gpt-5.5';
+  if (modelId === 'gpt-5.4-pro') return 'gpt-5.5-pro';
+  if (modelId === 'gpt-5.4-thinking') return 'gpt-5.5-thinking';
+  return modelId;
+}
+
+// v31.0: True if the model ID supports the web_search_preview tool.
+// Accepts both gpt-5.5* (current) and gpt-5.4* (legacy cached configs).
+function _modelSupportsWebSearch(modelId) {
+  if (!modelId) return false;
+  var m = String(modelId);
+  return m.indexOf('gpt-5.5') === 0 || m.indexOf('gpt-5.4') === 0;
+}
+
+// v31.0: Resolve UI model label to actual OpenAI API model ID.
+// "gpt-5.5-thinking" is a UI alias — at the API layer it's gpt-5.5 with reasoning.effort:high.
+function _apiModelFor(modelId) {
+  if (modelId === 'gpt-5.5-thinking' || modelId === 'gpt-5.4-thinking') return 'gpt-5.5';
+  return _normalizeModel(modelId);
+}
+
+// v31.0: True if the UI model label means the request should send reasoning.effort
+function _isThinkingLabel(modelId) {
+  if (!modelId) return false;
+  var m = String(modelId);
+  return m === 'gpt-5.5-thinking' || m === 'gpt-5.4-thinking' || m.indexOf('-thinking') !== -1;
+}
+
+// v22.19 / v31.0: GPT-5.5 Thinking model helpers (legacy gpt-5.4-thinking still recognized)
 function resolveOpenAIModel(model) {
   if (model && model.indexOf('-thinking') !== -1) {
     return model.replace('-thinking', '');
@@ -4914,17 +4949,27 @@ function resolveOpenAIModel(model) {
   return model;
 }
 
-function isOpenAIThinkingModel(model) {
-  return model && model.indexOf('-thinking') !== -1;
+// v31.0: Updated to recognize both gpt-5.4-thinking (legacy) and gpt-5.5-thinking labels
+function isOpenAIThinkingModel(modelId) {
+  if (!modelId) return false;
+  var m = String(modelId);
+  return m.indexOf('-thinking') !== -1 ||
+         m === 'gpt-5.5-thinking' ||
+         m === 'gpt-5.4-thinking';
 }
 
 // v22.18: Migrated to OpenAI Responses API (from Chat Completions)
+// v31.0: Normalize legacy gpt-5.4* labels to gpt-5.5*; resolve thinking alias to api model
 async function callOpenAIStudioStreaming(model, apiKey, prompt, onChunk, onComplete, onError) {
+  // v31.0: Normalize incoming UI label and resolve API model + thinking flag
+  var uiModel = _normalizeModel(model || 'gpt-5.5');
+  var apiModel = _apiModelFor(uiModel);
+  var thinkingMode = _isThinkingLabel(uiModel);
   // v22.19: Show thinking progress for thinking models and wrap callbacks
   // v29.0: Skip progress bars for multimodal (image) conversations
   var _studioHasMultimodal = typeof prompt === 'object' && Array.isArray(prompt);
   var _thinkingShownStudio = false;
-  if (isOpenAIThinkingModel(model) && !_studioHasMultimodal) {
+  if (thinkingMode && !_studioHasMultimodal) {
     showThinkingProgress();
     _thinkingShownStudio = true;
     var _origOnChunkS = onChunk;
@@ -4945,20 +4990,23 @@ async function callOpenAIStudioStreaming(model, apiKey, prompt, onChunk, onCompl
     };
   }
   try {
-    var actualModel = resolveOpenAIModel(model); // v22.19
     var requestBody = {
-      model: actualModel,
+      model: apiModel,
       stream: true,
       max_output_tokens: 8192,
       input: [{ role: 'user', content: prompt }]
     };
-    // v22.19: Inject reasoning for thinking models
-    if (isOpenAIThinkingModel(model)) {
-      requestBody.reasoning = { effort: 'high', summary: 'auto' };
+    // v31.0: Inject reasoning for thinking models — read effort from settings (default 'high')
+    if (thinkingMode) {
+      var effortS = (typeof window !== 'undefined' && window.localStorage)
+        ? (localStorage.getItem('roweos_reasoning_effort') || 'high')
+        : 'high';
+      if (['none','low','medium','high','xhigh'].indexOf(effortS) === -1) effortS = 'high';
+      requestBody.reasoning = { effort: effortS, summary: 'auto' };
       requestBody.max_output_tokens = 16384;
     }
-    // v22.20: Add web search tool for GPT-5.4 models
-    if (model.indexOf('gpt-5.4') === 0) {
+    // v31.0: Add web search tool for gpt-5.5* (and legacy gpt-5.4*) models
+    if (_modelSupportsWebSearch(uiModel)) {
       requestBody.tools = [{ type: 'web_search_preview' }];
     }
     var response = await fetch('https://api.openai.com/v1/responses', {
@@ -5785,17 +5833,21 @@ function callOpenAIChat(model, apiKey, messages, systemPrompt, onSuccess, onErro
 }
 
 // v22.18: Migrated to OpenAI Responses API with streaming, web search, and reasoning support
+// v31.0: Normalize legacy gpt-5.4* labels to gpt-5.5*; resolve thinking alias to api model
 async function callOpenAIStreaming(model, apiKey, messages, systemPrompt, onChunk, onComplete, onError, abortSignal) {
   if (systemPrompt) systemPrompt += '\n\nCRITICAL: Never use em-dashes or en-dashes in your writing. Use commas, semicolons, colons, periods, or hyphens instead.'; // v22.12
-  var actualModel = resolveOpenAIModel(model); // v22.19
-  setLastModelUsed('openai', actualModel); // v23.5
-  console.log('[Chat Web] OpenAI STREAMING call (Responses API), model:', actualModel, isOpenAIThinkingModel(model) ? '(thinking)' : '');
+  // v31.0: Normalize incoming UI label and resolve API model + thinking flag
+  var uiModel = _normalizeModel(model || 'gpt-5.5');
+  var apiModel = _apiModelFor(uiModel);
+  var thinkingMode = _isThinkingLabel(uiModel);
+  setLastModelUsed('openai', apiModel); // v23.5 / v31.0
+  console.log('[Chat Web] OpenAI STREAMING call (Responses API), model:', apiModel, thinkingMode ? '(thinking)' : '');
 
   // v12.0.3: Check cache first
   var cachedResponse = getCachedResponse(messages, systemPrompt);
   if (cachedResponse) {
     console.log('[Cache] Using cached response');
-    trackAPIUsage('openai', model, 0, 0, true, false);
+    trackAPIUsage('openai', uiModel, 0, 0, true, false);
     var words = cachedResponse.split(' ');
     var fullText = '';
     for (var w = 0; w < words.length; w++) {
@@ -5811,7 +5863,7 @@ async function callOpenAIStreaming(model, apiKey, messages, systemPrompt, onChun
   // v22.22: Skip progress bars for multimodal (image) conversations
   var _hasMultimodal = messages.some(function(m) { return Array.isArray(m.content); });
   var _thinkingShown = false;
-  if (isOpenAIThinkingModel(model) && !_hasMultimodal) {
+  if (thinkingMode && !_hasMultimodal) {
     showThinkingProgress();
     _thinkingShown = true;
     var _origOnChunk = onChunk;
@@ -5856,8 +5908,9 @@ async function callOpenAIStreaming(model, apiKey, messages, systemPrompt, onChun
 
   try {
     // v22.18: Build Responses API request body
+    // v31.0: model uses normalized apiModel (gpt-5.5-thinking → gpt-5.5)
     var requestBody = {
-      model: actualModel,
+      model: apiModel,
       instructions: systemPrompt || undefined,
       input: inputMessages,
       max_output_tokens: 4096,
@@ -5865,14 +5918,18 @@ async function callOpenAIStreaming(model, apiKey, messages, systemPrompt, onChun
       store: false
     };
 
-    // v22.19: Inject reasoning for thinking models
-    if (isOpenAIThinkingModel(model)) {
-      requestBody.reasoning = { effort: 'high', summary: 'auto' };
+    // v31.0: Inject reasoning for thinking models — read effort from settings (default 'high')
+    if (thinkingMode) {
+      var effortC = (typeof window !== 'undefined' && window.localStorage)
+        ? (localStorage.getItem('roweos_reasoning_effort') || 'high')
+        : 'high';
+      if (['none','low','medium','high','xhigh'].indexOf(effortC) === -1) effortC = 'high';
+      requestBody.reasoning = { effort: effortC, summary: 'auto' };
       requestBody.max_output_tokens = 16384;
     }
 
-    // v22.18: Add web search tool for GPT-5.4 models
-    if (model.indexOf('gpt-5.4') === 0) {
+    // v31.0: Add web search tool for gpt-5.5* (and legacy gpt-5.4*) models
+    if (_modelSupportsWebSearch(uiModel)) {
       requestBody.tools = [{ type: 'web_search_preview' }];
     }
 
@@ -6272,7 +6329,7 @@ async function generateConversationTitle(conversation, brand, commandId) {
           'Authorization': 'Bearer ' + apiKey
         },
         body: JSON.stringify({
-          model: 'gpt-5.4',
+          model: 'gpt-5.5', // v31.0
           input: [{ role: 'user', content: titlePrompt }],
           max_output_tokens: 30,
           store: false
@@ -7811,7 +7868,7 @@ function hideDeepResearchProgress() {
   if (timerEl) timerEl.textContent = 'Researching... 0:00';
 }
 
-// v22.19: GPT-5.4 Thinking progress indicator
+// v22.19 / v31.0: GPT-5.5 Thinking progress indicator
 var _thinkingTimerInterval = null;
 
 function showThinkingProgress() {
