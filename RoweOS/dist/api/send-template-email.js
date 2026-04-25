@@ -399,7 +399,7 @@ function buildSubscriptionInfo(userName) {
   // Provider cards
   var providers = [
     { name: 'Anthropic (Claude)', models: 'Sonnet 4.6, Opus 4.7, Haiku 4.5' },
-    { name: 'OpenAI (ChatGPT)', models: 'GPT-5.4, GPT-5.4 Pro, GPT-5.4 Thinking' },
+    { name: 'OpenAI (ChatGPT)', models: 'GPT-5.5, GPT-5.5 Pro, GPT-5.5 Thinking, GPT Image 2' },
     { name: 'Google (Gemini)', models: 'Gemini 3.1 Pro, Deep Research, NanoBanana 3 Pro' }
   ];
   for (var i = 0; i < providers.length; i++) {
