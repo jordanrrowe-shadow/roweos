@@ -1,12 +1,13 @@
 
   <!-- v15.0: Data Restore Prompt (shown when returning user has cloud data) -->
   <div id="dataRestorePrompt" style="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;backdrop-filter:blur(20px);">
-    <div style="background:var(--bg-secondary, #1a1a1a);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:40px;max-width:440px;text-align:center;">
+    <!-- v30.1: Use theme-aware colors so text is visible in both dark and light mode -->
+    <div style="background:var(--bg-secondary, #1a1a1a);border:1px solid var(--border-color, rgba(255,255,255,0.1));border-radius:16px;padding:40px;max-width:440px;text-align:center;">
       <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#a89878" stroke-width="1.5" style="margin-bottom:20px;"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
-      <div style="font-size:22px;font-weight:600;color:#fff;margin-bottom:8px;" id="restoreGreeting">Welcome back!</div>
-      <div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:28px;">We found your data in the cloud. Would you like to restore it?</div>
+      <div style="font-size:22px;font-weight:600;color:var(--text-primary, #fff);margin-bottom:8px;" id="restoreGreeting">Welcome back!</div>
+      <div style="font-size:14px;color:var(--text-secondary, rgba(255,255,255,0.5));margin-bottom:28px;">We found your data in the cloud. Would you like to restore it?</div>
       <div style="display:flex;gap:12px;">
-        <button onclick="skipDataRestore()" style="flex:1;padding:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;cursor:pointer;">Start Fresh</button>
+        <button onclick="skipDataRestore()" style="flex:1;padding:12px;background:var(--bg-tertiary, rgba(255,255,255,0.06));border:1px solid var(--border-color, rgba(255,255,255,0.1));border-radius:10px;color:var(--text-primary, #fff);font-size:14px;cursor:pointer;">Start Fresh</button>
         <button onclick="acceptDataRestore()" style="flex:1;padding:12px;background:#a89878;color:#000;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Restore Data</button>
       </div>
     </div>

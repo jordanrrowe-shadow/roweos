@@ -155,6 +155,17 @@ function writeDBDoc(collectionPath, docId, data, category) {
   }
 }
 
+// v30.3: Write a single chat entry as its own Firestore doc
+function writeDBChat(cmd) {
+  if (!cmd || !cmd.id || cmd.preliminary) return;
+  try {
+    var cleanDoc = typeof sanitizeChatEntry === 'function' ? sanitizeChatEntry(cmd) : cmd;
+    writeDBDoc('chats', String(cmd.id), cleanDoc, 'brandai_chats');
+  } catch(e) {
+    console.warn('[writeDBChat] Error:', e);
+  }
+}
+
 // Delete a subcollection document
 function deleteDBDoc(collectionPath, docId, category) {
   var db = getDB();
@@ -276,6 +287,13 @@ function writeDBConversations() {
     if (convData.agentHistoryJson) {
       writeDB('conversations/agentHistory', { json: convData.agentHistoryJson });
     }
+    // v30.3: Write last non-preliminary chat as individual doc
+    if (typeof writeDBChat === 'function' && agentCommands && agentCommands.length > 0) {
+      var _lastCmd = agentCommands[agentCommands.length - 1];
+      if (_lastCmd && !_lastCmd.preliminary) {
+        writeDBChat(_lastCmd);
+      }
+    }
   }, 5000);
 }
 
@@ -306,6 +324,8 @@ function flushPendingWrites() {
   if (!db) return;
   var basePath = 'roweos_users/' + firebaseUser.uid;
 
+  // v30.1: Collect batch commit promises so we only clear pending writes after all resolve
+  var commitPromises = [];
   var batch = db.batch();
   var batchCount = 0;
   queue.forEach(function(entry) {
@@ -322,17 +342,22 @@ function flushPendingWrites() {
       }
       batchCount++;
       if (batchCount >= 499) {
-        batch.commit().catch(function(e) { console.warn('[Sync V3] Batch flush error:', e.message); });
+        commitPromises.push(batch.commit());
         batch = db.batch();
         batchCount = 0;
       }
     } catch(e) {}
   });
   if (batchCount > 0) {
-    batch.commit().catch(function(e) { console.warn('[Sync V3] Batch flush error:', e.message); });
+    commitPromises.push(batch.commit());
   }
 
-  localStorage.removeItem('roweos_pending_writes');
+  // v30.1: Only clear pending writes after all batch commits resolve
+  Promise.all(commitPromises).then(function() {
+    localStorage.removeItem('roweos_pending_writes');
+  }).catch(function(e) {
+    console.warn('[Sync V3] Some batch flushes failed, retaining pending writes:', e.message);
+  });
 }
 
 // v25.0: One-time migration from V2 push/pull to V3 write-through
