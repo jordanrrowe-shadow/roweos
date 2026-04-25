@@ -4,6 +4,7 @@
     "runtime": "nodejs20"
   },
   "firestore": {
-    "indexes": "firestore.indexes.json"
+    "rules": "RoweOS/dist/firestore.rules",
+    "indexes": "RoweOS/dist/firestore.indexes.json"
   }
 }

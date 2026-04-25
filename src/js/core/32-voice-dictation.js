@@ -177,7 +177,7 @@ function transcribeAudio(blob) {
 
         var transcript = '';
         for (var i = 0; i < data.results.length; i++) {
-          if (data.results[i].alternatives && data.results[i].alternatives[0]) {
+          if (data.results[i].alternatives && data.results[i].alternatives[0] && data.results[i].alternatives[0].transcript) {
             transcript += data.results[i].alternatives[0].transcript;
           }
         }
@@ -210,7 +210,7 @@ function insertTranscript(text) {
 
   var start = textarea.selectionStart || 0;
   var end = textarea.selectionEnd || 0;
-  var current = textarea.value || '';
+  var current = textarea.value != null ? textarea.value : '';
 
   // Add space before if needed
   var prefix = '';

@@ -113,6 +113,7 @@ exports.runTaskNow = functions.https.onCall(
   },
   async function(request) {
     ensureInit();
+    var executor = getExecutor(); // v30.1: Initialize executor (was missing, caused crash)
     // Verify authentication
     if (!request.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Must be signed in');

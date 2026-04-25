@@ -169,7 +169,7 @@ function renderPromptLibrary() {
       '<span class="prompt-item-date">' + p.date + '</span>' +
       '</div>' +
       '<div class="prompt-item-preview">' + escapeHtml(p.context.substring(0, 100)) + (p.context.length > 100 ? '...' : '') + '</div>' +
-      '<div class="prompt-item-meta">' + p.agent + ' • ' + p.operation + ' • ' + p.brand + '</div>' +
+      '<div class="prompt-item-meta">' + escapeHtml(p.agent || '') + ' &bull; ' + escapeHtml(p.operation || '') + ' &bull; ' + escapeHtml(p.brand || '') + '</div>' +
       '<div class="prompt-item-actions">' +
       '<button class="prompt-item-btn" onclick="loadPromptToStudio(' + p.id + ')">Load</button>' +
       '<button class="prompt-item-btn" onclick="deletePrompt(' + p.id + ')">Delete</button>' +
@@ -424,7 +424,7 @@ function previewFile(fileId) {
     if (file.metadata) {
       imgHtml += '<div style="margin-top: var(--space-4); padding: var(--space-4); background: var(--bg-secondary); border-radius: var(--radius-md); text-align: left; font-size: var(--text-sm);">';
       if (file.metadata.prompt) {
-        imgHtml += '<div style="margin-bottom: var(--space-2);"><strong style="color: var(--text-secondary);">Prompt:</strong><br><span style="color: var(--text-primary);">' + file.metadata.prompt + '</span></div>';
+        imgHtml += '<div style="margin-bottom: var(--space-2);"><strong style="color: var(--text-secondary);">Prompt:</strong><br><span style="color: var(--text-primary);">' + escapeHtml(file.metadata.prompt || '') + '</span></div>'; // v30.1: XSS fix
       }
       if (file.metadata.model) {
         imgHtml += '<div style="color: var(--text-tertiary);">Model: ' + file.metadata.model + '</div>';
@@ -1213,7 +1213,7 @@ function renderLibraryBrands() {
     brandFolder.className = 'finder-folder';
     brandFolder.dataset.folder = 'brand-' + idx;
     brandFolder.onclick = function() { selectLibraryFolder('brand-' + idx); };
-    brandFolder.innerHTML = '<span class="finder-folder-name">' + brand.name + '</span>';
+    brandFolder.innerHTML = '<span class="finder-folder-name">' + escapeHtml(brand.name || '') + '</span>'; // v30.1: XSS fix
     
     // Insert after brands header
     if (nextEl) {
@@ -3255,7 +3255,9 @@ function sendStickyNoteToPulse() {
   };
   
   // Get existing goals from Pulse
-  var goals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+  // v30.1: Guard with try/catch and Array.isArray per CLAUDE.md rule
+  var goals = [];
+  try { goals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]'); if (!Array.isArray(goals)) goals = []; } catch(e) { goals = []; }
   goals.push(goal);
   localStorage.setItem('roweos_pulse_goals', JSON.stringify(goals));
   // v25.1: Write-through pulse goals to Firestore
@@ -4658,7 +4660,7 @@ function renderLibraryItems() {
           '<div class="finder-item-icon">' + icon + '</div>' + favStar +
         '</div>' +
         '<div class="finder-item-name">' + escapeHtml(item.name) + '</div>' +
-        '<div class="finder-item-meta">' + (item.brandName || '') + '</div>' +
+        '<div class="finder-item-meta">' + escapeHtml(item.brandName || '') + '</div>' // v30.1: XSS fix +
       '</div>';
     } else {
       return '<div class="finder-item" data-id="' + item.id + '" onclick="previewLibraryItem(\'' + item.id + '\', \'' + (item.brandIdx || 0) + '\', \'' + (item.type || 'output') + '\')">' +
@@ -5353,6 +5355,11 @@ function init() {
     var subSuccess = subParams.get('subscription');
     if (subSuccess === 'success') {
       var subTier = subParams.get('tier') || '';
+      // v30.5: Save params to window BEFORE cleaning URL — handleAuthState needs them
+      window._stripeSubscriptionSuccess = true;
+      window._stripeSubscriptionTier = subTier;
+      window._stripeReturnProcessed = true;
+      try { localStorage.setItem('roweos_tier_selected', subTier || 'solo'); } catch(e) {}
       window.history.replaceState({}, document.title, window.location.pathname);
       var subTierLabel = subTier ? subTier.charAt(0).toUpperCase() + subTier.slice(1) : '';
       setTimeout(function() {
@@ -5571,6 +5578,41 @@ function init() {
     if (!firebaseUser) {
       showAuthGate();
     }
+    // v30.5: Poll every 500ms until auth resolves. If user is logged in with no brands
+    // and no access key flow has shown tier selection, force it.
+    // Skip if Stripe return already handled or tier already selected.
+    var _tierCheckInterval = setInterval(function() {
+      // v30.5: Stop polling if Stripe return was processed or tier already selected
+      if (window._stripeReturnProcessed) {
+        clearInterval(_tierCheckInterval);
+        return;
+      }
+      var _tierDone = false;
+      try { _tierDone = !!localStorage.getItem('roweos_tier_selected'); } catch(e) {}
+      if (_tierDone) {
+        clearInterval(_tierCheckInterval);
+        return;
+      }
+      if (firebaseUser && (!brands || brands.length === 0)) {
+        var tierEl = document.getElementById('authGateTierSelect');
+        var gate = document.getElementById('authGate');
+        // If tier select exists but isn't visible, and gate is hidden or invisible, force show
+        if (tierEl && (tierEl.style.display === 'none' || tierEl.style.display === '')) {
+          if (!gate || gate.style.display === 'none' || gate.style.opacity === '0') {
+            console.log('[Auth] Poll: forcing tier selection for logged-in user with no brands');
+            if (typeof showTierSelection === 'function') showTierSelection();
+          }
+        }
+        // If tier select IS visible, stop polling
+        if (tierEl && tierEl.style.display === 'block') {
+          clearInterval(_tierCheckInterval);
+        }
+      }
+      // If user has brands, they're past onboarding - stop polling
+      if (brands && brands.length > 0) {
+        clearInterval(_tierCheckInterval);
+      }
+    }, 500);
   }, 100);
 }
 
@@ -5602,22 +5644,23 @@ function showStartupScreen() {
 
   if (brands && brands.length > 0) {
     hideWelcomeScreen();
-    // v16.5: Show post-login welcome on first session entry
+    // v30.1: Auto-login — returning users go straight to chat with last selected brand
+    // Skip both the landing blob screen and the welcome overlay for faster access
     if (!window._showedPostLoginWelcome) {
       window._showedPostLoginWelcome = true;
-      // v24.27: On new device, skip welcome overlay — go straight to chat
-      if (!localStorage.getItem('roweos_has_launched')) {
-        localStorage.setItem('roweos_has_launched', 'true');
-        showView('agent');
-      } else {
-        showPostLoginWelcome();
-      }
-    } else {
-      showLaunchScreen();
+      localStorage.setItem('roweos_has_launched', 'true');
     }
+    showView('agent');
+    // v30.1: Focus the chat input for immediate typing
+    setTimeout(function() {
+      var chatInput = document.getElementById('agentCommand') || document.getElementById('followupCommand');
+      if (chatInput && typeof chatInput.focus === 'function') chatInput.focus();
+    }, 500);
     // Update sidebar brand name display
     updateBrandName();
     populateSidebarBrandDropdown();
+    // v30.2: Ensure logo matches resolved selectedBrand after restore
+    if (typeof initBrandLogo === 'function') initBrandLogo();
   } else if (isFirstLaunch()) {
     showWelcomeScreen();
   } else {
@@ -6215,7 +6258,9 @@ function deleteCustomOp() {
   var isLife = getCurrentMode() === 'life';
 
   if (isLife) {
-    var lifeOps = JSON.parse(localStorage.getItem('roweos_generated_life_ops') || '[]');
+    // v30.1: Guard with try/catch and Array.isArray per CLAUDE.md rule
+    var lifeOps = [];
+    try { lifeOps = JSON.parse(localStorage.getItem('roweos_generated_life_ops') || '[]'); if (!Array.isArray(lifeOps)) lifeOps = []; } catch(e) { lifeOps = []; }
     lifeOps = lifeOps.filter(function(o) { return String(o.id) !== opId; });
     localStorage.setItem('roweos_generated_life_ops', JSON.stringify(lifeOps));
     if (typeof generatedLifeOps !== 'undefined') {
@@ -6920,7 +6965,9 @@ function togglePromptPreviewEdit() {
       if (selectedOp && (selectedOp.customCreated || selectedOp.aiGenerated)) {
         selectedOp.userPrompt = editedPrompt;
         if (getCurrentMode() === 'life') {
-          var lifeOps = JSON.parse(localStorage.getItem('roweos_generated_life_ops') || '[]');
+          // v30.1: Guard with try/catch and Array.isArray per CLAUDE.md rule
+          var lifeOps = [];
+          try { lifeOps = JSON.parse(localStorage.getItem('roweos_generated_life_ops') || '[]'); if (!Array.isArray(lifeOps)) lifeOps = []; } catch(e) { lifeOps = []; }
           var idx = lifeOps.findIndex(function(o) { return String(o.id) === String(selectedOp.id); });
           if (idx >= 0) { lifeOps[idx].userPrompt = editedPrompt; localStorage.setItem('roweos_generated_life_ops', JSON.stringify(lifeOps)); }
         } else {

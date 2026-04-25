@@ -34,12 +34,11 @@ if [ "$1" = "--minify" ]; then
 
     cp "$SRC_FILE" "$BACKUP_FILE"
 
-    npx html-minifier-terser \
-        --collapse-whitespace \
-        --remove-comments \
-        --minify-css true \
-        --minify-js "{\"mangle\":false,\"compress\":{\"drop_console\":false}}" \
-        < "$BACKUP_FILE" > "$SRC_FILE"
+    # v30.4: Skip minification entirely — just copy the file as-is
+    # CSS minifier breaks @keyframes animations (splash opacity stays 0)
+    # JS compress breaks control flow (removes return statements)
+    cp "$BACKUP_FILE" "$SRC_FILE"
+    echo "Skipping minification (disabled in v30.4)"
 
     ORIG_SIZE=$(wc -c < "$BACKUP_FILE" | tr -d ' ')
     MIN_SIZE=$(wc -c < "$SRC_FILE" | tr -d ' ')

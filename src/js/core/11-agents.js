@@ -1302,7 +1302,8 @@ function getSectionIcon(iconName) {
 }
 
 // v26.0: Sidebar expanded/grouped mode
-var _sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'grouped';
+// v30.1: Default to expanded (Advanced) mode
+var _sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'expanded';
 
 // v26.3: Default custom sidebar layout (matches Expanded sidebar)
 var DEFAULT_CUSTOM_SIDEBAR = {
@@ -2049,6 +2050,10 @@ function setSidebarMode(mode) {
   _sidebarMode = mode;
   localStorage.setItem('roweos_sidebar_mode', mode);
   applySidebarMode();
+  // v30.1: Write-through to Firestore for cross-device sync
+  if (typeof writeDB === 'function') {
+    writeDB('profile/main', { 'settings.sidebarMode': mode });
+  }
 }
 
 function toggleSidebarGroup(groupEl) {
@@ -2552,16 +2557,17 @@ function showView(view) {
   var originalView = view;
 
   // v26.0: Per-page landing interception (only in expanded/advanced mode)
-  var sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'grouped';
+  // v30.1: Default to expanded (Advanced) mode, skip landing pages
+  var sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'expanded';
   // v27.3: _wasSubSectionEntry = true ONLY when user clicked a specific sub-section on landing page,
   // NOT when showPageLanding redirected due to disabled landing pages
   var _wasSubSectionEntry = !!window._skipPageLanding && !window._landingDisabledRedirect;
   if (_pageLandingConfigs[view]) {
     // Don't show if we're coming FROM the landing page (entering a sub-section)
     if (!window._skipPageLanding) {
-      // v26.2: Check section prefs for skip landing
+      // v30.1: Skip landing pages by default (user can re-enable per section)
       var _sectionPrefs = getSectionPrefs(view);
-      if (_sectionPrefs && _sectionPrefs.skipLanding) {
+      if (!_sectionPrefs || !_sectionPrefs.showLanding) {
         // v27.2: Don't recurse -- just set flag and fall through to render the view
         window._skipPageLanding = true;
         // Will be handled below when _skipPageLanding is checked
@@ -2626,7 +2632,7 @@ function showView(view) {
   });
 
   // v26.0: Highlight parent group in grouped sidebar mode
-  var sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'grouped';
+  var sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'expanded'; // v30.1
   if (sidebarMode === 'grouped') {
     var groupItems = document.querySelectorAll('.nav-item[data-group]');
     for (var gi = 0; gi < groupItems.length; gi++) {
@@ -5188,17 +5194,21 @@ function reorderBrand(fromIdx, toIdx) {
     }
   }
 
+  // v30.2: Persist updated index and stable ID to localStorage
+  try { localStorage.setItem('roweos_selected_brand', String(selectedBrand)); } catch(e) {}
+  if (brands[selectedBrand] && brands[selectedBrand].id) {
+    try { localStorage.setItem('roweos_selected_brand_id', brands[selectedBrand].id); } catch(e) {}
+  }
+  window.lastActiveBrandIdx = selectedBrand;
+
   // Persist and sync
   if (typeof saveBrands === 'function') saveBrands();
 
   // Re-render the dropdown
   populateSidebarBrandDropdown();
 
-  // Update sidebar brand name display
-  var sidebarName = document.getElementById('sidebarBrandName');
-  if (sidebarName && brands[selectedBrand]) {
-    sidebarName.innerHTML = escapeHtml(brands[selectedBrand].shortName || brands[selectedBrand].name) + ' <span class="sidebar-brand-arrow">\u25BE</span>'; // v30.1: XSS safety
-  }
+  // v30.2: Apply full brand change (accent, logo, all downstream views)
+  if (typeof onBrandChange === 'function') onBrandChange();
 
   showToast('Brand order updated', 'success');
 }

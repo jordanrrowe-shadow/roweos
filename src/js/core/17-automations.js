@@ -6505,6 +6505,7 @@ function markAutomationRunning(id, type, stepIndex) {
 function markAutomationDone(id) {
   delete _runningAutomationIds[String(id)];
   delete _stoppedAutomationIds[String(id)];
+  try { localStorage.setItem('roweos_stopped_automation_ids', JSON.stringify(_stoppedAutomationIds)); } catch(e) {} // v30.1
   if (Object.keys(_runningAutomationIds).length === 0 && _runningTimerInterval) {
     clearInterval(_runningTimerInterval);
     _runningTimerInterval = null;
@@ -6555,10 +6556,13 @@ function restoreRunningStepDots() {
 }
 
 // v23.10: Stop automation — sets flag checked by workflow runner
+// v30.1: Persist stopped state to localStorage so it survives tab refresh
 var _stoppedAutomationIds = {};
+try { var _savedStops = JSON.parse(localStorage.getItem('roweos_stopped_automation_ids') || '{}'); if (typeof _savedStops === 'object' && _savedStops !== null) _stoppedAutomationIds = _savedStops; } catch(e) {}
 
 function stopAutomation(id) {
   _stoppedAutomationIds[String(id)] = true;
+  try { localStorage.setItem('roweos_stopped_automation_ids', JSON.stringify(_stoppedAutomationIds)); } catch(e) {} // v30.1
   showToast('Stopping automation...', 'info');
   // Update card UI immediately
   var cards = document.querySelectorAll('.auto-lab-card[data-auto-id="' + id + '"]');

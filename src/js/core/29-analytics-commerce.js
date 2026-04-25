@@ -1051,8 +1051,18 @@ async function renderSyncInventory() {
         var _brandCount = 0;
         results[0].forEach(function(doc) { if (doc.id !== '_all') _brandCount++; });
         cloudCounts['Brands'] = _brandCount;
+        // v30.3: Prefer subcollection count, fallback to blob
         cloudCounts['BrandAI Chats'] = 0;
-        if (results[1].exists) { try { var ah = results[1].data(); if (ah.json) cloudCounts['BrandAI Chats'] = JSON.parse(ah.json).length; } catch(e) {} }
+        try {
+          var _chatsSnap = await db.collection(basePath + '/chats').get();
+          if (_chatsSnap.size > 0) {
+            cloudCounts['BrandAI Chats'] = _chatsSnap.size;
+          } else if (results[1].exists) {
+            try { var ah = results[1].data(); if (ah.json) cloudCounts['BrandAI Chats'] = JSON.parse(ah.json).length; } catch(e) {}
+          }
+        } catch(_ce) {
+          if (results[1].exists) { try { var ah2 = results[1].data(); if (ah2.json) cloudCounts['BrandAI Chats'] = JSON.parse(ah2.json).length; } catch(e) {} }
+        }
         var lifeData = results[2].exists ? results[2].data() : {};
         cloudCounts['LifeAI Chats'] = lifeData.agentCommands ? lifeData.agentCommands.length : 0;
         // v25.0: Read todos from single-doc format
@@ -1437,8 +1447,8 @@ function loadSyncCategoryItems(catId, catName) {
   // Map category names to localStorage keys and item extractors
   var catMap = {
     'Brands': { key: 'roweos_user_brands', extract: function(d) { return d.map(function(b) { return { name: b.shortName || b.name || 'Brand', id: b.id || b.name, date: '' }; }); } },
-    'BrandAI Chats': { key: 'roweos_agentCommands', extract: function(d) { return d.map(function(c) { return { name: (c.brand || c.agent || 'Chat') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id, date: c.date || c.timestamp || '' }; }); } },
-    'LifeAI Chats': { key: 'roweos_life_agentCommands', extract: function(d) { return d.map(function(c) { return { name: (c.brand || c.lifeName || 'LifeAI') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id, date: c.date || c.timestamp || '' }; }); } },
+    'BrandAI Chats': { key: 'roweos_agentCommands', extract: function(d) { return d.map(function(c) { return { name: (c.brand || c.agent || 'Chat') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id, date: c.date || c.timestamp || c.time || '' }; }); } },
+    'LifeAI Chats': { key: 'roweos_life_agentCommands', extract: function(d) { return d.map(function(c) { return { name: (c.brand || c.lifeName || 'LifeAI') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id, date: c.date || c.timestamp || c.time || '' }; }); } },
     'BrandAI To-Dos': { key: 'roweosTodos', extract: function(d) { return d.map(function(t) { return { name: t.text || t.title || 'Task', id: t.id, date: t.createdAt || '' }; }); } },
     'LifeAI To-Dos': { key: 'roweos_life_todos', extract: function(d) { return d.map(function(t) { return { name: t.text || t.title || 'Task', id: t.id, date: t.createdAt || '' }; }); } },
     'Calendar': { key: 'roweos_calendar', extract: function(d) { return d.map(function(e) { return { name: e.title || 'Event', id: e.id, date: e.date || e.start || '' }; }); } },
@@ -1538,9 +1548,21 @@ function _fetchCloudCategoryItems(catName) {
         return items;
       });
     case 'BrandAI Chats':
-      return db.doc(basePath + '/conversations/agentHistory').get().then(function(doc) {
-        if (!doc.exists) return [];
-        try { var arr = JSON.parse(doc.data().json || '[]'); return arr.map(function(c) { return { name: (c.brand || c.agent || 'Chat') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id }; }); } catch(e) { return []; }
+      // v30.3: Prefer subcollection, fallback to blob
+      return db.collection(basePath + '/chats').get().then(function(snap) {
+        if (snap && snap.size > 0) {
+          var items = [];
+          snap.forEach(function(doc) {
+            var c = doc.data();
+            items.push({ name: (c.brand || c.agent || 'Chat') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id || doc.id });
+          });
+          return items;
+        }
+        // Fallback to blob
+        return db.doc(basePath + '/conversations/agentHistory').get().then(function(blobDoc) {
+          if (!blobDoc.exists) return [];
+          try { var arr = JSON.parse(blobDoc.data().json || '[]'); return arr.map(function(c) { return { name: (c.brand || c.agent || 'Chat') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id }; }); } catch(e) { return []; }
+        });
       });
     case 'Automations':
       return db.doc(basePath).get().then(function(doc) {
@@ -1585,7 +1607,7 @@ function deleteSyncCategoryItem(catName, itemId) {
     'Automations': { key: 'roweos_automations', idField: 'id', cloudPath: null }
   };
   var cfg = configs[catName];
-  if (!cfg) { showToast('Delete not supported for this category', 'error'); return; }
+  if (!cfg) { return; } // v30.0: silently ignore - delete buttons hidden for unsupported categories
   try {
     var data = JSON.parse(localStorage.getItem(cfg.key) || '[]');
     var before = data.length;
@@ -1612,6 +1634,12 @@ function deleteSyncCategoryItem(catName, itemId) {
     if (typeof renderSyncInventory === 'function') renderSyncInventory();
   } catch(e) { showToast('Delete failed', 'error'); }
 }
+
+// v30.0: Categories that support item deletion via deleteSyncCategoryItem()
+var _syncDeletableCategories = {
+  'Clients': true, 'Team': true, 'Direct Reports': true,
+  'Pulse Goals': true, 'BrandAI To-Dos': true, 'Journal': true, 'Automations': true
+};
 
 function _renderSyncDetailComparison(container, catName, localItems, cloudItems, isDeletable) {
   if (!localItems.length && (!cloudItems || !cloudItems.length)) {
@@ -1642,12 +1670,14 @@ function _renderSyncDetailComparison(container, catName, localItems, cloudItems,
       html += '</div>';
     }
 
+    // v30.0: Only show delete column for categories that support deletion
+    var canDelete = !!_syncDeletableCategories[catName];
     html += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
     html += '<thead><tr style="color:var(--text-muted);"><th style="text-align:left;padding:4px 8px;font-weight:500;">Name</th>';
     html += '<th style="text-align:center;padding:4px 8px;font-weight:500;width:60px;">Local</th>';
     html += '<th style="text-align:center;padding:4px 8px;font-weight:500;width:60px;">Cloud</th>';
     html += '<th style="text-align:right;padding:4px 8px;font-weight:500;">Date</th>';
-    html += '<th style="width:32px;"></th>';
+    if (canDelete) html += '<th style="width:32px;"></th>';
     html += '</tr></thead><tbody>';
 
     // Show items in both
@@ -1659,7 +1689,7 @@ function _renderSyncDetailComparison(container, catName, localItems, cloudItems,
       html += '<td style="text-align:center;padding:4px 8px;color:#22c55e;">&#10003;</td>';
       html += '<td style="text-align:center;padding:4px 8px;color:#22c55e;">&#10003;</td>';
       html += '<td style="padding:4px 8px;text-align:right;color:var(--text-muted);">' + dateStr + '</td>';
-      html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
+      if (canDelete) html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
       html += '</tr>';
     });
 
@@ -1672,7 +1702,7 @@ function _renderSyncDetailComparison(container, catName, localItems, cloudItems,
       html += '<td style="text-align:center;padding:4px 8px;color:#f59e0b;">&#10003;</td>';
       html += '<td style="text-align:center;padding:4px 8px;color:#555;">-</td>';
       html += '<td style="padding:4px 8px;text-align:right;color:var(--text-muted);">' + dateStr + '</td>';
-      html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || item.storageKey || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
+      if (canDelete) html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || item.storageKey || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
       html += '</tr>';
     });
 
@@ -1683,7 +1713,7 @@ function _renderSyncDetailComparison(container, catName, localItems, cloudItems,
       html += '<td style="text-align:center;padding:4px 8px;color:#555;">-</td>';
       html += '<td style="text-align:center;padding:4px 8px;color:#3b82f6;">&#10003;</td>';
       html += '<td style="padding:4px 8px;text-align:right;color:var(--text-muted);"></td>';
-      html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
+      if (canDelete) html += '<td style="padding:2px;text-align:center;"><button onclick="deleteSyncCategoryItem(\'' + escapeHtml(catName) + '\',\'' + escapeHtml(String(item.id || '')) + '\')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:2px 4px;font-size:14px;line-height:1;opacity:0.5;" title="Delete">&times;</button></td>';
       html += '</tr>';
     });
 
@@ -2450,6 +2480,16 @@ function manualSyncNow() {
         }
       }
     } catch(re) {}
+    // v30.1: Push settings preferences (sidebar mode, zoom, text size)
+    try {
+      var _syncSettings = {
+        'settings.sidebarMode': localStorage.getItem('roweos_sidebar_mode') || 'expanded',
+        'settings.appZoom': localStorage.getItem('roweos_app_zoom') || '75',
+        'settings.textSize': localStorage.getItem('roweos_text_size') || '100',
+        'settings.sidebarOrder': localStorage.getItem('roweos_sidebar_order') || null
+      };
+      writeDB('profile/main', _syncSettings);
+    } catch(se) {}
   } catch(pushErr) { console.warn('[manualSyncNow] Push phase error:', pushErr); }
 
   // Wait for async writes to propagate, then pull everything from cloud

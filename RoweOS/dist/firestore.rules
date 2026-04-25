@@ -53,9 +53,11 @@ service cloud.firestore {
         allow read, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
       }
     }
-    // v22.4: Newsletter subscribers — admin read only (server writes via service account)
+    // v22.4: Newsletter subscribers — admin full access, authenticated users can query + update (for key linking)
     match /newsletter_subscribers/{docId} {
       allow read, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      // v30.5: Allow authenticated users to query by email and update with accessKey/tier
+      allow list, update: if request.auth != null;
     }
     // v22.4: Admin notifications — admin read/update (server writes via service account)
     match /admin_notifications/{notifId} {

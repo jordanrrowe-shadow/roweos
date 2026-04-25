@@ -10604,7 +10604,12 @@ function initBlob() {
     }
     var helixC = document.getElementById('helixContainer');
     if (helixC) helixC.style.display = '';
-    if (typeof initHelix === 'function') initHelix();
+    // v30.1: Delay helix init — if agentView is hidden (display:none !important),
+    // WebGL can't render. showView('agent') will re-trigger initHelix when visible.
+    if (typeof initHelix === 'function') {
+      setTimeout(function() { initHelix(); }, 500);
+      setTimeout(function() { initHelix(); }, 2000); // retry in case view wasn't visible yet
+    }
     // Continue to init blob below (don't return)
   }
   if (savedShape !== 'both') {

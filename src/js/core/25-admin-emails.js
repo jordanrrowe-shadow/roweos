@@ -1,6 +1,9 @@
 // v30.1: Admin Email Management
 // Client-side logic for the Emails tab in the Admin panel
 
+// v30.5: Sort state for user list
+var _adminEmailSortBy = 'name';
+
 // ---- Helpers ----
 
 function formatTemplateName(template) {
@@ -36,7 +39,7 @@ function _adminFirestoreGet(collection) {
   var user = firebase.auth().currentUser;
   if (!user) return Promise.reject(new Error('Not authenticated'));
   return user.getIdToken().then(function(idToken) {
-    var projectId = 'roweos-app';
+    var projectId = 'roweos';
     var url = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents/' + collection;
     return fetch(url, { headers: { 'Authorization': 'Bearer ' + idToken } });
   }).then(function(resp) {
@@ -49,7 +52,7 @@ function _adminFirestoreGetDoc(path) {
   var user = firebase.auth().currentUser;
   if (!user) return Promise.reject(new Error('Not authenticated'));
   return user.getIdToken().then(function(idToken) {
-    var projectId = 'roweos-app';
+    var projectId = 'roweos';
     var url = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents/' + path;
     return fetch(url, { headers: { 'Authorization': 'Bearer ' + idToken } });
   }).then(function(resp) {
@@ -62,7 +65,7 @@ function _adminFirestorePatch(path, fields, updateMask) {
   var user = firebase.auth().currentUser;
   if (!user) return Promise.reject(new Error('Not authenticated'));
   return user.getIdToken().then(function(idToken) {
-    var projectId = 'roweos-app';
+    var projectId = 'roweos';
     var url = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents/' + path;
     if (updateMask && updateMask.length) {
       url += '?' + updateMask.map(function(f) { return 'updateMask.fieldPaths=' + encodeURIComponent(f); }).join('&');
@@ -126,7 +129,7 @@ function adminLoadEmailData() {
   // v30.1: Use Firebase client SDK. Each query wrapped in catch so one missing collection doesn't break all.
   var signupsP = db.collection('newsletter_subscribers').orderBy('subscribedAt', 'desc').limit(200).get().catch(function(e) { console.warn('[Admin Emails] signups query failed:', e.message); return null; });
   var emailLogP = db.collection('email_log').limit(500).get().catch(function(e) { console.warn('[Admin Emails] email_log query failed:', e.message); return null; });
-  var responsesP = db.collection('onboarding_responses').limit(500).get().catch(function(e) { console.warn('[Admin Emails] onboarding_responses query failed:', e.message); return null; });
+  var responsesP = db.collectionGroup('responses').limit(500).get().catch(function(e) { console.warn('[Admin Emails] responses query failed:', e.message); return null; });
 
   Promise.all([signupsP, emailLogP, responsesP]).then(function(results) {
     var signupSnap = results[0];
@@ -173,11 +176,11 @@ function adminLoadEmailData() {
         var d = doc.data();
         responses.push({
           id: doc.id,
-          userId: d.userId || '',
+          userId: doc.ref.parent.parent ? doc.ref.parent.parent.id : '',
           userEmail: d.userEmail || d.email || '',
           question: d.question || d.field || '',
           answer: d.answer || d.value || d.response || '',
-          template: d.template || d.source || '',
+          template: d.email_template || d.template || d.source || '',
           timestamp: d.timestamp || d.createdAt || d.submittedAt || ''
         });
       });
@@ -230,12 +233,34 @@ function adminRenderEmailUserList(users, emailLogs, responses) {
     return;
   }
 
-  // Sort users by signup date desc
-  users.sort(function(a, b) {
-    var ta = a.signupDate ? new Date(a.signupDate).getTime() : 0;
-    var tb = b.signupDate ? new Date(b.signupDate).getTime() : 0;
-    return tb - ta;
-  });
+  // v30.5: Sort users based on _adminEmailSortBy
+  if (_adminEmailSortBy === 'lastEmail') {
+    // Build lookup of most recent sentAt per user
+    var _lastSentMap = {};
+    if (emailLogs && emailLogs.length) {
+      for (var li = 0; li < emailLogs.length; li++) {
+        var _log = emailLogs[li];
+        var _lKey = _log.userId || _log.userEmail;
+        if (!_lKey) continue;
+        var _lTime = _log.sentAt ? new Date(_log.sentAt).getTime() : 0;
+        if (!_lastSentMap[_lKey] || _lTime > _lastSentMap[_lKey]) {
+          _lastSentMap[_lKey] = _lTime;
+        }
+      }
+    }
+    users.sort(function(a, b) {
+      var ta = _lastSentMap[a.uid] || _lastSentMap[a.email] || 0;
+      var tb = _lastSentMap[b.uid] || _lastSentMap[b.email] || 0;
+      return tb - ta;
+    });
+  } else {
+    // Default: sort by name A-Z
+    users.sort(function(a, b) {
+      var na = (a.name || '').toLowerCase();
+      var nb = (b.name || '').toLowerCase();
+      return na < nb ? -1 : (na > nb ? 1 : 0);
+    });
+  }
 
   // Build response counts per user
   var responseCounts = {};
@@ -261,9 +286,26 @@ function adminRenderEmailUserList(users, emailLogs, responses) {
   }
 
   var html = '';
+
+  // v30.5: Sort controls bar
+  var _nameActive = _adminEmailSortBy === 'name';
+  var _lastActive = _adminEmailSortBy === 'lastEmail';
+  var _pillBase = 'display:inline-block;padding:4px 12px;font-size:11px;font-weight:600;border-radius:20px;cursor:pointer;transition:all 0.15s;margin-right:6px;';
+  var _pillActiveStyle = _pillBase + 'border:1px solid var(--accent);color:var(--accent);background:rgba(168,152,120,0.1);';
+  var _pillInactiveStyle = _pillBase + 'border:1px solid var(--border-color);color:var(--text-muted);background:transparent;';
+
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 12px 0;">';
+  html += '<div style="display:flex;align-items:center;">';
+  html += '<span style="font-size:11px;color:var(--text-muted);margin-right:8px;font-weight:500;">Sort:</span>';
+  html += '<span style="' + (_nameActive ? _pillActiveStyle : _pillInactiveStyle) + '" onclick="_adminEmailSortBy=\'name\';adminRenderEmailUserList(window._adminEmailUsers,window._adminEmailLogs,window._adminEmailResponses);">Name (A-Z)</span>';
+  html += '<span style="' + (_lastActive ? _pillActiveStyle : _pillInactiveStyle) + '" onclick="_adminEmailSortBy=\'lastEmail\';adminRenderEmailUserList(window._adminEmailUsers,window._adminEmailLogs,window._adminEmailResponses);">Last Email</span>';
+  html += '</div>';
+  html += '<span id="adminEmailSelectedCount" style="font-size:11px;color:var(--text-muted);font-weight:500;"></span>';
+  html += '</div>';
+
   // Header row
   html += '<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color);font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">';
-  html += '<div style="width:30px;flex-shrink:0;"><input type="checkbox" id="adminEmailSelectAll" onchange="adminToggleAllEmailUsers(this.checked)" style="accent-color:var(--accent);"></div>';
+  html += '<div style="width:30px;flex-shrink:0;"><input type="checkbox" id="adminEmailSelectAll" onchange="adminToggleAllEmailUsers(this.checked);adminUpdateSelectedCount();" style="accent-color:var(--accent);"></div>';
   html += '<div style="flex:1;min-width:80px;">Name</div>';
   html += '<div style="flex:1.5;min-width:120px;">Email</div>';
   html += '<div style="width:100px;">Signup</div>';
@@ -297,7 +339,7 @@ function adminRenderEmailUserList(users, emailLogs, responses) {
     html += '<div class="admin-email-row" style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-color);cursor:pointer;transition:background 0.15s;" ';
     html += 'onmouseenter="this.style.background=\'var(--bg-secondary)\'" onmouseleave="this.style.background=\'transparent\'">';
     html += '<div style="width:30px;flex-shrink:0;" onclick="event.stopPropagation();">';
-    html += '<input type="checkbox" class="admin-email-user-cb" data-uid="' + escapeHtml(u.uid) + '" data-email="' + escapeHtml(u.email) + '" data-name="' + escapeHtml(u.name) + '" style="accent-color:var(--accent);">';
+    html += '<input type="checkbox" class="admin-email-user-cb" data-uid="' + escapeHtml(u.uid) + '" data-email="' + escapeHtml(u.email) + '" data-name="' + escapeHtml(u.name) + '" style="accent-color:var(--accent);" onchange="adminUpdateSelectedCount()">';
     html += '</div>';
     html += '<div style="flex:1;min-width:80px;color:var(--text-primary);font-weight:500;font-size:13px;" onclick="adminShowEmailUserDetail(\'' + escapeHtml(u.uid) + '\',\'' + escapeHtml(u.name).replace(/'/g, "\\'") + '\',\'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')">' + escapeHtml(u.name || 'Unknown') + '</div>';
     html += '<div style="flex:1.5;min-width:120px;color:var(--text-secondary);font-size:12px;" onclick="adminShowEmailUserDetail(\'' + escapeHtml(u.uid) + '\',\'' + escapeHtml(u.name).replace(/'/g, "\\'") + '\',\'' + escapeHtml(u.email).replace(/'/g, "\\'") + '\')">' + escapeHtml(u.email) + '</div>';
@@ -320,6 +362,20 @@ function adminToggleAllEmailUsers(checked) {
   var cbs = document.querySelectorAll('.admin-email-user-cb');
   for (var i = 0; i < cbs.length; i++) {
     cbs[i].checked = checked;
+  }
+}
+
+// v30.5: Update selected count badge
+function adminUpdateSelectedCount() {
+  var countEl = document.getElementById('adminEmailSelectedCount');
+  if (!countEl) return;
+  var cbs = document.querySelectorAll('.admin-email-user-cb:checked');
+  var n = cbs ? cbs.length : 0;
+  if (n > 0) {
+    countEl.textContent = '(' + n + ' selected)';
+    countEl.style.color = 'var(--accent)';
+  } else {
+    countEl.textContent = '';
   }
 }
 
@@ -461,9 +517,10 @@ function adminShowEmailUserDetail(uid, userName, userEmail) {
     'reengagement': 'reengagement',
     'feature_announcement': 'feature_announcement',
     'access_key_delivery': 'default',
-    'checkin': 'checkin_new'
+    'checkin': 'checkin_new',
+    'subscription_info': 'subscription_info'
   };
-  var templates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin'];
+  var templates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info'];
   templates.forEach(function(tmpl) {
     var composerTmpl = templateMap[tmpl] || tmpl;
     html += '<button onclick="adminOpenComposerForUser(\'' + escapeHtml(composerTmpl) + '\',\'' + escapeHtml(userEmail).replace(/'/g, "\\'") + '\',\'' + escapeHtml(userName).replace(/'/g, "\\'") + '\')" style="padding:6px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);font-weight:500;transition:all 0.15s;">';
@@ -649,7 +706,8 @@ function adminSendSelectedTemplate() {
     });
   }
 
-  showToast('Sending ' + template + ' to ' + targets.length + ' user(s)...', 'info');
+  // v30.5: Show progress toast with user count
+  showToast('Sending to ' + targets.length + ' users...', 'info');
 
   var promises = targets.map(function(t) {
     return adminSendTemplateToUser(template, t.uid, t.email, t.name);
@@ -659,12 +717,12 @@ function adminSendSelectedTemplate() {
     var sent = results.filter(function(r) { return r === true; }).length;
     var failed = results.length - sent;
     if (failed > 0) {
-      showToast('Sent: ' + sent + ', Failed: ' + failed, 'warning');
+      showToast('Sent to ' + sent + ', Failed: ' + failed, 'warning');
     } else {
-      showToast('Successfully sent to ' + sent + ' user(s)', 'success');
+      showToast('Sent to ' + sent + ' users successfully', 'success');
     }
-    // Refresh data
-    adminLoadEmailData();
+    // v30.3: Delay refresh so client-side email_log writes have time to commit
+    setTimeout(function() { adminLoadEmailData(); }, 1500);
   }).catch(function(err) {
     showToast('Error sending emails: ' + err.message, 'error');
   });
@@ -688,7 +746,28 @@ function adminSendTemplateToUser(template, userId, userEmail, userName, metadata
   }).then(function(resp) {
     if (!resp.ok) throw new Error('Send failed: ' + resp.status);
     return resp.json();
-  }).then(function() {
+  }).then(function(data) {
+    // v30.4: Direct Firestore write - no helper function, no admin check, raw SDK call
+    try {
+      var _db = firebase.firestore();
+      var _logData = {
+        userId: userId || '',
+        userEmail: userEmail || '',
+        template: template || '',
+        subject: (data && data.subject) || template || '',
+        sentAt: new Date().toISOString(),
+        status: 'sent',
+        sentBy: 'admin'
+      };
+      console.log('[email_log] DIRECT WRITE:', JSON.stringify(_logData));
+      _db.collection('email_log').add(_logData).then(function(ref) {
+        console.log('[email_log] SUCCESS - doc ID:', ref.id);
+      }).catch(function(writeErr) {
+        console.error('[email_log] FIRESTORE WRITE FAILED:', writeErr.code, writeErr.message);
+      });
+    } catch(logErr) {
+      console.error('[email_log] EXCEPTION:', logErr.message);
+    }
     return true;
   }).catch(function(err) {
     console.error('[Admin Emails] Send error:', err);
@@ -756,4 +835,452 @@ function adminLoadAutoSendSettings() {
   }).catch(function(err) {
     console.log('[Admin Emails] No auto-send settings found (may need first save):', err.message);
   });
+}
+
+// v30.5: Campaigns dashboard - full redesign with stats bar, expandable rows, response charts
+function adminRenderCampaigns() {
+  var panel = document.getElementById('adminTabCampaigns');
+  if (!panel) return;
+
+  var emailLogs = window._adminEmailLogs;
+  var users = window._adminEmailUsers;
+  var responses = window._adminEmailResponses;
+
+  // If data not loaded yet, load it first then re-render
+  if (!emailLogs && typeof adminLoadEmailData === 'function') {
+    panel.innerHTML = '<div style="color:var(--text-muted);padding:40px 0;text-align:center;font-size:13px;">Loading campaign data...</div>';
+    window._adminCampaignsPending = true;
+    adminLoadEmailData();
+    var _pollCount = 0;
+    var _pollTimer = setInterval(function() {
+      _pollCount++;
+      if (window._adminEmailLogs || _pollCount > 20) {
+        clearInterval(_pollTimer);
+        window._adminCampaignsPending = false;
+        adminRenderCampaigns();
+      }
+    }, 250);
+    return;
+  }
+
+  emailLogs = emailLogs || [];
+  users = users || [];
+  responses = responses || [];
+
+  // v30.5: Template display names and descriptions
+  var templateMeta = {
+    'onboarding_survey': { name: 'Onboarding Survey', desc: 'New user experience feedback' },
+    'reengagement': { name: 'Re-engagement', desc: 'Win back inactive users' },
+    'feature_announcement': { name: 'Feature Announcement', desc: 'Announce new capabilities' },
+    'checkin': { name: 'Check-in', desc: 'Ongoing satisfaction pulse' },
+    'access_key_delivery': { name: 'Access Key Delivery', desc: 'Welcome and activation' },
+    'subscription_info': { name: 'Subscription Info', desc: 'Plans, pricing, and API keys' }
+  };
+
+  // Templates that expect responses
+  var responseTemplates = { 'onboarding_survey': true, 'checkin': true };
+
+  // ---- Compute top-level stats ----
+  var totalUsers = users.length;
+
+  // Count signups within last 7 days
+  var now = Date.now();
+  var weekAgo = now - (7 * 24 * 60 * 60 * 1000);
+  var newThisWeek = 0;
+  for (var ui = 0; ui < users.length; ui++) {
+    var sd = users[ui].signupDate;
+    if (sd) {
+      var signupTime = new Date(sd).getTime();
+      if (!isNaN(signupTime) && signupTime >= weekAgo) {
+        newThisWeek++;
+      }
+    }
+  }
+
+  var totalEmailsSent = emailLogs.length;
+
+  // Response rate: responses / emails sent for response-capable templates
+  var responseCapableSends = 0;
+  var totalResponseUsers = 0;
+  for (var ei = 0; ei < emailLogs.length; ei++) {
+    if (responseTemplates[emailLogs[ei].template]) {
+      responseCapableSends++;
+    }
+  }
+  // Count unique users who responded
+  var _allRespondents = {};
+  for (var rri = 0; rri < responses.length; rri++) {
+    var rKey = (responses[rri].userEmail || responses[rri].userId || '').toLowerCase();
+    if (rKey) _allRespondents[rKey] = true;
+  }
+  totalResponseUsers = Object.keys(_allRespondents).length;
+  var overallResponseRate = responseCapableSends > 0 ? Math.round((totalResponseUsers / responseCapableSends) * 100) : 0;
+  if (overallResponseRate > 100) overallResponseRate = 100;
+
+  // Active campaigns: unique templates that have been sent
+  var sentTemplates = {};
+  for (var si = 0; si < emailLogs.length; si++) {
+    if (emailLogs[si].template) sentTemplates[emailLogs[si].template] = true;
+  }
+  var activeCampaigns = Object.keys(sentTemplates).length;
+
+  // ---- Group email logs by template ----
+  var campaignMap = {};
+  for (var i = 0; i < emailLogs.length; i++) {
+    var log = emailLogs[i];
+    var tmpl = log.template || 'unknown';
+    if (!campaignMap[tmpl]) {
+      campaignMap[tmpl] = { logs: [], successCount: 0, failedCount: 0, recipients: {}, earliest: null, latest: null };
+    }
+    var c = campaignMap[tmpl];
+    c.logs.push(log);
+    if (log.status === 'failed') {
+      c.failedCount++;
+    } else {
+      c.successCount++;
+    }
+    if (log.userEmail) {
+      c.recipients[log.userEmail.toLowerCase()] = true;
+    }
+    var sentTime = log.sentAt ? new Date(log.sentAt).getTime() : 0;
+    if (sentTime && (!c.earliest || sentTime < c.earliest)) c.earliest = sentTime;
+    if (sentTime && (!c.latest || sentTime > c.latest)) c.latest = sentTime;
+  }
+
+  // Sort logs within each campaign by sentAt descending
+  var campaignKeys = Object.keys(campaignMap);
+  for (var ck = 0; ck < campaignKeys.length; ck++) {
+    campaignMap[campaignKeys[ck]].logs.sort(function(a, b) {
+      var ta = a.sentAt ? new Date(a.sentAt).getTime() : 0;
+      var tb = b.sentAt ? new Date(b.sentAt).getTime() : 0;
+      return tb - ta;
+    });
+  }
+
+  // Count responses per template
+  var responsesByTemplate = {};
+  for (var r = 0; r < responses.length; r++) {
+    var resp = responses[r];
+    var rTmpl = resp.template || '';
+    if (!responsesByTemplate[rTmpl]) responsesByTemplate[rTmpl] = [];
+    responsesByTemplate[rTmpl].push(resp);
+  }
+
+  // ---- Build HTML ----
+  var html = '';
+
+  // Scoped styles for responsive layout and interactions
+  html += '<style>';
+  html += '.cmpn-stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:32px; }';
+  html += '.cmpn-row { transition: background 0.15s ease; cursor:pointer; }';
+  html += '.cmpn-row:hover { background: var(--bg-secondary); }';
+  html += '.cmpn-detail { overflow:hidden; transition: max-height 0.25s ease, opacity 0.2s ease; max-height:0; opacity:0; }';
+  html += '.cmpn-detail.cmpn-open { max-height:2000px; opacity:1; }';
+  html += '.cmpn-badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }';
+  html += '.cmpn-bar-track { width:100%; height:4px; background:var(--border-color); border-radius:2px; overflow:hidden; }';
+  html += '.cmpn-bar-fill { height:100%; border-radius:2px; transition: width 0.3s ease; }';
+  html += '@media (max-width: 768px) {';
+  html += '  .cmpn-stats-grid { grid-template-columns: 1fr; }';
+  html += '  .cmpn-row-cols { flex-direction:column; gap:8px; }';
+  html += '  .cmpn-row-cols > div { width:100% !important; text-align:left !important; }';
+  html += '  .cmpn-col-name { margin-bottom:4px; }';
+  html += '  .cmpn-detail-cols { flex-direction:column; }';
+  html += '  .cmpn-detail-cols > div { width:100% !important; }';
+  html += '}';
+  html += '</style>';
+
+  // ---- Top Stats Bar ----
+  html += '<div class="cmpn-stats-grid">';
+
+  // Stat 1: New RoweOS Users (full width feel with +new this week)
+  html += '<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;padding:24px;">';
+  html += '<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:8px;">New RoweOS Users</div>';
+  html += '<div style="display:flex;align-items:baseline;gap:12px;">';
+  html += '<div style="font-size:36px;font-weight:700;color:var(--text-primary);line-height:1;">' + totalUsers + '</div>';
+  if (newThisWeek > 0) {
+    html += '<div style="font-size:13px;color:#22c55e;font-weight:500;">+' + newThisWeek + ' this week</div>';
+  } else {
+    html += '<div style="font-size:13px;color:var(--text-muted);">No new signups this week</div>';
+  }
+  html += '</div>';
+  html += '<div style="font-size:12px;color:var(--text-muted);margin-top:8px;">' + activeCampaigns + ' active campaigns</div>';
+  html += '</div>';
+
+  // Stat 2: Active Trials (placeholder - can connect to Stripe/access_keys later)
+  html += '<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;padding:24px;">';
+  html += '<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:8px;">Active Trials</div>';
+  html += '<div style="display:flex;align-items:baseline;gap:12px;">';
+  html += '<div style="font-size:36px;font-weight:700;color:var(--text-primary);line-height:1;">' + totalUsers + '</div>';
+  html += '<div style="font-size:13px;color:var(--accent, #a89878);font-weight:500;">100% trial</div>';
+  html += '</div>';
+  html += '<div style="font-size:12px;color:var(--text-muted);margin-top:8px;">0 active subscriptions</div>';
+  html += '</div>';
+
+  html += '</div>'; // stats grid
+
+  // ---- Campaign Cards Section ----
+  html += '<div style="margin-bottom:8px;">';
+  html += '<div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Campaigns</div>';
+  html += '<div style="height:1px;background:var(--border-color);margin-bottom:16px;"></div>';
+  html += '</div>';
+
+  // Sort templates: known ones first in order, then unknowns
+  var knownOrder = ['onboarding_survey', 'reengagement', 'feature_announcement', 'checkin', 'access_key_delivery', 'subscription_info'];
+  var templateKeys = Object.keys(campaignMap);
+  templateKeys.sort(function(a, b) {
+    var ia = knownOrder.indexOf(a);
+    var ib = knownOrder.indexOf(b);
+    if (ia === -1) ia = 999;
+    if (ib === -1) ib = 999;
+    return ia - ib;
+  });
+
+  if (templateKeys.length === 0) {
+    html += '<div style="color:var(--text-muted);padding:40px 0;font-size:13px;text-align:center;">No campaign data available yet. Send some emails to see metrics here.</div>';
+    panel.innerHTML = html;
+    return;
+  }
+
+  // Table header row
+  html += '<div style="display:flex;align-items:center;padding:8px 16px;font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;" class="cmpn-row-cols">';
+  html += '<div style="flex:2;min-width:180px;">Campaign</div>';
+  html += '<div style="width:90px;text-align:center;">Sends</div>';
+  html += '<div style="width:90px;text-align:center;">Recipients</div>';
+  html += '<div style="width:120px;text-align:center;">Response Rate</div>';
+  html += '<div style="width:100px;text-align:right;">Last Sent</div>';
+  html += '</div>';
+  html += '<div style="height:1px;background:var(--border-color);"></div>';
+
+  // Campaign rows
+  for (var t = 0; t < templateKeys.length; t++) {
+    var key = templateKeys[t];
+    var campaign = campaignMap[key];
+    var meta = templateMeta[key] || { name: formatTemplateName(key), desc: '' };
+    var totalSends = campaign.successCount + campaign.failedCount;
+    var uniqueRecipients = Object.keys(campaign.recipients).length;
+
+    // Response rate for this campaign
+    var campResponseRate = 0;
+    var campResponseCount = 0;
+    if (responseTemplates[key]) {
+      var tResps = responsesByTemplate[key] || [];
+      var respondedUsers = {};
+      for (var ri = 0; ri < tResps.length; ri++) {
+        var rUser = (tResps[ri].userEmail || tResps[ri].userId || '').toLowerCase();
+        if (rUser) respondedUsers[rUser] = true;
+      }
+      campResponseCount = Object.keys(respondedUsers).length;
+      if (uniqueRecipients > 0) {
+        campResponseRate = Math.round((campResponseCount / uniqueRecipients) * 100);
+        if (campResponseRate > 100) campResponseRate = 100;
+      }
+    }
+
+    // Last sent
+    var lastSentText = '';
+    if (campaign.latest) {
+      lastSentText = formatRelativeTime(new Date(campaign.latest).toISOString());
+    }
+
+    var rowId = '_cmpn_row_' + t;
+
+    // Main row (clickable)
+    html += '<div class="cmpn-row cmpn-row-cols" style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border-color);" onclick="var d=document.getElementById(\'' + rowId + '\');if(d){d.classList.toggle(\'cmpn-open\');}">';
+
+    // Campaign name + description
+    html += '<div style="flex:2;min-width:180px;" class="cmpn-col-name">';
+    html += '<div style="font-size:13px;font-weight:600;color:var(--text-primary);">' + escapeHtml(meta.name) + '</div>';
+    if (meta.desc) {
+      html += '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + escapeHtml(meta.desc) + '</div>';
+    }
+    html += '</div>';
+
+    // Total sends
+    html += '<div style="width:90px;text-align:center;">';
+    html += '<span style="font-size:14px;font-weight:600;color:var(--text-primary);">' + totalSends + '</span>';
+    if (campaign.failedCount > 0) {
+      html += '<span style="font-size:11px;color:#f87171;margin-left:4px;">(' + campaign.failedCount + ' failed)</span>';
+    }
+    html += '</div>';
+
+    // Recipients
+    html += '<div style="width:90px;text-align:center;font-size:14px;font-weight:600;color:var(--text-primary);">' + uniqueRecipients + '</div>';
+
+    // Response rate with bar
+    html += '<div style="width:120px;text-align:center;">';
+    if (responseTemplates[key]) {
+      html += '<div style="font-size:14px;font-weight:600;color:var(--accent, #a89878);margin-bottom:4px;">' + campResponseRate + '%</div>';
+      html += '<div class="cmpn-bar-track">';
+      html += '<div class="cmpn-bar-fill" style="width:' + campResponseRate + '%;background:var(--accent, #a89878);"></div>';
+      html += '</div>';
+    } else {
+      html += '<span style="font-size:11px;color:var(--text-muted);">N/A</span>';
+    }
+    html += '</div>';
+
+    // Last sent
+    html += '<div style="width:100px;text-align:right;font-size:12px;color:var(--text-muted);">' + escapeHtml(lastSentText) + '</div>';
+
+    html += '</div>'; // row
+
+    // ---- Expandable detail panel ----
+    html += '<div id="' + rowId + '" class="cmpn-detail" style="border-bottom:1px solid var(--border-color);background:var(--bg-secondary);">';
+    html += '<div style="padding:20px 16px;">';
+
+    // Two-column layout: timeline + response breakdown
+    html += '<div style="display:flex;gap:24px;" class="cmpn-detail-cols">';
+
+    // Left column: Send timeline
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">Recent Sends</div>';
+
+    // Show up to 8 recent sends
+    var recentLogs = campaign.logs.slice(0, 8);
+    for (var li = 0; li < recentLogs.length; li++) {
+      var sLog = recentLogs[li];
+      var sDate = '';
+      if (sLog.sentAt) {
+        try {
+          sDate = new Date(sLog.sentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + new Date(sLog.sentAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        } catch (e) { /* skip */ }
+      }
+      var sStatusColor = sLog.status === 'failed' ? '#f87171' : '#22c55e';
+      var sStatusBg = sLog.status === 'failed' ? 'rgba(248,113,113,0.1)' : 'rgba(34,197,94,0.1)';
+      var sStatusBorder = sLog.status === 'failed' ? 'rgba(248,113,113,0.25)' : 'rgba(34,197,94,0.25)';
+      var sStatusLabel = sLog.status === 'failed' ? 'Failed' : 'Sent';
+
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;';
+      if (li < recentLogs.length - 1) html += 'border-bottom:1px solid var(--border-color);';
+      html += '">';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-size:12px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(sLog.userEmail || 'Unknown') + '</div>';
+      if (sDate) {
+        html += '<div style="font-size:11px;color:var(--text-muted);margin-top:1px;">' + escapeHtml(sDate) + '</div>';
+      }
+      html += '</div>';
+      html += '<span class="cmpn-badge" style="background:' + sStatusBg + ';border:1px solid ' + sStatusBorder + ';color:' + sStatusColor + ';margin-left:8px;flex-shrink:0;">' + sStatusLabel + '</span>';
+      html += '</div>';
+    }
+    if (campaign.logs.length > 8) {
+      html += '<div style="font-size:11px;color:var(--text-muted);padding-top:8px;text-align:center;">and ' + (campaign.logs.length - 8) + ' more</div>';
+    }
+    if (recentLogs.length === 0) {
+      html += '<div style="font-size:12px;color:var(--text-muted);">No sends recorded.</div>';
+    }
+    html += '</div>'; // left column
+
+    // Right column: Response breakdown (if applicable)
+    if (responseTemplates[key]) {
+      var tRespsAll = responsesByTemplate[key] || [];
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;">Response Breakdown</div>';
+
+      if (tRespsAll.length > 0) {
+        // Group responses by answer text
+        var answerCounts = {};
+        var answerTotal = 0;
+        for (var ari = 0; ari < tRespsAll.length; ari++) {
+          var aText = tRespsAll[ari].answer || '(no answer)';
+          answerCounts[aText] = (answerCounts[aText] || 0) + 1;
+          answerTotal++;
+        }
+
+        // Sort by count descending
+        var aKeys = Object.keys(answerCounts);
+        aKeys.sort(function(a, b) { return answerCounts[b] - answerCounts[a]; });
+
+        for (var aki = 0; aki < aKeys.length; aki++) {
+          var aLabel = aKeys[aki];
+          var aCount = answerCounts[aLabel];
+          var aPct = answerTotal > 0 ? Math.round((aCount / answerTotal) * 100) : 0;
+
+          html += '<div style="margin-bottom:10px;">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">';
+          html += '<span style="font-size:12px;color:var(--text-primary);font-weight:500;">' + escapeHtml(aLabel) + '</span>';
+          html += '<span style="font-size:11px;color:var(--text-muted);margin-left:8px;flex-shrink:0;">' + aCount + ' (' + aPct + '%)</span>';
+          html += '</div>';
+          // Horizontal bar
+          html += '<div class="cmpn-bar-track" style="height:6px;">';
+          html += '<div class="cmpn-bar-fill" style="width:' + aPct + '%;background:var(--accent, #a89878);height:100%;"></div>';
+          html += '</div>';
+          html += '</div>';
+        }
+      } else {
+        html += '<div style="font-size:12px;color:var(--text-muted);">No responses yet.</div>';
+      }
+
+      html += '</div>'; // right column
+    }
+
+    html += '</div>'; // two-column layout
+    html += '</div>'; // padding wrapper
+    html += '</div>'; // detail panel
+  }
+
+  // ---- Full Response Breakdown Section ----
+  if (responses.length > 0) {
+    html += '<div style="margin-top:32px;">';
+    html += '<div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">';
+    html += '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:8px;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    html += 'Response Breakdown';
+    html += '</div>';
+    html += '<div style="color:var(--text-muted);font-size:12px;margin-bottom:4px;">Answer distribution across all survey and check-in responses.</div>';
+    html += '<div style="height:1px;background:var(--border-color);margin-bottom:16px;"></div>';
+
+    // Group responses by question
+    var questionMap = {};
+    for (var q = 0; q < responses.length; q++) {
+      var rsp = responses[q];
+      var qKey = rsp.question || 'Unknown';
+      if (!questionMap[qKey]) questionMap[qKey] = {};
+      var aKey = rsp.answer || '(no answer)';
+      questionMap[qKey][aKey] = (questionMap[qKey][aKey] || 0) + 1;
+    }
+
+    var questionKeys = Object.keys(questionMap);
+    for (var qi = 0; qi < questionKeys.length; qi++) {
+      var question = questionKeys[qi];
+      var answers = questionMap[question];
+      var answerKeys = Object.keys(answers);
+
+      answerKeys.sort(function(a, b) { return answers[b] - answers[a]; });
+
+      var qTotal = 0;
+      for (var ai = 0; ai < answerKeys.length; ai++) {
+        qTotal += answers[answerKeys[ai]];
+      }
+
+      html += '<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;padding:20px;margin-bottom:12px;">';
+      html += '<div style="font-weight:600;color:var(--text-primary);font-size:13px;margin-bottom:14px;">' + escapeHtml(formatTemplateName(question)) + '</div>';
+
+      for (var aj = 0; aj < answerKeys.length; aj++) {
+        var answer = answerKeys[aj];
+        var count = answers[answer];
+        var pct = qTotal > 0 ? Math.round((count / qTotal) * 100) : 0;
+
+        html += '<div style="margin-bottom:10px;">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">';
+        html += '<span style="font-size:13px;color:var(--text-primary);">' + escapeHtml(answer) + '</span>';
+        html += '<span style="font-size:12px;color:var(--text-muted);margin-left:8px;flex-shrink:0;font-weight:600;">' + count + ' <span style="font-weight:400;">(' + pct + '%)</span></span>';
+        html += '</div>';
+        // Full-width bar
+        html += '<div class="cmpn-bar-track" style="height:6px;">';
+        html += '<div class="cmpn-bar-fill" style="width:' + pct + '%;background:var(--accent, #a89878);height:100%;"></div>';
+        html += '</div>';
+        html += '</div>';
+      }
+
+      // Total
+      html += '<div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border-color);font-size:12px;color:var(--text-muted);">';
+      html += '<span style="font-weight:600;">Total</span>';
+      html += '<span style="font-weight:600;">' + qTotal + '</span>';
+      html += '</div>';
+
+      html += '</div>'; // question card
+    }
+
+    html += '</div>'; // response breakdown section
+  }
+
+  panel.innerHTML = html;
 }

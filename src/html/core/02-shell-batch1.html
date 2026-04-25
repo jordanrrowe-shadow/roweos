@@ -1,7 +1,7 @@
 
   <!-- v20.1: Auth Gate - Two-phase splash gateway -->
-  <!-- v22.53: Start hidden — showAuthGate() makes visible only when needed -->
-  <div id="authGate" style="position:fixed;inset:0;z-index:100000;background:#0a0a0a;display:none;align-items:center;justify-content:center;flex-direction:column;opacity:1;transition:opacity 0.4s ease;">
+  <!-- v30.4: Start VISIBLE — shows splash immediately, hideAuthGate() hides after login -->
+  <div id="authGate" style="position:fixed;inset:0;z-index:100000;background:#0a0a0a;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:1;transition:opacity 0.4s ease;">
 
     <!-- v28.0: Migration overlay -->
     <div id="migrationOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;z-index:100000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -58,7 +58,7 @@
       </div>
 
       <img src="/icons/roweos-emblem.png" alt="RoweOS" style="width:200px;height:200px;object-fit:contain;margin-bottom:20px;margin-top:0;position:relative;filter:brightness(1.1);" onerror="this.style.display='none'">
-      <div class="auth-title" style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;color:#fff;margin-bottom:6px;position:relative;">Sign in to RoweOS</div>
+      <div class="auth-title" style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;color:#fff;margin-bottom:6px;position:relative;">Create your account or Sign in</div>
       <div class="auth-subtitle" style="font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:32px;position:relative;">Choose your sign-in method</div>
 
       <div id="authGateSignIn" style="position:relative;">
@@ -100,7 +100,7 @@
         <!-- v27.1: Email form (hidden until email card clicked) -->
         <div id="authEmailForm" style="display:none;width:100%;margin-top:8px;padding:20px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;">
           <!-- v31.0: Name field shown in Create Account mode (or when /info prefill provides a name) -->
-          <input type="text" id="authNameInput" placeholder="Your name" autocomplete="name" style="display:none;width:100%;padding:14px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;outline:none;margin-bottom:10px;transition:border-color 0.2s;" onfocus="this.style.borderColor='rgba(201,181,122,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+          <input type="text" id="authNameInput" placeholder="Full name" autocomplete="name" style="display:none;width:100%;padding:14px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;outline:none;margin-bottom:10px;transition:border-color 0.2s;" onfocus="this.style.borderColor='rgba(201,181,122,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
           <input type="email" id="authEmailInput" placeholder="Email address" autocomplete="email" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;outline:none;margin-bottom:10px;transition:border-color 0.2s;" onfocus="this.style.borderColor='rgba(201,181,122,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
           <input type="password" id="authPasswordInput" placeholder="Password" autocomplete="current-password" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:14px;outline:none;margin-bottom:14px;transition:border-color 0.2s;" onfocus="this.style.borderColor='rgba(201,181,122,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" onkeydown="if(event.key==='Enter')handleEmailPasswordAuth()">
           <button onclick="handleEmailPasswordAuth()" style="width:100%;padding:14px 24px;background:linear-gradient(135deg,#c9b57a,#d4b978);border:none;border-radius:12px;color:#0a0a0a;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.opacity='0.9';this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1';this.style.transform='none'" id="authEmailBtn">Sign In</button>
@@ -111,8 +111,8 @@
         </div>
       </div>
 
-      <!-- v27.1: Access key verification (shown after signup email is sent) -->
-      <div id="authGateAccessKey" style="display:none;margin-top:24px;">
+      <!-- v27.1: Access key verification (hidden v30.2 - kept for internal/admin use) -->
+      <div id="authGateAccessKey" style="display:none;margin-top:24px;" data-hidden-v302="true">
         <div id="accessKeyCheckEmail" style="display:none;text-align:center;margin-bottom:20px;">
           <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#c9b57a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="22,5 12,13 2,5"/></svg>
           <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#fff;margin-bottom:8px;">Check Your Email</div>
@@ -143,6 +143,71 @@
           <a href="/terms" target="_blank" style="color:rgba(255,255,255,0.2);text-decoration:none;font-size:10px;" onmouseover="this.style.color='rgba(255,255,255,0.45)'" onmouseout="this.style.color='rgba(255,255,255,0.2)'">Terms of Service</a>
         </div>
       </div>
+    </div>
+
+    <!-- v30.5: Tier selection - direct child of authGate (NOT inside authLogin) so hiding authLogin doesn't hide this -->
+    <div id="authGateTierSelect" style="display:none;width:100%;max-width:900px;padding:0 16px;">
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:8px;">Choose Your Plan</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.4);">Select a tier to get started with RoweOS</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;">
+
+        <!-- Solo -->
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#a89878;margin-bottom:8px;">Solo</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$29/mo after trial</div>
+          <div style="width:100%;text-align:left;margin-bottom:24px;">
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 1 Brand or LifeAI profile</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Studio (all agents)</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Library and Wellness</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Pulse goal tracking</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Calendar integration</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Community support</div>
+          </div>
+          <div style="margin-top:auto;">
+            <button onclick="selectTier('solo')" style="padding:12px 32px;background:transparent;border:1px solid rgba(168,152,120,0.4);border-radius:10px;color:#a89878;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,152,120,0.08)';this.style.borderColor='rgba(168,152,120,0.6)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(168,152,120,0.4)'">Start 7-Day Free Trial</button>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;">Card required. Auto-subscribes at $29/mo after trial.</div>
+          </div>
+        </div>
+
+        <!-- Founder — featured -->
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(168,152,120,0.3);border-radius:16px;padding:32px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;position:relative;">
+          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);padding:3px 14px;background:linear-gradient(135deg,#c9b57a,#d4b978);border-radius:20px;font-size:10px;font-weight:600;color:#0a0a0a;letter-spacing:1px;text-transform:uppercase;font-family:'DM Sans',sans-serif;">Popular</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#a89878;margin-bottom:8px;">Founder</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$59/mo after trial</div>
+          <div style="width:100%;text-align:left;margin-bottom:24px;">
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Up to 5 Brand and LifeAI profiles</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Studio automations and pipelines</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mail and social publishing</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Focus, Analytics, Inventory</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Priority support</div>
+          </div>
+          <div style="margin-top:auto;">
+            <button onclick="selectTier('founder')" style="padding:12px 32px;background:linear-gradient(135deg,#c9b57a,#d4b978);border:none;border-radius:10px;color:#0a0a0a;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.opacity='0.9';this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1';this.style.transform='none'">Start 14-Day Free Trial</button>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;">Card required. Auto-subscribes at $59/mo after trial.</div>
+          </div>
+        </div>
+
+        <!-- Premium -->
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;">
+          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#a89878;margin-bottom:8px;">Premium</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$79/mo after trial</div>
+          <div style="width:100%;text-align:left;margin-bottom:24px;">
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Up to 10 Brand and LifeAI profiles</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Brand sharing and config export</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Advanced Analytics</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Custom integrations, API</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 24/7 Priority support</div>
+          </div>
+          <div style="margin-top:auto;">
+            <button onclick="selectTier('premium')" style="padding:12px 32px;background:transparent;border:1px solid rgba(168,152,120,0.4);border-radius:10px;color:#a89878;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,152,120,0.08)';this.style.borderColor='rgba(168,152,120,0.6)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(168,152,120,0.4)'">Start 14-Day Free Trial</button>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;">Card required. Auto-subscribes at $79/mo after trial.</div>
+          </div>
+        </div>
+
+      </div>
+      <div id="tierSelectStatus" style="text-align:center;font-size:13px;color:rgba(255,255,255,0.4);margin-top:16px;min-height:20px;"></div>
     </div>
   </div>
 

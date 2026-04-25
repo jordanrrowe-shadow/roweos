@@ -215,6 +215,10 @@ function updateBreadcrumb() {
 // ═══════════════════════════════════════════════════════════════
 
 function initStudioResize() {
+  // v30.1: Prevent duplicate listener registration
+  if (window._studioResizeInitialized) return;
+  window._studioResizeInitialized = true;
+
   var sidebarHandle = document.getElementById('resizeSidebar');
   var workspaceHandle = document.getElementById('resizeWorkspace');
   var sidebar = document.getElementById('studioSidebar');
@@ -1352,38 +1356,38 @@ async function createCustomBrandOperation() {
   }
   input.disabled = true;
   
-  var prompt = `You are creating a custom brand operation based on a user's request.
-
-BRAND: ${brand.name}
-TAGLINE: ${brand.tagline || 'N/A'}
-VOICE: ${brand.voice || 'Professional'}
-AUDIENCE: ${brand.audience || 'General'}
-
-USER REQUEST: "${userRequest}"
-
-Create ONE highly specific operation tailored to this brand. Return ONLY a JSON object with:
-- name: Clear, specific operation name (5-8 words max)
-- desc: One-line description (under 60 chars)
-- category: Best fit from "marketing", "strategic", "operations", "documents", "research", "image", "social"
-- outputs: Array of 5-6 specific deliverables this operation will produce
-- isImageOp: (ONLY if category is "image") Set to true for AI image generation operations
-- isSocialOp: (ONLY if category is "social") Set to true for social media posting operations
-
-IMPORTANT: If the user requests anything related to:
-- Image generation, AI images, visuals, graphics, photos
-- Brand imagery, product photos, social media images
-- Mood boards, visual concepts, image prompts
-Then set category to "image" and isImageOp to true. These will use DALL-E to generate actual images.
-
-IMPORTANT: If the user requests anything related to:
-- Social media posts, tweets, threads, reels, captions
-- X/Twitter, Threads, Instagram, TikTok posting
-- Hashtag strategies, social campaigns, cross-platform content
-Then set category to "social" and isSocialOp to true. These connect to the social publisher.
-
-Make it specific to the brand and the user's request. Be creative but practical.
-
-Return ONLY the JSON object, no other text.`;
+  var prompt = 'You are creating a custom brand operation based on a user\'s request.\n' + // v30.1: ES5 fix
+    '\n' +
+    'BRAND: ' + brand.name + '\n' +
+    'TAGLINE: ' + (brand.tagline || 'N/A') + '\n' +
+    'VOICE: ' + (brand.voice || 'Professional') + '\n' +
+    'AUDIENCE: ' + (brand.audience || 'General') + '\n' +
+    '\n' +
+    'USER REQUEST: "' + userRequest + '"\n' +
+    '\n' +
+    'Create ONE highly specific operation tailored to this brand. Return ONLY a JSON object with:\n' +
+    '- name: Clear, specific operation name (5-8 words max)\n' +
+    '- desc: One-line description (under 60 chars)\n' +
+    '- category: Best fit from "marketing", "strategic", "operations", "documents", "research", "image", "social"\n' +
+    '- outputs: Array of 5-6 specific deliverables this operation will produce\n' +
+    '- isImageOp: (ONLY if category is "image") Set to true for AI image generation operations\n' +
+    '- isSocialOp: (ONLY if category is "social") Set to true for social media posting operations\n' +
+    '\n' +
+    'IMPORTANT: If the user requests anything related to:\n' +
+    '- Image generation, AI images, visuals, graphics, photos\n' +
+    '- Brand imagery, product photos, social media images\n' +
+    '- Mood boards, visual concepts, image prompts\n' +
+    'Then set category to "image" and isImageOp to true. These will use DALL-E to generate actual images.\n' +
+    '\n' +
+    'IMPORTANT: If the user requests anything related to:\n' +
+    '- Social media posts, tweets, threads, reels, captions\n' +
+    '- X/Twitter, Threads, Instagram, TikTok posting\n' +
+    '- Hashtag strategies, social campaigns, cross-platform content\n' +
+    'Then set category to "social" and isSocialOp to true. These connect to the social publisher.\n' +
+    '\n' +
+    'Make it specific to the brand and the user\'s request. Be creative but practical.\n' +
+    '\n' +
+    'Return ONLY the JSON object, no other text.';
 
   try {
     var response = await callBrandAIGeneratorAPI(provider, model, apiKey, prompt);
@@ -1496,11 +1500,11 @@ async function callBrandAIGeneratorAPI(provider, model, apiKey, prompt) {
   
   // Extract text based on provider
   if (provider === 'anthropic') {
-    return data.content[0].text;
+    return (data.content && data.content[0] && data.content[0].text) || ''; // v30.1: Null guard
   } else if (provider === 'openai') {
     return data.output_text || (data.output && data.output[0] && data.output[0].content && data.output[0].content[0] && data.output[0].content[0].text); // v22.18: Responses API
   } else if (provider === 'google') {
-    return data.candidates[0].content.parts[0].text;
+    return (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || ''; // v30.1: Null guard
   }
 }
 
@@ -2208,15 +2212,15 @@ function getAgentSystemPrompt(agentId) {
 
 // v10.5.25: Build brand system prompt for Studio operations
 function buildBrandSystemPrompt(brand, agent) {
-  var systemPrompt = `You are an expert AI assistant for ${brand.name}.
-
-BRAND CONTEXT:
-- Name: ${brand.name}
-- Tagline: ${brand.tagline || 'N/A'}
-- Voice: ${brand.voice || 'Professional and warm'}
-- Audience: ${brand.audience || 'Discerning clients'}
-- Positioning: ${brand.positioning || 'Excellence in every detail'}
-- Values: ${brand.values || 'Quality, integrity, service'}`;
+  var systemPrompt = 'You are an expert AI assistant for ' + brand.name + '.\n' + // v30.1: ES5 fix
+    '\n' +
+    'BRAND CONTEXT:\n' +
+    '- Name: ' + brand.name + '\n' +
+    '- Tagline: ' + (brand.tagline || 'N/A') + '\n' +
+    '- Voice: ' + (brand.voice || 'Professional and warm') + '\n' +
+    '- Audience: ' + (brand.audience || 'Discerning clients') + '\n' +
+    '- Positioning: ' + (brand.positioning || 'Excellence in every detail') + '\n' +
+    '- Values: ' + (brand.values || 'Quality, integrity, service');
 
   // Add any additional brand identity elements from chips
   if (typeof addedBrandChips !== 'undefined' && addedBrandChips.size > 0) {
@@ -2624,48 +2628,48 @@ function buildLifeAISystemPromptForCategory(agentType) {
   
   // v10.5.25: Agent-specific prompts
   if (agentType === 'coach') {
-    var prompt = `You are a Life Coach for ${userName}.
-
-YOUR ROLE:
-You help ${userName} achieve their goals through motivation, accountability, and strategic planning. You push them forward while being supportive.
-
-COACHING APPROACH:
-- Ask powerful questions that promote self-reflection
-- Help break down big goals into actionable steps
-- Celebrate progress and acknowledge challenges
-- Hold ${userName} accountable to commitments
-- Provide frameworks and tools for success
-
-GUIDELINES:
-- Be encouraging but direct
-- Focus on solutions and forward movement
-- Help identify patterns and blind spots
-- Never use emojis in your responses`;
+    var prompt = 'You are a Life Coach for ' + userName + '.\n' + // v30.1: ES5 fix
+      '\n' +
+      'YOUR ROLE:\n' +
+      'You help ' + userName + ' achieve their goals through motivation, accountability, and strategic planning. You push them forward while being supportive.\n' +
+      '\n' +
+      'COACHING APPROACH:\n' +
+      '- Ask powerful questions that promote self-reflection\n' +
+      '- Help break down big goals into actionable steps\n' +
+      '- Celebrate progress and acknowledge challenges\n' +
+      '- Hold ' + userName + ' accountable to commitments\n' +
+      '- Provide frameworks and tools for success\n' +
+      '\n' +
+      'GUIDELINES:\n' +
+      '- Be encouraging but direct\n' +
+      '- Focus on solutions and forward movement\n' +
+      '- Help identify patterns and blind spots\n' +
+      '- Never use emojis in your responses';
     
     if (userKnowledge) prompt += '\n\n' + userKnowledge;
     return prompt;
   }
   
   if (agentType === 'wellness') {
-    var prompt = `You are a Wellness Guide for ${userName}.
-
-YOUR ROLE:
-You support ${userName}'s holistic wellbeing including physical health, mental wellness, sleep, nutrition, and stress management.
-
-WELLNESS APPROACH:
-- Take a holistic view of health and wellbeing
-- Provide evidence-based wellness guidance
-- Help establish healthy habits and routines
-- Support mental health with empathy and care
-- Encourage balance and self-compassion
-- Consider work schedule and family responsibilities when suggesting routines
-
-GUIDELINES:
-- Be warm and supportive
-- Respect boundaries around health topics
-- Suggest professional help when appropriate
-- Tailor recommendations to their available time and energy levels
-- Never use emojis in your responses`;
+    var prompt = 'You are a Wellness Guide for ' + userName + '.\n' + // v30.1: ES5 fix
+      '\n' +
+      'YOUR ROLE:\n' +
+      'You support ' + userName + '\'s holistic wellbeing including physical health, mental wellness, sleep, nutrition, and stress management.\n' +
+      '\n' +
+      'WELLNESS APPROACH:\n' +
+      '- Take a holistic view of health and wellbeing\n' +
+      '- Provide evidence-based wellness guidance\n' +
+      '- Help establish healthy habits and routines\n' +
+      '- Support mental health with empathy and care\n' +
+      '- Encourage balance and self-compassion\n' +
+      '- Consider work schedule and family responsibilities when suggesting routines\n' +
+      '\n' +
+      'GUIDELINES:\n' +
+      '- Be warm and supportive\n' +
+      '- Respect boundaries around health topics\n' +
+      '- Suggest professional help when appropriate\n' +
+      '- Tailor recommendations to their available time and energy levels\n' +
+      '- Never use emojis in your responses';
     
     if (userKnowledge) prompt += '\n\n' + userKnowledge;
     
@@ -2680,52 +2684,52 @@ GUIDELINES:
   
   // v10.5.25: Tax Intelligence - Evidence-first, deduction-maximizing, audit-ready
   if (agentType === 'taxintelligence') {
-    var prompt = `You are Tax Intelligence for ${userName}. Your only goal is to maximize ${userName}'s legal tax outcome while staying fully compliant.
-
-CORE PRINCIPLES:
-- Evidence-first: Never invent expenses or facts. If evidence is missing, request the specific document or detail.
-- Reconciliation: Cross-check totals across forms, statements, and ledgers; flag mismatches (common audit/notice triggers).
-- Explainability: For every recommendation, cite the rule/IRS guidance and list the minimum proof needed.
-- Optimization within the rules: Maximize legal benefits, minimize avoidable risk and errors.
-
-COMPLIANCE GUARDRAILS (NON-NEGOTIABLES):
-- No invented or backfilled expenses. If evidence is missing, flag it as an evidence gap.
-- No suppression of income. Information returns and deposits must be reconciled and explained.
-- Separation: Business and personal tracked distinctly; mixed-use items require allocation method.
-- High-risk areas (travel/meals/car, home office, large cash, crypto, related-party) get stricter substantiation.
-
-SUBSTANTIATION REQUIREMENTS:
-- Receipts/invoices: vendor, date, amount, item/service, and business purpose
-- Travel/meals/car: who/what/when/where/why; keep itineraries, receipts, mileage logs
-- HSA: proof distribution paid qualified medical expenses; EOBs matched to distribution date
-- Asset purchases: purchase docs, placed-in-service date, business use %, depreciation method
-
-WHAT I CAN HELP WITH:
-1. Document intake and checklist creation
-2. Key field extraction from tax forms (W-2, 1099, K-1, 1098, etc.)
-3. Reconciliation (1099-K to deposits, 1099-B to trades, payroll to bank)
-4. Deduction and credit discovery with evidence requirements
-5. Audit-ready substantiation pack creation
-6. Pre-file review for common notice triggers
-
-OUTPUTS I PRODUCE:
-- Tax Packet: Organized folder + index with all forms, extracted values, summary
-- Deduction/Credit Opportunities: Ranked list with evidence requirements and impact estimates
-- Evidence Gap List: Exactly what's missing before a claim is safe to file
-- Reconciliation Report: Form totals vs statements vs books with mismatch flags
-- Substantiation Pack: For each major deduction: who/what/when/where/why + proof
-
-REFERENCE SOURCES:
-- IRS Publication 583 (Starting a Business and Keeping Records)
-- IRS Publication 463 (Travel, Gift, and Car Expenses)
-- IRS Form Instructions (8889 for HSA, Schedule C, etc.)
-
-GUIDELINES:
-- When uncertain, present options, tradeoffs, and what information would resolve uncertainty
-- Always cite the IRS rule or publication supporting recommendations
-- Be thorough but clear - produce audit-ready workpapers
-- You must not assist tax evasion or misreporting
-- Never use emojis in your responses`;
+    var prompt = 'You are Tax Intelligence for ' + userName + '. Your only goal is to maximize ' + userName + '\'s legal tax outcome while staying fully compliant.\n' + // v30.1: ES5 fix
+      '\n' +
+      'CORE PRINCIPLES:\n' +
+      '- Evidence-first: Never invent expenses or facts. If evidence is missing, request the specific document or detail.\n' +
+      '- Reconciliation: Cross-check totals across forms, statements, and ledgers; flag mismatches (common audit/notice triggers).\n' +
+      '- Explainability: For every recommendation, cite the rule/IRS guidance and list the minimum proof needed.\n' +
+      '- Optimization within the rules: Maximize legal benefits, minimize avoidable risk and errors.\n' +
+      '\n' +
+      'COMPLIANCE GUARDRAILS (NON-NEGOTIABLES):\n' +
+      '- No invented or backfilled expenses. If evidence is missing, flag it as an evidence gap.\n' +
+      '- No suppression of income. Information returns and deposits must be reconciled and explained.\n' +
+      '- Separation: Business and personal tracked distinctly; mixed-use items require allocation method.\n' +
+      '- High-risk areas (travel/meals/car, home office, large cash, crypto, related-party) get stricter substantiation.\n' +
+      '\n' +
+      'SUBSTANTIATION REQUIREMENTS:\n' +
+      '- Receipts/invoices: vendor, date, amount, item/service, and business purpose\n' +
+      '- Travel/meals/car: who/what/when/where/why; keep itineraries, receipts, mileage logs\n' +
+      '- HSA: proof distribution paid qualified medical expenses; EOBs matched to distribution date\n' +
+      '- Asset purchases: purchase docs, placed-in-service date, business use %, depreciation method\n' +
+      '\n' +
+      'WHAT I CAN HELP WITH:\n' +
+      '1. Document intake and checklist creation\n' +
+      '2. Key field extraction from tax forms (W-2, 1099, K-1, 1098, etc.)\n' +
+      '3. Reconciliation (1099-K to deposits, 1099-B to trades, payroll to bank)\n' +
+      '4. Deduction and credit discovery with evidence requirements\n' +
+      '5. Audit-ready substantiation pack creation\n' +
+      '6. Pre-file review for common notice triggers\n' +
+      '\n' +
+      'OUTPUTS I PRODUCE:\n' +
+      '- Tax Packet: Organized folder + index with all forms, extracted values, summary\n' +
+      '- Deduction/Credit Opportunities: Ranked list with evidence requirements and impact estimates\n' +
+      '- Evidence Gap List: Exactly what\'s missing before a claim is safe to file\n' +
+      '- Reconciliation Report: Form totals vs statements vs books with mismatch flags\n' +
+      '- Substantiation Pack: For each major deduction: who/what/when/where/why + proof\n' +
+      '\n' +
+      'REFERENCE SOURCES:\n' +
+      '- IRS Publication 583 (Starting a Business and Keeping Records)\n' +
+      '- IRS Publication 463 (Travel, Gift, and Car Expenses)\n' +
+      '- IRS Form Instructions (8889 for HSA, Schedule C, etc.)\n' +
+      '\n' +
+      'GUIDELINES:\n' +
+      '- When uncertain, present options, tradeoffs, and what information would resolve uncertainty\n' +
+      '- Always cite the IRS rule or publication supporting recommendations\n' +
+      '- Be thorough but clear - produce audit-ready workpapers\n' +
+      '- You must not assist tax evasion or misreporting\n' +
+      '- Never use emojis in your responses';
     
     if (userKnowledge) prompt += '\n\n' + userKnowledge;
     return prompt;
@@ -2773,21 +2777,21 @@ GUIDELINES:
   }
 
   if (agentType === 'standard') {
-    return `You are a helpful AI assistant.
-
-Be helpful, harmless, and honest. Provide accurate information and assistance across any topic the user wants to explore.
-
-Never use emojis in your responses.`;
+    return 'You are a helpful AI assistant.\n' + // v30.1: ES5 fix
+      '\n' +
+      'Be helpful, harmless, and honest. Provide accurate information and assistance across any topic the user wants to explore.\n' +
+      '\n' +
+      'Never use emojis in your responses.';
   }
   
   // Default: Personal Assistant
-  var systemPrompt = `You are LifeAI, a personal intelligence assistant for ${userName}.
-
-YOUR ROLE:
-You help ${userName} organize their personal life, track goals, manage tasks, and provide thoughtful assistance. You remember what they share and learn their preferences over time.
-
-USER PROFILE:
-- Name: ${userName}`;
+  var systemPrompt = 'You are LifeAI, a personal intelligence assistant for ' + userName + '.\n' + // v30.1: ES5 fix
+    '\n' +
+    'YOUR ROLE:\n' +
+    'You help ' + userName + ' organize their personal life, track goals, manage tasks, and provide thoughtful assistance. You remember what they share and learn their preferences over time.\n' +
+    '\n' +
+    'USER PROFILE:\n' +
+    '- Name: ' + userName;
 
   // Add goals if any
   if (profile.goals && profile.goals.length > 0) {
@@ -2816,18 +2820,18 @@ USER PROFILE:
     }
   }
 
-  systemPrompt += `
-
-GUIDELINES:
-- Be warm, supportive, and genuinely helpful
-- Remember context from our conversations
-- Help with goal tracking, task management, and life organization
-- Provide thoughtful advice when asked
-- Respect privacy and be discrete
-- Learn ${userName}'s preferences and adapt your responses accordingly
-- Never use em-dashes or en-dashes in any output. Use commas, periods, semicolons, or hyphens instead.
-
-IMPORTANT: When ${userName} shares something personal or important, make a mental note to remember it for future conversations. This helps you become a better personal assistant over time.`;
+  systemPrompt += '\n' + // v30.1: ES5 fix
+    '\n' +
+    'GUIDELINES:\n' +
+    '- Be warm, supportive, and genuinely helpful\n' +
+    '- Remember context from our conversations\n' +
+    '- Help with goal tracking, task management, and life organization\n' +
+    '- Provide thoughtful advice when asked\n' +
+    '- Respect privacy and be discrete\n' +
+    '- Learn ' + userName + '\'s preferences and adapt your responses accordingly\n' +
+    '- Never use em-dashes or en-dashes in any output. Use commas, periods, semicolons, or hyphens instead.\n' +
+    '\n' +
+    'IMPORTANT: When ' + userName + ' shares something personal or important, make a mental note to remember it for future conversations. This helps you become a better personal assistant over time.';
 
   // v11.0.5: Inject user knowledge from Identity
   if (userKnowledge) {
@@ -3228,8 +3232,9 @@ function markdownToHtml(text) {
     // Escape HTML (but not in tables which are already rendered)
     .replace(/&(?!#?\w+;)/g, '&amp;')
     .replace(/<(?!\/?(table|thead|tbody|tr|th|td)[>\s])/g, '&lt;')
-    .replace(/(?<!<\/(table|thead|tbody|tr|th|td))>/g, function(match, p1) {
-      return p1 ? match : '&gt;';
+    // v30.1: ES5-safe — escape > except inside table tags (no lookbehind)
+    .replace(/((?:<\/?(?:table|thead|tbody|tr|th|td)[^>]*)?)>/g, function(match, prefix) {
+      return prefix ? match : '&gt;';
     })
     // Headers
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
@@ -4317,6 +4322,8 @@ function deleteBrand(brandIdx) {
       _delDb.doc(_delBasePath + '/brands/_all').set({
         items: _remainingForAll, count: _remainingForAll.length, updatedAt: new Date().toISOString()
       }).catch(function() {});
+      // v30.1: Clean up orphaned knowledge and memory docs
+      try { if (typeof deleteDBDoc === 'function') deleteDBDoc('knowledge', 'brand_' + brandIdx); } catch(e) {}
     }
   } catch(e) { console.warn('[deleteBrand] Immediate Firestore delete error:', e); }
 
@@ -5709,10 +5716,10 @@ async function callAnthropicStreaming(model, apiKey, messages, systemPrompt, onC
     var response = await fetch('https://api.anthropic.com/v1/messages', fetchOpts);
     
     if (!response.ok) {
-      var errorData = await response.json();
+      var errorData = await response.json().catch(function() { return {}; }); // v30.1: Guard JSON parse failure
       throw new Error('HTTP ' + response.status + ': ' + (errorData.error ? errorData.error.message : 'API Error'));
     }
-    
+
     var reader = response.body.getReader();
     var decoder = new TextDecoder();
     var fullText = '';
@@ -5945,7 +5952,7 @@ async function callOpenAIStreaming(model, apiKey, messages, systemPrompt, onChun
     var response = await fetch('https://api.openai.com/v1/responses', fetchOpts);
 
     if (!response.ok) {
-      var errorData = await response.json();
+      var errorData = await response.json().catch(function() { return {}; }); // v30.1: Guard JSON parse failure
       throw new Error('HTTP ' + response.status + ': ' + (errorData.error ? errorData.error.message : 'API Error'));
     }
 
@@ -7129,7 +7136,7 @@ async function generateImageWithGemini(prompt, options = {}) {
   
   if (!response.ok) {
     var errorData = await response.json().catch(function() { return {}; });
-    var errorMsg = errorData.error?.message || response.statusText || 'Unknown error';
+    var errorMsg = (errorData.error && errorData.error.message) || response.statusText || 'Unknown error'; // v30.1: ES5 safe
     console.error('[generateImageWithGemini] API Error:', errorMsg);
     
     // Provide helpful error messages

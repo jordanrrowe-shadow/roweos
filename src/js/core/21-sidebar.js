@@ -444,7 +444,7 @@ function onMobileBrandChangeV2(value) {
   // Update sidebar brand name
   var sidebarName = document.getElementById('sidebarBrandName');
   if (sidebarName && brands[brandIdx]) {
-    sidebarName.innerHTML = (brands[brandIdx].shortName || brands[brandIdx].name) + ' <span class="sidebar-brand-arrow">▾</span>';
+    sidebarName.innerHTML = escapeHtml(brands[brandIdx].shortName || brands[brandIdx].name) + ' <span class="sidebar-brand-arrow">▾</span>'; // v30.1: XSS fix
   }
   
   // v9.1.14: Directly update Focus brand badge
@@ -492,7 +492,9 @@ function onMobileBrandDropdownChange(value) {
     if (document.getElementById('agentBrand')) document.getElementById('agentBrand').value = brandIdx;
     if (document.getElementById('studioBrand')) document.getElementById('studioBrand').value = brandIdx;
     onBrandChange();
-    showToast(brands[brandIdx].name + ' selected', 'success');
+    // v30.1: Null check brands[brandIdx] before accessing name
+    var _bName = brands[brandIdx] ? (brands[brandIdx].shortName || brands[brandIdx].name) : 'Brand';
+    showToast(_bName + ' selected', 'success');
     return;
   }
 
@@ -1490,45 +1492,40 @@ function openNanobananaKeyModal() {
     modal.id = 'nanobananaKeyModal';
     modal.className = 'api-key-modal';
     modal.onclick = function() { closeNanobananaKeyModal(); };
-    modal.innerHTML = `
-      <div class="api-key-modal-content" onclick="event.stopPropagation()" style="max-width: 480px;">
-        <h3 class="api-key-modal-title">Nano Banana (Gemini 2.0/3.0)</h3>
-        <p class="api-key-modal-desc">Configure your Nano Banana API key for Studio text and image generation. This uses Google's Gemini API.</p>
-
-        <div class="api-key-input-group" style="margin-top: var(--space-4);">
-          <label class="api-key-input-label">Nano Banana / Gemini API Key</label>
-          <input type="password" class="api-key-input" id="nanobananaKeyInput" placeholder="AIza..." onkeypress="if(event.key==='Enter') saveNanobananaKey()">
-        </div>
-        <div id="nanobananaKeyStatusBox" style="display: none; font-size: var(--text-sm); padding: var(--space-2); border-radius: var(--radius-sm); margin-top: var(--space-2);"></div>
-
-        <div id="nanobananaKeyControls" style="display:none;margin-top:12px;display:flex;align-items:center;gap:10px;">
-          <div style="flex:1;display:flex;align-items:center;gap:8px;">
-            <span style="font-size:12px;color:var(--text-muted);">Image Generation</span>
-            <button id="nanobananaToggleBtn" onclick="toggleImageGen()" style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid;cursor:pointer;transition:all 0.2s;">Enabled</button>
-          </div>
-          <button onclick="deleteNanobananaKey()" style="font-size:11px;color:var(--text-muted);background:none;border:1px solid var(--border-color);border-radius:6px;padding:4px 10px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color='#ef4444';this.style.borderColor='#ef4444'" onmouseout="this.style.color='var(--text-muted)';this.style.borderColor='var(--border-color)'">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Remove Key
-          </button>
-        </div>
-
-        <div style="margin-top:14px;padding:14px 16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);">
-          <div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:10px;">
-            <strong style="color:var(--text-primary);font-size:13px;">Available models</strong><br>
-            <span style="color:var(--accent);">&#8226;</span> <strong>Flash (Text)</strong> - Fast text generation<br>
-            <span style="color:var(--accent);">&#8226;</span> <strong>Studio (Image)</strong> - Image generation with Gemini
-          </div>
-          <div style="border-top:1px solid var(--border-color);padding-top:10px;font-size:12px;color:var(--text-muted);line-height:1.7;">
-            <span style="color:var(--accent);">1.</span> Visit <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent);text-decoration:none;">Google AI Studio</a> to create an API key<br>
-            <span style="color:var(--accent);">2.</span> Or email <a href="mailto:roweos@therowecollection.com" style="color:var(--accent);text-decoration:none;">roweos@therowecollection.com</a> for private Beta key access
-          </div>
-        </div>
-
-        <div class="api-key-modal-actions" style="margin-top: var(--space-5);">
-          <button class="api-key-modal-btn api-key-modal-btn-cancel" onclick="closeNanobananaKeyModal()">Cancel</button>
-          <button class="api-key-modal-btn api-key-modal-btn-save" onclick="saveNanobananaKey()">Save Key</button>
-        </div>
-      </div>
-    `;
+    // v30.1: Replace template literal with ES5 string concatenation
+    modal.innerHTML = '<div class="api-key-modal-content" onclick="event.stopPropagation()" style="max-width: 480px;">' +
+      '<h3 class="api-key-modal-title">Nano Banana (Gemini 2.0/3.0)</h3>' +
+      '<p class="api-key-modal-desc">Configure your Nano Banana API key for Studio text and image generation. This uses Google\'s Gemini API.</p>' +
+      '<div class="api-key-input-group" style="margin-top: var(--space-4);">' +
+        '<label class="api-key-input-label">Nano Banana / Gemini API Key</label>' +
+        '<input type="password" class="api-key-input" id="nanobananaKeyInput" placeholder="AIza..." onkeypress="if(event.key===\'Enter\') saveNanobananaKey()">' +
+      '</div>' +
+      '<div id="nanobananaKeyStatusBox" style="display: none; font-size: var(--text-sm); padding: var(--space-2); border-radius: var(--radius-sm); margin-top: var(--space-2);"></div>' +
+      '<div id="nanobananaKeyControls" style="display:none;margin-top:12px;display:flex;align-items:center;gap:10px;">' +
+        '<div style="flex:1;display:flex;align-items:center;gap:8px;">' +
+          '<span style="font-size:12px;color:var(--text-muted);">Image Generation</span>' +
+          '<button id="nanobananaToggleBtn" onclick="toggleImageGen()" style="font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid;cursor:pointer;transition:all 0.2s;">Enabled</button>' +
+        '</div>' +
+        '<button onclick="deleteNanobananaKey()" style="font-size:11px;color:var(--text-muted);background:none;border:1px solid var(--border-color);border-radius:6px;padding:4px 10px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.color=\'#ef4444\';this.style.borderColor=\'#ef4444\'" onmouseout="this.style.color=\'var(--text-muted)\';this.style.borderColor=\'var(--border-color)\'">' +
+          '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Remove Key' +
+        '</button>' +
+      '</div>' +
+      '<div style="margin-top:14px;padding:14px 16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);">' +
+        '<div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:10px;">' +
+          '<strong style="color:var(--text-primary);font-size:13px;">Available models</strong><br>' +
+          '<span style="color:var(--accent);">&#8226;</span> <strong>Flash (Text)</strong> - Fast text generation<br>' +
+          '<span style="color:var(--accent);">&#8226;</span> <strong>Studio (Image)</strong> - Image generation with Gemini' +
+        '</div>' +
+        '<div style="border-top:1px solid var(--border-color);padding-top:10px;font-size:12px;color:var(--text-muted);line-height:1.7;">' +
+          '<span style="color:var(--accent);">1.</span> Visit <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent);text-decoration:none;">Google AI Studio</a> to create an API key<br>' +
+          '<span style="color:var(--accent);">2.</span> Or email <a href="mailto:roweos@therowecollection.com" style="color:var(--accent);text-decoration:none;">roweos@therowecollection.com</a> for private Beta key access' +
+        '</div>' +
+      '</div>' +
+      '<div class="api-key-modal-actions" style="margin-top: var(--space-5);">' +
+        '<button class="api-key-modal-btn api-key-modal-btn-cancel" onclick="closeNanobananaKeyModal()">Cancel</button>' +
+        '<button class="api-key-modal-btn api-key-modal-btn-save" onclick="saveNanobananaKey()">Save Key</button>' +
+      '</div>' +
+    '</div>';
     document.body.appendChild(modal);
   }
   
@@ -1705,15 +1702,26 @@ async function saveProviderApiKey(provider) {
     // v29.1: Immediately update provider badges so Connected/Disconnected reflects without page flip
     if (typeof updateProviderStatuses === 'function') updateProviderStatuses();
     
-    // v25.3: Re-open modal to show updated state (model picker is now inline)
+    // v30.2: Show checkmark and auto-close instead of reopening modal
+    var config = PROVIDER_CONFIG[provider];
+    var providerName = config ? config.name : provider;
+    showToast(providerName + ' API key saved!', 'success');
+
+    var modalInner = document.getElementById('apiKeyModalInner');
+    if (modalInner) {
+      modalInner.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">' +
+        '<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#22c55e" stroke-width="2" style="margin-bottom:16px;"><path d="M20 6L9 17l-5-5"/></svg>' +
+        '<div style="font-size:18px;font-weight:600;color:#22c55e;margin-bottom:8px;">Key Saved</div>' +
+        '<div style="font-size:14px;color:var(--text-muted);">API key validated and saved successfully</div>' +
+        '</div>';
+    }
+
     setTimeout(function() {
-      var config = PROVIDER_CONFIG[provider];
-      var providerName = config ? config.name : provider;
-      showToast(providerName + ' API key saved!', 'success');
-      openApiKeyModal(provider);
-      // v19.1: Sync updated key to cloud if scheduler enabled
-      if (typeof syncApiKeysToCloud === 'function') syncApiKeysToCloud();
+      if (typeof closeApiKeyModal === 'function') closeApiKeyModal();
     }, 1500);
+
+    // v19.1: Sync updated key to cloud if scheduler enabled
+    if (typeof syncApiKeysToCloud === 'function') syncApiKeysToCloud();
   } catch (error) {
     console.error('[API] Exception:', error);
     if (statusEl) {
@@ -2019,7 +2027,9 @@ function completeFirebaseLogin(user) {
       return;
     }
 
-    // Hide ALL possible screens that might be showing
+    // v30.4: Clean up onboarding/welcome screens but do NOT hide auth gate or show views.
+    // handleAuthState (via onAuthStateChanged) handles routing: new users -> tier selection,
+    // existing users with key -> proceed to app.
     var elementsToHide = [
       document.getElementById('onboardingView'),
       document.getElementById('startupScreen'),
@@ -2028,24 +2038,11 @@ function completeFirebaseLogin(user) {
       document.querySelector('.welcome-screen'),
       document.querySelector('.onboarding-container')
     ];
-
     elementsToHide.forEach(function(el) {
-      if (el) {
-        el.classList.add('hidden');
-        el.style.display = 'none';
-        el.style.visibility = 'hidden';
-        el.style.opacity = '0';
-      }
+      if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
     });
-
-    // Remove any body classes that might interfere
     document.body.classList.remove('onboarding-active');
     document.body.classList.remove('welcome-active');
-
-    // Force show the agent view
-    if (typeof showView === 'function') {
-      showView('agent');
-    }
 
     // v22.1: Show admin nav for admin user
     if (typeof updateAdminNavVisibility === 'function') updateAdminNavVisibility();
@@ -2087,17 +2084,8 @@ function completeFirebaseLogin(user) {
             })
           }).catch(function(e) { console.warn('[RoweOS] Signup notification failed:', e.message); });
         } catch(notifyErr) {}
-        // v27.1: Auto-generate access key and send welcome email
-        if (typeof autoGenerateAccessKey === 'function') {
-          autoGenerateAccessKey(user).then(function(generatedKey) {
-            if (generatedKey) {
-              sendEarlyAccessEmail(user, generatedKey);
-              if (typeof showAccessKeyVerification === 'function') {
-                showAccessKeyVerification(user.email);
-              }
-            }
-          });
-        }
+        // v30.4: Access key generation moved to tier selection flow in handleAuthState
+        // Key is now generated after user picks a tier (founder/solo/premium)
       }
     } catch(newUserErr) { console.warn('[RoweOS] New user check error:', newUserErr.message); }
 
@@ -2253,7 +2241,7 @@ function initializeFirebase(shouldSignIn) {
       try { updateFirebaseModalUI(); } catch(e) { console.warn('[Firebase] updateFirebaseModalUI error:', e.message); }
       try { updateCloudSyncUI(); } catch(e) { console.warn('[Firebase] updateCloudSyncUI error:', e.message); }
       // v15.0: Delegate to central auth handler
-      try { handleAuthState(user); } catch(e) { console.error('[Firebase] handleAuthState error:', e.message); hideAuthGate(); showStartupScreen(); }
+      try { handleAuthState(user); } catch(e) { console.error('[Firebase] handleAuthState error:', e.message); if (typeof showTierSelection === 'function') { showTierSelection(); } }
     });
 
     // Track if login has been completed to prevent double-execution
@@ -2296,62 +2284,25 @@ function initializeFirebase(shouldSignIn) {
         // v25.0: Startup reconciliation
   // v28.0: Check for v4 migration before standard sync
   if (firebaseUser && typeof migrationEngine !== 'undefined' && migrationEngine.needsMigration()) {
-    var _migOverlay = document.getElementById('migrationOverlay');
-    if (_migOverlay) _migOverlay.style.display = 'block';
-    var _migSteps = document.getElementById('migrationSteps');
-    var _migBar = document.getElementById('migrationProgressBar');
-    var _migLabels = ['Brands','Settings','Brand Settings','Life Profiles','Life Settings',
-      'Todos','Calendar','Automations','Conversations','Pulse','Library','Folio',
-      'Clients','Runs','Inventory','Logos','Knowledge','Social Tokens','Social Activity',
-      'Scavenger Configs','Scavenger Targets','Visual Assets','API Keys','Mail',
-      'Social Posts','Social Workflows','Notifications','People','Push Subscriptions',
-      'Verifying','Complete'];
-    var _migDone = {};
-    window._migrationProgressCb = function(label, current, total) {
-      if (label === 'Complete') {
-        if (_migBar) _migBar.style.width = '100%';
-        // v29.0: Don't hide overlay — keep it visible until reload so user sees completion
-        if (_migSteps) {
-          _migSteps.innerHTML += '<div style="color:#4ade80;font-weight:600;margin-top:12px;">Migration complete. Restarting...</div>';
-        }
-        return;
-      }
-      _migDone[label] = true;
-      var doneCount = Object.keys(_migDone).length;
-      var pct = Math.min(95, Math.round((doneCount / _migLabels.length) * 100));
-      if (_migBar) _migBar.style.width = pct + '%';
-      if (_migSteps) {
-        var html = '';
-        for (var mi = 0; mi < _migLabels.length; mi++) {
-          var sl = _migLabels[mi];
-          if (_migDone[sl]) {
-            html += '<div style="color:#4ade80;">&#10003; ' + sl + '</div>';
-          } else if (mi === doneCount) {
-            html += '<div style="color:#a89878;">&#9679; ' + sl + '...</div>';
-          } else if (mi > doneCount) {
-            html += '<div>&#9675; ' + sl + '</div>';
-          }
-        }
-        _migSteps.innerHTML = html;
-      }
-    };
-    window._v4MigrationRunning = true; // v28.0: Block reconcileOnStartup
-    migrationEngine.run(window._migrationProgressCb).then(function() {
-      console.log('[SyncV4] Migration complete -- reloading app on v4');
-      // v29.0: Give user 3s to see completion before reload
-      setTimeout(function() { location.reload(); }, 3000);
-    }).catch(function(err) {
+    // v30.1: Run migration silently in background — no overlay, no reload
+    // Let the app continue to onboarding/main flow while migration runs
+    console.log('[SyncV4] Running migration in background...');
+    window._v4MigrationRunning = true;
+    migrationEngine.run(function(label) {
+      console.log('[SyncV4] Migrating:', label);
+    }).then(function() {
+      console.log('[SyncV4] Background migration complete');
       window._v4MigrationRunning = false;
-      var errEl = document.getElementById('migrationError');
-      var errMsg = document.getElementById('migrationErrorMsg');
-      if (errEl) errEl.style.display = 'block';
-      if (errMsg) errMsg.textContent = err.message;
-      // Let the app continue on old namespace
+      // Silently reconcile without reload
+      if (typeof reconcileOnStartup === 'function') reconcileOnStartup();
+    }).catch(function(err) {
+      console.warn('[SyncV4] Background migration failed:', err.message);
+      window._v4MigrationRunning = false;
       if (typeof reconcileOnStartup === 'function') reconcileOnStartup();
     });
-    // v28.0: STOP here -- do not continue auth flow while migrating
-    return;
-  } else if (firebaseUser && typeof syncEngine !== 'undefined' && syncEngine.isV4Active()) {
+    // v30.1: Continue auth flow — don't block on migration
+  }
+  if (firebaseUser && typeof syncEngine !== 'undefined' && syncEngine.isV4Active()) {
     syncEngine._setupConnectivity();
     syncEngine.setupListeners();
     _registerDevice();
@@ -2562,13 +2513,14 @@ function toggleEmailAuthMode() {
   var toggle = document.getElementById('authEmailToggle');
   var status = document.getElementById('authEmailStatus');
   var pwInput = document.getElementById('authPasswordInput');
-  // v31.0: Show name input only in create-account mode
+  // v30.5/v31.0: Show name input only in create-account mode
   var nameInput = document.getElementById('authNameInput');
   if (_authEmailMode === 'signin') {
     _authEmailMode = 'create';
     if (btn) btn.textContent = 'Create Account';
     if (toggle) toggle.innerHTML = 'Already have an account? <span style="color:#b2997b;font-weight:600;">Sign in</span>';
     if (pwInput) pwInput.setAttribute('autocomplete', 'new-password');
+    // v30.5: Show name field in create mode
     if (nameInput) nameInput.style.display = 'block';
   } else {
     _authEmailMode = 'signin';
@@ -2621,6 +2573,12 @@ function handleEmailPasswordAuth() {
     if (btn) btn.disabled = false;
     if (status) { status.style.color = '#22c55e'; status.textContent = _authEmailMode === 'create' ? 'Account created!' : 'Signed in!'; }
     console.log('Firebase: Email auth success:', result.user.email);
+    if (_authEmailMode === 'create' && nameVal) {
+      console.log('[Auth] Display name set to:', nameVal);
+    }
+    // v30.5: Tier selection is now handled by handleAuthState (called from onAuthStateChanged).
+    // The race condition is fixed: tierSelect is a direct child of authGate, not inside authLogin,
+    // and _tierSelectionActive flag prevents showAuthGate from overriding it.
   }).catch(function(error) {
     if (btn) btn.disabled = false;
     var msg = error.message || 'Authentication failed';

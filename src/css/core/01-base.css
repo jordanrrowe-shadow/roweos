@@ -40312,23 +40312,18 @@
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
       }
       
-      /* Textarea - smaller font, vertically centered */
+      /* Textarea - smaller font, auto-expands with content */
       #agentView .chat-input-v2 textarea {
         flex: 1 !important;
         font-size: var(--text-base) !important;
         min-height: 36px !important;
-        max-height: 36px !important;
-        padding: 0 6px !important;
+        max-height: 160px !important;
+        padding: 8px 6px !important;
         background: transparent !important;
         border: none !important;
-      }
-      /* v15.38: Allow textarea to expand when focused */
-      #agentView .chat-input-v2 textarea:focus {
-        max-height: 120px !important;
         resize: none !important;
-        line-height: 36px !important;
-        display: flex !important;
-        align-items: center !important;
+        line-height: 20px !important;
+        overflow-y: auto !important;
       }
       
       /* Hide footer - inline everything */
@@ -40791,6 +40786,7 @@
         border-bottom: none !important;
         flex: 0 0 auto !important;
         margin: 0 !important;
+        text-align: center !important;
       }
       /* v24.27: Reset ALL child element margins/padding (h2, p get browser defaults without * reset) */
       #agentView.conversation-active #agentConversationHeader *,
@@ -41168,18 +41164,14 @@
         font-style: normal !important;
         padding: 8px 12px !important;
         min-height: 36px !important;
-        max-height: 36px !important;
+        max-height: 160px !important;
         line-height: 20px !important;
         resize: none !important;
         background: transparent !important;
         border: none !important;
         margin: 0 !important;
         color: var(--text-primary) !important; /* v13.9: Explicit text color */
-      }
-      /* v15.38: Allow textarea to expand when focused */
-      #agentView .chat-input-v2 textarea:focus,
-      #agentView #agentCommand:focus {
-        max-height: 120px !important;
+        overflow-y: auto !important;
       }
 
       /* v13.9: Followup textarea explicit text color */
@@ -45883,6 +45875,13 @@
       #authGateSignIn button {
         font-size: 14px !important;
       }
+
+      /* v30.4: Tier selection grid stacks on mobile */
+      #authGateTierSelect > div:nth-child(2) {
+        grid-template-columns: 1fr !important;
+        max-width: 400px;
+        margin: 0 auto;
+      }
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -47241,7 +47240,7 @@ html.light-mode .scribe-knowledge-assistant code { background:rgba(0,0,0,0.06); 
 html.light-mode .scribe-knowledge-assistant pre { background:rgba(0,0,0,0.04); }
 
 /* v29.4: Voice dictation mic button */
-.voice-mic-btn { width:36px; height:36px; border-radius:50%; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; color:var(--text-secondary); flex-shrink:0; }
+.voice-mic-btn { width:36px; height:36px; min-width:36px; min-height:36px; max-width:36px; max-height:36px; border-radius:50%; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s; color:var(--text-secondary); flex-shrink:0; flex-grow:0; box-sizing:border-box; }
 .voice-mic-btn:hover { background:rgba(255,255,255,0.1); }
 .voice-mic-btn.recording { background:#ef4444; color:#fff; animation:mic-pulse 1.5s ease-in-out infinite; }
 .voice-mic-btn.processing { background:var(--accent, #a89878); color:#fff; }

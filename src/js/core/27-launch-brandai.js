@@ -1991,9 +1991,12 @@ function saveBrandEdits() {
     if (typeof renderIdentityView === 'function') renderIdentityView();
     if (typeof updateBrandName === 'function') updateBrandName(); // v11.0.5: Update sidebar with shortName
     
+    // v30.1: Refresh sidebar logo after brand edit (was missing from this dual path)
+    if (typeof initBrandLogo === 'function') initBrandLogo();
+
     // Close modal
     closeModal('editBrandModal');
-    
+
     // Show success message
     showToast('Brand updated successfully', 'success');
     

@@ -317,12 +317,17 @@ var syncEngine = {
 
     if (typeof updateSyncIndicator === 'function') updateSyncIndicator('syncing');
 
+    // v30.1: Track confirmed op IDs to avoid overwriting ops enqueued during flush
+    var confirmedIds = [];
     var idx = 0;
     function processNext() {
       if (idx >= pending.length) {
         syncEngine._flushing = false;
         if (typeof updateSyncIndicator === 'function') updateSyncIndicator('synced');
-        var cleaned = queue.filter(function(op) { return op.status !== 'confirmed'; });
+        // v30.1: Re-read queue from localStorage to avoid overwriting ops enqueued during flush
+        var _currentQueue = [];
+        try { _currentQueue = JSON.parse(localStorage.getItem(syncEngine._queueKey) || '[]'); } catch(e) {}
+        var cleaned = _currentQueue.filter(function(op) { return confirmedIds.indexOf(op.id) === -1; });
         try { localStorage.setItem(syncEngine._queueKey, JSON.stringify(cleaned)); } catch (e) {}
         return;
       }
@@ -344,6 +349,7 @@ var syncEngine = {
 
       promise.then(function() {
         op.status = 'confirmed';
+        confirmedIds.push(op.id);
         idx++;
         processNext();
       }).catch(function(err) {
@@ -354,10 +360,10 @@ var syncEngine = {
           console.error('[SyncV4] Operation moved to error state after 3 retries:', op.id);
         }
         try { localStorage.setItem(syncEngine._queueKey, JSON.stringify(queue)); } catch (e) {}
-        syncEngine._flushing = false;
         if (typeof updateSyncIndicator === 'function') updateSyncIndicator('error');
         var backoff = Math.min(1000 * Math.pow(2, op.retryCount), 8000);
-        setTimeout(function() { syncEngine._flush(); }, backoff);
+        // v30.1: Only clear flushing flag inside the retry callback to prevent concurrent flushes
+        setTimeout(function() { syncEngine._flushing = false; syncEngine._flush(); }, backoff);
       });
     }
 
@@ -770,14 +776,23 @@ var migrationEngine = {
 
   needsMigration: function() {
     // v28.0.2: Force reset if migration schema version doesn't match current
-    // This catches stale flags from failed migration attempts on older code
     var MIGRATION_SCHEMA = '2';
     if (localStorage.getItem('roweos_v4_migrated') === 'true' && localStorage.getItem('roweos_v4_schema') !== MIGRATION_SCHEMA) {
       console.warn('[Migration] Schema mismatch (expected ' + MIGRATION_SCHEMA + ', got ' + localStorage.getItem('roweos_v4_schema') + ') -- forcing re-migration');
       localStorage.removeItem('roweos_v4_migrated');
       localStorage.removeItem('roweos_v4_migration_timestamp');
     }
-    return localStorage.getItem('roweos_v4_migrated') !== 'true';
+    if (localStorage.getItem('roweos_v4_migrated') === 'true') return false;
+    // v30.1: New users have no data to migrate — skip and mark done immediately
+    var hasBrands = localStorage.getItem('roweosBrands') || localStorage.getItem('roweos_brands');
+    var hasOnboarding = localStorage.getItem('roweos_onboarding_completed');
+    if (!hasBrands && !hasOnboarding) {
+      console.log('[Migration] New user — no existing data, skipping migration');
+      localStorage.setItem('roweos_v4_migrated', 'true');
+      localStorage.setItem('roweos_v4_schema', MIGRATION_SCHEMA);
+      return false;
+    }
+    return true;
   },
 
   run: function(onProgress) {
@@ -1338,7 +1353,12 @@ function mergeByTimestamp(localItems, cloudItems, idField) {
   var merged = {};
   var cloudOrder = [];
   var lastSync = 0;
-  try { lastSync = parseInt(localStorage.getItem('roweos_last_sync') || '0'); } catch(e) {}
+  // v30.1: Handle both numeric timestamps and ISO date strings in roweos_last_sync
+  try {
+    var _rawSync = localStorage.getItem('roweos_last_sync') || '0';
+    lastSync = parseInt(_rawSync, 10);
+    if (isNaN(lastSync)) { try { lastSync = new Date(_rawSync).getTime() || 0; } catch(e) { lastSync = 0; } }
+  } catch(e) {}
   var firstSyncCompleted = localStorage.getItem('roweos_first_sync_completed') === 'true';
 
   // Cloud items are the authoritative baseline
@@ -2220,6 +2240,8 @@ function applyBrandRecovery(extractedBrands) {
   // Mark onboarding as complete
   localStorage.setItem('roweos_onboarding_completed', 'true');
   localStorage.setItem('roweos_welcomed', 'true');
+  // v30.5: Clear tier selection flag — onboarding is done, no longer needed
+  try { localStorage.removeItem('roweos_tier_selected'); } catch(e) {}
   
   // Initialize empty libraries if not present
   if (!localStorage.getItem(USER_DATA_KEYS.library)) {

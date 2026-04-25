@@ -5,9 +5,10 @@
 function generateFocus2AISuggestion() {
   var today = new Date().toISOString().slice(0, 10);
   var isLife = getCurrentMode() === 'life';
-  var brandIdx = parseInt(document.getElementById('brand')?.value || '0');
+  var _brandElJ1 = document.getElementById('brand'); // v30.1: ES5 fix
+  var brandIdx = parseInt((_brandElJ1 ? _brandElJ1.value : null) || '0');
   var brand = window.brands && window.brands[brandIdx] ? window.brands[brandIdx].name : '';
-  
+
   var pendingTasks = todos.filter(function(t) {
     return !t.completed && (!t.date || t.date <= today);
   });
@@ -80,7 +81,8 @@ function saveFocus2Task() {
   
   var today = new Date().toISOString().slice(0, 10);
   var isLife = getCurrentMode() === 'life';
-  var brandIdx = parseInt(document.getElementById('brand')?.value || '0');
+  var _brandElJ2 = document.getElementById('brand'); // v30.1: ES5 fix
+  var brandIdx = parseInt((_brandElJ2 ? _brandElJ2.value : null) || '0');
   var brand = !isLife && window.brands && window.brands[brandIdx] ? window.brands[brandIdx].name : '';
   
   var newTask = {

@@ -1477,7 +1477,8 @@ function _renderFocus2CategoriesActual() {
   }
   
   var isLife = getCurrentMode() === 'life';
-  var brandIdx = parseInt(document.getElementById('brand')?.value || '0');
+  var _brandEl1 = document.getElementById('brand'); // v30.1: ES5 fix
+  var brandIdx = parseInt((_brandEl1 ? _brandEl1.value : null) || '0');
   var brand = window.brands && window.brands[brandIdx] ? window.brands[brandIdx].name : '';
   var allCategories = window.todoCategories || [];
   
@@ -3002,18 +3003,23 @@ function closeFocus2NewTask() {
  * v10.5.25: Save new task from modal
  */
 function saveFocus2NewTask() {
-  var text = document.getElementById('focus2NewTaskText')?.value?.trim();
+  var _txtEl = document.getElementById('focus2NewTaskText'); // v30.1: ES5 fix
+  var text = _txtEl && _txtEl.value ? _txtEl.value.trim() : '';
   if (!text) {
     showToast('Please enter a task', 'warning');
     return;
   }
   
-  var category = document.getElementById('focus2NewTaskCategory')?.value || '';
-  var date = document.getElementById('focus2NewTaskDate')?.value || ''; // v12.0.1: Default to no date
-  var notes = document.getElementById('focus2NewTaskNotes')?.value || '';
-  
+  var _catEl = document.getElementById('focus2NewTaskCategory'); // v30.1: ES5 fix
+  var category = (_catEl ? _catEl.value : null) || '';
+  var _dateEl = document.getElementById('focus2NewTaskDate'); // v30.1: ES5 fix
+  var date = (_dateEl ? _dateEl.value : null) || ''; // v12.0.1: Default to no date
+  var _notesEl = document.getElementById('focus2NewTaskNotes'); // v30.1: ES5 fix
+  var notes = (_notesEl ? _notesEl.value : null) || '';
+
   var isLife = getCurrentMode() === 'life';
-  var brandIdx = parseInt(document.getElementById('brand')?.value || '0');
+  var _brandEl2 = document.getElementById('brand'); // v30.1: ES5 fix
+  var brandIdx = parseInt((_brandEl2 ? _brandEl2.value : null) || '0');
   var brand = !isLife && window.brands && window.brands[brandIdx] ? window.brands[brandIdx].name : '';
   
   var newTask = {
@@ -3239,7 +3245,8 @@ function updateFocus2TaskTitle() {
   if (!focus2CurrentTaskId) return;
   var task = todos.find(function(t) { return t.id === focus2CurrentTaskId; });
   if (!task) return;
-  task.text = document.getElementById('focus2TaskDetailTitle')?.value || task.text;
+  var _titleEl = document.getElementById('focus2TaskDetailTitle'); // v30.1: ES5 fix
+  task.text = (_titleEl ? _titleEl.value : null) || task.text;
   saveTodos();
   renderFocus2Categories();
 }
@@ -3248,7 +3255,8 @@ function updateFocus2TaskCategory() {
   if (!focus2CurrentTaskId) return;
   var task = todos.find(function(t) { return t.id === focus2CurrentTaskId; });
   if (!task) return;
-  task.category = document.getElementById('focus2TaskDetailCategory')?.value || '';
+  var _detCatEl = document.getElementById('focus2TaskDetailCategory'); // v30.1: ES5 fix
+  task.category = (_detCatEl ? _detCatEl.value : null) || '';
   saveTodos();
   renderFocus2Categories();
 }
@@ -3257,7 +3265,8 @@ function updateFocus2TaskBrand() {
   if (!focus2CurrentTaskId) return;
   var task = todos.find(function(t) { return t.id === focus2CurrentTaskId; });
   if (!task) return;
-  var brand = document.getElementById('focus2TaskDetailBrand')?.value || '';
+  var _detBrandEl = document.getElementById('focus2TaskDetailBrand'); // v30.1: ES5 fix
+  var brand = (_detBrandEl ? _detBrandEl.value : null) || '';
   task.brand = brand;
   task.isLife = brand === '_life';
   saveTodos();
@@ -3278,7 +3287,8 @@ function updateFocus2TaskDate() {
   if (!focus2CurrentTaskId) return;
   var task = todos.find(function(t) { return t.id === focus2CurrentTaskId; });
   if (!task) return;
-  task.date = document.getElementById('focus2TaskDetailDate')?.value || '';
+  var _detDateEl = document.getElementById('focus2TaskDetailDate'); // v30.1: ES5 fix
+  task.date = (_detDateEl ? _detDateEl.value : null) || '';
   saveTodos();
   renderFocus2Categories();
   renderFocus2MiniCalendar();
@@ -3288,7 +3298,8 @@ function updateFocus2TaskNotes() {
   if (!focus2CurrentTaskId) return;
   var task = todos.find(function(t) { return t.id === focus2CurrentTaskId; });
   if (!task) return;
-  task.notes = document.getElementById('focus2TaskDetailNotes')?.value || '';
+  var _detNotesEl = document.getElementById('focus2TaskDetailNotes'); // v30.1: ES5 fix
+  task.notes = (_detNotesEl ? _detNotesEl.value : null) || '';
   saveTodos();
 }
 
@@ -4272,9 +4283,10 @@ function toggleFocus2Task(taskId) {
 function updateFocus2Stats() {
   var today = new Date().toISOString().slice(0, 10);
   var isLife = getCurrentMode() === 'life';
-  var brandIdx = parseInt(document.getElementById('brand')?.value || '0');
+  var _brandEl3 = document.getElementById('brand'); // v30.1: ES5 fix
+  var brandIdx = parseInt((_brandEl3 ? _brandEl3.value : null) || '0');
   var brand = window.brands && window.brands[brandIdx] ? window.brands[brandIdx].name : '';
-  
+
   // v10.5.25: Count ALL tasks for current mode, not just today's
   var relevantTodos = todos.filter(function(t) {
     if (isLife) {

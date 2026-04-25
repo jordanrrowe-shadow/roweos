@@ -1333,7 +1333,7 @@ function showSectionHelpDropdown(btn, sectionId) {
   var feedbackArea = sectionToArea[sectionId] || sectionId;
   var hasTour = GUIDED_TOURS && GUIDED_TOURS[sectionId] && GUIDED_TOURS[sectionId].length > 0;
   var config = _pageLandingConfigs[sectionId];
-  var sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'grouped';
+  var sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'expanded'; // v30.1
   var showPrefs = !!config; // v26.3: Show skip landing prefs in all sidebar modes
   var prefs = getSectionPrefs(sectionId);
 
@@ -2391,7 +2391,8 @@ function deleteScheduledTask(taskId) {
 // v9.1.14: AUTOMATION NOTIFICATION CENTER
 // ═══════════════════════════════════════════════════════════════════════════════
 
-var completedAutomations = JSON.parse(localStorage.getItem('roweos_completed_automations') || '[]');
+// v30.1: Guard JSON.parse with Array.isArray check and try/catch
+var completedAutomations = (function() { try { var _d = JSON.parse(localStorage.getItem('roweos_completed_automations') || '[]'); return Array.isArray(_d) ? _d : []; } catch(e) { return []; } })();
 var notificationCenterCollapsed = false;
 
 function saveCompletedAutomations() {
@@ -3007,9 +3008,9 @@ function daysSince(date) {
 }
 
 async function executeScheduledTask(task, idx) {
-  // v24.25: Flag so pipeline outbox steps auto-send emails instead of just queuing
-  window._runningFromScheduler = true;
-  setTimeout(function() { window._runningFromScheduler = false; }, 120000); // safety clear after 2min
+  // v30.1: Scope to task ID instead of global boolean
+  if (!window._schedulerRunningTaskIds) window._schedulerRunningTaskIds = {};
+  window._schedulerRunningTaskIds[task.id] = true;
   // v20.14: Write lastRun IMMEDIATELY to prevent double-execution from concurrent scheduler checks
   writeLastRunById(task.id, new Date().toISOString());
   console.log('[Scheduler] Executing task:', task.name, 'Action:', task.action);
@@ -3017,9 +3018,13 @@ async function executeScheduledTask(task, idx) {
   // v23.11: Check if stopped before even starting
   if (task.id && typeof isAutomationStopped === 'function' && isAutomationStopped(task.id)) {
     markAutomationDone(task.id);
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1: cleanup
     showToast('Automation was stopped', 'warning');
     return;
   }
+
+  // v30.1: Mark running for all task types (was only done for research)
+  if (typeof markAutomationRunning === 'function') markAutomationRunning(task.id, 'standard');
 
   // v19.2: Resolve brand EARLY — before image/pipeline/post early-return paths
   var brandIdx = task.brandIdx !== undefined && task.brandIdx !== '' ? parseInt(task.brandIdx) : 0;
@@ -3065,6 +3070,8 @@ async function executeScheduledTask(task, idx) {
       writeLastRunById(task.id, new Date().toISOString());
       showToast('Image generation failed: ' + imgErr.message, 'error');
     }
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3091,6 +3098,8 @@ async function executeScheduledTask(task, idx) {
       writeLastRunById(task.id, new Date().toISOString());
       showToast('Video generation failed: ' + vidErr.message, 'error');
     }
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3148,10 +3157,13 @@ async function executeScheduledTask(task, idx) {
       console.error('[Scheduler] Pipeline error:', plErr);
       if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, false);
       if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, false, plErr.message);
+      if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, 'Pipeline failed: ' + plErr.message); // v30.1
       showToast('Pipeline "' + task.name + '" failed: ' + plErr.message, 'error');
       // v22.56: Write lastRun on failure to prevent infinite retry loop
       writeLastRunById(task.id, new Date().toISOString());
     }
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3163,12 +3175,20 @@ async function executeScheduledTask(task, idx) {
       showToast('No content for social post', 'error');
       if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, false, 'No content provided');
       if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, false);
+      if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, 'No content provided'); // v30.1
+      writeLastRunById(task.id, new Date().toISOString()); // v30.1
+      if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+      delete window._schedulerRunningTaskIds[task.id]; // v30.1
       return;
     }
     if (postPlatforms.length === 0) {
       showToast('No platforms selected for post', 'error');
       if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, false, 'No platforms selected');
       if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, false);
+      if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, 'No platforms selected'); // v30.1
+      writeLastRunById(task.id, new Date().toISOString()); // v30.1
+      if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+      delete window._schedulerRunningTaskIds[task.id]; // v30.1
       return;
     }
     showToast('Posting to social: ' + task.name, 'info');
@@ -3276,6 +3296,8 @@ async function executeScheduledTask(task, idx) {
       writeLastRunById(task.id, _pTs);
       // v18.5: Show results panel for single workflow
       showSingleWorkflowResultsPanel(task, _pSuccess, _pMsg);
+      if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+      delete window._schedulerRunningTaskIds[task.id]; // v30.1
     });
     return;
   }
@@ -3293,6 +3315,9 @@ async function executeScheduledTask(task, idx) {
       showToast('No recipient for email', 'error');
       if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, false, 'No recipient');
       if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, false);
+      writeLastRunById(task.id, new Date().toISOString()); // v30.1
+      if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+      delete window._schedulerRunningTaskIds[task.id]; // v30.1
       return;
     }
     showToast('Sending email: ' + emailSubject, 'info');
@@ -3408,9 +3433,12 @@ async function executeScheduledTask(task, idx) {
     } catch (emailErr) {
       if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, false, emailErr.message);
       if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, false);
+      if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, emailErr.message); // v30.1
       writeLastRunById(task.id, new Date().toISOString());
       showToast('Email failed: ' + emailErr.message, 'error');
     }
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3445,6 +3473,8 @@ async function executeScheduledTask(task, idx) {
     writeLastRunById(task.id, _ctTs);
     showToast('Task created: ' + _ctText, 'success');
     showSingleWorkflowResultsPanel(task, true, _ctResult);
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3467,6 +3497,8 @@ async function executeScheduledTask(task, idx) {
     if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, true, 'Reminder: ' + _remTitle);
     if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, 'Reminder: ' + _remTitle + (_remText ? ' - ' + _remText : ''));
     writeLastRunById(task.id, _remTs);
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3480,6 +3512,8 @@ async function executeScheduledTask(task, idx) {
     if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, 'Notification: ' + _nfText);
     // v20.11: Write lastRun by ID (not index)
     writeLastRunById(task.id, _nfTs);
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3559,6 +3593,8 @@ async function executeScheduledTask(task, idx) {
     // v20.11: Write lastRun by ID (not index)
     writeLastRunById(task.id, _pgTs);
     showToast(_pgResult, 'success');
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3621,6 +3657,8 @@ async function executeScheduledTask(task, idx) {
     if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, _cgResult);
     writeLastRunById(task.id, _cgTs);
     showToast(_cgResult, 'success');
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3631,6 +3669,8 @@ async function executeScheduledTask(task, idx) {
       showToast('No research query provided', 'error');
       if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, false, 'No research query');
       writeLastRunById(task.id, new Date().toISOString());
+      if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+      delete window._schedulerRunningTaskIds[task.id]; // v30.1
       return;
     }
     // Enrich with brand context
@@ -3662,43 +3702,11 @@ async function executeScheduledTask(task, idx) {
       showSingleWorkflowResultsPanel(task, false, _drErrMsg);
     }
     if (typeof markAutomationDone === 'function') markAutomationDone(task.id);
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
-  // v18.5: Handle "image" action — direct image generation, no extra AI call
-  if (task.action === 'image') {
-    var imgPrompt = task.target && task.target.text ? task.target.text : (task.description || '');
-    if (!imgPrompt) {
-      showToast('No image prompt provided', 'error');
-      if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, false, 'No image prompt');
-      return;
-    }
-    showToast('Generating image: ' + task.name, 'info');
-    try {
-      // v18.8: Pass reference image + provider/model from config
-      var _imgOpts2 = {};
-      if (task.config && task.config.referenceImage) _imgOpts2.referenceImages = [task.config.referenceImage];
-      else if (task.target && task.target.referenceImage) _imgOpts2.referenceImages = [task.target.referenceImage];
-      else if (window._wfRefImages && window._wfRefImages[String(task.id)]) _imgOpts2.referenceImages = [window._wfRefImages[String(task.id)]];
-      if (task.config && task.config.provider) _imgOpts2.provider = task.config.provider;
-      if (task.config && task.config.imageModel) _imgOpts2.model = task.config.imageModel;
-      var imgResult = await generateImageWithNanobanana(imgPrompt, _imgOpts2);
-      var _imgTs = new Date().toISOString();
-      if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, true);
-      if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, true, 'Image generated', { imageUrl: typeof imgResult === 'string' && imgResult.indexOf('data:image') === 0 ? imgResult : null });
-      // v18.6: Save to task history so Focus can find it
-      if (typeof saveTaskResult === 'function') saveTaskResult(task, idx, typeof imgResult === 'string' ? imgResult : 'Image generated');
-      // v20.11: Write lastRun by ID (not index)
-      writeLastRunById(task.id, _imgTs);
-      showToast('Image generated!', 'success');
-      showSingleWorkflowResultsPanel(task, true, typeof imgResult === 'string' ? imgResult : 'Image generated');
-    } catch(imgErr2) {
-      if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, false, imgErr2.message);
-      if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, false);
-      showToast('Image generation failed: ' + imgErr2.message, 'error');
-    }
-    return;
-  }
+  // v30.1: Removed dead code — second image handler was unreachable (first handler at top returns)
 
   // Build prompt based on action type
   var prompt = buildTaskPrompt(task);
@@ -3717,6 +3725,8 @@ async function executeScheduledTask(task, idx) {
     }
     // v13.9: Track in Automations Lab history
     if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, true, 'Reminder sent');
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+    delete window._schedulerRunningTaskIds[task.id]; // v30.1
     return;
   }
 
@@ -3761,6 +3771,8 @@ async function executeScheduledTask(task, idx) {
       showToast('No API key for ' + provider + '. Task skipped.', 'error');
       // v22.56: Write lastRun even on skip to prevent infinite retry loop
       writeLastRunById(task.id, new Date().toISOString());
+      if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
+      delete window._schedulerRunningTaskIds[task.id]; // v30.1
       return;
     }
 
@@ -3816,8 +3828,8 @@ async function executeScheduledTask(task, idx) {
       if (typeof addCompletedAutomation === 'function') {
         addCompletedAutomation(task, true);
       }
-      // v13.9: Track in Automations Lab history
-      if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, true, response.substring(0, 200));
+      // v30.1: Don't truncate history — full response stored (addAutoLabHistory handles its own limits)
+      if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, true, response);
 
       // v20.11: Write lastRun by ID (not index) — also store result preview
       var apiTs = new Date().toISOString();
@@ -3841,6 +3853,9 @@ async function executeScheduledTask(task, idx) {
     // v18.5: Show failure results panel
     showSingleWorkflowResultsPanel(task, false, error.message);
   }
+  // v30.1: Always clean up running state at end of AI task path
+  if (typeof markAutomationDone === 'function') markAutomationDone(task.id);
+  delete window._schedulerRunningTaskIds[task.id];
 }
 
 function buildTaskPrompt(task) {
@@ -4162,9 +4177,10 @@ function saveTaskResult(task, idx, result) {
   // v10.5.25: Save to brand's Library (Scheduled Outputs folder) with rich text
   if (task.brand && result) {
     // Find brand index
-    var brandIdx = brands.findIndex(function(b) { return b.name === task.brand; });
+    // v30.1: Match by shortName too (task.brand is usually shortName)
+    var brandIdx = brands.findIndex(function(b) { return b.name === task.brand || b.shortName === task.brand; });
     if (brandIdx === -1) brandIdx = 0;
-    
+
     // Get the brand's library
     var lib = getLibraryForBrandIndex(brandIdx);
     if (!lib.files) lib.files = [];

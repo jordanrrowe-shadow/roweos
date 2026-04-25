@@ -18,8 +18,13 @@ function generateCodeChallenge(verifier) {
     return btoa(String.fromCharCode.apply(null, new Uint8Array(hash))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   });
 }
+// v30.1: Use crypto.getRandomValues instead of Math.random for OAuth state
 function generateState() {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  var arr = new Uint8Array(24);
+  crypto.getRandomValues(arr);
+  var str = '';
+  for (var i = 0; i < arr.length; i++) str += String.fromCharCode(arr[i]);
+  return btoa(str).replace(/[+/=]/g, function(c) { return c === '+' ? '-' : c === '/' ? '_' : ''; }).substring(0, 24);
 }
 
 // v18.0: Per-brand/per-life-profile social connection scoping
@@ -584,7 +589,7 @@ function connectTikTok() {
   }
 
   var scope = getSocialKeyScope();
-  var state = 'tiktok' + scope + '_' + Math.random().toString(36).substring(2, 10);
+  var state = 'tiktok' + scope + '_' + generateState().substring(0, 10); // v30.1: Use crypto-safe state
   // v20.12: Append UID for Firestore token storage
   if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
     state += '~u:' + firebase.auth().currentUser.uid;
@@ -1458,7 +1463,7 @@ function renderPendingApproval() {
       html += '</div>';
     } else if (item.type === 'social' && item.raw) {
       // Social post expanded preview
-      var socialContent = (item.raw.content || '').replace(/\n/g, '<br>');
+      var socialContent = escapeHtml(item.raw.content || '').replace(/\n/g, '<br>'); // v30.1: XSS fix
       html += '<div style="font-size:13px;color:var(--text-primary);line-height:1.6;padding:12px;background:var(--bg-secondary);border-radius:8px;border:1px solid var(--border-color);white-space:pre-wrap;">' + socialContent + '</div>';
       if (item.raw.imageUrl) html += '<img src="' + escapeHtml(item.raw.imageUrl) + '" style="max-width:200px;border-radius:8px;margin-top:8px;">';
     }
@@ -1505,6 +1510,7 @@ function pendingApprovalEditInMail(id) {
 }
 
 // v25.4: Post to TikTok via Content Posting API
+// v30.1: getSocialToken returns a Promise — must chain properly
 function postToTikTok(content, imageBase64) {
   // TikTok requires media — text-only not supported
   if (!imageBase64) {
@@ -1512,40 +1518,41 @@ function postToTikTok(content, imageBase64) {
   }
   // For now, use Photo Mode for image posts
   // Video posting requires more complex upload flow
-  var token = getSocialToken('tiktok');
-  if (!token) {
-    return Promise.resolve({ success: false, platform: 'tiktok', error: 'TikTok not connected' });
-  }
-
-  // TikTok Photo Mode: POST /v2/post/publish/content/init/
-  return fetch('https://open.tiktokapis.com/v2/post/publish/content/init/', {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      post_info: {
-        title: content.substring(0, 2200),
-        privacy_level: 'PUBLIC_TO_EVERYONE',
-        disable_comment: false
-      },
-      source_info: {
-        source: 'PULL_FROM_URL',
-        photo_images: [imageBase64]
-      },
-      post_mode: 'DIRECT_POST',
-      media_type: 'PHOTO'
-    })
-  })
-  .then(function(resp) { return resp.json(); })
-  .then(function(data) {
-    if (data.error && data.error.code !== 'ok') {
-      return { success: false, platform: 'tiktok', error: data.error.message || 'TikTok post failed' };
+  return getSocialToken('tiktok').then(function(tokenData) {
+    var token = tokenData && tokenData.accessToken ? tokenData.accessToken : (typeof tokenData === 'string' ? tokenData : '');
+    if (!token) {
+      return { success: false, platform: 'tiktok', error: 'TikTok not connected' };
     }
-    return { success: true, platform: 'tiktok', postId: data.data ? data.data.publish_id : null };
-  })
-  .catch(function(err) {
+
+    // TikTok Photo Mode: POST /v2/post/publish/content/init/
+    return fetch('https://open.tiktokapis.com/v2/post/publish/content/init/', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        post_info: {
+          title: content.substring(0, 2200),
+          privacy_level: 'PUBLIC_TO_EVERYONE',
+          disable_comment: false
+        },
+        source_info: {
+          source: 'PULL_FROM_URL',
+          photo_images: [imageBase64]
+        },
+        post_mode: 'DIRECT_POST',
+        media_type: 'PHOTO'
+      })
+    })
+    .then(function(resp) { return resp.json(); })
+    .then(function(data) {
+      if (data.error && data.error.code !== 'ok') {
+        return { success: false, platform: 'tiktok', error: data.error.message || 'TikTok post failed' };
+      }
+      return { success: true, platform: 'tiktok', postId: data.data ? data.data.publish_id : null };
+    });
+  }).catch(function(err) {
     return { success: false, platform: 'tiktok', error: err.message };
   });
 }
@@ -2981,6 +2988,7 @@ function executeWorkflow(workflow) {
   }
 
   var context = {};
+  context._workflowName = workflow.name || ''; // v30.1: Pass workflow name to steps
   // v19.2: Use workflow's saved brandIdx for brand context
   if (typeof brands !== 'undefined' && brands[brandIdx]) {
     context.brandName = brands[brandIdx].shortName || brands[brandIdx].name;
@@ -3078,8 +3086,8 @@ function executeWorkflow(workflow) {
       } else {
         showToast('Workflow completed with errors (' + completedSteps.length + '/' + total + ' steps succeeded)', 'warning');
       }
-      // v18.5: Sync lastRun to automations storage
-      if (workflow.id) syncLastRunToAutomations(workflow.id, new Date().toISOString());
+      // v30.1: Use writeLastRunById (syncLastRunToAutomations is lower-level)
+      if (workflow.id && typeof writeLastRunById === 'function') writeLastRunById(workflow.id, new Date().toISOString());
       // v18.5: Show pipeline results panel with image previews
       showPipelineResultsPanel(workflow, completedSteps, failedSteps, context);
       return Promise.resolve({ completedSteps: completedSteps, failedSteps: failedSteps, context: context, _runningCard: _runningCard });
@@ -3137,7 +3145,7 @@ function executeWorkflow(workflow) {
               if (thinkBadge2) thinkBadge2.remove();
             }
             showToast('Pipeline stopped at step ' + step.stepId + ' (rejected)', 'warning');
-            if (workflow.id) syncLastRunToAutomations(workflow.id, new Date().toISOString());
+            if (workflow.id && typeof writeLastRunById === 'function') writeLastRunById(workflow.id, new Date().toISOString()); // v30.1
             showPipelineResultsPanel(workflow, completedSteps, failedSteps, context);
             return Promise.resolve({ completedSteps: completedSteps, failedSteps: failedSteps, context: context });
           }
@@ -4038,8 +4046,7 @@ function executeWorkflowStep(step, context) {
     }
     // v22.23: Queue to Outbox instead of auto-sending
     if (step.config && step.config.queueToOutbox && typeof addToMailOutbox === 'function') {
-      var pipelineName = '';
-      try { pipelineName = _pipelineName || ''; } catch(e) {}
+      var pipelineName = (context && context._workflowName) || ''; // v30.1: Read from context instead of undefined _pipelineName
       addToMailOutbox({
         to: emailTo,
         from: rawEmailFrom,
@@ -4292,8 +4299,7 @@ function executeWorkflowStep(step, context) {
     if (step.config && step.config.bccSelf && outboxFrom) {
       outboxBcc.push(outboxFrom);
     }
-    var pipelineName = '';
-    try { pipelineName = _pipelineName || ''; } catch(e) {}
+    var pipelineName = (context && context._workflowName) || ''; // v30.1: Read from context
     if (typeof addToMailOutbox === 'function') {
       addToMailOutbox({
         to: outboxTo || '',
@@ -4309,8 +4315,9 @@ function executeWorkflowStep(step, context) {
         folder: (step.config && step.config.outboxFolder) || ''
       });
     }
-    // v24.25: Auto-send when running from scheduler or when autoSend config is set
-    var _shouldAutoSend = (step.config && step.config.autoSend) || window._runningFromScheduler;
+    // v30.1: Check task-scoped scheduler IDs instead of global boolean
+    var _isFromScheduler = window._schedulerRunningTaskIds && Object.keys(window._schedulerRunningTaskIds).length > 0;
+    var _shouldAutoSend = (step.config && step.config.autoSend) || _isFromScheduler;
     if (_shouldAutoSend && outboxTo && outboxFrom) {
       // Send immediately via Resend/Gmail/Outlook instead of just queuing
       var uid = '';
@@ -4385,8 +4392,7 @@ function executeWorkflowStep(step, context) {
     try { _beMcfg = JSON.parse(localStorage.getItem('roweos_mail_config') || '{}'); } catch(e) {}
     var batchFrom = (step.config && step.config.emailFrom) ? step.config.emailFrom : (_beMcfg.defaultFromAddress || getDefaultFromAddress());
     var batchTemplate = (step.config && step.config.emailTemplate) ? step.config.emailTemplate : 'professional';
-    var pipelineName = '';
-    try { pipelineName = _pipelineName || ''; } catch(e) {}
+    var pipelineName = (context && context._workflowName) || ''; // v30.1: Read from context
     var queuedCount = 0;
     var _beBrandName = (context && context.brandName) ? context.brandName : 'Brand';
     var _beAccent = '#a89878';

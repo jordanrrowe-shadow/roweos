@@ -4121,34 +4121,34 @@ function showTemplateSuccessScreen(brandName, templateName) {
   successDiv.id = 'brandTemplateSuccess';
   successDiv.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center; padding: 40px;';
   
-  successDiv.innerHTML = `
-    <div style="width: 80px; height: 80px; background: rgba(74, 222, 128, 0.1); border: 2px solid #4ade80; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 32px;">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
-    </div>
-    
-    <h2 style="font-size: var(--text-4xl); font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-4);">✓ Brand Profile Created!</h2>
-    
-    <p style="font-size: var(--text-lg); color: var(--text-secondary); max-width: 600px; margin-bottom: 32px; line-height: 1.6;">
-      We've created <strong style="color: var(--accent);">${brandName}</strong> using the <strong style="color: var(--accent);">${templateName}</strong> template as a foundation.
-    </p>
-    
-    <div style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: var(--radius-lg); padding: var(--space-6); max-width: 600px; text-align: left; margin-bottom: 32px;">
-      <div style="font-size: var(--text-base); font-weight: 600; color: var(--accent); margin-bottom: var(--space-3);">✦ Next Steps</div>
-      <div style="font-size: var(--text-base); color: var(--text-secondary); line-height: 1.6;">
-        This is a starting point. You can customize every aspect of your brand profile in the <strong>Intelligence</strong> section:
-        <br/><br/>
-        • <strong>Identity:</strong> Refine your brand voice, positioning, and philosophy<br/>
-        • <strong>Signal:</strong> Add brand guidelines and vocabulary rules<br/>
-        • <strong>Memory:</strong> Train your BrandAI with examples and context
-      </div>
-    </div>
-    
-    <button class="onboarding-btn onboarding-btn-primary" onclick="completeTemplateOnboarding()" style="font-size: var(--text-lg); padding: 14px 32px;">
-      Get Started →
-    </button>
-  `;
+  successDiv.innerHTML = '\n' + // v30.1: ES5 fix
+    '    <div style="width: 80px; height: 80px; background: rgba(74, 222, 128, 0.1); border: 2px solid #4ade80; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 32px;">\n' +
+    '      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">\n' +
+    '        <polyline points="20 6 9 17 4 12"></polyline>\n' +
+    '      </svg>\n' +
+    '    </div>\n' +
+    '    \n' +
+    '    <h2 style="font-size: var(--text-4xl); font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-4);">&#10003; Brand Profile Created!</h2>\n' +
+    '    \n' +
+    '    <p style="font-size: var(--text-lg); color: var(--text-secondary); max-width: 600px; margin-bottom: 32px; line-height: 1.6;">\n' +
+    '      We\'ve created <strong style="color: var(--accent);">' + brandName + '</strong> using the <strong style="color: var(--accent);">' + templateName + '</strong> template as a foundation.\n' +
+    '    </p>\n' +
+    '    \n' +
+    '    <div style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: var(--radius-lg); padding: var(--space-6); max-width: 600px; text-align: left; margin-bottom: 32px;">\n' +
+    '      <div style="font-size: var(--text-base); font-weight: 600; color: var(--accent); margin-bottom: var(--space-3);">&#10022; Next Steps</div>\n' +
+    '      <div style="font-size: var(--text-base); color: var(--text-secondary); line-height: 1.6;">\n' +
+    '        This is a starting point. You can customize every aspect of your brand profile in the <strong>Intelligence</strong> section:\n' +
+    '        <br/><br/>\n' +
+    '        &#8226; <strong>Identity:</strong> Refine your brand voice, positioning, and philosophy<br/>\n' +
+    '        &#8226; <strong>Signal:</strong> Add brand guidelines and vocabulary rules<br/>\n' +
+    '        &#8226; <strong>Memory:</strong> Train your BrandAI with examples and context\n' +
+    '      </div>\n' +
+    '    </div>\n' +
+    '    \n' +
+    '    <button class="onboarding-btn onboarding-btn-primary" onclick="completeTemplateOnboarding()" style="font-size: var(--text-lg); padding: 14px 32px;">\n' +
+    '      Get Started &#8594;\n' +
+    '    </button>\n' +
+    '  ';
   
   var wizard = document.querySelector('.onboarding-wizard');
   if (wizard) {
@@ -4624,35 +4624,35 @@ async function getApiKey(provider) {
 async function generateBrandFromOnboarding() {
   try {
     // Build prompt for AI
-    var prompt = `You are building a brand intelligence system. Based on this information, generate a complete brand profile.
-
-INPUT:
-- Brand Name: ${onboardingData.brandName}
-- Tagline: ${onboardingData.tagline || 'Not provided'}
-- Voice Attributes: ${onboardingData.voice.join(', ')}
-- Target Audience: ${onboardingData.audience}
-- What They Value: ${onboardingData.audienceValues.join(', ')}
-- Brand Promise: ${onboardingData.promise}
-- Products: ${onboardingData.positioning}
-- Location: ${onboardingData.location || 'Not specified'}
-- Contact: ${onboardingData.email}
-
-GENERATE:
-Return a JSON object with these fields:
-{
-  "philosophy": "2-3 sentence brand philosophy",
-  "tone": "Writing style guidance (1 sentence)",
-  "vocabDo": "20 comma-separated words this brand should use",
-  "vocabDont": "15 comma-separated words to avoid",
-  "constraints": "3-4 sentences of brand rules and guidelines",
-  "contentPillars": ["Pillar 1", "Pillar 2", "Pillar 3"],
-  "customOperations": [
-    {"name": "Operation Name", "desc": "Description", "category": "marketing"}
-  ],
-  "successCriteria": ["Criterion 1", "Criterion 2", "Criterion 3"]
-}
-
-Return ONLY valid JSON, no markdown, no explanation.`;
+    var prompt = 'You are building a brand intelligence system. Based on this information, generate a complete brand profile.\n' + // v30.1: ES5 fix
+      '\n' +
+      'INPUT:\n' +
+      '- Brand Name: ' + onboardingData.brandName + '\n' +
+      '- Tagline: ' + (onboardingData.tagline || 'Not provided') + '\n' +
+      '- Voice Attributes: ' + onboardingData.voice.join(', ') + '\n' +
+      '- Target Audience: ' + onboardingData.audience + '\n' +
+      '- What They Value: ' + onboardingData.audienceValues.join(', ') + '\n' +
+      '- Brand Promise: ' + onboardingData.promise + '\n' +
+      '- Products: ' + onboardingData.positioning + '\n' +
+      '- Location: ' + (onboardingData.location || 'Not specified') + '\n' +
+      '- Contact: ' + onboardingData.email + '\n' +
+      '\n' +
+      'GENERATE:\n' +
+      'Return a JSON object with these fields:\n' +
+      '{\n' +
+      '  "philosophy": "2-3 sentence brand philosophy",\n' +
+      '  "tone": "Writing style guidance (1 sentence)",\n' +
+      '  "vocabDo": "20 comma-separated words this brand should use",\n' +
+      '  "vocabDont": "15 comma-separated words to avoid",\n' +
+      '  "constraints": "3-4 sentences of brand rules and guidelines",\n' +
+      '  "contentPillars": ["Pillar 1", "Pillar 2", "Pillar 3"],\n' +
+      '  "customOperations": [\n' +
+      '    {"name": "Operation Name", "desc": "Description", "category": "marketing"}\n' +
+      '  ],\n' +
+      '  "successCriteria": ["Criterion 1", "Criterion 2", "Criterion 3"]\n' +
+      '}\n' +
+      '\n' +
+      'Return ONLY valid JSON, no markdown, no explanation.';
 
     // Call API
     var response = await fetch('https://api.anthropic.com/v1/messages', {

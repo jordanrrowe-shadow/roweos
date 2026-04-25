@@ -446,7 +446,7 @@ function loadBrandKnowledge(brandKey) {
   
   // v9.1.14: Load insights from per-brand knowledge store (document uploads)
   // This takes priority over the brandKnowledgeData cache
-  var brandName = brands[brandIdx]?.name;
+  var brandName = (brands[brandIdx] ? brands[brandIdx].name : ''); // v30.1: ES5 fix
   // v27.0: Null-check knowledge-insights element (may not be in DOM yet)
   var _kiEl = document.getElementById('knowledge-insights');
   if (_kiEl) {
@@ -992,7 +992,7 @@ function loadBrandInsights() {
   }
   
   if (countEl) {
-    countEl.textContent = knowledge?.insights?.length || 0;
+    countEl.textContent = (knowledge && knowledge.insights ? knowledge.insights.length : 0); // v30.1: ES5 fix
   }
 }
 
@@ -1457,7 +1457,7 @@ async function processLifeIdentityFile(file, docType, instructions) {
     syncLifeAIToFirestore({ memory: JSON.stringify(lifeMemory) });
 
     renderLifeIdentityDocs();
-    showToast('Document analyzed - ' + (insights?.insights?.length || 0) + ' insights extracted', 'success');
+    showToast('Document analyzed - ' + ((insights && insights.insights ? insights.insights.length : 0)) + ' insights extracted', 'success'); // v30.1: ES5 fix
 
     // v14.0: Auto-show document insights after successful processing
     if (typeof showDocInsights === 'function' && docId) {
@@ -1834,7 +1834,7 @@ async function reanalyzeDocument() {
       localStorage.setItem('roweos_life_memory', JSON.stringify(lifeMemory));
 
       renderLifeIdentityDocs();
-      showToast('Document re-analyzed - ' + (insights?.insights?.length || 0) + ' insights', 'success');
+      showToast('Document re-analyzed - ' + ((insights && insights.insights ? insights.insights.length : 0)) + ' insights', 'success'); // v30.1: ES5 fix
     } catch (error) {
       showToast('Error re-analyzing: ' + error.message, 'error');
     } finally {
@@ -1852,7 +1852,7 @@ async function reanalyzeDocument() {
       var summary = await extractIdentityInsights(doc.content || '', doc.name, brandName);
 
       var brandKey = getBrandMemoryKey(selectedBrand);
-      var docIndex = (brandMemory[brandKey]?.documents || []).findIndex(function(d) { return d.id === doc.id; });
+      var docIndex = ((brandMemory[brandKey] && brandMemory[brandKey].documents) || []).findIndex(function(d) { return d.id === doc.id; }); // v30.1: ES5 fix
       if (docIndex >= 0 && summary) {
         // v24.11: Store summary string (not full object) to prevent [object Object] display
         brandMemory[brandKey].documents[docIndex].summary = typeof summary === 'string' ? summary : (summary.summary || '');
@@ -2575,7 +2575,8 @@ function addApplyToIdentityButton(section, displayName) {
   if (document.getElementById('applyToIdentityBtn')) return;
   
   // Find the followup container (conversation input area)
-  var followupContainer = document.getElementById('agentConversation')?.querySelector('.chat-input-v2');
+  var _agConv = document.getElementById('agentConversation'); // v30.1: ES5 fix
+  var followupContainer = _agConv ? _agConv.querySelector('.chat-input-v2') : null;
   if (!followupContainer) return;
   
   // Create the button
@@ -2655,19 +2656,19 @@ async function generateApplyPreview(section, displayName) {
     }
     
     // v9.1.14: Ask for both new content AND a refinement summary
-    var prompt = `Based on this conversation, generate the updated content for the "${displayName}" section of the brand identity.
-
-Current ${displayName} content:
-${currentContent || '(empty)'}
-
-Conversation:
-${conversationSummary.substring(0, 6000)}
-
-Return a JSON object with exactly these two fields:
-1. "content": The new "${displayName}" content (2-4 substantive sentences that incorporate the refinements discussed)
-2. "summary": A brief 1-sentence summary of what was refined/changed (e.g., "Clarified target demographic focus from general consumers to luxury-seeking professionals aged 35-55")
-
-Return ONLY valid JSON, no markdown, no explanations.`;
+    var prompt = 'Based on this conversation, generate the updated content for the "' + displayName + '" section of the brand identity.\n' + // v30.1: ES5 fix
+      '\n' +
+      'Current ' + displayName + ' content:\n' +
+      (currentContent || '(empty)') + '\n' +
+      '\n' +
+      'Conversation:\n' +
+      conversationSummary.substring(0, 6000) + '\n' +
+      '\n' +
+      'Return a JSON object with exactly these two fields:\n' +
+      '1. "content": The new "' + displayName + '" content (2-4 substantive sentences that incorporate the refinements discussed)\n' +
+      '2. "summary": A brief 1-sentence summary of what was refined/changed (e.g., "Clarified target demographic focus from general consumers to luxury-seeking professionals aged 35-55")\n' +
+      '\n' +
+      'Return ONLY valid JSON, no markdown, no explanations.';
 
     var response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -2690,7 +2691,7 @@ Return ONLY valid JSON, no markdown, no explanations.`;
       throw new Error(data.error.message || 'API error');
     }
     
-    var responseText = data.content?.[0]?.text || '';
+    var responseText = (data.content && data.content[0] ? data.content[0].text : '') || ''; // v30.1: ES5 fix
     
     if (!responseText) {
       throw new Error('No content generated');
@@ -3014,11 +3015,12 @@ function loadIdentityData() {
 function migrateExistingBrandData(brand) {
   // Map old fields to new sections
   var migrations = {
-    essence: ['philosophy', 'coreBelief', 'mission', 'ethos'].filter(f => brand[f]).map(f => brand[f]).join('\n\n'),
-    voice: ['voice', 'tone', 'approach'].filter(f => brand[f]).map(f => brand[f]).join('\n\n'),
+    // v30.1: Replace arrow functions with ES5 function expressions
+    essence: ['philosophy', 'coreBelief', 'mission', 'ethos'].filter(function(f) { return brand[f]; }).map(function(f) { return brand[f]; }).join('\n\n'),
+    voice: ['voice', 'tone', 'approach'].filter(function(f) { return brand[f]; }).map(function(f) { return brand[f]; }).join('\n\n'),
     audience: brand.audience || '',
-    messaging: [brand.promise, brand.cta].filter(f => f).join('\n\n'),
-    products: [brand.products, brand.services].filter(f => f).join('\n\n'),
+    messaging: [brand.promise, brand.cta].filter(function(f) { return f; }).join('\n\n'),
+    products: [brand.products, brand.services].filter(function(f) { return f; }).join('\n\n'),
     visual: brand.visual || '',
     competitive: brand.competitive || ''
   };
@@ -4054,7 +4056,8 @@ function renderMemoryBrandPills() {
     if (!isNaN(stored) && stored >= 0 && stored < brands.length) {
       currentBrandIdx = stored;
     } else {
-      currentBrandIdx = parseInt(document.getElementById('brand')?.value || 0);
+      var _brandEl = document.getElementById('brand'); // v30.1: ES5 fix
+      currentBrandIdx = parseInt((_brandEl ? _brandEl.value : 0) || 0);
       if (isNaN(currentBrandIdx) || currentBrandIdx < 0 || currentBrandIdx >= brands.length) {
         currentBrandIdx = 0;
       }
@@ -4116,7 +4119,7 @@ function updateMemoryUI() {
   // v9.1.14: Show insight count from brand knowledge
   if (insightCountEl && brandName) {
     var knowledge = getBrandKnowledge ? getBrandKnowledge(brandName) : null;
-    insightCountEl.textContent = knowledge?.insights?.length || 0;
+    insightCountEl.textContent = (knowledge && knowledge.insights ? knowledge.insights.length : 0); // v30.1: ES5 fix
   }
   
   if (!listEl) return;
@@ -4177,37 +4180,37 @@ function removeMemoryDoc(index) {
  */
 function showDocumentRemovalModal(docName, docIndex, brandKey, brandName) {
   // Create modal HTML
-  var modalHtml = `
-    <div id="docRemovalModal" class="api-key-modal active" onclick="closeDocRemovalModal()">
-      <div class="api-key-modal-content" onclick="event.stopPropagation()" style="max-width: 500px;">
-        <h3 class="api-key-modal-title">Remove Document</h3>
-        <p class="api-key-modal-desc">Remove "${escapeHtml(docName)}" from ${escapeHtml(brandName || 'this brand')}?</p>
-        
-        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-4); margin: 20px 0;">
-          <p style="color: var(--text-primary); margin: 0 0 12px 0; font-weight: 500;">Also remove learned insights?</p>
-          <p style="color: var(--text-secondary); font-size: var(--text-base); margin: 0 0 16px 0;">
-            If you select "Yes", any brand knowledge, vocabulary, and system prompt additions extracted from this document will also be removed from the brand's memory.
-          </p>
-          
-          <div style="display: flex; gap: var(--space-3);">
-            <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; padding: 10px 16px; background: var(--bg-tertiary); border: 2px solid var(--border-color); border-radius: var(--radius-md); flex: 1; transition: all 0.2s;">
-              <input type="radio" name="removeInsights" value="yes" style="accent-color: var(--accent);">
-              <span style="color: var(--text-primary);">Yes, remove insights</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; padding: 10px 16px; background: var(--bg-tertiary); border: 2px solid var(--border-color); border-radius: var(--radius-md); flex: 1; transition: all 0.2s;">
-              <input type="radio" name="removeInsights" value="no" checked style="accent-color: var(--accent);">
-              <span style="color: var(--text-primary);">No, keep insights</span>
-            </label>
-          </div>
-        </div>
-        
-        <div class="api-key-modal-actions" style="margin-top: var(--space-6);">
-          <button class="api-key-modal-btn api-key-modal-btn-cancel" onclick="closeDocRemovalModal()">Cancel</button>
-          <button class="api-key-modal-btn api-key-modal-btn-save" onclick="confirmDocRemoval(${docIndex}, '${brandKey}', '${brandName ? brandName.replace(/'/g, "\\'") : ''}', '${docName.replace(/'/g, "\\'")}')">Remove Document</button>
-        </div>
-      </div>
-    </div>
-  `;
+  var modalHtml = '\n' + // v30.1: ES5 fix
+    '    <div id="docRemovalModal" class="api-key-modal active" onclick="closeDocRemovalModal()">\n' +
+    '      <div class="api-key-modal-content" onclick="event.stopPropagation()" style="max-width: 500px;">\n' +
+    '        <h3 class="api-key-modal-title">Remove Document</h3>\n' +
+    '        <p class="api-key-modal-desc">Remove "' + escapeHtml(docName) + '" from ' + escapeHtml(brandName || 'this brand') + '?</p>\n' +
+    '        \n' +
+    '        <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-4); margin: 20px 0;">\n' +
+    '          <p style="color: var(--text-primary); margin: 0 0 12px 0; font-weight: 500;">Also remove learned insights?</p>\n' +
+    '          <p style="color: var(--text-secondary); font-size: var(--text-base); margin: 0 0 16px 0;">\n' +
+    '            If you select "Yes", any brand knowledge, vocabulary, and system prompt additions extracted from this document will also be removed from the brand\'s memory.\n' +
+    '          </p>\n' +
+    '          \n' +
+    '          <div style="display: flex; gap: var(--space-3);">\n' +
+    '            <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; padding: 10px 16px; background: var(--bg-tertiary); border: 2px solid var(--border-color); border-radius: var(--radius-md); flex: 1; transition: all 0.2s;">\n' +
+    '              <input type="radio" name="removeInsights" value="yes" style="accent-color: var(--accent);">\n' +
+    '              <span style="color: var(--text-primary);">Yes, remove insights</span>\n' +
+    '            </label>\n' +
+    '            <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; padding: 10px 16px; background: var(--bg-tertiary); border: 2px solid var(--border-color); border-radius: var(--radius-md); flex: 1; transition: all 0.2s;">\n' +
+    '              <input type="radio" name="removeInsights" value="no" checked style="accent-color: var(--accent);">\n' +
+    '              <span style="color: var(--text-primary);">No, keep insights</span>\n' +
+    '            </label>\n' +
+    '          </div>\n' +
+    '        </div>\n' +
+    '        \n' +
+    '        <div class="api-key-modal-actions" style="margin-top: var(--space-6);">\n' +
+    '          <button class="api-key-modal-btn api-key-modal-btn-cancel" onclick="closeDocRemovalModal()">Cancel</button>\n' +
+    '          <button class="api-key-modal-btn api-key-modal-btn-save" onclick="confirmDocRemoval(' + docIndex + ', \'' + brandKey + '\', \'' + (brandName ? brandName.replace(/'/g, "\\'") : '') + '\', \'' + docName.replace(/'/g, "\\'") + '\')">Remove Document</button>\n' +
+    '        </div>\n' +
+    '      </div>\n' +
+    '    </div>\n' +
+    '  ';
   
   // Add modal to DOM
   var modalContainer = document.createElement('div');
@@ -4225,7 +4228,8 @@ function closeDocRemovalModal() {
 
 function confirmDocRemoval(docIndex, brandKey, brandName, docName) {
   // Check if user wants to remove insights
-  var removeInsights = document.querySelector('input[name="removeInsights"]:checked')?.value === 'yes';
+  var _rmEl = document.querySelector('input[name="removeInsights"]:checked'); // v30.1: ES5 fix
+  var removeInsights = (_rmEl ? _rmEl.value : '') === 'yes';
   
   // Remove document from brandMemory
   if (brandMemory[brandKey]) {
@@ -5533,9 +5537,10 @@ async function generateLifeAIRecommendations() {
 // ═══════════════════════════════════════════════════════════════
 
 // Life Rhythm Data Structures
-var lifeHabits = JSON.parse(localStorage.getItem('roweos_life_habits') || '[]');
-var lifeGoals = JSON.parse(localStorage.getItem('roweos_life_goals') || '[]');
-var lifeRoutines = JSON.parse(localStorage.getItem('roweos_life_routines') || '[]');
+// v30.1: Guard with try/catch and Array.isArray per CLAUDE.md rule
+var lifeHabits = []; try { lifeHabits = JSON.parse(localStorage.getItem('roweos_life_habits') || '[]'); if (!Array.isArray(lifeHabits)) lifeHabits = []; } catch(e) { lifeHabits = []; }
+var lifeGoals = []; try { lifeGoals = JSON.parse(localStorage.getItem('roweos_life_goals') || '[]'); if (!Array.isArray(lifeGoals)) lifeGoals = []; } catch(e) { lifeGoals = []; }
+var lifeRoutines = []; try { lifeRoutines = JSON.parse(localStorage.getItem('roweos_life_routines') || '[]'); if (!Array.isArray(lifeRoutines)) lifeRoutines = []; } catch(e) { lifeRoutines = []; }
 var lifeCalendarView = 'month';
 var lifeWeekOffset = 0;
 var lifeDragItem = null;

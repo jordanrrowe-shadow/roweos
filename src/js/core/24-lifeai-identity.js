@@ -2786,14 +2786,11 @@ function toggleSettingsExpander(id, event) {
 function renderSyncStatus(containerId) {
   var container = document.getElementById(containerId || 'syncStatusPanel');
   if (!container) return;
-  if (typeof syncEngine === 'undefined' || !syncEngine.isV4Active()) {
-    container.innerHTML = '<div style="padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;color:#888;font-size:13px;">Sync v4 not active. Migration required.</div>';
-    return;
-  }
 
+  // v30.1: Removed misleading "Sync v4 not active" early-return — v4 is disabled but v2/v3 sync works fine
   var lastSync = localStorage.getItem('roweos_v4_last_sync');
   var lastSyncText = lastSync ? new Date(parseInt(lastSync)).toLocaleString() : 'Never';
-  var queueStatus = syncEngine.getQueueStatus();
+  var queueStatus = (typeof syncEngine !== 'undefined' && typeof syncEngine.getQueueStatus === 'function') ? syncEngine.getQueueStatus() : { pending: 0, errors: 0, total: 0 };
   var deviceId = _getDeviceId();
   var deviceName = _getDeviceName();
   var isOnline = navigator.onLine;
@@ -3100,16 +3097,19 @@ function applyAccessibilityScale() {
   var appContainer = document.getElementById('app') || document.body;
   var zoomFactor = zoomLevel / 100;
   if (zoomLevel !== 100) {
+    // v30.1: Capture viewport BEFORE zoom — Safari changes innerWidth after zoom is applied
+    var _preZoomW = window.innerWidth;
+    var _preZoomH = window.innerHeight;
     appContainer.style.zoom = zoomFactor.toString();
-    // v30.1: Use PIXELS not vw/vh — Safari double-compensates vw/vh units when body has CSS zoom.
-    // 133.33vw at 75% zoom in Safari = 2327px instead of 1745px because Safari's vw already
-    // accounts for zoom. Using pixels from window.innerWidth/innerHeight avoids this.
-    var compensatedW = Math.round(window.innerWidth / zoomFactor) + 'px';
-    var compensatedH = Math.round(window.innerHeight / zoomFactor) + 'px';
-    var compensatedVh = (100 / zoomFactor) + 'vh'; // Keep vh for height (works in both browsers)
+    // v30.1: Use pixels from PRE-ZOOM viewport, not vw/vh units (Safari double-compensates vw)
+    var compensatedW = Math.round(_preZoomW / zoomFactor) + 'px';
+    var compensatedH = Math.round(_preZoomH / zoomFactor) + 'px';
     appContainer.style.setProperty('width', compensatedW, 'important');
     appContainer.style.setProperty('min-height', compensatedH, 'important');
     appContainer.style.setProperty('max-width', compensatedW, 'important');
+    // v30.2: Expose compensated viewport as CSS vars for fixed-position elements
+    root.style.setProperty('--compensated-vw', compensatedW);
+    root.style.setProperty('--zoom-factor', zoomFactor.toString());
     root.style.setProperty('max-width', compensatedW, 'important');
     root.style.setProperty('width', compensatedW, 'important');
     root.style.setProperty('overflow-x', 'hidden', 'important');
@@ -3158,9 +3158,18 @@ function applyAccessibilityScale() {
         panelViews[pv].style.setProperty('min-height', compensatedH, 'important');
       }
       panelViews[pv].style.setProperty('max-width', 'none', 'important');
-      // v30.1: Do NOT set explicit width on agentView or agentLandingContent.
-      // The CSS centering (max-width:600px + align-items:center) is mathematically correct
-      // at all zoom levels. JS overrides with stale offsetWidth measurements BREAK centering.
+      // v30.2: On MOBILE ONLY, set explicit width — position:fixed with right:0 is
+      // viewport-relative, not zoom-aware. On desktop, do NOT set width (breaks blob centering).
+      if (_preZoomW <= 768) {
+        panelViews[pv].style.setProperty('width', compensatedW, 'important');
+      }
+    }
+    // v30.2: Fixed mobile elements (header, nav) also need compensated width on mobile
+    if (_preZoomW <= 768) {
+      var mobileHeader = document.querySelector('.mobile-header-v2');
+      if (mobileHeader) mobileHeader.style.setProperty('width', compensatedW, 'important');
+      var liquidNav = document.querySelector('.liquid-nav');
+      if (liquidNav) liquidNav.style.setProperty('width', compensatedW, 'important');
     }
   } else {
     appContainer.style.zoom = '';
@@ -3170,6 +3179,8 @@ function applyAccessibilityScale() {
     root.style.removeProperty('max-width');
     root.style.removeProperty('width');
     root.style.removeProperty('overflow-x');
+    root.style.removeProperty('--compensated-vw');
+    root.style.removeProperty('--zoom-factor');
     var sidebar = document.querySelector('.sidebar');
     if (sidebar) {
       sidebar.style.removeProperty('height');

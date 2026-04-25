@@ -4,7 +4,9 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Offline pending changes queue
-var pendingChanges = JSON.parse(localStorage.getItem('roweos_pending_changes') || '[]');
+// v30.1: Guard with try/catch and Array.isArray per CLAUDE.md rule
+var pendingChanges = [];
+try { pendingChanges = JSON.parse(localStorage.getItem('roweos_pending_changes') || '[]'); if (!Array.isArray(pendingChanges)) pendingChanges = []; } catch(e) { pendingChanges = []; }
 var isOnline = navigator.onLine;
 var syncRetryCount = 0;
 var maxSyncRetries = 3;
@@ -994,7 +996,8 @@ function getModelOptions(provider, selectedModel) {
 function updateBrandProvider(brandIndex, provider) {
   console.log('[BrandModel v24.11] updateBrandProvider called: brand=' + brandIndex + ' provider=' + provider);
   if (!brandSettings[brandIndex]) {
-    brandSettings[brandIndex] = { provider: provider, model: '' };
+    // v30.1: Default to claude-sonnet-4-6 (not empty string which is falsy and triggers bad fallbacks)
+    brandSettings[brandIndex] = { provider: provider, model: 'claude-sonnet-4-6' };
   } else {
     brandSettings[brandIndex].provider = provider;
   }
@@ -1315,12 +1318,12 @@ function goToOnboardingStep(step) {
       var gmailCard = document.getElementById('onboardingEmailGmailCard');
       var outlookCard = document.getElementById('onboardingEmailOutlookCard');
       if (config.gmailEmail && gmailStatus) {
-        gmailStatus.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#22c55e" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M20 6L9 17l-5-5"/></svg>' + config.gmailEmail;
+        gmailStatus.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#22c55e" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M20 6L9 17l-5-5"/></svg>' + escapeHtml(config.gmailEmail || ''); // v30.1: XSS fix
         gmailStatus.style.color = '#22c55e';
         if (gmailCard) gmailCard.dataset.connected = 'true';
       }
       if (config.outlookEmail && outlookStatus) {
-        outlookStatus.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#22c55e" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M20 6L9 17l-5-5"/></svg>' + config.outlookEmail;
+        outlookStatus.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#22c55e" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M20 6L9 17l-5-5"/></svg>' + escapeHtml(config.outlookEmail || ''); // v30.1: XSS fix
         outlookStatus.style.color = '#22c55e';
         if (outlookCard) outlookCard.dataset.connected = 'true';
       }
@@ -3513,7 +3516,7 @@ function buildLifeIdentityCards(profile) {
   html += '      <p>Your personal information</p>';
   html += '    </div>';
   html += '    <div class="identity-card-meta">';
-  html += '      <span class="identity-card-badge ai" id="badge-life-profile-ai" style="' + (profile.aiInsights?.profile ? '' : 'display:none;') + '">AI</span>';
+  html += '      <span class="identity-card-badge ai" id="badge-life-profile-ai" style="' + ((profile.aiInsights && profile.aiInsights.profile) ? '' : 'display:none;') // v30.1: ES5 fix + '">AI</span>';
   html += '    </div>';
   html += '    <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
   html += '  </div>';
@@ -3528,7 +3531,7 @@ function buildLifeIdentityCards(profile) {
   html += '        <span class="identity-field-hint">(click to edit)</span>';
   html += '      </div>';
   html += '      <div class="identity-ai-insights">';
-  html += '        <div class="identity-ai-richtext" contenteditable="true" id="life-profile-ai-notes" data-placeholder="LifeAI-generated insights and notes about you..." onblur="saveLifeAIInsightField(\'profile\', this.innerText)">' + formatAIInsights(profile.aiInsights?.profile || '') + '</div>';
+  html += '        <div class="identity-ai-richtext" contenteditable="true" id="life-profile-ai-notes" data-placeholder="LifeAI-generated insights and notes about you..." onblur="saveLifeAIInsightField(\'profile\', this.innerText)">' + formatAIInsights((profile.aiInsights && profile.aiInsights.profile) || '') // v30.1: ES5 fix + '</div>';
   html += '      </div>';
   html += '      <div style="display: flex; gap: 8px; flex-wrap: wrap;">';
   html += '      <button class="identity-ai-refine-btn" onclick="refineLifeIdentityWithAI(\'profile\', \'Profile & Personal Info\')">';
@@ -3623,7 +3626,7 @@ function buildLifeIdentityCards(profile) {
     coach: { name: 'Coach', desc: 'Motivating, pushes you forward' },
     analytical: { name: 'Analytical', desc: 'Data-driven, detailed insights' }
   };
-  var currentStyle = profile.preferences?.communicationStyle || 'supportive';
+  var currentStyle = (profile.preferences && profile.preferences.communicationStyle) || 'supportive'; // v30.1: ES5 fix
   var styleInfo = commStyles[currentStyle] || commStyles.supportive;
   
   html += '<div class="identity-card" data-section="life-comm">';
@@ -3658,7 +3661,7 @@ function buildLifeIdentityCards(profile) {
     afternoon: { name: 'Afternoon Focus', desc: '12pm - 5pm' },
     evening: { name: 'Night Owl', desc: '5pm - Late' }
   };
-  var currentRhythm = profile.preferences?.productiveTime || 'morning';
+  var currentRhythm = (profile.preferences && profile.preferences.productiveTime) || 'morning'; // v30.1: ES5 fix
   var rhythmInfo = rhythms[currentRhythm] || rhythms.morning;
   
   html += '<div class="identity-card" data-section="life-rhythm">';
@@ -4033,8 +4036,8 @@ function refineLifeIdentityWithAI(section, sectionName) {
     return LIFE_AREAS[a] ? LIFE_AREAS[a].name : a;
   }).join(', ') + '\n';
   context += 'Goals: ' + (profile.goals || []).map(function(g) { return g.title; }).join(', ') + '\n';
-  context += 'Communication Style: ' + (profile.preferences?.communicationStyle || 'Not set') + '\n';
-  context += 'Productive Time: ' + (profile.preferences?.productiveTime || 'Not set') + '\n';
+  context += 'Communication Style: ' + ((profile.preferences && profile.preferences.communicationStyle) || 'Not set') + '\n'; // v30.1: ES5 fix
+  context += 'Productive Time: ' + ((profile.preferences && profile.preferences.productiveTime) || 'Not set') + '\n'; // v30.1: ES5 fix
   
   // v11.0.5: Include structured identity data for the specific category
   var identityData = profile.identityData || {};
@@ -4510,7 +4513,7 @@ function updateCurrentLifeProfileField(field, value) {
     if (field === 'name') {
       var sidebarName = document.getElementById('sidebarBrandName');
       if (sidebarName) {
-        sidebarName.innerHTML = value + ' <span class="sidebar-brand-arrow">▾</span>';
+        sidebarName.innerHTML = escapeHtml(value) + ' <span class="sidebar-brand-arrow">▾</span>'; // v30.1: XSS fix
       }
     }
     
