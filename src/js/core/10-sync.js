@@ -2780,54 +2780,54 @@ var ops = [
     { id: 'clientWebsite', label: 'Client Website (optional)', type: 'text', placeholder: 'e.g. acmecorp.com' },
     { id: 'context', label: 'Research / Context', type: 'textarea', placeholder: 'Paste client research, notes, or details to personalize the pitch...' }
   ] },
-  // v22.20: INTELLIGENCE OPERATIONS (Web Search powered, GPT-5.4)
+  // v31.0: INTELLIGENCE OPERATIONS (Web Search powered, GPT-5.5)
   // Market Intelligence (1101-1104)
-  { id: 1101, name: 'Competitor Analysis', desc: 'Deep research on a specific competitor\'s current market position, pricing, recent moves, and vulnerabilities', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Market position summary', 'Pricing comparison', 'Strengths & weaknesses', 'Strategic opportunities'], params: [
+  { id: 1101, name: 'Competitor Analysis', desc: 'Deep research on a specific competitor\'s current market position, pricing, recent moves, and vulnerabilities', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Market position summary', 'Pricing comparison', 'Strengths & weaknesses', 'Strategic opportunities'], params: [
     { id: 'competitor', label: 'Competitor Name or URL', type: 'text' }
   ]},
-  { id: 1102, name: 'Market Opportunity Scanner', desc: 'Identify untapped market gaps and emerging opportunities in your industry using current data', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Market gaps identified', 'Opportunity ranking', 'Entry strategy', 'Risk assessment'], params: [
+  { id: 1102, name: 'Market Opportunity Scanner', desc: 'Identify untapped market gaps and emerging opportunities in your industry using current data', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Market gaps identified', 'Opportunity ranking', 'Entry strategy', 'Risk assessment'], params: [
     { id: 'focus', label: 'Focus Area (optional)', type: 'text' }
   ]},
-  { id: 1103, name: 'Industry Intelligence Brief', desc: 'Latest news, trends, regulations, and competitive moves affecting your industry', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Key developments', 'Trend analysis', 'Regulatory updates', 'Action items'], params: [
+  { id: 1103, name: 'Industry Intelligence Brief', desc: 'Latest news, trends, regulations, and competitive moves affecting your industry', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Key developments', 'Trend analysis', 'Regulatory updates', 'Action items'], params: [
     { id: 'timeframe', label: 'Timeframe', type: 'select', options: ['Past Week', 'Past Month', 'Past Quarter'], default: 'Past Month' }
   ]},
-  { id: 1104, name: 'Pricing & Positioning Research', desc: 'Research competitor pricing strategies, market rates, and positioning to optimize your pricing', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Pricing landscape', 'Competitor comparison', 'Positioning recommendations', 'Price optimization'], params: [
+  { id: 1104, name: 'Pricing & Positioning Research', desc: 'Research competitor pricing strategies, market rates, and positioning to optimize your pricing', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Pricing landscape', 'Competitor comparison', 'Positioning recommendations', 'Price optimization'], params: [
     { id: 'product', label: 'Product or Service to Research', type: 'text' }
   ]},
   // Client Acquisition (1105-1108)
-  { id: 1105, name: 'Research Potential Clients', desc: 'Find potential clients matching your ideal customer profile with company details and contact information', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Prospect list with details', 'Contact information', 'Company profiles', 'Outreach priority ranking'], params: [
+  { id: 1105, name: 'Research Potential Clients', desc: 'Find potential clients matching your ideal customer profile with company details and contact information', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Prospect list with details', 'Contact information', 'Company profiles', 'Outreach priority ranking'], params: [
     { id: 'criteria', label: 'Target Client Criteria', type: 'text' },
     { id: 'location', label: 'Location', type: 'text' },
     { id: 'count', label: 'Number of Leads', type: 'select', options: ['5', '10', '15', '20'], default: '10' }
   ]},
-  { id: 1106, name: 'Client Deep Research', desc: 'Comprehensive research on a specific company or person before outreach or a meeting', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Company overview', 'Key decision makers', 'Recent news & activity', 'Talking points & angles'], params: [
+  { id: 1106, name: 'Client Deep Research', desc: 'Comprehensive research on a specific company or person before outreach or a meeting', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Company overview', 'Key decision makers', 'Recent news & activity', 'Talking points & angles'], params: [
     { id: 'target', label: 'Company or Person Name', type: 'text' }
   ]},
-  { id: 1107, name: 'Smart Outreach Generator', desc: 'Research a prospect and generate personalized outreach messages backed by real intelligence', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Personalized outreach messages', 'Research-backed talking points', 'Follow-up sequence', 'Conversation starters'], params: [
+  { id: 1107, name: 'Smart Outreach Generator', desc: 'Research a prospect and generate personalized outreach messages backed by real intelligence', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Personalized outreach messages', 'Research-backed talking points', 'Follow-up sequence', 'Conversation starters'], params: [
     { id: 'target', label: 'Prospect Name or Company', type: 'text' },
     { id: 'channel', label: 'Channel', type: 'select', options: ['Email', 'LinkedIn', 'Cold Call Script', 'All'], default: 'Email' }
   ]},
-  { id: 1108, name: 'Partnership Scout', desc: 'Find and evaluate potential business partners, collaborators, or strategic alliances', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Partner candidates', 'Fit analysis', 'Approach strategy', 'Deal structure ideas'], params: [
+  { id: 1108, name: 'Partnership Scout', desc: 'Find and evaluate potential business partners, collaborators, or strategic alliances', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Partner candidates', 'Fit analysis', 'Approach strategy', 'Deal structure ideas'], params: [
     { id: 'type', label: 'Partnership Type', type: 'select', options: ['Strategic Alliance', 'Distribution', 'Co-Marketing', 'Technology', 'Any'], default: 'Any' }
   ]},
   // Grant & Funding (1109-1112)
-  { id: 1109, name: 'Grant Finder', desc: 'Search for grants and funding opportunities matching your business type, industry, and location', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Matching grants list', 'Eligibility requirements', 'Deadlines & timelines', 'Application tips'], params: [
+  { id: 1109, name: 'Grant Finder', desc: 'Search for grants and funding opportunities matching your business type, industry, and location', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Matching grants list', 'Eligibility requirements', 'Deadlines & timelines', 'Application tips'], params: [
     { id: 'focus', label: 'Funding Focus (optional)', type: 'text' },
     { id: 'amount', label: 'Amount Range', type: 'select', options: ['Under $10K', '$10K-$50K', '$50K-$250K', '$250K+', 'Any'], default: 'Any' }
   ]},
-  { id: 1110, name: 'Grant Application Assistant', desc: 'Help prepare grant application content, narratives, and supporting materials', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Application narrative', 'Budget justification', 'Impact statement', 'Supporting materials checklist'], params: [
+  { id: 1110, name: 'Grant Application Assistant', desc: 'Help prepare grant application content, narratives, and supporting materials', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Application narrative', 'Budget justification', 'Impact statement', 'Supporting materials checklist'], params: [
     { id: 'grant', label: 'Grant Name or Program', type: 'text' }
   ]},
-  { id: 1111, name: 'Vendor & Supplier Research', desc: 'Find and evaluate vendors, suppliers, or service providers for your business needs', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Vendor comparison', 'Pricing estimates', 'Reviews & reputation', 'Recommendation'], params: [
+  { id: 1111, name: 'Vendor & Supplier Research', desc: 'Find and evaluate vendors, suppliers, or service providers for your business needs', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Vendor comparison', 'Pricing estimates', 'Reviews & reputation', 'Recommendation'], params: [
     { id: 'need', label: 'What You Need', type: 'text' },
     { id: 'location', label: 'Preferred Location', type: 'text' }
   ]},
-  { id: 1112, name: 'Local Market Intelligence', desc: 'Research local market conditions, demographics, competitors, and opportunities in a specific area', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Market overview', 'Local competition', 'Demographics & trends', 'Opportunities'], params: [
+  { id: 1112, name: 'Local Market Intelligence', desc: 'Research local market conditions, demographics, competitors, and opportunities in a specific area', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Market overview', 'Local competition', 'Demographics & trends', 'Opportunities'], params: [
     { id: 'location', label: 'Target Location', type: 'text' },
     { id: 'focus', label: 'Focus', type: 'select', options: ['General Overview', 'Competition', 'Demographics', 'Real Estate', 'Events & Networking'], default: 'General Overview' }
   ]},
   // v22.31: Client pitch packet generation
-  { id: 1113, name: 'Client Pitch Packet', desc: 'Research a potential client and generate a branded RoweOS pitch document showing how each feature benefits their specific business', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.4', outputs: ['Client profile', 'Feature benefits map', 'Implementation roadmap', 'Outreach email draft'], params: [
+  { id: 1113, name: 'Client Pitch Packet', desc: 'Research a potential client and generate a branded RoweOS pitch document showing how each feature benefits their specific business', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Client profile', 'Feature benefits map', 'Implementation roadmap', 'Outreach email draft'], params: [
     { id: 'clientName', label: 'Client / Company Name', type: 'text' },
     { id: 'clientUrl', label: 'Website URL (optional)', type: 'text' },
     { id: 'industry', label: 'Industry', type: 'text' },
