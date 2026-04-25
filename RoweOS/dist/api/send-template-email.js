@@ -650,19 +650,17 @@ module.exports = async function handler(req, res) {
       console.error('[send-template-email]', sendError);
     } else {
       try {
-        // v31.2: BCC roweos@therowecollection.com when recipient name is unknown,
-        // so Jordan can audit what's actually delivered for unnamed signups.
-        var _isUnknownRecipient = !userName || !String(userName).trim() || /^unknown$/i.test(String(userName).trim());
+        // v31.3: Always BCC jordan@therowecollection.com so Jordan receives a copy
+        // of every campaign send for validation. Cannot BCC roweos@therowecollection.com
+        // because that's the FROM address and Resend silently drops same-address BCCs.
         var _payload = {
           from: 'RoweOS <roweos@therowecollection.com>',
           reply_to: 'jordan@therowecollection.com',
           to: [userEmail],
+          bcc: ['jordan@therowecollection.com'],
           subject: emailData.subject,
           html: emailData.html
         };
-        if (_isUnknownRecipient) {
-          _payload.bcc = ['roweos@therowecollection.com'];
-        }
         var resendResp = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
