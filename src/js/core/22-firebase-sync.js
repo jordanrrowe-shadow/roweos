@@ -5887,7 +5887,8 @@ function showAdminTab(tabName) {
     b.classList.remove('active');
   });
   // Show selected tab
-  var tabMap = { keys: 'adminTabKeys', users: 'adminTabUsers', configs: 'adminTabConfigs', pool: 'adminTabPool', feedback: 'adminTabFeedback', signups: 'adminTabSignups', emails: 'adminTabEmails' };
+  // v31.0: campaigns tab added
+  var tabMap = { keys: 'adminTabKeys', users: 'adminTabUsers', configs: 'adminTabConfigs', pool: 'adminTabPool', feedback: 'adminTabFeedback', signups: 'adminTabSignups', emails: 'adminTabEmails', campaigns: 'adminTabCampaigns' };
   var targetId = tabMap[tabName];
   if (targetId) {
     var el = document.getElementById(targetId);
@@ -5905,6 +5906,10 @@ function showAdminTab(tabName) {
   if (tabName === 'feedback' && typeof renderAdminFeedback === 'function') renderAdminFeedback();
   if (tabName === 'signups' && typeof adminLoadSignups === 'function') adminLoadSignups();
   if (tabName === 'emails' && typeof adminLoadEmailData === 'function') adminLoadEmailData();
+  // v31.0: Auto-load Campaigns tab
+  if (tabName === 'campaigns' && typeof adminLoadCampaigns === 'function') {
+    adminLoadCampaigns();
+  }
 }
 
 // v22.1: Show/hide admin nav based on admin status
