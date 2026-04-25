@@ -515,6 +515,10 @@ function calculateCost(provider, model, inputTokens, outputTokens, webSearchEnab
       'gpt-5.4': { input: 2.50, output: 15.00 },
       'gpt-5.4-pro': { input: 30.00, output: 180.00 },
       'gpt-5.4-thinking': { input: 2.50, output: 15.00 },
+      // v31.0: gpt-5.5 family pricing per https://developers.openai.com/api/docs/models/gpt-5.5
+      'gpt-5.5': { input: 5.00, output: 30.00 },
+      'gpt-5.5-pro': { input: 30.00, output: 180.00 },
+      'gpt-5.5-thinking': { input: 5.00, output: 30.00 }, // UI alias → gpt-5.5 + reasoning.effort:high
       'o4-mini': { input: 1.10, output: 4.40 },
       'o1-preview': { input: 15.00, output: 60.00 },
       'o1-mini': { input: 3.00, output: 12.00 }
@@ -4628,6 +4632,10 @@ function getModelDisplayName(modelId) {
     'gpt-5.4': 'GPT-5.4',
     'gpt-5.4-pro': 'GPT-5.4 Pro',
     'gpt-5.4-thinking': 'GPT-5.4 Thinking',
+    // v31.0: gpt-5.5 family display names
+    'gpt-5.5': 'GPT-5.5',
+    'gpt-5.5-pro': 'GPT-5.5 Pro',
+    'gpt-5.5-thinking': 'GPT-5.5 Thinking',
     'o4-mini': 'o4-mini',
     'o1-preview': 'o1-preview',
     'o1-mini': 'o1-mini',
