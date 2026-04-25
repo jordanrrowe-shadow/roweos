@@ -1,8 +1,10 @@
 // v20.6: Signup notification serverless function
 // Sends email via Resend API and writes to Firestore signups collection
 // POST { email, displayName, method, uid, createdAt }
+// v31.0: Extracted renderSignupEmail() + exported getFirebaseAccessToken()
+// so /api/info-signup can reuse them.
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   // CORS headers
   var origin = req.headers.origin || '';
   if (origin === 'https://roweos.vercel.app' || origin === 'https://roweos.com' || origin === 'https://www.roweos.com') {
@@ -41,69 +43,15 @@ export default async function handler(req, res) {
       timeZoneName: 'short'
     });
 
-    var methodLabel = method === 'google' ? 'Google' : method === 'x' ? 'X (Twitter)' : method === 'email' ? 'Email/Password' : method;
-    var firebaseConsoleUrl = 'https://console.firebase.google.com/project/roweos-app/authentication/users';
-
-    // Build email HTML
-    var emailHtml = [
-      '<!DOCTYPE html>',
-      '<html><head><meta charset="utf-8"></head>',
-      '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">',
-      '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;">',
-      '<tr><td align="center">',
-      '<table width="560" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:12px;border:1px solid #2a2a2a;">',
-      // Header
-      '<tr><td style="padding:32px 32px 16px;border-bottom:1px solid #2a2a2a;">',
-      '<h1 style="margin:0;font-size:20px;font-weight:600;color:#a89878;letter-spacing:0.5px;">RoweOS</h1>',
-      '<p style="margin:8px 0 0;font-size:13px;color:#888;">New User Signup via ' + escapeHtml(source) + '</p>',
-      '</td></tr>',
-      // Body
-      '<tr><td style="padding:24px 32px;">',
-      '<table width="100%" cellpadding="0" cellspacing="0">',
-      // Email
-      '<tr>',
-      '<td style="padding:8px 0;font-size:13px;color:#888;width:120px;vertical-align:top;">Email</td>',
-      '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;font-weight:500;">' + escapeHtml(email) + '</td>',
-      '</tr>',
-      // Display Name
-      '<tr>',
-      '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Display Name</td>',
-      '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;">' + escapeHtml(displayName) + '</td>',
-      '</tr>',
-      // Sign-in Method
-      '<tr>',
-      '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Sign-in Method</td>',
-      '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;">' + escapeHtml(methodLabel) + '</td>',
-      '</tr>',
-      // Source
-      '<tr>',
-      '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Source</td>',
-      '<td style="padding:8px 0;font-size:14px;color:#a89878;font-weight:500;">' + escapeHtml(source) + '</td>',
-      '</tr>',
-      // UID
-      '<tr>',
-      '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">UID</td>',
-      '<td style="padding:8px 0;font-size:12px;color:#666;font-family:monospace;">' + escapeHtml(uid) + '</td>',
-      '</tr>',
-      // Timestamp
-      '<tr>',
-      '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Created</td>',
-      '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;">' + escapeHtml(formattedDate) + '</td>',
-      '</tr>',
-      '</table>',
-      '</td></tr>',
-      // CTA
-      '<tr><td style="padding:8px 32px 32px;">',
-      '<a href="' + firebaseConsoleUrl + '" style="display:inline-block;padding:10px 20px;background:#a89878;color:#111;font-size:13px;font-weight:600;text-decoration:none;border-radius:6px;">View in Firebase Console</a>',
-      '</td></tr>',
-      // Footer
-      '<tr><td style="padding:16px 32px;border-top:1px solid #2a2a2a;">',
-      '<p style="margin:0;font-size:11px;color:#555;">Sent automatically by RoweOS signup monitoring.</p>',
-      '</td></tr>',
-      '</table>',
-      '</td></tr></table>',
-      '</body></html>'
-    ].join('\n');
+    // v31.0: Build email HTML via shared renderer (used by /api/info-signup too)
+    var emailHtml = renderSignupEmail({
+      email: email,
+      displayName: displayName,
+      method: method,
+      source: source,
+      uid: uid,
+      createdAt: createdAt
+    });
 
     var emailSent = false;
     var emailError = null;
@@ -390,6 +338,103 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+// v31.0: Render the admin signup notification email.
+// Shared by /api/notify-signup and /api/info-signup so both endpoints
+// produce visually identical admin emails (only Source/Method differ).
+// payload: { email, displayName, method, source, uid, createdAt }
+function renderSignupEmail(payload) {
+  var p = payload || {};
+  var email = p.email || 'unknown';
+  var displayName = p.displayName || 'No name provided';
+  var method = p.method || 'unknown';
+  var source = p.source || 'Unknown';
+  var uid = p.uid || 'unknown';
+  var createdAt = p.createdAt || new Date().toISOString();
+
+  var timestamp = new Date(createdAt);
+  var formattedDate;
+  try {
+    formattedDate = timestamp.toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+  } catch (e) {
+    formattedDate = createdAt;
+  }
+
+  var methodLabel = method === 'google' ? 'Google'
+    : method === 'x' ? 'X (Twitter)'
+    : method === 'email' ? 'Email/Password'
+    : method;
+
+  var firebaseConsoleUrl = 'https://console.firebase.google.com/project/roweos-app/authentication/users';
+
+  return [
+    '<!DOCTYPE html>',
+    '<html><head><meta charset="utf-8"></head>',
+    '<body style="margin:0;padding:0;background:#111;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">',
+    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#111;padding:40px 20px;">',
+    '<tr><td align="center">',
+    '<table width="560" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:12px;border:1px solid #2a2a2a;">',
+    // Header
+    '<tr><td style="padding:32px 32px 16px;border-bottom:1px solid #2a2a2a;">',
+    '<h1 style="margin:0;font-size:20px;font-weight:600;color:#a89878;letter-spacing:0.5px;">RoweOS</h1>',
+    '<p style="margin:8px 0 0;font-size:13px;color:#888;">New User Signup via ' + escapeHtml(source) + '</p>',
+    '</td></tr>',
+    // Body
+    '<tr><td style="padding:24px 32px;">',
+    '<table width="100%" cellpadding="0" cellspacing="0">',
+    // Email
+    '<tr>',
+    '<td style="padding:8px 0;font-size:13px;color:#888;width:120px;vertical-align:top;">Email</td>',
+    '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;font-weight:500;">' + escapeHtml(email) + '</td>',
+    '</tr>',
+    // Display Name
+    '<tr>',
+    '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Display Name</td>',
+    '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;">' + escapeHtml(displayName) + '</td>',
+    '</tr>',
+    // Sign-in Method
+    '<tr>',
+    '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Sign-in Method</td>',
+    '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;">' + escapeHtml(methodLabel) + '</td>',
+    '</tr>',
+    // Source
+    '<tr>',
+    '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Source</td>',
+    '<td style="padding:8px 0;font-size:14px;color:#a89878;font-weight:500;">' + escapeHtml(source) + '</td>',
+    '</tr>',
+    // UID
+    '<tr>',
+    '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">UID</td>',
+    '<td style="padding:8px 0;font-size:12px;color:#666;font-family:monospace;">' + escapeHtml(uid) + '</td>',
+    '</tr>',
+    // Timestamp
+    '<tr>',
+    '<td style="padding:8px 0;font-size:13px;color:#888;vertical-align:top;">Created</td>',
+    '<td style="padding:8px 0;font-size:14px;color:#e0e0e0;">' + escapeHtml(formattedDate) + '</td>',
+    '</tr>',
+    '</table>',
+    '</td></tr>',
+    // CTA
+    '<tr><td style="padding:8px 32px 32px;">',
+    '<a href="' + firebaseConsoleUrl + '" style="display:inline-block;padding:10px 20px;background:#a89878;color:#111;font-size:13px;font-weight:600;text-decoration:none;border-radius:6px;">View in Firebase Console</a>',
+    '</td></tr>',
+    // Footer
+    '<tr><td style="padding:16px 32px;border-top:1px solid #2a2a2a;">',
+    '<p style="margin:0;font-size:11px;color:#555;">Sent automatically by RoweOS signup monitoring.</p>',
+    '</td></tr>',
+    '</table>',
+    '</td></tr></table>',
+    '</body></html>'
+  ].join('\n');
+}
+
 // Generate Firebase access token from service account JSON (stored as env var)
 async function getFirebaseAccessToken() {
   try {
@@ -457,3 +502,8 @@ function base64url(str) {
   var b64 = btoa(str);
   return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
+
+// v31.0: Default export = handler (preserves existing /api/notify-signup behavior).
+// Named exports allow /api/info-signup to reuse the email template + Firebase auth helper.
+export default handler;
+export { renderSignupEmail, getFirebaseAccessToken };
