@@ -2670,14 +2670,14 @@ async function runSelectedOperation() {
       }
     }
 
-    // v22.20: Preferred model override for intelligence ops (web search requires GPT-5.4)
+    // v31.0: Preferred model override for intelligence ops (web search requires GPT-5.5)
     var currentOp = ops.filter(function(o) { return o.id === selectedOp.id; })[0]; // v30.1: Fix comparison — selectedOp is object, not ID
     if (currentOp && currentOp.preferredProvider && currentOp.preferredModel) {
       if (!studioProviderOverride && !studioModelOverride) {
         provider = currentOp.preferredProvider;
         model = currentOp.preferredModel;
-      } else if (currentOp.preferredModel.indexOf('gpt-5.4') === 0 && model.indexOf('gpt-5.4') !== 0) {
-        showToast('Web search not available with ' + model + '. Intelligence ops work best with GPT-5.4.', 'warning');
+      } else if (currentOp.preferredModel.indexOf('gpt-5.5') === 0 && !(model.indexOf('gpt-5.5') === 0 || model.indexOf('gpt-5.4') === 0)) {
+        showToast('Web search not available with ' + model + '. Intelligence ops work best with GPT-5.5.', 'warning');
       }
     }
 

@@ -3988,7 +3988,8 @@ async function makeScheduledTaskAPICall(provider, model, apiKey, systemPrompt, u
       oaiBody.reasoning = { effort: 'high', summary: 'auto' };
       oaiBody.max_output_tokens = Math.max(_tokLimit, 16384);
     }
-    if (model && model.indexOf('gpt-5.4') === 0) {
+    // v31.0: web_search_preview supported on gpt-5.5* and legacy gpt-5.4* models
+    if (typeof _modelSupportsWebSearch === 'function' ? _modelSupportsWebSearch(model) : (model && (model.indexOf('gpt-5.5') === 0 || model.indexOf('gpt-5.4') === 0))) {
       oaiBody.tools = [{ type: 'web_search_preview' }];
     }
     // Stream and collect full response (same as callOpenAIStreaming)
