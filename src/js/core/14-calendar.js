@@ -390,6 +390,10 @@ async function generateVideoWithVeo(prompt, options) {
 }
 
 // v22.19: OpenAI Image Generation via Responses API (native image_generation tool)
+// v31.0: Upgraded to GPT Image 2 — tool definition now requires explicit model: 'gpt-image-2'
+//        (previously inferred from parent request). Quality options: low/medium/high/auto.
+//        Sizes: arbitrary within constraints. Note: gpt-image-2 always uses high fidelity
+//        and does NOT support transparent backgrounds.
 async function generateImage(prompt, options) {
   if (!options) options = {};
   var apiKey = await getApiKey('openai');
@@ -398,14 +402,19 @@ async function generateImage(prompt, options) {
   }
 
   var size = options.size || '1024x1024';
-  var quality = options.quality || 'standard';
+  var quality = options.quality || 'auto'; // v31.0: gpt-image-2 default is 'auto'
   var n = options.n || 1;
 
-  console.log('[generateImage] Calling OpenAI Responses API with image_generation tool');
+  console.log('[generateImage] Calling OpenAI Responses API with image_generation tool (gpt-image-2)');
   console.log('[generateImage] Size:', size);
   console.log('[generateImage] Quality:', quality);
 
-  // v22.19: Use Responses API image_generation tool instead of DALL-E endpoint
+  // v31.0: Map legacy DALL-E quality strings to gpt-image-2 quality enum
+  var mappedQuality = quality;
+  if (quality === 'hd') mappedQuality = 'high';
+  else if (quality === 'standard') mappedQuality = 'medium';
+
+  // v31.0: Use Responses API image_generation tool with gpt-image-2 model
   var response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: {
@@ -413,9 +422,9 @@ async function generateImage(prompt, options) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'gpt-5.5', // v31.0
+      model: 'gpt-5.5', // v31.0: parent text model
       input: prompt,
-      tools: [{ type: 'image_generation', quality: quality === 'hd' ? 'high' : quality, size: size }],
+      tools: [{ type: 'image_generation', model: 'gpt-image-2', quality: mappedQuality, size: size }], // v31.0: explicit model field required
       store: false
     })
   });
@@ -451,19 +460,22 @@ async function generateImage(prompt, options) {
   try {
     var usg = data.usage || {};
     if (typeof trackAPIUsage === 'function') {
-      trackAPIUsage('openai', 'gpt-5.5', usg.input_tokens || 0, usg.output_tokens || 0, false, false, 'image'); // v31.0
+      trackAPIUsage('openai', 'gpt-image-2', usg.input_tokens || 0, usg.output_tokens || 0, false, false, 'image'); // v31.0
     }
   } catch(e) {}
 
   return {
     images: images,
-    model: 'gpt-5.5', // v31.0
+    model: 'gpt-image-2', // v31.0
     size: size,
-    quality: quality
+    quality: mappedQuality
   };
 }
 
 // v30.1: GPT Image 2 via OpenAI Images API
+// v31.0: Legacy DALL-E direct fallback (only used if Responses API image_generation unavailable).
+//        Calls /v1/images/generations directly. Kept for safety; primary path is generateImage()
+//        above which uses the Responses API image_generation tool with model: 'gpt-image-2'.
 async function generateImageWithGPT2(prompt, options) {
   if (!options) options = {};
   var apiKey = await getApiKey('openai');
@@ -832,18 +844,18 @@ async function runImageOperation() {
         aspectRatio: aspectRatio
       });
     } else {
-      // OpenAI DALL-E (default)
+      // v31.0: OpenAI GPT Image 2 (default)
       var _szEl = document.getElementById('dalleSize'); // v30.1: ES5 safe
       var size = (_szEl ? _szEl.value : null) || '1024x1024';
-      providerName = 'GPT Image';
-      
+      providerName = 'GPT Image 2'; // v31.0
+
       if (outputContent) {
-        outputContent.innerHTML = '<div class="studio-image-generating"><div class="spinner"></div><div class="generating-text">Generating with GPT Image...</div><div style="font-size: var(--text-sm); color: var(--text-faint); margin-top: var(--space-2);">This may take 30-60 seconds</div></div>';
+        outputContent.innerHTML = '<div class="studio-image-generating"><div class="spinner"></div><div class="generating-text">Generating with GPT Image 2...</div><div style="font-size: var(--text-sm); color: var(--text-faint); margin-top: var(--space-2);">This may take 30-60 seconds</div></div>'; // v31.0
       }
-      
+
       result = await generateImage(imagePrompt, {
         size: size,
-        quality: 'standard'
+        quality: 'auto' // v31.0: gpt-image-2 default
       });
     }
     

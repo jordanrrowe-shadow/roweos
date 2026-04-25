@@ -7134,7 +7134,7 @@ async function generateImageWithGemini(prompt, options = {}) {
     
     // Provide helpful error messages
     if (errorMsg.includes('quota') || errorMsg.includes('RESOURCE_EXHAUSTED')) {
-      throw new Error('Gemini API quota exceeded. Try again later or switch to GPT Image.');
+      throw new Error('Gemini API quota exceeded. Try again later or switch to GPT Image 2.'); // v31.0
     } else if (errorMsg.includes('not found') || errorMsg.includes('404')) {
       throw new Error('Gemini image model not available. Your API key may not have image generation access.');
     } else if (errorMsg.includes('permission') || errorMsg.includes('403')) {

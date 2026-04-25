@@ -430,7 +430,7 @@ function previewFile(fileId) {
         imgHtml += '<div style="color: var(--text-tertiary);">Model: ' + file.metadata.model + '</div>';
       }
       if (file.metadata.provider) {
-        imgHtml += '<div style="color: var(--text-tertiary);">Provider: ' + (file.metadata.provider === 'gemini' ? 'Nano Banana' : 'GPT Image') + '</div>';
+        imgHtml += '<div style="color: var(--text-tertiary);">Provider: ' + (file.metadata.provider === 'gemini' ? 'Nano Banana' : 'GPT Image 2') + '</div>'; // v31.0
       }
       imgHtml += '</div>';
     }
