@@ -291,6 +291,51 @@ export default async function handler(req, res) {
       console.log('[notify-signup] FIREBASE_PROJECT_ID not set, skipping Firestore write');
     }
 
+    // v30.5: Send push notification to admin (same pattern as newsletter.js)
+    try {
+      var adminUid = 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+      var pushTitle = 'New Signup (' + source + '): ' + (displayName || email);
+      var pushBody = method + ' | ' + email;
+      await fetch('https://roweos.com/api/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send', uid: adminUid, title: pushTitle, body: pushBody })
+      });
+      console.log('[notify-signup] Push notification sent');
+    } catch (pushErr) {
+      console.warn('[notify-signup] Push notification failed (non-fatal):', pushErr.message);
+    }
+
+    // v30.5: Write to admin_notifications for in-app Signups tab
+    try {
+      if (process.env.FIREBASE_PROJECT_ID) {
+        var notifToken = await getFirebaseAccessToken();
+        if (notifToken) {
+          var notifId = 'signup_app_' + Date.now();
+          var notifUrl = 'https://firestore.googleapis.com/v1/projects/' + process.env.FIREBASE_PROJECT_ID +
+            '/databases/(default)/documents/admin_notifications/' + notifId;
+          await fetch(notifUrl, {
+            method: 'PATCH',
+            headers: { 'Authorization': 'Bearer ' + notifToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fields: {
+                type: { stringValue: 'signup' },
+                email: { stringValue: email },
+                name: { stringValue: displayName },
+                signupType: { stringValue: 'individual' },
+                source: { stringValue: source },
+                createdAt: { stringValue: new Date().toISOString() },
+                read: { booleanValue: false }
+              }
+            })
+          });
+          console.log('[notify-signup] admin_notifications written');
+        }
+      }
+    } catch (notifErr) {
+      console.warn('[notify-signup] admin_notifications write failed (non-fatal):', notifErr.message);
+    }
+
     return res.status(200).json({
       success: true,
       emailSent: emailSent,
