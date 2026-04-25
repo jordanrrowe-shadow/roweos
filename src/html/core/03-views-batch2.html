@@ -1259,6 +1259,17 @@
           <label style="margin-right:12px"><input type="radio" name="roweos_reasoning_effort" value="medium" onclick="localStorage.setItem('roweos_reasoning_effort','medium')"> Medium</label>
           <label><input type="radio" name="roweos_reasoning_effort" value="high" onclick="localStorage.setItem('roweos_reasoning_effort','high')" checked> High</label>
         </div>
+        <script>
+        (function() {
+          try {
+            var saved = localStorage.getItem('roweos_reasoning_effort') || 'high';
+            var radios = document.getElementsByName('roweos_reasoning_effort');
+            for (var i = 0; i < radios.length; i++) {
+              radios[i].checked = (radios[i].value === saved);
+            }
+          } catch (e) {}
+        })();
+        </script>
 
         <label style="display: block; margin-bottom: var(--space-2); color: var(--text-secondary);">Schedule</label>
         <select id="scheduledPromptFrequency" class="settings-input" style="width: 100%; margin-bottom: var(--space-3);" onchange="toggleDaySelector()">
