@@ -2081,7 +2081,9 @@ function completeFirebaseLogin(user) {
               displayName: user.displayName || '',
               method: signInMethod,
               uid: user.uid,
-              createdAt: new Date().toISOString()
+              createdAt: new Date().toISOString(),
+              // v31.0: Tag /info-page leads so admin emails show "Source: Info Page Lead"
+              source: (typeof window !== 'undefined' && window._signupSource) || 'Welcome Screen'
             })
           }).catch(function(e) { console.warn('[RoweOS] Signup notification failed:', e.message); });
         } catch(notifyErr) {}
@@ -2560,16 +2562,20 @@ function toggleEmailAuthMode() {
   var toggle = document.getElementById('authEmailToggle');
   var status = document.getElementById('authEmailStatus');
   var pwInput = document.getElementById('authPasswordInput');
+  // v31.0: Show name input only in create-account mode
+  var nameInput = document.getElementById('authNameInput');
   if (_authEmailMode === 'signin') {
     _authEmailMode = 'create';
     if (btn) btn.textContent = 'Create Account';
     if (toggle) toggle.innerHTML = 'Already have an account? <span style="color:#b2997b;font-weight:600;">Sign in</span>';
     if (pwInput) pwInput.setAttribute('autocomplete', 'new-password');
+    if (nameInput) nameInput.style.display = 'block';
   } else {
     _authEmailMode = 'signin';
     if (btn) btn.textContent = 'Sign In';
     if (toggle) toggle.innerHTML = 'Don\'t have an account? <span style="color:#b2997b;font-weight:600;">Create one</span>';
     if (pwInput) pwInput.setAttribute('autocomplete', 'current-password');
+    if (nameInput) nameInput.style.display = 'none';
   }
   if (status) { status.textContent = ''; status.style.color = 'rgba(255,255,255,0.4)'; }
 }
@@ -2593,9 +2599,20 @@ function handleEmailPasswordAuth() {
   if (btn) btn.disabled = true;
   if (status) { status.style.color = 'rgba(255,255,255,0.6)'; status.textContent = _authEmailMode === 'create' ? 'Creating account...' : 'Signing in...'; }
 
+  // v31.0: Capture optional name for create-account flow (used in Firebase displayName)
+  var nameVal = '';
+  var nameInput = document.getElementById('authNameInput');
+  if (nameInput && nameInput.value) nameVal = nameInput.value.trim().slice(0, 200);
+
   var authPromise;
   if (_authEmailMode === 'create') {
-    authPromise = firebase.auth().createUserWithEmailAndPassword(email, password);
+    authPromise = firebase.auth().createUserWithEmailAndPassword(email, password).then(function(result) {
+      // v31.0: Apply displayName if provided (best-effort, non-fatal if it fails)
+      if (nameVal && result && result.user && result.user.updateProfile) {
+        return result.user.updateProfile({ displayName: nameVal }).then(function() { return result; }, function() { return result; });
+      }
+      return result;
+    });
   } else {
     authPromise = firebase.auth().signInWithEmailAndPassword(email, password);
   }

@@ -3989,6 +3989,76 @@ function adminCopyBrandConfigLink(code) {
 
 var _pendingRestoreData = null;
 
+// v31.0: Parse signup prefill from URL query (?email=...&name=...&source=info)
+// Used when /api/info-signup 302-redirects from the /info page form.
+function _parseSignupURLParams() {
+  try {
+    if (typeof window === 'undefined' || !window.location) return { email: '', name: '', source: '' };
+    var qs = new URLSearchParams(window.location.search);
+    return {
+      email: (qs.get('email') || '').trim(),
+      name: (qs.get('name') || '').trim(),
+      source: (qs.get('source') || '').trim()
+    };
+  } catch (e) {
+    return { email: '', name: '', source: '' };
+  }
+}
+
+// v31.0: Apply /info-page prefill to the auth gate.
+// - Skips the splash screen and reveals the email/password form
+// - Switches the form into Create Account mode (only if not already)
+// - Populates email + name inputs
+// - Stamps window._signupSource so the notify-signup call in handleAuthState
+//   tags the resulting admin email "Source: Info Page Lead"
+function _applySignupPrefill() {
+  try {
+    var prefill = _parseSignupURLParams();
+    if (!prefill.email) return false;
+
+    var splash = document.getElementById('authSplash');
+    var login = document.getElementById('authLogin');
+    if (splash) splash.style.display = 'none';
+    if (login) {
+      login.style.display = 'block';
+      login.style.opacity = '1';
+    }
+
+    // Reveal the email form (it starts hidden behind the email-card click target)
+    var emailForm = document.getElementById('authEmailForm');
+    if (emailForm && emailForm.style.display === 'none') {
+      if (typeof toggleEmailForm === 'function') {
+        toggleEmailForm();
+      } else {
+        emailForm.style.display = 'block';
+      }
+    }
+
+    // Force Create Account mode if not already there.
+    // _authEmailMode lives in 21-sidebar.js and starts at 'signin'.
+    if (typeof toggleEmailAuthMode === 'function' &&
+        typeof _authEmailMode !== 'undefined' && _authEmailMode !== 'create') {
+      toggleEmailAuthMode();
+    }
+
+    var emailInput = document.getElementById('authEmailInput');
+    var nameInput = document.getElementById('authNameInput');
+    if (emailInput) emailInput.value = prefill.email;
+    if (nameInput) {
+      nameInput.style.display = 'block';
+      if (prefill.name) nameInput.value = prefill.name;
+    }
+
+    if (prefill.source === 'info') {
+      window._signupSource = 'Info Page Lead';
+    }
+    return true;
+  } catch (e) {
+    console.warn('[auth] prefill failed:', e && e.message);
+    return false;
+  }
+}
+
 function showAuthGate() {
   // v22.53: Remove boot screen when auth gate shows
   var boot = document.getElementById('bootScreen');
@@ -4009,6 +4079,11 @@ function showAuthGate() {
   var keyEl = document.getElementById('authGateAccessKey');
   if (signInEl) signInEl.style.display = 'block';
   if (keyEl) keyEl.style.display = 'none';
+
+  // v31.0: If the user arrived from /info with ?email=&name=&source=info,
+  // skip the splash and prefill the create-account form. Run after the
+  // resets above so the splash hide/email-form reveal sticks.
+  _applySignupPrefill();
 }
 
 function hideAuthGate() {
