@@ -261,7 +261,7 @@ export default async function handler(req, res) {
         // Use Firebase service account if available, otherwise unauthenticated write
         var firestoreHeaders = { 'Content-Type': 'application/json' };
 
-        if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+        if (process.env.FIREBASE_SERVICE_ACCOUNT) {
           // Generate access token from service account
           var token = await getFirebaseAccessToken();
           if (token) {
@@ -393,7 +393,7 @@ function escapeHtml(str) {
 // Generate Firebase access token from service account JSON (stored as env var)
 async function getFirebaseAccessToken() {
   try {
-    var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     var now = Math.floor(Date.now() / 1000);
 
     // Build JWT header and claim set
