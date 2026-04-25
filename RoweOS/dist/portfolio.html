@@ -2400,7 +2400,7 @@ function _buildPDF(orientation) {
   setDraw(C.goldDim);
   pdf.setLineWidth(0.5);
   pdf.rect(30, 30, W - 60, H - 60);
-  // Logo — preserve aspect ratio, target width ~200pt
+  // Logo - preserve aspect ratio, target width ~200pt
   if (_logoBase64) {
     var _logoImg = document.querySelector('.cover-logo');
     var _natW = _logoImg ? _logoImg.naturalWidth : 400;

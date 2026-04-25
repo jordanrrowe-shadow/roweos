@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RoweOS — Content Studio</title>
+<title>RoweOS - Content Studio</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
@@ -215,7 +215,7 @@ Download Video
 
 <script>
 /* ============================================
-   ROWEOS CONTENT STUDIO — TEMPLATE ENGINE
+   ROWEOS CONTENT STUDIO - TEMPLATE ENGINE
    ============================================ */
 
 // ─── CONFIGURATION ───
@@ -375,7 +375,7 @@ featureData.forEach(function(f, i) {
       id: num,
       category: 'features',
       mode: mode,
-      label: toolName + ' — ' + mode,
+      label: toolName + ' - ' + mode,
       render: (function(fd, m, tn) {
         return function() {
           if (fd.img) {
@@ -423,7 +423,7 @@ betaData.forEach(function(b, i) {
       id: num,
       category: 'beta',
       mode: mode,
-      label: b.headline.substring(0, 30) + '… — ' + mode,
+      label: b.headline.substring(0, 30) + '… - ' + mode,
       render: (function(bd, m) {
         return function() {
           var glow = m === 'dark'
@@ -496,7 +496,7 @@ statsData.forEach(function(s, i) {
       id: num,
       category: 'stats',
       mode: mode,
-      label: s.big + ' ' + s.label + ' — ' + mode,
+      label: s.big + ' ' + s.label + ' - ' + mode,
       render: (function(sd, m) {
         return function() {
           var glow = m === 'dark'
@@ -523,7 +523,7 @@ statsData.forEach(function(s, i) {
     id: num,
     category: 'stats',
     mode: mode,
-    label: 'All Stats Combo — ' + mode,
+    label: 'All Stats Combo - ' + mode,
     render: (function(m) {
       return function() {
         var eyebrow = '<div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:var(--c-g4);margin-bottom:48px;text-align:center;">RoweOS by the numbers</div>';
@@ -550,7 +550,7 @@ statsData.forEach(function(s, i) {
   });
 });
 
-// ── 4. BRAND PORTFOLIO (5) — dark only ──
+// ── 4. BRAND PORTFOLIO (5) - dark only ──
 var portfolioData = [
   { brand: 'The Rowe Collection', quote: 'RoweOS replaced five separate tools with one intelligent platform that actually understands our brand voice.' },
   { brand: 'Rowe Solo Training', quote: 'Tracking certifications, managing client relationships, and generating personalized training content, all from one command center.' },
@@ -647,7 +647,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 63 : 64,
     category: 'value',
     mode: mode,
-    label: 'Stop Tab-Hopping — ' + mode,
+    label: 'Stop Tab-Hopping - ' + mode,
     render: (function(m) {
       return function() {
         var headline = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;line-height:1.15;margin-bottom:48px;">Stop tab-hopping.<br>Start operating.</div>';
@@ -683,7 +683,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 65 : 66,
     category: 'value',
     mode: mode,
-    label: 'Before vs After — ' + mode,
+    label: 'Before vs After - ' + mode,
     render: (function(m) {
       return function() {
         var beforeItems = ['5+ separate tools', 'Copy-paste brand guidelines', 'Manual scheduling', 'Generic AI responses', 'Zero context retention'];
@@ -717,7 +717,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 67 : 68,
     category: 'value',
     mode: mode,
-    label: 'Brand + Life Intelligence — ' + mode,
+    label: 'Brand + Life Intelligence - ' + mode,
     render: (function(m) {
       return function() {
         var brandFeats = ['Brand Voice AI', 'Agent Studio', 'Social Publishing', 'Competitive Intel', 'Client CRM'];
@@ -751,7 +751,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 69 : 70,
     category: 'value',
     mode: mode,
-    label: 'Your Models, Your Choice — ' + mode,
+    label: 'Your Models, Your Choice - ' + mode,
     render: (function(m) {
       return function() {
         var iconColor = m === 'dark' ? '#b2997b' : '#8b7b67';
@@ -787,7 +787,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 103 : 104,
     category: 'value',
     mode: mode,
-    label: 'RoweOS AI — ' + mode,
+    label: 'RoweOS AI - ' + mode,
     render: (function(m) {
       return function() {
         var iconColor = m === 'dark' ? '#b2997b' : '#8b7b67';
@@ -827,7 +827,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 71 : 72,
     category: 'value',
     mode: mode,
-    label: 'Create. Publish. Repeat. — ' + mode,
+    label: 'Create. Publish. Repeat. - ' + mode,
     render: (function(m) {
       return function() {
         var platforms = ['Instagram', 'Threads', 'X / Twitter', 'LinkedIn', 'Facebook'];
@@ -869,7 +869,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 73 : 74,
     category: 'mood',
     mode: mode,
-    label: 'Logo + Tagline — ' + mode,
+    label: 'Logo + Tagline - ' + mode,
     render: (function(m) {
       return function() {
         var glow = m === 'dark'
@@ -894,7 +894,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 75 : 76,
     category: 'mood',
     mode: mode,
-    label: 'Massive RoweOS — ' + mode,
+    label: 'Massive RoweOS - ' + mode,
     render: (function(m) {
       return function() {
         var big = '<div style="font-family:\'Cormorant Garamond\',serif;font-size:180px;font-weight:300;color:var(--c-g3);letter-spacing:-0.02em;line-height:0.85;margin-bottom:32px;">RoweOS</div>';
@@ -914,7 +914,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 77 : 78,
     category: 'mood',
     mode: mode,
-    label: 'Sophistication Quote — ' + mode,
+    label: 'Sophistication Quote - ' + mode,
     render: (function(m) {
       return function() {
         var divTop = '<div style="width:80px;height:1px;background:var(--c-g4);margin:0 auto 48px;"></div>';
@@ -936,7 +936,7 @@ showcaseData.forEach(function(s, i) {
     id: mode === 'dark' ? 79 : 80,
     category: 'mood',
     mode: mode,
-    label: 'Mobile Frame — ' + mode,
+    label: 'Mobile Frame - ' + mode,
     render: (function(m) {
       return function() {
         var borderColor = m === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)';
@@ -992,7 +992,7 @@ lifeFeatureData.forEach(function(f, i) {
       id: 81 + (i * 2) + (mode === 'dark' ? 0 : 1),
       category: 'lifeai',
       mode: mode,
-      label: f.name + ' (LifeAI) — ' + mode,
+      label: f.name + ' (LifeAI) - ' + mode,
       render: (function(fd, m) {
         return function() {
           var lifeAccent = m === 'dark' ? '#8aa0b0' : '#5a7a8a';
@@ -1034,7 +1034,7 @@ lifeFeatureData.forEach(function(f, i) {
     id: mode === 'dark' ? 97 : 98,
     category: 'lifeai',
     mode: mode,
-    label: 'Life Intelligence Platform — ' + mode,
+    label: 'Life Intelligence Platform - ' + mode,
     render: (function(m) {
       return function() {
         var lifeAccent = m === 'dark' ? '#8aa0b0' : '#5a7a8a';
@@ -1065,7 +1065,7 @@ lifeFeatureData.forEach(function(f, i) {
     id: mode === 'dark' ? 99 : 100,
     category: 'mood',
     mode: mode,
-    label: 'Brand Intelligence Platform — ' + mode,
+    label: 'Brand Intelligence Platform - ' + mode,
     render: (function(m) {
       return function() {
         var glow = m === 'dark'
@@ -1095,7 +1095,7 @@ lifeFeatureData.forEach(function(f, i) {
     id: mode === 'dark' ? 101 : 102,
     category: 'mood',
     mode: mode,
-    label: 'Brand & Life Platform — ' + mode,
+    label: 'Brand & Life Platform - ' + mode,
     render: (function(m) {
       return function() {
         var lifeAccent = m === 'dark' ? '#8aa0b0' : '#5a7a8a';
@@ -1196,7 +1196,7 @@ pricingTiers.forEach(function(p, idx) {
       id: 105 + (idx * 2) + (mode === 'dark' ? 0 : 1),
       category: 'pricing',
       mode: mode,
-      label: p.tier + ' Tier — ' + mode,
+      label: p.tier + ' Tier - ' + mode,
       render: (function(pd, m) {
         return function() {
           var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1266,7 +1266,7 @@ pricingTiers.forEach(function(p, idx) {
     id: mode === 'dark' ? 111 : 112,
     category: 'brandai',
     mode: mode,
-    label: 'BrandAI Hero — ' + mode,
+    label: 'BrandAI Hero - ' + mode,
     render: (function(m) {
       return function() {
         var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1292,7 +1292,7 @@ pricingTiers.forEach(function(p, idx) {
     id: mode === 'dark' ? 113 : 114,
     category: 'brandai',
     mode: mode,
-    label: 'BrandAI 4 Agents — ' + mode,
+    label: 'BrandAI 4 Agents - ' + mode,
     render: (function(m) {
       return function() {
         var agents = [
@@ -1328,7 +1328,7 @@ pricingTiers.forEach(function(p, idx) {
     id: mode === 'dark' ? 115 : 116,
     category: 'brandai',
     mode: mode,
-    label: 'BrandAI Tools — ' + mode,
+    label: 'BrandAI Tools - ' + mode,
     render: (function(m) {
       return function() {
         var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1371,7 +1371,7 @@ pricingTiers.forEach(function(p, idx) {
     id: mode === 'dark' ? 117 : 118,
     category: 'brandai',
     mode: mode,
-    label: 'Multi-Brand — ' + mode,
+    label: 'Multi-Brand - ' + mode,
     render: (function(m) {
       return function() {
         var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1414,7 +1414,7 @@ pricingTiers.forEach(function(p, idx) {
     id: mode === 'dark' ? 119 : 120,
     category: 'brandai',
     mode: mode,
-    label: 'RoweOS AI Routing — ' + mode,
+    label: 'RoweOS AI Routing - ' + mode,
     render: (function(m) {
       return function() {
         var goldAccent = m === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1448,7 +1448,7 @@ pricingTiers.forEach(function(p, idx) {
   });
 });
 
-// ── 12. BEFORE & AFTER (20) — IDs 121–140 ──
+// ── 12. BEFORE & AFTER (20) - IDs 121–140 ──
 
 function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
   var goldAccent = mode === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1460,7 +1460,7 @@ function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
   var badgeColor = isLife ? (mode === 'dark' ? '#8aa0b0' : '#5a7a8a') : goldAccent;
   var badgeLabel = isLife ? 'LifeAI' : 'BrandAI';
 
-  // BEFORE section — clean, no tinted background
+  // BEFORE section - clean, no tinted background
   var beforeSection = '<div style="padding:32px 72px 24px;flex:1;display:flex;flex-direction:column;justify-content:center;">'
     + '<div style="font-size:13px;letter-spacing:0.3em;text-transform:uppercase;color:'+redColor+';margin-bottom:22px;font-weight:500;">Before</div>';
   beforeItems.forEach(function(item) {
@@ -1471,12 +1471,12 @@ function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
   });
   beforeSection += '</div>';
 
-  // RoweOS title — sits on clean background
+  // RoweOS title - sits on clean background
   var roweosTitle = '<div style="text-align:center;padding:28px 72px 0;">'
     + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:52px;font-weight:300;letter-spacing:0.02em;color:'+goldAccent+';line-height:1;">RoweOS</div>'
     + '</div>';
 
-  // AFTER section — gold bg starts at the divider line, includes feature title
+  // AFTER section - gold bg starts at the divider line, includes feature title
   var afterSection = '<div style="padding:0 72px 32px;background:'+afterBg+';flex:1;display:flex;flex-direction:column;">'
     + '<div style="width:100%;height:2px;background:linear-gradient(90deg,transparent,'+goldAccent+',transparent);margin:16px 0;"></div>'
     + '<div style="text-align:center;margin-bottom:24px;"><div style="font-family:\'Cormorant Garamond\',serif;font-size:44px;font-weight:300;color:var(--c-text);line-height:1;">'+feature+'</div></div>'
@@ -1489,7 +1489,7 @@ function beforeAfterCard(mode, feature, beforeItems, afterItems, aiMode) {
   });
   afterSection += '</div>';
 
-  // Bottom badge circle — BrandAI or LifeAI
+  // Bottom badge circle - BrandAI or LifeAI
   var badge = '<div style="position:absolute;bottom:60px;left:50%;transform:translateX(-50%);width:72px;height:72px;border-radius:50%;border:1.5px solid '+badgeColor+'55;display:flex;align-items:center;justify-content:center;background:'+badgeColor+'0a;">'
     + '<span style="font-size:11px;font-weight:500;color:'+badgeColor+';letter-spacing:0.06em;">'+badgeLabel+'</span>'
     + '</div>';
@@ -1519,7 +1519,7 @@ beforeAfterData.forEach(function(ba, i) {
       id: 121 + i * 2 + mi,
       category: 'beforeafter',
       mode: m,
-      label: ba.feature + ' Before/After — ' + m,
+      label: ba.feature + ' Before/After - ' + m,
       render: (function(data, mode) {
         return function() { return beforeAfterCard(mode, data.feature, data.before, data.after, data.ai === 'life' ? 'life' : 'brand'); };
       })(ba, m)
@@ -1527,7 +1527,7 @@ beforeAfterData.forEach(function(ba, i) {
   });
 });
 
-// ── 13. USE CASES (10) — IDs 141–150 ──
+// ── 13. USE CASES (10) - IDs 141–150 ──
 
 function useCaseIcon(name, mode) {
   var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1586,7 +1586,7 @@ useCaseData.forEach(function(uc, i) {
       id: 141 + i * 2 + mi,
       category: 'usecases',
       mode: m,
-      label: uc.persona + ' — ' + m,
+      label: uc.persona + ' - ' + m,
       render: (function(data, mode) {
         return function() { return useCaseCard(mode, data.persona, data.icon, data.headline, data.details); };
       })(uc, m)
@@ -1594,7 +1594,7 @@ useCaseData.forEach(function(uc, i) {
   });
 });
 
-// ── 14. SOCIAL HOOKS (16) — IDs 151–166 ──
+// ── 14. SOCIAL HOOKS (16) - IDs 151–166 ──
 
 function hookCard(mode, hookText, subtitle) {
   var goldAccent = mode === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1634,7 +1634,7 @@ hookData.forEach(function(h, i) {
       id: 151 + i * 2 + mi,
       category: 'hooks',
       mode: m,
-      label: h.hook.substring(0, 35) + '… — ' + m,
+      label: h.hook.substring(0, 35) + '… - ' + m,
       render: (function(data, mode) {
         return function() { return hookCard(mode, data.hook, data.sub); };
       })(h, m)
@@ -1642,7 +1642,7 @@ hookData.forEach(function(h, i) {
   });
 });
 
-// ── 15. FEATURE SPOTLIGHTS (14) — IDs 167–180 ──
+// ── 15. FEATURE SPOTLIGHTS (14) - IDs 167–180 ──
 
 function spotlightIcon(name, mode) {
   var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
@@ -1705,7 +1705,7 @@ spotlightData.forEach(function(sp, i) {
       id: 167 + i * 2 + mi,
       category: 'spotlights',
       mode: m,
-      label: sp.feature + ' Spotlight — ' + m,
+      label: sp.feature + ' Spotlight - ' + m,
       render: (function(data, mode) {
         return function() { return spotlightCard(mode, data.feature, data.icon, data.caps); };
       })(sp, m)
@@ -1919,7 +1919,7 @@ launchData.forEach(function(l, i) {
       id: 181 + i * 2 + mi,
       category: 'launch',
       mode: m,
-      label: (l.headline || l.big || 'Launch').replace(/<br>/g, ' ').substring(0, 30) + '… — ' + m,
+      label: (l.headline || l.big || 'Launch').replace(/<br>/g, ' ').substring(0, 30) + '… - ' + m,
       render: (function(data, mode) {
         return function() {
           if (data.type === 'hero') return launchHeroCard(mode, data.headline, data.subtitle, data.bullets, data.cta);
@@ -1932,7 +1932,7 @@ launchData.forEach(function(l, i) {
   });
 });
 
-// ── 16. PRIVACY & SECURITY (14) — IDs 225–238 ──
+// ── 16. PRIVACY & SECURITY (14) - IDs 225–238 ──
 
 function privacyIcon(name, mode) {
   var color = mode === 'dark' ? '#b2997b' : '#8b7b67';
@@ -2014,12 +2014,12 @@ var privacyData = [
     headline: 'Bring your own API keys.',
     sub: 'Your keys. Your accounts. Your spend. RoweOS never touches, stores, or proxies your API calls through our servers.',
     icon: 'key',
-    details: ['Keys stored in your browser\'s localStorage', 'Direct API calls from your device to the provider', 'No intermediary servers. No data logging.', 'Delete your keys anytime — instant removal']
+    details: ['Keys stored in your browser\'s localStorage', 'Direct API calls from your device to the provider', 'No intermediary servers. No data logging.', 'Delete your keys anytime - instant removal']
   },
   {
     type: 'detail',
     headline: '100% local by default.',
-    sub: 'Every conversation, every brand memory, every automation — stored on your device. Nothing leaves unless you choose it.',
+    sub: 'Every conversation, every brand memory, every automation - stored on your device. Nothing leaves unless you choose it.',
     icon: 'lock',
     details: ['All data lives in localStorage on YOUR device', 'Works fully offline after first load', 'No account required to use the platform', 'No telemetry. No tracking. No analytics on your content.']
   },
@@ -2033,7 +2033,7 @@ var privacyData = [
     headline: 'Cloud sync is optional<br>and encrypted.',
     sub: 'When you enable Firebase sync, your data transfers with end-to-end encryption. Cross-device access without compromise.',
     icon: 'cloud',
-    details: ['Opt-in only — disabled by default', 'Firebase with encrypted data transfer', 'API keys sync to a secure subcollection', 'Delete your cloud data anytime from Settings']
+    details: ['Opt-in only - disabled by default', 'Firebase with encrypted data transfer', 'API keys sync to a secure subcollection', 'Delete your cloud data anytime from Settings']
   },
   {
     type: 'detail',
@@ -2055,7 +2055,7 @@ privacyData.forEach(function(p, i) {
       id: 225 + i * 2 + mi,
       category: 'privacy',
       mode: m,
-      label: (p.headline || p.big || 'Privacy').replace(/<br>/g, ' ').substring(0, 30) + '... — ' + m,
+      label: (p.headline || p.big || 'Privacy').replace(/<br>/g, ' ').substring(0, 30) + '... - ' + m,
       render: (function(data, mode) {
         return function() {
           if (data.type === 'statement') return privacyStatementCard(mode, data.big, data.small);
@@ -2066,13 +2066,13 @@ privacyData.forEach(function(p, i) {
   });
 });
 
-// ── 17. VIDEO GENERATION (8) — IDs 239–246 ──
+// ── 17. VIDEO GENERATION (8) - IDs 239–246 ──
 
 var videoData = [
   {
     type: 'detail',
     headline: 'AI video generation.<br>Built in.',
-    sub: 'Generate videos from text prompts or images with Google Veo — the same API powering your image generation.',
+    sub: 'Generate videos from text prompts or images with Google Veo - the same API powering your image generation.',
     icon: 'video',
     details: ['Text-to-video and image-to-video', '5 Veo model options including Veo 3.1', 'Up to 8 seconds with audio', 'Landscape and portrait aspect ratios']
   },
@@ -2110,7 +2110,7 @@ videoData.forEach(function(v, i) {
       id: 239 + i * 2 + mi,
       category: 'video',
       mode: m,
-      label: (v.headline || v.big || 'Video').replace(/<br>/g, ' ').substring(0, 30) + '... — ' + m,
+      label: (v.headline || v.big || 'Video').replace(/<br>/g, ' ').substring(0, 30) + '... - ' + m,
       render: (function(data, mode) {
         return function() {
           if (data.type === 'statement') return privacyStatementCard(mode, data.big, data.small);
@@ -2373,7 +2373,7 @@ wallpaperTemplates.forEach(function(wp, i) {
       mode: m,
       w: WP_W,
       h: WP_H,
-      label: wp.label + ' — ' + m,
+      label: wp.label + ' - ' + m,
       render: (function(data, mode) {
         return function() {
           switch(data.type) {
@@ -2396,7 +2396,7 @@ wallpaperTemplates.forEach(function(wp, i) {
   });
 });
 
-// ── 19. EMAIL COMPOSER CAMPAIGN (10) — IDs 301–310 ──
+// ── 19. EMAIL COMPOSER CAMPAIGN (10) - IDs 301–310 ──
 (function() {
   var emailCards = [
     { headline: 'Write it. Brand it. Send it.', sub: 'Email composer with branded templates, right inside Studio.', mode: 'dark', style: 'hero' },
@@ -2416,7 +2416,7 @@ wallpaperTemplates.forEach(function(wp, i) {
       id: 301 + i,
       category: 'email',
       mode: card.mode,
-      label: 'Email — ' + card.style + ' ' + card.mode,
+      label: 'Email - ' + card.style + ' ' + card.mode,
       render: (function(c) {
         return function() {
           var m = c.mode;
@@ -2521,7 +2521,7 @@ wallpaperTemplates.forEach(function(wp, i) {
   });
 })();
 
-// ── 20. NEWSLETTER SIGNUP CAMPAIGN (10) — IDs 311–320 ──
+// ── 20. NEWSLETTER SIGNUP CAMPAIGN (10) - IDs 311–320 ──
 (function() {
   var nlCards = [
     { headline: 'Stay in the loop.', sub: 'AI insights, feature drops, and early access. No spam.', mode: 'dark', style: 'hero' },
@@ -2541,7 +2541,7 @@ wallpaperTemplates.forEach(function(wp, i) {
       id: 311 + i,
       category: 'newsletter',
       mode: card.mode,
-      label: 'Newsletter — ' + card.style + ' ' + card.mode,
+      label: 'Newsletter - ' + card.style + ' ' + card.mode,
       render: (function(c) {
         return function() {
           var m = c.mode;
@@ -2615,7 +2615,7 @@ wallpaperTemplates.forEach(function(wp, i) {
   });
 })();
 
-// ── 21. LOGO SHOWCASE (16) — IDs 321–336 ──
+// ── 21. LOGO SHOWCASE (16) - IDs 321–336 ──
 (function() {
   var logoCards = [
     { style: 'centered', headline: 'Operating intelligence, built for brands & life.', mode: 'dark' },
@@ -2641,7 +2641,7 @@ wallpaperTemplates.forEach(function(wp, i) {
       id: 321 + i,
       category: 'logo',
       mode: card.mode,
-      label: 'Logo — ' + card.style + ' ' + card.mode,
+      label: 'Logo - ' + card.style + ' ' + card.mode,
       render: (function(c) {
         return function() {
           var m = c.mode;
@@ -2720,7 +2720,7 @@ wallpaperTemplates.forEach(function(wp, i) {
               + '</div>'
               + '</div>';
           } else if (c.style === 'cta') {
-            // Full CTA — logo, headline, URL, button
+            // Full CTA - logo, headline, URL, button
             inner = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:80px 72px;text-align:center;">'
               + '<div style="position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba('+glowRgb+','+(m==='dark'?'0.08':'0.05')+') 0%,transparent 55%);pointer-events:none;"></div>'
               + '<div style="position:relative;">'
@@ -2731,7 +2731,7 @@ wallpaperTemplates.forEach(function(wp, i) {
               + '</div>'
               + '</div>';
           } else if (c.style === 'stamp') {
-            // Minimal stamp — logo with ring, nothing else
+            // Minimal stamp - logo with ring, nothing else
             var ringBorder = m === 'dark' ? 'rgba(178,153,123,0.2)' : 'rgba(139,123,103,0.2)';
             inner = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;position:relative;">'
               + '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba('+glowRgb+','+(m==='dark'?'0.05':'0.03')+') 0%,transparent 50%);pointer-events:none;"></div>'
@@ -2749,7 +2749,7 @@ wallpaperTemplates.forEach(function(wp, i) {
   });
 })();
 
-// ── 22. DEMO VIDEO THUMBNAILS (14) — IDs 341–354 ──
+// ── 22. DEMO VIDEO THUMBNAILS (14) - IDs 341–354 ──
 (function() {
   var demoCards = [
     { title: 'Login & Mode Selection', cat: 'Core', img: 'login_dark.png', dur: '0:20' },
@@ -2783,7 +2783,7 @@ wallpaperTemplates.forEach(function(wp, i) {
       id: 341 + i,
       category: 'demos',
       mode: 'dark',
-      label: 'Demo — ' + card.title,
+      label: 'Demo - ' + card.title,
       render: (function(c) {
         return function() {
           var cc = catColors[c.cat] || catColors.Core;
@@ -2835,7 +2835,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
 }
 
 (function() {
-  // ── 1. HERO — "Your Brand, Always Blooming" ──
+  // ── 1. HERO - "Your Brand, Always Blooming" ──
   ['dark','light'].forEach(function(m) {
     var accent = m === 'dark' ? '#b2997b' : '#8b7b67';
     var mutedC = m === 'dark' ? '#9e9487' : '#6b6560';
@@ -2845,7 +2845,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
       id: m === 'dark' ? 361 : 362,
       category: 'bloom',
       mode: m,
-      label: 'Bloom Hero — ' + m,
+      label: 'Bloom Hero - ' + m,
       render: (function(mode, ac, mt, dm, gRgb) {
         return function() {
           var glow = '<div style="position:absolute;top:32%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba('+gRgb+',0.12) 0%,transparent 55%);pointer-events:none;"></div>';
@@ -2862,7 +2862,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 2. BENEFITS GRID — 4 key benefits ──
+  // ── 2. BENEFITS GRID - 4 key benefits ──
   var bloomBenefits = [
     { title: 'Personalized Feed', desc: 'Content tailored to each brand in your portfolio. Never generic.' },
     { title: 'Always Fresh', desc: 'New strategies, posts, and ideas generated on demand or on a schedule.' },
@@ -2878,7 +2878,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
       id: m === 'dark' ? 363 : 364,
       category: 'bloom',
       mode: m,
-      label: 'Bloom Benefits — ' + m,
+      label: 'Bloom Benefits - ' + m,
       render: (function(mode, ac, mt, sf, bd) {
         return function() {
           var top = '<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">'
@@ -2903,7 +2903,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 3. HOW IT WORKS — 3 steps ──
+  // ── 3. HOW IT WORKS - 3 steps ──
   var bloomSteps = [
     { num: '01', title: 'Connect Your Brands', desc: 'Add your brand portfolio. Bloom learns your voice, values, and audience from your Identity settings.' },
     { num: '02', title: 'Generate On Demand', desc: 'Four AI agents create tailored content. Strategy maps the plan, Marketing writes the copy, Operations optimizes timing.' },
@@ -2918,7 +2918,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
       id: m === 'dark' ? 365 : 366,
       category: 'bloom',
       mode: m,
-      label: 'Bloom How It Works — ' + m,
+      label: 'Bloom How It Works - ' + m,
       render: (function(mode, ac, mt, dm, bd) {
         return function() {
           var badge = '<div style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;border:1px solid '+bd+';margin-bottom:32px;">'
@@ -2945,7 +2945,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 4. BEFORE / AFTER — Manual vs Bloom ──
+  // ── 4. BEFORE / AFTER - Manual vs Bloom ──
   var bloomBefore = ['Staring at a blank page', 'Posting inconsistently', 'Same content for every platform', 'Guessing what resonates'];
   var bloomAfter = ['AI-generated drafts in seconds', 'Automated content calendar', 'Platform-native formatting', 'Data-driven recommendations'];
   ['dark','light'].forEach(function(m) {
@@ -2959,7 +2959,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
       id: m === 'dark' ? 367 : 368,
       category: 'bloom',
       mode: m,
-      label: 'Bloom Before/After — ' + m,
+      label: 'Bloom Before/After - ' + m,
       render: (function(mode, ac, mt, dm, sf, bd, rd) {
         return function() {
           var beforeSection = '<div style="background:'+sf+';border:1px solid '+bd+';border-radius:14px;padding:28px 32px;margin-bottom:20px;">'
@@ -2990,7 +2990,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 5. FEATURE SPOTLIGHT — Personalized AI Feed ──
+  // ── 5. FEATURE SPOTLIGHT - Personalized AI Feed ──
   ['dark','light'].forEach(function(m) {
     var accent = m === 'dark' ? '#b2997b' : '#8b7b67';
     var mutedC = m === 'dark' ? '#9e9487' : '#6b6560';
@@ -3002,7 +3002,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
       id: m === 'dark' ? 369 : 370,
       category: 'bloom',
       mode: m,
-      label: 'Bloom Spotlight — ' + m,
+      label: 'Bloom Spotlight - ' + m,
       render: (function(mode, ac, mt, dm, sf, bd, gRgb) {
         return function() {
           var glow = '<div style="position:absolute;top:18%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba('+gRgb+',0.08) 0%,transparent 55%);pointer-events:none;"></div>';
@@ -3033,7 +3033,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 6. SOCIAL HOOK — Punchy CTA ──
+  // ── 6. SOCIAL HOOK - Punchy CTA ──
   ['dark','light'].forEach(function(m) {
     var accent = m === 'dark' ? '#b2997b' : '#8b7b67';
     var mutedC = m === 'dark' ? '#9e9487' : '#6b6560';
@@ -3042,7 +3042,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
       id: m === 'dark' ? 371 : 372,
       category: 'bloom',
       mode: m,
-      label: 'Bloom Hook — ' + m,
+      label: 'Bloom Hook - ' + m,
       render: (function(mode, ac, mt, gRgb) {
         return function() {
           var glow = '<div style="position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba('+gRgb+',0.1) 0%,transparent 50%);pointer-events:none;"></div>';
@@ -3062,7 +3062,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
 })();
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// ─── NEW TEMPLATES v22.14 — 100+ Gold-Hue Bloom & Platform Templates ────────
+// ─── NEW TEMPLATES v22.14 - 100+ Gold-Hue Bloom & Platform Templates ────────
 // ═══════════════════════════════════════════════════════════════════════════════
 
 (function() {
@@ -3098,7 +3098,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   function pushPair(cat, label, renderFn) {
     ['dark','light'].forEach(function(m) {
       var id = nextId++;
-      templates.push({ id: id, category: cat, mode: m, label: label + ' — ' + m, render: (function(mode) { return function() { return renderFn(mode, gp(mode)); }; })(m) });
+      templates.push({ id: id, category: cat, mode: m, label: label + ' - ' + m, render: (function(mode) { return function() { return renderFn(mode, gp(mode)); }; })(m) });
     });
   }
 
@@ -3651,7 +3651,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Flower — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Flower - ' + m,
       render: (function(mode, pal) { return function() {
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
           wpGlow(mode, '45%', 1000, 0.12)+
@@ -3668,7 +3668,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Gradient — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Gradient - ' + m,
       render: (function(mode, pal) { return function() {
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
           '<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,transparent 0%,rgba('+pal.gRgb+',0.06) 50%,transparent 100%);pointer-events:none;"></div>'+
@@ -3686,7 +3686,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Stack — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Stack - ' + m,
       render: (function(mode, pal) { return function() {
         var features = ['Bloom','Studio','Chat','Focus','Video Lab','Pulse','Identity'];
         var stack = '';
@@ -3709,7 +3709,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Quote — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Quote - ' + m,
       render: (function(mode, pal) { return function() {
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:0 120px;">'+
           wpGlow(mode, '45%', 900, 0.1)+
@@ -3727,7 +3727,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   ['dark','light'].forEach(function(m) {
     var p = gp(m);
     var id = nextId++;
-    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Dual — ' + m,
+    templates.push({ id: id, w: WP_W, h: WP_H, category: 'bloom-wallpapers-gold', mode: m, label: 'Bloom Wallpaper Dual - ' + m,
       render: (function(mode, pal) { return function() {
         var inner = '<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;">'+
           '<div style="position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba('+pal.gRgb+',0.08) 0%,transparent 50%);pointer-events:none;"></div>'+
@@ -4067,12 +4067,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
   var modes = ['dark','light'];
   var nextId = 5001;
 
-  // ── 1. HERO — "Introducing B.L.A.K.E." ──
+  // ── 1. HERO - "Introducing B.L.A.K.E." ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Hero — ' + m,
+      label: 'BLAKE Hero - ' + m,
       render: function() {
         var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
           + blakeGlow(p.gRgb)
@@ -4093,7 +4093,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Acronym — ' + m,
+      label: 'BLAKE Acronym - ' + m,
       render: function() {
         var items = [
           { letter: 'B', word: 'Brand', desc: 'Five agents that become your brand.' },
@@ -4121,12 +4121,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 3. TWO MINDS — BrandAI + LifeAI = BLAKE ──
+  // ── 3. TWO MINDS - BrandAI + LifeAI = BLAKE ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'Two Minds — ' + m,
+      label: 'Two Minds - ' + m,
       render: function() {
         function mindCard(title, color, agents) {
           var pills = '';
@@ -4155,12 +4155,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 4. ENTITY REVEAL — Bold minimalist ──
+  // ── 4. ENTITY REVEAL - Bold minimalist ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Entity — ' + m,
+      label: 'BLAKE Entity - ' + m,
       render: function() {
         var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
           + blakeGlow(p.gRgb, '45%')
@@ -4175,12 +4175,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 5. FEATURES GRID — What BLAKE Can Do ──
+  // ── 5. FEATURES GRID - What BLAKE Can Do ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Features — ' + m,
+      label: 'BLAKE Features - ' + m,
       render: function() {
         var features = [
           { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="'+p.ac+'" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>', title: 'Contextual Chat' },
@@ -4209,12 +4209,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 6. STATS — Numbers ──
+  // ── 6. STATS - Numbers ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Stats — ' + m,
+      label: 'BLAKE Stats - ' + m,
       render: function() {
         var stats = [
           { num: '10', label: 'AI Agents', sub: '5 brand. 5 life.' },
@@ -4241,12 +4241,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 7. SOCIAL HOOK — "Not an assistant" ──
+  // ── 7. SOCIAL HOOK - "Not an assistant" ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Hook 1 — ' + m,
+      label: 'BLAKE Hook 1 - ' + m,
       render: function() {
         var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 80px;">'
           + blakeGlow(p.gRgb, '50%')
@@ -4261,12 +4261,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 8. SOCIAL HOOK — "Your brand has a mind now" ──
+  // ── 8. SOCIAL HOOK - "Your brand has a mind now" ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Hook 2 — ' + m,
+      label: 'BLAKE Hook 2 - ' + m,
       render: function() {
         var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 80px;">'
           + blakeGlow(p.gRgb, '40%')
@@ -4281,12 +4281,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 9. AGENT COLORS — Five agents visual ──
+  // ── 9. AGENT COLORS - Five agents visual ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Agents — ' + m,
+      label: 'BLAKE Agents - ' + m,
       render: function() {
         var agents = [
           { name: 'Strategy', color: p.purple },
@@ -4315,12 +4315,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 10. CTA — "Meet BLAKE" ──
+  // ── 10. CTA - "Meet BLAKE" ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'Meet BLAKE CTA — ' + m,
+      label: 'Meet BLAKE CTA - ' + m,
       render: function() {
         var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
           + blakeGlow(p.gRgb, '55%')
@@ -4335,12 +4335,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 11. SOVEREIGN — "Your data stays yours" ──
+  // ── 11. SOVEREIGN - "Your data stays yours" ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Sovereign — ' + m,
+      label: 'BLAKE Sovereign - ' + m,
       render: function() {
         var points = [
           'Browser-native architecture',
@@ -4367,12 +4367,12 @@ function bloomFlowerSvg(size, color, fillOpacity) {
     });
   });
 
-  // ── 12. ADAPTABLE — "Grows with you" ──
+  // ── 12. ADAPTABLE - "Grows with you" ──
   modes.forEach(function(m) {
     var p = bp(m);
     templates.push({
       id: nextId++, category: 'blake', mode: m,
-      label: 'BLAKE Adaptable — ' + m,
+      label: 'BLAKE Adaptable - ' + m,
       render: function() {
         var inner = '<div style="position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;height:100%;padding:80px 72px;">'
           + blakeGlow(p.gRgb, '35%')
@@ -4394,7 +4394,7 @@ function bloomFlowerSvg(size, color, fillOpacity) {
 
 })();
 
-// ── 23. X PROMO CAMPAIGN — IDs 501+ ──
+// ── 23. X PROMO CAMPAIGN - IDs 501+ ──
 
 // Centered card helper for X promos
 function xPromoCard(mode, line1, line2, sub, cta, footer) {
@@ -4438,7 +4438,7 @@ xPromos.forEach(function(p, i) {
       id: 501 + i * 2 + (mode === 'dark' ? 0 : 1),
       category: 'x-promo',
       mode: mode,
-      label: p.label + ' — ' + mode,
+      label: p.label + ' - ' + mode,
       render: function() { return xPromoCard(mode, p.line1, p.line2, p.sub, p.cta); }
     });
   });
@@ -5015,7 +5015,7 @@ function renderBloomVideo(idx) {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, W, H);
 
-        // Phase 1: 0-0.5s — Radial gold glow fades in
+        // Phase 1: 0-0.5s - Radial gold glow fades in
         var glowAlpha = 0;
         if (time < 0.5) {
           glowAlpha = easeOutCubic(time / 0.5) * 0.15;
@@ -5030,7 +5030,7 @@ function renderBloomVideo(idx) {
         ctx.fillStyle = grd;
         ctx.fillRect(0, 0, W, H);
 
-        // Phase 2: 0.5-2.5s — Flower blooms
+        // Phase 2: 0.5-2.5s - Flower blooms
         var flowerProg = 0;
         if (time >= 0.5 && time <= 2.5) {
           flowerProg = easeInOutCubic((time - 0.5) / 2.0);
@@ -5038,7 +5038,7 @@ function renderBloomVideo(idx) {
           flowerProg = 1;
         }
 
-        // Phase 3: 2.0-3.0s — Flower scales down & moves up, card fades in
+        // Phase 3: 2.0-3.0s - Flower scales down & moves up, card fades in
         var flowerScale = 1;
         var flowerY = H * 0.4;
         var cardAlpha = 0;
@@ -5073,7 +5073,7 @@ function renderBloomVideo(idx) {
           ctx.restore();
         }
 
-        // Phase 4: 3.0-5.0s — Subtle glow pulse
+        // Phase 4: 3.0-5.0s - Subtle glow pulse
         if (time >= 3.0) {
           var pulseTime = (time - 3.0) / 2.0;
           var pulse = Math.sin(pulseTime * Math.PI * 2) * 0.03;

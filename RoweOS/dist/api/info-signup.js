@@ -148,13 +148,15 @@ export default async function handler(req, res) {
     console.log('[info-signup] FIREBASE_PROJECT_ID/SERVICE_ACCOUNT not set, skipping info_leads');
   }
 
-  // 3. 302 redirect to main app with prefill so the auth gate can finish signup.
-  var qs = new URLSearchParams({
-    email: email,
-    name: name,
-    source: 'info'
-  }).toString();
-  res.statusCode = 302;
-  res.setHeader('Location', 'https://roweos.com/?' + qs);
-  res.end();
+  // 3. Return JSON success. Client (AJAX form on /info) will show its own
+  //    success state and provide a "Continue to RoweOS" button with prefill
+  //    query params. Keeping JSON instead of 302 because XHR can't display a
+  //    cross-origin redirect target without losing the in-page success state.
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify({
+    ok: true,
+    redirect: 'https://roweos.com/?email=' + encodeURIComponent(email)
+      + '&name=' + encodeURIComponent(name) + '&source=info'
+  }));
 }

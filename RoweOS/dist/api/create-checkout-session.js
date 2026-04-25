@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
   // Map tier to price ID
   var priceMap = {
-    solo: process.env.STRIPE_PRICE_SOLO || 'price_1T4PCn0XfMh3c11xArbx8gt8',
+    solo: process.env.STRIPE_PRICE_SOLO || 'price_1TQBok0XfMh3c11xvYETa6ws',
     founder: process.env.STRIPE_PRICE_FOUNDER || 'price_1T4PJZ0XfMh3c11xM5tfa2OE',
     premium: process.env.STRIPE_PRICE_PREMIUM || 'price_1T4PKm0XfMh3c11xE7WPn3E4'
   };
@@ -72,6 +72,18 @@ export default async function handler(req, res) {
     successParams += '&api_key_provider=' + apiKeyProvider + '&api_key_amount=' + apiKeyAmount;
   }
 
+  // v31.0: Auto-apply the first-100 launch promo for Founder + Premium so the
+  // 50% lifetime discount lands without the user having to type the code.
+  // We still keep allow_promotion_codes:true so manual codes work too, and
+  // because Stripe uses promotion_code IDs (not the raw code), we hardcode
+  // the promotion_code IDs from the dashboard. Override via env vars if needed.
+  var autoPromoId = null;
+  if (tier === 'founder') {
+    autoPromoId = process.env.STRIPE_PROMO_FOUNDER100 || 'promo_1TQBX70XfMh3c11x5TE0B4g7';
+  } else if (tier === 'premium') {
+    autoPromoId = process.env.STRIPE_PROMO_PREMIER100 || 'promo_1TQBed0XfMh3c11x4eUx6bb2';
+  }
+
   var sessionParams = {
     mode: 'subscription',
     line_items: lineItems,
@@ -82,18 +94,28 @@ export default async function handler(req, res) {
       trial_period_days: trialDays[tier] || 7,
       metadata: { tier: tier }
     },
-    payment_method_collection: 'always',
-    allow_promotion_codes: true
+    payment_method_collection: 'always'
   };
+
+  if (autoPromoId) {
+    // discounts is mutually exclusive with allow_promotion_codes — picking
+    // auto-apply means the code is locked in for this session. If a redemption
+    // limit is hit, Stripe returns a session-creation error and we fall back
+    // to allow_promotion_codes so the user can still check out at full price.
+    sessionParams.discounts = [{ promotion_code: autoPromoId }];
+  } else {
+    sessionParams.allow_promotion_codes = true;
+  }
 
   if (email) {
     sessionParams.customer_email = email;
   }
 
   // Create session via Stripe API (no SDK, direct REST)
-  try {
-    var formBody = buildFormBody(sessionParams);
-
+  // v31.0: If the auto-applied promo is exhausted (max_redemptions reached),
+  // retry once without it so the user can still check out at full price.
+  async function createSession(params) {
+    var formBody = buildFormBody(params);
     var resp = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
@@ -102,16 +124,30 @@ export default async function handler(req, res) {
       },
       body: formBody
     });
-
     var data = await resp.json();
+    return { ok: resp.ok, status: resp.status, data: data };
+  }
 
-    if (!resp.ok) {
-      console.error('[Checkout] Stripe API error:', data);
-      return res.status(resp.status).json({ error: data.error ? data.error.message : 'Stripe error' });
+  try {
+    var result = await createSession(sessionParams);
+
+    if (!result.ok && autoPromoId) {
+      var msg = (result.data && result.data.error && result.data.error.message) || '';
+      var promoExhausted = /promotion code|coupon|expired|max_redemptions|cannot be redeemed|inactive/i.test(msg);
+      if (promoExhausted) {
+        console.warn('[Checkout] Auto-promo failed (' + msg + '), retrying without discount.');
+        delete sessionParams.discounts;
+        sessionParams.allow_promotion_codes = true;
+        result = await createSession(sessionParams);
+      }
     }
 
-    // Return the checkout URL for redirect
-    return res.status(200).json({ url: data.url, sessionId: data.id });
+    if (!result.ok) {
+      console.error('[Checkout] Stripe API error:', result.data);
+      return res.status(result.status).json({ error: result.data.error ? result.data.error.message : 'Stripe error' });
+    }
+
+    return res.status(200).json({ url: result.data.url, sessionId: result.data.id });
 
   } catch (err) {
     console.error('[Checkout] Error creating session:', err.message);

@@ -115,7 +115,7 @@ async function handler(req, res) {
             '    <div style="text-align: center; margin: 32px 0;">',
             '      <a href="https://roweos.com/info#pricing" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #a89878, #c4a882); color: #0a0a0a; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 8px; letter-spacing: 0.5px;">View Plans & Get Your Access Key</a>',
             '    </div>',
-            '    <p style="color: #888; font-size: 13px; margin: 0 0 8px; text-align: center;">Plans start at $4.99/month</p>',
+            '    <p style="color: #888; font-size: 13px; margin: 0 0 8px; text-align: center;">Solo $9/mo · Founder $59/mo · Premium $79/mo · all start with a free trial</p>',
             '    <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #222;">',
             '      <p style="color: #888; font-size: 13px; margin: 0 0 12px;">Already have an access key? Just sign back in at <a href="https://roweos.com" style="color: #a89878; text-decoration: none;">roweos.com</a> and it will activate automatically.</p>',
             '      <p style="color: #888; font-size: 13px; margin: 0 0 12px;">Want a pre-loaded API key so you don\'t need your own? You can purchase one during checkout or in Settings after signing in.</p>',

@@ -300,8 +300,12 @@ function mapSessionToTier(session) {
   }
 
   // 3. Fallback: check price ID against known prices (configure in Stripe dashboard metadata instead)
-  // Add price_xxx -> tier mappings here if needed
+  // v31.0: Hardcode current price IDs as fallback so webhook still maps tier
+  // even if env vars aren't set. Env vars override.
   var priceMap = {};
+  priceMap['price_1TQBok0XfMh3c11xvYETa6ws'] = 'solo';     // $9/mo Solo (created 2026-04-25)
+  priceMap['price_1T4PJZ0XfMh3c11xM5tfa2OE'] = 'founder';  // $59/mo Founder
+  priceMap['price_1T4PKm0XfMh3c11xE7WPn3E4'] = 'premium';  // $79/mo Premium
   if (process.env.STRIPE_PRICE_SOLO || process.env.STRIPE_PRICE_BASIC) priceMap[process.env.STRIPE_PRICE_SOLO || process.env.STRIPE_PRICE_BASIC] = 'solo';
   if (process.env.STRIPE_PRICE_FOUNDER) priceMap[process.env.STRIPE_PRICE_FOUNDER] = 'founder';
   if (process.env.STRIPE_PRICE_PREMIUM) priceMap[process.env.STRIPE_PRICE_PREMIUM] = 'premium';
