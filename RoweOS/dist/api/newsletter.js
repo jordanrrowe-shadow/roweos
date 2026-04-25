@@ -186,7 +186,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     // Hero
     + '<tr><td style="padding:0 0 32px;text-align:center;">'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,\'Times New Roman\',serif;font-size:32px;font-weight:normal;color:' + textColor + ';line-height:1.3;">' + greeting + '</h1>'
-    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted access to RoweOS Founder (Beta), your personal AI operating system for managing brands and life from a single, elegant interface.</p>'
+    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">Your 14-day free trial of RoweOS Founder is now active. Your personal AI operating system for managing brands and life from a single, elegant interface.</p>'
     + '</td></tr>'
 
     // Divider
@@ -197,7 +197,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     + '<div style="background:' + cardBg + ';border:1px solid rgba(168,152,120,0.25);border-radius:12px;padding:24px;text-align:center;">'
     + '<p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">Your Access Key</p>'
     + '<code style="font-size:24px;color:' + gold + ';letter-spacing:3px;font-weight:600;font-family:\'SF Mono\',Monaco,\'Courier New\',monospace;">' + accessKey + '</code>'
-    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder (Beta): Full platform access</p>'
+    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder: Full platform access</p>'
     + '</div>'
     + '</td></tr>'
 
@@ -206,10 +206,9 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     + '<p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">Getting Started</p>'
     + '<div style="background:' + cardBg + ';border:1px solid ' + borderColor + ';border-radius:12px;padding:20px;margin-top:12px;">'
     + '<ol style="line-height:2.2;color:' + dimText + ';margin:0;padding-left:20px;font-size:14px;">'
-    + '<li>Go to <a href="https://roweos.com" style="color:' + gold + ';text-decoration:none;font-weight:500;">roweos.com</a></li>'
-    + '<li>Create your account or sign in with Google</li>'
-    + '<li>Open <strong style="color:' + textColor + ';">Settings</strong> and enter your Access Key above</li>'
-    + '<li>Add your brand and start building with AI</li>'
+    + '<li>Sign in at <a href="https://roweos.com" style="color:' + gold + ';text-decoration:none;font-weight:500;">roweos.com</a> - your key activates automatically</li>'
+    + '<li>Set up your brand in the onboarding wizard</li>'
+    + '<li>Start chatting with your BrandAI agents</li>'
     + '</ol>'
     + '</div>'
     + '</td></tr>'
@@ -221,11 +220,24 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     + '<tr><td style="padding:0 0 32px;">'
     + '<p style="margin:0 0 16px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">What You Get</p>'
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0">'
-    + buildFeatureRow('AI Agents', '4 specialized agents (Strategy, Marketing, Operations, Documents) that embody your brand\'s voice.', gold, textColor, dimText, borderColor)
-    + buildFeatureRow('150+ Operations', 'Pre-built templates for content, strategy, client intake, and more.', gold, textColor, dimText, borderColor)
+    + buildFeatureRow('5 AI Agents', 'Strategy, Marketing, Operations, Documents, and Intelligence agents that embody your brand\'s voice.', gold, textColor, dimText, borderColor)
+    + buildFeatureRow('Studio & Automations', 'Pipelines, scheduled workflows, and 150+ pre-built templates.', gold, textColor, dimText, borderColor)
+    + buildFeatureRow('Mail & Social', 'Email outbox, social publishing, and scheduling all in one place.', gold, textColor, dimText, borderColor)
     + buildFeatureRow('Cloud Sync', 'Secure cross-device sync for all your data, conversations, and settings.', gold, textColor, dimText, borderColor)
-    + buildFeatureRow('Automations', 'Schedule AI workflows that run on your timeline: content, social posts, reports.', gold, textColor, dimText, borderColor)
     + '</table>'
+    + '</td></tr>'
+
+    // AI Model Access
+    + '<tr><td style="padding:0 0 32px;">'
+    + '<div style="background:' + cardBg + ';border:1px solid ' + borderColor + ';border-radius:12px;padding:20px;">'
+    + '<p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">AI Model Access</p>'
+    + '<p style="margin:8px 0 0;font-size:13px;line-height:1.6;color:' + dimText + ';">RoweOS works with Claude, GPT, and Google AI. Add your own API keys in <strong style="color:' + textColor + ';">Settings</strong>, or purchase pre-loaded keys directly inside the app.</p>'
+    + '</div>'
+    + '</td></tr>'
+
+    // Other plans
+    + '<tr><td style="padding:0 0 12px;text-align:center;">'
+    + '<p style="margin:0;font-size:12px;color:' + dimText + ';">Explore all plans at <a href="https://roweos.com/purchase" style="color:' + gold + ';text-decoration:none;">roweos.com/purchase</a></p>'
     + '</td></tr>'
 
     // Footer
@@ -285,7 +297,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
     + '<div style="background:' + cardBg + ';border:1px solid rgba(168,152,120,0.25);border-radius:12px;padding:24px;text-align:center;">'
     + '<p style="margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">Your Access Key</p>'
     + '<code style="font-size:24px;color:' + gold + ';letter-spacing:3px;font-weight:600;font-family:\'SF Mono\',Monaco,\'Courier New\',monospace;">' + accessKey + '</code>'
-    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder (Beta): Full platform + advanced features</p>'
+    + '<p style="margin:12px 0 0;font-size:12px;color:' + dimText + ';">Founder: Full platform + advanced features</p>'
     + '</div>'
     + '</td></tr>'
 
@@ -480,10 +492,10 @@ export default async function handler(req, res) {
 
         if (signupType === 'company') {
           emailHtml = buildCompanyWelcomeEmail(firstName, accessKeyString, companyName);
-          emailSubject = 'Welcome to RoweOS Founder (Beta): ' + companyName + ' Access Key';
+          emailSubject = 'Welcome to RoweOS Founder: ' + companyName + ' Access Key';
         } else {
           emailHtml = buildIndividualWelcomeEmail(firstName, accessKeyString);
-          emailSubject = 'Welcome to RoweOS Founder (Beta): Your Access Key';
+          emailSubject = 'Welcome to RoweOS Founder: Your Access Key';
         }
 
         var emailResp = await fetch('https://api.resend.com/emails', {
