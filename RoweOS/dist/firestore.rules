@@ -82,6 +82,14 @@ service cloud.firestore {
     match /campaign_clicks/{campaignId} {
       allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
     }
+    // v31.3: Per-recipient click attribution subcollection — admin read (server writes)
+    match /campaign_clicks/{campaignId}/clicks/{recipientId} {
+      allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+    }
+    // v31.3: collectionGroup('clicks') needs a top-level rule too
+    match /{path=**}/clicks/{recipientId} {
+      allow read: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
+    }
     // v30.1: Email settings — admin read/write
     match /email_settings/{docId} {
       allow read, write: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';

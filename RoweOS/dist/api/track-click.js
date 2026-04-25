@@ -109,9 +109,68 @@ async function incrementCounter(projectId, accessToken, campaign) {
   return true;
 }
 
+// v31.3: Per-user click attribution. Writes campaign_clicks/{c}/clicks/{safeKey}
+// with clickCount + lastClickAt + recipient identifier so admins see WHO clicked.
+function _safeDocId(s) {
+  // Firestore doc IDs disallow '/'. Replace problematic chars while staying readable.
+  return String(s).replace(/[\/#?\.\[\]]/g, '_').slice(0, 200);
+}
+async function incrementUserClick(projectId, accessToken, campaign, recipient) {
+  if (!recipient) return false;
+  var safeKey = _safeDocId(recipient);
+  var docPath = 'projects/' + projectId + '/databases/(default)/documents/campaign_clicks/' + campaign + '/clicks/' + safeKey;
+  var url = 'https://firestore.googleapis.com/v1/projects/' + projectId + '/databases/(default)/documents:commit';
+  var body = {
+    writes: [
+      {
+        transform: {
+          document: docPath,
+          fieldTransforms: [
+            { fieldPath: 'clickCount', increment: { integerValue: '1' } },
+            { fieldPath: 'lastClickAt', setToServerValue: 'REQUEST_TIME' }
+          ]
+        }
+      },
+      {
+        update: {
+          name: docPath,
+          fields: {
+            recipient: { stringValue: recipient },
+            campaign: { stringValue: campaign }
+          }
+        },
+        updateMask: { fieldPaths: ['recipient', 'campaign'] },
+        currentDocument: { exists: false }
+      }
+    ]
+  };
+  var resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (resp.ok) return true;
+  // Doc exists: run transform alone
+  var resp2 = await fetch(url, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ writes: [{ transform: { document: docPath, fieldTransforms: [
+      { fieldPath: 'clickCount', increment: { integerValue: '1' } },
+      { fieldPath: 'lastClickAt', setToServerValue: 'REQUEST_TIME' }
+    ]}}]})
+  });
+  if (!resp2.ok) {
+    var err = await resp2.text();
+    console.error('[TrackClick] Per-user increment failed:', resp2.status, err);
+    return false;
+  }
+  return true;
+}
+
 module.exports = async function handler(req, res) {
   var campaign = (req.query.c || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 64);
   var to = req.query.to || '/';
+  var u = (req.query.u || '').slice(0, 256); // recipient identifier (email or uid)
   // Only allow same-origin redirects
   if (to.indexOf('http') === 0 || to.indexOf('//') === 0) to = '/';
   if (!campaign) {
@@ -125,7 +184,12 @@ module.exports = async function handler(req, res) {
       var serviceAccount = JSON.parse(serviceAccountRaw);
       var accessToken = await getGoogleAccessToken(serviceAccount);
       await incrementCounter(projectId, accessToken, campaign);
-      console.log('[TrackClick] Counted', campaign);
+      if (u) {
+        await incrementUserClick(projectId, accessToken, campaign, u);
+        console.log('[TrackClick] Counted', campaign, 'for', u);
+      } else {
+        console.log('[TrackClick] Counted', campaign, '(anonymous)');
+      }
     } else {
       console.warn('[TrackClick] Missing env vars - skipping count');
     }

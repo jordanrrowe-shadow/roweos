@@ -432,10 +432,13 @@ function buildSubscriptionInfo(userName) {
 
 // v31.2: Founder Lifetime Offer (Founder100). Personalized per-recipient.
 // No em dashes, no sentence dashes - per Jordan's preference.
-function buildFounderLifetimeOffer(userName) {
+function buildFounderLifetimeOffer(userName, recipientId) {
   var firstName = userName ? String(userName).split(' ')[0] : '';
   var greeting = firstName ? ('Hi ' + escapeHtml(firstName) + ',') : 'Hi there,';
   var parts = [];
+  // v31.3: Per-user click attribution. Encode recipient (email or uid) so
+  // /api/track-click can write to campaign_clicks/{c}/clicks/{recipient}.
+  var trackParam = recipientId ? '&u=' + encodeURIComponent(recipientId) : '';
 
   function providerCell(name, sub, svg) {
     return '<td align="center" style="padding:8px 6px;width:33.33%;">'
@@ -465,7 +468,7 @@ function buildFounderLifetimeOffer(userName) {
 
   // CTA
   parts.push('<div style="text-align:center;margin:0 0 32px;">');
-  parts.push('<a href="https://roweos.com/api/track-click?c=founder_offer&to=%2F" style="display:inline-block;padding:15px 40px;background:linear-gradient(135deg,#a89878,#d4b896);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;letter-spacing:0.5px;">Activate My Founder Trial</a>');
+  parts.push('<a href="https://roweos.com/api/track-click?c=founder_offer' + trackParam + '&to=%2F" style="display:inline-block;padding:15px 40px;background:linear-gradient(135deg,#a89878,#d4b896);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;letter-spacing:0.5px;">Activate My Founder Trial</a>');
   parts.push('<p style="color:#666;font-size:11px;margin:10px 0 0;">Type <span style="color:#d4b896;">Founder100</span> at checkout to lock the discount.</p>');
   parts.push('</div>');
 
@@ -492,7 +495,7 @@ function buildFounderLifetimeOffer(userName) {
   parts.push('<p style="color:#a89878;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">Optional Add-on</p>');
   parts.push('<h3 style="margin:0 0 8px;font-family:Georgia,serif;font-size:18px;font-weight:400;color:#f5ecd9;">Skip the API key setup.</h3>');
   parts.push('<p style="color:#ccc;font-size:13.5px;line-height:1.65;margin:0 0 14px;">RoweOS routes to OpenAI, Anthropic, and Google. You can bring your own API keys, or buy a Rowe managed key pack with a single charge so you can start running operations the moment your trial activates. No monthly billing, no provider accounts to set up.</p>');
-  parts.push('<a href="https://roweos.com/purchase" style="display:inline-block;padding:11px 22px;background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.45);border-radius:9px;color:#d4b896;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:0.3px;">Browse API Key Packs &rarr;</a>');
+  parts.push('<a href="https://roweos.com/api/track-click?c=founder_apikey' + trackParam + '&to=%2Fpurchase" style="display:inline-block;padding:11px 22px;background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.45);border-radius:9px;color:#d4b896;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:0.3px;">Browse API Key Packs &rarr;</a>');
   parts.push('</div>');
 
   // Google for Startups
@@ -514,7 +517,7 @@ function buildFounderLifetimeOffer(userName) {
 
 // --- Template router ---
 
-function buildTemplate(template, userId, userName, metadata) {
+function buildTemplate(template, userId, userName, metadata, userEmail) {
   switch (template) {
     case 'onboarding_survey':
       return buildOnboardingSurvey(userId, userName);
@@ -529,7 +532,7 @@ function buildTemplate(template, userId, userName, metadata) {
     case 'subscription_info':
       return buildSubscriptionInfo(userName);
     case 'founder_lifetime_offer':
-      return buildFounderLifetimeOffer(userName);
+      return buildFounderLifetimeOffer(userName, userEmail || userId);
     default:
       return null;
   }
@@ -624,7 +627,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Build template
-    var emailData = buildTemplate(template, userId, userName, metadata);
+    var emailData = buildTemplate(template, userId, userName, metadata, userEmail);
     if (!emailData) {
       return res.status(500).json({ error: 'Failed to build email template' });
     }
