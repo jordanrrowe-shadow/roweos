@@ -613,7 +613,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Validate template
-    var validTemplates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info'];
+    var validTemplates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info', 'founder_lifetime_offer'];
     if (validTemplates.indexOf(template) === -1) {
       return res.status(400).json({ error: 'Invalid template. Must be one of: ' + validTemplates.join(', ') });
     }
