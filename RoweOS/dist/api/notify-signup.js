@@ -291,6 +291,35 @@ export default async function handler(req, res) {
       console.log('[notify-signup] FIREBASE_PROJECT_ID not set, skipping Firestore write');
     }
 
+    // v30.5: Write to newsletter_subscribers so signup appears in Admin Signups tab
+    try {
+      if (process.env.FIREBASE_PROJECT_ID) {
+        var nsToken = await getFirebaseAccessToken();
+        if (nsToken) {
+          var nsUrl = 'https://firestore.googleapis.com/v1/projects/' + process.env.FIREBASE_PROJECT_ID +
+            '/databases/(default)/documents/newsletter_subscribers';
+          await fetch(nsUrl, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + nsToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fields: {
+                email: { stringValue: email },
+                name: { stringValue: displayName || '' },
+                displayName: { stringValue: displayName || '' },
+                uid: { stringValue: uid },
+                source: { stringValue: source },
+                subscribedAt: { stringValue: new Date().toISOString() },
+                type: { stringValue: 'individual' }
+              }
+            })
+          });
+          console.log('[notify-signup] newsletter_subscribers written for:', email);
+        }
+      }
+    } catch (nsErr) {
+      console.warn('[notify-signup] newsletter_subscribers write failed (non-fatal):', nsErr.message);
+    }
+
     // v30.5: Send push notification to admin (same pattern as newsletter.js)
     try {
       var adminUid = 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
