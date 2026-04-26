@@ -221,7 +221,38 @@ export default async function handler(req, res) {
     if (resendResp.ok) {
       var resendData = await resendResp.json();
       console.log('[resend-welcome] Email sent to:', email, 'from:', fromAddr, 'uid:', uid, 'id:', resendData.id, 'attachments:', resolvedAttachments.length);
-      return res.status(200).json({ success: true, emailId: resendData.id, attachmentCount: resolvedAttachments.length });
+      // v31.19: Log to Firestore email_log so the admin Campaigns dashboard sees this send.
+      // Previously only send-template-email wrote to email_log; resend-welcome was silent.
+      var loggedRW = false;
+      try {
+        if (process.env.FIREBASE_SERVICE_ACCOUNT && process.env.FIREBASE_PROJECT_ID) {
+          var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+          var token = await getGoogleAccessToken(sa);
+          if (token) {
+            var logUrl = 'https://firestore.googleapis.com/v1/projects/' + process.env.FIREBASE_PROJECT_ID + '/databases/(default)/documents/email_log';
+            var doc = { fields: {
+              userId: { stringValue: uid || '' },
+              userEmail: { stringValue: email || '' },
+              template: { stringValue: 'composer' },
+              subject: { stringValue: subject || '' },
+              sentAt: { stringValue: new Date().toISOString() },
+              status: { stringValue: 'sent' },
+              sentBy: { stringValue: 'resend-welcome' },
+              resendId: { stringValue: resendData.id || '' }
+            }};
+            var logResp = await fetch(logUrl, {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+              body: JSON.stringify(doc)
+            });
+            loggedRW = logResp.ok;
+            if (!logResp.ok) console.error('[resend-welcome] email_log write failed:', logResp.status, await logResp.text());
+          }
+        }
+      } catch (logErr) {
+        console.error('[resend-welcome] email_log error:', logErr.message);
+      }
+      return res.status(200).json({ success: true, emailId: resendData.id, attachmentCount: resolvedAttachments.length, logged: loggedRW });
     } else {
       var errText = await resendResp.text();
       console.error('[resend-welcome] Resend error:', resendResp.status, errText);
