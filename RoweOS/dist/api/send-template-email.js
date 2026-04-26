@@ -128,8 +128,11 @@ function wrapEmail(subtitle, bodyHtml) {
   parts.push('</tr></table>');
   parts.push('</td></tr>');
   // Footer
+  // v31.3: Include https://therowecollection.com in every email so URL domain matches the
+  // sending domain (roweos@therowecollection.com). Resolves Resend "URLs match sending domain"
+  // spam-filter warning and reinforces brand attribution.
   parts.push('<tr><td style="padding:16px 32px;border-top:1px solid #2a2a2a;text-align:center;">');
-  parts.push('<p style="margin:0 0 6px;font-size:11px;color:#555;">The Rowe Collection, LLC - Austin, TX</p>');
+  parts.push('<p style="margin:0 0 6px;font-size:11px;color:#555;">A product of <a href="https://therowecollection.com" style="color:#a89878;text-decoration:none;">The Rowe Collection, LLC</a> &middot; Austin, TX</p>');
   parts.push('<p style="margin:0;font-size:11px;color:#555;">Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color:#a89878;text-decoration:none;">jordan@therowecollection.com</a></p>');
   parts.push('</td></tr>');
   parts.push('</table>');
