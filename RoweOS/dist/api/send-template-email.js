@@ -432,6 +432,64 @@ function buildSubscriptionInfo(userName) {
 
 // v31.2: Founder Lifetime Offer (Founder100). Personalized per-recipient.
 // No em dashes, no sentence dashes - per Jordan's preference.
+// v31.3: Welcome email — sent to new signups (manual or auto). Mirrors the client-side
+// generateBetaWelcomeEmail/Founder welcome layout: dark card, getting-started steps, what-you-get.
+function buildWelcome(userName) {
+  var firstName = userName ? String(userName).split(' ')[0] : '';
+  var greeting = firstName ? ('Hi ' + escapeHtml(firstName) + ',') : 'Hi there,';
+  var parts = [];
+
+  parts.push('<p style="margin:0 0 16px;font-size:15px;color:#e0e0e0;line-height:1.6;">' + greeting + '</p>');
+  parts.push('<h2 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;font-weight:400;color:#f5ecd9;">Welcome to RoweOS Founder.</h2>');
+  parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.7;">Your 14 day free trial is now active. Here is everything you need to get started.</p>');
+
+  // Getting Started
+  parts.push('<div style="background:#0e0e0e;border:1px solid #1f1f1f;border-radius:10px;padding:18px 20px;margin:0 0 18px;">');
+  parts.push('<p style="margin:0 0 12px;font-size:11px;color:#a89878;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">Getting Started</p>');
+  var steps = [
+    'Sign in at <a href="https://roweos.com" style="color:#d4b896;">roweos.com</a> &mdash; your key activates automatically',
+    'Set up your brand in the onboarding wizard',
+    'Start chatting with your BrandAI agents'
+  ];
+  for (var i = 0; i < steps.length; i++) {
+    parts.push('<div style="display:flex;align-items:flex-start;margin:0 0 8px;">');
+    parts.push('<span style="display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;background:rgba(168,152,120,0.18);border-radius:50%;color:#d4b896;font-size:11px;font-weight:600;margin-right:11px;flex-shrink:0;">' + (i + 1) + '</span>');
+    parts.push('<p style="margin:0;font-size:13.5px;color:#ccc;line-height:1.6;">' + steps[i] + '</p>');
+    parts.push('</div>');
+  }
+  parts.push('</div>');
+
+  // What You Get
+  parts.push('<div style="background:#0e0e0e;border:1px solid #1f1f1f;border-radius:10px;padding:18px 20px;margin:0 0 22px;">');
+  parts.push('<p style="margin:0 0 12px;font-size:11px;color:#a89878;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">What You Get</p>');
+  var features = [
+    '5 BrandAI agents (Strategy, Marketing, Operations, Documents, Intelligence)',
+    'Studio automations and pipelines',
+    'Mail, social publishing, and scheduling',
+    'Pulse goals, Calendar, and Rhythm',
+    'Library, Memory, and Identity for every brand'
+  ];
+  for (var f = 0; f < features.length; f++) {
+    parts.push('<div style="display:flex;align-items:flex-start;margin:0 0 6px;">');
+    parts.push('<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#d4b896" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;margin-top:3px;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>');
+    parts.push('<p style="margin:0;font-size:13.5px;color:#ccc;line-height:1.55;">' + escapeHtml(features[f]) + '</p>');
+    parts.push('</div>');
+  }
+  parts.push('</div>');
+
+  parts.push('<div style="text-align:center;margin:0 0 18px;">');
+  parts.push(ctaButton('https://roweos.com', 'Open RoweOS'));
+  parts.push('</div>');
+
+  parts.push('<p style="margin:18px 0 0;font-size:12.5px;color:#888;line-height:1.6;">Reply to this email if you want a 1:1 walkthrough or have any questions.</p>');
+  parts.push('<p style="margin:8px 0 0;font-size:12.5px;color:#888;line-height:1.6;">Jordan, founder of The Rowe Collection</p>');
+
+  return {
+    subject: 'Welcome to RoweOS. Your trial is active.',
+    html: wrapEmail('New Signup · Welcome', parts.join('\n'))
+  };
+}
+
 function buildFounderLifetimeOffer(userName, recipientId) {
   var firstName = userName ? String(userName).split(' ')[0] : '';
   var greeting = firstName ? ('Hi ' + escapeHtml(firstName) + ',') : 'Hi there,';
@@ -533,6 +591,8 @@ function buildTemplate(template, userId, userName, metadata, userEmail) {
       return buildSubscriptionInfo(userName);
     case 'founder_lifetime_offer':
       return buildFounderLifetimeOffer(userName, userEmail || userId);
+    case 'welcome':
+      return buildWelcome(userName);
     default:
       return null;
   }
@@ -616,7 +676,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Validate template
-    var validTemplates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info', 'founder_lifetime_offer'];
+    var validTemplates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info', 'founder_lifetime_offer', 'welcome'];
     if (validTemplates.indexOf(template) === -1) {
       return res.status(400).json({ error: 'Invalid template. Must be one of: ' + validTemplates.join(', ') });
     }
