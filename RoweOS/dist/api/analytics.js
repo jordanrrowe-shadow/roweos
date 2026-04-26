@@ -8,8 +8,10 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const token = (process.env.VERCEL_ANALYTICS_TOKEN || '').trim();
-  const projectId = (process.env.VERCEL_PROJECT_ID || '').trim();
-  const teamId = (process.env.VERCEL_TEAM_ID || '').trim();
+  // v31.3: projectId and teamId can be overridden per-request (multi-site Admin > Sites view).
+  // Falls back to env defaults so the existing single-site flow still works unchanged.
+  const projectId = ((req.query.projectId || process.env.VERCEL_PROJECT_ID) || '').toString().trim();
+  const teamId = ((req.query.teamId || process.env.VERCEL_TEAM_ID) || '').toString().trim();
 
   if (!token || !projectId) {
     return res.status(500).json({ error: 'Missing Vercel analytics configuration', hasToken: !!token, hasProject: !!projectId });
