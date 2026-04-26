@@ -97,8 +97,23 @@ function ctaButton(url, label) {
   return '<a href="' + url + '" style="display:inline-block;padding:12px 28px;background:#a89878;color:#111;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;letter-spacing:0.3px;">' + escapeHtml(label) + '</a>';
 }
 
-function wrapEmail(subtitle, bodyHtml) {
+// v31.4: Build a tracked URL through /api/track-click so per-recipient + per-campaign
+// engagement is attributable. Falls back to the raw destination if recipientId is missing
+// (which would only happen for very old call sites that don't pass it through).
+function trackedUrl(campaign, dest, recipientId) {
+  var u = recipientId ? '&u=' + encodeURIComponent(recipientId) : '';
+  return 'https://roweos.com/api/track-click?c=' + encodeURIComponent(campaign)
+    + u + '&to=' + encodeURIComponent(dest);
+}
+
+function wrapEmail(subtitle, bodyHtml, recipientId, templateKey) {
   var tagline = subtitle || 'Operating intelligence, built for brands and life';
+  // v31.4: Per-template footer click attribution. Each template gets its own
+  // <template>_plans and <template>_apikeys campaigns so the admin dashboard
+  // shows footer engagement broken out by which campaign drove it.
+  var tplKey = templateKey || 'generic';
+  var plansUrl = trackedUrl(tplKey + '_plans', '/purchase', recipientId);
+  var apiKeysUrl = trackedUrl(tplKey + '_apikeys', '/purchase', recipientId);
   var parts = [
     '<!DOCTYPE html>',
     '<html><head><meta charset="utf-8"></head>',
@@ -123,8 +138,8 @@ function wrapEmail(subtitle, bodyHtml) {
   parts.push('<p style="font-family:\'DM Sans\',sans-serif;font-size:20px;font-weight:300;color:#a89878;letter-spacing:1px;margin:0 0 4px;">Intelligence, accessible.</p>');
   parts.push('<p style="font-family:\'DM Sans\',sans-serif;font-size:13px;color:#888;margin:0 0 16px;">Simple plans. No hidden fees.</p>');
   parts.push('<table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>');
-  parts.push('<td style="padding-right:8px;"><a href="https://roweos.com/purchase" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">View Plans</a></td>');
-  parts.push('<td style="padding-left:8px;"><a href="https://roweos.com/purchase" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">Get API Keys</a></td>');
+  parts.push('<td style="padding-right:8px;"><a href="' + plansUrl + '" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">View Plans</a></td>');
+  parts.push('<td style="padding-left:8px;"><a href="' + apiKeysUrl + '" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">Get API Keys</a></td>');
   parts.push('</tr></table>');
   parts.push('</td></tr>');
   // Footer
@@ -144,7 +159,7 @@ function wrapEmail(subtitle, bodyHtml) {
 
 // --- Template builders ---
 
-function buildOnboardingSurvey(userId, userName) {
+function buildOnboardingSurvey(userId, userName, recipientId) {
   var greeting = userName ? ('Hi ' + escapeHtml(userName) + ',') : 'Hi there,';
   var parts = [];
 
@@ -193,11 +208,11 @@ function buildOnboardingSurvey(userId, userName) {
 
   return {
     subject: 'Quick questions about your RoweOS experience',
-    html: wrapEmail('Onboarding Survey', parts.join('\n'))
+    html: wrapEmail('Onboarding Survey', parts.join('\n'), recipientId, 'onboarding_survey')
   };
 }
 
-function buildReengagement(userId, userName) {
+function buildReengagement(userId, userName, recipientId) {
   var greeting = userName ? ('Hi ' + escapeHtml(userName) + ',') : 'Hi there,';
   var parts = [];
 
@@ -220,16 +235,16 @@ function buildReengagement(userId, userName) {
   }
 
   parts.push('<div style="text-align:center;margin:28px 0 0;">');
-  parts.push(ctaButton('https://roweos.com', 'Open RoweOS'));
+  parts.push(ctaButton(trackedUrl('reengagement_open', '/', recipientId), 'Open RoweOS'));
   parts.push('</div>');
 
   return {
     subject: 'Your AI brand team is waiting for you',
-    html: wrapEmail(null, parts.join('\n'))
+    html: wrapEmail(null, parts.join('\n'), recipientId, 'reengagement')
   };
 }
 
-function buildFeatureAnnouncement(metadata) {
+function buildFeatureAnnouncement(metadata, recipientId) {
   var featureName = (metadata && metadata.featureName) || 'New Feature';
   var featureDescription = (metadata && metadata.featureDescription) || '';
   var imageUrl = (metadata && metadata.imageUrl) || '';
@@ -248,16 +263,16 @@ function buildFeatureAnnouncement(metadata) {
   }
 
   parts.push('<div style="text-align:center;margin:24px 0 0;">');
-  parts.push(ctaButton('https://roweos.com', 'Try it now'));
+  parts.push(ctaButton(trackedUrl('feature_announcement_open', '/', recipientId), 'Try it now'));
   parts.push('</div>');
 
   return {
     subject: 'New in RoweOS: ' + featureName,
-    html: wrapEmail('Feature Update', parts.join('\n'))
+    html: wrapEmail('Feature Update', parts.join('\n'), recipientId, 'feature_announcement')
   };
 }
 
-function buildAccessKeyDelivery(metadata, userName) {
+function buildAccessKeyDelivery(metadata, userName, recipientId) {
   var accessKey = (metadata && metadata.accessKey) || '';
   var tier = (metadata && metadata.tier) || 'Founder';
   var greeting = userName ? ('Hi ' + escapeHtml(userName) + ',') : 'Hi there,';
@@ -291,16 +306,16 @@ function buildAccessKeyDelivery(metadata, userName) {
   }
 
   parts.push('<div style="text-align:center;margin:28px 0 0;">');
-  parts.push(ctaButton('https://roweos.com', 'Activate Your Key'));
+  parts.push(ctaButton(trackedUrl('access_key_open', '/', recipientId), 'Activate Your Key'));
   parts.push('</div>');
 
   return {
     subject: 'Your RoweOS Access Key',
-    html: wrapEmail('Access Key Delivery', parts.join('\n'))
+    html: wrapEmail('Access Key Delivery', parts.join('\n'), recipientId, 'access_key_delivery')
   };
 }
 
-function buildCheckin(userId, userName) {
+function buildCheckin(userId, userName, recipientId) {
   var greeting = userName ? ('Hi ' + escapeHtml(userName) + ',') : 'Hi there,';
   var parts = [];
 
@@ -327,12 +342,12 @@ function buildCheckin(userId, userName) {
 
   return {
     subject: 'How\'s RoweOS working for you?',
-    html: wrapEmail('Check-in', parts.join('\n'))
+    html: wrapEmail('Check-in', parts.join('\n'), recipientId, 'checkin')
   };
 }
 
 // v30.4: Subscription Info email template
-function buildSubscriptionInfo(userName) {
+function buildSubscriptionInfo(userName, recipientId) {
   var greeting = userName ? ('Hi ' + escapeHtml(userName) + ',') : 'Hi there,';
   var parts = [];
 
@@ -389,7 +404,7 @@ function buildSubscriptionInfo(userName) {
 
   // CTA: Choose Your Plan
   parts.push('<div style="text-align:center;margin:0 0 32px;">');
-  parts.push(ctaButton('https://roweos.com', 'Choose Your Plan'));
+  parts.push(ctaButton(trackedUrl('subscription_choose', '/', recipientId), 'Choose Your Plan'));
   parts.push('</div>');
 
   // Divider
@@ -416,7 +431,7 @@ function buildSubscriptionInfo(userName) {
 
   // CTA: Get API Keys
   parts.push('<div style="text-align:center;margin:0 0 32px;">');
-  parts.push(ctaButton('https://roweos.com/purchase', 'Get API Keys'));
+  parts.push(ctaButton(trackedUrl('subscription_apikeys', '/purchase', recipientId), 'Get API Keys'));
   parts.push('</div>');
 
   // Divider
@@ -429,7 +444,7 @@ function buildSubscriptionInfo(userName) {
 
   return {
     subject: 'RoweOS Plans, API Keys, and AI Routing',
-    html: wrapEmail('Subscription', parts.join('\n'))
+    html: wrapEmail('Subscription', parts.join('\n'), recipientId, 'subscription_info')
   };
 }
 
@@ -437,10 +452,12 @@ function buildSubscriptionInfo(userName) {
 // No em dashes, no sentence dashes - per Jordan's preference.
 // v31.3: Welcome email — sent to new signups (manual or auto). Mirrors the client-side
 // generateBetaWelcomeEmail/Founder welcome layout: dark card, getting-started steps, what-you-get.
-function buildWelcome(userName) {
+// v31.4: Wrap Open RoweOS + footer URLs through /api/track-click for per-recipient attribution.
+function buildWelcome(userName, recipientId) {
   var firstName = userName ? String(userName).split(' ')[0] : '';
   var greeting = firstName ? ('Hi ' + escapeHtml(firstName) + ',') : 'Hi there,';
   var parts = [];
+  var signinUrl = trackedUrl('welcome_signin', '/', recipientId);
 
   parts.push('<p style="margin:0 0 16px;font-size:15px;color:#e0e0e0;line-height:1.6;">' + greeting + '</p>');
   parts.push('<h2 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;font-weight:400;color:#f5ecd9;">Welcome to RoweOS Founder.</h2>');
@@ -450,7 +467,7 @@ function buildWelcome(userName) {
   parts.push('<div style="background:#0e0e0e;border:1px solid #1f1f1f;border-radius:10px;padding:18px 20px;margin:0 0 18px;">');
   parts.push('<p style="margin:0 0 12px;font-size:11px;color:#a89878;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;">Getting Started</p>');
   var steps = [
-    'Sign in at <a href="https://roweos.com" style="color:#d4b896;">roweos.com</a> &mdash; your key activates automatically',
+    'Sign in at <a href="' + signinUrl + '" style="color:#d4b896;">roweos.com</a> &mdash; your key activates automatically',
     'Set up your brand in the onboarding wizard',
     'Start chatting with your BrandAI agents'
   ];
@@ -481,7 +498,7 @@ function buildWelcome(userName) {
   parts.push('</div>');
 
   parts.push('<div style="text-align:center;margin:0 0 18px;">');
-  parts.push(ctaButton('https://roweos.com', 'Open RoweOS'));
+  parts.push(ctaButton(trackedUrl('welcome_open', '/', recipientId), 'Open RoweOS'));
   parts.push('</div>');
 
   parts.push('<p style="margin:18px 0 0;font-size:12.5px;color:#888;line-height:1.6;">Reply to this email if you want a 1:1 walkthrough or have any questions.</p>');
@@ -489,7 +506,7 @@ function buildWelcome(userName) {
 
   return {
     subject: 'Welcome to RoweOS. Your trial is active.',
-    html: wrapEmail('New Signup · Welcome', parts.join('\n'))
+    html: wrapEmail('New Signup · Welcome', parts.join('\n'), recipientId, 'welcome')
   };
 }
 
@@ -572,30 +589,33 @@ function buildFounderLifetimeOffer(userName, recipientId) {
 
   return {
     subject: 'Your Founder Lifetime Discount. RoweOS is ready.',
-    html: wrapEmail('Founder · Lifetime Offer', parts.join('\n'))
+    html: wrapEmail('Founder · Lifetime Offer', parts.join('\n'), recipientId, 'founder_lifetime_offer')
   };
 }
 
 // --- Template router ---
-
+// v31.4: All builders receive recipientId (email-or-uid) so click tracking and
+// per-template footer attribution work uniformly. recipientId is what /api/track-click
+// uses as the document key in campaign_clicks/{c}/clicks/{recipient}.
 function buildTemplate(template, userId, userName, metadata, userEmail) {
+  var recipientId = userEmail || userId;
   switch (template) {
     case 'onboarding_survey':
-      return buildOnboardingSurvey(userId, userName);
+      return buildOnboardingSurvey(userId, userName, recipientId);
     case 'reengagement':
-      return buildReengagement(userId, userName);
+      return buildReengagement(userId, userName, recipientId);
     case 'feature_announcement':
-      return buildFeatureAnnouncement(metadata);
+      return buildFeatureAnnouncement(metadata, recipientId);
     case 'access_key_delivery':
-      return buildAccessKeyDelivery(metadata, userName);
+      return buildAccessKeyDelivery(metadata, userName, recipientId);
     case 'checkin':
-      return buildCheckin(userId, userName);
+      return buildCheckin(userId, userName, recipientId);
     case 'subscription_info':
-      return buildSubscriptionInfo(userName);
+      return buildSubscriptionInfo(userName, recipientId);
     case 'founder_lifetime_offer':
-      return buildFounderLifetimeOffer(userName, userEmail || userId);
+      return buildFounderLifetimeOffer(userName, recipientId);
     case 'welcome':
-      return buildWelcome(userName);
+      return buildWelcome(userName, recipientId);
     default:
       return null;
   }
