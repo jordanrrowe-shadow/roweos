@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// v24.8: AUTOMATION MEMORY — Learns user preferences from automation configs
+// v24.8: AUTOMATION MEMORY - Learns user preferences from automation configs
 // ═══════════════════════════════════════════════════════════════
 
 var AUTOMATION_MEMORY_MAX = 50;
@@ -78,7 +78,7 @@ function saveAutomationMemoryTracking(tracking) {
   try { localStorage.setItem('roweos_automation_memory_tracking', JSON.stringify(tracking)); } catch(e) {}
 }
 
-// v24.8: Auto-learn from pipeline saves — extract preferences from step configs
+// v24.8: Auto-learn from pipeline saves - extract preferences from step configs
 function learnFromPipelineConfig(pipeline) {
   if (!pipeline || !pipeline.steps) return;
   var tracking = getAutomationMemoryTracking();
@@ -485,7 +485,7 @@ async function bloomComment(postId) {
   var post = _bloomPosts.find(function(p) { return p.id === postId; });
   if (!post) { console.warn('[Bloom Comment] Post not found in _bloomPosts:', postId, '_bloomPosts count:', _bloomPosts.length); showToast('Post not found - try refreshing', 'warning'); return; }
 
-  // v22.56: Prevent rapid-fire — wait for previous AI reply on this post
+  // v22.56: Prevent rapid-fire - wait for previous AI reply on this post
   if (_bloomCommentPending[postId]) {
     showToast('Waiting for previous reply...', 'info');
     return;
@@ -1319,7 +1319,7 @@ function renderAutoLabWorkflows() {
     html += '</div>';
     html += '</div>';
 
-    // v22.46: Workflow action badge (non-pipeline) — shows action type with color
+    // v22.46: Workflow action badge (non-pipeline) - shows action type with color
     if (!isPipeline) {
       var _wfType = PIPELINE_STEP_TYPES[a.action];
       if (_wfType) {
@@ -1461,7 +1461,7 @@ function renderAutoLabWorkflows() {
 var _autoCardDragId = '';
 
 function onAutoCardDragStart(e, id) {
-  // v23.2: Only allow drag from handle — prevent text selection interference
+  // v23.2: Only allow drag from handle - prevent text selection interference
   var handle = e.target.closest('.auto-lab-drag-handle');
   if (!handle) { e.preventDefault(); return; }
   _autoCardDragId = String(id);
@@ -1485,7 +1485,7 @@ function onAutoCardDragLeave(e) {
   if (card) card.classList.remove('drag-over');
 }
 
-// v23.2: Clean up drag state on dragend — prevents ghost/dotted cards
+// v23.2: Clean up drag state on dragend - prevents ghost/dotted cards
 function onAutoCardDragEnd(e) {
   var grid = document.getElementById('autoLabCardGrid');
   if (grid) {
@@ -1685,7 +1685,7 @@ function showAutoLabWorkflowForm(editId) {
 
 // v14.3: Select workflow action from card grid
 function selectWfAction(action) {
-  // v18.7: Simplified — CSS .active class handles all visual states
+  // v18.7: Simplified - CSS .active class handles all visual states
   var hidden = document.getElementById('autoLabWfAction');
   if (hidden) hidden.value = action;
 
@@ -1739,7 +1739,7 @@ function renderAutoLabTargetConfig(action, existing) {
     html += '</select></div>';
     html += '<div class="auto-lab-form-field"><label>Operation</label>';
     html += '<select id="autoLabWfTargetOp"></select></div>';
-    // v18.5: Context textarea for studio operations — mirrors Studio context input
+    // v18.5: Context textarea for studio operations - mirrors Studio context input
     html += '<div class="auto-lab-form-field"><label>Context / Instructions</label>';
     html += '<textarea id="autoLabWfTargetContext" rows="3" placeholder="Provide context, topic, or specific instructions for this operation..." style="width:100%;padding:8px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:13px;resize:vertical;">' + escapeHtml(target.contextRef || target.text || '') + '</textarea></div>';
     // v18.7: Provider + model + length for single-step studio automations
@@ -1784,7 +1784,7 @@ function renderAutoLabTargetConfig(action, existing) {
   } else if (action === 'image') {
     html += '<div class="auto-lab-form-field"><label>Image Prompt</label>';
     html += '<input type="text" id="autoLabWfTargetText" placeholder="Describe the image to generate..." value="' + escapeHtml(target.text || '') + '"></div>';
-    // v20.0: Image model selector — default to Nano Banana Pro 3
+    // v20.0: Image model selector - default to Nano Banana Pro 3
     var imgModelVal = (existing && existing.config && existing.config.imageModel) ? existing.config.imageModel : 'gemini-3-pro-image-preview';
     var imgModels = [
       ['gemini-3-pro-image-preview', 'Nano Banana 3.0 Pro'],
@@ -1899,7 +1899,7 @@ function renderAutoLabTargetConfig(action, existing) {
     html += '<div class="auto-lab-form-field full-width"><label>Body</label>';
     html += '<textarea id="autoLabWfEmailBody" rows="4" placeholder="Email body text..." style="width:100%;padding:8px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:13px;resize:vertical;">' + escapeHtml(target.emailBody || '') + '</textarea></div>';
   } else if (action === 'batch_email') {
-    // v22.28: Batch Email — parses previous step output into multiple outbox emails
+    // v22.28: Batch Email - parses previous step output into multiple outbox emails
     var batchFrom = (existing && existing.config && existing.config.emailFrom) || getDefaultFromAddress();
     var batchTemplate = (existing && existing.config && existing.config.emailTemplate) || 'professional';
     html += '<div style="padding:8px 12px;background:var(--bg-tertiary,rgba(255,255,255,0.03));border-radius:8px;margin-bottom:12px;">';
@@ -1927,7 +1927,7 @@ function updateAutoLabWfOperations(agentId, preselect) {
   var opEl = document.getElementById('autoLabWfTargetOp');
   if (!opEl) return;
 
-  // v18.1: BUG 2+3+4 — use `ops` (not `operations`), apply categoryMap, filter by current brand
+  // v18.1: BUG 2+3+4 - use `ops` (not `operations`), apply categoryMap, filter by current brand
   var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
   var categoryMap = { strategy: 'strategic', coach: 'planning', research: 'research' };
   var mappedAgent = (agentId && categoryMap[agentId]) ? categoryMap[agentId] : agentId;
@@ -1973,7 +1973,7 @@ function updateAutoLabWfModelOptions(provider) {
 
 // v17.4: Toggle platform selection in workflow form
 function toggleWfPlatformSelection(platform, el) {
-  // v18.7: Simplified — CSS .selected class handles all visual states
+  // v18.7: Simplified - CSS .selected class handles all visual states
   if (!window._wfSelectedPlatforms) window._wfSelectedPlatforms = [];
   var idx = window._wfSelectedPlatforms.indexOf(platform);
   if (idx > -1) {
@@ -2036,9 +2036,9 @@ function closeAutoLabWorkflowForm() {
 
 // ─── PIPELINE BUILDER (v17.4, overhauled v22.46) ───────────────────────
 
-// v22.46: Global step type definitions — color, label, icon SVG, description
+// v22.46: Global step type definitions - color, label, icon SVG, description
 // =====================================================
-// v24.2: AUTOMATIONS AGENT — Conversational automation builder
+// v24.2: AUTOMATIONS AGENT - Conversational automation builder
 // =====================================================
 var _autoAgentMessages = [];
 var _autoAgentStreaming = false;
@@ -2059,7 +2059,7 @@ function handleAutoAgentDrop(e) {
   handleAutoAgentFile(fakeInput);
 }
 
-// v24.4: New chat for automations agent — clears messages and shows welcome
+// v24.4: New chat for automations agent - clears messages and shows welcome
 function newAutoAgentChat() {
   _autoAgentMessages = [];
   _autoAgentFiles = [];
@@ -2097,7 +2097,7 @@ function handleAutoAgentFile(input) {
   Array.from(input.files).forEach(function(file) {
     var ext = file.name.split('.').pop().toLowerCase();
     if (file.type.startsWith('image/')) {
-      // Image files — read as base64 data URL
+      // Image files - read as base64 data URL
       var reader = new FileReader();
       reader.onload = function(e) {
         _autoAgentFiles.push({ name: file.name, type: 'image', dataUrl: e.target.result, base64: e.target.result });
@@ -2105,7 +2105,7 @@ function handleAutoAgentFile(input) {
       };
       reader.readAsDataURL(file);
     } else if (ext === 'pdf') {
-      // v24.8: PDF — extract text via pdf.js
+      // v24.8: PDF - extract text via pdf.js
       var reader = new FileReader();
       reader.onload = function(e) {
         if (typeof pdfjsLib !== 'undefined') {
@@ -2133,7 +2133,7 @@ function handleAutoAgentFile(input) {
       };
       reader.readAsArrayBuffer(file);
     } else if (['xlsx', 'xls', 'csv'].indexOf(ext) !== -1) {
-      // v24.8: Spreadsheet — extract via SheetJS
+      // v24.8: Spreadsheet - extract via SheetJS
       var reader = new FileReader();
       reader.onload = function(e) {
         if (typeof XLSX !== 'undefined') {
@@ -2163,7 +2163,7 @@ function handleAutoAgentFile(input) {
       };
       reader.readAsText(file);
     } else if (['doc', 'docx', 'ppt', 'pptx'].indexOf(ext) !== -1) {
-      // v24.8: Office docs — read raw text (best effort, XML-based extraction)
+      // v24.8: Office docs - read raw text (best effort, XML-based extraction)
       var reader = new FileReader();
       reader.onload = function(e) {
         try {
@@ -2201,7 +2201,7 @@ function handleAutoAgentFile(input) {
               showToast('Document attached (limited text extraction)', 'info');
             }
           } else {
-            // .doc/.ppt (legacy binary) — just note attachment
+            // .doc/.ppt (legacy binary) - just note attachment
             _autoAgentFiles.push({ name: file.name, type: 'document', text: '[Legacy Office document attached: ' + file.name + ']', preview: file.name });
             renderAutoAgentFileChips();
             showToast('Document attached (binary format - limited extraction)', 'info');
@@ -2266,14 +2266,14 @@ function sendAutoAgentMessage() {
   renderAutoAgentMessages();
   scrollAutoAgentToBottom();
 
-  // v24.4: Use brandSettings like main chat — selectedProvider/selectedModel are stale legacy keys
+  // v24.4: Use brandSettings like main chat - selectedProvider/selectedModel are stale legacy keys
   var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
   var provider, modelKey;
   if (currentMode === 'life') {
     provider = localStorage.getItem('roweos_life_provider') || localStorage.getItem('selectedProvider') || 'anthropic';
     modelKey = localStorage.getItem('roweos_life_model') || 'claude-sonnet-4-6';
   } else {
-    // Read from brandSettings (per-brand config) — same source as main chat
+    // Read from brandSettings (per-brand config) - same source as main chat
     var _brandIdx = 0;
     try {
       var _agentBrandEl = document.getElementById('agentBrand');
@@ -2284,7 +2284,7 @@ function sendAutoAgentMessage() {
     modelKey = _bs.model || 'claude-sonnet-4-6';
   }
 
-  // v24.4: Handle RoweOS AI smart routing — resolve to actual provider/model
+  // v24.4: Handle RoweOS AI smart routing - resolve to actual provider/model
   if (provider === 'roweos') {
     try {
       var _resolved = resolveRoweOSAI({ userMessage: text, systemPrompt: '' });
@@ -2405,7 +2405,7 @@ function buildAutoAgentSystemPrompt() {
     '14. After showing the automation, tell the user they can click "Add" to save it or ask you to modify it.\n' +
     '15. ALWAYS wrap the JSON in ```automation and ``` markers (not ```json).\n' +
     '16. For email steps, if no recipient specified, leave emailTo empty and note the user should fill it in.\n' +
-    '16b. For outbox steps, ALWAYS set target.contentRef to reference the specific studio step output (e.g., "{{step3_content}}"). This is critical when a pipeline has multiple studio+outbox pairs — each outbox must reference its own studio step, not just the last one.\n' +
+    '16b. For outbox steps, ALWAYS set target.contentRef to reference the specific studio step output (e.g., "{{step3_content}}"). This is critical when a pipeline has multiple studio+outbox pairs - each outbox must reference its own studio step, not just the last one.\n' +
     '17. NEVER suggest or mention integrations that do not exist in RoweOS. There is NO Slack, Discord, Zapier, webhook, or SMS integration. Only suggest capabilities from the available step types listed above.';
 }
 
@@ -2476,12 +2476,12 @@ function renderAutoAgentMessages() {
       if (!msg.content && _autoAgentStreaming) {
         html += '<p class="auto-agent-thinking">Thinking...</p>';
       } else {
-        // v24.4: Hide raw JSON during streaming — show "Building" animation instead
+        // v24.4: Hide raw JSON during streaming - show "Building" animation instead
         var content = msg.content || '';
         var hasAutoBlock = content.indexOf('```automation') !== -1;
         var blockClosed = hasAutoBlock && content.indexOf('```', content.indexOf('```automation') + 14) !== -1;
         if (_autoAgentStreaming && hasAutoBlock && !blockClosed) {
-          // Still streaming the automation JSON — show building animation, no flicker
+          // Still streaming the automation JSON - show building animation, no flicker
           var preBlock = content.substring(0, content.indexOf('```automation'));
           html += renderAutoAgentText(preBlock);
           html += '<div class="auto-agent-building">';
@@ -2506,7 +2506,7 @@ function renderAutoAgentContent(text, msgIdx) {
 
   parts.forEach(function(part, i) {
     if (i === 0) {
-      // Before first automation block — just text
+      // Before first automation block - just text
       html += renderAutoAgentText(part);
     } else {
       // Contains automation JSON followed by closing ```
@@ -2518,7 +2518,7 @@ function renderAutoAgentContent(text, msgIdx) {
         var data = JSON.parse(jsonStr.trim());
         html += renderAutoAgentPreviewCard(data, msgIdx + '_' + i);
       } catch(e) {
-        // v24.4: Show building animation instead of raw JSON — user should never see code
+        // v24.4: Show building animation instead of raw JSON - user should never see code
         html += '<div class="auto-agent-building" style="animation:none;opacity:0.5;">';
         html += '<div class="auto-agent-building-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>';
         html += '<div class="auto-agent-building-text" style="color:var(--text-muted);">Could not parse automation</div>';
@@ -2562,7 +2562,7 @@ function renderAutoAgentPreviewCard(data, cardId) {
   html += '<span class="preview-name">' + escapeHtml(data.name || 'Untitled Automation') + '</span>';
   html += '</div>';
 
-  // Body — steps
+  // Body - steps
   html += '<div class="auto-agent-preview-body"><div class="auto-agent-preview-steps">';
   steps.forEach(function(step, i) {
     var st = PIPELINE_STEP_TYPES[step.action] || { color: '#666', label: step.action };
@@ -2792,7 +2792,7 @@ function addAutoAgentAutomation(cardId) {
     }
   }
 
-  // v24.14: Always write to scheduled tasks (dual storage required — was conditional, causing split state)
+  // v24.14: Always write to scheduled tasks (dual storage required - was conditional, causing split state)
   var tasks = getScheduledTasks();
   tasks.push(automation); // v24.14: Push full automation object (was building stripped copy with String ID mismatch)
   saveScheduledTasks(tasks);
@@ -2819,7 +2819,7 @@ function addAndRunAutoAgentAutomation(cardId) {
     if (!autoId) return;
     setTimeout(function() { runAutoLabNow(autoId); }, 300);
   } else {
-    // Already added — find the automation ID from stored data
+    // Already added - find the automation ID from stored data
     var data = window._autoAgentPreviews && window._autoAgentPreviews[cardId];
     if (!data) { showToast('Could not find automation', 'error'); return; }
     var automations = [];
@@ -2982,7 +2982,7 @@ function initAutoAgentScrollListener() {
 }
 
 // ============================================================
-// v25.0: FOLIO — Living Canvas
+// v25.0: FOLIO - Living Canvas
 // ============================================================
 
 var _folioMessages = [];
@@ -4063,7 +4063,7 @@ function newFolioChatSession() {
     container.innerHTML = '<div class="auto-agent-welcome" id="folioChatWelcome">'
       + '<div class="auto-agent-welcome-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg></div>'
       + '<div class="auto-agent-welcome-title">Folio Chat</div>'
-      + '<div class="auto-agent-welcome-sub">Describe a visual — dashboard, chart, diagram, interactive — and I will build it.</div>'
+      + '<div class="auto-agent-welcome-sub">Describe a visual - dashboard, chart, diagram, interactive - and I will build it.</div>'
       + '<div class="auto-agent-suggestions">'
       + '<button class="auto-agent-suggest-btn" onclick="folioQuickPrompt(\'Build a brand performance dashboard\')">Brand performance dashboard</button>'
       + '<button class="auto-agent-suggest-btn" onclick="folioQuickPrompt(\'Create an interactive org chart\')">Interactive org chart</button>'
@@ -4438,7 +4438,7 @@ function renderPipelineForm(editId, existing) {
   html += '</select></div>';
   html += '</div>';
 
-  // Step cards — v22.47: Undo button next to Steps label
+  // Step cards - v22.47: Undo button next to Steps label
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 8px;">';
   html += '<div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);">Steps</div>';
   html += '<button id="pipelineUndoBtn" class="auto-lab-card-btn" onclick="undoPipelineAction()" style="font-size:11px;padding:3px 10px;opacity:0.3;pointer-events:none;" title="Nothing to undo">';
@@ -4462,7 +4462,7 @@ function renderPipelineForm(editId, existing) {
   html += 'Add Step</button>';
   html += '</div>';
 
-  // v24.20: Compact presets — link to Browse tab + custom presets only
+  // v24.20: Compact presets - link to Browse tab + custom presets only
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;">';
   html += '<div style="display:flex;align-items:center;gap:10px;">';
   html += '<div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);">Presets</div>';
@@ -4530,7 +4530,7 @@ function renderPipelineStepCard(step, index, totalSteps) {
   html += '<div class="pipeline-step-header">';
   html += '<span class="pipeline-drag-handle" title="Drag to reorder"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>';
   html += '<span class="pipeline-step-number" style="background:' + sType.color + ';">' + (index + 1) + '</span>';
-  // v22.46: Step type badge — prominent, left-aligned next to step number
+  // v22.46: Step type badge - prominent, left-aligned next to step number
   html += '<button class="pipeline-step-type-badge" style="background:' + sType.color + ';" onclick="togglePipelineTypePicker(' + index + ')" title="Change step type">';
   html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" stroke-width="2">' + sType.icon + '</svg>';
   html += sType.label + '</button>';
@@ -4568,7 +4568,7 @@ function renderPipelineStepCard(step, index, totalSteps) {
   html += renderPipelineStepConfig(step, index);
   html += '</div>';
 
-  // v24.8: Output variable pill — shows as a referenceable output label
+  // v24.8: Output variable pill - shows as a referenceable output label
   var _outputKey = step.outputKey || 'step' + (index + 1) + '_output';
   html += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-color);">';
   // Output label
@@ -4659,17 +4659,17 @@ function renderPipelineStepConfig(step, index) {
     html += '</select></div>';
     html += '<div class="auto-lab-form-field"><label>Operation</label>';
     html += '<select id="pipelineStepOp_' + index + '"><option value="">Select...</option></select></div>';
-    // v18.1: FEATURE 1 — Context/instructions field for studio steps
+    // v18.1: FEATURE 1 - Context/instructions field for studio steps
     html += '<div class="auto-lab-form-field" style="flex-basis:100%;"><label>Instructions / Context</label>';
     html += '<textarea id="pipelineStepContext_' + index + '" rows="2" placeholder="' + (index > 0 ? 'Instructions or reference ' + _prevStepLabel + '...' : 'Instructions for this step...') + '" style="width:100%;padding:8px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:13px;resize:vertical;">' + escapeHtml(target.contextRef || '') + '</textarea></div>';
-    // v18.1: FEATURE 4 — Per-step API/model selection for studio steps
+    // v18.1: FEATURE 4 - Per-step API/model selection for studio steps
     var studioProvOpts = [['','Brand Default'],['anthropic','Anthropic'],['openai','OpenAI'],['google','Gemini']];
     var stepProv = (step.config && step.config.provider) ? step.config.provider : '';
     html += '<div class="auto-lab-form-field"><label>API Provider</label>';
     html += '<select id="pipelineStepProvider_' + index + '" onchange="updatePipelineStepModelOptions(' + index + ', this.value)">';
     studioProvOpts.forEach(function(po) { html += '<option value="' + po[0] + '"' + (stepProv === po[0] ? ' selected' : '') + '>' + po[1] + '</option>'; });
     html += '</select></div>';
-    // v18.7: Model selection dropdown — populated from providerConfigs
+    // v18.7: Model selection dropdown - populated from providerConfigs
     var stepModel = (step.config && step.config.model) ? step.config.model : '';
     html += '<div class="auto-lab-form-field" id="pipelineStepModelWrap_' + index + '" style="' + (stepProv ? '' : 'display:none;') + '"><label>Model</label>';
     html += '<select id="pipelineStepModel_' + index + '">';
@@ -4695,14 +4695,14 @@ function renderPipelineStepConfig(step, index) {
   } else if (step.action === 'image') {
     html += '<div class="auto-lab-form-field" style="flex:2;"><label>Image Prompt</label>';
     html += '<input type="text" id="pipelineStepText_' + index + '" placeholder="' + (index > 0 ? 'Describe image or use ' + _prevStepLabel + '...' : 'Describe the image to generate...') + '" value="' + escapeHtml(target.text || '') + '"></div>';
-    // v18.1: FEATURE 4 — Per-step image provider selection
+    // v18.1: FEATURE 4 - Per-step image provider selection
     var imgProvOpts = [['','Default (Nano Banana 3.0)'],['nanobanana','Nano Banana 3.0'],['nanobanana_pro','Nano Banana 3.0 Pro'],['gemini','Gemini 2.0 Flash'],['dalle','DALL-E']];
     var imgProv = (step.config && step.config.provider) ? step.config.provider : '';
     html += '<div class="auto-lab-form-field"><label>Image Provider</label>';
     html += '<select id="pipelineStepImgProvider_' + index + '" onchange="updatePipelineStepImageModelOptions(' + index + ', this.value)">';
     imgProvOpts.forEach(function(po) { html += '<option value="' + po[0] + '"' + (imgProv === po[0] ? ' selected' : '') + '>' + po[1] + '</option>'; });
     html += '</select></div>';
-    // v18.7: Image sub-model dropdown — only for providers with multiple models
+    // v18.7: Image sub-model dropdown - only for providers with multiple models
     var imgModel = (step.config && step.config.imageModel) ? step.config.imageModel : '';
     var imgModelProviders = { gemini: [['gemini-2.0-flash-preview-image-generation','Gemini 2.0 Flash'],['imagen-3.0-generate-002','Imagen 4']], dalle: [['dall-e-3','DALL-E 3'],['dall-e-2','DALL-E 2']] };
     var showImgModel = imgProv && imgModelProviders[imgProv];
@@ -4710,7 +4710,7 @@ function renderPipelineStepConfig(step, index) {
     html += '<select id="pipelineStepImgModel_' + index + '">';
     if (showImgModel) { imgModelProviders[imgProv].forEach(function(m) { html += '<option value="' + m[0] + '"' + (imgModel === m[0] ? ' selected' : '') + '>' + m[1] + '</option>'; }); }
     html += '</select></div>';
-    // v18.1: FEATURE 5 — Reference image upload
+    // v18.1: FEATURE 5 - Reference image upload
     html += '<div class="auto-lab-form-field"><label>Reference Image</label>';
     html += '<div style="display:flex;align-items:center;gap:8px;">';
     html += '<input type="file" accept="image/*" onchange="handlePipelineRefImageUpload(' + index + ', this)" style="font-size:12px;color:var(--text-secondary);">';
@@ -4856,7 +4856,7 @@ function renderPipelineStepConfig(step, index) {
     html += '<textarea id="pipelineStepResearchCtx_' + index + '" rows="2" placeholder="' + (index > 0 ? 'Detailed research instructions. Can reference ' + _prevStepLabel + '...' : 'Detailed research instructions (merged into the research query)...') + '" style="width:100%;padding:8px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:6px;color:var(--text-primary);font-size:13px;resize:vertical;">' + escapeHtml(target.contextRef || '') + '</textarea></div>';
     html += '<div style="font-size:11px;color:var(--text-muted);padding:4px 0;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Deep Research uses Gemini to conduct comprehensive research. May take 1-5 minutes to complete.</div>';
   } else if (step.action === 'outbox') {
-    // v22.24: Queue to Outbox pipeline step — auto-extracts emails from previous steps
+    // v22.24: Queue to Outbox pipeline step - auto-extracts emails from previous steps
     html += '<div class="auto-lab-form-field" style="flex:2;"><label>To (recipient email)</label>';
     html += '<input type="email" id="pipelineStepOutboxTo_' + index + '" placeholder="Auto-extracted from previous steps, or enter manually" value="' + escapeHtml(target.emailTo || '') + '"></div>';
     html += '<div style="font-size:11px;color:var(--text-muted);padding:0 0 8px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> Leave empty to auto-detect email addresses from previous step output (e.g. from Deep Research)</div>';
@@ -4937,7 +4937,7 @@ function renderPipelineStepConfig(step, index) {
     html += '<div class="auto-lab-form-field" style="flex:2;"><label>Instructions / Context</label>';
     html += '<input type="text" id="pipelineStepContext_' + index + '" placeholder="What should the AI do with this goal?" value="' + escapeHtml(target.contextRef || '') + '"></div>';
   }
-  // v22.47: Per-step "Require Approval" toggle — pauses pipeline for review before continuing
+  // v22.47: Per-step "Require Approval" toggle - pauses pipeline for review before continuing
   var _reqApproval = step.config && step.config.requireApproval;
   html += '<div class="auto-lab-form-field" style="flex-basis:100%;margin-top:4px;border-top:1px solid var(--border-color);padding-top:8px;">';
   html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text-secondary);">';
@@ -4947,7 +4947,7 @@ function renderPipelineStepConfig(step, index) {
   return html;
 }
 
-// v18.1: FEATURE 2 — Collect ALL DOM field data back into _pipelineSteps before re-render
+// v18.1: FEATURE 2 - Collect ALL DOM field data back into _pipelineSteps before re-render
 function collectPipelineStepData() {
   for (var i = 0; i < _pipelineSteps.length; i++) {
     var nameEl = document.getElementById('pipelineStepName_' + i);
@@ -5214,12 +5214,12 @@ function removePipelineStep(index) {
     _pipelineSteps[i].stepId = i + 1;
     _pipelineSteps[i].outputKey = 'step' + (i + 1) + '_output';
   }
-  // v24.4: Skip re-collect in reRender — we already collected and array indices shifted
+  // v24.4: Skip re-collect in reRender - we already collected and array indices shifted
   window._skipPipelineCollect = true;
   reRenderPipelineSteps();
 }
 
-// v18.1: FEATURE 5 — Handle reference image upload for image gen pipeline steps (in-memory only)
+// v18.1: FEATURE 5 - Handle reference image upload for image gen pipeline steps (in-memory only)
 function handlePipelineRefImageUpload(index, input) {
   if (!input || !input.files || !input.files[0]) return;
   var file = input.files[0];
@@ -5256,7 +5256,7 @@ function handlePipelinePostImageUpload(index, input) {
 }
 
 function onPipelineStepActionChange(index, action) {
-  // v18.1: FEATURE 2 — Collect all fields before re-render
+  // v18.1: FEATURE 2 - Collect all fields before re-render
   collectPipelineStepData();
   _pipelineSteps[index].action = action;
   _pipelineSteps[index].target = {};
@@ -5266,7 +5266,7 @@ function onPipelineStepActionChange(index, action) {
 function reRenderPipelineSteps() {
   // v22.9: Skip collect when loading presets to prevent stale DOM overwrite
   if (!window._skipPipelineCollect) {
-    // v18.1: FEATURE 2 — Collect ALL fields (not just names)
+    // v18.1: FEATURE 2 - Collect ALL fields (not just names)
     collectPipelineStepData();
   }
   window._skipPipelineCollect = false;
@@ -5318,7 +5318,7 @@ function pipelineEmailLogoPreview(index) {
 function updatePipelineStepOps(index, agentId, preselect) {
   var opEl = document.getElementById('pipelineStepOp_' + index);
   if (!opEl) return;
-  // v18.1: BUG 3+4 — apply categoryMap (strategy→strategic) and filter by current brand
+  // v18.1: BUG 3+4 - apply categoryMap (strategy→strategic) and filter by current brand
   var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
   var categoryMap = { strategy: 'strategic', coach: 'planning', research: 'research' };
   var mappedAgent = (agentId && categoryMap[agentId]) ? categoryMap[agentId] : agentId;
@@ -5390,7 +5390,7 @@ function updatePipelineStepImageModelOptions(index, provider) {
   sel.innerHTML = html;
 }
 
-// v22.47: Pipeline undo history — stores snapshots of _pipelineSteps before destructive actions
+// v22.47: Pipeline undo history - stores snapshots of _pipelineSteps before destructive actions
 var _pipelineUndoStack = [];
 
 function pushPipelineUndo() {
@@ -5589,10 +5589,10 @@ function savePipeline() {
       var opEl = document.getElementById('pipelineStepOp_' + i);
       if (agentEl) stepTarget.agentId = agentEl.value;
       if (opEl) stepTarget.operationId = opEl.value;
-      // v18.1: FEATURE 1 — Save context/instructions
+      // v18.1: FEATURE 1 - Save context/instructions
       var ctxEl = document.getElementById('pipelineStepContext_' + i);
       if (ctxEl && ctxEl.value.trim()) stepTarget.contextRef = ctxEl.value.trim();
-      // v18.1: FEATURE 4 — Save provider override
+      // v18.1: FEATURE 4 - Save provider override
       var provEl = document.getElementById('pipelineStepProvider_' + i);
       if (provEl && provEl.value) _pipelineSteps[i].config = _pipelineSteps[i].config || {};
       if (provEl && provEl.value) _pipelineSteps[i].config.provider = provEl.value;
@@ -5684,7 +5684,7 @@ function savePipeline() {
       var resBrandEl2 = document.getElementById('pipelineStepResearchBrandCtx_' + i);
       if (resBrandEl2) _pipelineSteps[i].config.includeBrandContext = resBrandEl2.checked;
     } else if (action === 'pulse') {
-      // v28.4: Save pulse step data (goalId + context) — was missing, causing data loss on save
+      // v28.4: Save pulse step data (goalId + context) - was missing, causing data loss on save
       var pulseGoalEl2 = document.getElementById('pipelineStepGoal_' + i);
       if (pulseGoalEl2) stepTarget.goalId = pulseGoalEl2.value;
       var pulseCtxEl2 = document.getElementById('pipelineStepContext_' + i);
@@ -5692,7 +5692,7 @@ function savePipeline() {
     } else {
       var textEl2 = document.getElementById('pipelineStepText_' + i);
       if (textEl2) stepTarget.text = textEl2.value.trim();
-      // v18.1: FEATURE 4 — Save image provider override
+      // v18.1: FEATURE 4 - Save image provider override
       if (action === 'image') {
         var imgProvEl = document.getElementById('pipelineStepImgProvider_' + i);
         if (imgProvEl && imgProvEl.value) { _pipelineSteps[i].config = _pipelineSteps[i].config || {}; _pipelineSteps[i].config.provider = imgProvEl.value; }
@@ -5863,7 +5863,7 @@ function createAutomationFromChat(cardIndex) {
   // Validate and default name
   var name = (d.name && d.name.trim()) ? d.name.trim() : (isPipeline ? 'Chat Pipeline' : 'Chat Automation');
 
-  // Validate schedule date — bump past dates to tomorrow for one-time
+  // Validate schedule date - bump past dates to tomorrow for one-time
   var schedDate = d.scheduledDate || today;
   var recurType = d.recurType || 'none';
   if ((recurType === 'none' || recurType === 'once') && schedDate < today) {
@@ -5976,7 +5976,7 @@ function createAutomationFromChat(cardIndex) {
   try { automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(e) {}
 
   if (existingId) {
-    // Update existing — replace by ID
+    // Update existing - replace by ID
     for (var ai = 0; ai < automations.length; ai++) {
       if (automations[ai].id === existingId) {
         automation.id = existingId; // Keep same ID
@@ -6040,7 +6040,7 @@ function createAutomationFromChat(cardIndex) {
 }
 
 // v19.7: Navigate to Automations Lab and pre-fill pipeline/automation editor with proposal data
-// v19.9: Edit in Lab — navigate to Automations view and open the builder pre-filled
+// v19.9: Edit in Lab - navigate to Automations view and open the builder pre-filled
 function editAutomationProposal(cardIndex) {
   var proposal = window._automationProposals ? window._automationProposals[cardIndex] : null;
   if (!proposal || !proposal.data) { showToast('Automation data not found', 'error'); return; }
@@ -6277,7 +6277,7 @@ function saveAutoLabWorkflow() {
       target.uploadedImage = window._wfUploadedImage;
     }
   }
-  // v14.3.1: Include reference document if attached (only for studio/run_operation actions — not post)
+  // v14.3.1: Include reference document if attached (only for studio/run_operation actions - not post)
   var _wfAction = action ? action.value : '';
   if (window.wfReferenceDoc && _wfAction !== 'post') {
     target.referenceDoc = { name: window.wfReferenceDoc.name, content: window.wfReferenceDoc.content };
@@ -6389,7 +6389,7 @@ function saveAutoLabWorkflow() {
   var automations = [];
   try { automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(e) { console.warn('[Automations] Parse error:', e.message); }
   if (editId) {
-    // v29.0: Use found flag pattern (matches savePipeline) — more reliable than map+some
+    // v29.0: Use found flag pattern (matches savePipeline) - more reliable than map+some
     var idStr = String(editId);
     var found = false;
     automations = automations.map(function(a) {
@@ -6449,9 +6449,9 @@ function saveAutoLabWorkflow() {
   // v25.1: saveScheduledTasks() already writes through to Firestore
 }
 
-// v21.13: Persistent deletion guard — survives page refresh, prevents zombie restoration
+// v21.13: Persistent deletion guard - survives page refresh, prevents zombie restoration
 // v22.8: Extended expiry from 48h to 30 days
-// v28.7: Restored tombstone persistence — write-through alone can't prevent zombie
+// v28.7: Restored tombstone persistence - write-through alone can't prevent zombie
 // restoration because cloud scheduler writes lastRun back to the doc, and sync inventory
 // reads the subcollection raw. Tombstones must survive page refresh.
 var _deletedAutomationIds = {};
@@ -6555,7 +6555,7 @@ function restoreRunningStepDots() {
   }
 }
 
-// v23.10: Stop automation — sets flag checked by workflow runner
+// v23.10: Stop automation - sets flag checked by workflow runner
 // v30.1: Persist stopped state to localStorage so it survives tab refresh
 var _stoppedAutomationIds = {};
 try { var _savedStops = JSON.parse(localStorage.getItem('roweos_stopped_automation_ids') || '{}'); if (typeof _savedStops === 'object' && _savedStops !== null) _stoppedAutomationIds = _savedStops; } catch(e) {}
@@ -6607,7 +6607,7 @@ function _updateAutoCardStopBtn(id, isRunning) {
   });
 }
 
-// v22.8: Single source of truth for merged automation list — used by scheduler and notification center
+// v22.8: Single source of truth for merged automation list - used by scheduler and notification center
 function getMergedAutomations() {
   var scheduledTasks = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
   var merged = {};
@@ -6619,18 +6619,18 @@ function getMergedAutomations() {
       if (!existing) {
         merged[String(a.id)] = a;
       } else if (!existing.action && a.action) {
-        // v19.1: Scheduled version is stripped — use full version from roweos_automations
+        // v19.1: Scheduled version is stripped - use full version from roweos_automations
         // v22.8: Always keep MAX lastRun from either source
         var mLr = existing.lastRun ? new Date(existing.lastRun).getTime() : 0;
         var aLr = a.lastRun ? new Date(a.lastRun).getTime() : 0;
         merged[String(a.id)] = a;
         if (mLr > aLr) merged[String(a.id)].lastRun = existing.lastRun;
       } else {
-        // v24.14: Both have action — prefer the one with newer updatedAt (fixes edits being discarded)
+        // v24.14: Both have action - prefer the one with newer updatedAt (fixes edits being discarded)
         var eUp = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
         var aUp = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
         if (aUp > eUp) {
-          // roweos_automations version is newer — use it
+          // roweos_automations version is newer - use it
           merged[String(a.id)] = a;
         }
         // Sync MAX lastRun regardless of which version won
@@ -6652,7 +6652,7 @@ function getMergedAutomations() {
   return result;
 }
 
-// v22.8: Proactive Firestore cleanup — deletes zombie docs from both collection paths
+// v22.8: Proactive Firestore cleanup - deletes zombie docs from both collection paths
 function _cleanupDeletedFromFirestore() {
   if (!firebaseUser || !firebase) return;
   var deletedIds = Object.keys(_deletedAutomationIds);
@@ -6684,7 +6684,7 @@ function deleteAutoLabWorkflow(id) {
     }
   }
 
-  // v25.1: Write-through delete — remove from localStorage + Firestore immediately
+  // v25.1: Write-through delete - remove from localStorage + Firestore immediately
   var automations = [];
   try { automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(e) { console.warn('[Automations] Parse error:', e.message); }
   automations = automations.filter(function(a) { return String(a.id) !== idStr; });

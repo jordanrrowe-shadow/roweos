@@ -430,7 +430,7 @@ console.log('[RoweOS] Foundation layer loaded - v' + CONST.VERSION);
 
 // ─────────────────────────────────────────────────────────────────────────────────
 // v22.36: INDEXEDDB OVERFLOW STORAGE
-// Transparent overflow layer — when localStorage is near capacity, large values
+// Transparent overflow layer - when localStorage is near capacity, large values
 // spill to IndexedDB automatically. No data loss, no user-facing errors.
 // ─────────────────────────────────────────────────────────────────────────────────
 var _idb = null;
@@ -513,7 +513,7 @@ function _unmarkIdbKey(key) {
   try { _origSetItem.call(localStorage, '_roweos_idb_keys', JSON.stringify(_idbKeys)); } catch(e) {}
 }
 
-// v22.36: Safe localStorage.setItem — overflows to IndexedDB on QuotaExceeded
+// v22.36: Safe localStorage.setItem - overflows to IndexedDB on QuotaExceeded
 var _origSetItem = Storage.prototype.setItem;
 var _origRemoveItem = Storage.prototype.removeItem;
 var _origGetItemFn = Storage.prototype.getItem;
@@ -521,7 +521,7 @@ var _origGetItemFn = Storage.prototype.getItem;
 // Threshold: start offloading when over 4MB (of ~5MB limit)
 var STORAGE_WARN_BYTES = 4 * 1024 * 1024;
 // Keys eligible for offloading (large, non-critical-path data)
-// NOTE: mail_outbox/mail_sent NOT included — they're small and UI reads them synchronously
+// NOTE: mail_outbox/mail_sent NOT included - they're small and UI reads them synchronously
 var OVERFLOW_ELIGIBLE_KEYS = [
   'roweos_conversations', 'roweos_auto_lab_history', 'roweos_task_history',
   'roweos_completed_automations', 'roweos_library', 'roweos_life_library',
@@ -547,7 +547,7 @@ function safeSetItem(key, value) {
           _origSetItem.call(localStorage, key, value);
           return;
         } catch(e2) {
-          // Still full — offload THIS key to IDB
+          // Still full - offload THIS key to IDB
         }
       }
       // Fallback: store this value in IndexedDB instead
@@ -556,7 +556,7 @@ function safeSetItem(key, value) {
       _markIdbKey(key);
       // Remove from localStorage to free space
       try { _origRemoveItem.call(localStorage, key); } catch(e3) {}
-      // v22.37: Silent — just log, no toast (fires too frequently)
+      // v22.37: Silent - just log, no toast (fires too frequently)
       if (typeof ROWEOS_DEBUG !== 'undefined' && localStorage.getItem('roweos_debug') === 'true') {
         console.log('[Storage] Optimized:', key, '→ IndexedDB');
       }
@@ -634,7 +634,7 @@ Storage.prototype.getItem = function(key) {
   return val;
 };
 
-// v22.36: Storage health monitor — runs periodically
+// v22.36: Storage health monitor - runs periodically
 function checkStorageHealth() {
   var usage = _getStorageUsage();
   var usageMB = (usage / (1024 * 1024)).toFixed(2);

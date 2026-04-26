@@ -88,7 +88,7 @@ var agents = [
     examples: ['Brand Image Concepts', 'Product Mockup Brief', 'Social Media Visual Kit', 'Brand Mood Board'],
     isImageAgent: true
   },
-  // v23.8: Infographic Agent — dedicated agent for data visualization infographics
+  // v23.8: Infographic Agent - dedicated agent for data visualization infographics
   {
     id: 'infographic',
     name: 'Infographic Agent',
@@ -357,7 +357,7 @@ var agents = [
 // var ROWEOS_VERSION -- see line 63130 for the single definition
 var _sessionCostTotal = 0; // v24.18: Session cost tracker, resets on page load
 
-// v16.0: Production log gating — set roweos_debug=true in localStorage to see debug logs
+// v16.0: Production log gating - set roweos_debug=true in localStorage to see debug logs
 // Wraps console.log with a level check. console.warn/error always pass through.
 var ROWEOS_DEBUG = localStorage.getItem('roweos_debug') === 'true';
 var _originalConsoleLog = console.log.bind(console);
@@ -434,7 +434,7 @@ var SIDEBAR_LABELS = {
   folio: 'Folio', rhythm: 'Rhythm', library: 'Library', automations: 'Automations',
   mail: 'Mail', memory: 'Identity', tuning: 'History', guardrails: 'Guardrails',
   clients: 'People', commerce: 'Analytics', inventory: 'Inventory', sync: 'Sync',
-  settings: 'System', bloom: 'Bloom', social: 'Media Lab', admin: 'Admin'
+  settings: 'System', bloom: 'Bloom', social: 'Social', admin: 'Admin' // v31.5: Media Lab retired
 };
 var runs = [];
 var calendar = [];
@@ -655,7 +655,7 @@ function selectAgentBrand(value, label) {
   if (typeof updateStarButtonProvider === 'function') updateStarButtonProvider();
   if (typeof updateDeepResearchButton === 'function') updateDeepResearchButton();
 
-  // v16.0: Delegate full brand sync to onBrandChange() — sets selectedBrand, persists,
+  // v16.0: Delegate full brand sync to onBrandChange() - sets selectedBrand, persists,
   // syncs Studio/mobile selectors, re-renders views, loads logo, etc.
   if (typeof onBrandChange === 'function') {
     onBrandChange();
@@ -759,7 +759,7 @@ function renderToolOpsGrid() {
   grid.appendChild(viewAll);
 }
 
-// v24.27: Removed dead renderQuickHistory() and quickPropose() — zero callers
+// v24.27: Removed dead renderQuickHistory() and quickPropose() - zero callers
 
 // v26.2: Get contrast text color (white or dark) based on hex background luminance
 function getContrastTextColor(hex) {
@@ -865,7 +865,7 @@ function handleLogoFileSelect(e) {
         brands[brandIdx].logoLight = dataUrl;
       } else {
         brands[brandIdx].logo = dataUrl;
-        // v29.1: Checkbox now means "use different logos" — if NOT checked (same for both), clear light logo
+        // v29.1: Checkbox now means "use different logos" - if NOT checked (same for both), clear light logo
         var useDiff = document.getElementById('logoSameForBoth');
         if (useDiff && !useDiff.checked) {
           delete brands[brandIdx].logoLight;
@@ -942,7 +942,7 @@ function renderLogoUploadPreviews() {
     }
   }
 
-  // v29.1: Update checkbox state — checkbox now means "use different logos"
+  // v29.1: Update checkbox state - checkbox now means "use different logos"
   var useDifferent = document.getElementById('logoSameForBoth');
   if (useDifferent) {
     useDifferent.checked = !!brand.logoLight;
@@ -957,7 +957,7 @@ function swapLogoForTheme() {
   var brand = brands[brandIdx];
   if (!brand) return;
   var isLight = document.documentElement.classList.contains('light-mode');
-  // v28.4: Fix — logoLight is the light-colored logo (for dark backgrounds), brand.logo is dark-colored (for light backgrounds)
+  // v28.4: Fix - logoLight is the light-colored logo (for dark backgrounds), brand.logo is dark-colored (for light backgrounds)
   var logoToUse = (!isLight && brand.logoLight) ? brand.logoLight : (brand.logo || '');
   if (!logoToUse) return;
 
@@ -1168,7 +1168,7 @@ var _sectionGroups = {
     description: 'Content generation, social media management, automation pipelines, and growth tools.',
     features: [
       { id: 'studio', label: 'Studio', desc: 'Generate content with specialized agents', icon: 'studio' },
-      { id: 'social', label: 'Media Lab', desc: 'Create, publish, and engage across platforms', icon: 'social' },
+      { id: 'social', label: 'Social', desc: 'Create, publish, and engage across platforms', icon: 'social' }, // v31.5: Media Lab retired
       { id: 'automations', label: 'Automations', desc: 'Multi-step AI workflows and pipelines', icon: 'automations' },
       { id: 'bloom', label: 'Bloom', desc: 'Growth algorithm and audience building', icon: 'bloom' }
     ],
@@ -1976,7 +1976,7 @@ var _viewLabels = {
   rhythm: 'Rhythm', library: 'Library', memory: 'Identity', tuning: 'History',
   settings: 'Settings', inventory: 'Inventory', clients: 'People',
   commerce: 'Analytics', admin: 'Admin', mail: 'Mail', folio: 'Folio',
-  social: 'Media Lab', bloom: 'Bloom', automations: 'Automations',
+  social: 'Social', bloom: 'Bloom', automations: 'Automations', // v31.5: Media Lab retired
   brandIntel: 'Guardrails'
 };
 
@@ -2134,7 +2134,7 @@ function navigateToSubSection(groupName, viewId) {
 
 // v26.0: Per-page landing configurations (for pages with sub-tabs)
 var _pageLandingConfigs = {
-  // v28.9: Media Lab merged into Studio — landing config removed
+  // v28.9: Media Lab merged into Studio - landing config removed
   // v29.0: Scribe - Knowledge Workspace
   'scribe': {
     label: 'SCRIBE',
@@ -2277,7 +2277,7 @@ var _pageLandingConfigs = {
     ],
     tabHandler: 'filterStudioByCategory'
   },
-  // v28.8: signal/Focus landing config removed — retired, redirects to pulse
+  // v28.8: signal/Focus landing config removed - retired, redirects to pulse
   'rhythm': {
     label: 'RHYTHM',
     tagline: 'Time well orchestrated',
@@ -2706,10 +2706,10 @@ function showView(view) {
 
   // v24.11: Tier-based view access gate
   if (typeof checkViewAccess === 'function' && checkViewAccess(view)) {
-    return; // blocked — upgrade modal shown
+    return; // blocked - upgrade modal shown
   }
 
-  // v22.1: Admin view — dedicated panel
+  // v22.1: Admin view - dedicated panel
   if (view === 'admin') {
     if (!isAdmin()) { showView('settings'); return; }
     if (typeof renderAdminPanel === 'function') renderAdminPanel();
@@ -2853,9 +2853,9 @@ function showView(view) {
     updateCalendarIntegrationUI();
     if (typeof updateDriveIntegrationUI === 'function') updateDriveIntegrationUI(); // v28.7
   }
-  // v28.8: Signal/Focus retired — redirect to Pulse
+  // v28.8: Signal/Focus retired - redirect to Pulse
   if (view === 'signal') { view = 'pulse'; }
-  // v28.9: Media Lab merged into Studio — redirect
+  // v28.9: Media Lab merged into Studio - redirect
   if (view === 'social') { view = 'studio'; }
   if (view === 'signal') {
     renderSignalView();
@@ -3034,16 +3034,16 @@ function showView(view) {
     if (typeof initScribe === 'function') initScribe();
   }
 
-  // v28.8: Focus mobile layout block removed — signal retired
+  // v28.8: Focus mobile layout block removed - signal retired
 
   // v26.1: Inject favorite star into page header
   updateFavoriteStarButton(view);
 
-  // v23.5: Sprint 8 — check first-visit help for this section
+  // v23.5: Sprint 8 - check first-visit help for this section
   if (typeof checkFirstVisitHelp === 'function') checkFirstVisitHelp(view);
 }
 
-// v24.27: Removed dead showTab() — zero callers
+// v24.27: Removed dead showTab() - zero callers
 
 // Toast Notification System
 function dismissToast(toast) {
@@ -3246,9 +3246,9 @@ function onBrandChange() {
   // v28.2: Read brand index from DOM first (set by caller), don't let stale ID override it
   var brandIdx = parseInt(document.getElementById('brand').value);
 
-  // v19.0: Validate brand index before applying — prevents sync race conditions from resetting to 0
+  // v19.0: Validate brand index before applying - prevents sync race conditions from resetting to 0
   if (isNaN(brandIdx) || brandIdx < 0 || brandIdx >= brands.length) {
-    // Invalid value — restore dropdown to current selectedBrand
+    // Invalid value - restore dropdown to current selectedBrand
     var brandSelect = document.getElementById('brand');
     if (brandSelect) brandSelect.value = selectedBrand;
     return;
@@ -3258,7 +3258,7 @@ function onBrandChange() {
   var prevBrand = selectedBrand;
   selectedBrand = brandIdx;
 
-  // v19.6: Notification Center — brand switch
+  // v19.6: Notification Center - brand switch
   try {
     if (typeof window._lastNotifBrand !== 'undefined' && window._lastNotifBrand !== brandIdx && brands[brandIdx]) {
       var newBrandName = brands[brandIdx].shortName || brands[brandIdx].name;
@@ -3334,9 +3334,9 @@ function onBrandChange() {
     showSettings();
   }
   
-  // v15.23: Dead code removed — Identity view uses currentView === 'memory', handled below
+  // v15.23: Dead code removed - Identity view uses currentView === 'memory', handled below
   
-  // v28.3: Wrap Focus render in try/catch — crashes here must not break brand switch chain
+  // v28.3: Wrap Focus render in try/catch - crashes here must not break brand switch chain
   try {
     if (typeof renderFocusView === 'function') renderFocusView();
   } catch(e) { console.warn('[onBrandChange] renderFocusView error:', e.message); }
@@ -3527,7 +3527,7 @@ function toggleProviderDropdown(provider, event) {
 
 // v9.1.14: Update star buttons with current provider color
 function updateStarButtonProvider() {
-  // v15.13: Prefer agentBrand (ChatAI context) — matches selectModel and executeAgentRequest
+  // v15.13: Prefer agentBrand (ChatAI context) - matches selectModel and executeAgentRequest
   var brandIdx = 0;
   var brandSelect = document.getElementById('brand');
   var agentBrandInput = document.getElementById('agentBrand');
@@ -3554,7 +3554,7 @@ function updateStarButtonProvider() {
 
 // Select Model from Dropdown
 function selectModel(provider, model, displayName) {
-  // v15.13: Read agentBrand FIRST (ChatAI context) — this is what executeAgentRequest uses
+  // v15.13: Read agentBrand FIRST (ChatAI context) - this is what executeAgentRequest uses
   var brandSelect = document.getElementById('brand');
   var agentBrandInput = document.getElementById('agentBrand');
   var brandIdx = 0;
@@ -3647,7 +3647,7 @@ function selectModel(provider, model, displayName) {
   closeIOSActionSheet();
 }
 
-// v24.27: Removed dead openIOSActionSheet() — 70 lines, zero callers, replaced by native picker
+// v24.27: Removed dead openIOSActionSheet() - 70 lines, zero callers, replaced by native picker
 
 function closeIOSActionSheet() {
   var backdrop = document.getElementById('iosActionSheetBackdrop');
@@ -3658,7 +3658,7 @@ function closeIOSActionSheet() {
   document.body.style.overflow = '';
 }
 
-// v24.27: Removed dead selectBrandFromSheet() — only called from dead openIOSActionSheet HTML
+// v24.27: Removed dead selectBrandFromSheet() - only called from dead openIOSActionSheet HTML
 
 // Toggle model dropdown (v7.1)
 function toggleModelDropdown(event) {
@@ -3887,7 +3887,7 @@ function restoreSendButton(btnId) {
   }
 }
 
-// v16.4: Chat message export — per-message action bar
+// v16.4: Chat message export - per-message action bar
 function exportChatMsg(btn, format) {
   var msgEl = btn.closest('.conversation-message');
   if (!msgEl) return;
@@ -3965,7 +3965,7 @@ function savePdfLogoPlacement(placement) {
   } catch(e) {}
 }
 
-// v22.31: RoweOS PDF Generator — programmatic dark-theme PDF via jsPDF
+// v22.31: RoweOS PDF Generator - programmatic dark-theme PDF via jsPDF
 // v23.4: Extended with color schemes, page numbers, logo, hyperlink support
 // Returns { pdf, base64 } or triggers download. Options: { title, subtitle, orientation, filename, returnBase64, colorScheme, brandLogo, clientLogo, logoPlacement, pageNumbers }
 function roweosPDF(markdownOrHtml, options) {
@@ -4045,7 +4045,7 @@ function roweosPDF(markdownOrHtml, options) {
   var _stripSel = tempDiv.querySelectorAll('.studio-smart-suggestions, .studio-edit-toolbar, .studio-output-meta, .studio-v2-actions-row, .studio-save-edits-bar, select, button');
   for (var _si = 0; _si < _stripSel.length; _si++) _stripSel[_si].remove();
 
-  // v23.16: Helper — add image to PDF from base64, compositing onto bg to fix transparency
+  // v23.16: Helper - add image to PDF from base64, compositing onto bg to fix transparency
   // Uses pre-loaded image from opts._preloadedLogos if available for correct dimensions
   function addLogoPdf(logoSrc, x, cy, maxW, maxH) {
     if (!logoSrc || logoSrc.indexOf('data:') !== 0) return;
@@ -4080,7 +4080,7 @@ function roweosPDF(markdownOrHtml, options) {
     } catch(e) { console.error('[PDF] addLogoPdf error:', e); }
   }
 
-  // v22.35: Cover page — centered title, brand, date on dark background
+  // v22.35: Cover page - centered title, brand, date on dark background
   if (opts.coverPage && opts.title) {
     var centerX = pageW / 2;
     var centerY = pageH / 2;
@@ -4100,15 +4100,15 @@ function roweosPDF(markdownOrHtml, options) {
     pdf.setDrawColor(gold[0], gold[1], gold[2]);
     pdf.setLineWidth(0.5);
     pdf.line(margin + 60, centerY - 60, pageW - margin - 60, centerY - 60);
-    // v23.16: Cover font — user-selectable (helvetica, times, courier)
+    // v23.16: Cover font - user-selectable (helvetica, times, courier)
     var _cf = opts.coverFont || 'helvetica';
-    // v23.16: Cover header text — editable, defaults to brand name
+    // v23.16: Cover header text - editable, defaults to brand name
     pdf.setFont(_cf, 'normal');
     pdf.setFontSize(12);
     pdf.setTextColor(gold[0], gold[1], gold[2]);
     var _coverHeader = opts.coverHeader !== undefined ? opts.coverHeader : (opts.brandName || '');
     if (_coverHeader) pdf.text(_coverHeader.toUpperCase(), centerX, centerY - 40, { align: 'center' });
-    // Document title — use contextTitle (client name), never the operation name
+    // Document title - use contextTitle (client name), never the operation name
     pdf.setFont(_cf, 'bold');
     pdf.setFontSize(28);
     pdf.setTextColor(text[0], text[1], text[2]);
@@ -4318,7 +4318,7 @@ function roweosPDF(markdownOrHtml, options) {
         pdf.line(margin, y, margin + usable, y);
         y += 12;
       } else if (tag === 'a') {
-        // v23.4: Render hyperlinks — blue underlined text with URL in parentheses
+        // v23.4: Render hyperlinks - blue underlined text with URL in parentheses
         var linkText = (node.textContent || '').trim();
         var linkHref = node.getAttribute('href') || '';
         if (linkText) {
@@ -4370,7 +4370,7 @@ function roweosPDF(markdownOrHtml, options) {
     var _closingBrand = opts.brandName || '';
     var _closingStyle = opts.closingStyle || 'text';
     var _closingLogoSrc = opts.brandLogo || '';
-    // v23.16: Closing page — text, logo, or both
+    // v23.16: Closing page - text, logo, or both
     if (_closingStyle === 'logo' || _closingStyle === 'both') {
       if (_closingLogoSrc && _closingLogoSrc.indexOf('data:') === 0) {
         addLogoPdf(_closingLogoSrc, _cx, _cy - (_closingStyle === 'both' ? 40 : 10), 140, 60);
@@ -4903,7 +4903,7 @@ function toggleSidebarBrandDropdown(event) {
 }
 
 // v15.18: Native iOS select picker for sidebar brand switcher on mobile
-// v15.21: Native iOS select picker — overlaid on brand name for direct user tap
+// v15.21: Native iOS select picker - overlaid on brand name for direct user tap
 function openNativeSidebarBrandPicker() {
   var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
 
@@ -5007,12 +5007,12 @@ function populateSidebarBrandDropdown() {
   var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
   var html = '';
   
-  // v24.24: Unified switcher — both modes show BrandAI + LifeAI sections consistently
+  // v24.24: Unified switcher - both modes show BrandAI + LifeAI sections consistently
   var currentBrand = parseInt(document.getElementById('brand').value) || 0;
   var lifeProfiles = typeof getLifeProfiles === 'function' ? getLifeProfiles() : [];
   var currentLifeIdx = parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0');
 
-  // BrandAI section — always shown
+  // BrandAI section - always shown
   html += '<div style="padding: 6px 12px 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); opacity: 0.7;">BrandAI</div>';
   brands.forEach(function(brand, idx) {
     var isActive = currentMode === 'brand' && idx === currentBrand;
@@ -5028,7 +5028,7 @@ function populateSidebarBrandDropdown() {
     html += '</button>';
   });
 
-  // LifeAI section — always shown if profiles exist
+  // LifeAI section - always shown if profiles exist
   if (lifeProfiles.length > 0 || currentMode === 'life') {
     html += '<div style="height: 1px; background: var(--border-color); margin: 8px 0;"></div>';
     html += '<div style="padding: 6px 12px 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); opacity: 0.7;">LifeAI</div>';
@@ -5061,7 +5061,7 @@ function populateSidebarBrandDropdown() {
 
 }
 
-// v29.x: Brand switcher drag reorder — single global handler, no stacking
+// v29.x: Brand switcher drag reorder - single global handler, no stacking
 var _bsDrag = { active: false, fromIdx: -1, startY: 0, el: null };
 
 (function() {
@@ -5230,7 +5230,7 @@ function selectLifeProfileByIndex(idx) {
       localStorage.setItem('roweos_life_accent_dark_mode', profile.accentDarkMode);
       localStorage.setItem('roweos_life_accent_dark_mode_dark', typeof darkenColor === 'function' ? darkenColor(profile.accentDarkMode, 20) : profile.accentDarkMode);
     } else {
-      // v15.32: Don't carry over previous profile's accent — reset to default
+      // v15.32: Don't carry over previous profile's accent - reset to default
       localStorage.removeItem('roweos_life_accent_dark_mode');
       localStorage.removeItem('roweos_life_accent_dark_mode_dark');
     }
@@ -5244,7 +5244,7 @@ function selectLifeProfileByIndex(idx) {
     if (typeof initLifeAccentColor === 'function') initLifeAccentColor();
     if (typeof applyCurrentModeAccent === 'function') applyCurrentModeAccent();
 
-    // v15.37: Logo loads via getCurrentLogoKey() which reads profile index — no shared key needed
+    // v15.37: Logo loads via getCurrentLogoKey() which reads profile index - no shared key needed
     if (typeof loadCurrentLogo === 'function') loadCurrentLogo();
 
     showToast('Switched to ' + (profile.name || 'Life ' + (idx + 1)), 'success');
@@ -5950,7 +5950,7 @@ function loadCurrentLogo() {
   var savedLogo = localStorage.getItem(logoKey);
   var savedSize = localStorage.getItem(sizeKey);
 
-  // v15.37: Mode safety guard — verify logo key matches current mode
+  // v15.37: Mode safety guard - verify logo key matches current mode
   var mode = (typeof getCurrentMode === 'function') ? getCurrentMode() : 'brand';
   if (mode === 'brand' && logoKey.indexOf('lifeai') !== -1) {
     console.warn('[Logo] Mode mismatch: brand mode but logo key is LifeAI:', logoKey);
@@ -5981,7 +5981,7 @@ function loadCurrentLogo() {
 }
 
 /**
- * v15.37: One-time migration — move shared roweos_lifeai_logo to per-profile key
+ * v15.37: One-time migration - move shared roweos_lifeai_logo to per-profile key
  * Prevents BrandAI/LifeAI logo bleed by eliminating the shared key
  */
 function migrateSharedLifeLogoToProfile() {
@@ -6018,7 +6018,7 @@ function applyBrandLogo(base64Logo, size) {
     logoImg.src = base64Logo;
   }
 
-  // v15.19: Apply scale via CSS custom property — container stays fixed, only img scales
+  // v15.19: Apply scale via CSS custom property - container stays fixed, only img scales
   var sizeVal = parseInt(size) || 100;
   var scale = sizeVal / 100;
   // Clamp scale: 0.3 to 3.0 (30% to 300%)
@@ -6039,7 +6039,7 @@ function applyBrandLogo(base64Logo, size) {
       collapsedLogo.appendChild(logoImg);
     }
   }
-  // v15.3: Keep mainLogo hidden — its inner img is permanently display:none via CSS.
+  // v15.3: Keep mainLogo hidden - its inner img is permanently display:none via CSS.
   // Showing it creates an empty visible box (the "black box" over logos).
   // The collapsed logo element handles the custom logo display instead.
   if (mainLogo) mainLogo.style.display = 'none';
@@ -6099,7 +6099,7 @@ function resetBrandLogo() {
   showToast('Logo reset to default', 'info');
 }
 
-// v24.24: Welcome Logo Size — resizes container, logo fills inside
+// v24.24: Welcome Logo Size - resizes container, logo fills inside
 function setWelcomeLogoSize(val) {
   var px = Math.round(72 * parseInt(val) / 100);
   document.documentElement.style.setProperty('--welcome-logo-size', px + 'px');
@@ -6118,7 +6118,7 @@ function initWelcomeLogoSize() {
   if (label) label.textContent = saved + '%';
 }
 
-// v24.24: Image Zoom — scales the logo image inside the container
+// v24.24: Image Zoom - scales the logo image inside the container
 function setLogoZoom(val) {
   var v = parseInt(val);
   var scale = v / 100;
@@ -6188,7 +6188,7 @@ function handleBrandLogoSizeChange(value) {
 }
 
 /**
- * v16.5: Sync brand logo to Firebase — writes to per-logo subcollection doc (not legacy user doc)
+ * v16.5: Sync brand logo to Firebase - writes to per-logo subcollection doc (not legacy user doc)
  */
 function syncBrandLogoToFirebase(base64Logo, size) {
   try {
@@ -6310,7 +6310,7 @@ function handleBrandLogoUpload(input) {
       showToast((isLife ? 'LifeAI' : 'Brand') + ' logo uploaded successfully', 'success');
     };
     img.onerror = function() {
-      // SVG or non-rasterizable — save as-is
+      // SVG or non-rasterizable - save as-is
       try {
         localStorage.setItem(logoKey, rawBase64);
         localStorage.setItem(sizeKey, '100');
@@ -6425,7 +6425,7 @@ function renderBrandLogoPicker(containerId) {
     html += '</div>';
   }
 
-  // v29.1: Dark/Light mode logos — consolidated here (BrandAI only)
+  // v29.1: Dark/Light mode logos - consolidated here (BrandAI only)
   if (!isLife) {
     var _bIdx = brandSelect ? parseInt(brandSelect.value) : 0;
     var _curBrand = (typeof brands !== 'undefined' && brands[_bIdx]) ? brands[_bIdx] : null;
@@ -6494,7 +6494,7 @@ function selectSidebarBrand(idx) {
   var dropdown = document.getElementById('sidebarBrandDropdown');
   if (dropdown) dropdown.classList.remove('active');
   
-  // v11.5.4: Directly update sidebar brand name — use shortName if available
+  // v11.5.4: Directly update sidebar brand name - use shortName if available
   var sidebarName = document.getElementById('sidebarBrandName');
   if (sidebarName && brands[idx]) {
     sidebarName.innerHTML = escapeHtml(brands[idx].shortName || brands[idx].name) + ' <span class="sidebar-brand-arrow">▾</span>'; // v30.1: XSS safety
@@ -6519,7 +6519,7 @@ function selectSidebarBrand(idx) {
     renderFocusView();
   }
 
-  // v28.2: Force Identity view refresh if currently visible — belt-and-suspenders
+  // v28.2: Force Identity view refresh if currently visible - belt-and-suspenders
   if (currentView === 'memory' && typeof renderBrandIdentityView === 'function') {
     currentKnowledgeBrand = 'brand_' + idx;
     renderBrandIdentityView();
@@ -6555,7 +6555,7 @@ function selectBrandFromDropdown(idxOrId) {
   if (brandSelect) brandSelect.value = idx;
   if (agentBrandInput) agentBrandInput.value = idx;
   
-  // v11.5.4: Update display names (sidebar, mobile, etc.) — use shortName if available
+  // v11.5.4: Update display names (sidebar, mobile, etc.) - use shortName if available
   var sidebarName = document.getElementById('sidebarBrandName');
   var mobilePillText = document.getElementById('mobileBrandPillText');
   
@@ -6674,18 +6674,18 @@ function getProviderForModel(model) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// v20.5: RoweOS AI — Smart Model Routing
+// v20.5: RoweOS AI - Smart Model Routing
 // Dynamically selects the optimal provider/model based on interaction type
 // ═══════════════════════════════════════════════════════════════════════════════
 
 var ROWEOS_AI_ROUTING = {
-  // v30.1: Image generation — symbolic routes, actual dispatch handled by handleSmartImageGeneration
+  // v30.1: Image generation - symbolic routes, actual dispatch handled by handleSmartImageGeneration
   image_generation: [
     { provider: 'google', model: 'nanobanana' },
     { provider: 'openai', model: 'gpt-image-2' }
   ],
   creative: [
-    // Alternates between Gemini 3.1 Pro and Sonnet 4.6 — resolved dynamically
+    // Alternates between Gemini 3.1 Pro and Sonnet 4.6 - resolved dynamically
     { provider: '_alternate', models: [
       { provider: 'google', model: 'gemini-3.1-pro-preview' },
       { provider: 'anthropic', model: 'claude-sonnet-4-6' }
@@ -6729,7 +6729,7 @@ function classifyInteraction(userMessage, systemPrompt, options) {
   options = options || {};
   var hasImages = options.hasImages || false;
   var agentCategory = (options.agentCategory || '').toLowerCase();
-  // v20.5: Handle multimodal content arrays — extract text part
+  // v20.5: Handle multimodal content arrays - extract text part
   var msgStr = '';
   if (Array.isArray(userMessage)) {
     hasImages = true; // Array content = multimodal
@@ -6742,10 +6742,10 @@ function classifyInteraction(userMessage, systemPrompt, options) {
   var msg = msgStr.toLowerCase();
   var msgLen = msgStr.length;
 
-  // Image/multimodal content — Gemini excels at native multimodal
+  // Image/multimodal content - Gemini excels at native multimodal
   if (hasImages) return 'multimodal';
 
-  // v30.1: Image generation detection — action verb + image noun (same pattern as isNanobananaImageRequest)
+  // v30.1: Image generation detection - action verb + image noun (same pattern as isNanobananaImageRequest)
   var _imgActions = ['generate', 'create', 'draw', 'make', 'design', 'render', 'paint', 'sketch', 'visualize', 'produce'];
   var _imgNouns = ['image', 'picture', 'photo', 'illustration', 'logo', 'icon', 'banner', 'poster', 'artwork', 'graphic', 'visual', 'thumbnail'];
   var _hasImgAction = false, _hasImgNoun = false;
@@ -6811,7 +6811,7 @@ function resolveRoweOSAI(context) {
   for (var i = 0; i < routes.length; i++) {
     var route = routes[i];
 
-    // v20.5: Handle _alternate entries — round-robin between available options
+    // v20.5: Handle _alternate entries - round-robin between available options
     if (route.provider === '_alternate' && route.models) {
       var pick = route.models[_roweosAIAlternateCounter % route.models.length];
       if (available[pick.provider]) {
@@ -6839,7 +6839,7 @@ function resolveRoweOSAI(context) {
     }
   }
 
-  // No keys found — return first preference, let the "no API key" error surface
+  // No keys found - return first preference, let the "no API key" error surface
   var fallback = routes[0];
   if (fallback.provider === '_alternate') fallback = fallback.models[0];
   return { provider: fallback.provider, model: fallback.model, taskType: taskType };

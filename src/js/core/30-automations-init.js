@@ -77,7 +77,7 @@ function initClientsTabDrag() {
   });
 }
 
-// v23.10: Clients List tab — flat alphabetical/sortable list
+// v23.10: Clients List tab - flat alphabetical/sortable list
 function renderClientsList() {
   var container = document.getElementById('clientsListContainer');
   if (!container) return;
@@ -315,7 +315,7 @@ function addClientFromContact(email, name, company) {
     showEmailPickerForClient(email, relatedEmails, name, company);
     return;
   }
-  // Single email — open modal directly
+  // Single email - open modal directly
   _openClientModalWithData(email, '', name, company);
 }
 
@@ -429,7 +429,7 @@ function mailAcceptAddClient(email, name, subject) {
 }
 
 /**
- * v23.5: Sprint 6 — Invoicing & Financial
+ * v23.5: Sprint 6 - Invoicing & Financial
  * 6.1: Spreadsheet import for invoices
  * 6.2: AI-generated invoice from documents
  * 6.3: Smart duplicate detection
@@ -758,7 +758,7 @@ function runAiInvoiceGeneration() {
   var settings = (typeof brandSettings !== 'undefined' && brandSettings[brandIdx]) ? brandSettings[brandIdx] : { provider: 'anthropic', model: 'claude-sonnet-4-6' };
   var provider = settings.provider || 'anthropic';
   var model = settings.model || 'claude-sonnet-4-6';
-  // Check for image content — use multimodal if available
+  // Check for image content - use multimodal if available
   var isImage = content.indexOf('[IMAGE:') === 0;
   var messages = [];
   if (isImage) {
@@ -895,7 +895,7 @@ function checkInvoiceDuplicates() {
 }
 
 function findDuplicateItem(desc, prevItems) {
-  // Fuzzy match — Levenshtein-like similarity
+  // Fuzzy match - Levenshtein-like similarity
   for (var i = 0; i < prevItems.length; i++) {
     var prevDesc = (prevItems[i].description || '').toLowerCase();
     if (prevDesc === desc) return prevItems[i];
@@ -935,7 +935,7 @@ function calcSimilarity(a, b) {
 })();
 
 /**
- * v23.5: Sprint 7 — AI Model Management
+ * v23.5: Sprint 7 - AI Model Management
  * 7.1: Model Tier Restriction
  */
 
@@ -1058,7 +1058,7 @@ function renderModelTierCards() {
 }
 
 /**
- * v23.5: Sprint 8 — UX, Accessibility & ADHD Optimization
+ * v23.5: Sprint 8 - UX, Accessibility & ADHD Optimization
  * 8.1 ADHD Usability, 8.2 Recommended/Default/Advanced, 8.3 Advanced Tools Toggle,
  * 8.4 First-Time Users, 8.5 Section Help, 8.6 Guided Tours
  */
@@ -1600,7 +1600,7 @@ function initLandingPagesToggle() {
 }
 
 function checkFirstVisitHelp(sectionId) {
-  // First-visit auto-open disabled — ? button now opens feedback modal directly
+  // First-visit auto-open disabled - ? button now opens feedback modal directly
   if (!SECTION_HELP[sectionId]) return;
   markSectionVisited(sectionId);
 }
@@ -1837,7 +1837,7 @@ function showFirstRunBanner(containerId, sectionId, title, desc, actionLabel, ac
   container.insertBefore(banner, container.firstChild);
 }
 
-// ── 8.1: ADHD — Success flash on element ──
+// ── 8.1: ADHD - Success flash on element ──
 function flashSuccess(elementOrId) {
   var el = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
   if (!el) return;
@@ -1847,7 +1847,7 @@ function flashSuccess(elementOrId) {
   setTimeout(function() { el.classList.remove('success-flash'); }, 700);
 }
 
-// ── 8.1: ADHD — Better toast for common errors ──
+// ── 8.1: ADHD - Better toast for common errors ──
 var FRIENDLY_ERRORS = {
   'Failed to fetch': 'Network error - check your internet connection and try again.',
   'NetworkError': 'Network error - check your internet connection and try again.',
@@ -2415,8 +2415,8 @@ function addCompletedAutomation(task, success) {
   renderNotificationCenter();
   if (typeof updateSidebarBadges === 'function') updateSidebarBadges(); // v24.13
   // v15.3: Toast notification when automation completes
-  // v25.1: Clickable toast — click to view result modal
-  // v28.7: Deduplicate — skip if a toast with the same message already exists
+  // v25.1: Clickable toast - click to view result modal
+  // v28.7: Deduplicate - skip if a toast with the same message already exists
   var _a1Msg = (success ? 'Automation completed: ' : 'Automation failed: ') + escapeHtml(task.name || 'Unknown');
   var _a1Existing = document.getElementById('toastContainer');
   if (_a1Existing) {
@@ -2609,7 +2609,7 @@ function viewCompletedAutomation(taskId) {
         '<button class="api-key-modal-btn" style="background: var(--bg-tertiary); border: 1px solid var(--border-color);" onclick="copyToClipboard(`' + historyItem.result.replace(/`/g, '\\`').replace(/\\/g, '\\\\') + '`); showToast(\'Copied to clipboard\', \'success\');">Copy</button>' +
         '<button class="api-key-modal-btn" style="background: var(--bg-tertiary); border: 1px solid var(--border-color);" onclick="this.closest(\'.api-key-modal\').remove(); showView(\'automations\'); setTimeout(function(){ showAutoLabTab(\'scheduler\');' + (labMatch ? ' setTimeout(function(){ var el=document.getElementById(\'autoLabHistoryEntry_' + (labMatch.id || '') + '\'); if(el){el.scrollIntoView({behavior:\'smooth\',block:\'center\'});el.style.outline=\'2px solid var(--brand-accent,#a89878)\';el.style.outlineOffset=\'2px\';setTimeout(function(){el.style.outline=\'none\';},3000);} },300);' : '') + ' }, 100);">' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><polyline points="12 8 12 12 14 14"/><circle cx="12" cy="12" r="10"/></svg>Go to Execution</button>' +
-        '<button class="api-key-modal-btn api-key-modal-btn-save" onclick="saveAutomationResultToLibrary(\'' + taskIdStr + '\'); setTimeout(function(){ showView(\'library\'); showToast(\'Saved — viewing in Library\', \'success\'); }, 300);">See Full Output in Library</button>' +
+        '<button class="api-key-modal-btn api-key-modal-btn-save" onclick="saveAutomationResultToLibrary(\'' + taskIdStr + '\'); setTimeout(function(){ showView(\'library\'); showToast(\'Saved - viewing in Library\', \'success\'); }, 300);">See Full Output in Library</button>' +
       '</div>' +
     '</div>';
   document.body.appendChild(modal);
@@ -2720,7 +2720,7 @@ function initScheduledTasksEngine() {
     renderNCWidgets();
   }, 5000);
   // v18.1: Re-check on tab focus (setInterval pauses in backgrounded tabs)
-  // v20.11: Deduplicate — only add listener once
+  // v20.11: Deduplicate - only add listener once
   if (!window._schedulerVisListenerAdded) {
     window._schedulerVisListenerAdded = true;
     document.addEventListener('visibilitychange', function() {
@@ -2749,7 +2749,7 @@ function initScheduledTasksEngine() {
   }, 10000);
   console.log('[Scheduler] Task execution engine initialized');
 
-  // v25.6: Cloud Outbox Pickup — check for emails composed by Cloud Functions
+  // v25.6: Cloud Outbox Pickup - check for emails composed by Cloud Functions
   setTimeout(function() { processCloudOutbox(); }, 10000);
   setInterval(function() { processCloudOutbox(); }, 60000);
 }
@@ -2761,7 +2761,7 @@ function checkAndRunDueTasks() {
     _schedulerLastCheck = Date.now();
     return;
   }
-  // v28.4: Wait for first cloud sync before running tasks — prevents re-execution
+  // v28.4: Wait for first cloud sync before running tasks - prevents re-execution
   // on second device that hasn't pulled lastRun timestamps from Firestore yet
   if (typeof firebaseUser !== 'undefined' && firebaseUser && localStorage.getItem('roweos_first_sync_completed') !== 'true') {
     console.log('[Scheduler] Waiting for first cloud sync before checking tasks');
@@ -2770,9 +2770,9 @@ function checkAndRunDueTasks() {
   }
   // v20.11: Track last check time for scheduler clock
   _schedulerLastCheck = Date.now();
-  // v22.8: Use getMergedAutomations() — single source of truth with deletion filtering
+  // v22.8: Use getMergedAutomations() - single source of truth with deletion filtering
   var tasks = getMergedAutomations();
-  // v20.11: Sync merged list back to BOTH stores — prevents stale automations from overwriting on Firebase pull
+  // v20.11: Sync merged list back to BOTH stores - prevents stale automations from overwriting on Firebase pull
   if (typeof saveScheduledTasks === 'function') {
     saveScheduledTasks(tasks);
   }
@@ -2794,7 +2794,7 @@ function checkAndRunDueTasks() {
       if (cloudRunAge < 10 * 60 * 1000) return;
     }
 
-    // v13.9: Unify frequency field — Automations Lab saves recurType, scheduler uses frequency
+    // v13.9: Unify frequency field - Automations Lab saves recurType, scheduler uses frequency
     var freq = task.frequency || task.recurType || 'none';
 
     // Check if task is due
@@ -2808,12 +2808,12 @@ function checkAndRunDueTasks() {
     var _neverRun = !lastRun;
     var _timePassedToday = timeDiff >= 0;
     var _inWindow = timeDiff >= 0 && timeDiff <= 30;
-    // v18.8: Custom recurrence uses pure interval math — bypass time window for sub-day intervals
+    // v18.8: Custom recurrence uses pure interval math - bypass time window for sub-day intervals
     if (freq === 'custom') {
       var cInterval = task.recurInterval || 1;
       var cUnit = task.recurUnit || 'days';
       if (_neverRun) {
-        // v23.17: First run — accept any time after scheduled time (not just 30-min window)
+        // v23.17: First run - accept any time after scheduled time (not just 30-min window)
         if (_timePassedToday) isDue = true;
       } else {
         var msSince = now.getTime() - lastRun.getTime();
@@ -2838,7 +2838,7 @@ function checkAndRunDueTasks() {
         var schedDateOnly = (task.scheduledDate || '').split('T')[0];
         isDue = !lastRun && schedDateOnly === todayStr && _timePassedToday;
       } else {
-        // No date set — fire once time has passed (or immediately if no time set)
+        // No date set - fire once time has passed (or immediately if no time set)
         isDue = !lastRun && _timePassedToday;
       }
     } else if (_inWindow || (_neverRun && _timePassedToday)) {
@@ -2858,7 +2858,7 @@ function checkAndRunDueTasks() {
     }
 
     if (isDue) {
-      // v22.8: 5-minute re-execution guard — prevents rapid re-firing even if merge corrupts lastRun
+      // v22.8: 5-minute re-execution guard - prevents rapid re-firing even if merge corrupts lastRun
       if (lastRun && (Date.now() - lastRun.getTime()) < 5 * 60 * 1000) {
         console.log('[Scheduler] Skipping task (ran <5min ago):', task.name);
         return;
@@ -2924,7 +2924,7 @@ async function executeScheduledPromptAuto(sp) {
   // Build prompt
   var promptText = sp.customPrompt || 'Create a ' + sp.operation + ' for ' + (brand.shortName || brand.name);
 
-  // v15.14: Determine model — use sp.model if set, else fall back to brand settings
+  // v15.14: Determine model - use sp.model if set, else fall back to brand settings
   var provider, model;
   if (sp.model) {
     model = sp.model;
@@ -3026,7 +3026,7 @@ async function executeScheduledTask(task, idx) {
   // v30.1: Mark running for all task types (was only done for research)
   if (typeof markAutomationRunning === 'function') markAutomationRunning(task.id, 'standard');
 
-  // v19.2: Resolve brand EARLY — before image/pipeline/post early-return paths
+  // v19.2: Resolve brand EARLY - before image/pipeline/post early-return paths
   var brandIdx = task.brandIdx !== undefined && task.brandIdx !== '' ? parseInt(task.brandIdx) : 0;
   var brand = (typeof brands !== 'undefined' && brands[brandIdx]) ? brands[brandIdx] : (typeof brands !== 'undefined' ? brands[0] : { name: 'Brand' });
   task.brand = brand.shortName || brand.name;
@@ -3103,8 +3103,8 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v17.4: Handle pipeline type — execute all steps via workflow engine
-  // v18.1: BUG 6 — Use result.failedSteps for accurate history
+  // v17.4: Handle pipeline type - execute all steps via workflow engine
+  // v18.1: BUG 6 - Use result.failedSteps for accurate history
   if (task.type === 'pipeline' && task.steps && task.steps.length > 0) {
     showToast('Running pipeline: ' + task.name, 'info');
     try {
@@ -3113,7 +3113,7 @@ async function executeScheduledTask(task, idx) {
       var okCount = pipeResult && pipeResult.completedSteps ? pipeResult.completedSteps.length : task.steps.length;
       var pipeSuccess = failCount === 0;
       if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, pipeSuccess);
-      // v20.6: Notification Center — pipeline completion with failure details
+      // v20.6: Notification Center - pipeline completion with failure details
       try {
         var pipeNotifMsg = (task.name || 'Pipeline') + ' (' + okCount + '/' + task.steps.length + ' steps)';
         if (!pipeSuccess && pipeResult && pipeResult.failedSteps && pipeResult.failedSteps.length > 0) {
@@ -3167,7 +3167,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v18.5: Handle "post" action — bypass AI and directly post to social media
+  // v18.5: Handle "post" action - bypass AI and directly post to social media
   if (task.action === 'post') {
     var postContent = task.target && task.target.text ? task.target.text : (task.description || '');
     var postPlatforms = task.target && task.target.platforms ? task.target.platforms : [];
@@ -3277,7 +3277,7 @@ async function executeScheduledTask(task, idx) {
     Promise.all(_postPromises).then(function() {
       var _pTs = new Date().toISOString();
       var _pSuccess = _postFailures.length === 0;
-      // v18.6: Rich post result — include actual posted content + platform list
+      // v18.6: Rich post result - include actual posted content + platform list
       var _pMsg = _pSuccess
         ? 'Posted to ' + postPlatforms.join(', ') + '\n\n**Content:**\n' + postContent.substring(0, 2000)
         : 'Post failed: ' + _postFailures.join('; ') + '\n\n**Attempted content:**\n' + postContent.substring(0, 500);
@@ -3302,7 +3302,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v22.9: Handle "email" action — send email via Resend API
+  // v22.9: Handle "email" action - send email via Resend API
   if (task.action === 'email') {
     var emailTo = (task.target && task.target.emailTo) ? task.target.emailTo : '';
     var emailSubject = (task.target && task.target.emailSubject) ? task.target.emailSubject : task.name || 'RoweOS Email';
@@ -3326,7 +3326,7 @@ async function executeScheduledTask(task, idx) {
       if (emailTemplate === 'plain') {
         htmlBody = '<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;"><pre style="white-space:pre-wrap;font-family:inherit;">' + escapeHtml(emailBody) + '</pre></div>';
       } else if (emailTemplate === 'ai_custom') {
-        // AI Custom — wrap in basic container, body is expected to be HTML or will be escaped
+        // AI Custom - wrap in basic container, body is expected to be HTML or will be escaped
         htmlBody = '<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;">' + escapeHtml(emailBody).replace(/\n/g, '<br>') + '</div>';
       } else {
         // Use branded template via generateBrandedEmail
@@ -3442,7 +3442,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v19.3: Handle "create" action — directly create Focus todo, no AI call
+  // v19.3: Handle "create" action - directly create Focus todo, no AI call
   if (task.action === 'create') {
     var _ctText = (task.target && task.target.text) ? task.target.text : (task.name || 'Task');
     var _ctCat = (task.target && task.target.category) ? task.target.category : '';
@@ -3478,7 +3478,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v24.25: Handle "reminder" action — interactive popup notification
+  // v24.25: Handle "reminder" action - interactive popup notification
   if (task.action === 'reminder') {
     var _remTitle = (task.target && task.target.reminderTitle) ? task.target.reminderTitle : (task.name || 'Reminder');
     var _remText = (task.target && task.target.text) ? task.target.text : '';
@@ -3502,7 +3502,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v19.3: Handle "notify" action — just show toast, no AI call
+  // v19.3: Handle "notify" action - just show toast, no AI call
   if (task.action === 'notify') {
     var _nfText = (task.target && task.target.text) ? task.target.text : (task.name || 'Reminder');
     showToast(_nfText, 'info');
@@ -3517,7 +3517,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v24.9: Handle "pulse" action — AI generates tasks for goal based on instructions
+  // v24.9: Handle "pulse" action - AI generates tasks for goal based on instructions
   if (task.action === 'pulse') {
     var _pgGoalId = task.target && task.target.goalId ? task.target.goalId : '';
     var _pgResult = 'Goal update triggered';
@@ -3576,7 +3576,7 @@ async function executeScheduledTask(task, idx) {
             _pgResult = 'Error generating tasks: ' + e.message;
           }
         } else {
-          // No instructions — just mark as updated
+          // No instructions - just mark as updated
           _pgGoal.lastUpdated = new Date().toISOString();
           savePulseGoals();
           if (typeof renderPulse3Checklists === 'function') renderPulse3Checklists();
@@ -3598,7 +3598,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v28.4: Handle "create_goal" action — create a new Pulse goal from automation
+  // v28.4: Handle "create_goal" action - create a new Pulse goal from automation
   if (task.action === 'create_goal') {
     var _cgResult = 'Goal creation triggered';
     var _cgTitle = (task.target && task.target.goalTitle) ? task.target.goalTitle : (task.name || 'Untitled Goal');
@@ -3662,7 +3662,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v22.56: Handle "research" action — Deep Research via Google Interactions API
+  // v22.56: Handle "research" action - Deep Research via Google Interactions API
   if (task.action === 'research') {
     var _drQuery = (task.target && task.target.researchQuery) ? task.target.researchQuery : (task.description || task.name || '');
     if (!_drQuery) {
@@ -3706,7 +3706,7 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
-  // v30.1: Removed dead code — second image handler was unreachable (first handler at top returns)
+  // v30.1: Removed dead code - second image handler was unreachable (first handler at top returns)
 
   // Build prompt based on action type
   var prompt = buildTaskPrompt(task);
@@ -3741,7 +3741,7 @@ async function executeScheduledTask(task, idx) {
     var provider = (settings.provider && _validSchedProvs.indexOf(settings.provider) !== -1) ? settings.provider : 'anthropic';
     var model = settings.model || 'claude-sonnet-4-6';
     // v18.7: Per-automation config overrides for provider/model
-    // v20.9: Validate provider — AI proposals sometimes set brand name as provider
+    // v20.9: Validate provider - AI proposals sometimes set brand name as provider
     if (task.config && task.config.provider && _validSchedProvs.indexOf(task.config.provider) !== -1) {
       provider = task.config.provider;
       if (provider === 'anthropic') model = 'claude-sonnet-4-6';
@@ -3828,10 +3828,10 @@ async function executeScheduledTask(task, idx) {
       if (typeof addCompletedAutomation === 'function') {
         addCompletedAutomation(task, true);
       }
-      // v30.1: Don't truncate history — full response stored (addAutoLabHistory handles its own limits)
+      // v30.1: Don't truncate history - full response stored (addAutoLabHistory handles its own limits)
       if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, true, response);
 
-      // v20.11: Write lastRun by ID (not index) — also store result preview
+      // v20.11: Write lastRun by ID (not index) - also store result preview
       var apiTs = new Date().toISOString();
       writeLastRunById(task.id, apiTs, { lastResult: response.substring(0, 500) });
 
@@ -3859,7 +3859,7 @@ async function executeScheduledTask(task, idx) {
 }
 
 function buildTaskPrompt(task) {
-  // v14.2: Handle 'studio' action — resolve operationId from task.target
+  // v14.2: Handle 'studio' action - resolve operationId from task.target
   if (task.action === 'studio' && task.target && task.target.operationId) {
     task = Object.assign({}, task, { action: 'run_operation', operationId: task.target.operationId });
   }
@@ -3872,7 +3872,7 @@ function buildTaskPrompt(task) {
       var opPrompt = '[AUTOMATED TASK: You MUST produce direct output only. Do NOT ask questions, seek clarification, or add meta-commentary. Do NOT say you cannot execute operations. Just produce the requested content immediately.]\n\n';
       opPrompt += 'TASK: ' + operation.name + '\n';
       if (operation.desc) opPrompt += operation.desc + '\n';
-      // v18.5: Raw output mode — skip deliverables list, add strict output-only directive
+      // v18.5: Raw output mode - skip deliverables list, add strict output-only directive
       if (operation.isRawOutput) {
         opPrompt += '\nCRITICAL OUTPUT RULE: Your ENTIRE response must be ONLY the final content text. No titles, no headers, no section labels, no analysis, no brand voice scores, no tone analysis, no posting time suggestions, no markdown formatting (no #, no **, no |), no explanations, no preamble. Output the raw text exactly as it should be published.\n';
       } else if (operation.outputs) {
@@ -3893,11 +3893,11 @@ function buildTaskPrompt(task) {
       opPrompt += '\n\nBegin your output now.';
       return opPrompt;
     } else {
-      console.warn('[Scheduler] Operation not found for id:', task.operationId, '— falling through to description-based prompt');
+      console.warn('[Scheduler] Operation not found for id:', task.operationId, '- falling through to description-based prompt');
     }
   }
   
-  // v18.6: Enhanced message action — include brand context + direct instruction directive
+  // v18.6: Enhanced message action - include brand context + direct instruction directive
   if (task.action === 'message') {
     var _msgText = (task.target && task.target.text) || task.description || '';
     var _msgBrandIdx = task.brandIdx !== undefined && task.brandIdx !== '' ? parseInt(task.brandIdx) : 0;

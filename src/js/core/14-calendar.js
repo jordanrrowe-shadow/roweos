@@ -72,7 +72,7 @@ async function callNanobananaStreaming(model, apiKey, messages, systemPrompt, on
               var nbInputTokens = data.usageMetadata.promptTokenCount || 0;
               var nbOutputTokens = data.usageMetadata.candidatesTokenCount || 0;
               if (nbInputTokens > 0 || nbOutputTokens > 0) {
-                trackAPIUsage('nanobanana', useModel, nbInputTokens, nbOutputTokens, false, false, 'text'); // v30.1: Fix — nanobanana text gen, not image
+                trackAPIUsage('nanobanana', useModel, nbInputTokens, nbOutputTokens, false, false, 'text'); // v30.1: Fix - nanobanana text gen, not image
               }
             }
           } catch (e) { /* skip invalid JSON */ }
@@ -141,7 +141,7 @@ async function generateImageWithNanobanana(prompt, options) {
     refParts.push({ inlineData: { mimeType: options.referenceImage.mimeType || 'image/png', data: options.referenceImage.base64 } });
   }
 
-  // v15.10: Multi-turn image editing — use full conversation history
+  // v15.10: Multi-turn image editing - use full conversation history
   if (options.imageHistory && options.imageHistory.length > 0) {
     // Build multi-turn contents: [prev user, prev model image, ..., new user prompt]
     var multiTurnContents = [];
@@ -216,7 +216,7 @@ async function generateImageWithNanobanana(prompt, options) {
   }
 
   if (images.length === 0) {
-    // v15.3: Return text response instead of throwing — prevents ChatAI from breaking
+    // v15.3: Return text response instead of throwing - prevents ChatAI from breaking
     var textResponse = '';
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
       data.candidates[0].content.parts.forEach(function(part) {
@@ -270,7 +270,7 @@ async function generateImageWithNanobanana(prompt, options) {
 
 // v21.15: Google Veo Video Generation (async predictLongRunning)
 async function generateVideoWithVeo(prompt, options) {
-  // v24.26: TEMP BLOCKER — video generation disabled to investigate billing. Remove this block to re-enable.
+  // v24.26: TEMP BLOCKER - video generation disabled to investigate billing. Remove this block to re-enable.
   showToast('Video generation is temporarily disabled while billing is being reviewed.', 'warning');
   throw new Error('Video generation temporarily disabled');
   if (!options) options = {};
@@ -390,7 +390,7 @@ async function generateVideoWithVeo(prompt, options) {
 }
 
 // v22.19: OpenAI Image Generation via Responses API (native image_generation tool)
-// v31.0: Upgraded to GPT Image 2 — tool definition now requires explicit model: 'gpt-image-2'
+// v31.0: Upgraded to GPT Image 2 - tool definition now requires explicit model: 'gpt-image-2'
 //        (previously inferred from parent request). Quality options: low/medium/high/auto.
 //        Sizes: arbitrary within constraints. Note: gpt-image-2 always uses high fidelity
 //        and does NOT support transparent backgrounds.
@@ -983,10 +983,10 @@ async function runImageOperation() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// INFOGRAPHIC ENGINE (v23.8) — AI JSON -> HTML/CSS -> Chart.js -> html2canvas -> PNG
+// INFOGRAPHIC ENGINE (v23.8) - AI JSON -> HTML/CSS -> Chart.js -> html2canvas -> PNG
 // ═══════════════════════════════════════════════════════════════
 
-// v23.8: Infographic template registry — each returns HTML string for a layout
+// v23.8: Infographic template registry - each returns HTML string for a layout
 var INFOGRAPHIC_TEMPLATES = {
   vertical: function(data, theme) {
     var html = '<div style="width:800px;padding:48px;background:' + theme.bg + ';color:' + theme.text + ';font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;">';
@@ -1343,7 +1343,7 @@ function captureInfographicPNG(container) {
   });
 }
 
-// v23.8: Render infographic JSON to PNG — returns Promise<dataURL>
+// v23.8: Render infographic JSON to PNG - returns Promise<dataURL>
 function renderInfographic(jsonData, brandIdx) {
   var theme = buildInfographicTheme(brandIdx);
   var layout = jsonData.layout || 'vertical';
@@ -2355,7 +2355,7 @@ async function copyImageToClipboard() {
   }
 }
 
-// v22.8: Deep Research operation handler — used by Research Agent ops (IDs 16-25)
+// v22.8: Deep Research operation handler - used by Research Agent ops (IDs 16-25)
 // Full deep research flow: progress UI, brand context enrichment, startDeepResearch + pollDeepResearch
 async function runDeepResearchOperation() {
   var btn = document.getElementById('studioRunBtn') || document.getElementById('runBtn');
@@ -2449,7 +2449,7 @@ async function runDeepResearchOperation() {
         op: selectedOp.name,
         brand: _drBrand,
         plan: 'Deep Research: ' + selectedOp.name,
-        deliv: resultText, // v25.3: No truncation — save full content
+        deliv: resultText, // v25.3: No truncation - save full content
         time: new Date().toLocaleString(),
         aiGenerated: true,
         source: 'studio'
@@ -2562,7 +2562,7 @@ async function runSelectedOperation() {
   
   // Include attached content if any
   if (window.studioAttachedContent) {
-    // v30.1: ES5 safe — no optional chaining or arrow functions
+    // v30.1: ES5 safe - no optional chaining or arrow functions
     var _sacMsgs = window.studioAttachedContent.messages;
     var attachedContent = window.studioAttachedContent.content ||
                           (_sacMsgs ? _sacMsgs.map(function(m) { return m.content; }).join('\n') : null) ||
@@ -2670,7 +2670,7 @@ async function runSelectedOperation() {
       model = studioModelOverride || (brand && brand.model) || 'claude-sonnet-4-6';
     }
 
-    // v20.5: RoweOS AI — resolve to actual provider/model
+    // v20.5: RoweOS AI - resolve to actual provider/model
     if (provider === 'roweos') {
       try {
         var _resolved = resolveRoweOSAI({ userMessage: userPrompt, systemPrompt: systemPrompt });
@@ -2683,7 +2683,7 @@ async function runSelectedOperation() {
     }
 
     // v31.0: Preferred model override for intelligence ops (web search requires GPT-5.5)
-    var currentOp = ops.filter(function(o) { return o.id === selectedOp.id; })[0]; // v30.1: Fix comparison — selectedOp is object, not ID
+    var currentOp = ops.filter(function(o) { return o.id === selectedOp.id; })[0]; // v30.1: Fix comparison - selectedOp is object, not ID
     if (currentOp && currentOp.preferredProvider && currentOp.preferredModel) {
       if (!studioProviderOverride && !studioModelOverride) {
         provider = currentOp.preferredProvider;
@@ -2782,7 +2782,7 @@ async function runSelectedOperation() {
       var title = extractChecklistTitle(fullResponse);
 
       if (items.length >= 2) {
-        // Store for import function — smart suggestions will render the button
+        // Store for import function - smart suggestions will render the button
         window._pendingChecklistItems = items;
         window._pendingChecklistTitle = title;
         window._pendingChecklistRawText = fullResponse; // v11.0.5: Store raw text for section parsing
@@ -2945,7 +2945,7 @@ async function runOp() {
   if (studioLayout) studioLayout.classList.add('agent-thinking');
   if (mainSidebar) mainSidebar.classList.add('shimmer-active');
 
-  // v15.15: Safely resolve brand — prefer studioBrand, fallback to brand selector, then selectedBrand
+  // v15.15: Safely resolve brand - prefer studioBrand, fallback to brand selector, then selectedBrand
   var studioBrandEl = document.getElementById('studioBrand');
   var mainBrandEl = document.getElementById('brand');
   var brandIdx = parseInt((studioBrandEl && studioBrandEl.value !== '' ? studioBrandEl.value : null) || (mainBrandEl && mainBrandEl.value !== '' ? mainBrandEl.value : null) || selectedBrand || 0);
@@ -3085,7 +3085,7 @@ async function runOp() {
     }
   }
 
-  // v20.5: RoweOS AI — resolve to actual provider/model
+  // v20.5: RoweOS AI - resolve to actual provider/model
   if (provider === 'roweos') {
     try {
       var _resolved = resolveRoweOSAI({ userMessage: aiPrompt || '', systemPrompt: '' });
@@ -3157,7 +3157,7 @@ async function runOp() {
       var readingTime = Math.ceil(wordCount / 200);
       var genTime = ((Date.now() - streamStartTime) / 1000).toFixed(1);
       
-      // v22.33: Clean meta — word count, read time, gen time
+      // v22.33: Clean meta - word count, read time, gen time
       var metaHtml = '<div class="studio-output-meta">';
       metaHtml += '<span>' + wordCount.toLocaleString() + ' words</span>';
       metaHtml += ' · <span>~' + readingTime + ' min read</span>';
@@ -3190,7 +3190,7 @@ async function runOp() {
         mode: runMode  // v11.0.5: Track mode for History separation
       };
       runs.push(run);
-      // v30.1: Removed duplicate saveRuns() — kept only the one inside history try block below
+      // v30.1: Removed duplicate saveRuns() - kept only the one inside history try block below
 
       // v15.15: Also save to agentCommands for History view + Firebase sync
       try {
@@ -3201,7 +3201,7 @@ async function runOp() {
             mode: runMode,
             command: selectedOp.name + (context ? ': ' + context.substring(0, 100) : ''),
             operation: selectedOp.name,
-            // v15.32: Store full content — truncation happens at sync layer
+            // v15.32: Store full content - truncation happens at sync layer
             result: generatedContent || templateStructure || '',
             source: 'studio',
             date: new Date().toISOString(),
@@ -3301,7 +3301,7 @@ async function runOp() {
   );
 }
 
-// v23.14: Smart Studio Suggestions — context-aware post-session actions
+// v23.14: Smart Studio Suggestions - context-aware post-session actions
 var SMART_SUGGESTION_ICONS = {
   pdf: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13h4M10 17h4M8 9h1"/></svg>',
   email: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>',
@@ -3326,24 +3326,24 @@ function getSmartSuggestions(run, selectedOp) {
   var contentLower = content.substring(0, 2000).toLowerCase();
   var opLower = opName.toLowerCase();
 
-  // 1. Save as PDF — always for text-based (primary, gold)
+  // 1. Save as PDF - always for text-based (primary, gold)
   if (!isImageOp && !isVideoOp && content.length > 100) {
     suggestions.push({ type: 'pdf', label: 'Save as PDF', primary: true });
   }
 
-  // 2. Send Email — reports, pitches, proposals, summaries, newsletters, briefs
+  // 2. Send Email - reports, pitches, proposals, summaries, newsletters, briefs
   var emailPatterns = /pitch|proposal|report|summary|newsletter|email|brief|memo|presentation|packet|deck|letter|welcome|outreach|follow.?up/i;
   if (!isSocialOp && (emailPatterns.test(opLower) || emailPatterns.test(contentLower.substring(0, 500)))) {
     suggestions.push({ type: 'email', label: 'Send as Email' });
   }
 
-  // 3. Add to Identity — strategy, analysis, brand research, positioning
+  // 3. Add to Identity - strategy, analysis, brand research, positioning
   var identityPatterns = /strategy|identity|brand|analysis|research|insight|positioning|audience|voice|messaging|competitive|persona|value.?prop|mission|vision/i;
   if (identityPatterns.test(opLower) || identityPatterns.test(contentLower.substring(0, 500))) {
     suggestions.push({ type: 'identity', label: 'Add to Identity' });
   }
 
-  // 4. Create Focus Tasks — action items, checklists, task lists, plans
+  // 4. Create Focus Tasks - action items, checklists, task lists, plans
   if (typeof detectChecklistInResponse === 'function' && detectChecklistInResponse(content)) {
     suggestions.push({ type: 'focus', label: 'Create Focus Tasks' });
   } else {
@@ -3353,13 +3353,13 @@ function getSmartSuggestions(run, selectedOp) {
     }
   }
 
-  // 5. Create Automation — recurring, scheduled, campaigns
+  // 5. Create Automation - recurring, scheduled, campaigns
   var autoPatterns = /recurring|weekly|monthly|daily|schedule|automate|regular|ongoing|campaign|cadence|routine|series/i;
   if (autoPatterns.test(contentLower.substring(0, 1000)) || autoPatterns.test(opLower)) {
     suggestions.push({ type: 'automation', label: 'Create Automation' });
   }
 
-  // 6. Chat with BrandAI — always for text-based outputs
+  // 6. Chat with BrandAI - always for text-based outputs
   if (!isImageOp && !isVideoOp && content.length > 100) {
     suggestions.push({ type: 'chat', label: 'Chat with BrandAI' });
   }
@@ -3502,7 +3502,7 @@ function handleSmartSuggestion(type) {
   }
 }
 
-// v23.14: Smart PDF export — auto-default for text Studio sessions
+// v23.14: Smart PDF export - auto-default for text Studio sessions
 function studioSmartExportPDF() {
   // v23.16: Auto-save any pending edits before exporting
   var _outputContent = document.getElementById('studioOutputContent');
@@ -3523,7 +3523,7 @@ function studioSmartExportPDF() {
   }
 }
 
-// v23.14: Smart email — pre-fill compose with Studio output
+// v23.14: Smart email - pre-fill compose with Studio output
 function studioSmartSendEmail() {
   if (!window.currentRun || !window.currentRun.deliv) {
     showToast('No content to email', 'error');
@@ -3546,7 +3546,7 @@ function studioSmartSendEmail() {
   if (typeof renderMailComposeFrom === 'function') renderMailComposeFrom();
 }
 
-// v23.14: Smart identity — extract insights, show preview, then save on approval
+// v23.14: Smart identity - extract insights, show preview, then save on approval
 function studioSmartAddToIdentity() {
   if (!window.currentRun || !window.currentRun.deliv) {
     showToast('No content to analyze', 'error');
@@ -3604,7 +3604,7 @@ function studioExtractIdentityInsights(content, opName, callback) {
     var fallbackInsights = [];
     var contentLower = content.toLowerCase();
     if (/brand voice|tone|language|style of communication/i.test(content)) {
-      // v30.1: ES5 safe — no optional chaining
+      // v30.1: ES5 safe - no optional chaining
       var _voiceMatch = content.match(/[^.]*(?:voice|tone|language)[^.]*/i);
       fallbackInsights.push({ section: 'voice', insight: (_voiceMatch && _voiceMatch[0] ? _voiceMatch[0].trim() : null) || 'Voice insights extracted from ' + opName });
     }
@@ -3746,7 +3746,7 @@ function studioApplyIdentityInsights() {
   closeModal('studioIdentityApprovalModal');
 }
 
-// v23.14: Smart Focus Tasks — extract tasks from Studio output
+// v23.14: Smart Focus Tasks - extract tasks from Studio output
 function studioSmartCreateFocusTasks() {
   if (!window.currentRun || !window.currentRun.deliv) return;
   var content = window.currentRun.deliv;
@@ -3771,7 +3771,7 @@ function studioSmartCreateFocusTasks() {
   showToast('Paste relevant tasks into Pulse from your Studio output', 'info');
 }
 
-// v23.14: Smart Automation — pre-fill automation from current operation
+// v23.14: Smart Automation - pre-fill automation from current operation
 function studioSmartCreateAutomation() {
   if (!window.currentRun) return;
   var run = window.currentRun;
@@ -3835,7 +3835,7 @@ function openSaveLibraryModalForStudio() {
     window.pendingSaveBrandIdx = null;
     renderSaveFolderList(); // Mode-aware folder list
   } else {
-    // v15.15: Get brand index — try name, shortName, then fallback to selectedBrand
+    // v15.15: Get brand index - try name, shortName, then fallback to selectedBrand
     var brandIdx = selectedBrand || 0;
     for (var i = 0; i < brands.length; i++) {
       if (brands[i].name === run.brand || brands[i].shortName === run.brand) {
@@ -3897,7 +3897,7 @@ function openSaveLibraryModalForBrandAI(content) {
  * v9.1.14: Save entire BrandAI conversation to Library
  * v11.0.5: Use AI-generated title if available
  */
-// v25.1: Save menu — choose Folio or Library
+// v25.1: Save menu - choose Folio or Library
 function openChatSaveMenu(btn) {
   // Remove any existing save menu
   var existing = document.getElementById('chatSaveMenu');
@@ -4038,7 +4038,7 @@ function openSaveConversationToLibrary() {
   var inLifeMode = currentMode === 'life';
   window.pendingSaveMode = currentMode;
   
-  // Store for save — v15.18: snapshot conversation array NOW (not at confirm time)
+  // Store for save - v15.18: snapshot conversation array NOW (not at confirm time)
   // to prevent data loss if currentConversation is reset before user clicks Save
   window.pendingSaveContent = content;
   window.pendingSaveSource = 'conversation';
@@ -4180,7 +4180,7 @@ function formatConversationForLibrary(conversation) {
   return html;
 }
 
-// v15.30: renderSaveFolderListForBrand() removed — replaced by mode-aware renderSaveFolderList()
+// v15.30: renderSaveFolderListForBrand() removed - replaced by mode-aware renderSaveFolderList()
 
 function proposeSchedule() {
   if (!window.currentRun) {
@@ -4218,8 +4218,8 @@ function toggleRhythmAutomations() {
   }
 }
 
-// v22.39: Toggle Auto-Pilot section — no-op now (always visible in grid)
-function toggleAutoPilotSection() { /* no-op — grid layout always shows */ }
+// v22.39: Toggle Auto-Pilot section - no-op now (always visible in grid)
+function toggleAutoPilotSection() { /* no-op - grid layout always shows */ }
 
 // v12.0.3: Clear all pending Auto-Pilot actions
 function clearAutoPilotQueue() {
@@ -4490,9 +4490,9 @@ var _gcalAccessToken = null;
 var _gcalConnected = false;
 var _gcalEvents = [];
 var _gcalSyncInProgress = false;
-// v23.2: Hardcoded RoweOS Google Client ID — users just sign in with their Google account
+// v23.2: Hardcoded RoweOS Google Client ID - users just sign in with their Google account
 var GCAL_CLIENT_ID = '145599655206-or0g4iasoasppsdpu6pjlia6gh6jbe50.apps.googleusercontent.com';
-// v28.5: Narrowed scope — calendar.events is sufficient and less likely to trigger "Access blocked"
+// v28.5: Narrowed scope - calendar.events is sufficient and less likely to trigger "Access blocked"
 var GCAL_SCOPES = 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly';
 var GCAL_API_BASE = 'https://www.googleapis.com/calendar/v3';
 
@@ -4667,7 +4667,7 @@ function initGoogleCalendarAuth() {
         if (errType === 'popup_failed_to_open') {
           showToast('Could not open Google sign-in popup. Check your popup blocker settings.', 'error');
         } else if (errType === 'popup_closed') {
-          // User closed — no toast needed
+          // User closed - no toast needed
         } else {
           showToast('Google Calendar: Sign-in error (' + errType + '). If you see "Access blocked", try with a personal Gmail account.', 'error');
         }
@@ -4710,7 +4710,7 @@ function handleGCalTokenResponse(resp) {
   showToast('Google Calendar connected', 'success');
 }
 
-// v18.4: Calendar scope toggle — shared vs per-brand/profile
+// v18.4: Calendar scope toggle - shared vs per-brand/profile
 function toggleCalendarScope(isPerScope) {
   localStorage.setItem('roweos_calendar_scope', isPerScope ? 'per_scope' : 'shared');
   var desc = document.getElementById('calendarScopeDesc');
@@ -4735,7 +4735,7 @@ function getCalendarCredentialKey(baseKey) {
 }
 
 function connectGoogleCalendar() {
-  // v23.2: Client ID is now hardcoded — no user input needed
+  // v23.2: Client ID is now hardcoded - no user input needed
   if (!_gcalTokenClient) {
     initGoogleCalendarAuth();
   }
@@ -4791,7 +4791,7 @@ function syncGoogleCalendarEvents(startDate, endDate) {
     headers: { 'Authorization': 'Bearer ' + _gcalAccessToken }
   }).then(function(resp) {
     if (resp.status === 401) {
-      // Token expired — try silent re-auth
+      // Token expired - try silent re-auth
       if (_gcalTokenClient) {
         _gcalTokenClient.requestAccessToken({ prompt: '' });
       }
@@ -5209,7 +5209,7 @@ function syncOutlookCalendarEvents(startDate, endDate) {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function(resp) {
     if (resp.status === 401) {
-      // Token expired — try refresh
+      // Token expired - try refresh
       refreshOutlookCalToken(function(newToken) {
         if (newToken) syncOutlookCalendarEvents(startDate, endDate);
         else showToast('Outlook Calendar session expired. Reconnect in Settings.', 'error');
@@ -5265,9 +5265,9 @@ function refreshOutlookCalToken(callback) {
   }).catch(function() { callback(null); });
 }
 
-// v25.2: Old v22.39 duplicate Outlook functions removed — v25.2 versions at ~86448 are authoritative
+// v25.2: Old v22.39 duplicate Outlook functions removed - v25.2 versions at ~86448 are authoritative
 
-// v22.39: Unified push — sends event to all connected external calendars
+// v22.39: Unified push - sends event to all connected external calendars
 function pushEventToExternalCalendars(event) {
   var pushed = [];
   if (_gcalConnected && _gcalAccessToken) {
@@ -5285,7 +5285,7 @@ function pushEventToExternalCalendars(event) {
   return pushed;
 }
 
-// v16.13: Full CalDAV discovery — principal → calendar-home-set → calendars
+// v16.13: Full CalDAV discovery - principal → calendar-home-set → calendars
 function discoverICloudCalendarHome(appleId, appPw) {
   // Step 1: PROPFIND root to get current-user-principal
   var rootUrl = 'https://caldav.icloud.com/';
@@ -5581,7 +5581,7 @@ function parseCalDAVEvents(xml, calHref) {
   return events;
 }
 
-// v25.2: Old duplicate iCloud push function removed — v25.2 version at ~86552 is authoritative
+// v25.2: Old duplicate iCloud push function removed - v25.2 version at ~86552 is authoritative
 
 // ═══════════════════════════════════════════════════════════════
 // v16.12: UNIFIED MERGE LAYER
@@ -5648,7 +5648,7 @@ function rebuildMergedCalendar() {
 }
 
 function getCalendarEventsForDate(dateStr) {
-  // v22.39: Sort by time — all-day first, then chronological
+  // v22.39: Sort by time - all-day first, then chronological
   return _mergedCalendarEvents.filter(function(ev) { return ev.date === dateStr; }).sort(function(a, b) {
     var aTime = a.time || '';
     var bTime = b.time || '';
@@ -6187,7 +6187,7 @@ function deleteICloudCalendarEvent(event) {
 
 // --- Unified event edit modal ---
 
-// v22.44: Open external event detail — editable for connected providers
+// v22.44: Open external event detail - editable for connected providers
 function openExternalEventDetail(eventId) {
   var ev = null;
   for (var i = 0; i < _mergedCalendarEvents.length; i++) {

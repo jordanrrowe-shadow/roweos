@@ -20,6 +20,8 @@
         <button class="admin-tab" onclick="showAdminTab('emails')" data-tab="emails" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Emails</button>
         <!-- v31.0: Campaigns tab -->
         <button class="admin-tab" onclick="showAdminTab('campaigns')" data-tab="campaigns" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Campaigns</button>
+        <!-- v31.3: Sites tab — Vercel web analytics across all owned websites -->
+        <button class="admin-tab" onclick="showAdminTab('sites')" data-tab="sites" style="padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-secondary);font-size:var(--text-sm);font-weight:500;cursor:pointer;white-space:nowrap;">Sites</button>
       </div>
       <!-- Keys tab -->
       <div class="admin-tab-content" id="adminTabKeys" style="display:block;">
@@ -215,6 +217,8 @@
                   </div>
                   <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                     <select id="adminEmailTemplate" style="padding:6px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-xs);">
+                      <option value="founder_lifetime_offer">Founder Lifetime Offer (Founder100)</option>
+                      <option value="welcome">Welcome</option>
                       <option value="onboarding_survey">Onboarding Survey</option>
                       <option value="reengagement">Re-engagement</option>
                       <option value="feature_announcement">Feature Announcement</option>
@@ -266,7 +270,9 @@
           </div>
         </div>
       </div>
-      <!-- v31.0: Campaigns tab — content rendered by adminRenderCampaigns() in 25-admin-emails.js -->
+      <!-- v31.0: Campaigns tab - content rendered by adminRenderCampaigns() in 25-admin-emails.js -->
       <div class="admin-tab-content" id="adminTabCampaigns" style="display:none;"></div>
+      <!-- v31.3: Sites tab - rendered by adminRenderSites() in 25-admin-sites.js -->
+      <div class="admin-tab-content" id="adminTabSites" style="display:none;"></div>
     </div>
   </div>

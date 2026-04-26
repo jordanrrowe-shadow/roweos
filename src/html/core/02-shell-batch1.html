@@ -1,6 +1,6 @@
 
   <!-- v20.1: Auth Gate - Two-phase splash gateway -->
-  <!-- v30.4: Start VISIBLE — shows splash immediately, hideAuthGate() hides after login -->
+  <!-- v30.4: Start VISIBLE - shows splash immediately, hideAuthGate() hides after login -->
   <div id="authGate" style="position:fixed;inset:0;z-index:100000;background:#0a0a0a;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:1;transition:opacity 0.4s ease;">
 
     <!-- v28.0: Migration overlay -->
@@ -146,68 +146,275 @@
     </div>
 
     <!-- v30.5: Tier selection - direct child of authGate (NOT inside authLogin) so hiding authLogin doesn't hide this -->
-    <div id="authGateTierSelect" style="display:none;width:100%;max-width:900px;padding:0 16px;">
-      <div style="text-align:center;margin-bottom:32px;">
-        <div style="font-family:'DM Sans',sans-serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:8px;">Choose Your Plan</div>
-        <div style="font-size:14px;color:rgba(255,255,255,0.4);">Select a tier to get started with RoweOS</div>
+    <!-- v31.0: Luxe tier picker. Replaces flat 3-card grid with premium framing,
+         per-tier highlights, lock-for-life Founder badge, trial reassurance row,
+         and a Bring-Your-Own-Keys / API key pack callout. -->
+    <div id="authGateTierSelect" style="display:none;width:100%;max-width:1080px;padding:32px 20px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
+      <style>
+        @keyframes tierFadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes tierFadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-12px)}}
+        @keyframes tierShimmer{0%,100%{opacity:0.55}50%{opacity:1}}
+        @keyframes tierIntroBadgePulse{0%,100%{transform:scale(1);opacity:0.92}50%{transform:scale(1.04);opacity:1}}
+        #authGateTierSelect{color:#f5f0e6;}
+        #tierIntro{animation:tierFadeIn 0.7s ease-out;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62vh;text-align:center;padding:40px 20px;}
+        #tierIntro.tier-intro-fade-out{animation:tierFadeOut 0.5s ease forwards;}
+        #tierContent{animation:tierFadeIn 0.6s ease-out;display:none;}
+        #tierContent.tier-content-visible{display:block;}
+        .tier-card{background:linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:30px 26px 28px;text-align:left;display:flex;flex-direction:column;position:relative;transition:transform 0.25s ease,border-color 0.25s ease,box-shadow 0.25s ease;}
+        .tier-card:hover{transform:translateY(-3px);border-color:rgba(168,152,120,0.35);box-shadow:0 18px 48px rgba(0,0,0,0.35)}
+        .tier-card.featured{background:linear-gradient(180deg,rgba(212,184,150,0.08),rgba(168,152,120,0.02));border:1px solid rgba(212,184,150,0.4);box-shadow:0 12px 36px rgba(168,152,120,0.18)}
+        .tier-card.featured:hover{box-shadow:0 22px 56px rgba(168,152,120,0.32)}
+        .tier-eyebrow{font-size:10px;letter-spacing:2.4px;text-transform:uppercase;color:#a89878;margin-bottom:8px;font-weight:500}
+        .tier-name{font-family:Georgia,serif;font-size:26px;line-height:1.1;color:#f5ecd9;margin-bottom:10px}
+        .tier-price{font-family:Georgia,serif;font-size:38px;color:#d4b896;line-height:1;font-weight:500;letter-spacing:-0.5px}
+        .tier-price-row{display:flex;align-items:baseline;gap:6px;margin-top:2px}
+        .tier-price-suffix{color:#888;font-size:13px;letter-spacing:0.2px}
+        .tier-price-was{display:inline-block;font-family:Georgia,serif;font-size:13px;color:#7a7268;text-decoration:line-through;font-weight:300;margin-bottom:4px;letter-spacing:0.3px}
+        .tier-price-note{font-size:11.5px;color:#7d756a;margin-top:8px;letter-spacing:0.3px;line-height:1.55}
+        .tier-feat{display:flex;gap:10px;font-size:13px;color:#c8bfae;padding:7px 0;line-height:1.45}
+        .tier-feat svg{flex-shrink:0;margin-top:2px}
+        .tier-feat-strong{color:#f0e8d8;font-weight:500}
+        .tier-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(168,152,120,0.18),transparent);margin:18px 0}
+        .tier-cta{width:100%;padding:15px 22px;border-radius:11px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:600;letter-spacing:0.3px;cursor:pointer;transition:all 0.2s}
+        .tier-cta-secondary{background:transparent;border:1px solid rgba(168,152,120,0.4);color:#d4b896}
+        .tier-cta-secondary:hover{background:rgba(168,152,120,0.08);border-color:rgba(168,152,120,0.7)}
+        .tier-cta-primary{background:linear-gradient(135deg,#a89878,#d4b896);color:#0a0a0a;border:none;box-shadow:0 8px 22px rgba(168,152,120,0.28)}
+        .tier-cta-primary:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(168,152,120,0.4)}
+        .tier-fineprint{font-size:10.5px;color:#666;margin-top:10px;text-align:center;letter-spacing:0.2px}
+        .lock-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;background:rgba(168,152,120,0.12);border:1px solid rgba(168,152,120,0.3);border-radius:999px;font-size:10px;color:#d4b896;letter-spacing:0.6px;text-transform:uppercase;margin-top:10px;font-weight:500}
+        .stat-tile{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:14px;text-align:center}
+        .stat-tile-num{font-family:Georgia,serif;font-size:22px;color:#d4b896;line-height:1}
+        .stat-tile-label{font-size:10.5px;color:#888;margin-top:5px;letter-spacing:0.6px}
+        @media (max-width: 820px){
+          .tier-grid{grid-template-columns:1fr !important}
+          /* v31.3: Mobile order — Founder first (best deal), then Premium, then Solo at the bottom.
+             DOM order is Solo, Founder, Premium so we re-order via :nth-child. */
+          .tier-grid > .tier-card:nth-child(1){order:3} /* Solo */
+          .tier-grid > .tier-card:nth-child(2){order:1} /* Founder (featured) */
+          .tier-grid > .tier-card:nth-child(3){order:2} /* Premium */
+        }
+        /* v31.3: Mobile-specific tweaks for the welcome splash + tier picker.
+           Earlier mobile feedback: H1 too large, padding too generous, scroll snap-back was hijacking the page. */
+        @media (max-width: 640px){
+          #authGateTierSelect{padding:20px 14px !important;}
+          #tierIntro{min-height:auto !important;padding:48px 16px 32px !important;}
+          #tierIntro h1{font-size:38px !important;letter-spacing:-0.3px !important;}
+          #tierIntro > div[style*="font-family:Georgia"]{padding:22px 20px !important;}
+          #tierIntro > div[style*="font-family:Georgia"] > div[style*="font-size:30px"]{font-size:24px !important;}
+          /* Make the manual back-to-welcome button comfortably tappable (≥44px target) */
+          #tierBackToIntro{padding:11px 18px !important;font-size:12.5px !important;margin-bottom:14px !important;}
+          .tier-card{padding:24px 20px 22px !important;}
+          .tier-name{font-size:23px !important;}
+          .tier-price{font-size:32px !important;}
+          .tier-cta{padding:14px 18px !important;font-size:13.5px !important;}
+        }
+      </style>
+
+      <!-- v31.2: Welcome intro with Google for Startups, fades into tier picker -->
+      <div id="tierIntro">
+        <div style="font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:#a89878;margin-bottom:18px;font-weight:500;animation:tierIntroBadgePulse 3.6s ease-in-out infinite;">A new kind of operating system</div>
+        <h1 style="font-family:Georgia,serif;font-size:52px;font-weight:400;line-height:1.05;margin:0 0 20px;color:#f5ecd9;letter-spacing:-0.5px;">Welcome to RoweOS.</h1>
+        <p style="font-size:16px;color:#a89878;line-height:1.65;margin:0 auto 44px;max-width:540px;">One operating system for your brand and life.</p>
+
+        <!-- Google for Startups card (matches /info layout - colored wordmark only, no separate icon) -->
+        <div style="background:linear-gradient(180deg,rgba(212,184,150,0.07),rgba(168,152,120,0.015));border:1px solid rgba(212,184,150,0.25);border-radius:18px;padding:28px 36px;max-width:520px;width:100%;">
+          <div style="font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:#a89878;margin-bottom:16px;font-weight:500;">Backed by</div>
+          <div style="font-family:Georgia,serif;font-size:30px;color:#f5ecd9;letter-spacing:-0.4px;line-height:1.05;margin-bottom:14px;">
+            <span style="font-weight:500;color:#4285F4;">G</span><span style="font-weight:500;color:#EA4335;">o</span><span style="font-weight:500;color:#FBBC05;">o</span><span style="font-weight:500;color:#4285F4;">g</span><span style="font-weight:500;color:#34A853;">l</span><span style="font-weight:500;color:#EA4335;">e</span>
+            <span style="color:#a89878;font-size:0.7em;font-style:italic;font-weight:300;margin-left:6px;">for Startups</span>
+          </div>
+          <p style="font-size:12.5px;color:#888;line-height:1.6;margin:0;max-width:420px;margin-left:auto;margin-right:auto;">RoweOS is a member of the Google for Startups Cloud Program. Vetted infrastructure, real builders.</p>
+        </div>
+
+        <button onclick="dismissTierIntro()" style="margin-top:36px;padding:11px 28px;background:transparent;border:1px solid rgba(168,152,120,0.4);border-radius:999px;color:#d4b896;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;letter-spacing:0.4px;font-weight:500;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,152,120,0.08)';this.style.borderColor='rgba(168,152,120,0.7)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(168,152,120,0.4)'">Choose Your Plan &rarr;</button>
+        <div style="font-size:11px;color:#555;margin-top:14px;letter-spacing:0.3px;">Continuing in a moment...</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%;">
+
+      <div id="tierContent">
+      <!-- v31.3: Manual restore button (replaces hijacked scroll-up gesture) -->
+      <button type="button" id="tierBackToIntro" onclick="restoreTierIntro()" aria-label="Back to welcome" style="display:flex;align-items:center;gap:6px;margin:0 auto 18px;padding:7px 14px;background:rgba(168,152,120,0.06);border:1px solid rgba(168,152,120,0.25);border-radius:999px;color:#a89878;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:11.5px;letter-spacing:0.4px;font-weight:500;cursor:pointer;transition:all 0.18s;" onmouseover="this.style.background='rgba(168,152,120,0.12)';this.style.borderColor='rgba(168,152,120,0.5)';this.style.color='#d4b896'" onmouseout="this.style.background='rgba(168,152,120,0.06)';this.style.borderColor='rgba(168,152,120,0.25)';this.style.color='#a89878'">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+        Back to welcome
+      </button>
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:32px;">
+        <div class="tier-eyebrow" style="margin-bottom:14px;animation:tierShimmer 2.6s ease-in-out infinite;">Step Two of Two · Choose Your Plan</div>
+        <h1 style="font-family:Georgia,serif;font-size:38px;font-weight:400;line-height:1.15;margin:0 0 14px;color:#f5ecd9;">Welcome to RoweOS.</h1>
+        <p style="font-size:15px;color:#a89878;line-height:1.6;margin:0 auto;max-width:520px;">One operating system for your brand and life. Pick the plan that fits.</p>
+      </div>
+
+      <!-- v31.2: Removed trial reassurance stat row (7-14 days / $0 / infinity) - too noisy -->
+
+      <!-- Tier grid -->
+      <div class="tier-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;width:100%;align-items:stretch;">
 
         <!-- Solo -->
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#a89878;margin-bottom:8px;">Solo</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$29/mo after trial</div>
-          <div style="width:100%;text-align:left;margin-bottom:24px;">
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 1 Brand or LifeAI profile</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Studio (all agents)</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Library and Wellness</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Pulse goal tracking</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Calendar integration</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Community support</div>
+        <div class="tier-card">
+          <div class="tier-eyebrow">Essentials</div>
+          <div class="tier-name">Solo</div>
+          <div class="tier-price-row"><div class="tier-price">$9</div><div class="tier-price-suffix">/mo</div></div>
+          <div class="tier-price-note">after your 7 day free trial</div>
+          <div class="tier-divider"></div>
+          <div style="flex:1;">
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span><span class="tier-feat-strong">1 Brand or LifeAI profile.</span> Your single source of intelligence.</span></div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Studio with all 5 BrandAI agents</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Library, Memory &amp; Pulse goals</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Calendar &amp; Rhythm scheduling</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Basic automations</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Community support</div>
           </div>
-          <div style="margin-top:auto;">
-            <button onclick="selectTier('solo')" style="padding:12px 32px;background:transparent;border:1px solid rgba(168,152,120,0.4);border-radius:10px;color:#a89878;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,152,120,0.08)';this.style.borderColor='rgba(168,152,120,0.6)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(168,152,120,0.4)'">Start 7-Day Free Trial</button>
-            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;">Card required. Auto-subscribes at $29/mo after trial.</div>
+          <div style="margin-top:24px;">
+            <button class="tier-cta tier-cta-secondary" onclick="selectTier('solo')">Start 7 Day Free Trial</button>
+            <div class="tier-fineprint">Card required. $9/mo after trial.</div>
           </div>
         </div>
 
-        <!-- Founder — featured -->
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(168,152,120,0.3);border-radius:16px;padding:32px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;position:relative;">
-          <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);padding:3px 14px;background:linear-gradient(135deg,#c9b57a,#d4b978);border-radius:20px;font-size:10px;font-weight:600;color:#0a0a0a;letter-spacing:1px;text-transform:uppercase;font-family:'DM Sans',sans-serif;">Popular</div>
-          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#a89878;margin-bottom:8px;">Founder</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$59/mo after trial</div>
-          <div style="width:100%;text-align:left;margin-bottom:24px;">
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Up to 5 Brand and LifeAI profiles</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Studio automations and pipelines</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mail and social publishing</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Focus, Analytics, Inventory</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Priority support</div>
+        <!-- Founder - featured -->
+        <div class="tier-card featured">
+          <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);padding:4px 14px;background:rgba(10,10,10,0.95);border:1px solid rgba(212,184,150,0.55);border-radius:999px;font-size:10px;font-weight:500;color:#d4b896;letter-spacing:1.4px;text-transform:uppercase;white-space:nowrap;">First 100 · 50% Off</div>
+          <div class="tier-name">Founder</div>
+          <div class="tier-price-was">$59/mo</div>
+          <div class="tier-price-row"><div class="tier-price">$29.50</div><div class="tier-price-suffix">/mo forever</div></div>
+          <div class="tier-divider"></div>
+          <div style="flex:1;">
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#d4b896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span class="tier-feat-strong">Everything in Solo, plus:</span></div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#d4b896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span><span class="tier-feat-strong">Up to 5 Brand &amp; LifeAI profiles</span></span></div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#d4b896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Studio operations &amp; multi-step pipelines</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#d4b896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Mail &amp; multi-platform social publishing</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#d4b896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Focus, Analytics, Identity &amp; Inventory</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#d4b896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Cloud sync across every device</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#d4b896" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Priority support &amp; Founder roadmap</div>
           </div>
-          <div style="margin-top:auto;">
-            <button onclick="selectTier('founder')" style="padding:12px 32px;background:linear-gradient(135deg,#c9b57a,#d4b978);border:none;border-radius:10px;color:#0a0a0a;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.opacity='0.9';this.style.transform='translateY(-1px)'" onmouseout="this.style.opacity='1';this.style.transform='none'">Start 14-Day Free Trial</button>
-            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;">Card required. Auto-subscribes at $59/mo after trial.</div>
+          <div style="margin-top:24px;">
+            <button class="tier-cta tier-cta-primary" onclick="selectTier('founder')">Start 14 Day Free Trial</button>
+            <div class="tier-fineprint">Card required. $29.50/mo after trial. Locked for life with code <strong>Founder100</strong>.</div>
           </div>
         </div>
 
         <!-- Premium -->
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;">
-          <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#a89878;margin-bottom:8px;">Premium</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$79/mo after trial</div>
-          <div style="width:100%;text-align:left;margin-bottom:24px;">
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Up to 10 Brand and LifeAI profiles</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Brand sharing and config export</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Advanced Analytics</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Custom integrations, API</div>
-            <div style="font-size:13px;color:rgba(255,255,255,0.55);padding:6px 0;display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 24/7 Priority support</div>
+        <div class="tier-card" style="position:relative;">
+          <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);padding:4px 14px;background:rgba(10,10,10,0.95);border:1px solid rgba(212,184,150,0.55);border-radius:999px;font-size:10px;font-weight:500;color:#d4b896;letter-spacing:1.4px;text-transform:uppercase;white-space:nowrap;">First 100 · 50% Off</div>
+          <div class="tier-name">Premium</div>
+          <div class="tier-price-was">$79/mo</div>
+          <div class="tier-price-row"><div class="tier-price">$39.50</div><div class="tier-price-suffix">/mo forever</div></div>
+          <div class="tier-divider"></div>
+          <div style="flex:1;">
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span class="tier-feat-strong">Everything in Founder, plus:</span></div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span class="tier-feat-strong">Up to 15 Brand &amp; LifeAI profiles</span></div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Bloom adaptive AI brand feeds</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Brand sharing &amp; config export</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Private 1:1 onboarding session</div>
+            <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>24/7 priority support</div>
           </div>
-          <div style="margin-top:auto;">
-            <button onclick="selectTier('premium')" style="padding:12px 32px;background:transparent;border:1px solid rgba(168,152,120,0.4);border-radius:10px;color:#a89878;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,152,120,0.08)';this.style.borderColor='rgba(168,152,120,0.6)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(168,152,120,0.4)'">Start 14-Day Free Trial</button>
-            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:8px;">Card required. Auto-subscribes at $79/mo after trial.</div>
+          <div style="margin-top:24px;">
+            <button class="tier-cta tier-cta-secondary" onclick="selectTier('premium')">Start 14 Day Free Trial</button>
+            <div class="tier-fineprint">Card required. $39.50/mo after trial. Locked for life with code <strong>Premier100</strong>.</div>
           </div>
         </div>
 
       </div>
-      <div id="tierSelectStatus" style="text-align:center;font-size:13px;color:rgba(255,255,255,0.4);margin-top:16px;min-height:20px;"></div>
+
+      <!-- API key callout -->
+      <div style="margin-top:32px;background:linear-gradient(180deg,rgba(168,152,120,0.07),rgba(168,152,120,0.01));border:1px solid rgba(168,152,120,0.18);border-radius:16px;padding:24px 28px;display:flex;flex-wrap:wrap;align-items:center;gap:24px;justify-content:space-between;">
+        <div style="flex:1;min-width:280px;">
+          <div class="tier-eyebrow">Need AI capacity? · Optional add on</div>
+          <div style="font-family:Georgia,serif;font-size:20px;color:#f5ecd9;margin-bottom:6px;">Bring your own keys, or buy a Rowe provided pack.</div>
+          <div style="font-size:13px;color:#a89878;line-height:1.6;">RoweOS routes to OpenAI, Anthropic, and Google. Use your own API keys for direct provider billing, or purchase a managed key pack from us with a single charge. No monthly billing, ideal for trying things out.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+          <button onclick="window.location.href='/purchase'" style="padding:12px 22px;background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.45);border-radius:10px;color:#d4b896;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:-apple-system,BlinkMacSystemFont,sans-serif;" onmouseover="this.style.background='rgba(168,152,120,0.25)'" onmouseout="this.style.background='rgba(168,152,120,0.15)'">Purchase API Key Pack →</button>
+          <div style="font-size:10.5px;color:#666;text-align:center;">Or add your own key after sign in.</div>
+        </div>
+      </div>
+
+      <div id="tierSelectStatus" style="text-align:center;font-size:13px;color:#a89878;margin-top:18px;min-height:20px;"></div>
+
+      <!-- v31.5: Preview/admin escape hatch — visible only on non-prod hostnames OR for admin UID.
+           Lets test environments (vercel preview URLs) and the admin bypass Stripe to validate
+           the actual app surface (chat/blob/accessibility). Hidden on roweos.com for normal users. -->
+      <div id="tierDevBypassWrap" style="text-align:center;margin-top:14px;display:none;">
+        <button id="tierDevBypassBtn" onclick="if(typeof devBypassTierGate==='function')devBypassTierGate()" style="padding:10px 20px;background:rgba(96,165,250,0.1);border:1px dashed rgba(96,165,250,0.45);border-radius:10px;color:#60a5fa;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:0.3px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">Skip to App (Preview / Admin)</button>
+        <div style="font-size:10.5px;color:#555;margin-top:6px;">Grants temporary Founder access for testing. Only visible on non-prod URLs or to the admin UID.</div>
+      </div>
+
+      <!-- Sign out escape hatch -->
+      <div style="text-align:center;margin-top:24px;">
+        <a href="#" onclick="try{firebase.auth().signOut()}catch(e){};try{window.location.reload()}catch(e){};return false;" style="font-size:12px;color:#666;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:1px;">Sign out</a>
+      </div>
+      </div><!-- /tierContent -->
+
+      <script>
+        // v31.2: Auto-fade from welcome intro into tier picker after a moment.
+        // Manual click on "Choose Your Plan" dismisses immediately.
+        // Scroll-up at top of tier picker fades the splash back in.
+        window._tierIntroDismissed = false;
+        window.dismissTierIntro = function() {
+          if (window._tierIntroDismissed) return;
+          window._tierIntroDismissed = true;
+          var intro = document.getElementById('tierIntro');
+          var content = document.getElementById('tierContent');
+          // v31.3: Force scroll to top — call repeatedly so it sticks against any browser scroll-restoration.
+          // Hits both #authGate (the tier-picker scroll container) and the document/body for any layout.
+          function _scrollTopHard() {
+            var gate = document.getElementById('authGate');
+            if (gate) gate.scrollTop = 0;
+            try { window.scrollTo(0, 0); } catch (e) {}
+            if (document.documentElement) document.documentElement.scrollTop = 0;
+            if (document.body) document.body.scrollTop = 0;
+          }
+          if (intro) {
+            intro.classList.add('tier-intro-fade-out');
+            setTimeout(function() { if (window._tierIntroDismissed) intro.style.display = 'none'; }, 480);
+          }
+          if (content) {
+            setTimeout(function() {
+              if (!window._tierIntroDismissed) return;
+              content.classList.add('tier-content-visible');
+              // Scroll *after* the content is rendered AND on the next frame so layout has settled.
+              _scrollTopHard();
+              if (typeof requestAnimationFrame === 'function') {
+                requestAnimationFrame(function() {
+                  _scrollTopHard();
+                  requestAnimationFrame(_scrollTopHard);
+                });
+              }
+              // Belt-and-suspenders: one more after the fade-out animation finishes (intro display:none triggers reflow)
+              setTimeout(_scrollTopHard, 520);
+            }, 220);
+          }
+        };
+        // Reopen the welcome splash if the user scrolls back up past the top.
+        window.restoreTierIntro = function() {
+          if (!window._tierIntroDismissed) return;
+          window._tierIntroDismissed = false;
+          var intro = document.getElementById('tierIntro');
+          var content = document.getElementById('tierContent');
+          if (content) content.classList.remove('tier-content-visible');
+          if (intro) {
+            intro.style.display = 'flex';
+            intro.classList.remove('tier-intro-fade-out');
+          }
+          // Cancel any auto-dismiss while user is on the splash again
+          if (window._tierIntroTimer) { clearTimeout(window._tierIntroTimer); window._tierIntroTimer = null; }
+        };
+        // Whenever the tier select container becomes visible, restart the intro and schedule auto-dismiss.
+        window._tierIntroAutoStart = function() {
+          window._tierIntroDismissed = false;
+          var intro = document.getElementById('tierIntro');
+          var content = document.getElementById('tierContent');
+          if (intro) { intro.classList.remove('tier-intro-fade-out'); intro.style.display = 'flex'; }
+          if (content) content.classList.remove('tier-content-visible');
+          // v31.3: Always start scrolled to the top so the welcome splash is fully visible (not mid-page)
+          var gate = document.getElementById('authGate');
+          if (gate) gate.scrollTop = 0;
+          window.scrollTo(0, 0);
+          if (window._tierIntroTimer) clearTimeout(window._tierIntroTimer);
+          window._tierIntroTimer = setTimeout(function() { window.dismissTierIntro(); }, 4200);
+        };
+        // v31.3: Removed scroll-up auto-restore — it was hijacking normal scroll on mobile,
+        // preventing users from reading the pricing cards. Replaced with explicit "Back to welcome"
+        // button rendered inside tierContent (see #tierBackToIntro below).
+      </script>
     </div>
   </div>
 

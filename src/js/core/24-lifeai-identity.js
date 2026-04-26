@@ -857,7 +857,7 @@ function startLifeBuildingAnimation() {
   });
 }
 
-// v15.27: Step 5 — Feature-focused launch summary
+// v15.27: Step 5 - Feature-focused launch summary
 function buildProfileSummary() {
   var container = document.getElementById('lifeProfileSummary');
   if (!container) return;
@@ -1024,7 +1024,7 @@ function finishLifeAIOnboarding() {
   var profiles = getLifeProfiles();
   var currentIdx = parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0');
   if (profiles.length === 0) {
-    // Profile was never created in the array — create it now
+    // Profile was never created in the array - create it now
     var surveyProfile = getLifeAIProfile();
     surveyProfile.id = surveyProfile.id || ('life_' + Date.now());
     surveyProfile.name = userName;
@@ -1063,7 +1063,7 @@ function finishLifeAIOnboarding() {
     }
   }
 
-  // v15.37: Save onboarding logo to per-profile key only — no shared key
+  // v15.37: Save onboarding logo to per-profile key only - no shared key
   if (window._onboardingLogo) {
     try {
       var profileLogoKey = 'roweos_lifeai_logo_profile_' + currentIdx;
@@ -1249,10 +1249,10 @@ function handleStep4Continue() {
   if (_onboardingStep4State === 'analytics') {
     goToOnboardingStep('logo');
   } else if (_onboardingStep4State === 'roweosAI') {
-    // Choice cards handle navigation — but if user just clicks Continue, default to auto
+    // Choice cards handle navigation - but if user just clicks Continue, default to auto
     selectRoweOSAIPref('auto');
   } else {
-    // Default: apiKey state — save the key
+    // Default: apiKey state - save the key
     saveOnboardingApiKey();
   }
 }
@@ -1434,7 +1434,7 @@ function selectModelFromOnboarding(provider, modelId) {
   }
   // v26.5: Start web search in background after API key validated and model selected
   if (typeof startOnboardingWebSearch === 'function') startOnboardingWebSearch();
-  // v21.0: Check for multiple API keys — show RoweOS AI splash
+  // v21.0: Check for multiple API keys - show RoweOS AI splash
   var avail = getAvailableProviders();
   var keyCount = Object.keys(avail).length;
   if (keyCount >= 2) {
@@ -1444,7 +1444,7 @@ function selectModelFromOnboarding(provider, modelId) {
   }
 }
 
-// v21.0: RoweOS AI routing splash — shown when 2+ API keys entered during onboarding
+// v21.0: RoweOS AI routing splash - shown when 2+ API keys entered during onboarding
 function showRoweOSAISplash() {
   var step4El = document.getElementById('onboardingStep4');
   if (!step4El) { goToOnboardingStep('logo'); return; }
@@ -1454,7 +1454,7 @@ function showRoweOSAISplash() {
 
   var html = '<div style="max-width:520px;margin:0 auto;">';
 
-  // Banner — matches /info page .roweos-ai-banner style
+  // Banner - matches /info page .roweos-ai-banner style
   html += '<div style="border:1px solid rgba(168,152,120,0.15);border-radius:14px;padding:28px 28px 24px;background:linear-gradient(135deg,rgba(168,152,120,0.06),rgba(168,152,120,0.02));position:relative;overflow:hidden;">';
   // Top accent line
   html += '<div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent,#a89878),transparent);"></div>';
@@ -1473,7 +1473,7 @@ function showRoweOSAISplash() {
   // Description
   html += '<p style="margin:0 0 16px;font-size:13px;color:var(--text-secondary);line-height:1.7;">RoweOS AI dynamically routes every request to the optimal model based on the task. Creative writing goes to Claude. Research goes to Gemini. Quick answers go to the fastest available model.</p>';
 
-  // Routing tags — pill style matching /info page
+  // Routing tags - pill style matching /info page
   html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">';
   var tags = ['Creative &rarr; Claude', 'Research &rarr; Gemini', 'Strategy &rarr; Opus', 'Quick tasks &rarr; Flash', 'Code &rarr; Sonnet'];
   for (var i = 0; i < tags.length; i++) {
@@ -1519,7 +1519,7 @@ function selectRoweOSAIPref(pref) {
   }
 }
 
-// v21.0: Analytics awareness splash — brief inline before logo step
+// v21.0: Analytics awareness splash - brief inline before logo step
 function showAnalyticsSplash() {
   var step4El = document.getElementById('onboardingStep4');
   if (!step4El) { goToOnboardingStep('logo'); return; }
@@ -1527,13 +1527,13 @@ function showAnalyticsSplash() {
   if (!contentEl) { goToOnboardingStep('logo'); return; }
   _onboardingStep4State = 'analytics';
 
-  // v22.2: Update header — key is already connected at this point
+  // v22.2: Update header - key is already connected at this point
   var titleEl = step4El.querySelector('.onboarding-title');
   var subtitleEl = step4El.querySelector('.onboarding-subtitle');
   if (titleEl) titleEl.textContent = 'Track your AI usage';
   if (subtitleEl) subtitleEl.textContent = 'Monitor costs and usage across all your AI providers';
 
-  // v22.2: Update buttons — "Change Provider" → hidden, "Connect & Continue" → "Continue"
+  // v22.2: Update buttons - "Change Provider" → hidden, "Connect & Continue" → "Continue"
   var actions = step4El.querySelector('.onboarding-actions');
   if (actions) {
     var secBtn = actions.querySelector('.onboarding-btn-secondary');
@@ -2178,7 +2178,7 @@ function renderTourStep(stepIndex) {
     card.style.left = '';
     card.innerHTML = html;
   } else if (step.type === 'deep-dive') {
-    // v24.25: Deep-dive — show spotlight on sidebar, switch to view, wider card
+    // v24.25: Deep-dive - show spotlight on sidebar, switch to view, wider card
     card.classList.add('tour-card-deep-dive');
     if (step.target && typeof showView === 'function') showView(step.target);
     positionTourSpotlight(step.target);
@@ -2787,7 +2787,7 @@ function renderSyncStatus(containerId) {
   var container = document.getElementById(containerId || 'syncStatusPanel');
   if (!container) return;
 
-  // v30.1: Removed misleading "Sync v4 not active" early-return — v4 is disabled but v2/v3 sync works fine
+  // v30.1: Removed misleading "Sync v4 not active" early-return - v4 is disabled but v2/v3 sync works fine
   var lastSync = localStorage.getItem('roweos_v4_last_sync');
   var lastSyncText = lastSync ? new Date(parseInt(lastSync)).toLocaleString() : 'Never';
   var queueStatus = (typeof syncEngine !== 'undefined' && typeof syncEngine.getQueueStatus === 'function') ? syncEngine.getQueueStatus() : { pending: 0, errors: 0, total: 0 };
@@ -2805,7 +2805,7 @@ function renderSyncStatus(containerId) {
   html += '<span style="font-size:12px;color:var(--text-muted);margin-left:auto;">Last sync: ' + escapeHtml(lastSyncText) + '</span>';
   html += '</div>';
 
-  // v28.2: Queue status — show category breakdown
+  // v28.2: Queue status - show category breakdown
   if (queueStatus.pending > 0 || queueStatus.errors > 0) {
     html += '<div style="padding:10px 12px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:8px;margin-bottom:12px;font-size:13px;color:#f59e0b;">';
     if (queueStatus.pending > 0) {
@@ -2830,7 +2830,7 @@ function renderSyncStatus(containerId) {
     html += '</div>';
   }
 
-  // v28.2: This device — editable name, ID shown small
+  // v28.2: This device - editable name, ID shown small
   html += '<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">This Device</div>';
   html += '<div style="padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">';
   html += '<div style="width:32px;height:32px;border-radius:8px;background:rgba(168,152,120,0.15);display:flex;align-items:center;justify-content:center;">';
@@ -2844,7 +2844,7 @@ function renderSyncStatus(containerId) {
   html += '<button onclick="var n=prompt(\'Name this device:\',\'' + escapeHtml(deviceName).replace(/'/g, "\\'") + '\');if(n)renameThisDevice(n);" style="background:none;border:1px solid var(--border-color);border-radius:6px;padding:4px 10px;color:var(--text-muted);cursor:pointer;font-size:11px;" title="Rename device">Rename</button>';
   html += '</div>';
 
-  // v28.2: Removed Force Sync / Reset Sync buttons — "Sync Now" at top is sufficient.
+  // v28.2: Removed Force Sync / Reset Sync buttons - "Sync Now" at top is sufficient.
   // Reset Sync moved to Diagnostics & Recovery section for advanced users only.
 
   container.innerHTML = html;
@@ -2872,7 +2872,7 @@ function _conflictCollectionLabel(collection) {
   return labels[collection] || collection.replace(/_/g, ' ').replace(/^./, function(s) { return s.toUpperCase(); });
 }
 
-// v28.2: Improved preview — show item names for arrays, not just count
+// v28.2: Improved preview - show item names for arrays, not just count
 function _conflictValuePreview(val) {
   if (val === null || val === undefined) return '(empty)';
   if (typeof val === 'string') return val.length > 150 ? val.substring(0, 150) + '...' : val;
@@ -2935,7 +2935,7 @@ function renderSyncConflicts(containerId) {
     var fieldLabel = _conflictFieldLabel(c.collection, c.field);
     var localPreview = _conflictValuePreview(c.localValue);
     var cloudPreview = _conflictValuePreview(c.cloudValue);
-    // v28.2: Build a descriptive title — include item name if available from the conflict data
+    // v28.2: Build a descriptive title - include item name if available from the conflict data
     var _conflictTitle = collLabel;
     if (fieldLabel && fieldLabel !== collLabel) _conflictTitle += ' > ' + fieldLabel;
     if (c.itemName) _conflictTitle += ' (' + c.itemName + ')';
@@ -3085,7 +3085,7 @@ function resetSettingsFolderOrder() {
   showToast('Settings order reset', 'success');
 }
 
-// v25.1: Shared helper — applies interface zoom (CSS zoom on app container) and
+// v25.1: Shared helper - applies interface zoom (CSS zoom on app container) and
 // text-size scaling (font-size on root) independently so they don't clobber each other.
 function applyAccessibilityScale() {
   var zoomLevel = parseInt(localStorage.getItem('roweos_app_zoom') || '100') || 100;
@@ -3093,11 +3093,11 @@ function applyAccessibilityScale() {
   var root = document.documentElement;
 
   // v25.1: Apply interface zoom via CSS zoom on the main app container
-  // This scales EVERYTHING proportionally — works on both desktop and iOS Safari
+  // This scales EVERYTHING proportionally - works on both desktop and iOS Safari
   var appContainer = document.getElementById('app') || document.body;
   var zoomFactor = zoomLevel / 100;
   if (zoomLevel !== 100) {
-    // v30.1: Capture viewport BEFORE zoom — Safari changes innerWidth after zoom is applied
+    // v30.1: Capture viewport BEFORE zoom - Safari changes innerWidth after zoom is applied
     var _preZoomW = window.innerWidth;
     var _preZoomH = window.innerHeight;
     appContainer.style.zoom = zoomFactor.toString();
@@ -3118,7 +3118,7 @@ function applyAccessibilityScale() {
     if (mainWrapper) {
       mainWrapper.style.setProperty('min-height', compensatedH, 'important');
     }
-    // v30.1: TEMP DEBUG — log centering measurements for Safari diagnosis
+    // v30.1: TEMP DEBUG - log centering measurements for Safari diagnosis
     setTimeout(function() {
       var _s = document.querySelector('.sidebar');
       var _b = document.getElementById('blobContainer');
@@ -3139,8 +3139,8 @@ function applyAccessibilityScale() {
           ' | zoom=' + zoomFactor + ' viewport=' + window.innerWidth);
       }
     }, 500);
-    // All fixed panel-views — compensate height, remove max-width cap
-    // Do NOT set explicit width — fixed views use left/right positioning to auto-stretch
+    // All fixed panel-views - compensate height, remove max-width cap
+    // Do NOT set explicit width - fixed views use left/right positioning to auto-stretch
     // v29.5: Fixed-position views (position:fixed + bottom:0) need explicit height
     // because CSS zoom makes bottom:0 anchor to the zoomed container, not the viewport.
     // v30.1: ALL fixed panel-views with bottom:0 need explicit height at zoom
@@ -3158,7 +3158,7 @@ function applyAccessibilityScale() {
         panelViews[pv].style.setProperty('min-height', compensatedH, 'important');
       }
       panelViews[pv].style.setProperty('max-width', 'none', 'important');
-      // v30.2: On MOBILE ONLY, set explicit width — position:fixed with right:0 is
+      // v30.2: On MOBILE ONLY, set explicit width - position:fixed with right:0 is
       // viewport-relative, not zoom-aware. On desktop, do NOT set width (breaks blob centering).
       if (_preZoomW <= 768) {
         panelViews[pv].style.setProperty('width', compensatedW, 'important');
@@ -3171,6 +3171,27 @@ function applyAccessibilityScale() {
       var liquidNav = document.querySelector('.liquid-nav');
       if (liquidNav) liquidNav.style.setProperty('width', compensatedW, 'important');
     }
+    // v31.5: Safari sidebar overlap fix at zoom < 100%.
+    // Safari does NOT scale position:fixed elements with the parent's CSS zoom — so the
+    // sidebar (fixed) keeps its CSS width while .main-wrapper margin-left scales DOWN
+    // with zoom, leaving the chat content sliding under the sidebar by sidebarW * (1-zoom).
+    // Detect Safari behavior by comparing visual sidebar width vs CSS width and compensate
+    // the wrapper margin so visual margin equals the unzoomed sidebar width again.
+    // Re-runs on every resize because the new resize listener calls applyAccessibilityScale().
+    setTimeout(function() {
+      var _sb = document.querySelector('.sidebar');
+      var _mw = document.querySelector('.main-wrapper');
+      if (!_sb || !_mw) return;
+      var visualW = _sb.getBoundingClientRect().width;
+      var cssW = parseInt(window.getComputedStyle(_sb).width) || 64;
+      // ~2px tolerance for sub-pixel rounding
+      var safariBehavior = Math.abs(visualW - cssW) < 2 && zoomFactor < 1;
+      if (safariBehavior) {
+        _mw.style.setProperty('margin-left', Math.round(cssW / zoomFactor) + 'px', 'important');
+      } else {
+        _mw.style.removeProperty('margin-left');
+      }
+    }, 120);
   } else {
     appContainer.style.zoom = '';
     appContainer.style.removeProperty('width');
@@ -3189,6 +3210,8 @@ function applyAccessibilityScale() {
     if (mainWrapper) {
       mainWrapper.style.removeProperty('min-height');
       mainWrapper.style.removeProperty('overflow-x');
+      // v31.5: Clear Safari sidebar margin compensation when returning to 100%
+      mainWrapper.style.removeProperty('margin-left');
     }
     var panelViews = document.querySelectorAll('.panel-view');
     for (var pv = 0; pv < panelViews.length; pv++) {
@@ -3218,7 +3241,7 @@ function applyAccessibilityScale() {
   if (typeof resizeHelix === 'function') { setTimeout(resizeHelix, 100); setTimeout(resizeHelix, 500); }
   if (typeof resizeBlob === 'function') { setTimeout(resizeBlob, 100); }
 
-  // v30.1: TEMP DEBUG — fires at ALL zoom levels including 100%
+  // v30.1: TEMP DEBUG - fires at ALL zoom levels including 100%
   setTimeout(function() {
     var _s = document.querySelector('.sidebar');
     var _b = document.getElementById('blobContainer');
@@ -3244,8 +3267,8 @@ function applyAccessibilityScale() {
   }, 1000);
 }
 
-// v23.7: Accessibility — Display Size (text scaling via Settings slider only)
-// Does NOT hijack Cmd+/- — browser zoom works natively as before
+// v23.7: Accessibility - Display Size (text scaling via Settings slider only)
+// Does NOT hijack Cmd+/- - browser zoom works natively as before
 // v25.1: Fixed to work on mobile (iPad/iPhone) by combining with text-size
 function setAppZoom(level) {
   level = parseInt(level);
@@ -3284,8 +3307,23 @@ function initAppZoom() {
   } catch(e) {}
 }
 
-// v22.39: Accessibility — Text Size
-// v25.1: Fixed to work on mobile (iPad/iPhone) — no longer clobbers zoom setting
+// v31.5: Re-run accessibility scale on window resize so compensated dimensions
+// (which are computed from the pre-zoom window.innerWidth captured ONCE at apply time)
+// stay in sync when the user drags the window. Debounced 150ms to avoid thrash.
+// At zoom 100% this is a no-op cleanup pass — applyAccessibilityScale() already
+// branches to removeProperty in that case.
+(function() {
+  var _scaleResizeTimer = null;
+  window.addEventListener('resize', function() {
+    if (_scaleResizeTimer) clearTimeout(_scaleResizeTimer);
+    _scaleResizeTimer = setTimeout(function() {
+      try { applyAccessibilityScale(); } catch(e) {}
+    }, 150);
+  });
+})();
+
+// v22.39: Accessibility - Text Size
+// v25.1: Fixed to work on mobile (iPad/iPhone) - no longer clobbers zoom setting
 function setTextSize(level) {
   level = parseInt(level);
   if (isNaN(level) || level < 80 || level > 140) return;
@@ -3386,7 +3424,7 @@ function toggleTheme(silent) {
   // v26.2: Swap logo for dark/light theme
   if (typeof swapLogoForTheme === 'function') swapLogoForTheme();
 
-  // v24.27: Removed theme toast — user can see the change
+  // v24.27: Removed theme toast - user can see the change
 }
 
 // v24.26: Promo font style toggle (DM Sans + Cormorant Garamond)
@@ -3592,7 +3630,7 @@ function updateModeUI(mode) {
       var arrow = sidebarName.querySelector('.sidebar-brand-arrow');
       sidebarName.innerHTML = escapeHtml(userName) + (arrow ? arrow.outerHTML : '<span class="sidebar-brand-arrow">▾</span>'); // v30.1: XSS fix
     } else {
-      // v11.5.4: Show brand name in BrandAI mode — use shortName if available
+      // v11.5.4: Show brand name in BrandAI mode - use shortName if available
       // v30.1: Replace optional chaining with ES5
       var _brandEl = document.getElementById('brand');
       var currentBrandIdx = parseInt(_brandEl ? _brandEl.value : '0');
@@ -3964,7 +4002,7 @@ async function refreshApiStatus() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v22.45: API ROUTING — per-category provider selection
+// v22.45: API ROUTING - per-category provider selection
 // ═══════════════════════════════════════════════════════════════
 
 var API_ROUTING_CATEGORIES = [
@@ -4651,7 +4689,7 @@ runOp = async function() {
   var studioLayout = document.querySelector('.studio-layout');
   if (studioLayout) studioLayout.classList.add('agent-thinking');
 
-  // v15.15: Safely resolve brand — prefer studioBrand, fallback to brand selector
+  // v15.15: Safely resolve brand - prefer studioBrand, fallback to brand selector
   var studioBrandEl2 = document.getElementById('studioBrand');
   var mainBrandEl2 = document.getElementById('brand');
   var brandIdx = parseInt((studioBrandEl2 && studioBrandEl2.value !== '' ? studioBrandEl2.value : null) || (mainBrandEl2 && mainBrandEl2.value !== '' ? mainBrandEl2.value : null) || selectedBrand || 0);
@@ -5432,7 +5470,7 @@ function buildConversationItem(cmd, mode) {
   return item;
 }
 
-// v15.20: Filter history by mode — includes both Conversations and Studio sections
+// v15.20: Filter history by mode - includes both Conversations and Studio sections
 function filterHistoryByMode(mode) {
   // Update tab buttons
   document.querySelectorAll('.history-mode-tab').forEach(function(tab) {
@@ -6249,7 +6287,7 @@ function updateBlockedContent(type, blocked) {
   saveGuardrails();
 }
 
-// v22.37: Guardrails tab switching — v26.0: Updated to use pill nav
+// v22.37: Guardrails tab switching - v26.0: Updated to use pill nav
 var _guardrailsActiveTab = 'agents';
 function showGuardrailsTab(tab) {
   _guardrailsActiveTab = tab;

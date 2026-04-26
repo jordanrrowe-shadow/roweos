@@ -2,7 +2,7 @@
 // DATA INITIALIZATION & MIGRATION - v4.8.0
 // ═══════════════════════════════════════════════════════════════
 
-var ROWEOS_VERSION = 'v31.0'; // v31.0: Version bump
+var ROWEOS_VERSION = 'v31.5'; // v31.5: Live window resize re-applies accessibility scale; landscape mobile chat edge-to-edge in conversation mode + blob centered
 var ROWEOS_DATA_VERSION_KEY = 'roweos_data_version';
 var ROWEOS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/YOUR-REPO/roweos-updates/main/latest-version.json';
 var ROWEOS_LAST_UPDATE_CHECK = 'roweos_last_update_check';
@@ -31,7 +31,7 @@ function getDB() {
   return _dbRef;
 }
 
-// Sync mode check — shared by all write functions
+// Sync mode check - shared by all write functions
 function isLocalOnlyMode() {
   var mode = 'hybrid';
   try { mode = (JSON.parse(localStorage.getItem('roweos_sync_settings') || '{}')).syncMode || 'hybrid'; } catch(e) {}
@@ -393,7 +393,7 @@ function reconcileOnStartup() {
     loadFromFirebaseV2().then(function() {
       localStorage.setItem('roweos_first_sync_completed', 'true');
       localStorage.setItem('roweos_last_sync', String(Date.now()));
-      // v28.2: Re-check API keys after cloud pull — keys may have been synced from Firestore
+      // v28.2: Re-check API keys after cloud pull - keys may have been synced from Firestore
       if (typeof checkApiConnection === 'function') checkApiConnection(true);
       if (typeof updateProviderStatuses === 'function') updateProviderStatuses();
     });

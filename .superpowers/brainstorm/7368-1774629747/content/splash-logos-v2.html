@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS Splash — Logo Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #fff; font-family: 'DM Sans', sans-serif; }
+
+  .panel {
+    height: 100vh; display: flex; align-items: center; justify-content: center;
+    position: relative; background: #0a0a0a;
+  }
+
+  .panel-label {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 4px; color: rgba(201,181,122,0.5);
+    border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03);
+    z-index: 2;
+  }
+
+  .glow {
+    position: absolute; width: 550px; height: 550px;
+    background: radial-gradient(circle, rgba(201,181,122,0.09) 0%, transparent 65%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    border-radius: 50%;
+    animation: breathe 6s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  }
+
+  .corner { position: absolute; width: 48px; height: 48px; }
+  .corner-tl { top: 32px; left: 32px; border-top: 1px solid rgba(201,181,122,0.25); border-left: 1px solid rgba(201,181,122,0.25); }
+  .corner-br { bottom: 32px; right: 32px; border-bottom: 1px solid rgba(201,181,122,0.25); border-right: 1px solid rgba(201,181,122,0.25); }
+
+  .h-line { position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,181,122,0.2), transparent); }
+  .h-line-top { top: 0; }
+  .h-line-bottom { bottom: 0; }
+
+  .splash-content { text-align: center; position: relative; z-index: 1; }
+
+  .welcome-line {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px; font-weight: 500;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: rgba(201,181,122,0.45);
+    margin-bottom: 20px;
+  }
+
+  .divider { width: 48px; height: 1px; background: rgba(201,181,122,0.35); margin: 0 auto 20px; }
+
+  .tagline {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 16px; font-style: italic;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.5px; margin-bottom: 48px;
+  }
+
+  .cta-button {
+    display: inline-block; padding: 16px 40px;
+    border: 1px solid rgba(201,181,122,0.4);
+    border-radius: 8px; background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: #c9b57a; cursor: pointer;
+    transition: all 0.4s ease; text-decoration: none;
+  }
+  .cta-button:hover {
+    background: rgba(201,181,122,0.08);
+    border-color: rgba(201,181,122,0.6);
+    box-shadow: 0 0 40px rgba(201,181,122,0.06);
+  }
+
+  .wordmark-img {
+    max-width: 480px; width: 80vw; height: auto;
+    margin-bottom: 8px;
+  }
+
+  .emblem-img {
+    width: 160px; height: 160px;
+    margin-bottom: 28px;
+    object-fit: contain;
+  }
+
+  .gold-text {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 72px; font-weight: 300;
+    letter-spacing: 3px; line-height: 1;
+    background: linear-gradient(135deg, #e0cc8a, #c9b57a, #d4b978, #c9b57a);
+    background-size: 200% 200%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: goldShimmer 8s ease-in-out infinite;
+    margin-bottom: 12px;
+  }
+
+  @keyframes goldShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .scroll-hint {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100;
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.25); animation: bounce 2s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-6px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-hint">Scroll to compare all 3 options</div>
+
+<!-- Option A: Script wordmark as hero -->
+<div class="panel">
+  <div class="panel-label">A — Script Wordmark as Hero</div>
+  <div class="glow"></div>
+  <div class="h-line h-line-top"></div>
+  <div class="h-line h-line-bottom"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-br"></div>
+  <div class="splash-content">
+    <div class="welcome-line">Welcome, to</div>
+    <img src="roweos-wordmark.png" class="wordmark-img" alt="RoweOS">
+    <div class="divider"></div>
+    <div class="tagline">Brand & Life Intelligence</div>
+    <a class="cta-button">Begin Experience</a>
+  </div>
+</div>
+
+<!-- Option B: Emblem + gold text -->
+<div class="panel">
+  <div class="panel-label">B — Emblem + Gold Text</div>
+  <div class="glow"></div>
+  <div class="h-line h-line-top"></div>
+  <div class="h-line h-line-bottom"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-br"></div>
+  <div class="splash-content">
+    <img src="roweos-emblem.png" class="emblem-img" alt="RoweOS">
+    <div class="welcome-line">Welcome, to</div>
+    <div class="gold-text">RoweOS</div>
+    <div class="divider"></div>
+    <div class="tagline">Brand & Life Intelligence</div>
+    <a class="cta-button">Begin Experience</a>
+  </div>
+</div>
+
+<!-- Option C: Emblem + script wordmark -->
+<div class="panel">
+  <div class="panel-label">C — Emblem + Script Wordmark</div>
+  <div class="glow"></div>
+  <div class="h-line h-line-top"></div>
+  <div class="h-line h-line-bottom"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-br"></div>
+  <div class="splash-content">
+    <img src="roweos-emblem.png" class="emblem-img" alt="RoweOS" style="width:120px;height:120px;margin-bottom:20px;">
+    <div class="welcome-line" style="margin-bottom:16px;">Welcome, to</div>
+    <img src="roweos-wordmark.png" class="wordmark-img" alt="RoweOS" style="max-width:400px;margin-bottom:8px;">
+    <div class="divider"></div>
+    <div class="tagline">Brand & Life Intelligence</div>
+    <a class="cta-button">Begin Experience</a>
+  </div>
+</div>
+
+</body>
+</html>

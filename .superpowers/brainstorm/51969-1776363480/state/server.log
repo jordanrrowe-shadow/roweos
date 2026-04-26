@@ -1,0 +1,5 @@
+{"type":"server-started","port":63662,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:63662","screen_dir":"/Users/jordanrowe/Developer/roweOS/.superpowers/brainstorm/51969-1776363480/content","state_dir":"/Users/jordanrowe/Developer/roweOS/.superpowers/brainstorm/51969-1776363480/state"}
+{"type":"screen-added","file":"/Users/jordanrowe/Developer/roweOS/.superpowers/brainstorm/51969-1776363480/content/carousel-overview.html"}
+{"type":"screen-added","file":"/Users/jordanrowe/Developer/roweOS/.superpowers/brainstorm/51969-1776363480/content/carousel-v2.html"}
+{"type":"screen-updated","file":"/Users/jordanrowe/Developer/roweOS/.superpowers/brainstorm/51969-1776363480/content/carousel-v2.html"}
+{"type":"server-stopped","reason":"owner process exited"}

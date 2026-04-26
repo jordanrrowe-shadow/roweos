@@ -1,5 +1,5 @@
 // ============================================================================
-// 33-scribe.js — Scribe Notebook System
+// 33-scribe.js - Scribe Notebook System
 // v29.0: Complete notebook system with CRUD, rich editing, metadata, knowledge mode
 // ============================================================================
 
@@ -79,7 +79,7 @@ function initScribe() { // v29.2:
   } else {
     _showScribeEmptyState();
   }
-  // v29.2: Defer TinyMCE init — view needs to be fully visible first
+  // v29.2: Defer TinyMCE init - view needs to be fully visible first
   setTimeout(function() {
     initScribeTinymce();
   }, 200);
@@ -195,7 +195,7 @@ function deleteScribeNotebook(id) { // v29.0:
   if (typeof showToast === 'function') showToast('Notebook deleted', 'success');
 }
 
-// v29.5: Context-aware delete — deletes page if viewing a page, notebook if at notebook level
+// v29.5: Context-aware delete - deletes page if viewing a page, notebook if at notebook level
 function deleteActiveScribeItem() {
   if (_scribeActivePageId && _scribeActiveId) {
     deleteScribePage(_scribeActiveId, _scribeActivePageId);
@@ -236,7 +236,7 @@ function renderScribeNotebookList() { // v29.0:
     // v29.3: Archive mode shows only archived, normal mode hides archived
     if (_scribeArchiveMode) return nb.archived === true;
     if (nb.archived) return false;
-    // v29.3: Brand filtering — null brandIdx shows in all brands
+    // v29.3: Brand filtering - null brandIdx shows in all brands
     if (!_scribeShowAllBrands && typeof selectedBrand !== 'undefined') {
       if (nb.brandIdx !== null && nb.brandIdx !== undefined && nb.brandIdx !== selectedBrand) return false;
     }
@@ -513,7 +513,7 @@ function selectScribeNotebook(id) { // v29.0:
   if (tinymceEditor && _scribeTinymceReady) {
     tinymceEditor.setContent(_nbContent);
   } else {
-    // TinyMCE not ready yet — retry after init completes
+    // TinyMCE not ready yet - retry after init completes
     setTimeout(function() {
       var ed = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
       if (ed) ed.setContent(_nbContent);

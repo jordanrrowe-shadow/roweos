@@ -82,7 +82,7 @@ var liquidGridViews = {
   settings: { label: 'System', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', section: 'Governance' }
 };
 
-// v15.43: Default nav tabs — 4 primary, no more 'more'
+// v15.43: Default nav tabs - 4 primary, no more 'more'
 var defaultLiquidNavTabs = ['agent', 'studio', 'scribe', 'pulse']; // v29.1: Replaced signal (Focus retired v28.8) with scribe
 
 // Get user's selected tabs from localStorage or use defaults
@@ -93,7 +93,7 @@ function getLiquidNavTabs() {
     if (saved) {
       var tabs = JSON.parse(saved);
       if (Array.isArray(tabs) && tabs.length >= 3) {
-        // v15.43: Remove 'more' — FAB replaces it
+        // v15.43: Remove 'more' - FAB replaces it
         // v29.1: Replace 'signal' (Focus retired) with 'scribe'
         tabs = tabs.map(function(t) { return t === 'signal' ? 'scribe' : t; });
         tabs = tabs.filter(function(t) { return t !== 'more'; });
@@ -250,7 +250,7 @@ function openNavCustomizer() {
   
   var html = '';
   Object.keys(liquidNavTabs).forEach(function(tabId) {
-    // v15.43: 'more' is replaced by FAB — hide from customizer
+    // v15.43: 'more' is replaced by FAB - hide from customizer
     if (tabId === 'more') return;
     var tab = liquidNavTabs[tabId];
     var label = (tabId === 'agent' && isLifeMode) ? tab.lifeLabel : tab.label;
@@ -469,7 +469,7 @@ function onMobileBrandChangeV2(value) {
   }
 }
 
-// v16.0: Mobile header brand dropdown change handler — delegates to onMobileBrandChangeV2 for shared paths
+// v16.0: Mobile header brand dropdown change handler - delegates to onMobileBrandChangeV2 for shared paths
 function onMobileBrandDropdownChange(value) {
   // v11.0.5: Handle LifeAI agent/coach selection (unique to header dropdown)
   if (value.startsWith('agent_')) {
@@ -1023,7 +1023,7 @@ function initMobileV2() {
     item.classList.toggle('active', item.dataset.menuView === currentView);
   });
 
-  // v15.38: Mobile keyboard — keep chat input visible above keyboard
+  // v15.38: Mobile keyboard - keep chat input visible above keyboard
   // v24.27: Use captured initial height so keyboard-close detection is reliable
   if (window.visualViewport && !window._vvListenerAdded) {
     window._vvListenerAdded = true;
@@ -1255,7 +1255,7 @@ function initBrandSettings() {
 // v14.2: Renamed from saveBrandSettings() to avoid collision with Identity page function
 // v24.10: Track when brand model config was last saved locally to block onSnapshot overwrites
 var _brandModelConfigSavedAt = 0;
-var _BRAND_MODEL_CONFIG_GRACE = Infinity; // v24.11: Permanent — once user saves model config, cloud NEVER overwrites during this session
+var _BRAND_MODEL_CONFIG_GRACE = Infinity; // v24.11: Permanent - once user saves model config, cloud NEVER overwrites during this session
 
 function saveBrandModelConfig() {
   try {
@@ -2242,6 +2242,25 @@ function initializeFirebase(shouldSignIn) {
       try { updateCloudSyncUI(); } catch(e) { console.warn('[Firebase] updateCloudSyncUI error:', e.message); }
       // v15.0: Delegate to central auth handler
       try { handleAuthState(user); } catch(e) { console.error('[Firebase] handleAuthState error:', e.message); if (typeof showTierSelection === 'function') { showTierSelection(); } }
+      // v31.2: Heartbeat - record lastActiveAt on every authenticated session (throttled to once per 6h per device)
+      try {
+        if (user && user.uid) {
+          var _lastBeatKey = 'roweos_last_active_beat_' + user.uid;
+          var _lastBeat = parseInt(localStorage.getItem(_lastBeatKey) || '0', 10);
+          var _now = Date.now();
+          if (!_lastBeat || (_now - _lastBeat) > 6 * 60 * 60 * 1000) {
+            firebase.firestore().collection('roweos_users').doc(user.uid).set({
+              lastActiveAt: firebase.firestore.FieldValue.serverTimestamp(),
+              email: user.email || '',
+              displayName: user.displayName || ''
+            }, { merge: true }).then(function() {
+              localStorage.setItem(_lastBeatKey, String(_now));
+            }).catch(function(err) {
+              console.warn('[Auth] lastActiveAt heartbeat failed:', err.message);
+            });
+          }
+        }
+      } catch (hbErr) { console.warn('[Auth] heartbeat error:', hbErr.message); }
     });
 
     // Track if login has been completed to prevent double-execution
@@ -2284,7 +2303,7 @@ function initializeFirebase(shouldSignIn) {
         // v25.0: Startup reconciliation
   // v28.0: Check for v4 migration before standard sync
   if (firebaseUser && typeof migrationEngine !== 'undefined' && migrationEngine.needsMigration()) {
-    // v30.1: Run migration silently in background — no overlay, no reload
+    // v30.1: Run migration silently in background - no overlay, no reload
     // Let the app continue to onboarding/main flow while migration runs
     console.log('[SyncV4] Running migration in background...');
     window._v4MigrationRunning = true;
@@ -2300,7 +2319,7 @@ function initializeFirebase(shouldSignIn) {
       window._v4MigrationRunning = false;
       if (typeof reconcileOnStartup === 'function') reconcileOnStartup();
     });
-    // v30.1: Continue auth flow — don't block on migration
+    // v30.1: Continue auth flow - don't block on migration
   }
   if (firebaseUser && typeof syncEngine !== 'undefined' && syncEngine.isV4Active()) {
     syncEngine._setupConnectivity();
@@ -2418,7 +2437,7 @@ function handleGoogleSignIn() {
       window.open(window.location.href, '_blank');
     });
   } else if (isIOS && !isStandalone) {
-    // v16.10: iOS Safari — popup instead of redirect (Safari ITP blocks redirect flow)
+    // v16.10: iOS Safari - popup instead of redirect (Safari ITP blocks redirect flow)
     showToast('Opening sign-in...', 'info');
     return firebase.auth().signInWithPopup(provider).then(function(result) {
       if (result && result.user) {
@@ -2669,7 +2688,7 @@ function handleAppleSignIn() {
       if (error.code === 'auth/popup-closed-by-user') {
         showToast('Sign-in cancelled', 'info');
       } else if (error.code === 'auth/operation-not-allowed') {
-        // v15.13: Suppress — Apple provider not enabled in Firebase Console
+        // v15.13: Suppress - Apple provider not enabled in Firebase Console
         console.warn('Firebase: Apple sign-in not enabled in Firebase project');
         showToast('Apple sign-in is not available. Use Google sign-in instead.', 'warning');
       } else {

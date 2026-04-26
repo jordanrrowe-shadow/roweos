@@ -477,7 +477,7 @@ function updateSettingsApiStatus() {
 }
 
 function updateProviderStatuses() {
-  // v29.0: Read actual keys from localStorage — don't trust in-memory apiKeys
+  // v29.0: Read actual keys from localStorage - don't trust in-memory apiKeys
   var _actualKeys = { anthropic: false, openai: false, google: false };
   try {
     var stored = localStorage.getItem('roweos_api_keys');
@@ -813,7 +813,7 @@ function testBrandAI() {
    ========================================== */
 
 // Modal Management
-// v21.0: Atomic cssText assignment — kills CSS animation/transition conflicts on reopen
+// v21.0: Atomic cssText assignment - kills CSS animation/transition conflicts on reopen
 function openModal(modalId) {
   var modal = document.getElementById(modalId);
   if (modal) {
@@ -828,7 +828,7 @@ function closeModal(modalId) {
   try {
     var modal = document.getElementById(modalId);
     if (modal) {
-      // v21.0: Nuke all inline styles then set display:none — clean slate for next open
+      // v21.0: Nuke all inline styles then set display:none - clean slate for next open
       modal.removeAttribute('style');
       modal.style.cssText = 'display:none !important;';
     }
@@ -1066,7 +1066,7 @@ function openEditBrandModal() {
     var roleDeptEl = document.getElementById('editRoleDepartment');
     if (roleDeptEl) roleDeptEl.value = roleData.profession || '';
 
-    // v16.5 / v28.5: Primary brand checkbox — resolve by ID
+    // v16.5 / v28.5: Primary brand checkbox - resolve by ID
     var primaryCheckbox = document.getElementById('editPrimaryBrand');
     if (primaryCheckbox) {
       var _pId = localStorage.getItem('roweos_primary_brand_id');
@@ -1446,7 +1446,7 @@ function renderBrandAccentPicker(containerId) {
 
   // v24.24: Preset swatches with current color square inline
   var html = '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">';
-  // Current accent color square — clickable color picker, inline with swatches
+  // Current accent color square - clickable color picker, inline with swatches
   html += '<div style="position:relative;width:26px;height:26px;border-radius:6px;background:' + currentColor + ';cursor:pointer;border:2px solid rgba(255,255,255,0.15);flex-shrink:0;" onclick="this.querySelector(\'input\').click();">';
   html += '<input type="color" id="persAccentColorInput" value="' + currentColor + '" onchange="setCustomBrandAccentColor(this.value)" style="position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;">';
   html += '</div>';
@@ -1641,7 +1641,7 @@ function renderLifeLogoPicker(containerId) {
   var container = document.getElementById(containerId);
   if (!container) return;
 
-  // v15.37: Per-profile logo key only — no shared key fallback
+  // v15.37: Per-profile logo key only - no shared key fallback
   var logoKey = typeof getCurrentLogoKey === 'function' ? getCurrentLogoKey() : ('roweos_lifeai_logo_profile_' + (parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0')));
   var sizeKey = logoKey + '_size';
   var savedLogo = localStorage.getItem(logoKey);
@@ -1787,7 +1787,7 @@ function handlePersLifeLogoUpload(input) {
   }
   var reader = new FileReader();
   reader.onload = function(e) {
-    // v15.37: Per-profile logo storage only — no shared key
+    // v15.37: Per-profile logo storage only - no shared key
     var logoKey = getCurrentLogoKey();
     localStorage.setItem(logoKey, e.target.result);
     // Update profile's logoKey reference
@@ -1811,7 +1811,7 @@ function handlePersLifeLogoUpload(input) {
  * v15.1: Reset LifeAI logo
  */
 function resetPersLifeLogo() {
-  // v15.37: Remove per-profile key only — no shared key
+  // v15.37: Remove per-profile key only - no shared key
   var logoKey = typeof getCurrentLogoKey === 'function' ? getCurrentLogoKey() : ('roweos_lifeai_logo_profile_' + (parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0')));
   localStorage.removeItem(logoKey);
   localStorage.removeItem(logoKey + '_size');
@@ -1834,7 +1834,7 @@ function resetPersLifeLogo() {
  * v15.1: Handle LifeAI logo size change
  */
 function handlePersLifeLogoSizeChange(value) {
-  // v15.37: Per-profile logo size only — no shared key
+  // v15.37: Per-profile logo size only - no shared key
   var logoKey = typeof getCurrentLogoKey === 'function' ? getCurrentLogoKey() : ('roweos_lifeai_logo_profile_' + (parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0')));
   localStorage.setItem(logoKey + '_size', value);
   var sizeValue = document.getElementById('persLifeLogoSizeValue');
@@ -2092,7 +2092,7 @@ function confirmDeleteBrand() {
 
 // Import/Export Functions
 function exportBrandData() {
-  // v22.49: Fix — use global selectedBrand, not undefined selectedBrandIdx
+  // v22.49: Fix - use global selectedBrand, not undefined selectedBrandIdx
   var brand = brands[selectedBrand];
   if (!brand) {
     showToast('No brand selected', 'error');
@@ -2177,7 +2177,7 @@ function openExportBrandModal() {
     document.body.appendChild(modal);
   }
   var brandName = brands[selectedBrand] ? (brands[selectedBrand].shortName || brands[selectedBrand].name) : 'Brand';
-  // v22.49: Fix — use .modal class for proper background
+  // v22.49: Fix - use .modal class for proper background
   modal.innerHTML = '<div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">' +
     '<div class="modal-header"><h2 class="modal-title">Export Brand</h2>' +
     '<button class="modal-close" onclick="closeModal(\'exportBrandModal\')">' +
@@ -3101,7 +3101,7 @@ function showToast(arg1, arg2, arg3) {
   
   type = type || 'info';
 
-  // v23.5: ADHD — make error messages user-friendly
+  // v23.5: ADHD - make error messages user-friendly
   if (type === 'error' && message && typeof friendlyError === 'function') {
     message = friendlyError(message);
   }

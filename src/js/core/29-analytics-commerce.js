@@ -89,7 +89,7 @@ function renderWebAnalytics(data, days) {
   if (loading) loading.style.display = 'none';
   if (content) content.style.display = '';
 
-  // v25.3: Parse Vercel timeseries — format: { data: { groups: { all: [{key, total, devices, bounceRate}] } } }
+  // v25.3: Parse Vercel timeseries - format: { data: { groups: { all: [{key, total, devices, bounceRate}] } } }
   var totalVisitors = 0;
   var totalPageViews = 0;
   var avgBounceRate = 0;
@@ -945,7 +945,7 @@ function updateSyncHubStatus() {
   var isConnected = typeof firebaseUser !== 'undefined' && firebaseUser;
 
   if (isConnected) {
-    // v29.0: Check if API keys exist — sync connected doesn't mean AI works
+    // v29.0: Check if API keys exist - sync connected doesn't mean AI works
     var _hasApiKeys = false;
     try { var _ak = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}'); _hasApiKeys = !!(_ak.anthropic || _ak.openai || _ak.google); } catch(e) {}
     if (_hasApiKeys) {
@@ -996,7 +996,7 @@ async function renderSyncInventory() {
 
   container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Loading inventory...</div>';
 
-  // v15.10: Category definitions — local counts always from localStorage
+  // v15.10: Category definitions - local counts always from localStorage
   var categories = [
     { name: 'Brands', syncKey: 'brands', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_user_brands') || '[]').length; } catch(e) { return 0; } } },
     { name: 'BrandAI Chats', syncKey: 'brandai_chats', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_agentCommands') || '[]').length; } catch(e) { return 0; } } },
@@ -1101,7 +1101,7 @@ async function renderSyncInventory() {
         cloudCounts['Library Files'] = libCount;
         // Root doc for legacy data
         var rootData = results[11].exists ? results[11].data() : {};
-        // v28.7: Automations stored in subcollection — filter out deleted tombstones
+        // v28.7: Automations stored in subcollection - filter out deleted tombstones
         try {
           var _autoSnap = await db.collection(basePath + '/automations').get();
           var _autoCount = 0;
@@ -1197,7 +1197,7 @@ async function renderSyncInventory() {
     var statusColor = '';
     var actionBtn = '';
 
-    // v28.2: Status logic — always compare real local vs cloud counts. Baseline only used as tiebreaker.
+    // v28.2: Status logic - always compare real local vs cloud counts. Baseline only used as tiebreaker.
     if (local === 0 && cloud === 0) {
       status = 'Empty';
       statusColor = '#666';
@@ -1279,7 +1279,7 @@ function _saveSyncBaselines() {
   } catch(e) { console.warn('[Sync] Baseline save error:', e); }
 }
 
-// v15.12: Push button handler — syncs all data, clears orphans, re-fetches real counts
+// v15.12: Push button handler - syncs all data, clears orphans, re-fetches real counts
 function pushSyncCategory(btn) {
   btn.disabled = true;
   btn.textContent = 'Pushing...';
@@ -1372,7 +1372,7 @@ function pushSyncCategory(btn) {
   }, 5000);
 }
 
-// v15.12: Pull button handler — loads from cloud, re-fetches real counts
+// v15.12: Pull button handler - loads from cloud, re-fetches real counts
 function pullSyncCategory(btn) {
   btn.disabled = true;
   btn.textContent = 'Syncing...';
@@ -1437,7 +1437,7 @@ function toggleSyncCategoryDetail(catId, catName) {
   }
 }
 
-// v28.2: Load items for a sync category — shows local AND cloud side-by-side
+// v28.2: Load items for a sync category - shows local AND cloud side-by-side
 function loadSyncCategoryItems(catId, catName) {
   var container = document.getElementById('syncDetailContent_' + catId);
   if (!container) return;
@@ -1624,7 +1624,7 @@ function deleteSyncCategoryItem(catName, itemId) {
     if (catName === 'Pulse Goals' && typeof deleteDBDoc === 'function') {
       deleteDBDoc('pulse_goals', itemId, 'goals');
     }
-    // Special: clients — write full people array
+    // Special: clients - write full people array
     if (catName === 'Clients' && typeof writeDB === 'function') {
       var cleaned = JSON.parse(JSON.stringify(data));
       cleaned.forEach(function(p) { if (p.logo && p.logo.length > 50000) p.logo = ''; });
@@ -1932,7 +1932,7 @@ function renderStorageManagement() {
       size: function() { return getKeySize('roweosLibrary') + getKeySize('roweos_life_library'); },
       count: function() {
         var c = 0;
-        // v14.2: Library is nested per-brand — sum all brands
+        // v14.2: Library is nested per-brand - sum all brands
         try { var _lib = JSON.parse(localStorage.getItem('roweosLibrary') || '{}'); Object.keys(_lib).forEach(function(k) { if (_lib[k] && _lib[k].files) c += _lib[k].files.length; }); } catch(e) {}
         try { var _lifeLib = JSON.parse(localStorage.getItem('roweos_life_library') || '{}'); if (_lifeLib.files) c += _lifeLib.files.length; } catch(e) {}
         return c;
@@ -2260,7 +2260,7 @@ function updateSyncHubSetting(setting, value) {
  * v15.4: Set sync mode (cloud / hybrid / local)
  */
 function setSyncMode(mode) {
-  // v23.0: Map new mode names — perfect_cloud and perfect_local
+  // v23.0: Map new mode names - perfect_cloud and perfect_local
   // Legacy 'cloud' and 'local' still work
   syncSettings.syncMode = mode;
   saveSyncSettings();
@@ -2300,7 +2300,7 @@ function setSyncMode(mode) {
     'calendar', 'brand_todos', 'life_todos', 'runs', 'goals', 'knowledge', 'folio'];
 
   if (mode === 'cloud' || mode === 'perfect_cloud') {
-    // v15.10: All cloud — enable all sync, set all categories to cloud, then auto-push
+    // v15.10: All cloud - enable all sync, set all categories to cloud, then auto-push
     syncSettings.conversations = true;
     syncSettings.libraryContent = true;
     if (hubConv) hubConv.checked = true;
@@ -2402,7 +2402,7 @@ function showSnapshotListModal() {
 }
 
 /**
- * v15.12: Manual sync now — pushes data (clears orphans), then re-fetches real counts
+ * v15.12: Manual sync now - pushes data (clears orphans), then re-fetches real counts
  */
 // v25.0: Sync Now pulls from cloud (write-through handles all pushes)
 // v25.2: Sync Now pulls from cloud (cloud-authoritative)
@@ -2414,14 +2414,14 @@ function manualSyncNow() {
     return;
   }
   showToast('Syncing all data to cloud...', 'info');
-  // v28.7: Full bidirectional sync — push ALL categories first, then pull everything.
+  // v28.7: Full bidirectional sync - push ALL categories first, then pull everything.
   // Previously only pushed brands, leaving logos/folio/inventory/chats out of sync.
   try {
     if (typeof saveBrands === 'function') saveBrands();
     if (typeof writeDBConversations === 'function') writeDBConversations();
     if (typeof writeDBTodos === 'function') writeDBTodos();
     if (typeof writeDBCalendar === 'function') writeDBCalendar();
-    // v30.0: Pulse goals — write per-doc (not single array to pulse/main)
+    // v30.0: Pulse goals - write per-doc (not single array to pulse/main)
     if (typeof pulseGoals !== 'undefined' && typeof writeDBDoc === 'function') {
       pulseGoals.forEach(function(g) {
         if (g && g.id) writeDBDoc('pulse_goals', g.id, g, 'goals');
@@ -2431,7 +2431,7 @@ function manualSyncNow() {
     var _syncAutos = [];
     try { _syncAutos = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(ae) {}
     _syncAutos.forEach(function(a) { if (a && a.id && typeof writeDBAutomation === 'function') writeDBAutomation(a); });
-    // v30.0: People (unified) — replaces legacy roweos_clients push
+    // v30.0: People (unified) - replaces legacy roweos_clients push
     var _syncPeople = [];
     try { _syncPeople = JSON.parse(localStorage.getItem('roweos_people') || '[]'); } catch(pe) {}
     if (typeof writeDB === 'function') {
@@ -2467,7 +2467,7 @@ function manualSyncNow() {
       var _syncLifeProfiles = JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]');
       if (Array.isArray(_syncLifeProfiles) && _syncLifeProfiles.length > 0) writeDB('lifeAI/main', { profiles: _syncLifeProfiles });
     } catch(lpe) {}
-    // Brand logos — push to logos/ subcollection (too large for brand docs)
+    // Brand logos - push to logos/ subcollection (too large for brand docs)
     if (typeof pushBrandLogos === 'function') pushBrandLogos();
     // Studio runs
     try {
@@ -2919,7 +2919,7 @@ async function clearAllSyncData() {
   }
 }
 
-// v20.9: Shared helper — deletes ALL Firestore data for a given UID
+// v20.9: Shared helper - deletes ALL Firestore data for a given UID
 async function deleteUserFirestoreData(uid) {
   var db = firebase.firestore();
   var basePath = 'roweos_users/' + uid;
@@ -2983,7 +2983,7 @@ async function deleteUserFirestoreData(uid) {
   } catch(e) { /* legacy collection may not exist */ }
 }
 
-// v20.9: Full account deletion — Firebase data + localStorage + Auth account
+// v20.9: Full account deletion - Firebase data + localStorage + Auth account
 async function deleteMyAccount() {
   if (!firebaseUser) {
     showToast('Not signed in', 'error');
@@ -3052,7 +3052,7 @@ async function deleteMyAccount() {
 }
 
 /**
- * v15.10: Run full sync diagnostic — reads V2 subcollections (not V1 root doc)
+ * v15.10: Run full sync diagnostic - reads V2 subcollections (not V1 root doc)
  */
 async function runFullSyncDiagnostic() {
   var container = document.getElementById('syncDiagnosticsTable');
@@ -3072,7 +3072,7 @@ async function runFullSyncDiagnostic() {
     var db = firebase.firestore();
     var basePath = 'roweos_users/' + uid;
 
-    // v15.10: Read from V2 subcollections — same paths as renderSyncInventory
+    // v15.10: Read from V2 subcollections - same paths as renderSyncInventory
     var results = await Promise.all([
       db.collection(basePath + '/brands').get(),
       db.doc(basePath + '/conversations/agentHistory').get(),
@@ -3174,7 +3174,7 @@ async function recoverAllSyncData() {
 window._recoverableData = {};
 
 /**
- * v15.10: Run full data diagnostic — reads V2 subcollections (not V1 root doc)
+ * v15.10: Run full data diagnostic - reads V2 subcollections (not V1 root doc)
  */
 async function runFullDataDiagnostic() {
   var resultsContainer = document.getElementById('dataRecoveryResults');
@@ -4043,13 +4043,13 @@ function updateCommerceStats() {
       .forEach(function(e) { apiSpend += (e.cost || 0); });
   }
   
-  // v15.4: Outstanding invoices — read from dedicated storage
+  // v15.4: Outstanding invoices - read from dedicated storage
   var outstanding = 0;
   var allInvoices = getInvoices();
   allInvoices.filter(function(inv) { return inv.status === 'pending' || inv.status === 'overdue'; })
     .forEach(function(inv) { outstanding += (inv.total || 0); });
 
-  // v15.4: Total clients — read from dedicated storage
+  // v15.4: Total clients - read from dedicated storage
   var totalClients = getClients().length;
   
   // Active products
@@ -4277,7 +4277,7 @@ function showCommerceTab(tab) {
 }
 
 /**
- * v15.7: AI Integration — Provider status cards + settings toggles
+ * v15.7: AI Integration - Provider status cards + settings toggles
  */
 function renderApiProviderStatus() {
   var statusEl = document.getElementById('apiProviderStatus');
@@ -4693,7 +4693,7 @@ function getModelDisplayName(modelId) {
 }
 
 /**
- * v29.0: Analytics Dashboard — Team/Reports, Custom KPIs, Screenshots
+ * v29.0: Analytics Dashboard - Team/Reports, Custom KPIs, Screenshots
  */
 
 // --- Data accessors ---
@@ -4894,7 +4894,7 @@ function renderAnalyticsDashboard() {
   if (!Array.isArray(dashPeople)) dashPeople = [];
   var peopleTotal = dashPeople.length;
 
-  // Top row: 4 stat cards (no client-specific cards — people section handles that)
+  // Top row: 4 stat cards (no client-specific cards - people section handles that)
   var html = '<div class="kpi-grid kpi-grid-4">';
 
   // Revenue card
@@ -5284,7 +5284,7 @@ function scheduleCheckInReminders() {
 }
 
 // v25.3: Backward-compatible wrappers for existing client code
-// v30.0: Always nuke legacy roweos_clients on every load — data lives in roweos_people
+// v30.0: Always nuke legacy roweos_clients on every load - data lives in roweos_people
 function getClients() {
   // v30.0: Force-clear legacy key on every call to prevent resurrection on any device
   try {
@@ -5698,7 +5698,7 @@ function printInvoice(id) {
   setTimeout(function() { printWindow.print(); }, 250);
 }
 
-// v15.7: Invoice Product Picker — browse inventory items to add as line items
+// v15.7: Invoice Product Picker - browse inventory items to add as line items
 function openInvoiceProductPicker() {
   // v15.14: Use correct storage key for current mode
   var invKey = typeof getInventoryStorageKey === 'function' ? getInventoryStorageKey() : 'roweos_inventory';
@@ -6063,7 +6063,7 @@ function openPersonModal(personType, editId) {
 
   var saveAction = editPerson ? 'onclick="saveEditPerson(\'' + editPerson.id + '\')"' : 'onclick="saveNewPerson(\'' + personType + '\')"';
 
-  // v25.3: Shared fields HTML — bottom sheet on mobile
+  // v25.3: Shared fields HTML - bottom sheet on mobile
   var personModalStyle = personIsMobile ? 'width:100%;max-width:100%;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;max-height:90vh;' : 'max-width: 520px; width: 90%; border-radius: var(--radius-xl);';
   var html = '<div style="background: var(--bg-secondary); border: 1px solid var(--border-color); padding: var(--space-6); overflow-y: auto; max-height: 85vh;' + personModalStyle + '">' +
     '<div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4);">' +
@@ -6657,7 +6657,7 @@ function saveEditClient(clientId) {
 
 function deleteClient(id) {
   if (!confirm('Delete this client?')) return;
-  // v29.0: Use String comparison — id comes as string from onclick, c.id may be number
+  // v29.0: Use String comparison - id comes as string from onclick, c.id may be number
   var idStr = String(id);
   var clients = getClients().filter(function(c) { return String(c.id) !== idStr; });
   saveClients(clients);
@@ -6668,7 +6668,7 @@ function deleteClient(id) {
 }
 
 /**
- * v16.11: Client System — Pipeline stages, filtering, detail view, BrandAI integration
+ * v16.11: Client System - Pipeline stages, filtering, detail view, BrandAI integration
  */
 var CLIENT_PIPELINE_STAGES = [
   { id: 'lead', label: 'Lead', color: '#94a3b8' },
@@ -6776,7 +6776,7 @@ function closeAddPersonDropdown() {
   if (dd) dd.style.display = 'none';
 }
 
-// v29: People Select Mode — mass actions across Clients, Team, Reports
+// v29: People Select Mode - mass actions across Clients, Team, Reports
 var _peopleSelectMode = false;
 var _selectedPeople = {};
 
@@ -6952,7 +6952,7 @@ function switchPeopleType(type) {
   _updatePeopleSelectBar();
   // v26.1: Update pill nav active state
   updatePillNavActive('peoplePillNav', type);
-  // v28.6: Show/hide appropriate content — use dedicated peopleTypeContent container for team/report
+  // v28.6: Show/hide appropriate content - use dedicated peopleTypeContent container for team/report
   var pipelineTab = document.getElementById('clientsPipelineTab');
   var listTab = document.getElementById('clientsListTab');
   var addressBookTab = document.getElementById('clientsAddressBookTab');
@@ -6966,7 +6966,7 @@ function switchPeopleType(type) {
     if (clientTabs) clientTabs.style.display = 'flex';
     switchClientsTab(_clientsActiveTab || 'pipeline');
   } else if (type === 'team' || type === 'report') {
-    // v28.6: Hide ALL client containers — never destroy their HTML
+    // v28.6: Hide ALL client containers - never destroy their HTML
     if (clientTabs) clientTabs.style.display = 'none';
     if (pipelineTab) pipelineTab.style.display = 'none';
     if (listTab) listTab.style.display = 'none';
@@ -9100,7 +9100,7 @@ function runClientActionPrompt(clientId, promptId) {
   }, 300);
 }
 
-// v28.6: Client Timeline — visual event timeline per client
+// v28.6: Client Timeline - visual event timeline per client
 function _saveClientAndRefresh(clients, clientId) {
   saveClients(clients);
   if (typeof writeDB === 'function') {
@@ -9514,7 +9514,7 @@ function getActiveClientsContext(brandIdx) {
 }
 
 /**
- * v23.3: Sprint 4 — Client Management & CRM
+ * v23.3: Sprint 4 - Client Management & CRM
  * Enhanced profiles, relationship status, dialogue tracking, timeline, Studio integration, universal/brand scope
  */
 
@@ -10103,7 +10103,7 @@ function migrateClientsSprint4() {
 }
 
 /**
- * v23.4: Sprint 5 — PDF Export & Document System
+ * v23.4: Sprint 5 - PDF Export & Document System
  * 5.1: Universal PDF Export with standardized template
  * 5.2: PDF Color Scheme Preferences
  * 5.3: PDF Preview Before Download
@@ -10111,8 +10111,8 @@ function migrateClientsSprint4() {
  * 5.5: Hyperlink handling in PDF
  */
 
-// 5.2: PDF Settings Modal — color scheme + logo placement
-// v23.16: showPdfSettingsModal — title, cover header, logo, color scheme, logo placement, closing page
+// 5.2: PDF Settings Modal - color scheme + logo placement
+// v23.16: showPdfSettingsModal - title, cover header, logo, color scheme, logo placement, closing page
 function showPdfSettingsModal(callback, pdfOpts) {
   var existing = document.getElementById('roweosPdfSettingsOverlay');
   if (existing) existing.remove();
@@ -10258,11 +10258,11 @@ function pdfSelectFont(font) {
   }
 }
 
-// v23.16: Load cursive font (Dancing Script) for jsPDF — cached after first load
+// v23.16: Load cursive font (Dancing Script) for jsPDF - cached after first load
 var _pdfCursiveFontData = null;
 function loadCursiveFont(callback) {
   if (_pdfCursiveFontData) { callback(_pdfCursiveFontData); return; }
-  // Dancing Script Regular from Google Fonts — fetch TTF and convert to base64
+  // Dancing Script Regular from Google Fonts - fetch TTF and convert to base64
   var url = 'https://fonts.gstatic.com/s/dancingscript/v25/If2RXTr6YS-zF4S-kcSWSVi_szLgiuE.ttf';
   fetch(url).then(function(resp) {
     if (!resp.ok) throw new Error('Font fetch failed');
@@ -10394,7 +10394,7 @@ function showPdfPreviewModal(pdfResult, onDownload, onAdjust) {
     '</div></div>';
   document.body.appendChild(overlay);
 
-  // v23.14: Load PDF into iframe — use blob URL for iOS multi-page support
+  // v23.14: Load PDF into iframe - use blob URL for iOS multi-page support
   var frame = document.getElementById('pdfPreviewFrame');
   if (frame) {
     try {
@@ -10453,7 +10453,7 @@ function pdfPreviewZoom(pct) {
   var overlay = document.getElementById('roweosPdfPreviewOverlay');
   var baseUrl = (overlay && overlay._blobUrl) ? overlay._blobUrl : (frame.src || '').split('#')[0];
   if (baseUrl) {
-    // Use #zoom= fragment — supported by Chrome/Edge/Firefox PDF viewers
+    // Use #zoom= fragment - supported by Chrome/Edge/Firefox PDF viewers
     frame.src = baseUrl + '#zoom=' + pct;
   }
   // Update active button
@@ -10463,9 +10463,9 @@ function pdfPreviewZoom(pct) {
   }
 }
 
-// 5.1: Universal PDF Export — chains: settings → generate → preview → download
+// 5.1: Universal PDF Export - chains: settings → generate → preview → download
 // Standardized across all surfaces. Options: { content, title, brandName, coverPage, closingPage, brandLogo, clientLogo, skipSettings, skipPreview }
-// v23.16: universalPDFExport — settings modal returns title + logo
+// v23.16: universalPDFExport - settings modal returns title + logo
 function universalPDFExport(content, exportOpts) {
   var eo = exportOpts || {};
   // v23.16: Get brand info using studioSelectedBrand (PDF is a Studio feature)
@@ -10556,7 +10556,7 @@ function universalPDFExport(content, exportOpts) {
           return;
         }
         showPdfPreviewModal(pdfResult, null, function() {
-          // On "Adjust" — re-open settings then re-generate
+          // On "Adjust" - re-open settings then re-generate
           showPdfSettingsModal(function(newSettings) {
             doGenerate(newSettings);
           }, { title: finalTitle, coverHeader: coverHeader, closingStyle: closingStyle, coverFont: coverFont, customLogo: (settings && settings.logo) || '' });
@@ -10650,7 +10650,7 @@ function exportLibraryFileAsPDF(fileId, brandIdx) {
   });
 }
 
-// 5.1: Studio output PDF Export (enhanced — uses universal flow with preview)
+// 5.1: Studio output PDF Export (enhanced - uses universal flow with preview)
 function exportStudioAsPDF(run) {
   if (!run) run = window.currentRun;
   if (!run || !run.deliv) { showToast('No output to export', 'warning'); return; }

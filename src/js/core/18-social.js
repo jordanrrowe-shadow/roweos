@@ -34,13 +34,13 @@ function getSocialKeyScope() {
     var lifeIdx = parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0');
     return '_life_' + lifeIdx;
   }
-  // v25.5: Always read from localStorage — it is the source of truth and avoids
+  // v25.5: Always read from localStorage - it is the source of truth and avoids
   // race condition where selectedBrand=0 (default) before initializeBrands() runs
   var brandIdx = parseInt(localStorage.getItem('roweos_selected_brand') || '0');
   return '_brand_' + brandIdx;
 }
 
-// v18.0: One-time migration — copies global social keys to _brand_0 scoped keys
+// v18.0: One-time migration - copies global social keys to _brand_0 scoped keys
 function migrateSocialConnectionsToPerBrand() {
   try {
     if (localStorage.getItem('roweos_social_migration_v18') === 'done') return;
@@ -161,7 +161,7 @@ function refreshSocialAccountCards() {
 
 // --- OAuth Connection Flows ---
 function connectSocialAccount(platform) {
-  // v19.3: Removed redundant isSocialConnected guard — delegated listener already checks
+  // v19.3: Removed redundant isSocialConnected guard - delegated listener already checks
   if (platform === 'x') {
     connectX();
   } else if (platform === 'threads') {
@@ -196,12 +196,12 @@ function getOwnSocialKey(platform) {
   } catch(e) { return null; }
 }
 
-// v17.0: Public app IDs (not secrets — safe for client-side)
+// v17.0: Public app IDs (not secrets - safe for client-side)
 var ROWEOS_SOCIAL_APP_IDS = {
   threads: '925207080456321',
   instagram: '1277280787606457', // v23.18: Instagram-specific App ID (not main Meta App ID)
   x: 'Nzh0SHZIbnZJM0FnbVlCR3FDc1Q6MTpjaQ', // v22.33: RoweOS X Client ID
-  tiktok: '' // v25.4: Requires developer app approval — user provides own key
+  tiktok: '' // v25.4: Requires developer app approval - user provides own key
 };
 
 function connectX() {
@@ -217,7 +217,7 @@ function connectX() {
   var codeVerifier = generateCodeVerifier();
   // v20.6: Embed verifier + clientId in state so callback can recover them when localStorage is partitioned (iOS Safari, mobile redirect)
   // v20.12: Also embed Firebase UID (prefixed 'u:') for Firestore token storage on mobile
-  // Format: x_scopeCode_random~verifier~clientId~u:firebaseUid — X echoes state back unchanged
+  // Format: x_scopeCode_random~verifier~clientId~u:firebaseUid - X echoes state back unchanged
   var stateBase = 'x_' + scopeCode + '_' + generateState();
   var fbUid = '';
   try { if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) fbUid = firebase.auth().currentUser.uid; } catch(e) {}
@@ -226,7 +226,7 @@ function connectX() {
   // v18.0: Store brand context for callback to read
   try { localStorage.setItem('roweos_social_pending_context', scope); } catch(e) {}
 
-  // Store PKCE verifier for callback (localStorage so popup tab can read it — primary path)
+  // Store PKCE verifier for callback (localStorage so popup tab can read it - primary path)
   try {
     localStorage.setItem('roweos_x_code_verifier', codeVerifier);
     localStorage.setItem('roweos_x_state', stateBase);
@@ -242,7 +242,7 @@ function connectX() {
       '&state=' + encodeURIComponent(state) +
       '&code_challenge=' + challenge +
       '&code_challenge_method=S256';
-    // v19.0: In-app modal for all platforms — works on both desktop and mobile
+    // v19.0: In-app modal for all platforms - works on both desktop and mobile
     showSocialAuthModal('x', authUrl, scope);
   });
 }
@@ -275,7 +275,7 @@ function connectThreads() {
   showSocialAuthModal('threads', authUrl, scope);
 }
 
-// v18.9: In-app modal for social OAuth — Safari blocks scripted navigation to Meta domains.
+// v18.9: In-app modal for social OAuth - Safari blocks scripted navigation to Meta domains.
 // Shows a branded overlay with a real <a target="_blank"> link the user clicks.
 // Polls localStorage for successful connection while user authenticates in new tab.
 function showSocialAuthModal(platform, authUrl, scope) {
@@ -300,7 +300,7 @@ function showSocialAuthModal(platform, authUrl, scope) {
   var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   // v19.0: iOS universal links intercept ALL navigations to threads.com/x.com/instagram.com
-  // (302 redirects, JS window.location, form submissions — all intercepted)
+  // (302 redirects, JS window.location, form submissions - all intercepted)
   // On iOS: show copy-link as PRIMARY action (paste in Safari address bar bypasses universal links)
   // On other mobile: use direct link (Android handles OAuth in browser)
   // On desktop: direct link in new tab
@@ -509,7 +509,7 @@ function pollForSocialConnection(platform, popup) {
       refreshSocialAccountCards();
       showToast(platform.charAt(0).toUpperCase() + platform.slice(1) + ' connected', 'success');
     } else if (popupClosed && attempts > 5) {
-      // Popup closed without connecting — stop polling
+      // Popup closed without connecting - stop polling
       clearInterval(pollInterval);
       refreshSocialAccountCards();
     } else if (attempts >= maxAttempts) {
@@ -551,7 +551,7 @@ function connectInstagram() {
     try { localStorage.setItem('roweos_ig_oauth_pending', '1'); } catch(e) {}
     var isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone;
     if (isStandalone) {
-      // v24.1: PWA mode — open our intermediary page (our domain loads fine in SFSafariViewController).
+      // v24.1: PWA mode - open our intermediary page (our domain loads fine in SFSafariViewController).
       // From there, it tries sized popup to Instagram OAuth, with copy-link fallback.
       var igRedirectUrl = 'https://' + window.location.host + '/api/ig-redirect?url=' + encodeURIComponent(igAuthUrl);
       window.open(igRedirectUrl);
@@ -649,7 +649,7 @@ function handleSocialOAuthCallback() {
     else if (state === tState) { platform = 'threads'; callbackPromise = handleThreadsCallback(code); }
     else if (state === igState) { platform = 'instagram'; callbackPromise = handleInstagramCallback(code); }
 
-    // v17.3: Fallback — detect platform from state prefix (iOS Safari localStorage partitioning)
+    // v17.3: Fallback - detect platform from state prefix (iOS Safari localStorage partitioning)
     if (!platform && state) {
       if (state.indexOf('x_') === 0) { platform = 'x'; callbackPromise = handleXCallback(code); }
       else if (state.indexOf('threads_') === 0) { platform = 'threads'; callbackPromise = handleThreadsCallback(code); }
@@ -791,7 +791,7 @@ function getSocialToken(platform) {
           if (parsed && parsed.accessToken) { resolve(parsed); return; }
         }
       } catch(e) {}
-      // v17.2: Last resort — check pending token (callback timing bug)
+      // v17.2: Last resort - check pending token (callback timing bug)
       try {
         var pending = localStorage.getItem('roweos_social_pending_token_' + platform + scope);
         if (pending) {
@@ -833,7 +833,7 @@ document.addEventListener('visibilitychange', function() {
   try {
     if (typeof firebase === 'undefined' || !firebase.auth || !firebase.auth().currentUser) return;
     var uid = firebase.auth().currentUser.uid;
-    // Query ALL social_tokens docs — covers all scopes regardless of current mode
+    // Query ALL social_tokens docs - covers all scopes regardless of current mode
     firebase.firestore().collection('roweos_users').doc(uid).collection('social_tokens').get().then(function(snap) { // v26.7: Fix collection name
       if (snap.empty) return;
       var foundNew = false;
@@ -1056,7 +1056,7 @@ function removeSocialPublisherImage() {
   showToast('Image removed', 'info');
 }
 
-// v18.1: FEATURE 10 — Handle image upload for social publisher
+// v18.1: FEATURE 10 - Handle image upload for social publisher
 function handleSocialPublisherImageUpload(input) {
   if (!input || !input.files || !input.files[0]) return;
   var file = input.files[0];
@@ -1083,7 +1083,7 @@ function handleSocialPublisherImageUpload(input) {
 }
 
 function closeSocialPublisher() {
-  // v25.4: No-op — publisher is now a permanent tab in Media Lab
+  // v25.4: No-op - publisher is now a permanent tab in Media Lab
 }
 
 // v20.8: Auto-refresh expired social tokens before posting
@@ -1140,7 +1140,7 @@ function refreshSocialTokenIfNeeded(platform, tokenData) {
   });
 }
 
-// v22.39: Social Outbox — queue posts for review when guardrails require approval
+// v22.39: Social Outbox - queue posts for review when guardrails require approval
 var _socialOutboxCache = null;
 
 function getSocialOutbox() {
@@ -1191,7 +1191,7 @@ function socialOutboxSend(itemId) {
   postToSocial(item.platform, { silent: false }).then(function(result) {
     window._socialOutboxBypass = false;
     if (result && result.success) {
-      // v22.44: Don't tombstone sent posts — they're posted, not deleted
+      // v22.44: Don't tombstone sent posts - they're posted, not deleted
       outbox.splice(idx, 1);
       saveSocialOutbox(outbox);
       if (typeof renderPendingApproval === 'function') renderPendingApproval();
@@ -1255,7 +1255,7 @@ function socialPostRequiresApproval() {
   return guardrailsConfig && guardrailsConfig.automationGuardrails && guardrailsConfig.automationGuardrails.approvalRequired && guardrailsConfig.automationGuardrails.approvalRequired.social;
 }
 
-// v22.40: Unified Pending Approval — email and document queues
+// v22.40: Unified Pending Approval - email and document queues
 function emailApprovalRequired() {
   return guardrailsConfig && guardrailsConfig.automationGuardrails && guardrailsConfig.automationGuardrails.approvalRequired && guardrailsConfig.automationGuardrails.approvalRequired.email;
 }
@@ -1332,7 +1332,7 @@ function pendingApprovalApprove(itemId) {
     }
     queue.splice(idx, 1);
     savePendingApproval(queue);
-    // v22.44: Don't tombstone approved emails — they move to outbox/sent, not deleted
+    // v22.44: Don't tombstone approved emails - they move to outbox/sent, not deleted
     renderPendingApproval();
     showToast('Email approved and sending', 'success');
   } else if (item.type === 'document') {
@@ -1369,7 +1369,7 @@ function pendingApprovalApprove(itemId) {
     }
     queue.splice(idx, 1);
     savePendingApproval(queue);
-    // v22.44: Don't tombstone approved documents — they move to library, not deleted
+    // v22.44: Don't tombstone approved documents - they move to library, not deleted
     renderPendingApproval();
     if (typeof currentView !== 'undefined' && currentView === 'library' && typeof renderLibraryView === 'function') renderLibraryView();
     showToast('Document approved and saved to Library', 'success');
@@ -1431,7 +1431,7 @@ function renderPendingApproval() {
     var expandId = 'pendingPreview_' + idx;
 
     html += '<div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:14px;margin-bottom:10px;">';
-    // Header row — clickable to expand
+    // Header row - clickable to expand
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:pointer;" onclick="var el=document.getElementById(\'' + expandId + '\');if(el)el.style.display=el.style.display===\'none\'?\'block\':\'none\';">';
     html += '<div style="display:flex;align-items:center;gap:8px;">';
     html += '<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:' + color + ';background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;">' + icon + ' ' + typeName + '</span>';
@@ -1468,7 +1468,7 @@ function renderPendingApproval() {
       if (item.raw.imageUrl) html += '<img src="' + escapeHtml(item.raw.imageUrl) + '" style="max-width:200px;border-radius:8px;margin-top:8px;">';
     }
     html += '</div>';
-    // Actions — v22.47: Use auto-lab-card-btn instead of btn class to avoid dark mode text color issues
+    // Actions - v22.47: Use auto-lab-card-btn instead of btn class to avoid dark mode text color issues
     html += '<div style="display:flex;gap:8px;justify-content:flex-end;">';
     html += '<button onclick="pendingApprovalDelete(\'' + item.id + '\')" class="auto-lab-card-btn" style="padding:5px 12px;font-size:11px;color:#ef4444;background:none;border:1px solid rgba(239,68,68,0.2);">Delete</button>';
     if (item.type === 'email') {
@@ -1510,9 +1510,9 @@ function pendingApprovalEditInMail(id) {
 }
 
 // v25.4: Post to TikTok via Content Posting API
-// v30.1: getSocialToken returns a Promise — must chain properly
+// v30.1: getSocialToken returns a Promise - must chain properly
 function postToTikTok(content, imageBase64) {
-  // TikTok requires media — text-only not supported
+  // TikTok requires media - text-only not supported
   if (!imageBase64) {
     return Promise.resolve({ success: false, platform: 'tiktok', error: 'TikTok requires an image or video' });
   }
@@ -1566,7 +1566,7 @@ function postToSocial(platform, opts) {
   var content = edited || window._socialPublisherContent || '';
   var formatted = edited || formatForPlatform(content, platform);
 
-  // v22.39: Intercept — queue to outbox if approval required (unless bypassing from outbox send)
+  // v22.39: Intercept - queue to outbox if approval required (unless bypassing from outbox send)
   // v22.47: Also intercept if _forceApprovalQueue is set (per-automation requireApproval toggle)
   if (!window._socialOutboxBypass && (socialPostRequiresApproval() || window._forceApprovalQueue)) {
     addToSocialOutbox(platform, formatted, window._socialPublisherImage || null);
@@ -1606,7 +1606,7 @@ function postToSocial(platform, opts) {
       userId: tokenData.userId || ''
     };
 
-    // v25.4: TikTok — client-side direct posting via Content Posting API
+    // v25.4: TikTok - client-side direct posting via Content Posting API
     if (platform === 'tiktok') {
       return postToTikTok(formatted, window._socialPublisherImage || null).then(function(result) {
         if (result.success) {
@@ -1659,7 +1659,7 @@ function postToSocial(platform, opts) {
   });
 }
 
-// v20.6: Post directly from chat social card — properly awaits each platform result
+// v20.6: Post directly from chat social card - properly awaits each platform result
 function postFromChatCard(cardIndex) {
   var proposal = window._chatSocialProposals && window._chatSocialProposals[cardIndex];
   if (!proposal) { showToast('Post data not found', 'error'); return; }
@@ -1690,7 +1690,7 @@ function postFromChatCard(cardIndex) {
 
   function postNext(idx) {
     if (idx >= platforms.length) {
-      // All done — update per-platform pill status
+      // All done - update per-platform pill status
       var successCount = 0;
       var failCount = 0;
       var queuedCount = 0;
@@ -2072,7 +2072,7 @@ function checkAndShowSocialPublisher(opId, output) {
   showSocialPublisher(output, platforms);
 }
 
-// v17.0: Social Platform Selector — pre-run UI for choosing which platforms to publish to
+// v17.0: Social Platform Selector - pre-run UI for choosing which platforms to publish to
 window._selectedSocialPlatforms = [];
 
 function updateSocialPlatformSelector(op) {
@@ -2446,7 +2446,7 @@ var WORKFLOW_PRESETS = [
   }
 ];
 
-// v24.20: Browse Preset Library — categorized, expandable preset cards
+// v24.20: Browse Preset Library - categorized, expandable preset cards
 var _browsePresetCategory = 'all';
 
 // Map preset IDs to categories for Browse tab
@@ -2572,7 +2572,7 @@ function renderAutoLabBrowse() {
 
     html += '<div class="browse-preset-card" data-preset-cat="' + cat + '" data-preset-id="' + escapeHtml(p.id) + '" onclick="toggleBrowsePresetExpand(this)">';
 
-    // Header — name + short badge
+    // Header - name + short badge
     html += '<div class="browse-preset-card-header">';
     html += '<div class="browse-preset-card-name">' + escapeHtml(p.name) + '</div>';
     html += '<span class="browse-preset-card-badge cat-' + cat + '">' + escapeHtml(badgeText) + '</span>';
@@ -2581,7 +2581,7 @@ function renderAutoLabBrowse() {
     // Description
     html += '<div class="browse-preset-card-desc">' + escapeHtml(p.desc || '') + '</div>';
 
-    // Meta line — step count + chevron
+    // Meta line - step count + chevron
     html += '<div class="browse-preset-card-meta">';
     html += '<span style="display:inline-flex;align-items:center;gap:4px;">';
     // Step type dots (compact)
@@ -2618,7 +2618,7 @@ function renderAutoLabBrowse() {
     // Action buttons
     html += '<div class="browse-preset-card-actions">';
     if (p._isCustom) {
-      // Already in library — show Use + Delete
+      // Already in library - show Use + Delete
       html += '<button class="browse-preset-action-btn primary" onclick="event.stopPropagation();browsePresetUse(\'' + escapeHtml(p.id) + '\')">Use Preset</button>';
       html += '<button class="browse-preset-action-btn" onclick="event.stopPropagation();browsePresetChat(\'' + escapeHtml(p.id) + '\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Chat</button>';
       html += '<button class="browse-preset-action-btn" onclick="event.stopPropagation();deleteCustomPreset(\'' + escapeHtml(p.id) + '\');renderAutoLabBrowse();" style="color:#ef4444;">Remove</button>';
@@ -2627,7 +2627,7 @@ function renderAutoLabBrowse() {
       html += '<button class="browse-preset-action-btn primary" onclick="event.stopPropagation();browsePresetUse(\'' + escapeHtml(p.id) + '\')">Use Preset</button>';
       html += '<button class="browse-preset-action-btn" onclick="event.stopPropagation();browsePresetChat(\'' + escapeHtml(p.id) + '\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Chat</button>';
     } else {
-      // Not saved — show Add to Library + Chat
+      // Not saved - show Add to Library + Chat
       html += '<button class="browse-preset-action-btn primary" onclick="event.stopPropagation();browsePresetAddToLibrary(\'' + escapeHtml(p.id) + '\',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M12 5v14M5 12h14"/></svg> Add to Library</button>';
       html += '<button class="browse-preset-action-btn" onclick="event.stopPropagation();browsePresetChat(\'' + escapeHtml(p.id) + '\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Chat</button>';
     }
@@ -2757,7 +2757,7 @@ function browsePresetAddToLibrary(presetId, btnEl) {
   }, 400);
 }
 
-// v24.20: Use a preset — open pipeline builder with the preset loaded
+// v24.20: Use a preset - open pipeline builder with the preset loaded
 function browsePresetUse(presetId) {
   // Check built-in presets first, then custom
   var preset = null;
@@ -2785,7 +2785,7 @@ function browsePresetUse(presetId) {
   }, 150);
 }
 
-// v24.20: Chat about a preset — send it to the Agent tab for customization
+// v24.20: Chat about a preset - send it to the Agent tab for customization
 function browsePresetChat(presetId) {
   var preset = null;
   if (typeof WORKFLOW_PRESETS !== 'undefined') {
@@ -2842,18 +2842,18 @@ function resolveTemplateVars(text, context) {
   });
 }
 
-// v18.7: Clear expendable localStorage data to free quota — very aggressive
+// v18.7: Clear expendable localStorage data to free quota - very aggressive
 function clearExpendableStorageData() {
   try {
     // Clear response cache (can be very large)
     localStorage.removeItem('roweos_response_cache');
     // Clear auto lab images entirely (base64 = huge)
     localStorage.removeItem('roweos_auto_lab_images');
-    // Clear task history (stores full result text — often biggest offender)
+    // Clear task history (stores full result text - often biggest offender)
     localStorage.removeItem('roweos_task_history');
     // Clear completed automations metadata
     localStorage.removeItem('roweos_completed_automations');
-    // Trim runs aggressively — keep last 5
+    // Trim runs aggressively - keep last 5
     var runsRaw = localStorage.getItem('roweos_runs');
     if (runsRaw) {
       try {
@@ -2911,7 +2911,7 @@ function syncLastRunToAutomations(taskId, timestamp) {
   } catch(e) {}
 }
 
-// v20.11: Write lastRun to scheduled tasks by ID (not array index — index mismatch caused wrong task updates)
+// v20.11: Write lastRun to scheduled tasks by ID (not array index - index mismatch caused wrong task updates)
 function writeLastRunById(taskId, timestamp, extras) {
   var idStr = String(taskId);
   try {
@@ -2939,7 +2939,7 @@ function executeWorkflow(workflow) {
     return Promise.resolve({ completedSteps: [], failedSteps: [], context: {} });
   }
 
-  // v18.5: Pre-flight error checks — read API keys from roweos_api_keys JSON
+  // v18.5: Pre-flight error checks - read API keys from roweos_api_keys JSON
   var preflightErrors = [];
   // v19.2: Use workflow's saved brandIdx instead of global selectedBrand
   var brandIdx = workflow.brandIdx !== undefined ? parseInt(workflow.brandIdx) : (typeof selectedBrand !== 'undefined' ? selectedBrand : 0);
@@ -2968,14 +2968,14 @@ function executeWorkflow(workflow) {
         preflightErrors.push('Step ' + (si + 1) + ': Image generation not available');
       }
     } else if (step.action === 'email') {
-      // v22.8: Preflight — check for recipient
+      // v22.8: Preflight - check for recipient
       if (!step.target || !step.target.emailTo) {
         preflightErrors.push('Step ' + (si + 1) + ': No recipient email address');
       }
     } else if (step.action === 'outbox') {
-      // v22.24: Outbox step — no hard preflight, To can be auto-extracted at runtime
+      // v22.24: Outbox step - no hard preflight, To can be auto-extracted at runtime
     } else if (step.action === 'research') {
-      // v22.8: Preflight — check for Google API key
+      // v22.8: Preflight - check for Google API key
       var hasGoogleKey = pfApiKeys['google'] || localStorage.getItem('roweos_google_key');
       if (!hasGoogleKey) {
         preflightErrors.push('Step ' + (si + 1) + ': No Google API key (required for Deep Research)');
@@ -3041,7 +3041,7 @@ function executeWorkflow(workflow) {
     });
   }
 
-  // v18.1: BUG 6 — Track failed/completed steps for accurate history reporting
+  // v18.1: BUG 6 - Track failed/completed steps for accurate history reporting
   var completedSteps = [];
   var failedSteps = [];
   var stepIndex = 0;
@@ -3122,17 +3122,17 @@ function executeWorkflow(workflow) {
         context[step.outputKey] = output || '';
       }
       completedSteps.push(step);
-      // v18.1: FEATURE 7 — Per-step history entry
+      // v18.1: FEATURE 7 - Per-step history entry
       if (typeof addAutoLabHistory === 'function') {
         addAutoLabHistory({ name: (workflow.name || 'Pipeline') + ' > Step ' + step.stepId + ': ' + (step.name || step.action), action: step.action }, true, output ? String(output).substring(0, 50000) : '');
       }
-      // v22.47: Per-step approval gate — pause pipeline and show review modal
+      // v22.47: Per-step approval gate - pause pipeline and show review modal
       if (step.config && step.config.requireApproval) {
         return showPipelineApprovalModal(step, output, workflow, stepIndex, workflow.steps.length).then(function(approved) {
           if (approved) {
             return runNextStep();
           } else {
-            // User rejected — stop pipeline, clean up
+            // User rejected - stop pipeline, clean up
             if (_drTimerInterval) clearInterval(_drTimerInterval);
             if (workflow.id) markAutomationDone(workflow.id);
             if (_runningCard) {
@@ -3155,7 +3155,7 @@ function executeWorkflow(workflow) {
     }).catch(function(err) {
       failedSteps.push({ step: step, error: err.message || 'Unknown error' });
       showToast('Workflow step ' + step.stepId + ' failed: ' + (err.message || 'Unknown error'), 'error');
-      // v18.1: FEATURE 7 — Per-step failure history
+      // v18.1: FEATURE 7 - Per-step failure history
       if (typeof addAutoLabHistory === 'function') {
         addAutoLabHistory({ name: (workflow.name || 'Pipeline') + ' > Step ' + step.stepId + ': ' + (step.name || step.action), action: step.action }, false, err.message || 'Unknown error');
       }
@@ -3221,7 +3221,7 @@ function showPipelineResultsPanel(workflow, completedSteps, failedSteps, context
   document.body.insertAdjacentHTML('beforeend', html);
 }
 
-// v22.47: Pipeline step approval modal — pauses execution, returns Promise<boolean>
+// v22.47: Pipeline step approval modal - pauses execution, returns Promise<boolean>
 function showPipelineApprovalModal(step, output, workflow, currentStepIdx, totalSteps) {
   return new Promise(function(resolve) {
     var existing = document.getElementById('pipelineApprovalModal');
@@ -3356,7 +3356,7 @@ function showSingleWorkflowResultsPanel(task, success, result) {
     }
   }
 
-  // v18.6: Smart action buttons based on result type — stash data in global to avoid inline JSON escaping issues
+  // v18.6: Smart action buttons based on result type - stash data in global to avoid inline JSON escaping issues
   window._autoResultData = { result: result, taskName: task.name || 'Automation' };
   html += '<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:flex-end;">';
   // v18.7: "View Post" buttons for social post results
@@ -3500,7 +3500,7 @@ function executeWorkflowStep(step, context) {
         postImageUrl = window._autoAgentImages[_agentImgKeys[_agentImgKeys.length - 1]];
       }
     }
-    // v18.1: FEATURE 6 — Smart image detection from previous step outputs (fallback)
+    // v18.1: FEATURE 6 - Smart image detection from previous step outputs (fallback)
     if (!postImageUrl && context) {
       var ctxKeys = Object.keys(context);
       for (var ci = 0; ci < ctxKeys.length; ci++) {
@@ -3520,7 +3520,7 @@ function executeWorkflowStep(step, context) {
         }
       }
     }
-    // v20.10: Early check — no content means step 1 likely failed/returned empty
+    // v20.10: Early check - no content means step 1 likely failed/returned empty
     if (!content && !postImageUrl) {
       return Promise.reject(new Error('Post failed: No content available (previous step may have returned empty)'));
     }
@@ -3646,8 +3646,8 @@ function executeWorkflowStep(step, context) {
       showToast('Operation not found for step ' + step.stepId, 'warning');
       return Promise.resolve('');
     }
-    // v19.0: Pipeline steps always use focused task prompt — prevents conversational AI responses
-    // v23.10: Restructured prompt — context FIRST, then task, then directive. Prevents thinking models from ignoring user instructions.
+    // v19.0: Pipeline steps always use focused task prompt - prevents conversational AI responses
+    // v23.10: Restructured prompt - context FIRST, then task, then directive. Prevents thinking models from ignoring user instructions.
     var userPrompt = '';
     // Add user-provided context/instructions FIRST so it's most prominent
     if (target.contextRef) {
@@ -3662,15 +3662,15 @@ function executeWorkflowStep(step, context) {
       userPrompt += '\nRequired Deliverables:\n';
       operation.outputs.forEach(function(o) { userPrompt += '- ' + o + '\n'; });
     }
-    // v19.2: Resolve API settings — use workflow brand from context, not global selectedBrand
+    // v19.2: Resolve API settings - use workflow brand from context, not global selectedBrand
     var brandIdx = (context && context._brandIdx !== undefined) ? context._brandIdx : (typeof selectedBrand !== 'undefined' ? selectedBrand : 0);
     var brand = (typeof brands !== 'undefined' && brands[brandIdx]) ? brands[brandIdx] : { name: 'Brand' };
     var settings = (typeof brandSettings !== 'undefined' && brandSettings[brandIdx]) ? brandSettings[brandIdx] : { provider: 'anthropic', model: 'claude-sonnet-4-6' };
     var _validProvs = ['anthropic', 'openai', 'google'];
     var provider = (settings.provider && _validProvs.indexOf(settings.provider) !== -1) ? settings.provider : 'anthropic';
     var model = settings.model || 'claude-sonnet-4-6';
-    // v18.1: FEATURE 4 — Per-step provider override
-    // v20.9: Only accept known providers — AI sometimes sets brand name as provider
+    // v18.1: FEATURE 4 - Per-step provider override
+    // v20.9: Only accept known providers - AI sometimes sets brand name as provider
     if (step.config && step.config.provider && _validProvs.indexOf(step.config.provider) !== -1) {
       provider = step.config.provider;
       // Pick a sensible default model for the overridden provider
@@ -3698,13 +3698,13 @@ function executeWorkflowStep(step, context) {
         userPrompt += '\n\nOutput must be under ' + _charLimit + ' characters. This is for social media posting.';
       }
     }
-    // v23.10: Stronger final directive — explicitly tells thinking models to execute, not converse
+    // v23.10: Stronger final directive - explicitly tells thinking models to execute, not converse
     userPrompt += '\n\n---\nYou are in a non-interactive automated pipeline. There is NO user to respond to. You MUST produce the complete output NOW using the instructions and context above. Do NOT ask questions, request clarification, or say anything like "Could you provide" or "I need more details". Execute the task with the information given.\n\nOutput:';
-    // v19.0: Build system prompt — always use focused pipeline prompt, not conversational brand prompt
+    // v19.0: Build system prompt - always use focused pipeline prompt, not conversational brand prompt
     var sysPrompt = '';
     var agentId = target.agentId || (operation.category || null);
     var brandName = (brand.shortName || brand.name || 'Brand');
-    // v23.10: Stronger pipeline system prompt — prevents thinking models from going into "helpful assistant" mode
+    // v23.10: Stronger pipeline system prompt - prevents thinking models from going into "helpful assistant" mode
     sysPrompt = 'You are an automated task executor for ' + brandName + '. You are running inside a non-interactive automation pipeline with no user present to answer questions.';
     if (brand.tagline) sysPrompt += ' ' + brand.tagline + '.';
     if (brand.voice) sysPrompt += ' Voice: ' + brand.voice + '.';
@@ -3738,7 +3738,7 @@ function executeWorkflowStep(step, context) {
       showToast('Image generation not available', 'error');
       return Promise.resolve('');
     }
-    // v18.1: FEATURE 5 — Pass reference images if attached
+    // v18.1: FEATURE 5 - Pass reference images if attached
     var imgGenOpts = {};
     if (step.config && step.config.referenceImage) {
       imgGenOpts.referenceImages = [step.config.referenceImage];
@@ -3767,7 +3767,7 @@ function executeWorkflowStep(step, context) {
         if (labImages.length > 50) labImages = labImages.slice(-50);
         localStorage.setItem('roweos_auto_lab_images', JSON.stringify(labImages));
       } catch(e) {}
-      // v18.1: FEATURE 9 — Also push to Image Lab chat messages
+      // v18.1: FEATURE 9 - Also push to Image Lab chat messages
       if (typeof _imageLabChatMessages !== 'undefined' && imgDataUrl) {
         _imageLabChatMessages.push({ role: 'assistant', content: 'Pipeline generated: ' + (imgPrompt || '').substring(0, 100), imageUrl: imgDataUrl, timestamp: new Date().toISOString() });
         if (typeof saveImageLabChatMessages === 'function') saveImageLabChatMessages();
@@ -3841,7 +3841,7 @@ function executeWorkflowStep(step, context) {
   // v17.4: Save to Library step
   if (action === 'library') {
     var libContent = resolveTemplateVars(target.text || target.contentRef || '', context);
-    // v24.20: Fallback — if no explicit content, use most recent context value (previous step output)
+    // v24.20: Fallback - if no explicit content, use most recent context value (previous step output)
     if (!libContent) {
       var _libCtxKeys = Object.keys(context || {});
       for (var _lk = _libCtxKeys.length - 1; _lk >= 0; _lk--) {
@@ -4185,7 +4185,7 @@ function executeWorkflowStep(step, context) {
     });
   }
 
-  // v22.24: Queue to Outbox step — auto-extracts email from previous step output
+  // v22.24: Queue to Outbox step - auto-extracts email from previous step output
   if (action === 'outbox') {
     var outboxTo = resolveTemplateVars(target.emailTo || '', context);
     var outboxSubject = resolveTemplateVars(target.emailSubject || '', context);
@@ -4364,7 +4364,7 @@ function executeWorkflowStep(step, context) {
     return Promise.resolve(_obMsg);
   }
 
-  // v22.28: Batch Email step — parses previous step output into multiple outbox emails
+  // v22.28: Batch Email step - parses previous step output into multiple outbox emails
   if (action === 'batch_email') {
     var batchBody = '';
     // Gather previous step output
@@ -4432,7 +4432,7 @@ function executeWorkflowStep(step, context) {
       // Extract TO, SUBJECT, BODY
       var toMatch = cleaned.match(/^TO:\s*(.+)$/mi);
       var subMatch = cleaned.match(/^SUBJECT:\s*(.+)$/mi);
-      // v22.29: Greedy capture — grab everything from BODY: to end of block
+      // v22.29: Greedy capture - grab everything from BODY: to end of block
       var bodyMatch = cleaned.match(/^BODY:\s*([\s\S]+)/mi);
       var emailTo = toMatch ? toMatch[1].trim() : '';
       var emailSubject = subMatch ? subMatch[1].trim() : _beBrandName + ' - Outreach';
@@ -4540,14 +4540,14 @@ function executeWorkflowStep(step, context) {
     }
     // v22.10: Use runDeepResearchFull with auto-retry on cancellation
     return runDeepResearchFull(enrichedQuery, function(status, elapsed) {
-      // Progress — update timer badge on automation card if visible
+      // Progress - update timer badge on automation card if visible
     }, 3).then(function(result) {
       showToast('Step ' + step.stepId + ' research complete (' + result.elapsed + 's)', 'success');
       return result.text;
     });
   }
 
-  // v24.9: Pulse step — AI generates tasks for a goal
+  // v24.9: Pulse step - AI generates tasks for a goal
   if (action === 'pulse') {
     var _wfGoalId = target.goalId || '';
     if (!_wfGoalId || typeof pulseGoals === 'undefined') return Promise.resolve('No goal selected');
@@ -4596,7 +4596,7 @@ function executeWorkflowStep(step, context) {
     });
   }
 
-  // v24.25: Reminder step — interactive popup
+  // v24.25: Reminder step - interactive popup
   if (action === 'reminder') {
     var remTitle = resolveTemplateVars(target.reminderTitle || 'Reminder', context);
     var remText = resolveTemplateVars(target.text || '', context);
@@ -4634,7 +4634,7 @@ function initSocialMedia() {
   renderSocialPostHistory();
 }
 
-// v17.0: social-callback.html stores tokens in localStorage as pending — pick them up and save to Firestore
+// v17.0: social-callback.html stores tokens in localStorage as pending - pick them up and save to Firestore
 // v18.0: Scan all brand/life scopes for pending tokens
 function processPendingSocialTokens() {
   var platforms = ['x', 'threads', 'instagram'];
@@ -4968,7 +4968,7 @@ function renderAutoLabScheduler() {
     html += '<div class="auto-lab-empty">No recurring schedules active.</div>';
   }
 
-  // v18.1: FEATURE 8 — Execution History with filter bar
+  // v18.1: FEATURE 8 - Execution History with filter bar
   html += '<div class="auto-lab-section-title">Execution History</div>';
   html += '<div class="auto-lab-history-filters" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">';
   html += '<select id="autoLabHistoryFilter" onchange="filterAutoLabHistory()" class="auto-lab-filter-control">';
@@ -5019,7 +5019,7 @@ function addAutoLabHistory(task, success, result, opts) {
   try {
     localStorage.setItem('roweos_auto_lab_history', JSON.stringify(history));
   } catch(e) {
-    // Storage full — trim aggressively and retry
+    // Storage full - trim aggressively and retry
     if (typeof clearExpendableStorageData === 'function') clearExpendableStorageData();
     history = history.slice(-20);
     // Strip all imageUrl data to save space
@@ -5028,7 +5028,7 @@ function addAutoLabHistory(task, success, result, opts) {
   }
 }
 
-// v18.1: FEATURE 8 — Filter/sort/search execution history
+// v18.1: FEATURE 8 - Filter/sort/search execution history
 function filterAutoLabHistory() {
   var container = document.getElementById('autoLabHistoryTimeline');
   if (!container) return;
@@ -5064,7 +5064,7 @@ function filterAutoLabHistory() {
       if (h.duration && h.duration > 0) {
         durationStr = h.duration < 1000 ? h.duration + 'ms' : (h.duration / 1000).toFixed(1) + 's';
       }
-      // v18.1: FEATURE 7 — Indent pipeline sub-steps
+      // v18.1: FEATURE 7 - Indent pipeline sub-steps
       var isSubStep = (h.name || '').indexOf(' > Step ') > -1;
       // v20.6: Add id for notification center deep-link scroll
       var entryId = h.id ? ' id="autoLabHistoryEntry_' + h.id + '"' : '';
@@ -5077,7 +5077,7 @@ function filterAutoLabHistory() {
       if (h.imageUrl) {
         html += '<div style="margin-top:6px;"><img src="' + h.imageUrl + '" style="max-width:120px;max-height:80px;border-radius:8px;border:1px solid var(--border-color);" loading="lazy"></div>';
       }
-      // v18.7: Content preview snippet (2 lines) — skip base64 data
+      // v18.7: Content preview snippet (2 lines) - skip base64 data
       if (h.result && !h.imageUrl && h.result.indexOf('data:image') !== 0 && h.result.indexOf('data:') !== 0) {
         var _preview = h.result.replace(/\*\*/g, '').replace(/#{1,3}\s*/g, '').replace(/\n+/g, ' ').trim();
         if (_preview.length > 120) _preview = _preview.substring(0, 120) + '...';
@@ -5242,7 +5242,7 @@ async function runAutoLabNow(autoId) {
   for (var i = 0; i < scheduled.length; i++) {
     if (String(scheduled[i].id) === idStr) { task = scheduled[i]; idx = i; break; }
   }
-  // v19.1: Always check roweos_automations for the full object — scheduled tasks
+  // v19.1: Always check roweos_automations for the full object - scheduled tasks
   // may have been stripped of action/target/config by loadFromFirebaseV2()
   var automations = [];
   try { automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(e) { console.warn('[Automations] Parse error:', e.message); }
@@ -5253,7 +5253,7 @@ async function runAutoLabNow(autoId) {
     if (typeof saveScheduledTasks === 'function') saveScheduledTasks(scheduled);
     idx = scheduled.length - 1;
   } else if (task && fullTask && !task.action && fullTask.action) {
-    // Scheduled version is stripped — use full version from roweos_automations
+    // Scheduled version is stripped - use full version from roweos_automations
     task = fullTask;
     scheduled[idx] = fullTask;
     if (typeof saveScheduledTasks === 'function') saveScheduledTasks(scheduled);
@@ -5321,11 +5321,13 @@ function renderAutoLabImageLab(targetId) {
   // Quick Generate sub-tab (existing UI)
   html += '<div class="auto-lab-prompt-bar">';
   html += '<input type="text" id="autoLabImagePrompt" placeholder="Describe the image you want to generate...">';
+  // v31.5: Default to Nano Banana 3.0 Pro (first option). Added GPT Image 2 (OpenAI provider).
   html += '<select id="autoLabImageModel">';
-  html += '<option value="gemini-2.5-flash-image">Nano Banana 3.0</option>';
   html += '<option value="gemini-3-pro-image-preview">Nano Banana 3.0 Pro</option>';
-  html += '<option value="gemini-2.0-flash-exp-image-generation">Gemini 2.0 Flash Image (Legacy)</option>';
+  html += '<option value="gemini-2.5-flash-image">Nano Banana 3.0</option>';
   html += '<option value="imagen3">Imagen 4</option>';
+  html += '<option value="gpt-image-2">GPT Image 2</option>';
+  html += '<option value="gemini-2.0-flash-exp-image-generation">Gemini 2.0 Flash Image (Legacy)</option>';
   html += '</select>';
   html += '<select id="autoLabImageAspect">';
   html += '<option value="1:1">1:1</option>';
@@ -5409,11 +5411,13 @@ function renderImageLabChatHTML() {
 
   // Toolbar
   h += '<div class="imagelab-chat-toolbar">';
-  h += '<select id="imageLabChatModel" onchange="_imageLabChatModel=this.value;">';
-  h += '<option value="gemini-2.5-flash-image"' + (_imageLabChatModel === 'gemini-2.5-flash-image' ? ' selected' : '') + '>Nano Banana 3.0</option>';
+  // v31.5: Default order — Nano Banana 3.0 Pro first, then 3.0, Imagen 4, GPT Image 2, legacy.
+  h += '<select id="imageLabChatModel" onchange="_imageLabChatModel=this.value;renderAutoLabImageLab(window._imageLabTargetId);">';
   h += '<option value="gemini-3-pro-image-preview"' + (_imageLabChatModel === 'gemini-3-pro-image-preview' ? ' selected' : '') + '>Nano Banana 3.0 Pro</option>';
-  h += '<option value="gemini-2.0-flash-exp-image-generation"' + (_imageLabChatModel === 'gemini-2.0-flash-exp-image-generation' ? ' selected' : '') + '>Gemini 2.0 Flash Image (Legacy)</option>';
+  h += '<option value="gemini-2.5-flash-image"' + (_imageLabChatModel === 'gemini-2.5-flash-image' ? ' selected' : '') + '>Nano Banana 3.0</option>';
   h += '<option value="imagen3"' + (_imageLabChatModel === 'imagen3' ? ' selected' : '') + '>Imagen 4</option>';
+  h += '<option value="gpt-image-2"' + (_imageLabChatModel === 'gpt-image-2' ? ' selected' : '') + '>GPT Image 2</option>';
+  h += '<option value="gemini-2.0-flash-exp-image-generation"' + (_imageLabChatModel === 'gemini-2.0-flash-exp-image-generation' ? ' selected' : '') + '>Gemini 2.0 Flash Image (Legacy)</option>';
   h += '</select>';
   h += '<select id="imageLabChatAspect">';
   h += '<option value="1:1">1:1</option>';
@@ -5452,7 +5456,13 @@ function renderImageLabChatHTML() {
     h += '<input type="file" accept="image/*" multiple id="imageLabChatRef" style="display:none" onchange="handleImageLabChatRefUploads(this)">';
   }
   h += '</label>';
-  h += '<input type="text" id="imageLabChatInput" placeholder="Describe an image or edit the last one..." onkeydown="if(event.key===\'Enter\')sendImageLabMessage();" style="border-radius:0;border-left:none;border-right:none;">';
+  // v31.5: Switched from <input> to <textarea> so long prompts wrap onto new lines instead of
+  // becoming an unreadable horizontal-scroll line. Auto-grows up to 6 rows then scrolls vertically.
+  // Enter sends, Shift+Enter inserts a newline.
+  h += '<textarea id="imageLabChatInput" rows="1" placeholder="Describe an image or edit the last one..."' +
+    ' oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,160)+\'px\';"' +
+    ' onkeydown="if(event.key===\'Enter\' && !event.shiftKey){event.preventDefault();sendImageLabMessage();}"' +
+    ' style="border-radius:0;border-left:none;border-right:none;resize:none;line-height:1.45;padding:10px 12px;font-family:inherit;font-size:14px;min-height:40px;max-height:160px;overflow-y:auto;"></textarea>';
   h += '<button id="imageLabChatSendBtn" onclick="sendImageLabMessage()" style="border-radius:0 8px 8px 0;">Send</button>';
   h += '</div>';
 
@@ -5701,7 +5711,7 @@ async function sendImageLabMessage() {
       renderImageLabChatThread();
       saveImageLabChatMessages();
 
-      // v15.47: Don't clear ref images after use — keep them for multi-turn editing
+      // v15.47: Don't clear ref images after use - keep them for multi-turn editing
       // Ref images are preserved so user can continue referencing them
       renderAutoLabImageLab(window._imageLabTargetId);
     } else if (result && result.text) {
@@ -5932,6 +5942,82 @@ function selectImageLabBrowserImage(idx) {
   window._imageLabBrowserImages = null;
 
   renderAutoLabImageLab(window._imageLabTargetId);
+  showToast('Reference image set from ' + (img.source || 'selection'), 'success');
+}
+
+// v31.5: Video Lab Library/Inventory browsers — same UX as Image Lab.
+function openVideoLabLibraryBrowser() {
+  var images = [];
+  try {
+    var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
+    if (mode === 'life') {
+      var lifeLib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : JSON.parse(localStorage.getItem('roweos_life_library') || '{}');
+      if (lifeLib.files) lifeLib.files.forEach(function(f) {
+        if (f.type && f.type.indexOf('image') !== -1 && f.content) images.push({ name: f.name, dataUrl: f.content, source: 'library' });
+      });
+    } else {
+      var lib = JSON.parse(localStorage.getItem('roweos_file_library') || localStorage.getItem('roweosLibrary') || '{}');
+      Object.keys(lib).forEach(function(brandKey) {
+        if (lib[brandKey] && lib[brandKey].files) lib[brandKey].files.forEach(function(f) {
+          if (f.type && f.type.indexOf('image') !== -1 && f.content) images.push({ name: f.name, dataUrl: f.content, source: 'library' });
+        });
+      });
+    }
+  } catch (e) { console.warn('[VideoLab] Library parse error:', e); }
+  if (images.length === 0) { showToast('No images found in Library', 'info'); return; }
+  showVideoLabBrowserModal(images, 'Library');
+}
+
+function openVideoLabInventoryBrowser() {
+  var images = [];
+  try {
+    var inv = JSON.parse(localStorage.getItem(getInventoryStorageKey()) || '{}');
+    if (inv.items) inv.items.forEach(function(item) {
+      if (item.image) images.push({ name: item.name || 'Item', dataUrl: item.image, source: 'inventory' });
+    });
+  } catch (e) { console.warn('[VideoLab] Inventory parse error:', e); }
+  if (images.length === 0) { showToast('No images found in Inventory', 'info'); return; }
+  showVideoLabBrowserModal(images, 'Inventory');
+}
+
+function showVideoLabBrowserModal(images, sourceLabel) {
+  var existing = document.getElementById('videoLabBrowserModal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'videoLabBrowserModal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;';
+  modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
+  var html = '<div style="background:var(--bg-primary);border-radius:16px;padding:24px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;" onclick="event.stopPropagation()">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">';
+  html += '<div style="font-size:16px;font-weight:600;color:var(--text-primary);">Select from ' + escapeHtml(sourceLabel) + '</div>';
+  html += '<button onclick="document.getElementById(\'videoLabBrowserModal\').remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;">&times;</button>';
+  html += '</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;">';
+  images.forEach(function(img, idx) {
+    html += '<div onclick="selectVideoLabBrowserImage(' + idx + ')" style="cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid var(--border-color);" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border-color)\'">';
+    html += '<img src="' + img.dataUrl + '" style="width:100%;height:100px;object-fit:cover;display:block;">';
+    html += '<div style="padding:6px 8px;font-size:11px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(img.name) + '</div>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  modal.innerHTML = html;
+  window._videoLabBrowserImages = images;
+  document.body.appendChild(modal);
+}
+
+function selectVideoLabBrowserImage(idx) {
+  var images = window._videoLabBrowserImages || [];
+  var img = images[idx];
+  if (!img || !img.dataUrl) return;
+  var parts = img.dataUrl.split(',');
+  var mimeMatch = parts[0] ? parts[0].match(/data:([^;]+)/) : null;
+  var mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+  var base64 = parts[1] || '';
+  window.videoLabRefImage = { base64: base64, mimeType: mimeType, name: img.name || 'Reference' };
+  var modal = document.getElementById('videoLabBrowserModal');
+  if (modal) modal.remove();
+  window._videoLabBrowserImages = null;
+  renderAutoLabVideoLab(window._videoLabTargetId);
   showToast('Reference image set from ' + (img.source || 'selection'), 'success');
 }
 
@@ -6208,14 +6294,27 @@ function renderVideoLabQuickGenHTML() {
   h += 'Generate</button>';
   h += '</div>';
 
-  // Reference image upload
-  h += '<div style="margin-bottom:16px;">';
-  h += '<label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-secondary);font-size:var(--text-xs);">';
+  // v31.5: Reference upload — match Image Lab with Upload + Library + Inventory options.
+  // Image-to-video with a brand asset, screenshot from inventory, or fresh upload.
+  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">';
+  h += '<label class="auto-lab-card-btn" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:10px;font-size:12px;white-space:nowrap;">';
+  h += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload Reference';
   h += '<input type="file" accept="image/*" onchange="handleVideoLabRefUpload(this)" style="display:none;">';
-  h += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
-  h += 'Add reference image (image-to-video)</label>';
+  h += '</label>';
+  h += '<button class="auto-lab-card-btn" onclick="openVideoLabLibraryBrowser()" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:10px;font-size:12px;white-space:nowrap;">';
+  h += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg> From Library';
+  h += '</button>';
+  h += '<button class="auto-lab-card-btn" onclick="openVideoLabInventoryBrowser()" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:10px;font-size:12px;white-space:nowrap;">';
+  h += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg> From Inventory';
+  h += '</button>';
   if (window.videoLabRefImage) {
-    h += '<span style="margin-left:8px;color:var(--accent);font-size:var(--text-xs);">' + escapeHtml(window.videoLabRefImage.name || 'Loaded') + ' <button onclick="window.videoLabRefImage=null;renderAutoLabVideoLab(window._videoLabTargetId);" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:11px;">x</button></span>';
+    h += '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-secondary);border-radius:10px;">';
+    if (window.videoLabRefImage.base64) {
+      h += '<img src="data:' + (window.videoLabRefImage.mimeType || 'image/png') + ';base64,' + window.videoLabRefImage.base64 + '" style="width:36px;height:36px;object-fit:cover;border-radius:6px;">';
+    }
+    h += '<div style="font-size:12px;color:var(--text-primary);font-weight:500;">' + escapeHtml(window.videoLabRefImage.name || 'Reference') + '</div>';
+    h += '<button class="auto-lab-card-btn danger" onclick="window.videoLabRefImage=null;renderAutoLabVideoLab(window._videoLabTargetId);" style="padding:4px 8px;font-size:11px;">&times;</button>';
+    h += '</div>';
   }
   h += '</div>';
 
@@ -6321,7 +6420,7 @@ async function generateAutoLabVideo() {
   try {
     var result = await generateVideoWithVeo(prompt.value.trim(), opts);
 
-    // Save to gallery (metadata only — blob URL doesn't persist)
+    // Save to gallery (metadata only - blob URL doesn't persist)
     var videos = [];
     try { videos = JSON.parse(localStorage.getItem('roweos_auto_lab_videos') || '[]'); } catch(e) {}
     videos.push({
@@ -6475,7 +6574,7 @@ function renderVideoLabChatThread() {
 }
 
 function saveVideoLabChatMessages() {
-  // Save display messages only — strip blob URLs (they don't persist)
+  // Save display messages only - strip blob URLs (they don't persist)
   var toSave = _videoLabChatMessages.map(function(m) {
     var copy = {};
     for (var k in m) copy[k] = m[k];

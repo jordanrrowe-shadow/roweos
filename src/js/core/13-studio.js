@@ -140,7 +140,7 @@ function getStudioContextTitle(op, brandName) {
       }
     }
   }
-  // v22.37: DOM fallback — read directly from rendered param inputs if currentParamValues empty
+  // v22.37: DOM fallback - read directly from rendered param inputs if currentParamValues empty
   if (!clientName) {
     for (var di = 0; di < nameKeys.length; di++) {
       var domEl = document.getElementById('param_' + nameKeys[di]);
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch(e) {}
   })();
 
-  // v24.27: Force iOS Safari box-sizing recalculation — replicates the inspector toggle that fixes rendering
+  // v24.27: Force iOS Safari box-sizing recalculation - replicates the inspector toggle that fixes rendering
   // iOS PWA renders with stale content-box sizing on initial load; toggling border-box off/on forces recalc
   if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
     window.addEventListener('load', function() {
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // v22.25: Nuclear Safari autofill kill — Safari ignores autocomplete on email/text fields
+  // v22.25: Nuclear Safari autofill kill - Safari ignores autocomplete on email/text fields
   // Must: remove type="email", set autocomplete="one-time-code", add data-1p-ignore, role on forms
   (function() {
     var _authInputIds = { authEmailInput: true, authPasswordInput: true }; // login fields keep type
@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
       el.setAttribute('data-lpignore', 'true');
       el.setAttribute('data-1p-ignore', 'true');
       el.setAttribute('data-form-type', 'other');
-      // Safari uses type="email" as autofill hint — convert to type="text" (except login fields)
+      // Safari uses type="email" as autofill hint - convert to type="text" (except login fields)
       if (el.type === 'email' && !_authInputIds[el.id]) {
         el.setAttribute('type', 'text');
         el.setAttribute('inputmode', 'email'); // keep email keyboard on mobile
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     _afObserver.observe(document.body, { childList: true, subtree: true });
-    // Safari re-attaches autofill on focus — block it aggressively
+    // Safari re-attaches autofill on focus - block it aggressively
     document.addEventListener('focus', function(e) {
       var t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) {
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // v23.16: Click-to-edit on Studio output — enter edit mode when clicking output content
+  // v23.16: Click-to-edit on Studio output - enter edit mode when clicking output content
   var _studioOutput = document.getElementById('studioOutputContent');
   if (_studioOutput) {
     _studioOutput.addEventListener('click', function(e) {
@@ -673,7 +673,7 @@ function _stopDropdownScrollLeak(e) {
   var scrollHeight = el.scrollHeight;
   var clientHeight = el.clientHeight;
   var delta = e.deltaY;
-  // At top scrolling up, or at bottom scrolling down — prevent
+  // At top scrolling up, or at bottom scrolling down - prevent
   if ((delta < 0 && scrollTop <= 0) || (delta > 0 && scrollTop + clientHeight >= scrollHeight)) {
     e.preventDefault();
   }
@@ -820,16 +820,16 @@ function updateDeepResearchToggle() {
   var isDedicatedDR = selectedOp && selectedOp.id === 53;
 
   if (isDedicatedDR) {
-    // Dedicated Deep Research op — always checked, disabled
+    // Dedicated Deep Research op - always checked, disabled
     toggleRow.style.display = 'flex';
     toggle.checked = true;
     toggle.disabled = true;
   } else if (isGemini3 && isResearchOp) {
-    // Research op with Gemini 3.1 Pro — show toggle, user opts in
+    // Research op with Gemini 3.1 Pro - show toggle, user opts in
     toggleRow.style.display = 'flex';
     toggle.disabled = false;
   } else {
-    // Not applicable — hide and uncheck
+    // Not applicable - hide and uncheck
     toggleRow.style.display = 'none';
     toggle.checked = false;
     toggle.disabled = false;
@@ -1422,7 +1422,7 @@ async function createCustomBrandOperation() {
         newOp.isImageOp = true;
         newOp.category = 'image';
       }
-      // v17.2: Support social operations — keyword fallback
+      // v17.2: Support social operations - keyword fallback
       var socialKeywords = /\b(thread|threads|tweet|post.*to|instagram|tiktok|x\/twitter|social media|caption|hashtag|reel)\b/i;
       if (operation.isSocialOp || operation.category === 'social' || socialKeywords.test(userRequest)) {
         newOp.isSocialOp = true;
@@ -1828,7 +1828,7 @@ function toggleShowAllOps() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v28.9: Studio Action Bar — expandable panels
+// v28.9: Studio Action Bar - expandable panels
 // ═══════════════════════════════════════════════════════════════
 
 var _studioExpanderActive = null;
@@ -1889,7 +1889,7 @@ function toggleStudioExpander(type) {
   }
 }
 
-// v28.9: AI Generate — runs generation with glow animation on button
+// v28.9: AI Generate - runs generation with glow animation on button
 function runStudioAIGenerate(btn) {
   if (!btn) return;
   // Add glow animation
@@ -1950,7 +1950,7 @@ function selectAgent(agentId) {
     return;
   }
 
-  // Normal agent/category selection — show operations + action bar, hide media panel
+  // Normal agent/category selection - show operations + action bar, hide media panel
   if (studioContent) studioContent.style.display = '';
   if (studioMediaPanel) studioMediaPanel.style.display = 'none';
   if (studioActionBar) studioActionBar.style.display = '';
@@ -1990,7 +1990,7 @@ function selectAgent(agentId) {
 /**
  * v13.1: Toggle Studio system prompt preview visibility
  */
-// v28.9: Image Chat panel in Studio — reuses existing renderAutoLabImageLab
+// v28.9: Image Chat panel in Studio - reuses existing renderAutoLabImageLab
 function renderStudioImageChat(container) {
   if (!container) return;
   container.innerHTML = '<div id="studioImageLabPanel"></div>';
@@ -2001,7 +2001,7 @@ function renderStudioImageChat(container) {
   }
 }
 
-// v28.9: Video Chat panel in Studio — reuses existing video lab
+// v28.9: Video Chat panel in Studio - reuses existing video lab
 function renderStudioVideoChat(container) {
   if (!container) return;
   container.innerHTML = '<div id="studioVideoLabPanel"></div>';
@@ -2012,7 +2012,7 @@ function renderStudioVideoChat(container) {
   }
 }
 
-// v28.9: Blog panel in Studio — renders blog editor inline
+// v28.9: Blog panel in Studio - renders blog editor inline
 function renderStudioBlog(container) {
   if (!container) return;
   // Show the existing blog tab content by cloning it from socialTabBlog
@@ -3164,7 +3164,7 @@ function addToRecent(opId) {
   saveRuns();
 }
 
-// v24.27: Removed dead showTab() — zero callers, referenced tab0-tab4 IDs that no longer exist
+// v24.27: Removed dead showTab() - zero callers, referenced tab0-tab4 IDs that no longer exist
 
 function showHistory() {
   var h = document.getElementById('tuningHistory');
@@ -3232,7 +3232,7 @@ function markdownToHtml(text) {
     // Escape HTML (but not in tables which are already rendered)
     .replace(/&(?!#?\w+;)/g, '&amp;')
     .replace(/<(?!\/?(table|thead|tbody|tr|th|td)[>\s])/g, '&lt;')
-    // v30.1: ES5-safe — escape > except inside table tags (no lookbehind)
+    // v30.1: ES5-safe - escape > except inside table tags (no lookbehind)
     .replace(/((?:<\/?(?:table|thead|tbody|tr|th|td)[^>]*)?)>/g, function(match, prefix) {
       return prefix ? match : '&gt;';
     })
@@ -3336,7 +3336,7 @@ function showOutput(run) {
   var outputHeader = document.getElementById('studioOutputHeader');
   
   if (outputContent) {
-    // v22.33: Smart header — use contextual title if available
+    // v22.33: Smart header - use contextual title if available
     if (outputHeader) {
       var agentInfo = run.agentIcon ? run.agentIcon + ' ' : '';
       var headerTitle = run.contextTitle || run.op;
@@ -3347,7 +3347,7 @@ function showOutput(run) {
     var wordCount = run.deliv.split(/\s+/).filter(function(w) { return w.length > 0; }).length;
     var readingTime = Math.ceil(wordCount / 200);
 
-    // v22.33: Clean meta — just word count and read time
+    // v22.33: Clean meta - just word count and read time
     var metaHtml = '<div class="studio-output-meta">';
     metaHtml += '<span>' + wordCount.toLocaleString() + ' words</span>';
     metaHtml += ' · <span>~' + readingTime + ' min read</span>';
@@ -3483,7 +3483,7 @@ function studioClearFormat() {
   document.execCommand('removeFormat', false, null);
 }
 
-// v23.16: Save edits — capture HTML, update currentRun, exit edit mode
+// v23.16: Save edits - capture HTML, update currentRun, exit edit mode
 function saveOutputEdits() {
   var outputContent = document.getElementById('studioOutputContent');
   if (!outputContent) return;
@@ -3499,7 +3499,7 @@ function saveOutputEdits() {
   var saveBar = outputContent.querySelector('.studio-save-edits-bar');
   if (saveBar) saveBar.remove();
 
-  // Capture the edited HTML content — strip any UI elements that crept in
+  // Capture the edited HTML content - strip any UI elements that crept in
   var _tempCanvas = canvasEl.cloneNode(true);
   var _uiEls = _tempCanvas.querySelectorAll('.studio-smart-suggestions, .studio-edit-toolbar, .studio-output-meta, .studio-save-edits-bar, select');
   for (var _ui = 0; _ui < _uiEls.length; _ui++) _uiEls[_ui].remove();
@@ -3528,7 +3528,7 @@ function saveOutputEdits() {
   showToast('Edits saved', 'success');
 }
 
-// v23.16: Cancel edits — revert contenteditable without saving
+// v23.16: Cancel edits - revert contenteditable without saving
 function cancelOutputEdits() {
   var outputContent = document.getElementById('studioOutputContent');
   if (!outputContent) return;
@@ -3884,7 +3884,7 @@ function closeExportDropdown(e) {
 }
 
 
-// v23.4: Export to PDF — uses universal flow with preview + settings
+// v23.4: Export to PDF - uses universal flow with preview + settings
 function exportAsPDF(run) {
   exportStudioAsPDF(run);
 }
@@ -4489,7 +4489,7 @@ function showSettings() {
   if (versionEl) versionEl.textContent = ROWEOS_VERSION;
 
   // v16.12: Pre-fill calendar integration fields and update status
-  // v23.2: gcalClientIdInput removed — Client ID is hardcoded
+  // v23.2: gcalClientIdInput removed - Client ID is hardcoded
   var icloudIdInput = document.getElementById('icloudAppleIdInput');
   if (icloudIdInput) icloudIdInput.value = localStorage.getItem('roweos_icloud_apple_id') || '';
   updateCalendarIntegrationUI();
@@ -4915,7 +4915,7 @@ async function callAnthropicStudioStreaming(model, apiKey, prompt, onChunk, onCo
   }
 }
 
-// v31.0: Backwards-compat shim — maps deprecated gpt-5.4* model IDs to gpt-5.5* UI labels.
+// v31.0: Backwards-compat shim - maps deprecated gpt-5.4* model IDs to gpt-5.5* UI labels.
 // ~10 active users have preferredModel:'gpt-5.4' saved in localStorage / Firestore brand configs.
 // Without normalization their next API call would 404.
 function _normalizeModel(modelId) {
@@ -4935,7 +4935,7 @@ function _modelSupportsWebSearch(modelId) {
 }
 
 // v31.0: Resolve UI model label to actual OpenAI API model ID.
-// "gpt-5.5-thinking" is a UI alias — at the API layer it's gpt-5.5 with reasoning.effort:high.
+// "gpt-5.5-thinking" is a UI alias - at the API layer it's gpt-5.5 with reasoning.effort:high.
 function _apiModelFor(modelId) {
   if (modelId === 'gpt-5.5-thinking' || modelId === 'gpt-5.4-thinking') return 'gpt-5.5';
   return _normalizeModel(modelId);
@@ -5003,7 +5003,7 @@ async function callOpenAIStudioStreaming(model, apiKey, prompt, onChunk, onCompl
       max_output_tokens: 8192,
       input: [{ role: 'user', content: prompt }]
     };
-    // v31.0: Inject reasoning for thinking models — read effort from settings (default 'high')
+    // v31.0: Inject reasoning for thinking models - read effort from settings (default 'high')
     if (thinkingMode) {
       var effortS = (typeof window !== 'undefined' && window.localStorage)
         ? (localStorage.getItem('roweos_reasoning_effort') || 'high')
@@ -5080,7 +5080,7 @@ function extractGeminiResponseText(parts) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// v24.25: GEMINI CONTEXT CACHING — 90% discount on cached input tokens
+// v24.25: GEMINI CONTEXT CACHING - 90% discount on cached input tokens
 // Uses generativelanguage.googleapis.com/v1beta/cachedContents API.
 // Caches system instructions + conversation history; only sends new user message.
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -5465,7 +5465,7 @@ async function callAnthropicAPI(model, apiKey, messages, systemPrompt) {
     return { role: m.role, content: m.content };
   });
 
-  // v24.24: Prompt caching — cache system prompt for 90% input cost reduction on hits
+  // v24.24: Prompt caching - cache system prompt for 90% input cost reduction on hits
   var systemPayload = systemPrompt
     ? [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }]
     : undefined;
@@ -5768,7 +5768,7 @@ async function callAnthropicStreaming(model, apiKey, messages, systemPrompt, onC
     }
     onComplete(fullText);
   } catch (err) {
-    // v16.4: Handle abort gracefully — return partial text
+    // v16.4: Handle abort gracefully - return partial text
     if (err.name === 'AbortError') {
       console.log('[Chat Web] Anthropic stream aborted, returning partial text');
       onComplete(fullText || '');
@@ -5925,7 +5925,7 @@ async function callOpenAIStreaming(model, apiKey, messages, systemPrompt, onChun
       store: false
     };
 
-    // v31.0: Inject reasoning for thinking models — read effort from settings (default 'high')
+    // v31.0: Inject reasoning for thinking models - read effort from settings (default 'high')
     if (thinkingMode) {
       var effortC = (typeof window !== 'undefined' && window.localStorage)
         ? (localStorage.getItem('roweos_reasoning_effort') || 'high')
@@ -6094,7 +6094,7 @@ async function callGoogleStreaming(model, apiKey, messages, systemPrompt, onChun
   // v24.25: Build structured contents array (required for context caching)
   var geminiContents = _buildGeminiContents(messages);
 
-  // v24.25: Try Gemini context caching — cache system prompt + all messages except last user message
+  // v24.25: Try Gemini context caching - cache system prompt + all messages except last user message
   var cacheEntry = null;
   var requestBody = {};
   if (messages.length >= 3 && _geminiSupportsCaching(model)) {
@@ -6110,7 +6110,7 @@ async function callGoogleStreaming(model, apiKey, messages, systemPrompt, onChun
   }
 
   if (cacheEntry) {
-    // Use cached context — only send the new message(s)
+    // Use cached context - only send the new message(s)
     var newMessages = messages.slice(messages.length - 1);
     requestBody = {
       cachedContent: cacheEntry.name,
@@ -6119,7 +6119,7 @@ async function callGoogleStreaming(model, apiKey, messages, systemPrompt, onChun
     };
     if (ROWEOS_DEBUG) console.log('[GeminiCache] Using cache:', cacheEntry.name, 'cached tokens:', cacheEntry.tokenCount);
   } else {
-    // No cache — send full contents with systemInstruction
+    // No cache - send full contents with systemInstruction
     requestBody = {
       contents: geminiContents,
       systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined,
@@ -6296,7 +6296,7 @@ async function generateConversationTitle(conversation, brand, commandId) {
       return;
     }
     
-    // v20.1: Handle multimodal content (array) — use displayContent fallback
+    // v20.1: Handle multimodal content (array) - use displayContent fallback
     var userMsg = (conversation[0].displayContent || (typeof conversation[0].content === 'string' ? conversation[0].content : '[Image]')).substring(0, 200);
     var aiMsg = (conversation[1].displayContent || (typeof conversation[1].content === 'string' ? conversation[1].content : '')).substring(0, 300);
     
@@ -6671,7 +6671,7 @@ async function executeWorkflowOperation(op, brand, context, params) {
     if (_resolved) { provider = _resolved.provider; model = _resolved.model; }
     else { provider = 'anthropic'; model = 'claude-sonnet-4-6'; }
   }
-  var apiKey = await getApiKey(provider); // v24.27: was missing await — passed Promise as key
+  var apiKey = await getApiKey(provider); // v24.27: was missing await - passed Promise as key
 
   if (!apiKey) {
     throw new Error('No API key configured for ' + provider);
@@ -7536,7 +7536,7 @@ async function handleNanobananaChatImage(model, userMessage, onChunk, onComplete
       nanobananaImageActive = false;
       _nanobananaLastImage = null;
       _nanobananaImageHistory = [];
-      // v15.3: Model returned text only — display it gracefully instead of erroring
+      // v15.3: Model returned text only - display it gracefully instead of erroring
       var textResult = (result && result.text) ? result.text : 'Image generation completed but no image was returned. Try a more specific prompt.';
       onComplete(textResult);
     }
@@ -7687,7 +7687,7 @@ function pollDeepResearch(interactionId, onProgress, onComplete, onError, apiKey
           // v24.18: Known in-progress state - don't log as unknown
           if (ROWEOS_DEBUG) console.log('[RoweOS] Deep Research in progress, elapsed=' + elapsed + 's');
         } else if (status === 'unknown') {
-          // v22.10: Unknown status — log full response for debugging
+          // v22.10: Unknown status - log full response for debugging
           console.warn('[RoweOS] Deep Research unknown status, full response:', JSON.stringify(data).substring(0, 500));
         }
       })
@@ -7779,7 +7779,7 @@ function runDeepResearchFull(query, onProgress, maxRetries) {
   });
 }
 
-// v13.9: Deep Research state (v16.6: removed duplicate toggleDeepResearch — single definition at line ~82927)
+// v13.9: Deep Research state (v16.6: removed duplicate toggleDeepResearch - single definition at line ~82927)
 window._deepResearchActive = false;
 
 /**

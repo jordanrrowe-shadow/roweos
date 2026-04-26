@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// v23.0: SYNC SAFETY — IndexedDB Snapshots + Backup Engine
+// v23.0: SYNC SAFETY - IndexedDB Snapshots + Backup Engine
 // Pre-sync snapshots prevent data loss during cross-device conflicts
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -71,7 +71,7 @@ function initSyncIndexedDB() {
   } catch(e) {
     console.warn('[SyncDB] IndexedDB init error:', e);
     _syncDB = null;
-    _syncDBReady = true; // v25.0: Same — prevent queue from hanging forever
+    _syncDBReady = true; // v25.0: Same - prevent queue from hanging forever
   }
 }
 
@@ -207,7 +207,7 @@ function _purgeOldSnapshots(uid) {
   });
 }
 
-// v23.0: Undo Last Sync — restores the most recent snapshot
+// v23.0: Undo Last Sync - restores the most recent snapshot
 function undoLastSync() {
   var lastId = parseInt(localStorage.getItem('roweos_last_snapshot_id') || '0');
   if (!lastId) {
@@ -396,13 +396,13 @@ function _executeBackupImport(backup) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// v23.9: Smart Restore — Add Brand, Merge, Full Overwrite
+// v23.9: Smart Restore - Add Brand, Merge, Full Overwrite
 // ─────────────────────────────────────────────────────────────────────
 
 var _pendingRestoreBackup = null;
 var _restoreMode = 'merge';
 
-// v23.9: Restore category definitions — maps display name to localStorage keys
+// v23.9: Restore category definitions - maps display name to localStorage keys
 var RESTORE_CATEGORIES = {
   brands: { label: 'Brands & Identity', keys: ['roweos_user_brands', 'roweos_user_brand_settings', 'roweos_identity_config', 'roweos_guardrails', 'roweos_primary_brand'] },
   knowledge: { label: 'Knowledge', keys: ['roweos_knowledge_0', 'roweos_knowledge_1', 'roweos_knowledge_2', 'roweos_knowledge_3', 'roweos_knowledge_4', 'roweos_user_knowledge', 'roweos_brand_memory', 'roweos_life_memory'] },
@@ -919,11 +919,11 @@ function markChatActivity() {
     clearTimeout(deferredSyncTimer);
     deferredSyncTimer = null;
   }
-  // v25.0: Write-through — sync conversations (deferred 5s)
+  // v25.0: Write-through - sync conversations (deferred 5s)
   if (typeof writeDBConversations === 'function') writeDBConversations();
 }
 
-// v25.0: Request sync — triggers conversation write-through
+// v25.0: Request sync - triggers conversation write-through
 function requestSync() {
   if (typeof writeDBConversations === 'function') writeDBConversations();
 }
@@ -1009,7 +1009,7 @@ async function syncToFirebaseV1_legacy() {
     // showToast('Syncing to cloud...', 'info');
     updateSyncIndicator('syncing');
     
-    // v22.32: Removed autoTrimDataForSync — sync functions trim their own copies for Firestore
+    // v22.32: Removed autoTrimDataForSync - sync functions trim their own copies for Firestore
 
     // v12.2.7: Respect both syncSettings and per-category sync preferences
     var conversationsData = {};
@@ -1096,7 +1096,7 @@ async function syncToFirebaseV1_legacy() {
         }
       }
 
-      // v16.6: Removed library content trimming — full file content should sync
+      // v16.6: Removed library content trimming - full file content should sync
       // Only strip base64 from library file content to prevent Firestore errors
       if (syncSettings.libraryContent && brandLibSize > 300000) {
         try {
@@ -1129,7 +1129,7 @@ async function syncToFirebaseV1_legacy() {
       }
     }
     
-    // v15.13: Safe JSON parse helper — prevents corrupted localStorage from crashing sync
+    // v15.13: Safe JSON parse helper - prevents corrupted localStorage from crashing sync
     function safeParse(key, fallback) {
       try {
         var raw = localStorage.getItem(key);
@@ -1347,7 +1347,7 @@ async function syncToFirebaseV1_legacy() {
     // v11.0.5: Silent sync - no toast spam
     // showToast('Synced to cloud ✓', 'success');
 
-    // v19.6: Notification Center — throttled sync success
+    // v19.6: Notification Center - throttled sync success
     try {
       var _now = Date.now();
       if (_now - _lastSyncNotifTime > 60000) {
@@ -1360,7 +1360,7 @@ async function syncToFirebaseV1_legacy() {
     console.error('Firebase sync error:', error);
     updateSyncIndicator('error');
 
-    // v19.6: Notification Center — sync error
+    // v19.6: Notification Center - sync error
     try {
       var _nowErr = Date.now();
       if (_nowErr - _lastSyncNotifTime > 60000) {
@@ -1455,7 +1455,7 @@ function autoTrimDataForSync() {
     localStorage.setItem('roweos_life_agentCommands', JSON.stringify(lifeCmds));
   } catch (e) { console.warn('[AutoTrim] life agentCommands error:', e); }
   
-  // 4. Library files — v15.37: Do NOT trim library content. User explicitly saved these outputs.
+  // 4. Library files - v15.37: Do NOT trim library content. User explicitly saved these outputs.
   // Only cap file count per brand (keep last 100) to prevent unbounded growth.
   try {
     var library = JSON.parse(localStorage.getItem('roweosLibrary') || '{}');
@@ -1473,7 +1473,7 @@ function autoTrimDataForSync() {
     }
   } catch (e) { console.warn('[AutoTrim] library error:', e); }
 
-  // 5. LifeAI Library — v15.37: Same — preserve content, only cap file count
+  // 5. LifeAI Library - v15.37: Same - preserve content, only cap file count
   try {
     var lifeLib = JSON.parse(localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}');
     if (lifeLib.files && lifeLib.files.length > 100) {
@@ -1550,7 +1550,7 @@ function emergencyDataTrim() {
   // Clear conversation history completely
   localStorage.removeItem('roweos_conversations');
   
-  // v15.37: Emergency trim — cap library file count only, never trim content
+  // v15.37: Emergency trim - cap library file count only, never trim content
   try {
     var library = JSON.parse(localStorage.getItem('roweosLibrary') || '{}');
     var elibChanged = false;
@@ -1614,7 +1614,7 @@ function collectConversationsWithLimit() {
   var convos = {};
 
   // v15.18: Sanitize a message for Firestore (strip base64, remove undefined)
-  // v16.6: Increased limits — preserve full content for sync, only strip binary data
+  // v16.6: Increased limits - preserve full content for sync, only strip binary data
   function sanitizeMessage(msg) {
     var clean = { role: msg.role || 'user' };
     if (msg.displayContent !== undefined && msg.displayContent !== null) {
@@ -1624,7 +1624,7 @@ function collectConversationsWithLimit() {
       if (typeof msg.content === 'string') {
         // Strip base64 data URLs (images embedded in markdown)
         var c = msg.content.replace(/data:(image|application)\/[^;]+;base64,[A-Za-z0-9+\/=]+/g, '[image-data-stripped]');
-        // v16.6: Raised limit from 8KB to 200KB — full messages should sync
+        // v16.6: Raised limit from 8KB to 200KB - full messages should sync
         if (c.length > 200000) c = c.substring(0, 200000) + '\n...[trimmed for sync]';
         clean.content = c;
       } else if (Array.isArray(msg.content)) {
@@ -1664,7 +1664,7 @@ function collectConversationsWithLimit() {
     } catch (e) {}
   }
 
-  // Agent history — stringify and limit size
+  // Agent history - stringify and limit size
   // v16.6: Raised limits to preserve full conversation content for sync
   if (typeof agentCommands !== 'undefined' && agentCommands.length > 0) {
     try {
@@ -1737,7 +1737,7 @@ function loadFromFirebase(showNotification) {
   // v15.0: Redirect to subcollection-based load
   if (showNotification === undefined) showNotification = true;
   console.log('[Firebase] Redirecting to loadFromFirebaseV2...');
-  // v24.4: Always skip mode sync on login — mode is per-device, user picks from welcome screen
+  // v24.4: Always skip mode sync on login - mode is per-device, user picks from welcome screen
   return loadFromFirebaseV2(showNotification, true);
 }
 
@@ -1784,7 +1784,7 @@ async function loadFromFirebaseV1_legacy(showNotification) {
 
 // Apply cloud data to local storage
 function applyCloudData(data) {
-  // Brands — v20.9: Don't overwrite if local has more brands than cloud
+  // Brands - v20.9: Don't overwrite if local has more brands than cloud
   if (data.brands && data.brands.length > 0) {
     var localBCount = 0;
     try { localBCount = JSON.parse(localStorage.getItem(USER_DATA_KEYS.brands) || '[]').length; } catch(e) {}
@@ -1792,7 +1792,7 @@ function applyCloudData(data) {
       localStorage.setItem(USER_DATA_KEYS.brands, JSON.stringify(data.brands));
       console.log('Firebase: Loaded', data.brands.length, 'brands');
     } else {
-      console.warn('Firebase: Cloud has', data.brands.length, 'brands but local has', localBCount, '— keeping local');
+      console.warn('Firebase: Cloud has', data.brands.length, 'brands but local has', localBCount, '- keeping local');
     }
   }
   
@@ -1804,7 +1804,7 @@ function applyCloudData(data) {
       // v24.4: Also update in-memory brandSettings so UI reflects cloud data without page reload
       try { brandSettings = JSON.parse(JSON.stringify(data.brandSettings)); } catch(e) {}
     } else {
-      console.log('[applyCloudData] Skipping brandSettings overwrite — local model config saved recently');
+      console.log('[applyCloudData] Skipping brandSettings overwrite - local model config saved recently');
     }
   }
 
@@ -1849,7 +1849,7 @@ function applyCloudData(data) {
   }
   
   // v12.2.7: Operations (gated by sync category)
-  // v23.16: Merge runs by ID instead of replacing — prevents sync from wiping local runs
+  // v23.16: Merge runs by ID instead of replacing - prevents sync from wiping local runs
   if (data.runs && shouldSyncCategory('runs')) {
     var existingRunsObj = {};
     try { existingRunsObj = JSON.parse(localStorage.getItem('roweos_runs') || '{}'); } catch(e) { console.warn('[Sync] Corrupted roweos_runs data:', e.message); }
@@ -1872,7 +1872,7 @@ function applyCloudData(data) {
     localStorage.setItem('roweos_runs', JSON.stringify(existingRunsObj));
   }
   if (data.customOps) localStorage.setItem('roweos_custom_operations', JSON.stringify(data.customOps));
-  // v30.0: Legacy roweos_clients restore disabled — data now in roweos_people
+  // v30.0: Legacy roweos_clients restore disabled - data now in roweos_people
   if (data.pinnedOps) localStorage.setItem('roweos_pinnedOps', JSON.stringify(data.pinnedOps));
   if (data.recentOps) localStorage.setItem('roweos_recentOps', JSON.stringify(data.recentOps));
   
@@ -1906,7 +1906,7 @@ function applyCloudData(data) {
 
   // v12.2.7: Calendar (gated by sync category)
   if (data.calendar && shouldSyncCategory('calendar')) localStorage.setItem('roweos_calendar', JSON.stringify(data.calendar));
-  // v24.14: V1 automation load — merge by updatedAt like V2 (was raw overwrite, clobbering local edits)
+  // v24.14: V1 automation load - merge by updatedAt like V2 (was raw overwrite, clobbering local edits)
   if (data.automations) {
     var v1Autos = data.automations;
     if (typeof _deletedAutomationIds !== 'undefined' && Object.keys(_deletedAutomationIds).length > 0) {
@@ -1938,7 +1938,7 @@ function applyCloudData(data) {
   }
   if (data.scheduledPrompts) localStorage.setItem('roweosScheduledPrompts', JSON.stringify(data.scheduledPrompts));
   
-  // v25.0: BrandAI To-Do items (gated by sync category) — Firestore is truth
+  // v25.0: BrandAI To-Do items (gated by sync category) - Firestore is truth
   if (data.todos && shouldSyncCategory('brand_todos')) localStorage.setItem('roweosTodos', JSON.stringify(data.todos));
   if (data.todoCategories && shouldSyncCategory('brand_todos')) {
     localStorage.setItem('roweos_todo_categories', JSON.stringify(data.todoCategories));
@@ -2107,7 +2107,7 @@ function applyCloudData(data) {
       localStorage.setItem('roweos_user_name', data.lifeAI.userName);
     }
     // v24.4: Don't overwrite mode if user explicitly selected one from welcome screen or cross-device sync
-    // v30.1: App mode is DEVICE-LOCAL — cloud never overwrites it (like theme)
+    // v30.1: App mode is DEVICE-LOCAL - cloud never overwrites it (like theme)
     // Each device remembers its own last mode. Cloud mode caused cross-device mode switching
     // (e.g. iOS in LifeAI mode would force desktop to LifeAI on next load)
     if (data.lifeAI.appMode && !localStorage.getItem('roweos_app_mode')) {
@@ -2166,7 +2166,7 @@ function applyCloudData(data) {
     if (data.lifeAI.goals) localStorage.setItem('roweos_life_goals', JSON.stringify(data.lifeAI.goals));
     if (data.lifeAI.routines) localStorage.setItem('roweos_life_routines', JSON.stringify(data.lifeAI.routines));
     if (data.lifeAI.habits) localStorage.setItem('roweos_life_habits', JSON.stringify(data.lifeAI.habits));
-    // v25.0: LifeAI todo categories — Firestore is truth, no tombstone merge
+    // v25.0: LifeAI todo categories - Firestore is truth, no tombstone merge
     if (data.lifeAI.todoCategories) {
       localStorage.setItem('roweos_life_todo_categories', JSON.stringify(data.lifeAI.todoCategories));
     }
@@ -2190,7 +2190,7 @@ function applyCloudData(data) {
     localStorage.setItem('roweos_journal', JSON.stringify(data.journal));
     console.log('[Firebase] Loaded journal entries:', data.journal.length);
   }
-  // v25.0: Pulse — Firestore is truth, no tombstone merge needed
+  // v25.0: Pulse - Firestore is truth, no tombstone merge needed
   if (data.pulse) {
     if (data.pulse.goals && shouldSyncCategory('goals')) {
       localStorage.setItem('roweos_pulse_goals', JSON.stringify(data.pulse.goals));
@@ -2231,7 +2231,7 @@ function applyCloudData(data) {
   }
 
   // v12.2.4: Load per-brand/mode logos from Firebase
-  // v23.9: Skip logo restoration from root doc — logos are stored in V2 subcollection.
+  // v23.9: Skip logo restoration from root doc - logos are stored in V2 subcollection.
   // Root doc logos field may contain truncated data from V1 era (50% cut off).
   // loadFromFirebaseV2() will load full logos from the subcollection instead.
   if (data.logos || data.brandLogo) {
@@ -2373,7 +2373,7 @@ function setupRealtimeSync() {
     var unsubRoot = db.doc(basePath).onSnapshot(function(doc) {
       if (!doc.exists) return;
       var data = doc.data();
-      // v24.15: Cross-device check BEFORE grace period — never block updates from other devices
+      // v24.15: Cross-device check BEFORE grace period - never block updates from other devices
       if (data.meta && data.meta.lastDeviceId && data.meta.lastDeviceId !== deviceId) {
         console.log('[Firebase V3] Cross-device update detected from ' + data.meta.lastDeviceId + ', pulling V2 data...');
         if (typeof loadFromFirebaseV2 === 'function') {
@@ -2386,7 +2386,7 @@ function setupRealtimeSync() {
         updateSyncIndicator('connected');
         return;
       }
-      // v24.15: Same-device echo — short grace period only (was 30s, now 5s)
+      // v24.15: Same-device echo - short grace period only (was 30s, now 5s)
       var now = Date.now();
       if (now - lastLocalSaveTime < 5000) {
         console.log('[Firebase V3] Same-device echo skipped (' + Math.floor((now - lastLocalSaveTime) / 1000) + 's ago)');
@@ -2548,7 +2548,7 @@ function setupRealtimeSync() {
           } catch(e3) {}
         }
       } else if (_skipBrandSettingsMerge) {
-        console.log('[Firebase V3] Skipping brandSettings merge — local model config saved ' + (Date.now() - _brandModelConfigSavedAt) + 'ms ago');
+        console.log('[Firebase V3] Skipping brandSettings merge - local model config saved ' + (Date.now() - _brandModelConfigSavedAt) + 'ms ago');
       }
       // v28.3: Theme is device-local, never overwrite from real-time sync
       // v29.0: Real-time primary brand sync across devices
@@ -2890,7 +2890,7 @@ function stopPeriodicSync() {
   }
 }
 
-// v15.9: Silent sync — redirect to V2 subcollection sync (was V1 root doc, caused cross-device sync failure)
+// v15.9: Silent sync - redirect to V2 subcollection sync (was V1 root doc, caused cross-device sync failure)
 // v25.0: Silent sync is now a no-op (write-through handles all pushes)
 async function silentSyncToFirebase() {
   // No-op: retained for backward compatibility
@@ -3282,10 +3282,17 @@ function checkUserAccessKey() {
               } else if (action === 'downgrade') {
                 tier = 'solo';
               }
-              // 'flag' — return actual tier, admin sees badge
+              // 'flag' - return actual tier, admin sees badge
             }
           }
-          return { valid: isActive, tier: tier, key: keyString };
+          // v31.0: Surface trialActivatedAt so founder gating can fire for the
+          // 99 pre-launch keyholders who never went through Stripe.
+          return {
+            valid: isActive,
+            tier: tier,
+            key: keyString,
+            trialActivatedAt: keyData.trialActivatedAt || null
+          };
         });
     }).catch(function(err) {
       console.warn('[Auth] checkUserAccessKey error:', err.message);
@@ -3325,12 +3332,26 @@ var _cachedUserTier = 'founder';
 var _cachedUserTierExpiry = 0;
 
 function getUserTier(forceRefresh) {
-  // v20.7: Admin always gets premium — no key needed
+  // v20.7: Admin always gets premium - no key needed
   if (typeof isAdmin === 'function' && isAdmin()) {
     _cachedUserTier = 'premium';
     _cachedUserTierExpiry = Date.now() + 300000;
     return Promise.resolve('premium');
   }
+  // v31.5: Dev/preview tier override — honored only on non-prod hostnames so prod users
+  // can never grant themselves a paid tier by editing localStorage.
+  try {
+    var hostname = (window.location && window.location.hostname) || '';
+    var isProd = hostname === 'roweos.com' || hostname === 'www.roweos.com';
+    if (!isProd) {
+      var overrideTier = localStorage.getItem('roweos_dev_tier_override');
+      if (overrideTier === 'solo' || overrideTier === 'founder' || overrideTier === 'premium') {
+        _cachedUserTier = overrideTier;
+        _cachedUserTierExpiry = Date.now() + 300000;
+        return Promise.resolve(overrideTier);
+      }
+    }
+  } catch (e) {}
   var now = Date.now();
   if (!forceRefresh && _cachedUserTier && now < _cachedUserTierExpiry) {
     return Promise.resolve(_cachedUserTier);
@@ -3351,21 +3372,21 @@ function getUserTier(forceRefresh) {
 }
 
 function hasFeatureAccess(feature) {
-  // v30.1: Tier alignment update — studio, identity, analytics, mail moved to Solo
+  // v30.1: Tier alignment update - studio, identity, analytics, mail moved to Solo
   // Solo ($29): 1 brand, 1 life, chat, library, memory, pulse, rhythm, studio, identity, analytics, mail
   // Founder ($59): Everything in Solo + 5 brands, 5 life, automations agent, pipelines, social, pulse, sync
   // Premium ($79): Everything in Founder + 15 brands, 15 life, private onboarding, white-label, multi-user
   // Backwards compat: 'basic' = solo (rank 1), 'pro' = founder (rank 2), 'enterprise' = premium (rank 3)
   var tierRank = { free: 0, basic: 1, solo: 1, founder: 2, pro: 2, premium: 3, enterprise: 3 };
   var featureMinTier = {
-    // Solo tier — basic access, basic automations, studio, identity, analytics, mail
+    // Solo tier - basic access, basic automations, studio, identity, analytics, mail
     export: 'solo',
     basicAutomations: 'solo',
     studio: 'solo',       // v30.1: moved from founder
     identity: 'solo',     // v30.1: moved from founder
     analytics: 'solo',    // v30.1: moved from founder
     mail: 'solo',         // v30.1: moved from founder
-    // Founder tier — advanced automation, social, sync
+    // Founder tier - advanced automation, social, sync
     sync: 'founder',
     brandConfig: 'founder',
     automations: 'founder',
@@ -3373,7 +3394,7 @@ function hasFeatureAccess(feature) {
     pipelines: 'founder',
     social: 'founder',
     focus: 'founder',
-    // Premium tier — expensive/exclusive features
+    // Premium tier - expensive/exclusive features
     bloom: 'premium',
     brandSharing: 'premium',
     whiteLabel: 'premium',
@@ -3400,7 +3421,7 @@ function getMaxLifeProfiles() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// v24.11: TIER ENFORCEMENT — Upgrade Modal, View Gates, Sidebar Locks
+// v24.11: TIER ENFORCEMENT - Upgrade Modal, View Gates, Sidebar Locks
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // v24.11: Feature-friendly display names
@@ -3417,7 +3438,7 @@ var VIEW_FEATURE_MAP = {
   memory: 'identity', mail: 'mail', sync: 'sync', research: 'research'
 };
 
-// v24.11: Upgrade modal — shows contextual upgrade options based on current tier
+// v24.11: Upgrade modal - shows contextual upgrade options based on current tier
 function showUpgradeModal(feature, requiredTier) {
   // Admin always bypasses
   if (typeof isAdmin === 'function' && isAdmin()) return false;
@@ -3486,7 +3507,7 @@ function checkViewAccess(viewName) {
   var feature = VIEW_FEATURE_MAP[viewName];
   if (!feature) return false; // no gate for this view
   if (hasFeatureAccess(feature)) return false; // user has access
-  // Blocked — show upgrade modal
+  // Blocked - show upgrade modal
   // v30.1: studio, analytics, identity, mail moved to solo
   var featureMinTier = { bloom: 'premium', brandSharing: 'premium', studio: 'solo', automations: 'founder', automationsAgent: 'founder', pipelines: 'founder', social: 'founder', focus: 'founder', analytics: 'solo', identity: 'solo', mail: 'solo', sync: 'founder' };
   var requiredTier = featureMinTier[feature] || 'founder';
@@ -3556,7 +3577,7 @@ function claimBrandConfig(code) {
         showToast('This config has been deactivated', 'error');
         throw new Error('Config inactive');
       }
-      // v20.3: Invite-only configs have no brands — just validate and welcome
+      // v20.3: Invite-only configs have no brands - just validate and welcome
       if (!config.brands || !config.brands.length) {
         firebase.firestore().collection('brand_configs').doc(code).update({
           usageCount: firebase.firestore.FieldValue.increment(1)
@@ -3572,7 +3593,7 @@ function claimBrandConfig(code) {
       var isReplace = existingCount === 0;
 
       if (isReplace) {
-        // v20.3: Fresh user — replace entirely
+        // v20.3: Fresh user - replace entirely
         brands = config.brands.slice();
         saveBrands();
 
@@ -3596,7 +3617,7 @@ function claimBrandConfig(code) {
           } catch(e) {}
         }
       } else {
-        // v20.3: Existing user — merge/append brands
+        // v20.3: Existing user - merge/append brands
         var offset = existingCount;
         config.brands.forEach(function(brand) {
           // Check for duplicate by name
@@ -3689,7 +3710,7 @@ function joinBrandConfigFromSettings() {
 function adminGenerateBrandConfig() {
   if (!isAdmin()) return;
 
-  // v20.3: Name field — required for invite-only, auto-filled for brand data configs
+  // v20.3: Name field - required for invite-only, auto-filled for brand data configs
   var nameInput = document.getElementById('adminBrandConfigName');
   var configName = nameInput ? nameInput.value.trim() : '';
 
@@ -3707,7 +3728,7 @@ function adminGenerateBrandConfig() {
     code = generateAccessKeyString();
   }
 
-  // v20.3: Brand selection — invite only, single brand, or all
+  // v20.3: Brand selection - invite only, single brand, or all
   var brandSelect = document.getElementById('adminBrandConfigBrand');
   var brandVal = brandSelect ? brandSelect.value : 'invite';
   var configBrands = [];
@@ -3722,7 +3743,7 @@ function adminGenerateBrandConfig() {
       if (nameInput) nameInput.focus();
       return;
     }
-    // Empty arrays — claimBrandConfig will see brands.length === 0 and skip data load
+    // Empty arrays - claimBrandConfig will see brands.length === 0 and skip data load
     configBrands = [];
   } else {
     if (!brands || !brands.length) {
@@ -3825,7 +3846,7 @@ function copyBrandConfigUrl() {
   }
 }
 
-// v20.4: Share My Brand — any signed-in user can share their current brand
+// v20.4: Share My Brand - any signed-in user can share their current brand
 function openShareBrandModal() {
   if (!firebaseUser) {
     showToast('Sign in to share your brand', 'error');
@@ -4116,6 +4137,10 @@ function _applySignupPrefill() {
 
     if (prefill.source === 'info') {
       window._signupSource = 'Info Page Lead';
+    } else if (prefill.source === 'founder_offer') {
+      window._signupSource = 'Founder100 Email';
+    } else if (prefill.source === 'founder_apikey') {
+      window._signupSource = 'Founder100 API Pack';
     }
     return true;
   } catch (e) {
@@ -4138,7 +4163,7 @@ function showAuthGate() {
     gate.style.display = 'flex';
     gate.style.opacity = '1';
   }
-  // v20.14: Always reset to splash view (Phase 1) — never show login form directly.
+  // v20.14: Always reset to splash view (Phase 1) - never show login form directly.
   // The splash has no email/password fields so iOS autofill won't trigger.
   var splash = document.getElementById('authSplash');
   var login = document.getElementById('authLogin');
@@ -4156,6 +4181,17 @@ function showAuthGate() {
   // skip the splash and prefill the create-account form. Run after the
   // resets above so the splash hide/email-form reveal sticks.
   _applySignupPrefill();
+  // v31.3: Capture campaign source even without an email prefill.
+  // Founder100 button arrives as /?source=founder_offer with no email — _applySignupPrefill
+  // exits early in that case, so the source needs its own capture path here.
+  try {
+    var _src = _parseSignupURLParams().source;
+    if (!window._signupSource) {
+      if (_src === 'founder_offer') window._signupSource = 'Founder100 Email';
+      else if (_src === 'founder_apikey') window._signupSource = 'Founder100 API Pack';
+      else if (_src === 'info') window._signupSource = 'Info Page Lead';
+    }
+  } catch (e) {}
 }
 
 function hideAuthGate() {
@@ -4168,6 +4204,39 @@ function hideAuthGate() {
     setTimeout(function() { gate.style.display = 'none'; }, 400);
   }
 }
+
+// v31.5: Dev/admin bypass for the tier gate. Used in preview environments and by
+// admin to validate the actual app surface (chat/blob/accessibility settings) without
+// going through Stripe checkout. Sets a localStorage tier override that getUserTier()
+// honors, hides the gate, and lets the app boot normally.
+//
+// Safety: button that calls this is only rendered when hostname != roweos.com OR user
+// is admin. The override flag itself is checked in getUserTier() so it works after
+// hard refresh too — but ONLY when the same conditions are met (hostname or admin).
+function devBypassTierGate() {
+  try {
+    var hostname = (window.location && window.location.hostname) || '';
+    var isProd = hostname === 'roweos.com' || hostname === 'www.roweos.com';
+    var isAdminUser = (typeof isAdmin === 'function' && isAdmin());
+    if (isProd && !isAdminUser) {
+      console.warn('[devBypassTierGate] Blocked — production hostname and not admin');
+      return;
+    }
+    localStorage.setItem('roweos_dev_tier_override', 'founder');
+    localStorage.setItem('roweos_dev_tier_override_at', String(Date.now()));
+    // Reset cached tier so the next getUserTier() reads the override
+    _cachedUserTier = 'founder';
+    _cachedUserTierExpiry = Date.now() + 300000;
+    var statusEl = document.getElementById('tierSelectStatus');
+    if (statusEl) { statusEl.style.color = '#22c55e'; statusEl.textContent = 'Bypass granted. Loading app...'; }
+    hideAuthGate();
+    // Soft reload so any tier-gated UI re-evaluates with the override in place
+    setTimeout(function() { try { window.location.reload(); } catch(e) {} }, 600);
+  } catch (e) {
+    console.error('[devBypassTierGate] error:', e);
+  }
+}
+window.devBypassTierGate = devBypassTierGate;
 
 function showAccessKeyPrompt() {
   var signInEl = document.getElementById('authGateSignIn');
@@ -4184,6 +4253,17 @@ function showTierSelection() {
     console.log('[Auth] showTierSelection blocked - Stripe return already processed');
     return;
   }
+  // v31.5: Honor dev tier override on non-prod so testers don't get re-gated after reload
+  try {
+    var _h = (window.location && window.location.hostname) || '';
+    var _isProd = _h === 'roweos.com' || _h === 'www.roweos.com';
+    var _override = localStorage.getItem('roweos_dev_tier_override');
+    if (!_isProd && (_override === 'solo' || _override === 'founder' || _override === 'premium')) {
+      console.log('[Auth] showTierSelection skipped - dev tier override active:', _override);
+      hideAuthGate();
+      return;
+    }
+  } catch (e) {}
   console.log('[Auth] showTierSelection called');
   // v30.5: Set flag so showAuthGate() won't override us
   window._tierSelectionActive = true;
@@ -4196,8 +4276,13 @@ function showTierSelection() {
   var migrationOverlay = document.getElementById('migrationOverlay');
 
   // Force gate visible
+  // v31.5: With flex-direction:column, align-items controls HORIZONTAL alignment and
+  // justify-content controls VERTICAL. Earlier code set align-items:flex-start trying to
+  // pin content to the top, but that actually left-aligned the cards on wide desktops.
+  // Correct combo: align-items:center (horizontal center) + justify-content:flex-start
+  // (top-aligned, with overflow-y:auto for scroll on tall content).
   if (gate) {
-    gate.style.cssText = 'position:fixed;inset:0;z-index:100000;background:#0a0a0a;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:1;';
+    gate.style.cssText = 'position:fixed;inset:0;z-index:100000;background:#0a0a0a;display:flex;align-items:center;justify-content:flex-start;flex-direction:column;opacity:1;overflow-y:auto;-webkit-overflow-scrolling:touch;';
   }
   // Hide everything inside the gate except tier select
   if (splash) { splash.style.display = 'none'; splash.style.opacity = '0'; }
@@ -4207,7 +4292,26 @@ function showTierSelection() {
   // Show tier select
   if (tierSelect) {
     tierSelect.style.display = 'block';
+    // v31.5: margin:auto 0 vertically centers within the flex column when there's
+    // spare height, but collapses to 0 when content is taller than viewport (so the
+    // top of the cards is never scrolled out of view on short windows).
+    tierSelect.style.marginTop = 'auto';
+    tierSelect.style.marginBottom = 'auto';
     console.log('[Auth] Tier select shown, children:', tierSelect.childElementCount);
+    // v31.5: Show preview/admin bypass when hostname is non-prod OR user is admin
+    try {
+      var hostname = (window.location && window.location.hostname) || '';
+      var isProd = hostname === 'roweos.com' || hostname === 'www.roweos.com';
+      var isAdminUser = (typeof isAdmin === 'function' && isAdmin());
+      var bypassWrap = document.getElementById('tierDevBypassWrap');
+      if (bypassWrap && (!isProd || isAdminUser)) {
+        bypassWrap.style.display = 'block';
+      }
+    } catch (e) { /* ignore */ }
+    // v31.2: Trigger Welcome intro fade-into-tier-picker animation
+    if (typeof window._tierIntroAutoStart === 'function') {
+      try { window._tierIntroAutoStart(); } catch(e) { console.warn('[Auth] tier intro start failed:', e); }
+    }
   } else {
     console.error('[Auth] #authGateTierSelect NOT FOUND in DOM');
   }
@@ -4249,6 +4353,149 @@ function selectTier(tier) {
     console.error('[TierSelect] Checkout error:', err);
     if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'Unable to start checkout. Please try again.'; }
   });
+}
+
+// v31.0: Premium Founder activation splash for the 99 pre-launch keyholders.
+// Shown after a valid Founder key is detected but trialActivatedAt is unset.
+// Single CTA -> selectTier('founder') -> Stripe 14-day trial with mandatory CC.
+function showFounderTrialActivation(keyString) {
+  window._tierSelectionActive = true;
+  var gate = document.getElementById('authGate');
+  var splash = document.getElementById('authSplash');
+  var login = document.getElementById('authLogin');
+  var tierSelect = document.getElementById('authGateTierSelect');
+  var goldOverlay = document.getElementById('goldTransitionOverlay');
+  var migrationOverlay = document.getElementById('migrationOverlay');
+  if (gate) { gate.style.cssText = 'position:fixed;inset:0;z-index:100000;background:#0a0a0a;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:1;overflow-y:auto;padding:40px 20px;'; }
+  if (splash) { splash.style.display = 'none'; }
+  if (login) { login.style.display = 'none'; }
+  if (tierSelect) { tierSelect.style.display = 'none'; }
+  if (goldOverlay) { goldOverlay.style.display = 'none'; goldOverlay.style.pointerEvents = 'none'; }
+  if (migrationOverlay) { migrationOverlay.style.display = 'none'; }
+
+  var existing = document.getElementById('founderActivationSplash');
+  if (existing) existing.parentNode.removeChild(existing);
+
+  var feat = function(svg, title, desc) {
+    return '<div style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(168,152,120,0.12);">'
+      + '<div style="flex-shrink:0;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(168,152,120,0.15),rgba(212,184,150,0.08));display:flex;align-items:center;justify-content:center;">'
+      + svg + '</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-family:Georgia,serif;font-size:15px;color:#f0e8d8;margin-bottom:3px;">' + title + '</div>'
+      + '<div style="font-size:12.5px;color:#888;line-height:1.5;">' + desc + '</div></div></div>';
+  };
+  var icon = function(d) {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#a89878" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+  };
+
+  var html = '<div id="founderActivationSplash" style="max-width:580px;width:100%;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#f5f0e6;animation:founderFadeIn 0.6s ease-out;">'
+    + '<style>@keyframes founderFadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes founderShimmer{0%,100%{opacity:0.6}50%{opacity:1}}.founder-shimmer{animation:founderShimmer 2.4s ease-in-out infinite}</style>'
+
+    // Crest / badge
+    + '<div style="text-align:center;margin-bottom:28px;">'
+    + '<div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(212,184,150,0.35),rgba(168,152,120,0.08));border:1px solid rgba(212,184,150,0.4);margin-bottom:18px;position:relative;">'
+    + '<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#d4b896" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L15 8.5 L22 9.3 L17 14.1 L18.2 21 L12 17.8 L5.8 21 L7 14.1 L2 9.3 L9 8.5 Z"/></svg>'
+    + '</div>'
+    + '<div class="founder-shimmer" style="font-size:11px;letter-spacing:3.5px;color:#a89878;text-transform:uppercase;margin-bottom:14px;">Founder · Reserved Access</div>'
+    + '<h1 style="font-family:Georgia,serif;font-size:34px;font-weight:400;line-height:1.2;margin:0 0 14px;color:#f5ecd9;">Welcome to RoweOS, Founder.</h1>'
+    + '<p style="font-size:15px;color:#a89878;line-height:1.6;margin:0 auto;max-width:440px;">You are one of <span style="color:#d4b896;font-weight:500;">99 people</span> chosen for early Founder access. Your key has been waiting for you. Activate your 14-day trial below to begin.</p>'
+    + '</div>'
+
+    // Plan summary card
+    + '<div style="background:linear-gradient(180deg,rgba(168,152,120,0.08),rgba(168,152,120,0.02));border:1px solid rgba(168,152,120,0.25);border-radius:16px;padding:24px 26px 26px;margin-bottom:24px;">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;">'
+    + '<div><div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#a89878;margin-bottom:4px;">Your Plan</div>'
+    + '<div style="font-family:Georgia,serif;font-size:22px;color:#f5ecd9;">Founder · Locked Forever</div></div>'
+    + '<div style="text-align:right;"><div style="font-family:Georgia,serif;font-size:30px;color:#d4b896;line-height:1;">$59<span style="font-size:13px;color:#888;font-weight:400;"> /mo</span></div>'
+    + '<div style="font-size:11px;color:#777;margin-top:4px;">after 14-day trial</div></div></div>'
+
+    + feat(icon('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'),
+        'Founder Pricing Locked For Life',
+        'Keep $59/mo permanently - $20 less than Premium - as long as your subscription stays active.')
+    + feat(icon('<circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M1 21v-2a4 4 0 0 1 3-3.87"/>'),
+        '5 Brand & LifeAI Profiles',
+        'Run multiple brands and personal profiles from one workspace.')
+    + feat(icon('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),
+        'Studio, Pipelines & Full Automations',
+        'Multi-step Studio operations, AI agents, scheduled pipelines, and Bloom-ready content.')
+    + feat(icon('<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'),
+        'Mail & Social Publishing',
+        'Send from your domain, schedule posts, run multi-platform campaigns from one inbox.')
+    + feat(icon('<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>'),
+        'Cloud Sync Across Every Device',
+        'Your brands, automations, and identity follow you to every browser and device.')
+    + feat(icon('<path d="M12 2 L9.5 8 L3 8.7 L8 13.2 L6.5 19.5 L12 16.3 L17.5 19.5 L16 13.2 L21 8.7 L14.5 8 Z"/>'),
+        'Priority Support & Founder Channel',
+        'Direct line to Jordan and the Founder roadmap - your feedback ships first.')
+    + '</div>'
+
+    // Trial reassurance row
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">'
+    + '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:center;">'
+    + '<div style="font-family:Georgia,serif;font-size:24px;color:#d4b896;line-height:1;">14</div>'
+    + '<div style="font-size:11px;color:#888;margin-top:6px;letter-spacing:0.5px;">DAYS FREE</div></div>'
+    + '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:center;">'
+    + '<div style="font-family:Georgia,serif;font-size:24px;color:#d4b896;line-height:1;">$0</div>'
+    + '<div style="font-size:11px;color:#888;margin-top:6px;letter-spacing:0.5px;">CHARGED TODAY</div></div>'
+    + '</div>'
+
+    // CTA
+    + '<button id="founderActivateBtn" style="width:100%;padding:18px 24px;background:linear-gradient(135deg,#a89878,#d4b896);color:#0a0a0a;border:none;border-radius:12px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:15px;font-weight:600;letter-spacing:0.3px;cursor:pointer;transition:all 0.25s;box-shadow:0 8px 24px rgba(168,152,120,0.25);">Activate My 14-Day Trial</button>'
+    + '<p id="founderActivateStatus" style="text-align:center;font-size:13px;color:#a89878;margin:14px 0 0;min-height:18px;"></p>'
+    + '<p style="text-align:center;font-size:11px;color:#666;margin:14px 0 0;line-height:1.6;">A payment method is required to start your trial. We will not charge you until day 15. Cancel anytime in account settings.</p>'
+
+    // Sign out escape hatch
+    + '<div style="text-align:center;margin-top:28px;">'
+    + '<a href="#" id="founderSignOutLink" style="font-size:12px;color:#666;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:1px;">Sign out</a>'
+    + '</div>'
+
+    + '</div>';
+
+  // Mount inside the auth gate so it inherits the lockdown
+  if (gate) {
+    var mount = document.createElement('div');
+    mount.innerHTML = html;
+    gate.appendChild(mount.firstChild);
+    var btn = document.getElementById('founderActivateBtn');
+    if (btn) {
+      btn.onmouseover = function() { btn.style.transform = 'translateY(-1px)'; btn.style.boxShadow = '0 12px 32px rgba(168,152,120,0.35)'; };
+      btn.onmouseout = function() { btn.style.transform = 'translateY(0)'; btn.style.boxShadow = '0 8px 24px rgba(168,152,120,0.25)'; };
+      btn.onclick = function() {
+        btn.disabled = true;
+        btn.textContent = 'Opening secure checkout...';
+        var statusEl = document.getElementById('founderActivateStatus');
+        if (statusEl) statusEl.textContent = 'Connecting to Stripe…';
+        try { localStorage.setItem('roweos_pending_tier', 'founder'); } catch(e) {}
+        var email = (firebaseUser && firebaseUser.email) || '';
+        fetch('/api/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tier: 'founder', email: email, founderActivation: true, accessKey: keyString })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.url) { window.location.href = data.url; }
+          else {
+            btn.disabled = false;
+            btn.textContent = 'Activate My 14-Day Trial';
+            if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.textContent = data.error || 'Could not start checkout.'; }
+          }
+        })
+        .catch(function() {
+          btn.disabled = false;
+          btn.textContent = 'Activate My 14-Day Trial';
+          if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.textContent = 'Network error. Please try again.'; }
+        });
+      };
+    }
+    var signOutLink = document.getElementById('founderSignOutLink');
+    if (signOutLink) {
+      signOutLink.onclick = function(e) {
+        e.preventDefault();
+        try { firebase.auth().signOut(); } catch(_) {}
+        try { window.location.reload(); } catch(_) {}
+      };
+    }
+  }
 }
 
 // v27.1: Show access key verification screen after signup email sent
@@ -4322,7 +4569,7 @@ function handleAccessKeySubmit() {
 
 function showDataRestorePrompt(data) {
   _pendingRestoreData = data;
-  // v18.9: Hide auth gate first — its z-index (100000) covers the restore prompt (99999)
+  // v18.9: Hide auth gate first - its z-index (100000) covers the restore prompt (99999)
   hideAuthGate();
   var prompt = document.getElementById('dataRestorePrompt');
   var greeting = document.getElementById('restoreGreeting');
@@ -4337,14 +4584,14 @@ function acceptDataRestore() {
   var prompt = document.getElementById('dataRestorePrompt');
   if (prompt) prompt.style.display = 'none';
   if (_pendingRestoreData) {
-    // v24.27: Don't block the app — restore in background, let user proceed immediately
+    // v24.27: Don't block the app - restore in background, let user proceed immediately
     try {
       applyCloudData(_pendingRestoreData);
       reloadAllData();
-      // v30.2: Call loadBrands() directly — reloadAllData() may be throttled
+      // v30.2: Call loadBrands() directly - reloadAllData() may be throttled
       if (typeof loadBrands === 'function') loadBrands();
       if (typeof initBrandLogo === 'function') initBrandLogo();
-      showToast('Data restored from cloud — check Sync for details', 'success');
+      showToast('Data restored from cloud - check Sync for details', 'success');
     } catch(e) {
       console.error('[Restore] Error:', e);
       showToast('Some data may not have restored. Check Sync.', 'warning');
@@ -4420,7 +4667,7 @@ function proceedToApp() {
 }
 
 // v30.5: Notify admin of new signup (fire-and-forget, deduped per session)
-// Called right before showTierSelection — if we're showing tier selection, user IS new
+// Called right before showTierSelection - if we're showing tier selection, user IS new
 function _notifyNewSignup(user, source) {
   if (!user || window._signupNotified) return;
   window._signupNotified = true;
@@ -4477,7 +4724,7 @@ function handleAuthState(user) {
               try {
                 applyCloudData(doc.data());
                 reloadAllData();
-                // v30.2: Call loadBrands() directly — reloadAllData() may be throttled
+                // v30.2: Call loadBrands() directly - reloadAllData() may be throttled
                 if (typeof loadBrands === 'function') loadBrands();
                 if (typeof initBrandLogo === 'function') initBrandLogo();
               } catch(e) { console.warn('[Auth] Silent restore error:', e); }
@@ -4515,7 +4762,7 @@ function handleAuthState(user) {
   // v30.4: If user has no brands locally, they're a new user.
   if (!brands || brands.length === 0) {
     // Check if returning from Stripe first
-    // v30.5: Also check window._stripeSubscriptionSuccess — initApp() cleans the URL before this runs
+    // v30.5: Also check window._stripeSubscriptionSuccess - initApp() cleans the URL before this runs
     var urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('subscription') === 'success' || window._stripeSubscriptionSuccess) {
       var stripeTier = urlParams.get('tier') || window._stripeSubscriptionTier || localStorage.getItem('roweos_pending_tier') || 'solo';
@@ -4532,13 +4779,19 @@ function handleAuthState(user) {
     // v30.5: Always check for a valid access key before showing tier selection.
     // The user may be returning on a new device/browser where they already paid.
     if (window._stripeReturnProcessed) {
-      // Already handled this page load — go straight to cloud check
+      // Already handled this page load - go straight to cloud check
       _handlePostKeyCloudCheck(user);
       return;
     }
     console.log('[Auth] No brands locally - checking for existing access key');
     checkUserAccessKey().then(function(keyResult) {
       if (keyResult.valid) {
+        // v31.0: Gate Founder keys without trial activation (same as keyed-user path below)
+        if (keyResult.tier === 'founder' && !keyResult.trialActivatedAt) {
+          console.log('[Auth] Founder key without trial activation (no-brands path) - showing activation splash');
+          showFounderTrialActivation(keyResult.key);
+          return;
+        }
         console.log('[Auth] User has valid key (tier:', keyResult.tier, ') - proceeding to app');
         _handlePostKeyCloudCheck(user);
       } else {
@@ -4615,6 +4868,37 @@ function handleAuthState(user) {
 
     console.log('[Auth] Valid access key:', keyResult.key, 'tier:', keyResult.tier);
 
+    // v31.0: If returning from Stripe checkout with a Founder key, stamp
+    // trialActivatedAt on the access key doc so the gate stops firing.
+    // This handles the 99 pre-launch Founder keyholders who just completed
+    // their first trial activation.
+    var _vkUrlParams = new URLSearchParams(window.location.search);
+    if (_vkUrlParams.get('subscription') === 'success' && keyResult.tier === 'founder') {
+      window._stripeReturnProcessed = true;
+      try { window.history.replaceState({}, '', window.location.pathname); } catch(e) {}
+      if (statusEl) { statusEl.style.color = '#a89878'; statusEl.textContent = 'Activating your trial...'; }
+      firebase.firestore().collection('access_keys').doc(keyResult.key).update({
+        trialActivatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(function() {
+        console.log('[Auth] Founder trial activation stamped on key:', keyResult.key);
+        _handlePostKeyCloudCheck(user);
+      }).catch(function(err) {
+        console.warn('[Auth] Failed to stamp trialActivatedAt, proceeding anyway:', err);
+        _handlePostKeyCloudCheck(user);
+      });
+      return;
+    }
+
+    // v31.0: Founder trial gate. The 99 pre-launch Founder keys were issued
+    // before Stripe trial activation existed. Their docs have no
+    // trialActivatedAt - we intercept and force them through Stripe before
+    // the app loads.
+    if (keyResult.tier === 'founder' && !keyResult.trialActivatedAt) {
+      console.log('[Auth] Founder key without trial activation - showing activation splash');
+      showFounderTrialActivation(keyResult.key);
+      return;
+    }
+
     // Check for existing cloud data
     _handlePostKeyCloudCheck(user);
   }).catch(function(err) {
@@ -4638,7 +4922,7 @@ function _handlePostKeyCloudCheck(user) {
             try {
               applyCloudData(doc.data());
               reloadAllData();
-              // v30.2: Call loadBrands() directly — reloadAllData() may be throttled
+              // v30.2: Call loadBrands() directly - reloadAllData() may be throttled
               if (typeof loadBrands === 'function') loadBrands();
               if (typeof initBrandLogo === 'function') initBrandLogo();
             } catch(e) { console.warn('[Auth] Silent restore error:', e); }
@@ -4649,7 +4933,7 @@ function _handlePostKeyCloudCheck(user) {
               showStartupScreen();
             });
           } else {
-            // No local data, first visit — offer restore
+            // No local data, first visit - offer restore
             showDataRestorePrompt(doc.data());
           }
         } else {
@@ -4692,12 +4976,12 @@ function uploadToStorage(path, data, contentType) {
   if (!firebase || !firebase.storage) return Promise.reject(new Error('Storage not available'));
   var ref = firebase.storage().ref(path);
   if (typeof data === 'string' && data.indexOf('data:') === 0) {
-    // v15.27: Validate data URL header before uploading — must match data:[type];base64,
+    // v15.27: Validate data URL header before uploading - must match data:[type];base64,
     if (!/^data:[a-zA-Z]+\/[a-zA-Z0-9.+-]+;base64,/.test(data)) {
       console.warn('[Storage] Invalid data URL format, skipping upload for:', path);
       return Promise.reject(new Error('Invalid data URL format'));
     }
-    // Base64 data URL — wrap in try/catch to prevent uncaught format errors
+    // Base64 data URL - wrap in try/catch to prevent uncaught format errors
     try {
       return ref.putString(data, 'data_url').then(function(snapshot) {
         return snapshot.ref.getDownloadURL();
@@ -4728,7 +5012,7 @@ function deleteFromStorage(path) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// v20.6: YOUR PLAN (Settings — visible to any signed-in user)
+// v20.6: YOUR PLAN (Settings - visible to any signed-in user)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function renderSettingsPlan() {
@@ -4787,7 +5071,7 @@ function renderSettingsPlan() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// v24.11: ACCOUNT FOLDER — Profile, Tier, API Keys, Plan Comparison
+// v24.11: ACCOUNT FOLDER - Profile, Tier, API Keys, Plan Comparison
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function renderAccountFolder() {
@@ -4802,7 +5086,7 @@ function renderAccountFolder() {
   }
   if (!userName && userEmail) userName = userEmail.split('@')[0];
 
-  // v30.3: Admin always premium — force cache before reading
+  // v30.3: Admin always premium - force cache before reading
   if (typeof isAdmin === 'function' && isAdmin()) {
     _cachedUserTier = 'premium';
   }
@@ -4912,7 +5196,7 @@ function renderAccountFolder() {
   html += '<div style="flex:1;min-width:180px;padding:18px;border:1px solid ' + (isSolo ? '#60a5fa' : 'var(--border-color)') + ';border-radius:var(--radius-lg);background:var(--bg-secondary);">';
   html += '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);">Essentials</div>';
   html += '<div style="font-size:18px;font-weight:700;color:#60a5fa;margin:4px 0;">Solo</div>';
-  html += '<div style="font-size:20px;font-weight:700;color:var(--text-primary);">$29<span style="font-size:12px;color:var(--text-muted);font-weight:400;">/mo</span></div>';
+  html += '<div style="font-size:20px;font-weight:700;color:var(--text-primary);">$9<span style="font-size:12px;color:var(--text-muted);font-weight:400;">/mo</span></div>';
   // v30.1: Solo now includes studio, identity, analytics, mail
   html += '<div style="font-size:11px;color:var(--text-muted);margin-top:10px;line-height:1.7;">1 Brand, 1 Life profile<br>Studio, Identity, Analytics, Mail<br>Library, Pulse, Rhythm<br>Basic automations</div>';
   if (isSolo) {
@@ -4988,8 +5272,8 @@ var _feedbackAreas = [];
 var _feedbackPlatform = [];
 var _feedbackOS = [];
 
-// v21.0: Dedicated close — completely self-contained, no reliance on generic closeModal
-// v25.1: Robust reset — clear all state so modal can reopen cleanly
+// v21.0: Dedicated close - completely self-contained, no reliance on generic closeModal
+// v25.1: Robust reset - clear all state so modal can reopen cleanly
 function closeFeedbackModal() {
   var modal = document.getElementById('feedbackModal');
   if (modal) {
@@ -5010,7 +5294,7 @@ function closeFeedbackModal() {
 function openFeedbackModal(preselectedArea) {
   var modal = document.getElementById('feedbackModal');
   if (!modal) return;
-  // v21.0: Show modal FIRST — set all visibility properties before any UI reset
+  // v21.0: Show modal FIRST - set all visibility properties before any UI reset
   // This ensures the modal is visible even if reset code throws
   modal.removeAttribute('style');
   modal.classList.remove('open');
@@ -5248,7 +5532,7 @@ function handleFeedbackDrop(e) {
   }
 }
 
-// v21.11: Firestore direct write — NO screenshots in doc (1MB limit), API fire-and-forget for notify
+// v21.11: Firestore direct write - NO screenshots in doc (1MB limit), API fire-and-forget for notify
 function submitFeedback() {
   var btn = document.getElementById('feedbackSubmitBtn');
   function resetBtn() { if (btn) { btn.disabled = false; btn.textContent = 'Submit Feedback'; btn.style.background = ''; btn.style.color = ''; } }
@@ -5294,7 +5578,7 @@ function submitFeedback() {
 
     console.log('[Feedback] Submitting:', feedbackId, category, 'screenshots:', screenshotCount);
 
-    // Safety timeout — 10s
+    // Safety timeout - 10s
     var safetyTimer = setTimeout(function() {
       console.warn('[Feedback] Safety timeout fired');
       showToast('Request timed out', 'warning');
@@ -5324,7 +5608,7 @@ function submitFeedback() {
         }
       }
 
-      // v21.12: Fire-and-forget: notify admin via API (email + push) — include screenshot data for email
+      // v21.12: Fire-and-forget: notify admin via API (email + push) - include screenshot data for email
       try {
         var notifyScreenshots = [];
         try { notifyScreenshots = (_feedbackScreenshots || []).slice(0, 3); } catch(e) {}
@@ -5378,9 +5662,9 @@ function submitFeedback() {
   }
 }
 
-// v21.0: Floating feedback button removed — accessible via System > Feedback
+// v21.0: Floating feedback button removed - accessible via System > Feedback
 
-// v20.19: Admin feedback panel — query and render feedback from Firestore
+// v20.19: Admin feedback panel - query and render feedback from Firestore
 function renderAdminFeedback() {
   if (!isAdmin()) return;
   var container = document.getElementById('adminFeedbackList');
@@ -5565,7 +5849,7 @@ function renderAdminFeedback() {
 }
 
 // v24.25: Export reviewed feedback grouped by feature area with screenshots
-// v24.27: Unified export — supports any status filter
+// v24.27: Unified export - supports any status filter
 function exportFeedbackByStatus(status) {
   if (!isAdmin()) return;
   var statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
@@ -5908,7 +6192,7 @@ function deleteFeedbackItem(feedbackId) {
   });
 }
 
-// v20.7: Tier picker modal — shows all 3 plans, highlights current, upgrade/downgrade
+// v20.7: Tier picker modal - shows all 3 plans, highlights current, upgrade/downgrade
 function openTierPicker() {
   var currentTier = _cachedUserTier || 'free';
   var tierRank = { free: 0, solo: 1, basic: 1, founder: 2, premium: 3 };
@@ -5917,7 +6201,7 @@ function openTierPicker() {
   var tiers = [
     {
       // v30.1: Solo now includes studio, identity, analytics, mail
-      id: 'solo', name: 'Solo', price: '$29', period: '/mo', stage: 'Essentials',
+      id: 'solo', name: 'Solo', price: '$9', period: '/mo', stage: 'Essentials',
       features: ['1 Brand profile', '1 LifeAI profile', 'Studio, Identity, Analytics, Mail', 'Library, Pulse, Rhythm', 'Chat with all AI agents', 'Basic automations']
     },
     {
@@ -5985,7 +6269,7 @@ function openTierPicker() {
   openModal('tierPickerModal');
 }
 
-// v20.7: Handle tier change from picker — routes to portal (existing sub) or new checkout
+// v20.7: Handle tier change from picker - routes to portal (existing sub) or new checkout
 function selectTierChange(tier) {
   closeModal('tierPickerModal');
   var currentTier = _cachedUserTier || 'free';
@@ -5997,7 +6281,7 @@ function selectTierChange(tier) {
     firebase.firestore().collection('roweos_users').doc(firebaseUser.uid).get()
       .then(function(doc) {
         if (doc.exists && doc.data().stripeCustomerId) {
-          // Existing subscriber — send to Customer Portal for plan change
+          // Existing subscriber - send to Customer Portal for plan change
           showToast('Opening subscription management...', 'info');
           var customerId = doc.data().stripeCustomerId;
           return fetch('/api/create-portal-session', {
@@ -6014,7 +6298,7 @@ function selectTierChange(tier) {
             }
           });
         } else {
-          // No existing subscription — create new checkout
+          // No existing subscription - create new checkout
           openCheckoutForTier(tier);
         }
       })
@@ -6181,7 +6465,7 @@ function showAdminTab(tabName) {
   });
   // Show selected tab
   // v31.0: campaigns tab added
-  var tabMap = { keys: 'adminTabKeys', users: 'adminTabUsers', configs: 'adminTabConfigs', pool: 'adminTabPool', feedback: 'adminTabFeedback', signups: 'adminTabSignups', emails: 'adminTabEmails', campaigns: 'adminTabCampaigns' };
+  var tabMap = { keys: 'adminTabKeys', users: 'adminTabUsers', configs: 'adminTabConfigs', pool: 'adminTabPool', feedback: 'adminTabFeedback', signups: 'adminTabSignups', emails: 'adminTabEmails', campaigns: 'adminTabCampaigns', sites: 'adminTabSites' };
   var targetId = tabMap[tabName];
   if (targetId) {
     var el = document.getElementById(targetId);
@@ -6199,15 +6483,22 @@ function showAdminTab(tabName) {
   if (tabName === 'feedback' && typeof renderAdminFeedback === 'function') renderAdminFeedback();
   if (tabName === 'signups' && typeof adminLoadSignups === 'function') adminLoadSignups();
   if (tabName === 'emails' && typeof adminLoadEmailData === 'function') adminLoadEmailData();
-  // v31.0: Auto-load Campaigns tab — adminRenderCampaigns (25-admin-emails.js) owns the panel
+  // v31.0: Auto-load Campaigns tab - adminRenderCampaigns (25-admin-emails.js) owns the panel
   // and renders the rich green-stat dashboard via innerHTML. Falls back to modular
   // adminLoadCampaigns (25-admin-campaigns.js) only if the legacy renderer isn't loaded.
   if (tabName === 'campaigns') {
+    // v31.3: Always refetch click counters when entering the tab so engagement metrics stay current
+    window._adminCampaignClicks = null;
+    window._adminCampaignClickRecipients = null;
     if (typeof adminRenderCampaigns === 'function') {
       adminRenderCampaigns();
     } else if (typeof adminLoadCampaigns === 'function') {
       adminLoadCampaigns();
     }
+  }
+  // v31.3: Sites tab — multi-website Vercel analytics
+  if (tabName === 'sites' && typeof adminRenderSites === 'function') {
+    adminRenderSites();
   }
 }
 
@@ -6249,14 +6540,14 @@ function adminGenerateKey() {
   });
 }
 
-// v22.4: Admin Signups tab — load newsletter subscribers
+// v22.4: Admin Signups tab - load newsletter subscribers
 function adminLoadSignups() {
   if (!isAdmin() || !firebase) return;
   var listEl = document.getElementById('adminSignupsList');
   if (!listEl) return;
   listEl.innerHTML = '<div style="color:var(--text-muted);padding:8px 0;">Loading signups...</div>';
 
-  // v30.1: One-time migration — flip existing 'unknown' sources to 'info_page'
+  // v30.1: One-time migration - flip existing 'unknown' sources to 'info_page'
   var _migKey = 'roweos_signup_source_migrated';
   var _migDone = localStorage.getItem(_migKey);
   var _migPromise = Promise.resolve();
@@ -6377,15 +6668,19 @@ function adminLoadSignups() {
   }); // v30.1: close _migPromise.then
 }
 
-// v22.5: Delete signup — removes subscriber doc + access key doc
+// v22.5: Delete signup - removes subscriber doc + access key doc
 function adminDeleteSignup(email, accessKey, btnEl) {
   if (!isAdmin() || !firebase) return;
+  // v31.2: Use the universal delete so signups + Auth + roweos_users + email_log all clear together.
+  if (typeof adminDeleteUserEverywhere === 'function') {
+    return adminDeleteUserEverywhere(email, '');
+  }
   if (!confirm('Delete signup for ' + email + '?\n\nThis will also revoke access key ' + accessKey + '.')) return;
   var btn = btnEl;
   btn.textContent = '...';
   btn.disabled = true;
   var db = firebase.firestore();
-  // Doc ID is sha256(email).substring(0,20) — same as newsletter.js
+  // Doc ID is sha256(email).substring(0,20) - same as newsletter.js
   // We can't compute sha256 client-side easily, so query by email instead
   var promises = [];
   // Delete subscriber doc by querying email
@@ -6505,6 +6800,9 @@ function loadComposerTemplate(name) {
   } else if (name === 'subscription_info') {
     html = generateSubscriptionInfoPreview();
     if (subjectEl) subjectEl.value = 'RoweOS Plans, API Keys, and AI Routing';
+  } else if (name === 'founder_lifetime_offer') {
+    html = generateFounderLifetimeOfferPreview();
+    if (subjectEl) subjectEl.value = 'Your Founder Lifetime Discount - RoweOS is ready';
   } else if (name === 'individual') {
     html = generateBetaWelcomeEmail(key, 'solo');
     if (subjectEl) subjectEl.value = 'Welcome to RoweOS Solo - Your Access Key';
@@ -6525,7 +6823,10 @@ function loadComposerTemplate(name) {
   var preview = document.getElementById('betaEmailPreviewContent');
   if (preview) {
     var iframeBg = isLightBg ? '#f5f5f5' : '#0a0a0a';
-    preview.innerHTML = '<iframe id="betaEmailIframe" style="width:100%;min-height:300px;border:none;border-radius:8px;background:' + iframeBg + ';" frameborder="0"></iframe>';
+    // v31.0: Force the preview wrapper to inherit the email background so any
+    // gap on the right (caused by light-mode modal chrome) doesn't show as white.
+    preview.style.background = iframeBg;
+    preview.innerHTML = '<iframe id="betaEmailIframe" style="display:block;width:100%;min-height:300px;border:none;border-radius:8px;background:' + iframeBg + ';" frameborder="0"></iframe>';
     var iframe = document.getElementById('betaEmailIframe');
     var doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
@@ -6534,9 +6835,11 @@ function loadComposerTemplate(name) {
     var style = doc.createElement('style');
     if (isLightBg) {
       // v22.7: Light styles for white-bg branded templates
-      style.textContent = '* { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; } body { color: #333; background: #f5f5f5 !important; } a { color: inherit !important; }';
+      style.textContent = 'html,body{width:100%;min-width:100%;margin:0;padding:0}html{background:#f5f5f5 !important}* { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; } body { color: #333; background: #f5f5f5 !important; } a { color: inherit !important; }';
     } else {
-      style.textContent = '* { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; } body { color: #ccc; background: #0a0a0a !important; } div, p, span, td, li, br, section, article { color: #ccc; } ol, ul { color: #ccc; } ol li::marker, ul li::marker { color: #ccc; } font[color="#000000"], font[color="black"] { color: #ccc !important; } [style*="color: rgb(0, 0, 0)"], [style*="color:rgb(0, 0, 0)"], [style*="color: black"] { color: #ccc !important; } code { color: #a89878 !important; font-family: "SF Mono", Monaco, "Courier New", monospace !important; } h1, h2, h3, strong { color: #fff !important; } a { color: #a89878 !important; }';
+      // v31.0: Force html + body to fully fill the iframe with the dark email
+      // background so the right-edge white block goes away.
+      style.textContent = 'html,body{width:100%;min-width:100%;margin:0;padding:0}html{background:#0a0a0a !important}* { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important; } body { color: #ccc; background: #0a0a0a !important; } div, p, span, td, li, br, section, article { color: #ccc; } ol, ul { color: #ccc; } ol li::marker, ul li::marker { color: #ccc; } font[color="#000000"], font[color="black"] { color: #ccc !important; } [style*="color: rgb(0, 0, 0)"], [style*="color:rgb(0, 0, 0)"], [style*="color: black"] { color: #ccc !important; } code { color: #a89878 !important; font-family: "SF Mono", Monaco, "Courier New", monospace !important; } h1, h2, h3, strong { color: #fff !important; } a { color: #a89878 !important; }';
     }
     doc.head.appendChild(style);
     doc.designMode = 'on';
@@ -6685,7 +6988,7 @@ function generateSubscriptionInfoPreview() {
     // Price
     + '<tr>'
     + '<td style="padding:10px 8px;font-size:12px;color:#888;border-bottom:1px solid #1e1e1e;">Price</td>'
-    + '<td style="padding:10px 8px;font-size:14px;color:#e0e0e0;font-weight:600;text-align:center;border-bottom:1px solid #1e1e1e;">$29/mo</td>'
+    + '<td style="padding:10px 8px;font-size:14px;color:#e0e0e0;font-weight:600;text-align:center;border-bottom:1px solid #1e1e1e;">$9/mo</td>'
     + '<td style="padding:10px 8px;font-size:14px;color:#e0e0e0;font-weight:600;text-align:center;border-bottom:1px solid #1e1e1e;">$59/mo</td>'
     + '<td style="padding:10px 8px;font-size:14px;color:#e0e0e0;font-weight:600;text-align:center;border-bottom:1px solid #1e1e1e;">$79/mo</td>'
     + '</tr>'
@@ -6719,13 +7022,13 @@ function generateSubscriptionInfoPreview() {
     + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 20px;">RoweOS works with your own API keys from three providers:</p>'
     + '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:14px 16px;margin:0 0 10px;">'
     + '<p style="margin:0 0 4px;font-size:14px;color:#e0e0e0;font-weight:500;">Anthropic (Claude)</p>'
-    + '<p style="margin:0;font-size:12px;color:#888;">Latest: Sonnet 4.6, Opus 4.7, Haiku 4.5</p></div>'
+    + '<p style="margin:0;font-size:12px;color:#888;">Latest: Opus 4.7, Sonnet 4.6, Haiku 4.5 + mini app building</p></div>'
     + '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:14px 16px;margin:0 0 10px;">'
     + '<p style="margin:0 0 4px;font-size:14px;color:#e0e0e0;font-weight:500;">OpenAI (ChatGPT)</p>'
-    + '<p style="margin:0;font-size:12px;color:#888;">Latest: GPT-5.4, GPT-5.4 Pro, GPT-5.4 Thinking</p></div>'
+    + '<p style="margin:0;font-size:12px;color:#888;">Latest: GPT-5.5 Pro, GPT-5.5, GPT-5.5 Thinking + High Reasoning + OpenAI Image 2</p></div>'
     + '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:14px 16px;margin:0 0 10px;">'
     + '<p style="margin:0 0 4px;font-size:14px;color:#e0e0e0;font-weight:500;">Google (Gemini)</p>'
-    + '<p style="margin:0;font-size:12px;color:#888;">Latest: Gemini 3.1 Pro, Deep Research, NanoBanana 3 Pro</p></div>'
+    + '<p style="margin:0;font-size:12px;color:#888;">Latest: Gemini 3.1 Pro, Deep Research, Nano Banana 3 Pro, Imagen 4 + Veo 3.1 video</p></div>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:16px 0 20px;">Bring your own keys and pay only for what you use. Or purchase pre-loaded keys from The Rowe Collection.</p>'
     + '<div style="text-align:center;margin:0 0 32px;">' + cta('https://roweos.com/purchase', 'Get API Keys') + '</div>'
     // Divider
@@ -6735,6 +7038,84 @@ function generateSubscriptionInfoPreview() {
     + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:0 0 16px;">When you have all three AI providers configured, RoweOS AI automatically selects the best model for each task. Strategy questions route to Claude. Creative content routes to GPT. Research and analysis routes to Gemini.</p>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:0;">One prompt, the right model, every time.</p>';
   return _emailPreviewWrap('Subscription', body);
+}
+
+// v31.0: Founder · Lifetime 50% Discount email - sent to the 99 pre-launch
+// keyholders. Surfaces the Founder100 Stripe coupon, invites API key purchase,
+// shows the three AI providers RoweOS routes to, and the Google for Startups
+// credibility line.
+function generateFounderLifetimeOfferPreview() {
+  var providerLogo = function(name, sub, color, mark) {
+    return '<td align="center" style="padding:8px 6px;width:33.33%;">'
+      + '<div style="display:inline-block;padding:14px 10px 12px;background:#0e0e0e;border:1px solid #1f1f1f;border-radius:10px;width:140px;">'
+      + '<div style="font-family:Georgia,serif;font-size:18px;color:' + color + ';line-height:1;margin-bottom:4px;">' + mark + '</div>'
+      + '<div style="font-size:12px;color:#ddd;font-weight:500;letter-spacing:0.4px;">' + name + '</div>'
+      + '<div style="font-size:10px;color:#666;margin-top:3px;letter-spacing:0.5px;text-transform:uppercase;">' + sub + '</div>'
+      + '</div></td>';
+  };
+
+  // v31.2: Personalized greeting on its own line; em/sentence dashes removed throughout.
+  var body = ''
+    // Hero greeting
+    + '<p style="color:#d4b896;font-size:11px;letter-spacing:2.4px;text-transform:uppercase;margin:0 0 8px;text-align:center;">Founder · Reserved Access</p>'
+    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 18px;text-align:center;">' + _emailGreeting() + '</p>'
+    + '<h2 style="margin:0 0 12px;font-family:Georgia,serif;font-size:26px;font-weight:400;color:#f5ecd9;text-align:center;line-height:1.25;">Your Founder seat is ready.</h2>'
+    + '<p style="color:#a89878;font-size:14px;line-height:1.7;margin:0 0 28px;text-align:center;">You\'re one of the first 100 chosen for early Founder access to RoweOS. As a thank you, your trial unlocks at <span style="color:#d4b896;font-weight:500;">half price for life</span>.</p>'
+
+    // Coupon code card
+    + '<div style="background:linear-gradient(180deg,#1a1a1a,#0e0e0e);border:1px solid rgba(212,184,150,0.4);border-radius:14px;padding:24px;margin:0 0 24px;text-align:center;">'
+    + '<p style="color:#a89878;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 10px;">Your Lifetime Discount Code</p>'
+    + '<div style="font-family:\'SF Mono\',Menlo,Monaco,Consolas,monospace;font-size:30px;font-weight:600;color:#d4b896;letter-spacing:6px;padding:14px 0;border-top:1px dashed rgba(212,184,150,0.3);border-bottom:1px dashed rgba(212,184,150,0.3);margin:0 0 12px;">Founder100</div>'
+    + '<p style="color:#ccc;font-size:13px;line-height:1.6;margin:0 0 4px;"><strong style="color:#fff;">50% off, locked for life.</strong></p>'
+    + '<p style="color:#888;font-size:13px;margin:0;"><span style="text-decoration:line-through;color:#666;">$59/mo</span> &nbsp;→&nbsp; <span style="color:#d4b896;font-size:18px;font-weight:500;">$29.50/mo</span> &nbsp;forever</p>'
+    + '<p style="color:#666;font-size:11px;margin:14px 0 0;line-height:1.5;">Apply at checkout. Your 14 day free trial starts immediately. We don\'t charge until day 15. Limited to the first 100 Founder activations.</p>'
+    + '</div>'
+
+    // Primary CTA
+    + '<div style="text-align:center;margin:0 0 32px;">'
+    + '<a href="https://roweos.com/api/track-click?c=founder_offer&to=%2F" style="display:inline-block;padding:15px 40px;background:linear-gradient(135deg,#a89878,#d4b896);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;letter-spacing:0.5px;">Activate My Founder Trial</a>'
+    + '<p style="color:#666;font-size:11px;margin:10px 0 0;">Type <span style="color:#d4b896;">Founder100</span> at checkout to lock the discount.</p>'
+    + '</div>'
+
+    // Vision section
+    + '<div style="border-top:1px solid #2a2a2a;padding:28px 0 0;margin:0 0 24px;">'
+    + '<h3 style="margin:0 0 12px;font-family:Georgia,serif;font-size:20px;font-weight:400;color:#f5ecd9;">What you can build with RoweOS.</h3>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.75;margin:0 0 14px;">RoweOS is an operating system for the way you actually work. One workspace where your brand intelligence and your personal life sit side by side. Run five brands at once. Have an AI Strategy agent draft your quarter, a Marketing agent ship your social calendar, an Operations agent file your weekly review.</p>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.75;margin:0;">Then flip to LifeAI and have a Wellness Coach calendar your week, a Tax Copilot reconcile receipts, a Personal AI remember the names of your clients\' kids. One brain, two halves, no context switching.</p>'
+    + '</div>'
+
+    // Powered by AI providers
+    + '<div style="background:#0e0e0e;border:1px solid #1e1e1e;border-radius:14px;padding:22px 18px;margin:0 0 24px;text-align:center;">'
+    + '<p style="color:#888;font-size:11px;letter-spacing:2.4px;text-transform:uppercase;margin:0 0 14px;">Powered by</p>'
+    + '<table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;width:100%;max-width:440px;"><tr>'
+    // v31.2: Real provider SVG logos to match roweos.com/info (was Unicode glyphs)
+    + providerLogo('Anthropic', 'Opus 4.7', '#d4b896', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle;"><path fill="#d4b896" d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>')
+    + providerLogo('OpenAI', 'GPT-5.5', '#d4b896', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle;"><path fill="#d4b896" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>')
+    + providerLogo('Google', 'Gemini 3.1', '#d4b896', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle;"><path fill="#d4b896" d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>')
+    + '</tr></table>'
+    + '<p style="color:#666;font-size:11.5px;margin:14px 0 0;line-height:1.5;">Claude · Opus 4.7, Sonnet 4.6 · GPT-5.5 family + High Reasoning · Gemini 3.1 Pro · Nano Banana 3 Pro · Imagen 4 · Veo 3.1</p>'
+    + '</div>'
+
+    // API key purchase invitation
+    + '<div style="background:linear-gradient(180deg,rgba(168,152,120,0.07),rgba(168,152,120,0.02));border:1px solid rgba(168,152,120,0.22);border-radius:14px;padding:22px 24px;margin:0 0 24px;">'
+    + '<p style="color:#a89878;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">Optional Add-on</p>'
+    + '<h3 style="margin:0 0 8px;font-family:Georgia,serif;font-size:18px;font-weight:400;color:#f5ecd9;">Skip the API key setup.</h3>'
+    + '<p style="color:#ccc;font-size:13.5px;line-height:1.65;margin:0 0 14px;">RoweOS routes to OpenAI, Anthropic, and Google. You can bring your own API keys, or buy a Rowe managed key pack with a single charge so you can start running operations the moment your trial activates. No monthly billing, no provider accounts to set up.</p>'
+    + '<a href="https://roweos.com/purchase" style="display:inline-block;padding:11px 22px;background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.45);border-radius:9px;color:#d4b896;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:0.3px;">Browse API Key Packs →</a>'
+    + '</div>'
+
+    // Google for Startups credibility
+    + '<div style="text-align:center;padding:18px 16px;background:#0e0e0e;border:1px solid #1e1e1e;border-radius:12px;margin:0 0 24px;">'
+    + '<p style="color:#666;font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;margin:0 0 8px;">Backed by</p>'
+    + '<p style="font-family:Georgia,serif;font-size:17px;color:#d4b896;margin:0;">Google for Startups</p>'
+    + '<p style="color:#888;font-size:11.5px;margin:6px 0 0;line-height:1.5;max-width:380px;margin-left:auto;margin-right:auto;">RoweOS is part of the Google for Startups Cloud Program. Supported infrastructure, vetted product, real builders.</p>'
+    + '</div>'
+
+    // Closing
+    + '<p style="color:#888;font-size:13px;line-height:1.7;margin:0 0 8px;">Reply to this email if you want a 1:1 walkthrough. Happy to demo the Founder workflow live.</p>'
+    + '<p style="color:#888;font-size:13px;line-height:1.7;margin:0;">Jordan, founder of The Rowe Collection</p>';
+
+  return _emailPreviewWrap('Founder · Lifetime Offer', body);
 }
 
 // v21.14: Beta Welcome Email Generator
@@ -7242,7 +7623,7 @@ function _logSentEmail(recipientEmail, subject, templateName) {
   }
 }
 
-// v22.4: Open in macOS Mail app via mailto: — fire <a>.click() synchronously for user gesture
+// v22.4: Open in macOS Mail app via mailto: - fire <a>.click() synchronously for user gesture
 function openComposerInMail() {
   // v25.3: Transfer Admin composer email into RoweOS Mail compose
   var to = (document.getElementById('composerTo').value || '').trim();
@@ -7263,14 +7644,24 @@ function openComposerInMail() {
       if (toEl) toEl.value = to;
       if (subEl) subEl.value = subject;
       if (fromEl && from) fromEl.value = from;
-      // v25.3: Set body in the compose body (contenteditable div)
+      // v25.3 / v31.0: Inject FULL HTML (logo, table, buttons) into compose canvas
+      // - was previously falling back to plain text and stripping the template.
       var canvas = document.getElementById('mailComposeBody');
       if (canvas) {
-        canvas.innerHTML = bodyText || bodyHtml;
-        canvas.style.minHeight = '200px';
+        canvas.innerHTML = bodyHtml || bodyText || '';
+        canvas.style.minHeight = '320px';
       }
       // Store the full HTML for send
       window._mailTransferredHtml = bodyHtml;
+      // v31.0: When transferring an admin template, set the template selector
+      // to "none" so the Mail compose layer doesn't re-wrap the already-wrapped HTML.
+      var _mtSel = document.getElementById('mailComposeTemplate');
+      if (_mtSel) {
+        try {
+          _mtSel.value = 'none';
+          if (typeof mailOnTemplateChange === 'function') mailOnTemplateChange();
+        } catch (e) {}
+      }
       showToast('Email imported to Mail compose', 'success');
     }, 200);
   }, 100);
@@ -7336,21 +7727,21 @@ function generateBrandedEmail(layout) {
     // Replace expiring HTTP URL with permanent base64
     logo = window._mailLogoBase64;
   } else if (logo && logo.indexOf('data:') === 0) {
-    // Already base64 — use as-is (no need to upload to Storage)
+    // Already base64 - use as-is (no need to upload to Storage)
   }
   var logoPos = ctx.logoAlignment || ctx.logoPosition || 'center'; // v22.45/v23.11: left, center, right
   // v23.2: Logo size and font from context
   var logoSizePx = ctx.logoSize || 150;
   var maxH = Math.round(logoSizePx * 0.4);
   var fontFamily = ctx.fontFamily || "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  // v22.45: Build logo HTML — position-aware with proper centering
+  // v22.45: Build logo HTML - position-aware with proper centering
   var logoHtml = '';
   var logoAlign = logoPos === 'left' ? 'left' : logoPos === 'right' ? 'right' : 'center';
   var logoMargin = logoPos === 'center' ? 'margin:0 auto;' : logoPos === 'right' ? 'margin:0 0 0 auto;' : '';
-  // v28.4: Use base64 data URIs directly — they work in Apple Mail, Gmail, and most modern clients.
+  // v28.4: Use base64 data URIs directly - they work in Apple Mail, Gmail, and most modern clients.
   // Firebase Storage URLs expire after ~1hr causing logos to show "?" placeholder.
   if (logo && (logo.indexOf('http') === 0 || logo.indexOf('data:') === 0)) {
-    // v28.4: Accept both HTTP URLs and base64 data URIs — base64 never expires
+    // v28.4: Accept both HTTP URLs and base64 data URIs - base64 never expires
     logoHtml = '<img src="' + logo + '" alt="' + escapeHtml(brandName) + '" width="' + logoSizePx + '" height="auto" style="display:block;' + logoMargin + 'max-width:' + logoSizePx + 'px;max-height:' + maxH + 'px;width:' + logoSizePx + 'px;border-radius:6px;object-fit:contain;">';
   }
   // v29.x: No logo = no logo section (no fallback initial/empty box)
@@ -7363,13 +7754,13 @@ function generateBrandedEmail(layout) {
   return generateBrandedProfessional(content, brandName, accent, logoHtml, date, logoAlign);
 }
 
-// v22.45: Professional — white bg, accent border under header, logo position-aware
+// v22.45: Professional - white bg, accent border under header, logo position-aware
 function generateBrandedProfessional(content, brandName, accent, logoHtml, date, logoAlign) {
   logoAlign = logoAlign || 'center';
   var headerHtml;
   var hasLogo = logoHtml && logoHtml.length > 0;
   if (!hasLogo) {
-    // No logo — just brand name + date, centered
+    // No logo - just brand name + date, centered
     headerHtml = '<div style="text-align:center;font-size:20px;font-weight:600;color:#1a1a1a;letter-spacing:0.5px;">' + escapeHtml(brandName) + '</div>'
       + (date ? '<div style="text-align:center;font-size:12px;color:#888;margin-top:2px;">' + date + '</div>' : '');
   } else if (logoAlign === 'center') {
@@ -7410,7 +7801,7 @@ function generateBrandedProfessional(content, brandName, accent, logoHtml, date,
     + '</body></html>';
 }
 
-// v22.45: Minimal — no bg box, uppercase brand name in accent, logo position-aware
+// v22.45: Minimal - no bg box, uppercase brand name in accent, logo position-aware
 function generateBrandedMinimal(content, brandName, accent, logoHtml, date, logoAlign) {
   logoAlign = logoAlign || 'center';
   var textAlign = logoAlign === 'right' ? 'text-align:right;' : logoAlign === 'center' ? 'text-align:center;' : '';
@@ -7436,7 +7827,7 @@ function generateBrandedMinimal(content, brandName, accent, logoHtml, date, logo
     + '</body></html>';
 }
 
-// v22.45: Bold — dark bg (#0a0a0a), full-width accent header band, logo position-aware
+// v22.45: Bold - dark bg (#0a0a0a), full-width accent header band, logo position-aware
 function generateBrandedBold(content, brandName, accent, logoHtml, date, logoAlign) {
   logoAlign = logoAlign || 'center';
   var textAlign = logoAlign === 'right' ? 'text-align:right;' : logoAlign === 'center' ? 'text-align:center;' : 'text-align:left;';
@@ -7463,7 +7854,7 @@ function generateBrandedBold(content, brandName, accent, logoHtml, date, logoAli
     + '</body></html>';
 }
 
-// v22.45: Newsletter — dark gradient header, accent divider, white body, logo position-aware
+// v22.45: Newsletter - dark gradient header, accent divider, white body, logo position-aware
 function generateBrandedNewsletter(content, brandName, accent, logoHtml, date, logoAlign) {
   logoAlign = logoAlign || 'center';
   var textAlign = logoAlign === 'right' ? 'text-align:right;' : logoAlign === 'center' ? 'text-align:center;' : 'text-align:left;';
@@ -7529,7 +7920,7 @@ function adminDeleteKey(keyId) {
   });
 }
 
-// v20.11: Shared helper — release all pool keys assigned to an email
+// v20.11: Shared helper - release all pool keys assigned to an email
 function adminReleasePoolKeysForEmail(email) {
   if (!email || !firebase) return Promise.resolve();
   return firebase.firestore().collection('api_key_pool').where('assignedToEmail', '==', email).get().then(function(snap) {
@@ -7542,7 +7933,7 @@ function adminReleasePoolKeysForEmail(email) {
   });
 }
 
-// v21.0: Edit access key — inline form for tier, expiry, action (v22.2: renders in-place)
+// v21.0: Edit access key - inline form for tier, expiry, action (v22.2: renders in-place)
 function adminEditKey(keyId) {
   if (!isAdmin() || !firebase) return;
   firebase.firestore().collection('access_keys').doc(keyId).get().then(function(doc) {
@@ -7602,7 +7993,7 @@ function adminUpdateKey(keyString) {
   });
 }
 
-// v20.9: Redesigned admin key list — card layout for mobile
+// v20.9: Redesigned admin key list - card layout for mobile
 function adminLoadKeys() {
   if (!isAdmin() || !firebase) return;
   var listEl = document.getElementById('adminKeyList');
@@ -7675,7 +8066,7 @@ function adminLoadKeys() {
   });
 }
 
-// v20.9: Redesigned admin user list — card layout with Remove button
+// v20.9: Redesigned admin user list - card layout with Remove button
 function adminLoadUsers() {
   if (!isAdmin() || !firebase) return;
   var listEl = document.getElementById('adminUserList');
@@ -7737,8 +8128,13 @@ function adminLoadUsers() {
   });
 }
 
-// v20.9: Admin — delete ALL data for a user (Firestore subcollections + access key + registration)
+// v20.9: Admin - delete ALL data for a user (Firestore subcollections + access key + registration)
 async function adminDeleteUserData(uid, email) {
+  // v31.2: Delegate to universal cross-system delete (Auth + every Firestore collection + Emails refresh).
+  // Works from Users, Keys, Signups, Emails admin tabs alike.
+  if (typeof adminDeleteUserEverywhere === 'function') {
+    return adminDeleteUserEverywhere(email, uid);
+  }
   if (!confirm('Delete ALL data for ' + email + '?\n\nThis will remove:\n- All synced data (brands, conversations, library, etc.)\n- Their access key\n- Their registration record\n\nFirebase Auth account must be deleted from Firebase Console separately.')) return;
   if (!isAdmin() || !firebase) return;
 
@@ -7784,7 +8180,7 @@ async function adminDeleteUserData(uid, email) {
   }
 }
 
-// v20.9: Admin — inline rename a registered user
+// v20.9: Admin - inline rename a registered user
 function adminStartRename(docId) {
   var container = document.getElementById('adminUserName_' + docId);
   if (!container) return;
@@ -8266,7 +8662,7 @@ function checkAndDeliverPurchasedApiKeys() {
             // Only auto-fill if user doesn't already have a key for this provider
             var existingKey = localStorage.getItem(storageKey);
             if (existingKey && existingKey.length > 5) {
-              // User already has a key — mark as delivered but don't overwrite
+              // User already has a key - mark as delivered but don't overwrite
               doc.ref.update({
                 status: 'delivered',
                 deliveredAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -8317,7 +8713,7 @@ function clearFirestoreSubcollection(db, collectionPath) {
   });
 }
 
-// v29.1: Purge cloud todos — force-replaces Firestore with current local todos
+// v29.1: Purge cloud todos - force-replaces Firestore with current local todos
 // Use when deleted tasks have resurrected from cloud. Writes with set() (no merge)
 // and removes orphaned individual docs from the todos subcollection.
 function purgeCloudTodos() {
@@ -8399,14 +8795,14 @@ function _syncToFirebaseV2_DEPRECATED() {
   if (isSyncing) {
     // v24.15: Queue sync instead of silently dropping it
     _syncQueued = true;
-    console.log('[Firebase V2] Sync queued — already in progress');
+    console.log('[Firebase V2] Sync queued - already in progress');
     return Promise.resolve();
   }
   isSyncing = true;
-  // v24.15: stampLocalSave() moved to .then() — stamping at start was blocking cross-device updates
+  // v24.15: stampLocalSave() moved to .then() - stamping at start was blocking cross-device updates
   updateSyncIndicator('syncing');
 
-  // v22.32: Removed autoTrimDataForSync — it was mutating localStorage permanently,
+  // v22.32: Removed autoTrimDataForSync - it was mutating localStorage permanently,
   // destroying conversation history. Sync functions (collectConversationsWithLimit etc.)
   // already trim their OWN copies for Firestore without touching local data.
 
@@ -8449,8 +8845,8 @@ function _syncToFirebaseV2_DEPRECATED() {
       mailCurrentTab: localStorage.getItem('roweos_mail_current_tab') || ''
     },
     // v16.15: Calendar integration credentials (synced across devices)
-    // v23.2: gcalClientId removed — hardcoded in app
-    // v30.1: icloudAppPassword excluded — device-local only, NEVER pushed to Firestore
+    // v23.2: gcalClientId removed - hardcoded in app
+    // v30.1: icloudAppPassword excluded - device-local only, NEVER pushed to Firestore
     calendarIntegration: {
       icloudAppleId: localStorage.getItem('roweos_icloud_apple_id') || '',
       icloudCalHome: localStorage.getItem('roweos_icloud_cal_home') || '',
@@ -8480,7 +8876,7 @@ function _syncToFirebaseV2_DEPRECATED() {
         var lp = JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]');
         for (var li = 0; li < lp.length; li++) scopes.push('_life_' + li);
       } catch(e) {}
-      // v19.1: Only sync platforms that ARE connected — writing connected:false
+      // v19.1: Only sync platforms that ARE connected - writing connected:false
       // from a device without the connection would overwrite another device's valid connection
       sp.forEach(function(p) {
         scopes.forEach(function(s) {
@@ -8493,7 +8889,7 @@ function _syncToFirebaseV2_DEPRECATED() {
               token: localStorage.getItem('roweos_social_token_' + p + s) || ''
             };
           }
-          // v19.1: Skip writing connected:false — disconnection is per-device
+          // v19.1: Skip writing connected:false - disconnection is per-device
         });
       });
       return sc;
@@ -8525,7 +8921,7 @@ function _syncToFirebaseV2_DEPRECATED() {
   var writes = [];
   var cleanupPromises = []; // v20.17: Async cleanup operations (delete orphaned cloud docs)
 
-  // v24.4: Moved sp() before first use — minifier breaks function hoisting
+  // v24.4: Moved sp() before first use - minifier breaks function hoisting
   function sp(key, fallback) {
     try { var r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }
     catch (e) { console.warn('[Firebase V2] Corrupt data in ' + key, e.message); return fallback; }
@@ -8534,7 +8930,7 @@ function _syncToFirebaseV2_DEPRECATED() {
   // Profile doc
   writes.push(db.doc(basePath + '/profile/main').set(profileData, { merge: true }));
 
-  // Brands subcollection — v15.27: Strip base64 data URLs to prevent Firestore/Storage format errors
+  // Brands subcollection - v15.27: Strip base64 data URLs to prevent Firestore/Storage format errors
   brandsArr.forEach(function(brand, idx) {
     var cleanBrand = JSON.parse(JSON.stringify(brand));
     // Recursively strip base64 data URLs from brand objects
@@ -8605,13 +9001,13 @@ function _syncToFirebaseV2_DEPRECATED() {
     });
   }
 
-  // v20.17: Automations — sync with deletion support
+  // v20.17: Automations - sync with deletion support
   // v22.9: Sync deleted IDs to Firestore so cross-device deletes persist
   if (typeof _deletedAutomationIds !== 'undefined' && Object.keys(_deletedAutomationIds).length > 0) {
     writes.push(db.doc(basePath + '/profile/deletedAutomationIds').set({ data: _deletedAutomationIds }));
   }
   var automations = sp('roweos_automations', []);
-  // Write current automations — v22.9: skip deleted IDs to prevent zombie re-upload
+  // Write current automations - v22.9: skip deleted IDs to prevent zombie re-upload
   var localAutoIds = {};
   automations.forEach(function(auto, idx) {
     var docId = String(auto.id || idx);
@@ -8650,7 +9046,7 @@ function _syncToFirebaseV2_DEPRECATED() {
   if (customOps.length > 0) {
     writes.push(db.doc(basePath + '/profile/customOps').set({ data: customOps }));
   }
-  // v30.0: Always clear legacy profile/clients cloud doc — all data via profile/people
+  // v30.0: Always clear legacy profile/clients cloud doc - all data via profile/people
   writes.push(db.doc(basePath + '/profile/clients').set({ data: [], deletedIds: [] }));
   // v16.8: Sync AI-generated brand ops (were missing from V2 sync)
   // v24.12: Always write even when empty so deletions sync
@@ -8671,7 +9067,7 @@ function _syncToFirebaseV2_DEPRECATED() {
   if (socialWf.length > 0) {
     writes.push(db.doc(basePath + '/profile/socialWorkflows').set({ data: socialWf }));
   }
-  // v22.25: Sync automation execution history (was missing — caused stale data on mobile)
+  // v22.25: Sync automation execution history (was missing - caused stale data on mobile)
   if (shouldSyncCategory('calendar')) {
     var autoLabHist = sp('roweos_auto_lab_history', []);
     if (autoLabHist.length > 0) {
@@ -8803,7 +9199,7 @@ function _syncToFirebaseV2_DEPRECATED() {
   }
 
   // v15.3: Library (sync to V2 subcollection)
-  // v15.30: Per-profile life library sync — bundle all profile libraries
+  // v15.30: Per-profile life library sync - bundle all profile libraries
   if (shouldSyncCategory('library')) {
     var libraryData = localStorage.getItem('roweosLibrary') || '{}';
     // v24.9: Include library favorites in sync
@@ -8826,7 +9222,7 @@ function _syncToFirebaseV2_DEPRECATED() {
     writes.push(db.doc(basePath + '/library/life').set({ data: JSON.stringify(lifeLibProfiles) }));
   }
 
-  // v29.3: Pulse — write goals to per-goal subcollection, non-goal data to pulse/main
+  // v29.3: Pulse - write goals to per-goal subcollection, non-goal data to pulse/main
   if (shouldSyncCategory('goals')) {
     var _pushGoals = sp('roweos_pulse_goals', []);
     _pushGoals.forEach(function(goal) {
@@ -8907,7 +9303,7 @@ function _syncToFirebaseV2_DEPRECATED() {
     writes.push(db.doc(basePath + '/profile/focusNotes').set({ data: fnTrimmed }));
   }
 
-  // v16.5: Sync logos to cloud — one Firestore doc per logo (fixes 1MB doc limit overflow)
+  // v16.5: Sync logos to cloud - one Firestore doc per logo (fixes 1MB doc limit overflow)
   if (shouldSyncCategory('logos')) {
     var MAX_LOGO_SYNC_SIZE = 900000; // 900KB max per logo
     var logoKeys = [];
@@ -8979,7 +9375,7 @@ function _syncToFirebaseV2_DEPRECATED() {
   }
 
   // Also write v1 format for backwards compatibility during migration period
-  // v15.27: Sanitize brands for legacy doc — strip base64 and undefined values
+  // v15.27: Sanitize brands for legacy doc - strip base64 and undefined values
   var legacyBrands = brandsArr.map(function(b) {
     try {
       var s = JSON.stringify(b);
@@ -8995,7 +9391,7 @@ function _syncToFirebaseV2_DEPRECATED() {
     _migrated: true,
     _v2: true,
     meta: profileData.meta,
-    // v23.9: Delete old logos field from root doc — V2 uses subcollection, root logos may be truncated
+    // v23.9: Delete old logos field from root doc - V2 uses subcollection, root logos may be truncated
     logos: firebase.firestore.FieldValue.delete(),
     brandLogo: firebase.firestore.FieldValue.delete()
   };
@@ -9071,7 +9467,7 @@ function _syncToFirebaseV2_DEPRECATED() {
     if (msg.indexOf('PERMISSION_DENIED') !== -1) {
       showToast('Sync permission denied. Try signing out and back in.', 'error');
     } else if (msg.indexOf('does not match format') !== -1 || msg.indexOf('invalid-format') !== -1) {
-      // v15.27: Suppress storage format errors — non-critical, data still syncs via Firestore
+      // v15.27: Suppress storage format errors - non-critical, data still syncs via Firestore
       console.warn('[Firebase V2] Storage format error (non-critical):', msg);
     } else {
       showToast('Sync error: ' + msg.substring(0, 50), 'error');
@@ -9090,10 +9486,10 @@ function _syncToFirebaseV2_DEPRECATED() {
     }
   });
 
-  // v15.7: Safety timeout — reset isSyncing if stuck for > 30s
+  // v15.7: Safety timeout - reset isSyncing if stuck for > 30s
   setTimeout(function() {
     if (isSyncing) {
-      console.warn('[Firebase V2] Sync timeout — resetting isSyncing flag');
+      console.warn('[Firebase V2] Sync timeout - resetting isSyncing flag');
       isSyncing = false;
       updateSyncIndicator('error');
     }
@@ -9130,19 +9526,19 @@ function _mergeCloudBrands(cloudBrandsArr) {
     var cloudTs = _normalizeTs(cloud._modifiedAt);
     var localTs = _normalizeTs(local._modifiedAt);
     if (cloudTs === 0 && localTs === 0) {
-      // No timestamps on either — keep local (safe default for v23.0 upgrade)
+      // No timestamps on either - keep local (safe default for v23.0 upgrade)
       merged.push(local);
       console.log('[Sync v23] Brand ' + i + ': no timestamps, keeping local');
     } else if (localTs > cloudTs) {
       merged.push(local);
       console.log('[Sync v23] Brand ' + i + ': local newer (' + localTs + ' > ' + cloudTs + '), keeping local');
     } else if (cloudTs > localTs) {
-      // Cloud is newer — but preserve local _modifiedAt fields that might be on sub-objects
+      // Cloud is newer - but preserve local _modifiedAt fields that might be on sub-objects
       cloud._modifiedAt = cloudTs;
       merged.push(cloud);
       console.log('[Sync v23] Brand ' + i + ': cloud newer (' + cloudTs + ' > ' + localTs + '), using cloud');
     } else {
-      // Same timestamp — keep local
+      // Same timestamp - keep local
       merged.push(local);
     }
   }
@@ -9151,9 +9547,9 @@ function _mergeCloudBrands(cloudBrandsArr) {
 }
 
 function _mergeCloudBrandSettings(cloudSettings) {
-  // v24.10: Hard block — if user just saved model config, never overwrite
+  // v24.10: Hard block - if user just saved model config, never overwrite
   if (typeof _brandModelConfigSavedAt !== 'undefined' && _brandModelConfigSavedAt > 0 && (Date.now() - _brandModelConfigSavedAt) < _BRAND_MODEL_CONFIG_GRACE) {
-    console.log('[Sync v24.10] BrandSettings: BLOCKED — user saved model config ' + (Date.now() - _brandModelConfigSavedAt) + 'ms ago');
+    console.log('[Sync v24.10] BrandSettings: BLOCKED - user saved model config ' + (Date.now() - _brandModelConfigSavedAt) + 'ms ago');
     return;
   }
   var local = {};
@@ -9178,7 +9574,7 @@ function _mergeCloudBrandSettings(cloudSettings) {
 function _mergeCloudKnowledge(localKey, cloudData) {
   var localRaw = localStorage.getItem(localKey);
   if (!localRaw) {
-    // No local data — take cloud
+    // No local data - take cloud
     localStorage.setItem(localKey, JSON.stringify(cloudData));
     return;
   }
@@ -9195,12 +9591,12 @@ function _mergeCloudKnowledge(localKey, cloudData) {
     console.log('[Sync v23] Knowledge ' + localKey + ': local newer, keeping local');
     return;
   }
-  // Cloud is newer or equal — use cloud
+  // Cloud is newer or equal - use cloud
   localStorage.setItem(localKey, JSON.stringify(cloudData));
   console.log('[Sync v23] Knowledge ' + localKey + ': cloud newer, using cloud');
 }
 
-// v23.7: Safe sync write — never overwrite non-empty local data with empty cloud data
+// v23.7: Safe sync write - never overwrite non-empty local data with empty cloud data
 function safeSyncWrite(key, cloudData) {
   if (cloudData === null || cloudData === undefined) return;
 
@@ -9370,7 +9766,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         _mergeCloudBrandSettings(profile.brandSettings);
       }
       // v28.3: Cloud theme only applies on first load (no local preference yet)
-      // Theme is device-local — user's toggle is always authoritative
+      // Theme is device-local - user's toggle is always authoritative
       if (profile.settings && profile.settings.theme) {
         // v30.1: Check both hyphen and underscore variants of theme key
         var _hasLocalTheme = localStorage.getItem('roweos-theme') || localStorage.getItem('roweos_theme');
@@ -9436,7 +9832,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
               localStorage.setItem('roweos_cloud_scheduler', 'true');
               if (typeof updateCloudSchedulerUI === 'function') updateCloudSchedulerUI(true);
             }
-            // Cross-device API key sync — always run
+            // Cross-device API key sync - always run
             try {
               var localKeys = {};
               try { localKeys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}'); } catch(e) {}
@@ -9458,9 +9854,9 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       // v16.15: Restore calendar integration credentials
       if (profile.calendarIntegration) {
         var calInt = profile.calendarIntegration;
-        // v23.2: gcalClientId no longer synced — hardcoded in app
+        // v23.2: gcalClientId no longer synced - hardcoded in app
         if (calInt.icloudAppleId) localStorage.setItem('roweos_icloud_apple_id', calInt.icloudAppleId);
-        // v30.1: iCloud app password is device-local only — NEVER sync to Firestore
+        // v30.1: iCloud app password is device-local only - NEVER sync to Firestore
         if (calInt.icloudAppPassword) localStorage.setItem('roweos_icloud_app_password', calInt.icloudAppPassword);
         if (calInt.icloudCalHome) localStorage.setItem('roweos_icloud_cal_home', calInt.icloudCalHome);
         // v17.3: Restore calendar list from Firebase
@@ -9492,7 +9888,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         }
       }
       // v19.0: Restore social connections from Firebase (desktop OAuth → mobile sync)
-      // v19.1: Only apply connected:true entries — don't remove local connections
+      // v19.1: Only apply connected:true entries - don't remove local connections
       // that may not be in Firebase yet (avoids cross-device disconnection)
       if (profile.socialConnections) {
         var sc = profile.socialConnections;
@@ -9507,7 +9903,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             if (entry.handle) localStorage.setItem('roweos_social_' + p + '_handle' + s, entry.handle);
             if (entry.token) localStorage.setItem('roweos_social_token_' + p + s, entry.token);
           }
-          // v19.1: Don't remove local connections — connected:false entries are
+          // v19.1: Don't remove local connections - connected:false entries are
           // no longer synced to Firebase, so absence means "not connected on that device"
         });
         if (typeof refreshSocialAccountCards === 'function') {
@@ -9594,7 +9990,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       });
     }
 
-    // Brands — v27.0: Merge cloud with local instead of blind overwrite
+    // Brands - v27.0: Merge cloud with local instead of blind overwrite
     // v27.0: Skip brands merge if we just saved locally
     var _brandSkipMerge = typeof lastLocalSaveTime !== 'undefined' && Date.now() - lastLocalSaveTime < 10000;
     if (!brandsSnap.empty && !_brandSkipMerge) {
@@ -9708,7 +10104,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     }
 
     // Conversations
-    // v23.7: Merge-based sync — never overwrite local with fewer conversations
+    // v23.7: Merge-based sync - never overwrite local with fewer conversations
     if (convCurrentDoc.exists && shouldSyncCategory('brandai_chats')) {
       var convCurrent = convCurrentDoc.data();
       if (convCurrent.messages && typeof currentConversation !== 'undefined') {
@@ -9723,7 +10119,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       var histData = convHistoryDoc.data();
       var cloudHistJson = histData.json || (histData.data ? JSON.stringify(histData.data) : null);
       if (cloudHistJson) {
-        // v23.7: Merge cloud history with local — never lose local conversations
+        // v23.7: Merge cloud history with local - never lose local conversations
         try {
           var cloudHist = JSON.parse(cloudHistJson);
           var localHist = [];
@@ -9731,13 +10127,13 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           if (!Array.isArray(cloudHist)) cloudHist = [];
           if (!Array.isArray(localHist)) localHist = [];
           if (localHist.length === 0) {
-            // Local empty — take cloud as-is
+            // Local empty - take cloud as-is
             localStorage.setItem('roweos_conversations', cloudHistJson);
           } else if (cloudHist.length === 0) {
-            // Cloud empty — keep local (don't overwrite with nothing)
+            // Cloud empty - keep local (don't overwrite with nothing)
             console.log('[Sync] Cloud history empty, preserving ' + localHist.length + ' local conversations');
           } else {
-            // Both have data — merge by ID, cloud wins for matching IDs (newer), keep local-only entries
+            // Both have data - merge by ID, cloud wins for matching IDs (newer), keep local-only entries
             var cloudById = {};
             cloudHist.forEach(function(conv) {
               var cId = conv.id || conv.timestamp || JSON.stringify(conv.messages && conv.messages[0]);
@@ -9765,7 +10161,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           }
         } catch(mergeErr) {
           console.warn('[Sync] Conversation merge error, keeping local:', mergeErr.message);
-          // On error, keep local data — never lose it
+          // On error, keep local data - never lose it
         }
       }
     }
@@ -9776,7 +10172,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       try {
         var _cloudChats = [];
         chatsSubSnap.forEach(function(doc) { _cloudChats.push(doc.data()); });
-        // Same merge logic as blob path — merge cloud with local by ID
+        // Same merge logic as blob path - merge cloud with local by ID
         var _subCloudById = {};
         _cloudChats.forEach(function(cmd) { if (cmd.id) _subCloudById[cmd.id] = cmd; });
         var _subLocalOnly = [];
@@ -9784,7 +10180,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           if (cmd.id && !_subCloudById[cmd.id]) _subLocalOnly.push(cmd);
         });
         var _subAllMerged = _subLocalOnly.concat(_cloudChats);
-        // v28.4: Split merged chats by mode — agentHistory stores both brand+life
+        // v28.4: Split merged chats by mode - agentHistory stores both brand+life
         var _subBrandChats = _subAllMerged.filter(function(cmd) { return cmd.mode !== 'life'; });
         var _subLifeChats = _subAllMerged.filter(function(cmd) { return cmd.mode === 'life'; });
         agentCommands.length = 0;
@@ -9803,12 +10199,12 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         console.warn('[Firebase V3] Chat subcollection merge error:', e.message);
       }
     } else if (convAgentDoc.exists && shouldSyncCategory('brandai_chats')) {
-      // Existing blob fallback — keep ALL existing code unchanged
+      // Existing blob fallback - keep ALL existing code unchanged
       var agentData = convAgentDoc.data();
       if (agentData.json && typeof agentCommands !== 'undefined') {
         try {
           var parsed = JSON.parse(agentData.json);
-          // v22.32: Merge cloud with local — cloud may be trimmed (max 30), local may have more
+          // v22.32: Merge cloud with local - cloud may be trimmed (max 30), local may have more
           // Keep local entries not found in cloud, then add cloud entries (cloud wins for matching IDs)
           var cloudById = {};
           parsed.forEach(function(cmd) { if (cmd.id) cloudById[cmd.id] = cmd; });
@@ -9817,7 +10213,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             if (cmd.id && !cloudById[cmd.id]) localOnly.push(cmd);
           });
           var allMerged = localOnly.concat(parsed);
-          // v28.4: Split merged chats by mode — agentHistory stores both brand+life
+          // v28.4: Split merged chats by mode - agentHistory stores both brand+life
           var _brandChats = allMerged.filter(function(cmd) { return cmd.mode !== 'life'; });
           var _lifeChats = allMerged.filter(function(cmd) { return cmd.mode === 'life'; });
           agentCommands.length = 0;
@@ -9854,7 +10250,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           try {
             var bmCloud = JSON.parse(kData.data || '{}');
             var bmLocal = JSON.parse(localStorage.getItem('roweos_brand_memory') || '{}');
-            // Merge cloud docs with local — cloud provides metadata/insights, local keeps raw content
+            // Merge cloud docs with local - cloud provides metadata/insights, local keeps raw content
             Object.keys(bmCloud).forEach(function(bKey) {
               if (!bmLocal[bKey]) bmLocal[bKey] = { documents: [] };
               var cloudDocs = bmCloud[bKey].documents || [];
@@ -9862,7 +10258,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
               cloudDocs.forEach(function(cd) {
                 var existing = localDocs.find(function(ld) { return ld.id === cd.id; });
                 if (!existing) {
-                  // Doc exists in cloud but not locally — restore it (without raw content)
+                  // Doc exists in cloud but not locally - restore it (without raw content)
                   localDocs.push(cd);
                 }
               });
@@ -9931,7 +10327,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       }
       if (life.currentProfile) safeSyncWrite('roweos_life_profile', life.currentProfile);
       if (life.userName) localStorage.setItem('roweos_user_name', life.userName);
-      // v30.1: App mode is DEVICE-LOCAL — cloud/onSnapshot never overwrites it
+      // v30.1: App mode is DEVICE-LOCAL - cloud/onSnapshot never overwrites it
       // Only seed if no local preference exists (first load on new device)
       if (life.mainSystemPrompt) localStorage.setItem('roweos_life_main_prompt', life.mainSystemPrompt);
       if (life.generatedOps) safeSyncWrite('roweos_generated_life_ops', life.generatedOps);
@@ -9946,7 +10342,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       if (life.accentLightMode) localStorage.setItem('roweos_life_accent_light_mode', life.accentLightMode);
       if (life.accentLightModeDark) localStorage.setItem('roweos_life_accent_light_mode_dark', life.accentLightModeDark);
       // v15.13: Restore LifeAI chats, todos, memory
-      // v23.7: Merge LifeAI chats — never overwrite local with fewer or empty
+      // v23.7: Merge LifeAI chats - never overwrite local with fewer or empty
       if (life.agentCommands && shouldSyncCategory('lifeai_chats')) {
         var localLifeChats = [];
         try { localLifeChats = JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]'); } catch(e) {}
@@ -10010,7 +10406,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       }
     }
 
-    // v29.3: Pulse goals — read from per-goal collection, fallback to legacy pulse/main
+    // v29.3: Pulse goals - read from per-goal collection, fallback to legacy pulse/main
     var _cloudGoalsFromCollection = [];
     pulseGoalsSnap.forEach(function(doc) {
       var g = doc.data();
@@ -10105,7 +10501,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       }
     }
 
-    // v25.0: Automations — write-through, Firestore is truth
+    // v25.0: Automations - write-through, Firestore is truth
     var _automationsChain = db.collection(basePath + '/automations').get().then(function(autoSnap) {
       var cloudAutos = [];
       if (autoSnap && !autoSnap.empty) {
@@ -10138,7 +10534,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       console.log('[Firebase V3] Automations loaded: ' + cloudAutos.length + ' from cloud');
     }).catch(function(err) { console.warn('[Firebase V3] Automations load skipped:', err.message); });
 
-    // Inventory (brand) — v20.5: smart merge, never blindly overwrite
+    // Inventory (brand) - v20.5: smart merge, never blindly overwrite
     if (shouldSyncCategory('inventory')) {
       var cloudInvItems = [];
       if (!inventorySnap.empty) {
@@ -10231,7 +10627,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         var logoInfo = doc.data();
         if (logoInfo && logoInfo.base64 && logoInfo.key) {
           var logoKey = logoInfo.key;
-          // v15.37: Skip shared LifeAI key — migrate to per-profile key instead
+          // v15.37: Skip shared LifeAI key - migrate to per-profile key instead
           if (logoKey === 'roweos_lifeai_logo') {
             var profileIdx = parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0');
             var perProfileKey = 'roweos_lifeai_logo_profile_' + profileIdx;
@@ -10306,7 +10702,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         localStorage.setItem('roweos_custom_operations', JSON.stringify(co.data));
       }
     }
-    // v30.0: Legacy roweos_clients restore DISABLED — all client data now in roweos_people
+    // v30.0: Legacy roweos_clients restore DISABLED - all client data now in roweos_people
     // profile/clients cloud doc is stale. getClients() reads from roweos_people.
     // v25.3: Restore people from Firebase (unified people storage)
     if (peopleDoc && peopleDoc.exists) {
@@ -10393,7 +10789,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         try { localStorage.setItem('roweos_bloom_library', JSON.stringify(localLib)); } catch(e) {}
       }
     }
-    // v22.17: Restore bloom knowledge from cloud — merge with local by id dedup
+    // v22.17: Restore bloom knowledge from cloud - merge with local by id dedup
     if (bloomKnowledgeDoc && bloomKnowledgeDoc.exists) {
       var bkd = bloomKnowledgeDoc.data();
       if (bkd && bkd.data) {
@@ -10419,7 +10815,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         try { localStorage.setItem('roweos_bloom_knowledge', JSON.stringify(localKnow)); } catch(e) {}
       }
     }
-    // v24.8: Restore user contact card from cloud — cloud wins if local is empty
+    // v24.8: Restore user contact card from cloud - cloud wins if local is empty
     if (userContactDoc && userContactDoc.exists) {
       var _ucd = userContactDoc.data();
       if (_ucd && _ucd.data) {
@@ -10431,7 +10827,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         }
       }
     }
-    // v24.8: Restore automation memory from cloud — merge by ID
+    // v24.8: Restore automation memory from cloud - merge by ID
     if (automationMemoryDoc && automationMemoryDoc.exists) {
       var _amd = automationMemoryDoc.data();
       if (_amd && _amd.data && Array.isArray(_amd.data)) {
@@ -10507,7 +10903,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         safeSyncWrite('roweos_research_history', _rhData.items);
       }
     }
-    // v19.7: Restore notifications from cloud — merge with local by timestamp dedup
+    // v19.7: Restore notifications from cloud - merge with local by timestamp dedup
     if (notificationsDoc && notificationsDoc.exists) {
       var nfd = notificationsDoc.data();
       if (nfd && nfd.items) {
@@ -10533,7 +10929,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       }
     }
     // v22.23: Restore mail outbox, sent, config from cloud
-    // v22.39: Tombstone-aware merge — deleted items stay deleted across devices
+    // v22.39: Tombstone-aware merge - deleted items stay deleted across devices
     if (mailDoc && mailDoc.exists) {
       var md = mailDoc.data();
       if (md) {
@@ -10547,7 +10943,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           var tid = typeof item === 'string' ? item : (item && item.id ? item.id : null);
           if (tid) _tombSet[tid] = true;
         });
-        // Don't persist merged tombstones back — let getMailDeletedIds() handle expiry naturally
+        // Don't persist merged tombstones back - let getMailDeletedIds() handle expiry naturally
 
         if (md.outbox !== undefined) {
           // v25.2: Cloud-authoritative for outbox. If cloud outbox is empty [],
@@ -10573,7 +10969,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         if (md.config) {
           var localConfig = {};
           try { localConfig = JSON.parse(localStorage.getItem('roweos_mail_config') || '{}'); } catch(e) {}
-          // v23.1: Check explicitly disconnected providers — never restore their keys
+          // v23.1: Check explicitly disconnected providers - never restore their keys
           var _disconnected = [];
           try { _disconnected = JSON.parse(localStorage.getItem('roweos_mail_disconnected') || '[]'); } catch(e) {}
           var _gmailKeys = ['gmailEmail','gmailToken','gmailRefreshToken','gmailExpiresAt'];
@@ -10775,7 +11171,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             else localStorage.removeItem('roweos_analytics_threshold_' + p);
           });
         } else if (sd && sd.threshold) {
-          // v20.2: Backwards compat — old global threshold
+          // v20.2: Backwards compat - old global threshold
           ['claude', 'openai', 'gemini'].forEach(function(p) {
             localStorage.setItem('roweos_analytics_threshold_' + p, sd.threshold);
           });
@@ -10858,7 +11254,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         }
       }
     }
-    // v29.2: Scribe notebooks — cloud-authoritative merge
+    // v29.2: Scribe notebooks - cloud-authoritative merge
     if (scribeDoc && scribeDoc.exists) {
       var _scribeCloud = scribeDoc.data();
       var _cloudNbs = (_scribeCloud && _scribeCloud.notebooks) ? _scribeCloud.notebooks : [];
@@ -10885,7 +11281,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
   });
 }
 
-// v30.3: One-time migration — split agentHistory blob into per-doc subcollection
+// v30.3: One-time migration - split agentHistory blob into per-doc subcollection
 function migrateChatBlobToSubcollection() {
   if (localStorage.getItem('roweos_chat_subcollection_migrated') === 'true') return;
   if (typeof firebase === 'undefined' || !firebase.firestore || typeof firebaseUser === 'undefined' || !firebaseUser) return;

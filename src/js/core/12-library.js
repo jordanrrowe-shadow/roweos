@@ -13,7 +13,7 @@ function initLibrary() {
   if (saved) {
     try {
       var parsedLib = JSON.parse(saved);
-      // v15.7: Merge cloud data with existing — don't overwrite non-empty library
+      // v15.7: Merge cloud data with existing - don't overwrite non-empty library
       if (Object.keys(fileLibrary).length === 0 || Object.keys(parsedLib).length > 0) {
         fileLibrary = parsedLib;
       }
@@ -910,7 +910,7 @@ function confirmSaveToLibrary() {
   window.pendingSaveMode = null;
   window.pendingSaveConversation = null;
 
-  // v22.40: Intercept — queue for approval if guardrails require it
+  // v22.40: Intercept - queue for approval if guardrails require it
   // v22.47: Also intercept if _forceApprovalQueue is set (per-automation requireApproval toggle)
   if (!window._docApprovalBypass && (window._forceApprovalQueue || (typeof docApprovalRequired === 'function' && docApprovalRequired()))) {
     addToPendingApproval({
@@ -1175,7 +1175,7 @@ function getLibraryForBrandIndex(brandIdx) {
 }
 
 /**
- * v10.5.25: Mode-aware library save — saves to correct storage based on brandIdx
+ * v10.5.25: Mode-aware library save - saves to correct storage based on brandIdx
  */
 function saveLibraryForBrandIndex(brandIdx) {
   if (brandIdx === -1) {
@@ -1414,10 +1414,10 @@ function renderLifeLibrary() {
 }
 
 /**
- * v10.5.25: Get the LifeAI library storage — reads from localStorage as single source of truth
+ * v10.5.25: Get the LifeAI library storage - reads from localStorage as single source of truth
  */
 function getLifeLibrary() {
-  // v15.30: Per-profile storage key — each LifeAI profile gets its own library
+  // v15.30: Per-profile storage key - each LifeAI profile gets its own library
   var profileIdx = parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0');
   var storageKey = 'roweos_life_library_profile_' + profileIdx;
   var saved = localStorage.getItem(storageKey);
@@ -1930,7 +1930,7 @@ function deleteLifeFolder(folderId) {
 }
 
 /**
- * v10.5.25: Open life file preview — full-featured, matches openLibraryFilePreview
+ * v10.5.25: Open life file preview - full-featured, matches openLibraryFilePreview
  */
 function openLifeFilePreview(fileId) {
   var lib = getLifeLibrary();
@@ -2710,7 +2710,14 @@ function uploadFileToModeLibrary() {
           if (processedCount === files.length) {
             saveBrandLibrary(brandIdx, lib);
             showToast(files.length + ' file' + (files.length > 1 ? 's' : '') + ' uploaded', 'success');
-            renderLibrary();
+            // v31.5: If the user is currently viewing inside a folder, re-render the
+            // folder's file list so newly uploaded files appear immediately. Otherwise
+            // re-render the top-level folder grid.
+            if (libraryCurrentFolder && libraryCurrentFolder !== 'all' && typeof openLibraryFolderForBrand === 'function') {
+              openLibraryFolderForBrand(libraryViewingBrandIdx != null ? libraryViewingBrandIdx : brandIdx, libraryCurrentFolder);
+            } else {
+              renderLibrary();
+            }
           }
         };
         if (file.type.startsWith('text/') || file.name.match(/\.(txt|md|csv)$/i)) {
@@ -3810,7 +3817,7 @@ function renderConversationFromArray(conversation, brandName) {
     var aiTypeClass = isLifeMode ? 'life-ai' : 'brand-ai';
 
     // v11.0.5: Use displayContent for user messages if available (cleaner than full content with file data)
-    // v20.1: Handle multimodal content (array) — always prefer displayContent for arrays
+    // v20.1: Handle multimodal content (array) - always prefer displayContent for arrays
     var messageContent = (typeof msg.content === 'string' ? msg.content : (msg.displayContent || '[Multimodal content]')) || '';
     if (isUser && msg.displayContent) {
       messageContent = msg.displayContent;
@@ -4179,7 +4186,7 @@ function continueConversationFromLibrary() {
   var file = null;
   
   if (isLifeMode || libraryPreviewBrandIdx === -1) {
-    // LifeAI: Get file from life library — v16.0: use getLifeLibrary() for per-profile support
+    // LifeAI: Get file from life library - v16.0: use getLifeLibrary() for per-profile support
     var lifeLib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : JSON.parse(localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}');
     if (libraryPreviewFileId && lifeLib.files) {
       file = lifeLib.files.find(function(f) { return f.id === libraryPreviewFileId; });
@@ -4460,7 +4467,7 @@ function updateLibraryFolderList() {
   });
 }
 
-// v24.27: Removed dead updateLibraryCounts() — zero callers, folderCountAll/Recent/Favorites elements removed
+// v24.27: Removed dead updateLibraryCounts() - zero callers, folderCountAll/Recent/Favorites elements removed
 
 // v16.0: Toggle a library file as favorite
 function toggleLibraryFavorite(fileId) {
@@ -4514,7 +4521,7 @@ function getLibraryItemsForFolder(folderId) {
       }
     }
   } else if (folderId === 'favorites') {
-    // v16.0: Favorites — filter files by favorited IDs
+    // v16.0: Favorites - filter files by favorited IDs
     var favIds = [];
     try { favIds = JSON.parse(localStorage.getItem('roweos_library_favorites') || '[]'); } catch(e) {}
     if (favIds.length > 0) {
@@ -5136,7 +5143,7 @@ function previewLibraryItem(itemId, brandIdx, type) {
 }
 
 // Clean up test/demo brands that shouldn't have been saved
-// v20.8: Tightened — only remove brands named exactly "test", never remove brands with missing name
+// v20.8: Tightened - only remove brands named exactly "test", never remove brands with missing name
 // (missing name is a sync corruption, not a test brand)
 function cleanupTestBrands() {
   try {
@@ -5147,7 +5154,7 @@ function cleanupTestBrands() {
       var removed = [];
 
       brandsArray = brandsArray.filter(function(brand) {
-        if (!brand || !brand.name) return true; // v20.8: Keep brands with missing name (sync corruption) — don't silently delete
+        if (!brand || !brand.name) return true; // v20.8: Keep brands with missing name (sync corruption) - don't silently delete
         var name = brand.name.toLowerCase().trim();
 
         // Only remove brands explicitly named "test"
@@ -5182,7 +5189,7 @@ function syncBrandDropdowns() {
   // v10.5.25: Check mode - in Life mode, we still need the brand dropdowns synced for when user switches back
   var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
 
-  // v19.0: Use selectedBrand as authority (not DOM value) — prevents sync race conditions
+  // v19.0: Use selectedBrand as authority (not DOM value) - prevents sync race conditions
   var authorityIdx = (typeof selectedBrand === 'number' && !isNaN(selectedBrand) && selectedBrand >= 0 && selectedBrand < brands.length)
     ? selectedBrand : parseInt(localStorage.getItem('roweos_selected_brand') || '0');
   if (isNaN(authorityIdx) || authorityIdx < 0 || authorityIdx >= brands.length) authorityIdx = 0;
@@ -5355,7 +5362,7 @@ function init() {
     var subSuccess = subParams.get('subscription');
     if (subSuccess === 'success') {
       var subTier = subParams.get('tier') || '';
-      // v30.5: Save params to window BEFORE cleaning URL — handleAuthState needs them
+      // v30.5: Save params to window BEFORE cleaning URL - handleAuthState needs them
       window._stripeSubscriptionSuccess = true;
       window._stripeSubscriptionTier = subTier;
       window._stripeReturnProcessed = true;
@@ -5618,10 +5625,10 @@ function init() {
 
 // Helper to show appropriate startup screen
 function showStartupScreen() {
-  // v22.53: Remove boot screen — app is ready
+  // v22.53: Remove boot screen - app is ready
   var boot = document.getElementById('bootScreen');
   if (boot) boot.remove();
-  // v20.4: Check pending join FIRST — load brands before routing to avoid onboarding race
+  // v20.4: Check pending join FIRST - load brands before routing to avoid onboarding race
   try {
     var pendingJoin = localStorage.getItem('roweos_pending_join');
     if (pendingJoin && firebaseUser && !window._pendingJoinInProgress) {
@@ -5632,10 +5639,10 @@ function showStartupScreen() {
         showStartupScreen();
       }).catch(function() {
         window._pendingJoinInProgress = false;
-        // Config failed — continue normal startup
+        // Config failed - continue normal startup
         showStartupScreen();
       });
-      return; // Don't route yet — wait for config
+      return; // Don't route yet - wait for config
     }
   } catch(e) {}
 
@@ -5644,7 +5651,7 @@ function showStartupScreen() {
 
   if (brands && brands.length > 0) {
     hideWelcomeScreen();
-    // v30.1: Auto-login — returning users go straight to chat with last selected brand
+    // v30.1: Auto-login - returning users go straight to chat with last selected brand
     // Skip both the landing blob screen and the welcome overlay for faster access
     if (!window._showedPostLoginWelcome) {
       window._showedPostLoginWelcome = true;
@@ -5670,7 +5677,7 @@ function showStartupScreen() {
   // v11.0.5: Start aggressive auto-save system for conversation protection
   startConversationAutoSave();
 
-  // v24.24: Bloom prefetch removed — only loads when user navigates to Bloom view (saves API tokens)
+  // v24.24: Bloom prefetch removed - only loads when user navigates to Bloom view (saves API tokens)
 
   // v22.44: Start scheduled email checker
   if (typeof startMailScheduleChecker === 'function') startMailScheduleChecker();
@@ -5678,7 +5685,7 @@ function showStartupScreen() {
   // v21.0: Floating feedback button removed
 }
 
-// v16.5: Post-login welcome overlay — shows personalized profile cards
+// v16.5: Post-login welcome overlay - shows personalized profile cards
 function showPostLoginWelcome() {
   var overlay = document.getElementById('postLoginWelcome');
   if (!overlay) { showLaunchScreen(); return; }
@@ -5687,7 +5694,7 @@ function showPostLoginWelcome() {
   var hasBrands = brands && brands.length > 0;
   var hasLife = profiles.length > 0;
 
-  // No data at all — fall back to launch screen
+  // No data at all - fall back to launch screen
   if (!hasBrands && !hasLife) { showLaunchScreen(); return; }
 
   // Greeting
@@ -5725,7 +5732,7 @@ function showPostLoginWelcome() {
       + 'box-shadow: 0 2px 24px rgba(' + rgb + ', 0.08);';
   }
 
-  // v16.5 / v28.5: Primary brand — resolve by ID first (survives reorder), fall back to index
+  // v16.5 / v28.5: Primary brand - resolve by ID first (survives reorder), fall back to index
   var primaryBrandIdx = 0;
   var _primaryId = localStorage.getItem('roweos_primary_brand_id');
   if (_primaryId && brands && brands.length > 0) {
@@ -5734,7 +5741,7 @@ function showPostLoginWelcome() {
       if (brands[_pi] && brands[_pi].id === _primaryId) { primaryBrandIdx = _pi; _foundPrimary = true; break; }
     }
     if (!_foundPrimary) {
-      // ID not found in brands — stale, clear it and fall back to index
+      // ID not found in brands - stale, clear it and fall back to index
       try { localStorage.removeItem('roweos_primary_brand_id'); } catch(e) {}
       primaryBrandIdx = parseInt(localStorage.getItem('roweos_primary_brand') || '0');
       if (isNaN(primaryBrandIdx) || primaryBrandIdx < 0 || !brands || primaryBrandIdx >= brands.length) primaryBrandIdx = 0;
@@ -5820,7 +5827,7 @@ function showPostLoginWelcome() {
   document.body.style.overflow = 'hidden';
 }
 
-// v16.5: Enter from welcome card — sets mode and navigates to Chat
+// v16.5: Enter from welcome card - sets mode and navigates to Chat
 function enterFromWelcome(mode, idx) {
   var overlay = document.getElementById('postLoginWelcome');
   if (overlay) {
@@ -5830,7 +5837,7 @@ function enterFromWelcome(mode, idx) {
 
   hideLaunchScreen();
 
-  // v24.4: Flag explicit user mode selection — prevents loadFromFirebaseV2 from overwriting
+  // v24.4: Flag explicit user mode selection - prevents loadFromFirebaseV2 from overwriting
   window._userSelectedMode = true;
   stampLocalSave();
 
@@ -6165,7 +6172,7 @@ function showConfigPanel(op) {
   var lengthGroup = document.getElementById('studioLengthGroup');
 
   if (op.isVideoOp) {
-    // v22.0: Video ops — show model dropdown (has Veo models) + video settings, hide length
+    // v22.0: Video ops - show model dropdown (has Veo models) + video settings, hide length
     if (modelControls) modelControls.style.display = 'flex';
     if (lengthGroup) lengthGroup.style.display = 'none';
     if (imageProvider) imageProvider.style.display = 'none';
@@ -6549,113 +6556,150 @@ function renderLibraryPickerContent() {
   var foldersContainer = document.getElementById('libraryPickerFolders');
   var itemsContainer = document.getElementById('libraryPickerItems');
   if (!foldersContainer || !itemsContainer) return;
-  
+
   // v10.5.25: Check mode to determine data source
   var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
   var isLifeMode = currentMode === 'life';
-  
+
   var files, folders, sourceName;
-  
+
   if (isLifeMode) {
-    // LifeAI mode - use Life Library — v16.0: per-profile support
     var lifeLib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : JSON.parse(localStorage.getItem('roweos_life_library') || '{"files":[],"folders":[]}');
     files = lifeLib.files || [];
     folders = lifeLib.folders || [];
     sourceName = 'Life Library';
   } else {
-    // BrandAI mode - use brand library
-    var lib = getLibraryForBrandIndex(studioSelectedBrand);
+    // v31.5: Use the user's currently-selected brand (selectedBrand) as the fallback
+    // when studioSelectedBrand is unset. Files uploaded into the active brand were
+    // never appearing because studioSelectedBrand could point at a different brand.
+    var brandIdx = (typeof studioSelectedBrand === 'number') ? studioSelectedBrand : (typeof selectedBrand === 'number' ? selectedBrand : 0);
+    var lib = getLibraryForBrandIndex(brandIdx);
     files = (lib && lib.files) || [];
     folders = (lib && lib.folders) || [];
-    sourceName = brands[studioSelectedBrand] ? brands[studioSelectedBrand].name : 'Brand';
+    sourceName = brands[brandIdx] ? brands[brandIdx].name : 'Brand';
   }
-  
-  // Render folder chips
-  var foldersHtml = '<div class="library-picker-folder active" onclick="filterLibraryPicker(\'all\')">All Files</div>';
+
+  // v31.5: Folder chips key off folder.id (matches what files store in `folderId`).
+  // Previously chips used folder.name, and the file filter compared `f.folder === folderName`
+  // — but uploaded files store `folderId`, not `folder`. Newly created folders + uploads
+  // never matched, so the picker always looked empty.
+  window._libraryPickerFolders = folders; // cache for filter lookup
+  var foldersHtml = '<div class="library-picker-folder active" data-folder-id="all" onclick="filterLibraryPicker(\'all\')">All Files</div>';
   folders.forEach(function(folder) {
-    var folderName = typeof folder === 'string' ? folder : folder.name;
-    var displayName = (folderName === 'Root') ? sourceName : folderName;
-    foldersHtml += '<div class="library-picker-folder" onclick="filterLibraryPicker(\'' + folderName + '\')">' + displayName + '</div>';
+    var fId = (typeof folder === 'string') ? folder : (folder.id || folder.name);
+    var fName = (typeof folder === 'string') ? folder : (folder.name || folder.id || 'Folder');
+    var displayName = (fName === 'Root') ? sourceName : fName;
+    foldersHtml += '<div class="library-picker-folder" data-folder-id="' + escapeHtml(fId) + '" onclick="filterLibraryPicker(\'' + escapeHtml(fId).replace(/'/g, "\\'") + '\')">' + escapeHtml(displayName) + '</div>';
   });
   foldersContainer.innerHTML = foldersHtml;
-  
+
   // Render all items
   filterLibraryPicker('all');
 }
 
 // v10.5.25: Filter library picker by folder (mode-aware)
+// v31.5: Now keyed by folder ID, with image thumbnails for image-type files.
 var currentPickerFolder = 'all';
-function filterLibraryPicker(folder) {
-  currentPickerFolder = folder;
-  
-  // Update active folder
+function filterLibraryPicker(folderId) {
+  currentPickerFolder = folderId;
+
+  // Update active folder chip by data-folder-id
   document.querySelectorAll('.library-picker-folder').forEach(function(f) {
-    f.classList.toggle('active', f.textContent === (folder === 'all' ? 'All Files' : folder));
+    f.classList.toggle('active', f.getAttribute('data-folder-id') === folderId);
   });
-  
+
   var itemsContainer = document.getElementById('libraryPickerItems');
   if (!itemsContainer) return;
-  
-  // v10.5.25: Check mode to determine data source
+
   var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
   var isLifeMode = currentMode === 'life';
-  
+
   var allFiles;
   if (isLifeMode) {
     var lifeLib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : JSON.parse(localStorage.getItem('roweos_life_library') || '{"files":[]}');
     allFiles = lifeLib.files || [];
   } else {
-    var lib = getLibraryForBrandIndex(studioSelectedBrand);
+    var brandIdx = (typeof studioSelectedBrand === 'number') ? studioSelectedBrand : (typeof selectedBrand === 'number' ? selectedBrand : 0);
+    var lib = getLibraryForBrandIndex(brandIdx);
     allFiles = (lib && lib.files) || [];
   }
-  
-  // Filter by folder if needed
-  var items = folder === 'all' ? allFiles : allFiles.filter(function(f) {
-    return f.folder === folder;
-  });
-  
+
+  // v31.5: Match against folderId (the actual stored property), with legacy fallback
+  // for older files that used `folder` (folder name) instead of `folderId`.
+  var items;
+  if (folderId === 'all') {
+    items = allFiles;
+  } else {
+    items = allFiles.filter(function(f) {
+      if (f.folderId && f.folderId === folderId) return true;
+      if (f.folder && f.folder === folderId) return true; // legacy
+      return false;
+    });
+  }
+
   if (items.length === 0) {
-    var emptyMsg = isLifeMode 
-      ? 'No content saved yet. Save notes, journals, or goals from the Life Library to see them here.'
-      : 'No content saved yet. Save content from BrandAI chat to see it here.';
+    var emptyMsg = isLifeMode
+      ? 'No content in this folder yet. Save notes, journals, or upload files to see them here.'
+      : 'No content in this folder yet. Upload files in Library or save content from BrandAI chat to see them here.';
     itemsContainer.innerHTML = '<div style="padding: var(--space-6); text-align: center; color: var(--text-muted);">' + emptyMsg + '</div>';
     return;
   }
-  
+
   var html = '';
   items.forEach(function(item, idx) {
-    var icon = item.type === 'conversation' ? '💬' : (item.type === 'image' ? '🖼' : (item.type === 'note' ? '📝' : (item.type === 'journal' ? '📔' : '📄')));
     var date = item.savedAt ? new Date(item.savedAt).toLocaleDateString() : (item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '');
     var title = item.title || item.name || 'Untitled';
-    html += '<div class="library-picker-item" data-idx="' + idx + '" data-folder="' + folder + '">' +
-      '<div class="library-picker-item-icon">' + icon + '</div>' +
+    var isImage = item.type === 'image' && item.content;
+    // v31.5: Real thumbnail for image files (was an emoji placeholder).
+    var iconHtml;
+    if (isImage) {
+      iconHtml = '<div class="library-picker-item-icon" style="width:44px;height:44px;border-radius:6px;overflow:hidden;background:#1a1a1a;display:flex;align-items:center;justify-content:center;">' +
+        '<img src="' + item.content + '" style="max-width:100%;max-height:100%;object-fit:cover;" alt="' + escapeHtml(title) + '">' +
+        '</div>';
+    } else {
+      var emoji = item.type === 'conversation' ? '💬' : (item.type === 'note' ? '📝' : (item.type === 'journal' ? '📔' : '📄'));
+      iconHtml = '<div class="library-picker-item-icon">' + emoji + '</div>';
+    }
+    html += '<div class="library-picker-item" data-idx="' + idx + '" data-folder-id="' + escapeHtml(folderId) + '">' +
+      iconHtml +
       '<div class="library-picker-item-info">' +
-        '<div class="library-picker-item-title">' + title + '</div>' +
+        '<div class="library-picker-item-title">' + escapeHtml(title) + '</div>' +
         '<div class="library-picker-item-meta">' + (item.type || 'Document') + ' • ' + date + '</div>' +
       '</div>' +
-      '<button class="library-picker-item-add" onclick="selectLibraryItemForStudio(\'' + folder + '\', ' + idx + ')">Add</button>' +
+      '<button class="library-picker-item-add" onclick="selectLibraryItemForStudio(\'' + escapeHtml(folderId).replace(/'/g, "\\'") + '\', ' + idx + ')">Add</button>' +
     '</div>';
   });
-  
+
   itemsContainer.innerHTML = html;
 }
 
 // v10.5.25: Select item and add to Studio (mode-aware)
-function selectLibraryItemForStudio(folder, idx) {
+// v31.5: Folder param is now folderId (matching renderLibraryPickerContent rewrite).
+function selectLibraryItemForStudio(folderId, idx) {
   // Check mode to determine data source
   var currentMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
   var isLifeMode = currentMode === 'life';
-  
+
   var allFiles;
   if (isLifeMode) {
     var lifeLib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : JSON.parse(localStorage.getItem('roweos_life_library') || '{"files":[]}');
     allFiles = lifeLib.files || [];
   } else {
-    var lib = getLibraryForBrandIndex(studioSelectedBrand);
+    var brandIdx = (typeof studioSelectedBrand === 'number') ? studioSelectedBrand : (typeof selectedBrand === 'number' ? selectedBrand : 0);
+    var lib = getLibraryForBrandIndex(brandIdx);
     allFiles = (lib && lib.files) || [];
   }
-  
-  var items = folder === 'all' ? allFiles : allFiles.filter(function(f) { return f.folder === folder; });
+
+  var items;
+  if (folderId === 'all') {
+    items = allFiles;
+  } else {
+    items = allFiles.filter(function(f) {
+      if (f.folderId && f.folderId === folderId) return true;
+      if (f.folder && f.folder === folderId) return true; // legacy
+      return false;
+    });
+  }
   var item = items[idx];
   
   if (!item) {
@@ -7341,7 +7385,7 @@ function startInlineEdit() {
   }
 }
 
-// v9.1.14: Cancel inline editing (Studio) — v24.27: renamed to avoid Focus2 collision
+// v9.1.14: Cancel inline editing (Studio) - v24.27: renamed to avoid Focus2 collision
 function cancelStudioInlineEdit() {
   var container = document.getElementById('studioSelectedOp');
   if (container) {
@@ -7350,7 +7394,7 @@ function cancelStudioInlineEdit() {
   }
 }
 
-// v9.1.14: Save inline edits (Studio) — v24.27: renamed to avoid Focus2 collision
+// v9.1.14: Save inline edits (Studio) - v24.27: renamed to avoid Focus2 collision
 function saveStudioInlineEdit() {
   if (!selectedOp || !selectedOp.aiGenerated) return;
 
@@ -7866,7 +7910,7 @@ function initGoogleDriveAuth() {
         showToast('Google Drive: Sign-in error (' + errType + ')', 'error');
       }
     });
-    // v29.0: Do NOT auto-reconnect on startup — Drive tokens are short-lived
+    // v29.0: Do NOT auto-reconnect on startup - Drive tokens are short-lived
     // and silent re-auth opens a popup. Only connect when user explicitly clicks.
     // The flag is kept so the UI shows the browser (not connect card) when they navigate to the tab.
   } catch(e) {
@@ -8518,7 +8562,7 @@ function scanSelectedGDriveToIdentity() {
 
   showToast('Scanning ' + toScan.length + ' file' + (toScan.length > 1 ? 's' : '') + ' for brand identity...', 'info');
 
-  // Download all file contents as text — use export for Office/Google docs, skip binary
+  // Download all file contents as text - use export for Office/Google docs, skip binary
   var downloads = toScan.map(function(file) {
     var mime = file.mimeType;
     var isGoogleDoc = mime.indexOf('application/vnd.google-apps.') === 0;
@@ -8551,7 +8595,7 @@ function scanSelectedGDriveToIdentity() {
     return fetch(url, { headers: { 'Authorization': 'Bearer ' + _gdriveAccessToken } })
       .then(function(r) {
         if (!r.ok && isOfficeDoc) {
-          // Export failed (file not uploaded via Google, can't convert) — try direct download
+          // Export failed (file not uploaded via Google, can't convert) - try direct download
           return fetch(GDRIVE_API_BASE + '/files/' + file.id + '?alt=media', {
             headers: { 'Authorization': 'Bearer ' + _gdriveAccessToken }
           }).then(function(r2) { return r2.ok ? r2.text() : ''; });

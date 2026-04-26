@@ -260,7 +260,7 @@ function saveBrandMemory() {
   try {
     localStorage.setItem('roweos_brand_memory', JSON.stringify(brandMemory));
   } catch (e) {
-    // v15.14: Handle localStorage quota exceeded — truncate doc content and retry
+    // v15.14: Handle localStorage quota exceeded - truncate doc content and retry
     if (e.name === 'QuotaExceededError' || (e.message && e.message.indexOf('quota') !== -1)) {
       console.warn('[Memory] Quota exceeded, truncating stored documents');
       Object.keys(brandMemory).forEach(function(key) {
@@ -2007,7 +2007,7 @@ async function saveChatDocToIdentity(attachedFiles, aiResponse, mode) {
       savedCount++;
 
       // v22.50: Run identity extraction to populate identity sections (essence, voice, etc.)
-      // Uses the AI's analysis response as content to extract from — avoids redundant API call
+      // Uses the AI's analysis response as content to extract from - avoids redundant API call
       var extractContent = aiResponse || fileContent;
       if (extractContent && typeof extractIdentityInsightsWithContext === 'function') {
         try {
@@ -3074,7 +3074,7 @@ function saveAllIdentityData() {
     }
   });
 
-  // v15.37: Save role data — check both Identity view and Edit Brand modal radios
+  // v15.37: Save role data - check both Identity view and Edit Brand modal radios
   if (!brand.roleData) brand.roleData = {};
   var roleRadio = document.querySelector('input[name="brandRole"]:checked') || document.querySelector('input[name="editBrandRole"]:checked');
   if (roleRadio) {
@@ -3282,11 +3282,11 @@ async function extractFromIdentityWebsite() {
       '  "competitive": { "content": "2-4 sentences about competitive positioning and market differentiation.", "keyPoints": ["Key insight 1", "Key insight 2"] }\n' +
       '}\n\nOnly include sections where you can extract meaningful information.\n\nWebsite content:\n' + websiteContent;
 
-    // v22.49: Multi-provider support — use client's selected provider
+    // v22.49: Multi-provider support - use client's selected provider
     var response, data, content;
 
     if (activeProvider === 'anthropic') {
-      // v22.49: Validate model name — fall back to known-good model if stored value is invalid
+      // v22.49: Validate model name - fall back to known-good model if stored value is invalid
       var claudeModel = localStorage.getItem('claudeModel') || 'claude-sonnet-4-6';
       var validModels = ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001', 'claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022'];
       if (validModels.indexOf(claudeModel) === -1 && claudeModel.indexOf('claude') === -1) {
@@ -3661,7 +3661,7 @@ async function extractIdentityInsightsWithContext(content, fileName, brandName, 
         if (!brand.identityData[section]) brand.identityData[section] = {};
 
         if (extracted[section].content) {
-          // v22.50: Fix [object Object] — convert existing array to string before appending
+          // v22.50: Fix [object Object] - convert existing array to string before appending
           var existing = brand.identityData[section].ai || '';
           if (Array.isArray(existing)) {
             existing = existing.map(function(item) {
@@ -4048,7 +4048,7 @@ function renderMemoryBrandPills() {
   // v9.1.14: Load new Identity UI data
   loadIdentityData();
 
-  // v18.2: Read selectedBrand but never WRITE it back — prevents reset during sync
+  // v18.2: Read selectedBrand but never WRITE it back - prevents reset during sync
   var currentBrandIdx = selectedBrand;
   if (typeof currentBrandIdx !== 'number' || isNaN(currentBrandIdx) || currentBrandIdx < 0 || currentBrandIdx >= brands.length) {
     // Prefer localStorage as source of truth over DOM which may be stale
@@ -4134,7 +4134,7 @@ function updateMemoryUI() {
       var statusText = doc.processed ? 'AI Analyzed' : (doc.error ? 'Error' : 'Uploaded');
       var statusColor = doc.processed ? 'var(--success)' : (doc.error ? 'var(--error)' : 'var(--text-muted)');
       
-      // v9.1.14: Show AI summary if available — v24.11: handle object format
+      // v9.1.14: Show AI summary if available - v24.11: handle object format
       var _docSum = doc.summary ? (typeof doc.summary === 'string' ? doc.summary : (doc.summary.summary || '')) : '';
       var summaryHtml = _docSum ?
         '<div class="doc-ai-summary" style="font-size: var(--text-sm); color: var(--text-secondary); margin-top: var(--space-2); padding: 8px 12px; background: rgba(212, 175, 55, 0.08); border-radius: var(--radius-xs);">' +
@@ -4393,7 +4393,7 @@ function exportBrandConfig() {
   showToast('Brand configuration exported', 'success');
 }
 
-// v16.0: Removed duplicate exportAllBrands() (v1.9.2) — canonical version is at ~line 113679 (v2.50.0)
+// v16.0: Removed duplicate exportAllBrands() (v1.9.2) - canonical version is at ~line 113679 (v2.50.0)
 
 function downloadJSON(data, filename) {
   var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -4669,7 +4669,7 @@ function generateBrandAIPrompt() {
   }
   prompt += '\n';
 
-  // v15.14: INJECT IDENTITY INTELLIGENCE — documents, insights, knowledge
+  // v15.14: INJECT IDENTITY INTELLIGENCE - documents, insights, knowledge
   if (typeof getBrandIdentityIntelligence === 'function') {
     var identityData = getBrandIdentityIntelligence(brand);
     if (identityData) {
@@ -5550,7 +5550,7 @@ var lifeDragItem = null;
  */
 function initLifeRhythm() {
   // v13.2: Check for personalization survey
-  // v25.1: No longer auto-fill hardcoded defaults — the onboarding survey
+  // v25.1: No longer auto-fill hardcoded defaults - the onboarding survey
   // (showLifeRhythmSurvey -> generatePersonalizedDefaults) populates routines,
   // habits, and goals based on what the user selects. This prevents the
   // recurring 6:30am preset conflict.
@@ -5646,7 +5646,7 @@ function saveLifeRhythmSurvey() {
   syncLifeAIToFirestore({ rhythmPreferences: prefs });
 }
 
-// v15.21: Dismiss survey without saving — uses all defaults
+// v15.21: Dismiss survey without saving - uses all defaults
 function dismissLifeRhythmSurvey() {
   var overlay = document.getElementById('lifeRhythmSurvey');
   if (overlay) overlay.remove();
@@ -5697,7 +5697,7 @@ function renderLifeRhythmSurveyWidgets() {
 }
 
 /**
- * v15.4: Rhythm Widget Builder — toggle visibility and reorder left panel cards
+ * v15.4: Rhythm Widget Builder - toggle visibility and reorder left panel cards
  */
 var rhythmWidgetDefaults = [
   { id: 'routine', label: "Today's Routine", visible: true },
@@ -5852,7 +5852,7 @@ function resetRhythmWidgets() {
  * v13.2: Generate personalized routines, habits, and goals based on survey
  */
 function generatePersonalizedDefaults(prefs) {
-  // v13.9: Defensive initialization — ensure arrays exist before merging
+  // v13.9: Defensive initialization - ensure arrays exist before merging
   console.log('[Survey] generatePersonalizedDefaults called with:', JSON.stringify(prefs));
   if (typeof lifeRoutines === 'undefined' || !Array.isArray(lifeRoutines)) { window.lifeRoutines = []; }
   if (typeof lifeHabits === 'undefined' || !Array.isArray(lifeHabits)) { window.lifeHabits = []; }
@@ -5865,7 +5865,7 @@ function generatePersonalizedDefaults(prefs) {
   var baseId = Date.now();
 
   if (areas.indexOf('health') !== -1) {
-    // v25.1: No pre-set time to avoid recurring calendar conflicts — user sets their own schedule
+    // v25.1: No pre-set time to avoid recurring calendar conflicts - user sets their own schedule
     newHabits.push({ id: baseId++, name: 'Drink 8 glasses of water', streak: 0, completedDates: [] });
     newHabits.push({ id: baseId++, name: '10,000 steps', streak: 0, completedDates: [] });
     newGoals.push({ id: baseId++, name: 'Build a consistent fitness routine', progress: 0, dueDate: null });
@@ -5946,7 +5946,7 @@ function getDefaultLifeRoutines() {
 
 /**
  * Get default habits
- * v25.1: Removed hardcoded defaults — onboarding survey populates these
+ * v25.1: Removed hardcoded defaults - onboarding survey populates these
  */
 function getDefaultLifeHabits() {
   return [];
@@ -5954,7 +5954,7 @@ function getDefaultLifeHabits() {
 
 /**
  * Get default goals
- * v25.1: Removed hardcoded defaults — onboarding survey populates these
+ * v25.1: Removed hardcoded defaults - onboarding survey populates these
  */
 function getDefaultLifeGoals() {
   return [];
@@ -6063,7 +6063,7 @@ function renderLifeRhythm() {
   renderLifeRhythmSurveyWidgets();
   
   // v10.5.25: Auto-select today and show day panel
-  // v15.43: Skip auto-open on mobile — user must tap a day
+  // v15.43: Skip auto-open on mobile - user must tap a day
   var today = new Date();
   var todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
   if (window.innerWidth > 768) {
@@ -6083,7 +6083,7 @@ function renderLifeRhythm() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// v15.37: Rhythm AI Goal Tasks — Generate daily task recommendations from Pulse goals
+// v15.37: Rhythm AI Goal Tasks - Generate daily task recommendations from Pulse goals
 // ═══════════════════════════════════════════════════════════════════════════
 
 function getRhythmGoalTasksCacheKey() {
@@ -6391,7 +6391,7 @@ function toggleLifeRhythmAddDropdown() {
 }
 
 /**
- * v13.9: Open Life Rhythm add form — proper slide-up panel instead of prompt() dialogs
+ * v13.9: Open Life Rhythm add form - proper slide-up panel instead of prompt() dialogs
  */
 function openLifeRhythmAddForm(type) {
   toggleLifeRhythmAddDropdown();
@@ -6679,7 +6679,7 @@ function toggleLifeRoutineStatus(routineId) {
 }
 
 /**
- * v13.9: Add routine item — uses form panel instead of prompt()
+ * v13.9: Add routine item - uses form panel instead of prompt()
  */
 function addLifeRoutineItem() {
   openLifeRhythmAddForm('routine');
@@ -6857,7 +6857,7 @@ function toggleLifeHabit(habitId) {
 }
 
 /**
- * v13.9: Add habit — uses form panel instead of prompt()
+ * v13.9: Add habit - uses form panel instead of prompt()
  */
 function addLifeHabit() {
   openLifeRhythmAddForm('habit');
@@ -7321,7 +7321,7 @@ function addLifeTaskToDay() {
 }
 
 /**
- * v13.9: Add task — uses form panel instead of prompt()
+ * v13.9: Add task - uses form panel instead of prompt()
  */
 function addLifeTask() {
   openLifeRhythmAddForm('task');
@@ -7855,8 +7855,8 @@ function switchPulseTab(tabId) {
   }
 }
 
-// v28.8: Today tab — shows today's tasks, calendar events, reminders
-// v28.8: Today tab — shows ALL pending tasks across all goals + inline calendar
+// v28.8: Today tab - shows today's tasks, calendar events, reminders
+// v28.8: Today tab - shows ALL pending tasks across all goals + inline calendar
 function renderPulseTodayTab() {
   var container = document.getElementById('pulseTodayContent');
   if (!container) return;
@@ -7978,7 +7978,7 @@ function renderPulseTodayTab() {
   container.innerHTML = html;
 }
 
-// v28.8: Self-contained Pulse calendar — no Focus dependencies
+// v28.8: Self-contained Pulse calendar - no Focus dependencies
 var _pulseCalMonth = new Date();
 
 function renderPulseCalendar() {
@@ -7997,7 +7997,7 @@ function renderPulseCalendar() {
   // Today card + calendar side by side in a styled card
   var html = '<div class="pulse-date-calendar-card" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:20px;background:var(--bg-secondary,rgba(255,255,255,0.04));border-radius:12px;border:1px solid var(--border-color,rgba(255,255,255,0.08));">';
 
-  // Today date card — centered vertically within the flex row
+  // Today date card - centered vertically within the flex row
   html += '<div class="pulse-date-card" style="text-align:center;padding:20px 24px;min-width:120px;display:flex;flex-direction:column;justify-content:center;align-items:center;align-self:center;">';
   html += '<div style="font-size:36px;font-weight:700;color:var(--text-primary);line-height:1;">' + now.getDate() + '</div>';
   html += '<div style="font-size:12px;font-weight:600;letter-spacing:1px;color:var(--accent,#a89878);margin-top:4px;">' + now.toLocaleDateString('en-US', { month: 'long' }).toUpperCase() + '</div>';
@@ -8037,7 +8037,7 @@ function renderPulseCalendar() {
 
   html += '</div>';
 
-  // v28.8: Today widget — pending tasks for today
+  // v28.8: Today widget - pending tasks for today
   var lifeMode = typeof isLifeMode === 'function' ? isLifeMode() : false;
   var _todayPending = [];
   var _todayDone = [];
@@ -8104,8 +8104,8 @@ function renderPulseCalendar() {
   container.innerHTML = html;
 }
 
-// v28.8: Calendar tab — mini calendar with task dots
-// v28.8: Completed Goals section — collapsed by default
+// v28.8: Calendar tab - mini calendar with task dots
+// v28.8: Completed Goals section - collapsed by default
 var _pulseCompletedExpanded = false;
 
 function renderPulseCompletedGoals() {
@@ -8153,7 +8153,7 @@ function renderPulseCompletedGoals() {
       }
       var cgExpanded = window._pulseExpandedCompleted[cg.id] || false;
       html += '<div style="padding:12px 16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;">';
-      // Header — click to expand
+      // Header - click to expand
       html += '<div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="window._pulseExpandedCompleted[\'' + cg.id + '\']=!window._pulseExpandedCompleted[\'' + cg.id + '\'];renderPulseCompletedGoals();">';
       html += '<div style="display:flex;align-items:center;gap:8px;">';
       html += '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.2s;transform:rotate(' + (cgExpanded ? '0' : '-90') + 'deg);opacity:0.4;"><path d="M6 9l6 6 6-6"/></svg>';
@@ -8273,7 +8273,7 @@ function selectPulseCalendarDay(dateStr) {
   renderPulseCalendarTab();
 }
 
-// v28.8: Calendar day detail — tasks for a selected date
+// v28.8: Calendar day detail - tasks for a selected date
 function renderPulseCalendarDayDetail(dateStr) {
   var container = document.getElementById('pulseCalendarDayDetail');
   if (!container) return;
@@ -8308,7 +8308,7 @@ function renderPulseCalendarDayDetail(dateStr) {
   container.innerHTML = html;
 }
 
-// v28.8: Notes tab — daily notes textarea
+// v28.8: Notes tab - daily notes textarea
 function renderPulseNotesTab() {
   var container = document.getElementById('pulseNotesContent');
   if (!container) return;
@@ -8360,7 +8360,7 @@ function savePulseNoteToJournal() {
   }
 }
 
-// v28.8: Streaks tab — streak display, heatmap, stats
+// v28.8: Streaks tab - streak display, heatmap, stats
 function renderPulseStreaksTab() {
   var container = document.getElementById('pulseStreaksContent');
   if (!container) return;
@@ -8460,8 +8460,8 @@ function renderPulseStreaksTab() {
   container.innerHTML = html;
 }
 
-// v28.8: Goals tab — clones checklists content
-// v28.8: Goals tab — renders all goals (including completed) with layout toggle
+// v28.8: Goals tab - clones checklists content
+// v28.8: Goals tab - renders all goals (including completed) with layout toggle
 var _pulseGoalGridLayout = localStorage.getItem('roweos_pulse_goal_layout') === 'grid';
 
 function renderPulseGoalsTab() {
@@ -8536,7 +8536,7 @@ function renderPulse3Overview() {
   
   var html = '';
   
-  // v28.8: Clickable progress ring — toggles between active tasks vs all-time
+  // v28.8: Clickable progress ring - toggles between active tasks vs all-time
   var _allTimeTotal = 0;
   var _allTimeCompleted = 0;
   modeFilteredGoals.forEach(function(goal) {
@@ -8568,7 +8568,7 @@ function renderPulse3Overview() {
     '<div class="pulse-3-stat-meta">Keep it up!</div>' +
   '</div>';
 
-  // v28.8: Merged Focus stats — pending count + streak
+  // v28.8: Merged Focus stats - pending count + streak
   var _pPending = totalItems - completedItems;
   var _pStreak = parseInt(localStorage.getItem('roweosStreak') || '0', 10);
   html += '<div class="pulse-3-stat-card">' +
@@ -8577,7 +8577,7 @@ function renderPulse3Overview() {
     '<div class="pulse-3-stat-meta">' + _pStreak + ' day streak</div>' +
   '</div>';
 
-  // v22.41: Brand Activity Pulse — automations, emails, social posts
+  // v22.41: Brand Activity Pulse - automations, emails, social posts
   var autoCount = 0;
   var emailCount = 0;
   var socialCount = 0;
@@ -8805,7 +8805,7 @@ function renderPulse3Checklists() {
       }).join('');
     }
 
-    // Render flat items (non-sectioned) — v15.47: skip if sections already rendered these items
+    // Render flat items (non-sectioned) - v15.47: skip if sections already rendered these items
     if ((!goal.sections || goal.sections.length === 0) && goal.items && goal.items.length > 0) {
       itemsHtml += (goal.items || []).map(function(item) {
         var categoryPill = item.sourceCategory ? '<span style="font-size: 10px; padding: 1px 6px; border-radius: 8px; background: rgba(168,152,120,0.15); color: var(--text-muted); margin-left: 6px;">' + escapeHtml(item.sourceCategory) + '</span>' : '';
@@ -9125,7 +9125,7 @@ function getLifeIdentityContextForGoals() {
     var overdue = pendingTodos.filter(function(t) { return t.date && t.date < todayStr; });
     if (overdue.length > 0) context.push('Overdue Tasks: ' + overdue.length);
 
-    // v13.2: Add recent library titles — v16.0: per-profile support
+    // v13.2: Add recent library titles - v16.0: per-profile support
     try {
       var lifeLib = typeof getLifeLibrary === 'function' ? getLifeLibrary() : JSON.parse(localStorage.getItem('roweos_life_library') || '{}');
       var libFiles = (lifeLib.files || []).slice(-5);
@@ -10193,7 +10193,7 @@ function closePulseGoalDropdown() {
 }
 
 /**
- * v22.41: Create inline goal card (Quick Goal — no AI)
+ * v22.41: Create inline goal card (Quick Goal - no AI)
  */
 function createInlineGoal() {
   var container = document.getElementById('pulse3Checklists');
@@ -10561,7 +10561,7 @@ function selectMotivateGoal(goalId) {
 }
 
 /**
- * v22.41: Inline goal title editing — click to edit
+ * v22.41: Inline goal title editing - click to edit
  */
 function editGoalTitleInline(el, goalId) {
   if (!el || el.contentEditable === 'true') return;
@@ -10599,7 +10599,7 @@ function editGoalTitleInline(el, goalId) {
 }
 
 /**
- * v22.41: Inline task text editing — click to edit
+ * v22.41: Inline task text editing - click to edit
  */
 function editTaskInline(el, goalId, itemId) {
   if (!el || el.contentEditable === 'true') return;
@@ -10730,7 +10730,7 @@ function generateAITasksForGoal(goalId) {
 }
 
 /**
- * v10.6: Edit goal (legacy — kept for backward compatibility)
+ * v10.6: Edit goal (legacy - kept for backward compatibility)
  */
 function editGoal(goalId) {
   var goal = pulseGoals.find(function(g) { return g.id === goalId; });

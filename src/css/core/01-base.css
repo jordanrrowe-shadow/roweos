@@ -40268,7 +40268,62 @@
       html[data-mobile-nav="sidebar"] #agentView .chat-input-area {
         bottom: env(safe-area-inset-bottom, 8px) !important;
       }
-      
+
+    /* v31.4 / v31.5: Landscape mobile - mirror portrait edge-to-edge.
+       max-height:500px is universally safe (no desktop is that short, iPad landscape is 820px).
+       Touches ONLY landscape-mobile rules — desktop + mobile-portrait untouched. */
+    @media (max-height: 500px) and (orientation: landscape) {
+      /* Landing chat input - edge-to-edge */
+      #agentView .chat-input-area {
+        position: fixed !important;
+        bottom: calc(50px + env(safe-area-inset-bottom, 0px)) !important;
+        left: 6px !important;
+        right: 6px !important;
+        width: auto !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        z-index: 100 !important;
+        box-sizing: border-box !important;
+      }
+      html[data-mobile-nav="sidebar"] #agentView .chat-input-area {
+        bottom: env(safe-area-inset-bottom, 8px) !important;
+      }
+
+      /* v31.5: Conversation mode — kill desktop max-width caps so messages + input
+         use the full landscape width. agentConversation/conversationThread otherwise
+         inherit desktop centering and look pinched. */
+      #agentView.conversation-active #agentConversation,
+      #agentView.conversation-active .conversation-thread {
+        max-width: none !important;
+        width: 100% !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        box-sizing: border-box !important;
+      }
+      #agentView.conversation-active .chat-input-area,
+      #agentView.conversation-active > .chat-input-area {
+        max-width: none !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 12px 8px !important;
+      }
+
+      /* v31.5: Blob + title group horizontal centering inside agentLandingContent.
+         Desktop already centers via align-items, but landscape collapses the flex
+         column with no align — force margin auto so it stays in the middle of the
+         visible chat surface (not pulled to the sidebar). */
+      #agentView #blobTitleGroup {
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      #agentView #agentLandingContent {
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+      }
+    }
+
       /* Rounded pill */
       #agentView .chat-input-v2 {
         display: flex !important;

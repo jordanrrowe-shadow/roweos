@@ -84,7 +84,7 @@
       gold.style.pointerEvents = 'none';
     }
   }
-  // v20.8: Auth gate theme toggle — class-based approach
+  // v20.8: Auth gate theme toggle - class-based approach
   function toggleAuthTheme() {
     var html = document.documentElement;
     var gate = document.getElementById('authGate');

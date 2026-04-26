@@ -30,7 +30,7 @@
             <!-- Appearance folder -->
             <div class="settings-folder-content" data-folder="appearance">
 
-          <!-- v24.24: Personalization — collapsible, top of appearance folder -->
+          <!-- v24.24: Personalization - collapsible, top of appearance folder -->
           <div class="settings-section">
             <div class="settings-section-title">Personalization</div>
             <div class="settings-row" style="cursor:pointer;flex-direction:column;align-items:stretch;" onclick="toggleSettingsExpander('persExpander',event)">
@@ -43,7 +43,7 @@
                 <span class="settings-chevron" id="persExpanderChevron" style="transition:transform 0.2s;">›</span>
               </div>
               <div id="persExpander" style="display:none;margin-top:12px;" onclick="event.stopPropagation();">
-                <!-- Brand/Life mode toggle — small pill -->
+                <!-- Brand/Life mode toggle - small pill -->
                 <div style="margin-bottom:10px;">
                   <div style="display:inline-flex;border-radius:8px;overflow:hidden;border:1px solid var(--border);">
                     <button class="accent-mode-tab active" id="persTabBrand" data-mode="brand" onclick="switchPersonalizationMode('brand')" style="flex:none;padding:6px 14px;border-radius:0;border:none;font-size:12px;">BrandAI</button>
@@ -69,7 +69,7 @@
             </div>
           </div>
 
-            <!-- v29.1: Dark/Light Mode Logos — consolidated into renderBrandLogoPicker -->
+            <!-- v29.1: Dark/Light Mode Logos - consolidated into renderBrandLogoPicker -->
             <!-- (removed duplicate standalone section; dark/light toggle now renders inside the logo picker) -->
 
           <!-- Appearance Section -->
@@ -106,7 +106,7 @@
                 <span class="settings-chevron">›</span>
               </div>
             </div>
-            <!-- v24.24: Blob Customizer — collapsible -->
+            <!-- v24.24: Blob Customizer - collapsible -->
             <div class="settings-row" style="cursor:pointer;flex-direction:column;align-items:stretch;" onclick="toggleSettingsExpander('blobExpander',event);onBlobExpanderOpen()">
               <div style="display:flex;align-items:center;gap:12px;width:100%;">
                 <div style="width:48px;height:48px;flex-shrink:0;position:relative;">
@@ -126,7 +126,7 @@
               <div id="blobExpander" style="display:none;margin-top:12px;" onclick="event.stopPropagation();">
                 <!-- v25.0: Removed ambient live preview (non-functional) -->
 
-                <!-- v24.26: Shape Type Selection — None / B.L.A.K.E. / Helix -->
+                <!-- v24.26: Shape Type Selection - None / B.L.A.K.E. / Helix -->
                 <div style="margin-bottom:14px;">
                   <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:500;">Shape Type</div>
                   <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -137,7 +137,7 @@
                   </div>
                 </div>
 
-                <!-- v24.27: Unified color swatches — visible for both B.L.A.K.E. and Helix -->
+                <!-- v24.27: Unified color swatches - visible for both B.L.A.K.E. and Helix -->
                 <div style="margin-bottom:14px;" id="ambientColorSection">
                   <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Color</div>
                   <div style="display:flex;gap:6px;flex-wrap:wrap;" id="ambientColorSwatches"></div>
@@ -247,7 +247,7 @@
                 </div>
               </div>
             </div>
-            <!-- v24.24: Welcome Cards — collapsible -->
+            <!-- v24.24: Welcome Cards - collapsible -->
             <div class="settings-row" style="cursor:pointer;flex-direction:column;align-items:stretch;" onclick="toggleSettingsExpander('welcomeExpander',event)">
               <div style="display:flex;align-items:center;gap:12px;width:100%;">
                 <div style="display:flex;gap:4px;flex-shrink:0;" id="welcomeCardPreviewContainer">
@@ -427,7 +427,7 @@
             <div id="modelLastUsedIndicator" style="margin-top:8px;"></div>
           </div>
 
-          <!-- v22.45: API Routing — per-category provider selection -->
+          <!-- v22.45: API Routing - per-category provider selection -->
           <div class="settings-section">
             <div class="settings-section-title">RoweOS AI</div>
             <div class="settings-row-desc" style="margin-bottom:12px;padding:0 4px;font-size:12px;color:var(--text-muted);">Choose how RoweOS routes AI requests. Auto selects based on your model tier preference.</div>
@@ -716,7 +716,7 @@
               </div>
             </div>
 
-            <!-- v23.2: Google Client ID row removed — hardcoded in app -->
+            <!-- v23.2: Google Client ID row removed - hardcoded in app -->
 
             <!-- Google Last Sync + Sync Now -->
             <div class="settings-row" id="gcalSyncRow">
@@ -929,10 +929,10 @@
             <!-- v18.0: Per-brand/per-profile context hint -->
             <div id="socialContextHint" style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:10px;padding:0 2px;"></div>
 
-            <!-- v28.4: Social connections moved to Media Lab -->
+            <!-- v31.5: "Media Lab" name retired — point users at the Social view directly. -->
             <div style="text-align:center;padding:24px;border:1px solid var(--border-color);border-radius:12px;background:var(--bg-secondary);">
               <p style="color:var(--text-primary);font-weight:600;margin-bottom:4px;">Social Connections</p>
-              <p style="color:var(--text-secondary);font-size:13px;margin-bottom:12px;">Manage your social media connections in Media Lab > Settings</p>
+              <p style="color:var(--text-secondary);font-size:13px;margin-bottom:12px;">Manage your social media connections in Social > Settings</p>
               <button onclick="showView('social');showSocialTab('settings');" style="padding:6px 16px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:13px;">Go to Social Settings</button>
             </div>
 
@@ -979,7 +979,7 @@
             <!-- Intelligence folder -->
             <div class="settings-folder-content" data-folder="intelligence">
 
-          <!-- v15.15: Advanced Features toggles removed — Cross-Mode Intelligence kept -->
+          <!-- v15.15: Advanced Features toggles removed - Cross-Mode Intelligence kept -->
           <div class="settings-section">
             <div class="settings-section-title">Intelligence</div>
 
@@ -1534,8 +1534,8 @@
                 </svg>
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
-                  <!-- v31.0: Version bump -->
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v31.0</div>
+                  <!-- v31.5: Version bump -->
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v31.5</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -1629,8 +1629,8 @@
               <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
                 <div style="display:flex;align-items:center;gap:12px;width:100%;">
                   <div>
-                    <!-- v31.0: Version bump -->
-                    <div style="font-size:16px;font-weight:500;color:var(--text-primary);" id="updateCurrentVersion">Current Version: v31.0</div>
+                    <!-- v31.1: Version bump -->
+                    <div style="font-size:16px;font-weight:500;color:var(--text-primary);" id="updateCurrentVersion">Current Version: v31.1</div>
                     <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;" id="updateStatus">Click below to check for updates</div>
                   </div>
                 </div>

@@ -6,7 +6,10 @@ var _voiceChunks = [];
 var _voiceTargetId = null;
 var _voiceBtnEl = null;
 var _voiceTimeout = null;
-var _voiceMaxDuration = 60000; // 60 seconds
+// v31.4: Google Speech v1 sync `recognize` rejects audio >60s with
+// "Sync input too long. For audio longer than 1 min use LongRunningRecognize".
+// We auto-stop at 55s so the upload stays inside that window even with codec overhead.
+var _voiceMaxDuration = 55000;
 
 function initVoiceDictation() {
   // Check browser support
@@ -75,11 +78,11 @@ function startVoiceRecording(targetTextareaId, btnEl) {
     _voiceRecorder.start(1000); // 1s chunks
     setVoiceBtnState('recording');
 
-    // Auto-stop after 60 seconds
+    // v31.4: Auto-stop at 55s to stay under Google's 60s sync limit. Tap the mic again to continue.
     _voiceTimeout = setTimeout(function() {
       if (_voiceRecorder && _voiceRecorder.state === 'recording') {
         stopVoiceRecording();
-        showToast('Recording stopped (60s limit)', 'info');
+        showToast('Recording stopped at 55s. Tap the mic again to keep dictating.', 'info');
       }
     }, _voiceMaxDuration);
 

@@ -1967,7 +1967,7 @@ function backToOnboardingChoice() {
 /**
  * Parse website URL for brand information
  */
-// v24.26: Analyze website from Brand Basics step — fills in all fields
+// v24.26: Analyze website from Brand Basics step - fills in all fields
 async function analyzeWebsiteForBrandBasics() {
   var urlInput = document.getElementById('wizardBrandWebsite');
   var url = urlInput ? urlInput.value.trim() : '';
@@ -1994,7 +1994,7 @@ async function analyzeWebsiteForBrandBasics() {
         if (aiData.tagline) { var t = document.getElementById('wizardBrandTagline'); if (t) t.value = aiData.tagline; }
         if (aiData.location) { var l = document.getElementById('wizardBrandLocation'); if (l && !l.value) l.value = aiData.location; }
         if (aiData.essence || aiData.description) { var d = document.getElementById('wizardBrandDescription'); if (d) d.value = aiData.essence || aiData.description || ''; }
-        // v24.26: Pre-fill Voice & Tone (step 8) — auto-select matching voice cards
+        // v24.26: Pre-fill Voice & Tone (step 8) - auto-select matching voice cards
         if (aiData.voice) {
           window._analyzedBrandVoice = aiData.voice;
           var voiceLower = aiData.voice.toLowerCase();
@@ -3663,18 +3663,18 @@ async function extractBrandInfoWithAI(content) {
   }
 
   // v24.27: Write from the brand's first-person perspective, not analytical third person
-  var promptText = 'You are building a brand AI identity from this website content. Write ALL descriptions from the FIRST PERSON perspective of the brand (use "we", "our", "I") — as if the brand owner is describing their own business. Do NOT write in third person or analytical tone.\n\nReturn ONLY a JSON object with these keys:\n' +
+  var promptText = 'You are building a brand AI identity from this website content. Write ALL descriptions from the FIRST PERSON perspective of the brand (use "we", "our", "I") - as if the brand owner is describing their own business. Do NOT write in third person or analytical tone.\n\nReturn ONLY a JSON object with these keys:\n' +
     '{\n' +
     '  "name": "Brand/company name",\n' +
     '  "tagline": "Brand tagline or slogan (create one if not found)",\n' +
     '  "location": "City, State if mentioned on the site",\n' +
     '  "essence": "Write as the brand: who we are, what we do, our mission and values. First person, confident, authentic. (4-6 sentences)",\n' +
     '  "voice": "Brand voice and tone description. How the brand sounds when it communicates. (4-6 sentences)",\n' +
-    '  "audience": "Who we serve — our ideal customers, their needs, demographics, and why they come to us. First person. (4-6 sentences)",\n' +
+    '  "audience": "Who we serve - our ideal customers, their needs, demographics, and why they come to us. First person. (4-6 sentences)",\n' +
     '  "messaging": "Our key messages, value propositions, and what makes us different. First person. (4-6 sentences)",\n' +
-    '  "products": "What we offer — our products, services, and unique features. First person. (4-6 sentences)",\n' +
-    '  "visual": "Visual identity — colors, typography, imagery style, design direction. (4-6 sentences)",\n' +
-    '  "competitive": "How we stand apart — our unique positioning and competitive advantages. First person. (4-6 sentences)"\n' +
+    '  "products": "What we offer - our products, services, and unique features. First person. (4-6 sentences)",\n' +
+    '  "visual": "Visual identity - colors, typography, imagery style, design direction. (4-6 sentences)",\n' +
+    '  "competitive": "How we stand apart - our unique positioning and competitive advantages. First person. (4-6 sentences)"\n' +
     '}\n\n' +
     'Be thorough. If information is not on the site, make educated inferences based on what IS there. Leave fields empty only if truly impossible to determine.\n\n' +
     'Website content:\n' + content.substring(0, 50000);

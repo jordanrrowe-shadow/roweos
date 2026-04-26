@@ -34,7 +34,7 @@ function _getDeviceName() {
   return name;
 }
 
-// v28.2: Rename this device — persists to localStorage and Firestore
+// v28.2: Rename this device - persists to localStorage and Firestore
 function renameThisDevice(newName) {
   if (!newName || !newName.trim()) return;
   newName = newName.trim().substring(0, 40);
@@ -126,7 +126,7 @@ var syncEngine = {
   _flushing: false,
 
   isV4Active: function() {
-    // v28.4: V4 disabled — incomplete migration caused data loss (chat contamination,
+    // v28.4: V4 disabled - incomplete migration caused data loss (chat contamination,
     // folio overwrites, missing categories). All reads/writes use old roweos_users/ path.
     // V4 data preserved in Firestore for future re-migration when properly implemented.
     return false;
@@ -502,7 +502,7 @@ var syncEngine = {
       existing.push(conflicts[j]);
     }
     try { localStorage.setItem('roweos_v4_conflicts', JSON.stringify(existing)); } catch (e) {}
-    // v29.0: Debounce conflict toast — show 1 summary toast instead of per-category spam
+    // v29.0: Debounce conflict toast - show 1 summary toast instead of per-category spam
     if (window._conflictToastTimer) clearTimeout(window._conflictToastTimer);
     window._conflictToastTimer = setTimeout(function() {
       try {
@@ -673,7 +673,7 @@ var syncEngine = {
 
       var cloudDoc = doc.data();
       try {
-        // v28.4: Array-stored keys need special handling — cloud stores { data: [...] }
+        // v28.4: Array-stored keys need special handling - cloud stores { data: [...] }
         // but localStorage stores the raw array [...]. fieldMerge can't reconcile these shapes.
         var _cloudArr = (cloudDoc && Array.isArray(cloudDoc.data)) ? cloudDoc.data :
                         (cloudDoc && Array.isArray(cloudDoc.items)) ? cloudDoc.items : null;
@@ -685,7 +685,7 @@ var syncEngine = {
                         (_localParsed && Array.isArray(_localParsed.items)) ? _localParsed.items : null;
 
         if (_cloudArr && _localArr !== null) {
-          // Both sides are arrays — merge by ID, keeping all items from both
+          // Both sides are arrays - merge by ID, keeping all items from both
           var _mergedIds = {};
           var _merged = [];
           // Local items first (preserve local edits)
@@ -701,7 +701,7 @@ var syncEngine = {
           }
           localStorage.setItem(localStorageKey, JSON.stringify(_merged));
         } else {
-          // Non-array doc — use standard fieldMerge
+          // Non-array doc - use standard fieldMerge
           var localDoc = _localParsed && typeof _localParsed === 'object' && !Array.isArray(_localParsed) ? _localParsed : {};
           var result = syncEngine.fieldMerge(collectionName, doc.id, cloudDoc, localDoc);
           localStorage.setItem(localStorageKey, JSON.stringify(result.merged));
@@ -783,11 +783,11 @@ var migrationEngine = {
       localStorage.removeItem('roweos_v4_migration_timestamp');
     }
     if (localStorage.getItem('roweos_v4_migrated') === 'true') return false;
-    // v30.1: New users have no data to migrate — skip and mark done immediately
+    // v30.1: New users have no data to migrate - skip and mark done immediately
     var hasBrands = localStorage.getItem('roweosBrands') || localStorage.getItem('roweos_brands');
     var hasOnboarding = localStorage.getItem('roweos_onboarding_completed');
     if (!hasBrands && !hasOnboarding) {
-      console.log('[Migration] New user — no existing data, skipping migration');
+      console.log('[Migration] New user - no existing data, skipping migration');
       localStorage.setItem('roweos_v4_migrated', 'true');
       localStorage.setItem('roweos_v4_schema', MIGRATION_SCHEMA);
       return false;
@@ -1461,7 +1461,7 @@ function saveBrands() {
           var docId = brand.id || ('brand_name_' + (brand.name || '').toLowerCase().replace(/[^a-z0-9]/g, '_'));
           batch.set(db.doc(basePath + '/brands/' + docId), data, { merge: true });
         });
-        // Delete ghosts in the SAME batch (atomic — no window for onSnapshot to resurrect)
+        // Delete ghosts in the SAME batch (atomic - no window for onSnapshot to resurrect)
         existingSnap.forEach(function(doc) {
           if (doc.id === '_all') return;
           if (_writtenBrandIds.indexOf(doc.id) === -1) {
@@ -1710,7 +1710,7 @@ function loadBrands() {
       if (!_skipBsRefresh) {
         brandSettings = settings;
       } else {
-        console.log('[loadBrands] Skipping brandSettings overwrite — local model config saved recently');
+        console.log('[loadBrands] Skipping brandSettings overwrite - local model config saved recently');
       }
       
       // Re-render brand UI
@@ -2059,7 +2059,7 @@ function extractBrandsFromRecoveryScript(content) {
 }
 
 
-// v15.27: Brand Recovery Modal — select brands to add or replace all
+// v15.27: Brand Recovery Modal - select brands to add or replace all
 function showBrandRecoveryModal(extractedBrands) {
   // Remove any existing recovery modal
   var existing = document.getElementById('brandRecoveryModal');
@@ -2206,7 +2206,7 @@ function applyBrandRecoveryMerge(extractedBrands) {
     msg += ', ' + skipped.length + ' duplicate' + (skipped.length !== 1 ? 's' : '') + ' skipped';
   }
   showToast(msg, 'success');
-  console.log('[BrandRecovery] Merge complete —', msg);
+  console.log('[BrandRecovery] Merge complete -', msg);
 
   // Reload after 2s
   setTimeout(function() {
@@ -2240,7 +2240,7 @@ function applyBrandRecovery(extractedBrands) {
   // Mark onboarding as complete
   localStorage.setItem('roweos_onboarding_completed', 'true');
   localStorage.setItem('roweos_welcomed', 'true');
-  // v30.5: Clear tier selection flag — onboarding is done, no longer needed
+  // v30.5: Clear tier selection flag - onboarding is done, no longer needed
   try { localStorage.removeItem('roweos_tier_selected'); } catch(e) {}
   
   // Initialize empty libraries if not present
@@ -2685,7 +2685,7 @@ var ops = [
   { id: 23, name: 'Funding Landscape Report', desc: 'Investor research and funding opportunities', category: 'research', brand: null, outputs: ['Investor profiles', 'Funding trends', 'Requirements analysis', 'Success patterns', 'Application strategy'] },
   { id: 24, name: 'Geographic Market Analysis', desc: 'Regional market entry research', category: 'research', brand: null, outputs: ['Market characteristics', 'Competitive landscape', 'Cultural considerations', 'Entry barriers', 'Opportunity assessment'] },
   { id: 25, name: 'Supply Chain Research', desc: 'Vendor, supplier, and logistics analysis', category: 'research', brand: null, outputs: ['Supplier profiles', 'Pricing comparison', 'Quality assessment', 'Lead times', 'Risk analysis'] },
-  // v22.9: Dedicated Deep Research Agent — always uses Gemini Deep Research
+  // v22.9: Dedicated Deep Research Agent - always uses Gemini Deep Research
   { id: 53, name: 'Deep Research', desc: 'Comprehensive deep research powered by Gemini', category: 'research', brand: null, outputs: ['In-depth analysis', 'Source citations', 'Key findings', 'Strategic recommendations', 'Action items'], requiresDeepResearch: true },
 
   // ═══════════════════════════════════════════════════════════════
@@ -2760,7 +2760,7 @@ var ops = [
     { id: 'topic', label: 'Campaign Topic', type: 'text', placeholder: 'e.g., New product launch, Sale announcement' },
     { id: 'tone', label: 'Brand Tone', type: 'select', options: ['Professional', 'Casual', 'Witty', 'Inspirational', 'Luxury'], default: 'Professional' }
   ]},
-  // v18.5: Raw social caption writer — outputs ONLY the post text, nothing else
+  // v18.5: Raw social caption writer - outputs ONLY the post text, nothing else
   { id: 48, name: 'Social Caption Writer', desc: 'Write a single social media caption ready to post immediately. Output ONLY the caption text itself. Nothing else. No titles, no headers, no analysis, no brand voice scores, no tone variants, no posting time suggestions, no hashtag lists, no markdown formatting, no explanations. Just the exact words that will appear as the social media post.', category: 'social', brand: null, outputs: ['Caption text'], isRawOutput: true, isSocialOp: true, params: [
     { id: 'platform', label: 'Platform', type: 'select', options: ['X (Twitter)', 'Threads', 'Instagram', 'TikTok'], default: 'Threads' },
     { id: 'tone', label: 'Tone', type: 'select', options: ['Professional', 'Casual', 'Witty', 'Inspirational', 'Urgent', 'Storytelling', 'Founder-Forward'], default: 'Professional' },
@@ -2796,7 +2796,7 @@ var ops = [
     { id: 'format', label: 'Output Format', type: 'select', options: ['HTML Template', 'Plain Text', 'Markdown'], default: 'HTML Template' },
     { id: 'emailCount', label: 'Email Count', type: 'select', options: ['Single Email', '2-Email Sequence', '3-Email Sequence'], default: 'Single Email' }
   ] },
-  // v22.33: Pitch Document Generator — produces portfolio-style markdown for PDF conversion
+  // v22.33: Pitch Document Generator - produces portfolio-style markdown for PDF conversion
   { id: 510, name: 'Pitch Document Generator', desc: 'Generate a polished, portfolio-style pitch document in structured markdown. Output ONLY the document. Structure with Roman numeral chapters: I. Executive Summary, II. Services and Capabilities, III. Strategic Approach, IV. Key Differentiators, V. Engagement Model. Use ## for chapters, ### for subsections, > for callouts, bold for key terms. Start with brand name, tagline, and Prepared for [Client]. Reference client by name throughout. Under 1200 words. No em-dashes.', category: 'documents', brand: null, outputs: ['Branded pitch document in markdown'], prompt: 'Generate a polished, portfolio-style pitch document for the client specified below. Output ONLY the document content in clean markdown.\n\nFORMAT INSTRUCTIONS:\n- Structure the document with clear chapter sections using Roman numerals (I, II, III, etc.)\n- Start with a title page section: brand name, tagline, and \"Prepared for [Client Name]\"\n- Chapter I: Executive Summary - brief overview of the brand and why this client is a fit\n- Chapter II: Services and Capabilities - what the brand offers, tailored to this client\n- Chapter III: Strategic Approach - how the brand would specifically help this client, referencing their industry and needs\n- Chapter IV: Key Differentiators - competitive advantages and unique value\n- Chapter V: Engagement Model - how working together would look, next steps, and call to action\n- Use markdown headings (## for chapters, ### for subsections)\n- Use blockquotes (>) for key callouts or brand philosophy statements\n- Use bullet points for feature lists and deliverables\n- Use bold text for emphasis on key terms\n- Keep professional, confident tone - not sales-y\n- Reference the client by name throughout\n- If a client website is provided, reference specific details about their business\n- Keep under 1200 words total\n- Do not use em-dashes or en-dashes\n\n{context}', params: [
     { id: 'recipientName', label: 'Client / Company Name', type: 'text', placeholder: 'e.g. Acme Corp, Sarah Chen' },
     { id: 'clientWebsite', label: 'Client Website (optional)', type: 'text', placeholder: 'e.g. acmecorp.com' },
@@ -2857,7 +2857,7 @@ var ops = [
   ]},
 
   // ═══════════════════════════════════════════════════════════════
-  // INFOGRAPHIC OPERATIONS (v23.8) — AI-generated data infographics
+  // INFOGRAPHIC OPERATIONS (v23.8) - AI-generated data infographics
   // ═══════════════════════════════════════════════════════════════
   { id: 1200, name: 'Brand Performance Dashboard', desc: 'Generate a visual dashboard infographic showing key brand metrics, KPIs, and performance indicators', category: 'infographic', brand: null, isInfographicOp: true, outputs: ['Performance metrics', 'KPI visualizations', 'Trend indicators', 'Action items'], params: [
     { id: 'metrics', label: 'Key Metrics / Focus Areas', type: 'textarea' },

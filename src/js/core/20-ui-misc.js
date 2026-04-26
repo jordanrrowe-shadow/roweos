@@ -1272,7 +1272,7 @@ function renderRhythmEvents() {
 
   var container = document.getElementById('rhythmDayEvents');
   var isLifeMode = (localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand') === 'life';
-  // v16.12: Use merged calendar — native mode-filtered + external (always shown)
+  // v16.12: Use merged calendar - native mode-filtered + external (always shown)
   var dayEvents = getCalendarEventsForDate(rhythmSelectedDate).filter(function(item) {
     // External events show in both modes
     if (item.source === 'google' || item.source === 'icloud') return true;
@@ -1415,7 +1415,7 @@ function renderRhythmDayPanel() {
   renderRhythmDayPanelUnified();
 }
 
-// v22.39: Unified day panel — events, tasks, automations in one stream
+// v22.39: Unified day panel - events, tasks, automations in one stream
 function renderRhythmDayPanelUnified() {
   var container = document.getElementById('rhythmDayUnified');
   if (!container || !rhythmSelectedDate) return;
@@ -2887,7 +2887,7 @@ function updateDeepResearchUI() {
   var lengthWrapper = document.querySelector('.chat-length-wrapper');
   if (lengthWrapper) lengthWrapper.style.display = deepResearchActive ? 'none' : '';
   // v16.10: Deep research avatars now use .research-icon/.research-label classes
-  // (bypasses gold .avatar-icon CSS entirely — no specificity battle needed)
+  // (bypasses gold .avatar-icon CSS entirely - no specificity battle needed)
   // Mobile header brand pill
   var mobileBrandPill = document.querySelector('.mobile-brand-pill');
   if (mobileBrandPill) {
@@ -3603,7 +3603,7 @@ function showConversationView() {
     if (aiTitle) {
       title = aiTitle;
     } else {
-      // v20.1: Handle multimodal content (array) — use displayContent fallback
+      // v20.1: Handle multimodal content (array) - use displayContent fallback
       var firstMessage = currentConversation[0].displayContent || (typeof currentConversation[0].content === 'string' ? currentConversation[0].content : 'Image conversation');
       // Generate title from first message (first 50 chars or first sentence)
       title = firstMessage.split('\n')[0].substring(0, 60);
@@ -3686,7 +3686,7 @@ function handleChatPaste(e) {
         };
         reader.readAsDataURL(file);
       } else {
-        // Regular chat — add as file attachment
+        // Regular chat - add as file attachment
         processAgentFile(file);
         showToast('Image attached', 'success');
       }
@@ -4217,7 +4217,7 @@ function setupContainerDragDrop(containerId, handler) {
   }, false);
   
   container.addEventListener('drop', function(e) {
-    // Handled by agentView listener — just clean up state
+    // Handled by agentView listener - just clean up state
     container.classList.remove('drag-over');
   }, false);
 }
@@ -4288,7 +4288,7 @@ function readDroppedFile(file, onSuccess, onError) {
     return;
   }
   
-  // Image handling — read as data URL
+  // Image handling - read as data URL
   if (file.type && file.type.startsWith('image/')) {
     var reader = new FileReader();
     reader.onload = function(e) { onSuccess(e.target.result); };
@@ -4703,9 +4703,9 @@ document.addEventListener('click', function(e) {
   if (!link) return;
   var href = link.getAttribute('href');
   if (!href || href.startsWith('#') || href.startsWith('javascript')) return;
-  // Internal navigation (onclick handlers like showView) — skip
+  // Internal navigation (onclick handlers like showView) - skip
   if (link.getAttribute('onclick')) return;
-  // External or absolute URLs — open in new tab
+  // External or absolute URLs - open in new tab
   if (href.startsWith('http') || href.startsWith('//') || href.startsWith('mailto:')) {
     e.preventDefault();
     window.open(href, '_blank', 'noopener');
@@ -4822,7 +4822,7 @@ function renderConversation() {
     // Use simple escapeHtml for user messages to prevent XSS but preserve readability
     if (msg.role === 'assistant') {
       content = formatMessageContent(content);
-      // v15.22: Fallback — if msg has imageUrl but content lost the image, re-inject it
+      // v15.22: Fallback - if msg has imageUrl but content lost the image, re-inject it
       if (msg.imageUrl && content.indexOf('<img') === -1) {
         content += '<div style="margin-top:8px;"><img src="' + msg.imageUrl + '" alt="Generated Image" style="max-width:100%;border-radius:8px;" /></div>';
       }
@@ -4850,7 +4850,7 @@ function renderConversation() {
         div.classList.add('standard-ai-response');
         div.innerHTML = '<div class="conversation-avatar standard-ai-avatar"><span class="avatar-icon">◇</span><span class="avatar-label">StandardAI</span></div><div class="conversation-message-bubble"><div class="conversation-message-content">' + content + '</div>' + msgActionsHtml + '</div>';
       } else if (content.indexOf('deep-research-card') !== -1) {
-        // v16.10: Deep research results — add class for mobile ::before pill
+        // v16.10: Deep research results - add class for mobile ::before pill
         div.classList.add('deep-research-message');
         div.innerHTML = '<div class="conversation-avatar"><span class="research-icon">&#9670;</span><span class="research-label">Research</span></div><div class="conversation-message-bubble"><div class="conversation-message-content">' + content + '</div>' + msgActionsHtml + '</div>';
       } else if (window._villainousMode) {
@@ -4924,7 +4924,7 @@ function renderAttachedFileCards(files, messageId) {
   return html;
 }
 
-// v24.27: Removed duplicate formatFileSize — the version at line ~68623 handles null guard + GB tier
+// v24.27: Removed duplicate formatFileSize - the version at line ~68623 handles null guard + GB tier
 
 function toggleFileContentPreview(fileId) {
   // Find the file card and toggle content preview
@@ -5002,7 +5002,7 @@ function formatMessageContent(content) {
   var webSearchIndicatorHtml = '<div class="web-search-indicator" style="display:flex;align-items:center;gap:8px;padding:12px;background:rgba(168,152,120,0.08);border:1px solid rgba(168,152,120,0.15);border-radius:8px;margin:8px 0;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brand-accent,#a89878)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><span style="font-size:13px;color:var(--text-secondary);">Searching the web...</span></div>';
   // Match XML-style invoke with web_search/WebSearch
   displayContent = displayContent.replace(/<(?:antml:)?invoke\s+name\s*=\s*["'](?:web_search|WebSearch|web-search)["'][^>]*>[\s\S]*?<\/(?:antml:)?invoke>/gi, '%%WEB_SEARCH_INDICATOR%%');
-  // Match incomplete XML invoke for web_search (streaming — block not yet closed)
+  // Match incomplete XML invoke for web_search (streaming - block not yet closed)
   displayContent = displayContent.replace(/<(?:antml:)?invoke\s+name\s*=\s*["'](?:web_search|WebSearch|web-search)["'][^>]*>[\s\S]*$/gi, '%%WEB_SEARCH_INDICATOR%%');
   // Match function-call style: web_search("query")
   displayContent = displayContent.replace(/(?:web_search|WebSearch|web-search)\s*\([^)]*\)/gi, '%%WEB_SEARCH_INDICATOR%%');
@@ -5021,7 +5021,7 @@ function formatMessageContent(content) {
   // v20.6: Strip URL context blocks from display (injected for API only)
   displayContent = displayContent.replace(/\n\n---\n\[Web page content from [^\]]*\]\n[\s\S]*?\[End of web page content\]/g, '');
 
-  // v20.5: Strip markdown blockquote prefix (> ) — AI models output it but it looks wrong in chat
+  // v20.5: Strip markdown blockquote prefix (> ) - AI models output it but it looks wrong in chat
   displayContent = displayContent.replace(/^> ?/gm, '');
 
   // v14.2: Extract image markdown before HTML escape to prevent base64 rendering as text
@@ -5045,7 +5045,7 @@ function formatMessageContent(content) {
     return '%%AUTOMATION_PLACEHOLDER_' + localIdx + '%%';
   });
 
-  // v20.6: Extract roweos-identity-update JSON blocks — apply to identity and render confirmation card
+  // v20.6: Extract roweos-identity-update JSON blocks - apply to identity and render confirmation card
   var identityCardStore = [];
   displayContent = displayContent.replace(/```roweos-identity-update\s*\n([\s\S]*?)```/g, function(match, jsonStr) {
     var cardIdx = identityCardStore.length;
@@ -5054,7 +5054,7 @@ function formatMessageContent(content) {
     return '%%IDENTITY_PLACEHOLDER_' + cardIdx + '%%';
   });
 
-  // v22.35: Extract roweos-add-clients JSON blocks — add to clients (deduplicated)
+  // v22.35: Extract roweos-add-clients JSON blocks - add to clients (deduplicated)
   if (!window._processedClientBlocks) window._processedClientBlocks = {};
   var clientCardStore = [];
   displayContent = displayContent.replace(/```roweos-add-clients\s*\n([\s\S]*?)```/g, function(match, jsonStr) {
@@ -5065,7 +5065,7 @@ function formatMessageContent(content) {
       var newClients = JSON.parse(blockKey);
       if (Array.isArray(newClients) && newClients.length > 0) {
         var names = newClients.map(function(c) { return c.name; }).join(', ');
-        // v22.35: Only add clients once — skip if this exact block was already processed
+        // v22.35: Only add clients once - skip if this exact block was already processed
         if (!window._processedClientBlocks[blockKey]) {
           window._processedClientBlocks[blockKey] = true;
           var clients = getClients();
@@ -5136,7 +5136,7 @@ function formatMessageContent(content) {
     if (!isVisual) return match; // Leave as regular code block
     var cardId = window._visualCardCounter++;
     var localIdx = visualCardStore.length;
-    // Build the iframe srcdoc — inject base styles for dark background + viewport meta
+    // Build the iframe srcdoc - inject base styles for dark background + viewport meta
     var srcdocHtml = trimmed;
     if (srcdocHtml.indexOf('<meta name="viewport"') === -1 && srcdocHtml.indexOf('<!DOCTYPE') === -1) {
       srcdocHtml = '<meta name="viewport" content="width=device-width,initial-scale=1">' + srcdocHtml;
@@ -5202,7 +5202,7 @@ function formatMessageContent(content) {
     return '%%PULSE_GOAL_PLACEHOLDER_' + localIdx + '%%';
   });
 
-  // v25.1: ST2 fix — detect incomplete ```html blocks (still streaming) and show building animation
+  // v25.1: ST2 fix - detect incomplete ```html blocks (still streaming) and show building animation
   // If there's an open ```html block without a closing ```, replace it with a pulsating placeholder
   var incompleteHtmlMatch = displayContent.match(/```html\s*\n([\s\S]*)$/);
   if (incompleteHtmlMatch) {
@@ -5230,7 +5230,7 @@ function formatMessageContent(content) {
   // Horizontal rules
   displayContent = displayContent.replace(/^---$/gm, '<hr>');
   
-  // v15.47: Markdown table rendering — detect lines with | separators
+  // v15.47: Markdown table rendering - detect lines with | separators
   displayContent = displayContent.replace(/((?:^[^\n]*\|[^\n]*$\n?){2,})/gm, function(tableBlock) {
     var tableLines = tableBlock.trim().split('\n').filter(function(l) { return l.trim(); });
     if (tableLines.length < 2) return tableBlock;
@@ -5289,7 +5289,7 @@ function formatMessageContent(content) {
       }
       result.push('<li>' + numberMatch[2] + '</li>');
     } else {
-      // v10.5.25: Look ahead past blank lines — don't close the list if the next
+      // v10.5.25: Look ahead past blank lines - don't close the list if the next
       // non-empty line is another list item of the same type
       if (inList && !line.trim()) {
         var keepOpen = false;
@@ -5470,7 +5470,7 @@ function resizeVisualIframe(iframe) {
   }
 }
 
-// v20.6 / v29.0: Render identity update proposal card — does NOT auto-apply, user must confirm
+// v20.6 / v29.0: Render identity update proposal card - does NOT auto-apply, user must confirm
 function applyIdentityUpdateFromChat(jsonStr, cardIndex) {
   try {
     var trimmedJson = jsonStr.trim();
@@ -5490,7 +5490,7 @@ function applyIdentityUpdateFromChat(jsonStr, cardIndex) {
     window._pendingIdentityUpdates[updateId] = { section: section, content: content };
 
     var preview = content.length > 200 ? content.substring(0, 200) + '...' : content;
-    // v29.0: Render as a proposal card with Add/Dismiss — NOT auto-applied
+    // v29.0: Render as a proposal card with Add/Dismiss - NOT auto-applied
     return '<div id="' + updateId + '_card" style="padding:14px 16px;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);border-radius:10px;margin:8px 0;">' +
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
       '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a89878" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>' +
@@ -5564,7 +5564,7 @@ function renderAutomationProposalCard(blockType, jsonStr, cardIndex) {
     var cleaned = jsonStr.trim().replace(/,\s*([}\]])/g, '$1');
     parsed = JSON.parse(cleaned);
   } catch(e) {
-    // Parse error — return error card
+    // Parse error - return error card
     return '<div style="border:1px solid #ef4444;border-radius:12px;padding:16px;margin:12px 0;background:rgba(239,68,68,0.08);">' +
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
       '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' +
@@ -5637,7 +5637,7 @@ function renderAutomationProposalCard(blockType, jsonStr, cardIndex) {
       '</div>';
   }
 
-  // v20.8: Check if a matching automation already exists (same name) — show "Update" instead
+  // v20.8: Check if a matching automation already exists (same name) - show "Update" instead
   var existingId = null;
   var btnLabel = isPipeline ? 'Schedule Pipeline' : 'Schedule This';
   try {
@@ -5804,7 +5804,7 @@ function addMessageToThread(role, content) {
   thread.scrollTop = thread.scrollHeight;
 }
 
-// v30.1: SmartAI image generation handler — auto-detects image requests and routes to best available provider
+// v30.1: SmartAI image generation handler - auto-detects image requests and routes to best available provider
 async function handleSmartImageGeneration(userMessage, btnId) {
   var btn = btnId ? document.getElementById(btnId) : null;
   try {
@@ -5848,7 +5848,7 @@ async function handleSmartImageGeneration(userMessage, btnId) {
     var result;
     var provider;
 
-    // Prefer Nano Banana (Google) — generally faster and included with Google key
+    // Prefer Nano Banana (Google) - generally faster and included with Google key
     if (hasNanobanana) {
       provider = 'nanobanana';
       try {
@@ -6258,7 +6258,7 @@ function sendFollowup() {
     var textFilesFollowup = readyFilesFollowup.filter(function(f) { return !f.type || !f.type.startsWith('image/'); });
 
     if (imageFilesFollowup.length > 0 && textFilesFollowup.length === 0) {
-      // Only images — use multimodal format
+      // Only images - use multimodal format
       var contentPartsFollowup = [];
       imageFilesFollowup.forEach(function(f) {
         var base64DataFollowup = f.content.split(',')[1];
@@ -6433,7 +6433,7 @@ async function enrichMessageWithUrlContent(userMessage) {
 }
 
 async function executeAgentRequest(brand, userMessage, btn, btnId) {
-  // v22.41: Defense-in-depth — hide stale progress bars (especially for multimodal/image sends)
+  // v22.41: Defense-in-depth - hide stale progress bars (especially for multimodal/image sends)
   if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
   if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
   // v20.6: Fetch URL content and store as hidden context (not in conversation display)
@@ -6457,7 +6457,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
   }
 
 
-  // v29.0: Villainous Game Master — hidden /villain command intercept
+  // v29.0: Villainous Game Master - hidden /villain command intercept
   var _msgStr = typeof userMessage === 'string' ? userMessage : '';
   var _villainCmd = _msgStr.trim().toLowerCase();
   // Activate: "/villain" alone or "/villain <question>"
@@ -6634,7 +6634,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       || localStorage.getItem('selectedProvider') || 'anthropic';
     var model = localStorage.getItem('roweos_life_model') || (provider === 'openai' ? 'gpt-5.5' : (provider === 'google' ? 'gemini-3.1-pro-preview' : 'claude-sonnet-4-6')); // v30.1: Match default model to provider
 
-    // v20.5: RoweOS AI — resolve to actual provider/model
+    // v20.5: RoweOS AI - resolve to actual provider/model
     if (provider === 'roweos') {
       try {
         var _hasImg = false;
@@ -6704,7 +6704,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
         var streamContent = document.getElementById('streamingContent');
         if (streamContent) {
           streamContent.innerHTML = formatMessageContent(fullText) + '<span class="streaming-cursor"></span>';
-          // v16.4: Smart scroll — only auto-scroll if user is near bottom
+          // v16.4: Smart scroll - only auto-scroll if user is near bottom
           if (convThread) {
             var isNearBottom = convThread.scrollHeight - convThread.scrollTop - convThread.clientHeight < 150;
             if (isNearBottom) convThread.scrollTop = convThread.scrollHeight;
@@ -6863,7 +6863,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       restoreSendButton('followupBtn');
       // v30.1: Ensure followup btn is fully restored
       if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
-      // v22.39: Safety — always hide progress bars on completion
+      // v22.39: Safety - always hide progress bars on completion
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
       setAgentStatus('ready');
@@ -6878,7 +6878,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       restoreSendButton('followupBtn');
       // v30.1: Ensure followup btn is fully restored
       if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
-      // v22.39: Safety — always hide progress bars on error
+      // v22.39: Safety - always hide progress bars on error
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
       setAgentStatus('error');
@@ -6908,7 +6908,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     } else if (provider === 'google') {
       callGoogleStreaming(model, apiKey, messages, prompt, onChunk, onComplete, onError, _lifeSignal);
     } else if (provider === 'nanobanana') {
-      // v13.9: Nanobanana chat — detect image requests and route accordingly
+      // v13.9: Nanobanana chat - detect image requests and route accordingly
       var lastUserMsg = messages.length > 0 ? (typeof messages[messages.length - 1].content === 'string' ? messages[messages.length - 1].content : '') : '';
       if (isNanobananaImageRequest(model, lastUserMsg)) {
         handleNanobananaChatImage(model, lastUserMsg, onChunk, onComplete, onError);
@@ -6933,7 +6933,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     provider = settings.provider || 'anthropic';
     model = settings.model || 'claude-sonnet-4-6';
 
-    // v20.5: RoweOS AI — resolve to actual provider/model
+    // v20.5: RoweOS AI - resolve to actual provider/model
     if (provider === 'roweos') {
       try {
         var _resolved = resolveRoweOSAI({ userMessage: userMessage, systemPrompt: prompt });
@@ -6994,7 +6994,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
         var streamContent = document.getElementById('streamingContent');
         if (streamContent) {
           streamContent.innerHTML = formatMessageContent(fullText) + '<span class="streaming-cursor"></span>';
-          // v16.4: Smart scroll — only auto-scroll if user is near bottom
+          // v16.4: Smart scroll - only auto-scroll if user is near bottom
           if (convThread) {
             var isNearBottom = convThread.scrollHeight - convThread.scrollTop - convThread.clientHeight < 150;
             if (isNearBottom) convThread.scrollTop = convThread.scrollHeight;
@@ -7044,7 +7044,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
           conversation: JSON.parse(JSON.stringify(currentConversation)),
           time: new Date().toLocaleString()
         };
-        // v30.1: Check for preliminary entry from runAgent — update in place instead of pushing duplicate
+        // v30.1: Check for preliminary entry from runAgent - update in place instead of pushing duplicate
         var _prelimIdx2 = window._currentPreliminaryIndex;
         if (_prelimIdx2 !== null && _prelimIdx2 !== undefined && agentCommands[_prelimIdx2] && agentCommands[_prelimIdx2].preliminary) {
           Object.keys(commandRecord).forEach(function(k) { agentCommands[_prelimIdx2][k] = commandRecord[k]; });
@@ -7073,7 +7073,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       restoreSendButton('followupBtn');
       // v30.1: Ensure followup btn is fully restored
       if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
-      // v22.39: Safety — always hide progress bars on completion
+      // v22.39: Safety - always hide progress bars on completion
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
       setAgentStatus('ready');
@@ -7110,7 +7110,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       restoreSendButton('followupBtn');
       // v30.1: Ensure followup btn is fully restored
       if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
-      // v22.39: Safety — always hide progress bars on error
+      // v22.39: Safety - always hide progress bars on error
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
       setAgentStatus('ready');
@@ -7140,7 +7140,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     } else if (provider === 'google') {
       callGoogleStreaming(model, apiKey, messages, prompt, onChunk, onComplete, onError, _stdSignal);
     } else if (provider === 'nanobanana') {
-      // v13.9: Nanobanana chat — detect image requests and route accordingly
+      // v13.9: Nanobanana chat - detect image requests and route accordingly
       var lastUserMsg = messages.length > 0 ? (typeof messages[messages.length - 1].content === 'string' ? messages[messages.length - 1].content : '') : '';
       if (isNanobananaImageRequest(model, lastUserMsg)) {
         handleNanobananaChatImage(model, lastUserMsg, onChunk, onComplete, onError);
@@ -7152,7 +7152,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
   }
 
   if (brandAIActive) {
-    // v13.9: Null-safe brand fallback — prevents "invalid brand" errors
+    // v13.9: Null-safe brand fallback - prevents "invalid brand" errors
     if (!brand && brands.length > 0) {
       brand = brands[0];
       console.log('[BrandAI] Brand was null, falling back to first brand:', brand.name);
@@ -7273,18 +7273,18 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       if (extraContext) prompt += extraContext;
     }
 
-    // v15.14: BRAND IDENTITY INTELLIGENCE — inject learned knowledge from Identity
+    // v15.14: BRAND IDENTITY INTELLIGENCE - inject learned knowledge from Identity
     if (typeof getBrandIdentityIntelligence === 'function') {
       var identityKnowledge = getBrandIdentityIntelligence(brand);
       if (identityKnowledge) prompt += identityKnowledge;
     }
 
-    // v16.11: CLIENT ROSTER — inject active clients context for this brand
+    // v16.11: CLIENT ROSTER - inject active clients context for this brand
     if (typeof getActiveClientsContext === 'function') {
       var clientRoster = getActiveClientsContext(brandIdxForContext);
       if (clientRoster) prompt += clientRoster;
     }
-    // v22.33: CLIENT PROFILE — scan user message for client name mentions (uses actual message, not DOM)
+    // v22.33: CLIENT PROFILE - scan user message for client name mentions (uses actual message, not DOM)
     if (typeof getClientIdentityContext === 'function' && typeof getClients === 'function') {
       try {
         var userMsg = typeof userMessage === 'string' ? userMessage.toLowerCase() : '';
@@ -7378,11 +7378,11 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
   // Use IPC handler for API call
   var brandIdx = brands.indexOf(brand);
   var settings = brandSettings[brandIdx] || {};
-  // v30.1: Only read from brandSettings — brand.provider/brand.model are stale fields that cause nanobanana defaulting bug
+  // v30.1: Only read from brandSettings - brand.provider/brand.model are stale fields that cause nanobanana defaulting bug
   var provider = settings.provider || 'anthropic';
   var model = settings.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.5' : (provider === 'nanobanana' ? 'gemini-3-pro-image-preview' : 'gemini-3.1-pro-preview')));
 
-  // v20.5: RoweOS AI — resolve to actual provider/model before dispatch
+  // v20.5: RoweOS AI - resolve to actual provider/model before dispatch
   if (provider === 'roweos') {
     try {
       var _hasImg = false;
@@ -7457,7 +7457,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
         var streamContent = document.getElementById('streamingContent');
         if (streamContent) {
           streamContent.innerHTML = formatMessageContent(fullText) + '<span class="streaming-cursor"></span>';
-          // v16.4: Smart scroll — only auto-scroll if user is near bottom
+          // v16.4: Smart scroll - only auto-scroll if user is near bottom
           if (convThread) {
             var isNearBottom = convThread.scrollHeight - convThread.scrollTop - convThread.clientHeight < 150;
             if (isNearBottom) convThread.scrollTop = convThread.scrollHeight;
@@ -7514,7 +7514,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
           conversation: JSON.parse(JSON.stringify(currentConversation)),
           time: new Date().toLocaleString()
         };
-        // v30.1: Check for preliminary entry from runAgent — update in place instead of pushing duplicate
+        // v30.1: Check for preliminary entry from runAgent - update in place instead of pushing duplicate
         var _prelimIdx = window._currentPreliminaryIndex;
         if (_prelimIdx !== null && _prelimIdx !== undefined && agentCommands[_prelimIdx] && agentCommands[_prelimIdx].preliminary) {
           Object.keys(commandRecord).forEach(function(k) { agentCommands[_prelimIdx][k] = commandRecord[k]; });
@@ -7548,7 +7548,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
         btn.disabled = false;
         btn.classList.remove('sending');
       }
-      // v22.39: Safety — always hide progress bars on completion
+      // v22.39: Safety - always hide progress bars on completion
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
       setAgentStatus('ready');
@@ -7560,7 +7560,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
       if (streamingMsg) streamingMsg.remove();
       _streamAbortController = null;
       restoreSendButton('followupBtn');
-      // v22.39: Safety — always hide progress bars on error
+      // v22.39: Safety - always hide progress bars on error
       if (typeof hideDeepResearchProgress === 'function') hideDeepResearchProgress();
       if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
       handleChatError(error, btnId, btn);
@@ -7590,7 +7590,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     } else if (provider === 'google') {
       callGoogleStreaming(model, apiKey, messages, prompt, onChunk, onComplete, onError, _brandSignal);
     } else if (provider === 'nanobanana') {
-      // v13.9: Nanobanana chat — detect image requests and route accordingly
+      // v13.9: Nanobanana chat - detect image requests and route accordingly
       var lastUserMsg = messages.length > 0 ? (typeof messages[messages.length - 1].content === 'string' ? messages[messages.length - 1].content : '') : '';
       if (isNanobananaImageRequest(model, lastUserMsg)) {
         handleNanobananaChatImage(model, lastUserMsg, onChunk, onComplete, onError);
@@ -7958,7 +7958,7 @@ function saveRuns() {
           content = content.substring(0, 2000) + '\n\n...[Content trimmed for storage - ' + pdfRef + ']...';
         }
         
-        // v16.6: Only trim at very high safety cap — preserve full content
+        // v16.6: Only trim at very high safety cap - preserve full content
         if (content.length > 500000) {
           content = content.substring(0, 500000) + '\n\n...[Content trimmed for storage (' + Math.round(content.length/1000) + 'KB)]...';
         }
@@ -8006,7 +8006,7 @@ function saveRuns() {
       var brandCommands = cleanedAgentCommands.filter(function(cmd) { return cmd.mode !== 'life'; });
       localStorage.setItem('roweos_life_agentCommands', JSON.stringify(lifeCommands));
       localStorage.setItem('roweos_agentCommands', JSON.stringify(brandCommands));
-      // v15.25: Clear sync baselines — local data changed, needs re-push
+      // v15.25: Clear sync baselines - local data changed, needs re-push
       localStorage.removeItem('roweos_sync_baseline_brandai_chats');
       localStorage.removeItem('roweos_sync_baseline_lifeai_chats');
     } catch (e) { console.warn('[saveRuns] Could not save split agentCommands:', e.message); }
@@ -8047,7 +8047,7 @@ function loadRuns() {
       return;
     }
 
-    // v15.37: Handle both formats — flat array (from sync) and object (from saveRuns)
+    // v15.37: Handle both formats - flat array (from sync) and object (from saveRuns)
     if (Array.isArray(data)) {
       console.log('[loadRuns] Migrating flat array format (' + data.length + ' runs) to object format');
       runs = data;
@@ -8389,7 +8389,7 @@ function openMobileFullMenu() {
 
 function closeMobileFullMenu() {
   closeLiquidGrid();
-  // Legacy cleanup — also close old full menu if somehow open
+  // Legacy cleanup - also close old full menu if somehow open
   var overlay = document.getElementById('mobileFullMenuOverlay');
   var menu = document.getElementById('mobileFullMenu');
   if (overlay) overlay.classList.remove('show');
@@ -8397,7 +8397,7 @@ function closeMobileFullMenu() {
   document.body.style.overflow = '';
 }
 
-// v15.43: Liquid Grid — toggle/open/close
+// v15.43: Liquid Grid - toggle/open/close
 var liquidGridOpen = false;
 
 function toggleLiquidGrid() {
@@ -8440,7 +8440,7 @@ function closeLiquidGrid() {
   document.body.style.overflow = '';
 }
 
-// v15.43: Build grid panel items — all views NOT in the pill, plus utility toggles
+// v15.43: Build grid panel items - all views NOT in the pill, plus utility toggles
 function renderLiquidGridItems() {
   var container = document.getElementById('liquidGridItems');
   if (!container) return;
@@ -8642,7 +8642,7 @@ function toggleModeFromGrid() {
           nb.content = html;
           nb.title = text.split('\n')[0].substring(0, 60) || 'Chat Selection';
           if (typeof saveScribeNotebooks === 'function') saveScribeNotebooks();
-          // Now show the view — initScribe will load the notebook with content already in it
+          // Now show the view - initScribe will load the notebook with content already in it
           showView('scribe');
           if (typeof selectScribeNotebook === 'function') {
             setTimeout(function() { selectScribeNotebook(nb.id); }, 300);
@@ -8668,7 +8668,7 @@ function toggleModeFromGrid() {
       }
     } else if (action === 'email') {
       // v30.1: chatSendAsEmail(btn) expects a button inside a message bubble.
-      // From selection toolbar we don't have that context — open Mail compose with content instead.
+      // From selection toolbar we don't have that context - open Mail compose with content instead.
       if (typeof showView === 'function') {
         showView('mail');
         setTimeout(function() {

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoweOS Splash — Hybrid Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #fff; font-family: -apple-system, sans-serif; overflow: hidden; height: 100vh; }
+
+  /* === SPLASH SCREEN === */
+  .splash {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    background: #0a0a0a;
+  }
+
+  /* Ambient gold glow behind text */
+  .splash::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(168,152,120,0.07) 0%, transparent 65%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    animation: breathe 6s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  }
+
+  /* Corner accents from C */
+  .corner { position: absolute; width: 48px; height: 48px; opacity: 0; animation: cornerIn 1s ease forwards; }
+  .corner-tl { top: 32px; left: 32px; border-top: 1px solid rgba(168,152,120,0.25); border-left: 1px solid rgba(168,152,120,0.25); animation-delay: 0.8s; }
+  .corner-br { bottom: 32px; right: 32px; border-bottom: 1px solid rgba(168,152,120,0.25); border-right: 1px solid rgba(168,152,120,0.25); animation-delay: 1s; }
+
+  @keyframes cornerIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  /* Text container */
+  .splash-content {
+    text-align: center; position: relative; z-index: 1;
+  }
+
+  /* "Welcome, to" — sans-serif from B, but sized down */
+  .welcome-line {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    font-size: 20px; font-weight: 500;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 16px;
+    opacity: 0; animation: fadeUp 0.8s ease forwards 0.3s;
+  }
+
+  /* "RoweOS" — large Cormorant from A/C with gold gradient */
+  .brand-name {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 82px; font-weight: 300;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, #d4c4a0, #a89878, #c0b090, #a89878);
+    background-size: 200% 200%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: fadeUp 0.9s ease forwards 0.5s, goldShimmer 8s ease-in-out infinite 1.5s;
+    opacity: 0;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  @keyframes goldShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Divider line from C */
+  .divider {
+    width: 48px; height: 1px;
+    background: rgba(168,152,120,0.35);
+    margin: 0 auto 20px;
+    opacity: 0; animation: fadeUp 0.6s ease forwards 0.7s;
+  }
+
+  /* Tagline */
+  .tagline {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 16px; font-style: italic;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.5px;
+    margin-bottom: 48px;
+    opacity: 0; animation: fadeUp 0.7s ease forwards 0.9s;
+  }
+
+  /* CTA — outlined from A but with hover fill */
+  .cta-button {
+    display: inline-block; padding: 16px 40px;
+    border: 1px solid rgba(168,152,120,0.4);
+    border-radius: 8px; background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: #a89878; cursor: pointer;
+    transition: all 0.4s ease;
+    opacity: 0; animation: fadeUp 0.7s ease forwards 1.2s;
+    text-decoration: none;
+  }
+  .cta-button:hover {
+    background: rgba(168,152,120,0.1);
+    border-color: rgba(168,152,120,0.6);
+    box-shadow: 0 0 30px rgba(168,152,120,0.08);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Horizontal gold lines from B */
+  .h-line-top, .h-line-bottom {
+    position: absolute; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168,152,120,0.2), transparent);
+    opacity: 0; animation: lineIn 1.2s ease forwards 0.6s;
+  }
+  .h-line-top { top: 0; }
+  .h-line-bottom { bottom: 0; }
+
+  @keyframes lineIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  /* === GOLD TRANSITION === */
+  .gold-transition {
+    position: fixed; inset: 0; z-index: 20;
+    pointer-events: none; opacity: 0;
+  }
+  .gold-transition.active {
+    pointer-events: all;
+    animation: goldFlash 1.4s ease forwards;
+  }
+
+  @keyframes goldFlash {
+    0% { opacity: 0; }
+    15% { opacity: 1; background: radial-gradient(circle at center, rgba(168,152,120,0.25) 0%, rgba(10,10,10,0.95) 70%); }
+    40% { opacity: 1; background: radial-gradient(circle at center, rgba(168,152,120,0.15) 0%, rgba(10,10,10,1) 60%); }
+    100% { opacity: 1; background: #0a0a0a; }
+  }
+
+  /* === DESTINATION (what's behind the splash) === */
+  .destination {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.6s ease 0.8s;
+  }
+  .destination.visible { opacity: 1; }
+  .destination-content { text-align: center; }
+  .destination-content h2 {
+    font-family: 'DM Sans', sans-serif; font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 8px;
+  }
+  .destination-content p {
+    font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 32px;
+  }
+  .auth-cards { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .auth-card {
+    padding: 20px 28px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+    font-size: 14px; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.3s;
+    background: rgba(255,255,255,0.03);
+  }
+  .auth-card:hover { border-color: rgba(168,152,120,0.4); color: #a89878; }
+
+  /* Replay button */
+  .replay {
+    position: fixed; bottom: 24px; right: 24px; z-index: 30;
+    padding: 10px 20px; border: 1px solid rgba(168,152,120,0.3); border-radius: 6px;
+    background: rgba(10,10,10,0.9); color: #a89878; font-size: 12px;
+    letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .replay:hover { border-color: rgba(168,152,120,0.6); }
+
+  /* Info label */
+  .info-label {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 30;
+    font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; color: rgba(168,152,120,0.5);
+    background: rgba(10,10,10,0.8); padding: 8px 16px; border-radius: 4px;
+    border: 1px solid rgba(168,152,120,0.15);
+  }
+</style>
+</head>
+<body>
+
+<div class="info-label">Hybrid Preview — Click "Begin Experience" to see transition</div>
+
+<!-- Destination (Login/Signup page preview) -->
+<div class="destination" id="dest">
+  <div class="destination-content">
+    <img src="/icons/roweos-logo.png" onerror="this.style.display='none'" style="width:80px; border-radius:12px; margin-bottom:20px; opacity:0.9;">
+    <h2>Launch RoweOS</h2>
+    <p>Sign in or create your account</p>
+    <div class="auth-cards">
+      <div class="auth-card">Continue with Google</div>
+      <div class="auth-card">Continue with X</div>
+      <div class="auth-card">Email & Password</div>
+    </div>
+    <div style="margin-top:24px;">
+      <span style="font-size:13px; color:rgba(168,152,120,0.5); cursor:pointer;">Learn More</span>
+    </div>
+  </div>
+</div>
+
+<!-- Gold transition overlay -->
+<div class="gold-transition" id="goldTransition"></div>
+
+<!-- Splash -->
+<div class="splash" id="splash">
+  <div class="h-line-top"></div>
+  <div class="h-line-bottom"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-br"></div>
+
+  <div class="splash-content">
+    <div class="welcome-line">Welcome, to</div>
+    <div class="brand-name">RoweOS</div>
+    <div class="divider"></div>
+    <div class="tagline">Brand & Life Intelligence</div>
+    <a class="cta-button" onclick="triggerTransition()">Begin Experience</a>
+  </div>
+</div>
+
+<button class="replay" onclick="replay()">Replay</button>
+
+<script>
+function triggerTransition() {
+  var splash = document.getElementById('splash');
+  var gold = document.getElementById('goldTransition');
+  var dest = document.getElementById('dest');
+
+  // Fade out splash content first
+  splash.style.transition = 'opacity 0.4s ease';
+  splash.style.opacity = '0';
+
+  // Fire gold flash
+  setTimeout(function() {
+    gold.classList.add('active');
+  }, 200);
+
+  // Show destination
+  setTimeout(function() {
+    splash.style.display = 'none';
+    dest.classList.add('visible');
+  }, 900);
+
+  // Clear gold overlay
+  setTimeout(function() {
+    gold.style.transition = 'opacity 0.5s ease';
+    gold.style.opacity = '0';
+  }, 1600);
+}
+
+function replay() {
+  var splash = document.getElementById('splash');
+  var gold = document.getElementById('goldTransition');
+  var dest = document.getElementById('dest');
+
+  gold.classList.remove('active');
+  gold.style.transition = 'none';
+  gold.style.opacity = '0';
+  dest.classList.remove('visible');
+
+  splash.style.display = 'flex';
+  splash.style.transition = 'none';
+  splash.style.opacity = '1';
+
+  // Re-trigger animations by cloning
+  var content = splash.querySelector('.splash-content');
+  var clone = content.cloneNode(true);
+  clone.querySelector('.cta-button').onclick = triggerTransition;
+  content.parentNode.replaceChild(clone, content);
+}
+</script>
+
+</body>
+</html>

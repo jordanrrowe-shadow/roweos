@@ -1,0 +1,355 @@
+<style>
+  .preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 32px 0; }
+  .slide-preview { background: #111; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
+  .slide-preview .slide-inner { aspect-ratio: 4/5; padding: 32px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: 'DM Sans', sans-serif; position: relative; background: #0a0a0a; }
+  .slide-preview .slide-label { padding: 8px 12px; font-size: 11px; color: #9e9487; border-top: 1px solid rgba(255,255,255,0.06); }
+  .gold { color: #b2997b; }
+  .serif { font-family: 'Cormorant Garamond', serif; }
+  .google-colors span:nth-child(1) { color: #4285F4; }
+  .google-colors span:nth-child(2) { color: #EA4335; }
+  .google-colors span:nth-child(3) { color: #FBBC05; }
+  .google-colors span:nth-child(4) { color: #34A853; }
+  .google-colors span:nth-child(5) { color: #EA4335; }
+  .google-colors span:nth-child(6) { color: #4285F4; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; border: 1px solid rgba(178,153,123,0.2); border-radius: 20px; font-size: 11px; color: #b2997b; letter-spacing: 0.05em; }
+  .divider { width: 40px; height: 1px; background: #b2997b; margin: 12px auto; opacity: 0.4; }
+  .set-label { font-size: 13px; font-weight: 600; color: #b2997b; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 40px; margin-bottom: 8px; }
+  .app-icon { width: 64px; height: 64px; border-radius: 16px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.08); }
+  .app-icon-sm { width: 48px; height: 48px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.08); }
+  .app-icon-xs { width: 40px; height: 40px; border-radius: 10px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.08); }
+
+  /* DEVICE FRAMES */
+  .macbook-frame {
+    width: 85%;
+    margin: 12px auto;
+    position: relative;
+  }
+  .macbook-screen {
+    background: linear-gradient(135deg, #151515, #1a1a1a);
+    border-radius: 6px 6px 0 0;
+    border: 2px solid #333;
+    border-bottom: none;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #655e54;
+    font-size: 10px;
+    position: relative;
+  }
+  .macbook-screen::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 16px;
+    background: linear-gradient(180deg, #2a2a2a, #1e1e1e);
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+  }
+  .macbook-base {
+    height: 8px;
+    background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+    border-radius: 0 0 2px 2px;
+    position: relative;
+  }
+  .macbook-base::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 25%;
+    right: 25%;
+    height: 4px;
+    background: #2a2a2a;
+    border-radius: 0 0 8px 8px;
+  }
+  .macbook-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 12px;
+    background: #1e1e1e;
+    border-radius: 0 0 8px 8px;
+    border: 1px solid #333;
+    border-top: none;
+    z-index: 2;
+  }
+
+  .iphone-frame {
+    width: 36%;
+    margin: 8px auto;
+    position: relative;
+  }
+  .iphone-body {
+    background: #1a1a1a;
+    border-radius: 20px;
+    border: 2px solid #333;
+    padding: 8px 4px;
+    position: relative;
+  }
+  .iphone-screen {
+    background: linear-gradient(135deg, #151515, #1a1a1a);
+    border-radius: 14px;
+    aspect-ratio: 9/19.5;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #655e54;
+    font-size: 9px;
+    position: relative;
+  }
+  .iphone-notch {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 18px;
+    background: #1a1a1a;
+    border-radius: 0 0 12px 12px;
+    z-index: 2;
+  }
+  .iphone-bar {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    height: 3px;
+    background: #555;
+    border-radius: 3px;
+  }
+
+  /* Two-device layout */
+  .devices-row { display: flex; align-items: flex-end; justify-content: center; gap: 12px; width: 95%; margin: 8px auto; }
+  .devices-row .macbook-frame { width: 58%; margin: 0; }
+  .devices-row .iphone-frame { width: 18%; margin: 0; }
+
+  .feature-list { text-align: left; width: 80%; margin: 0 auto; }
+  .feature-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .feature-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .feature-text { font-size: 11px; color: #9e9487; }
+  .feature-text strong { color: #ece4d8; font-weight: 500; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<h2>Revised Carousel Designs</h2>
+<p class="subtitle">Updated: device frames, real app icon, redesigned stats slide</p>
+
+<div class="set-label">Announcement Carousel - Updated</div>
+
+<div class="preview-grid">
+  <!-- Slide 1: Hero with app icon -->
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <img src="/images/promo/logo-icon-dark.png" style="width:64px;height:64px;border-radius:16px;margin-bottom:24px;border:1px solid rgba(255,255,255,0.08);" crossorigin="anonymous" onerror="this.style.background='#1a1a1a';this.style.display='flex';this.alt='RoweOS icon'">
+      <div class="serif" style="font-size:32px;font-weight:300;color:#ece4d8;line-height:1.2;margin-bottom:16px;">Backed by<br><span class="google-colors"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></span></div>
+      <div class="divider"></div>
+      <div style="font-size:10px;color:#655e54;letter-spacing:0.15em;text-transform:uppercase;margin-top:8px;">Google for Startups Cloud Program</div>
+    </div>
+    <div class="slide-label">Slide 1 - App icon + "Backed by Google"</div>
+  </div>
+
+  <!-- Slide 2: MacBook + iPhone -->
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <div style="font-size:10px;color:#655e54;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;">What is RoweOS?</div>
+      <div class="serif" style="font-size:20px;font-weight:300;color:#ece4d8;line-height:1.3;margin-bottom:4px;">Operating intelligence,<br>built for brands.</div>
+      <div class="devices-row">
+        <div class="macbook-frame">
+          <div class="macbook-screen">
+            <div class="macbook-notch"></div>
+            Dashboard UI
+          </div>
+          <div class="macbook-base"></div>
+        </div>
+        <div class="iphone-frame">
+          <div class="iphone-body">
+            <div class="iphone-screen">
+              <div class="iphone-notch"></div>
+              Mobile
+              <div class="iphone-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#9e9487;margin-top:4px;">Desktop & mobile. One platform.</div>
+    </div>
+    <div class="slide-label">Slide 2 - MacBook + iPhone frames</div>
+  </div>
+
+  <!-- Slide 3: iPhone chat -->
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <div style="font-size:10px;color:#655e54;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;">Brand Intelligence</div>
+      <div class="serif" style="font-size:20px;font-weight:300;color:#ece4d8;line-height:1.3;margin-bottom:8px;">AI agents that<br>learn your voice.</div>
+      <div class="iphone-frame" style="width:42%;">
+        <div class="iphone-body">
+          <div class="iphone-screen">
+            <div class="iphone-notch"></div>
+            Chat UI
+            <div class="iphone-bar"></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:8px;">
+        <span style="padding:3px 8px;border-radius:12px;font-size:8px;background:rgba(167,139,250,0.15);color:#a78bfa;">Strategy</span>
+        <span style="padding:3px 8px;border-radius:12px;font-size:8px;background:rgba(244,114,182,0.15);color:#f472b6;">Marketing</span>
+        <span style="padding:3px 8px;border-radius:12px;font-size:8px;background:rgba(74,222,128,0.15);color:#4ade80;">Ops</span>
+        <span style="padding:3px 8px;border-radius:12px;font-size:8px;background:rgba(251,191,36,0.15);color:#fbbf24;">Docs</span>
+      </div>
+    </div>
+    <div class="slide-label">Slide 3 - iPhone frame, agent badges</div>
+  </div>
+
+  <!-- Slide 4: MacBook automations -->
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <div style="font-size:10px;color:#655e54;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:8px;">Automation</div>
+      <div class="serif" style="font-size:20px;font-weight:300;color:#ece4d8;line-height:1.3;margin-bottom:8px;">Set it. Forget it.</div>
+      <div class="macbook-frame" style="width:90%;">
+        <div class="macbook-screen">
+          <div class="macbook-notch"></div>
+          Automations Lab UI
+        </div>
+        <div class="macbook-base"></div>
+      </div>
+      <div style="font-size:10px;color:#9e9487;margin-top:8px;max-width:220px;">Scheduled tasks and multi-step pipelines that run while you sleep.</div>
+    </div>
+    <div class="slide-label">Slide 4 - MacBook frame</div>
+  </div>
+
+  <!-- Slide 5: REDESIGNED - Feature list instead of stats -->
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <div style="font-size:10px;color:#655e54;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:12px;">Everything you need</div>
+      <div class="serif" style="font-size:20px;font-weight:300;color:#ece4d8;line-height:1.3;margin-bottom:16px;">One platform.<br>Total intelligence.</div>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-dot" style="background:#a78bfa;"></div>
+          <div class="feature-text"><strong>6 AI Agents</strong> that learn your brand</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot" style="background:#f472b6;"></div>
+          <div class="feature-text"><strong>Automations</strong> that run 24/7</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot" style="background:#4ade80;"></div>
+          <div class="feature-text"><strong>Multi-brand</strong> portfolio management</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot" style="background:#fbbf24;"></div>
+          <div class="feature-text"><strong>Content Studio</strong> for instant creation</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot" style="background:#22d3ee;"></div>
+          <div class="feature-text"><strong>Identity Memory</strong> that never forgets</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-dot" style="background:#b2997b;"></div>
+          <div class="feature-text"><strong>Desktop & Mobile</strong> everywhere you are</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-label">Slide 5 - Feature list (replaces stats)</div>
+  </div>
+
+  <!-- Slide 6: CTA -->
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <div style="font-size:10px;color:#655e54;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:24px;">Now in Beta</div>
+      <img src="/images/promo/logo-icon-dark.png" style="width:48px;height:48px;border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08);" crossorigin="anonymous" onerror="this.style.background='#1a1a1a'">
+      <div class="serif" style="font-size:28px;font-weight:300;color:#ece4d8;margin-bottom:8px;">Join the Beta.</div>
+      <div class="gold" style="font-size:14px;letter-spacing:0.1em;margin-bottom:24px;">roweos.com</div>
+      <div class="badge">
+        <span class="google-colors" style="font-size:12px;"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></span>
+        <span>for Startups</span>
+      </div>
+    </div>
+    <div class="slide-label">Slide 6 - CTA with app icon</div>
+  </div>
+</div>
+
+<div class="set-label" style="margin-top:48px;">Feature Carousel Example - Chat (with device frames)</div>
+<p style="font-size:12px;color:#888;margin-bottom:16px;">Each feature gets its own 3-slide set like this</p>
+
+<div class="preview-grid">
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <div class="badge" style="margin-bottom:16px;">
+        <span class="google-colors" style="font-size:10px;"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></span>
+        <span style="font-size:10px;">for Startups</span>
+      </div>
+      <div class="serif" style="font-size:24px;font-weight:300;color:#ece4d8;line-height:1.2;margin-bottom:12px;">Your AI.<br>Your voice.</div>
+      <div class="iphone-frame" style="width:42%;">
+        <div class="iphone-body">
+          <div class="iphone-screen">
+            <div class="iphone-notch"></div>
+            Chat UI
+            <div class="iphone-bar"></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#9e9487;margin-top:8px;">Same question. Different brand. Different tone.</div>
+    </div>
+    <div class="slide-label">Feature 1 of 3</div>
+  </div>
+
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <div style="display:flex;gap:8px;width:85%;justify-content:center;">
+        <div class="iphone-frame" style="width:48%;margin:0;">
+          <div class="iphone-body">
+            <div class="iphone-screen" style="aspect-ratio:9/16;">
+              <div class="iphone-notch"></div>
+              <div style="font-size:8px;">Brand A<br>Formal tone</div>
+              <div class="iphone-bar"></div>
+            </div>
+          </div>
+        </div>
+        <div class="iphone-frame" style="width:48%;margin:0;">
+          <div class="iphone-body">
+            <div class="iphone-screen" style="aspect-ratio:9/16;">
+              <div class="iphone-notch"></div>
+              <div style="font-size:8px;">Brand B<br>Casual tone</div>
+              <div class="iphone-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="serif" style="font-size:18px;font-weight:300;color:#ece4d8;margin-top:12px;">Same content.<br>Two brands.<br>Two voices.</div>
+      <div style="font-size:10px;color:#9e9487;margin-top:6px;">RoweOS adapts to each brand's identity automatically.</div>
+    </div>
+    <div class="slide-label">Feature 2 of 3 - Side by side (like Sunny)</div>
+  </div>
+
+  <div class="slide-preview">
+    <div class="slide-inner">
+      <img src="/images/promo/logo-icon-dark.png" style="width:40px;height:40px;border-radius:10px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.08);" crossorigin="anonymous" onerror="this.style.background='#1a1a1a'">
+      <div class="serif" style="font-size:22px;font-weight:300;color:#ece4d8;margin-bottom:6px;">Try it yourself.</div>
+      <div class="gold" style="font-size:13px;letter-spacing:0.1em;margin-bottom:20px;">roweos.com</div>
+      <div class="badge">
+        <span>Backed by</span>
+        <span class="google-colors" style="font-size:12px;"><span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span></span>
+      </div>
+    </div>
+    <div class="slide-label">Feature 3 of 3 - CTA</div>
+  </div>
+</div>
+
+<div style="margin-top:40px;padding:20px;background:rgba(178,153,123,0.06);border-radius:12px;border:1px solid rgba(178,153,123,0.12);">
+  <h3 style="font-size:14px;color:#b2997b;margin-bottom:8px;">Changes from v1</h3>
+  <ul style="font-size:12px;color:#9e9487;line-height:1.8;">
+    <li><strong>App icon</strong> replaces text "R" on slides 1 and 6 (uses actual logo-icon-dark.png)</li>
+    <li><strong>Device frames</strong> - MacBook and iPhone mockups wrap all screenshots</li>
+    <li><strong>Slide 2</strong> - MacBook + iPhone side by side showing desktop & mobile</li>
+    <li><strong>Slide 5 redesigned</strong> - Feature list with agent-colored dots instead of number stats</li>
+    <li><strong>Feature carousel</strong> - side-by-side iPhones for the "two brands, two voices" comparison (Sunny-style)</li>
+    <li>Grey placeholder areas will be replaced with actual RoweOS screenshots</li>
+  </ul>
+</div>

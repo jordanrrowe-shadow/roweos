@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// v28.7: GOOGLE DRIVE — SAVE & AUTO-SYNC
+// v28.7: GOOGLE DRIVE - SAVE & AUTO-SYNC
 // Extends the Drive browser in 12-library.js with:
 //   - Save to Google Drive (from save modal)
 //   - Auto-sync Library to roweOS/ folder in Drive

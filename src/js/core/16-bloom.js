@@ -5,7 +5,7 @@
 var _bloomPosts = [];
 var _bloomFilter = 'all';
 var _bloomGenerating = false;
-var _bloomBatchSize = 20; // v22.56: Increased from 12 to 20 — full garden per batch
+var _bloomBatchSize = 20; // v22.56: Increased from 12 to 20 - full garden per batch
 var _bloomLikedIds = {};
 var _bloomSavedIds = {};
 var _bloomSavedPosts = {}; // v22.51: Full saved post data for persistence
@@ -934,12 +934,12 @@ function renderBloomFeed() {
     html += '<div class="bloom-generating">more seeds in bloom\u2026 <svg class="bloom-sprout-anim" viewBox="0 0 24 24"><ellipse class="seed" cx="12" cy="21" rx="3.5" ry="2"/><path class="stem" d="M12 20 C12 16 12 12 12 8"/><path class="leaf-l" d="M12 12 C10 10 7 10 6 12 C7 13 10 13 12 12Z"/><path class="leaf-r" d="M12 10 C14 8 17 8 18 10 C17 11 14 11 12 10Z"/><circle class="bloom-fl" cx="12" cy="5" r="2.5"/></svg></div>';
   }
 
-  // v23.7: "Load More Seeds" button — appends more seeds to current feed (9.7)
+  // v23.7: "Load More Seeds" button - appends more seeds to current feed (9.7)
   if (displayPosts.length > 0) {
     html += '<div class="bloom-load-more"><button onclick="bloomLoadMoreSeeds()" id="bloomLoadMoreBtn"' + (_bloomGenerating ? ' disabled' : '') + '>Load More Seeds</button></div>';
   }
 
-  // v22.56: "Grow New Seeds" button at bottom of feed — always show if posts exist
+  // v22.56: "Grow New Seeds" button at bottom of feed - always show if posts exist
   if (displayPosts.length > 0) {
     html += '<div class="bloom-grow-section">'
       + '<div class="bloom-grow-hint">New garden will replace current posts</div>'
@@ -1271,7 +1271,7 @@ async function generateBloomBatch(count) {
     if (provider === 'roweos' && typeof resolveRoweOSAI === 'function') {
       try { var _resolved = resolveRoweOSAI({ userMessage: 'Generate brand content', systemPrompt: '' }); provider = _resolved.provider; model = _resolved.model; } catch(routeErr) { provider = 'anthropic'; model = 'claude-sonnet-4-6'; }
     }
-    // v22.49: For text gen, use selectedProvider — nanobanana can't do text so fall back
+    // v22.49: For text gen, use selectedProvider - nanobanana can't do text so fall back
     if (provider === 'nanobanana') {
       var selProv = localStorage.getItem('selectedProvider') || 'google';
       if (selProv !== 'nanobanana') { provider = selProv; }
@@ -1795,7 +1795,7 @@ function appendBloomPostToFeed(post) {
 }
 
 /**
- * v22.56: Bloom Create — custom content generation from user prompt
+ * v22.56: Bloom Create - custom content generation from user prompt
  */
 function openBloomCreateModal() {
   var overlay = document.getElementById('bloomCreateOverlay');
@@ -1819,14 +1819,14 @@ function closeBloomCreateModal() {
 }
 
 /**
- * v22.56: Grow New Seeds — clear current posts and generate a fresh batch of 20
+ * v22.56: Grow New Seeds - clear current posts and generate a fresh batch of 20
  * Generates a mix of text, images, and video based on user's content mode preferences.
  */
 function bloomGrowNewSeeds() {
   if (_bloomGenerating) return;
   _bloomPosts = [];
   _bloomLikedIds = {};
-  // Keep saved IDs intact — they're persisted
+  // Keep saved IDs intact - they're persisted
   _bloomGenerating = false;
   var feed = document.getElementById('bloomFeed');
   if (feed) feed.scrollTop = 0;
@@ -1835,7 +1835,7 @@ function bloomGrowNewSeeds() {
 }
 
 /**
- * v23.7: Load More Seeds — appends more seeds without clearing current feed (9.7)
+ * v23.7: Load More Seeds - appends more seeds without clearing current feed (9.7)
  */
 function bloomLoadMoreSeeds() {
   if (_bloomGenerating || _bloomCooldown.active) return;
@@ -2137,11 +2137,11 @@ async function bloomGenerateCustomContent() {
 }
 
 /**
- * v22.11/v22.56: Setup IntersectionObserver for infinite scroll — DISABLED in v22.56
+ * v22.11/v22.56: Setup IntersectionObserver for infinite scroll - DISABLED in v22.56
  * Posts now only refresh via "Grow New Seeds" button. No more auto-load on scroll.
  */
 function setupBloomInfiniteScroll() {
-  // v22.56: Disconnect and do nothing — no more infinite scroll
+  // v22.56: Disconnect and do nothing - no more infinite scroll
   if (_bloomObserver) {
     _bloomObserver.disconnect();
     _bloomObserver = null;
@@ -2149,11 +2149,11 @@ function setupBloomInfiniteScroll() {
 }
 
 /**
- * v22.12/v22.56: Pull-to-refresh — DISABLED in v22.56
+ * v22.12/v22.56: Pull-to-refresh - DISABLED in v22.56
  * Posts now only refresh via "Grow New Seeds" button.
  */
 function setupBloomPullToRefresh() {
-  return; // v22.56: Disabled — use Grow New Seeds button instead
+  return; // v22.56: Disabled - use Grow New Seeds button instead
   /* eslint-disable no-unreachable */
   var feed = document.getElementById('bloomFeed');
   if (!feed) return;
@@ -3274,7 +3274,7 @@ function renderAutomationMemoryList() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v24.8: USER CONTACT CARD — Stores owner's contact info for AI injection
+// v24.8: USER CONTACT CARD - Stores owner's contact info for AI injection
 // ═══════════════════════════════════════════════════════════════
 
 function getUserContact() {

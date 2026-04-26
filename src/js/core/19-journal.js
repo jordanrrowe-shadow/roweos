@@ -647,7 +647,7 @@ function showInlineAutomation(categoryName) {
 }
 
 /**
- * v12.2.4: Save inline automation (Focus2 category) — v24.27: renamed to avoid Rhythm collision
+ * v12.2.4: Save inline automation (Focus2 category) - v24.27: renamed to avoid Rhythm collision
  */
 function saveCategoryInlineAutomation(categoryName) {
   var trigger = document.getElementById('inlineAutoTrigger') ? document.getElementById('inlineAutoTrigger').value : 'time';
@@ -2183,7 +2183,7 @@ function selectFocusCategory(catName) {
   closeInlineDropdown('focusCategoryDropdown');
 }
 
-// v24.27: Removed dead openTodoCategoryPicker stub — real implementation below overwrites it
+// v24.27: Removed dead openTodoCategoryPicker stub - real implementation below overwrites it
 
 // ========== CATEGORY MANAGEMENT ==========
 
@@ -3132,7 +3132,7 @@ function initFocusCardDragDrop() {
       }, 0);
     });
     
-    // Drag end — v24.27: Reset ALL visual states including outline
+    // Drag end - v24.27: Reset ALL visual states including outline
     card.addEventListener('dragend', function(e) {
       card.classList.remove('dragging');
       card.style.outline = 'none';

@@ -231,7 +231,7 @@ function startPeriodicLoadCheck() {
   }, 5 * 60 * 1000); // 5 minutes
 }
 
-// v19.1: Cloud Scheduler — Background execution support
+// v19.1: Cloud Scheduler - Background execution support
 
 /**
  * Toggle cloud scheduler on/off
@@ -251,7 +251,7 @@ function toggleCloudScheduler(enabled) {
 }
 
 /**
- * Enable cloud scheduler — copies API keys to Firestore secure storage
+ * Enable cloud scheduler - copies API keys to Firestore secure storage
  */
 function enableCloudScheduler() {
   if (!firebaseUser || !firebase) {
@@ -461,7 +461,7 @@ function pickUpCloudResults() {
           } catch(e) {}
         }
 
-        // Notification Center — pass execution timestamp so it shows when it ran, not when picked up
+        // Notification Center - pass execution timestamp so it shows when it ran, not when picked up
         try {
           var execTs = data.timestamp ? (data.timestamp.toDate ? data.timestamp.toDate().toISOString() : data.timestamp) : new Date().toISOString();
           addNotification('cloud_result',
@@ -749,7 +749,7 @@ async function forcePullFromCloud() {
     // Todos
     if (data.todos) localStorage.setItem('roweosTodos', JSON.stringify(data.todos));
     
-    // Runs — v23.16: Merge by ID instead of replacing (preserves local runs)
+    // Runs - v23.16: Merge by ID instead of replacing (preserves local runs)
     if (data.runs) {
       var v2Existing = {};
       try { v2Existing = JSON.parse(localStorage.getItem('roweos_runs') || '{}'); } catch(e) { console.warn('[Sync] Corrupted roweos_runs (batch):', e.message); }
@@ -872,7 +872,7 @@ function renderModelConfigList() {
   var container = document.getElementById('modelConfigList');
   if (!container) return;
 
-  // v24.11: Always read fresh from localStorage — in-memory brandSettings can be stale from sync overwrites
+  // v24.11: Always read fresh from localStorage - in-memory brandSettings can be stale from sync overwrites
   var freshSettings = {};
   try { freshSettings = JSON.parse(localStorage.getItem(USER_DATA_KEYS.brandSettings) || '{}'); } catch(e) {}
 
@@ -1327,7 +1327,7 @@ function goToOnboardingStep(step) {
         outlookStatus.style.color = '#22c55e';
         if (outlookCard) outlookCard.dataset.connected = 'true';
       }
-      // v24.26: Don't auto-fill default from during onboarding — let user enter manually
+      // v24.26: Don't auto-fill default from during onboarding - let user enter manually
     }, 100);
   } else if (step === 'automations') {
     targetStepId = 'onboardingStepAutomations';
@@ -1430,7 +1430,7 @@ function goToOnboardingStep(step) {
     var _wsUrl = window._pendingWebSearchUrl || localStorage.getItem('roweos_pending_web_search_url');
     var wsState = typeof getWebSearchState === 'function' ? getWebSearchState() : null;
     if (_wsUrl) {
-      // Web search already running — go straight to review
+      // Web search already running - go straight to review
       if (wsState && wsState.status !== 'idle') {
         goToOnboardingStep('websearch-review');
         return;
@@ -1698,7 +1698,7 @@ function proceedFromModeSelection() {
   
   // v15.26: Life mode uses shared onboarding flow (no longer branches to separate modal)
   if (selectedOnboardingMode === 'life') {
-    console.log('[Onboarding] Life mode — creating profile, staying in shared flow');
+    console.log('[Onboarding] Life mode - creating profile, staying in shared flow');
 
     // Create new life profile
     var newProfile = {
@@ -1993,7 +1993,7 @@ function updateOnboardingColorPreview() {
   }
   if (previewText) previewText.style.color = color;
   if (previewIcon) previewIcon.style.color = color;
-  // v15.25: Apply accent color live to onboarding UI — set CSS vars directly (bypasses brand mode guard)
+  // v15.25: Apply accent color live to onboarding UI - set CSS vars directly (bypasses brand mode guard)
   var root = document.documentElement;
   root.style.setProperty('--accent', color);
   root.style.setProperty('--accent-hover', typeof lightenColor === 'function' ? lightenColor(color, 10) : color);
@@ -2181,7 +2181,7 @@ function renderOnboardingSyncPrefs() {
     { key: 'inventory', name: 'Inventory Images', icon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>' }
   ];
 
-  // v15.27: Removed inline "Keep Everything Local" button — now in HTML as dual-button layout
+  // v15.27: Removed inline "Keep Everything Local" button - now in HTML as dual-button layout
   var html = '';
 
   categories.forEach(function(cat) {
@@ -2313,7 +2313,7 @@ function proceedFromOnboardingSync() {
       localStorage.setItem('roweos_sync_settings', JSON.stringify(ss));
     } catch(e) {}
     setAllSyncCloud();
-    goToOnboardingStep('email'); // v24.25: Skip Firebase step — auto-syncs via login
+    goToOnboardingStep('email'); // v24.25: Skip Firebase step - auto-syncs via login
   } else if (_onboardingSyncMode === 'perfect_local') {
     // Set sync mode, skip Firebase
     try {
@@ -2330,7 +2330,7 @@ function proceedFromOnboardingSync() {
       ss3.syncMode = 'hybrid';
       localStorage.setItem('roweos_sync_settings', JSON.stringify(ss3));
     } catch(e) {}
-    goToOnboardingStep('email'); // v24.25: Skip Firebase step — auto-syncs via login
+    goToOnboardingStep('email'); // v24.25: Skip Firebase step - auto-syncs via login
   } else {
     // Fallback: no mode selected
     showToast('Please select a sync mode to continue', 'info');
@@ -2340,7 +2340,7 @@ function proceedFromOnboardingSync() {
 // v16.12: Calendar onboarding step functions
 function proceedFromOnboardingCalendar() {
   // v18.4: Go to social step instead of directly to brand/life steps
-  // v20.2: Fix — was passing full ID 'onboardingStepSocial', needs just 'social'
+  // v20.2: Fix - was passing full ID 'onboardingStepSocial', needs just 'social'
   goToOnboardingStep('social');
 }
 
@@ -2350,7 +2350,7 @@ function proceedFromOnboardingSocial() {
   goToOnboardingStep('automations');
 }
 
-// v24.26: Automations onboarding step — enable cloud scheduler if toggled
+// v24.26: Automations onboarding step - enable cloud scheduler if toggled
 function proceedFromOnboardingAutomations() {
   // v24.26: Read the custom toggle div state
   var toggle = document.getElementById('onbCloudToggle');
@@ -2506,7 +2506,7 @@ function proceedFromPushSetup() {
   goToOnboardingStep('crossDevice');
 }
 
-// v20.20: Dock step — populate device-specific instructions
+// v20.20: Dock step - populate device-specific instructions
 function populateDockInstructions() {
   var container = document.getElementById('dockInstructionsContainer');
   var title = document.getElementById('dockStepTitle');
@@ -2572,7 +2572,7 @@ function populateCrossDeviceContent() {
   var html = '';
 
   if (isMobile) {
-    // Mobile user — show desktop wireframe + home screen instructions
+    // Mobile user - show desktop wireframe + home screen instructions
     html += '<div style="display:flex;flex-direction:column;gap:20px;text-align:center;">';
     // Desktop wireframe
     html += '<div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:12px;padding:20px;max-width:320px;margin:0 auto;">';
@@ -2601,7 +2601,7 @@ function populateCrossDeviceContent() {
     html += '</div>';
     html += '</div>';
   } else {
-    // Desktop user — show phone wireframe + sync messaging
+    // Desktop user - show phone wireframe + sync messaging
     html += '<div style="display:flex;gap:32px;align-items:center;text-align:left;">';
     // Phone wireframe
     html += '<div style="flex-shrink:0;width:140px;">';
@@ -2642,7 +2642,7 @@ function populateCrossDeviceContent() {
   container.innerHTML = html;
 }
 
-// v20.20: Beta welcome — proceed to brand or life flow
+// v20.20: Beta welcome - proceed to brand or life flow
 function proceedFromBetaWelcome() {
   if (selectedOnboardingMode === 'life') {
     // v27.0: Open life onboarding modal which shows web import fork (step 0) first
@@ -2738,7 +2738,7 @@ function toggleOnboardingIcloudInputs() {
 }
 
 function connectOnboardingGoogleCalendar() {
-  // v23.2: Client ID is hardcoded — just connect directly
+  // v23.2: Client ID is hardcoded - just connect directly
   try {
     connectGoogleCalendar();
   } catch (e) {
@@ -3177,7 +3177,7 @@ function renderBrandIdentityView() {
   if (catTabs) catTabs.style.display = '';
   showIdentityCategory('user');
 
-  // v20.7: Render role badge and digital presence FIRST — before any function that could throw
+  // v20.7: Render role badge and digital presence FIRST - before any function that could throw
   try { renderIdentityRoleBadge(); } catch(e) {}
   try { renderDigitalPresenceCard(); } catch(e) {}
 
@@ -3222,7 +3222,7 @@ function renderIdentityRoleBadge() {
   container.innerHTML = html;
 }
 
-// v18.9: Digital Presence card in Identity view — redesigned with website import
+// v18.9: Digital Presence card in Identity view - redesigned with website import
 function renderDigitalPresenceCard() {
   try {
   var brand = (typeof brands !== 'undefined' && typeof selectedBrand !== 'undefined') ? brands[selectedBrand] : null;
@@ -3248,7 +3248,7 @@ function renderDigitalPresenceCard() {
   html += '</div>';
   html += '<div class="identity-card-body">';
 
-  // v20.7: Website URL bar — styled like other Identity inputs
+  // v20.7: Website URL bar - styled like other Identity inputs
   html += '<div class="dp-website-bar">';
   html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" style="flex-shrink:0"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
   html += '<input type="url" id="dpWebsiteInput" placeholder="https://yourbrand.com" value="' + escapeHtml(website) + '" onchange="saveBrandWebsite(this.value)">';
@@ -3264,7 +3264,7 @@ function renderDigitalPresenceCard() {
   // Detected social links area (populated by scan)
   html += '<div id="dpDetectedLinks"></div>';
 
-  // v20.6: Extract Brand Info — AI-powered identity extraction from website
+  // v20.6: Extract Brand Info - AI-powered identity extraction from website
   html += '<div style="margin-top: 16px; padding: 14px; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">';
   html += '<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">';
   html += '<div style="flex: 1;">';
@@ -3374,7 +3374,7 @@ function scanBrandWebsite() {
       return;
     }
 
-    // Cache on brand object (in-memory only, not persisted to localStorage — too large)
+    // Cache on brand object (in-memory only, not persisted to localStorage - too large)
     var brand = brands[selectedBrand];
     if (brand) brand._siteMeta = data;
 

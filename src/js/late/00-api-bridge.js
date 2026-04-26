@@ -402,7 +402,7 @@
 })();
 
 // ═══════════════════════════════════════════════════════════
-// v11.5.4 — Collapsible Glass Sidebar (Three-State Pin)
+// v11.5.4 - Collapsible Glass Sidebar (Three-State Pin)
 // ═══════════════════════════════════════════════════════════
 // States: 0 = unpinned (hover-expand), 1 = pinned-expanded, 2 = pinned-collapsed
 // Cycle:  0 → 1 → 2 → 0
@@ -457,6 +457,11 @@
     // v12.2.4: Re-apply brand logo to ensure collapsed logo is updated
     if (typeof loadCurrentLogo === 'function') {
       loadCurrentLogo();
+    }
+    // v31.5: Recompute zoom-time sidebar margin compensation since sidebar width changed.
+    // Defer past the CSS transition so getBoundingClientRect reads the post-transition width.
+    if (typeof applyAccessibilityScale === 'function') {
+      setTimeout(function() { try { applyAccessibilityScale(); } catch(e) {} }, 320);
     }
   }
 
@@ -595,7 +600,7 @@
 })();
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// v22.23: MAIL VIEW — Outbox, Sent, Compose, Inbox (Gmail/Outlook Phase 2)
+// v22.23: MAIL VIEW - Outbox, Sent, Compose, Inbox (Gmail/Outlook Phase 2)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // --- Data Layer ---
@@ -612,7 +617,7 @@ function getMailDeletedIds() {
     var result = [];
     for (var i = 0; i < raw.length; i++) {
       if (typeof raw[i] === 'string') {
-        result.push(raw[i]); // Legacy — will be cleaned on next addMailDeletedId
+        result.push(raw[i]); // Legacy - will be cleaned on next addMailDeletedId
       } else if (raw[i] && raw[i].id) {
         if (now - (raw[i].ts || 0) < TOMBSTONE_EXPIRY_MS) {
           result.push(raw[i].id);
@@ -645,7 +650,7 @@ function addMailDeletedId(id) {
     if (!exists) {
       entries.push({ id: id, ts: now });
     }
-    // Keep max 200 tombstones (reduced from 500 — only real deletes now)
+    // Keep max 200 tombstones (reduced from 500 - only real deletes now)
     if (entries.length > 200) entries = entries.slice(entries.length - 200);
     localStorage.setItem('roweos_mail_deleted_ids', JSON.stringify(entries));
   } catch(e) {}
@@ -741,7 +746,7 @@ function getMailConfig() {
   try { return JSON.parse(localStorage.getItem('roweos_mail_config') || '{}'); } catch(e) { return {}; }
 }
 
-// v23.10: Multi-account support — get all Gmail accounts (array, with legacy migration)
+// v23.10: Multi-account support - get all Gmail accounts (array, with legacy migration)
 function getMailGmailAccounts() {
   var config = getMailConfig();
   if (config.gmailAccounts && config.gmailAccounts.length > 0) {
@@ -765,7 +770,7 @@ function getMailGmailAccounts() {
   return [];
 }
 
-// v23.10: Multi-account support — get all Outlook accounts (with legacy migration)
+// v23.10: Multi-account support - get all Outlook accounts (with legacy migration)
 function getMailOutlookAccounts() {
   var config = getMailConfig();
   if (config.outlookAccounts && config.outlookAccounts.length > 0) {
@@ -807,7 +812,7 @@ function getMailAccountCredentials(email) {
   return null;
 }
 
-// v22.33: Dynamic default from address — no hardcoded emails
+// v22.33: Dynamic default from address - no hardcoded emails
 function getDefaultFromAddress() {
   var config = getMailConfig();
   if (config.defaultFromAddress) return config.defaultFromAddress;
@@ -818,12 +823,12 @@ function getDefaultFromAddress() {
   if (config.customFromAddresses && config.customFromAddresses[0]) return config.customFromAddresses[0];
   return '';
 }
-// v22.33: Build From <option> HTML for any From dropdown — admin-only built-ins
+// v22.33: Build From <option> HTML for any From dropdown - admin-only built-ins
 function buildFromOptionsHtml(selectedVal) {
   var config = getMailConfig();
   var html = '';
   var sel = selectedVal || config.defaultFromAddress || '';
-  // v25.3: Removed hardcoded Resend addresses (RoweOS, Jordan Rowe) — use Gmail/Outlook connected accounts only
+  // v25.3: Removed hardcoded Resend addresses (RoweOS, Jordan Rowe) - use Gmail/Outlook connected accounts only
   var custom = config.customFromAddresses || [];
   custom.forEach(function(a) { html += '<option value="' + escapeHtml(a) + '"' + (sel === a ? ' selected' : '') + '>' + escapeHtml(a) + '</option>'; });
   // v23.10: Multi-account Gmail (with display name)
@@ -849,7 +854,7 @@ function saveMailConfig(config) {
 
 // --- Add to Outbox (called from pipeline or compose) ---
 function addToMailOutbox(emailData) {
-  // v22.40: Intercept — queue for approval if guardrails require it
+  // v22.40: Intercept - queue for approval if guardrails require it
   // v22.47: Also intercept if _forceApprovalQueue is set (per-automation requireApproval toggle)
   if ((window._forceApprovalQueue || (typeof emailApprovalRequired === 'function' && emailApprovalRequired())) && !(emailData && emailData._approvalBypass)) {
     var approvalData = {};
@@ -924,7 +929,7 @@ function mailSendOutboxItem(itemId) {
 
   var uid = (typeof firebaseUser !== 'undefined' && firebaseUser) ? firebaseUser.uid : '';
 
-  // v23.4: Build HTML body — await logo upload if pending so Firebase URL is available
+  // v23.4: Build HTML body - await logo upload if pending so Firebase URL is available
   function _buildAndSend() {
   var htmlBody = item.html;
   if (!htmlBody && item.body) {
@@ -940,7 +945,7 @@ function mailSendOutboxItem(itemId) {
   }
   console.log('[Mail Send] item.id:', item.id, 'to:', item.to, 'attachments:', item.attachments ? item.attachments.length : 0, 'keys:', Object.keys(item));
 
-  // v23.9: Route through Gmail/Outlook API — multi-account aware
+  // v23.9: Route through Gmail/Outlook API - multi-account aware
   var config = getMailConfig();
   var rawFrom = item.from || config.defaultFromAddress || getDefaultFromAddress();
   var fromAddr = rawFrom;
@@ -1006,7 +1011,7 @@ function mailSendOutboxItem(itemId) {
     updateMailBadge();
     showToast('Email sent to ' + item.to + (sendVia !== 'resend' ? ' via ' + sendVia.charAt(0).toUpperCase() + sendVia.slice(1) : ''), 'success');
     renderMailView();
-    // v25.3: Client Identity extraction — auto-creates client if not found when checkbox is checked
+    // v25.3: Client Identity extraction - auto-creates client if not found when checkbox is checked
     if (item._informClient && typeof mailExtractClientIdentity === 'function') {
       mailExtractClientIdentity(item.to, item.subject, item.body || '');
     } else if (typeof mailPromptAddUnknownRecipient === 'function') {
@@ -1036,7 +1041,7 @@ function mailSendOutboxItem(itemId) {
       })
     }).then(function(r) {
       if (r.status === 401) {
-        // Token expired — refresh and retry
+        // Token expired - refresh and retry
         mailRefreshGmailToken(function(newToken) {
           if (newToken) mailSendOutboxItem(itemId);
           else showToast('Gmail session expired. Please reconnect.', 'error');
@@ -1136,7 +1141,7 @@ function mailSendOutboxItem(itemId) {
   }
 }
 
-// v25.6: Cloud Outbox Pickup — polls Firestore cloud_outbox for emails composed by Cloud Functions
+// v25.6: Cloud Outbox Pickup - polls Firestore cloud_outbox for emails composed by Cloud Functions
 function processCloudOutbox() {
   if (typeof firebaseUser === 'undefined' || !firebaseUser || !firebaseUser.uid) return;
   if (typeof firebase === 'undefined' || !firebase.firestore) return;
@@ -1584,13 +1589,13 @@ function mailRenderBody(body, template, canvasHtml, hideLogo, logoPosition) {
   var rendered = canvasHtml || body;
   // v22.36: Strip any template chrome that may have leaked into canvas via preview sync
   if (canvasHtml && canvasHtml.indexOf('<!DOCTYPE') !== -1) {
-    // Canvas contains full template HTML — extract just the body content
+    // Canvas contains full template HTML - extract just the body content
     var _strip = document.createElement('div');
     _strip.innerHTML = canvasHtml;
     var _contentArea = _strip.querySelector('div[style*="font-size:15px"]') || _strip.querySelector('div[style*="line-height:1.7"]');
     if (_contentArea) { rendered = _contentArea.innerHTML; }
   }
-  // v22.44: Base64 image stripping removed — original issue was designMode head injection (fixed in v22.43)
+  // v22.44: Base64 image stripping removed - original issue was designMode head injection (fixed in v22.43)
   // v22.33: Auto-linkify bare URLs in canvas HTML that aren't already in <a> tags
   if (canvasHtml) {
     var _tmp = document.createElement('div');
@@ -1640,11 +1645,11 @@ function mailRenderBody(body, template, canvasHtml, hideLogo, logoPosition) {
     return '<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;">' + rendered + '</div>';
   }
 
-  // v22.25: AI-generated template — use stored HTML if available
+  // v22.25: AI-generated template - use stored HTML if available
   if (template === 'ai' && window._mailAiTemplateHtml) {
     return window._mailAiTemplateHtml;
   }
-  // v22.45: Saved custom templates — inject current content into template placeholder
+  // v22.45: Saved custom templates - inject current content into template placeholder
   if (template && template.indexOf('custom_') === 0) {
     try {
       var customTemplates = JSON.parse(localStorage.getItem('roweos_mail_custom_templates') || '[]');
@@ -1656,7 +1661,7 @@ function mailRenderBody(body, template, canvasHtml, hideLogo, logoPosition) {
         if (tplHtml.indexOf('{{EMAIL_CONTENT}}') !== -1) {
           tplHtml = tplHtml.replace('{{EMAIL_CONTENT}}', wrappedContent);
         } else {
-          // v22.45: Legacy saved templates without placeholder — find content area and inject
+          // v22.45: Legacy saved templates without placeholder - find content area and inject
           var _tplDiv = document.createElement('div');
           _tplDiv.innerHTML = tplHtml;
           var _cArea = _tplDiv.querySelector('div[style*="line-height:1.7"]') || _tplDiv.querySelector('div[style*="line-height:1.6"]');
@@ -1673,7 +1678,7 @@ function mailRenderBody(body, template, canvasHtml, hideLogo, logoPosition) {
   // Use branded template if generateBrandedEmail exists
   if (typeof generateBrandedEmail === 'function' && template !== 'plain') {
     var brandName = 'Brand';
-    // v22.29: Fix — use selectedBrand (the actual global), not currentBrandIndex
+    // v22.29: Fix - use selectedBrand (the actual global), not currentBrandIndex
     var _bidx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
     try { brandName = brands[_bidx].shortName || brands[_bidx].name; } catch(e) {}
     var accent = '#a89878';
@@ -1833,11 +1838,11 @@ var dmState = {
 
 function initEngageTab() {
   if (!firebase.auth().currentUser) return;
-  // v25.5: Render keyword pills but don't auto-load feed — starts empty
+  // v25.5: Render keyword pills but don't auto-load feed - starts empty
   renderEngageKeywordPills();
 }
 
-// v25.5: Load Feed button — attaches Firestore listener on demand
+// v25.5: Load Feed button - attaches Firestore listener on demand
 function loadEngageFeed() {
   if (!firebase.auth().currentUser) return;
   var uid = firebase.auth().currentUser.uid;
@@ -1929,7 +1934,7 @@ function quickEngageSearch(keyword) {
 
 // v25.4: Manual X API search from Engage tab
 function searchEngagePosts() {
-  // v25.5: Search runs independently — no auto-listener attachment
+  // v25.5: Search runs independently - no auto-listener attachment
 
   var input = document.getElementById('engageSearchInput');
   var btn = document.getElementById('engageSearchBtn');
@@ -2302,7 +2307,7 @@ function likeEngagePost(targetId) {
 
   if (!token) { showToast('Connect X to like posts', 'error'); return; }
 
-  // v25.5: Fallback — fetch userId via /2/users/me if not stored (pre-fix connections)
+  // v25.5: Fallback - fetch userId via /2/users/me if not stored (pre-fix connections)
   var likeWithUserId = function(userId) {
     fetch('/api/x-dm-proxy', {
       method: 'POST',
@@ -2321,7 +2326,7 @@ function likeEngagePost(targetId) {
       } else {
         showToast('Liked @' + target.authorHandle + '\'s post!', 'success');
         logSocialActivity('scavenger_reply', { platform: 'x', description: 'Liked post by @' + target.authorHandle });
-        // v25.5: Visual feedback — toggle heart fill
+        // v25.5: Visual feedback - toggle heart fill
         try {
           var btn = document.querySelector('[data-like-target="' + targetId + '"]');
           if (btn) { btn.style.color = 'var(--accent)'; btn.setAttribute('data-liked', 'true'); }
@@ -3366,7 +3371,7 @@ function submitSocialFeedback() {
   });
 }
 
-// v28.4: Media Lab — Tab switching (renamed from Social Hub)
+// v28.4: Media Lab - Tab switching (renamed from Social Hub)
 function showSocialTab(tab) {
   // v28.4: Map legacy tab names to merged Post tab
   if (tab === 'publish' || tab === 'create') tab = 'post';
@@ -6109,7 +6114,7 @@ function mailSaveToOutbox() {
   }
 }
 
-// v22.35: Cancel compose — clear and go back to outbox
+// v22.35: Cancel compose - clear and go back to outbox
 function mailCancelCompose() {
   mailClearCompose();
   window._mailEditingId = null;
@@ -6152,7 +6157,7 @@ function mailComposeSend() {
   if (_sendItem && _sendItem.id) {
     mailSendOutboxItem(_sendItem.id);
   }
-  // v23.16: If _sendItem is null, email went to approval queue — don't send random outbox item
+  // v23.16: If _sendItem is null, email went to approval queue - don't send random outbox item
 }
 
 // v22.31: Email Attachment System
@@ -6286,7 +6291,7 @@ function mailRenderAttachmentChips() {
 
 function mailGetAttachments() {
   return (window._mailAttachments || []).map(function(a) {
-    // v22.37: URL-based attachments (Firebase Storage) or base64 inline — include size for display
+    // v22.37: URL-based attachments (Firebase Storage) or base64 inline - include size for display
     if (a.url) {
       return { filename: a.name, url: a.url, type: a.type, size: a.size || 0 };
     }
@@ -6486,7 +6491,7 @@ function mailSaveDraft() {
   updateMailDraftsBadge();
   renderMailDrafts();
 
-  // v22.26: Mirror draft to outbox — same email accessible from both tabs
+  // v22.26: Mirror draft to outbox - same email accessible from both tabs
   var draftItem = window._mailEditingDraftId
     ? drafts.find(function(d) { return d.id === window._mailEditingDraftId; })
     : drafts[0];
@@ -6612,7 +6617,7 @@ function mailOnTemplateChange() {
   // v22.45: Show/hide delete button for custom templates
   var delBtn = document.getElementById('mailCustomTemplateDeleteBtn');
   if (delBtn) delBtn.style.display = (val.indexOf('custom_') === 0) ? 'inline-flex' : 'none';
-  // v25.3: Admin welcome templates — pre-fill subject + body with full styled email
+  // v25.3: Admin welcome templates - pre-fill subject + body with full styled email
   if (val.indexOf('admin_welcome_') === 0) {
     var tierMap = { admin_welcome_solo: 'solo', admin_welcome_founder: 'founder', admin_welcome_premium: 'premium' };
     var tier = tierMap[val] || 'founder';
@@ -6685,7 +6690,7 @@ function mailDeleteCustomTemplate() {
   showToast('Template deleted', 'success');
 }
 
-// v25.0: Function-level debounce — all callers (dropdowns, canvas, logo) coalesced
+// v25.0: Function-level debounce - all callers (dropdowns, canvas, logo) coalesced
 var _mailPreviewDebounceTimer = null;
 function mailUpdateTemplatePreview() {
   clearTimeout(_mailPreviewDebounceTimer);
@@ -6794,20 +6799,20 @@ function _mailUpdateTemplatePreviewImpl() {
 }
 
 // v22.44: Get the live preview HTML (includes user edits to header/brand name)
-// Only capture <body> content — excludes browser-injected <head> styles from designMode
+// Only capture <body> content - excludes browser-injected <head> styles from designMode
 function mailGetPreviewHtml() {
   try {
     var frame = document.getElementById('mailTemplatePreviewFrame');
     if (!frame) return null;
     var doc = frame.contentDocument || frame.contentWindow.document;
     if (!doc || !doc.body || !doc.body.innerHTML) return null;
-    // v22.44: Use body.innerHTML only — designMode can inject massive style blocks in <head>
+    // v22.44: Use body.innerHTML only - designMode can inject massive style blocks in <head>
     return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;">' + doc.body.innerHTML + '</body></html>';
   } catch(e) { return null; }
 }
 
 // v22.36: Sync template preview edits back to canvas
-// v25.0: DISABLED — preview sync-back caused feedback loop destroying canvas content.
+// v25.0: DISABLED - preview sync-back caused feedback loop destroying canvas content.
 // Canvas is the source of truth. Preview is display-only.
 // Edits made directly in the preview iframe are captured via mailGetPreviewHtml() at send time.
 function mailSyncPreviewToCanvas(doc) {
@@ -6830,7 +6835,7 @@ function mailSyncPreviewToCanvas(doc) {
   }
 }
 
-// v22.36: Upload brand logo to Firebase Storage for email use (HTTP URL — email clients block base64)
+// v22.36: Upload brand logo to Firebase Storage for email use (HTTP URL - email clients block base64)
 window._mailLogoUrl = null;
 window._mailLogoUrlSrc = null;
 window._mailLogoUploadPromise = null; // v22.44: Track upload for awaiting
@@ -6857,7 +6862,7 @@ function mailEnsureLogoUrl(base64Src) {
       if (typeof uploadToStorage === 'function') {
         var storagePath = 'users/' + uid + '/mail_logo/email_logo.png';
         uploadToStorage(storagePath, resizedBase64).then(function(url) {
-          // v24.27: Also store in Firestore as backup — Storage URLs can 403
+          // v24.27: Also store in Firestore as backup - Storage URLs can 403
           try {
             firebase.firestore().doc('roweos_users/' + uid + '/profile/mail_logo').set({
               base64: resizedBase64.substring(0, 900000), // Firestore 1MB limit
@@ -6871,7 +6876,7 @@ function mailEnsureLogoUrl(base64Src) {
           if (typeof mailUpdateTemplatePreview === 'function') mailUpdateTemplatePreview();
           resolve(url);
         }).catch(function(e) {
-          // Storage failed — use base64 directly as fallback
+          // Storage failed - use base64 directly as fallback
           window._mailLogoUrl = resizedBase64;
           window._mailLogoUrlSrc = base64Src;
           window._mailLogoBase64 = resizedBase64;
@@ -6889,7 +6894,7 @@ function mailEnsureLogoUrl(base64Src) {
   }); // end Promise
 }
 
-// v22.31: Upload logo from template preview (temporary — does not replace brand logo)
+// v22.31: Upload logo from template preview (temporary - does not replace brand logo)
 function mailUploadLogo(input) {
   if (!input.files || !input.files[0]) return;
   var file = input.files[0];
@@ -7086,7 +7091,7 @@ function mailGenerateAiTemplate() {
   mailShowComposeLoading(true);
   var canvas = document.getElementById('mailComposeBody');
 
-  // v28.4/v29.0: Wait for logo then generate — use placeholder so AI doesn't need to reproduce base64
+  // v28.4/v29.0: Wait for logo then generate - use placeholder so AI doesn't need to reproduce base64
   logoReady.then(function(resolvedLogoUrl) {
   var logoUrl = window._mailLogoBase64 || resolvedLogoUrl || window._mailLogoUrl || '';
   // v29.0: Use a short placeholder in the AI prompt instead of the actual logo URL/base64.
@@ -7147,7 +7152,7 @@ function mailGenerateAiTemplate() {
   }); // end logoReady.then
 }
 
-// v22.45: Save AI-generated template for reuse — strips content, saves structure only
+// v22.45: Save AI-generated template for reuse - strips content, saves structure only
 function mailSaveAiTemplate() {
   if (!window._mailAiTemplateHtml) { showToast('Generate a template first', 'error'); return; }
   var desc = window._mailAiTemplateDesc || 'Custom AI Template';
@@ -7259,7 +7264,7 @@ function renderMailConnections() {
     _mccEl.innerHTML = _ccHtml;
   }
   var config = getMailConfig();
-  // v23.9: Multi-account — show all connected accounts
+  // v23.9: Multi-account - show all connected accounts
   var gmailAccts = getMailGmailAccounts();
   var outlookAccts = getMailOutlookAccounts();
   var gmailStatus = document.getElementById('gmailConnectionStatus');
@@ -7664,7 +7669,7 @@ function mailConnectGmail() {
 // v22.24: Listen for Gmail/Outlook connection from callback popup
 window.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'gmail_mail_connected') {
-    // v24.26: Removed connection toast — expected to always be connected
+    // v24.26: Removed connection toast - expected to always be connected
     // v23.1: Clear disconnected flag so sync won't block this provider
     try { var _dc = JSON.parse(localStorage.getItem('roweos_mail_disconnected') || '[]'); _dc = _dc.filter(function(p) { return p !== 'gmail'; }); localStorage.setItem('roweos_mail_disconnected', JSON.stringify(_dc)); } catch(e) {}
     renderMailConnections();
@@ -7681,7 +7686,7 @@ window.addEventListener('message', function(event) {
     }
   }
   if (event.data && event.data.type === 'outlook_mail_connected') {
-    // v24.26: Removed connection toast — expected to always be connected
+    // v24.26: Removed connection toast - expected to always be connected
     // v23.1: Clear disconnected flag
     try { var _dc2 = JSON.parse(localStorage.getItem('roweos_mail_disconnected') || '[]'); _dc2 = _dc2.filter(function(p) { return p !== 'outlook'; }); localStorage.setItem('roweos_mail_disconnected', JSON.stringify(_dc2)); } catch(e) {}
     renderMailConnections();
@@ -7698,7 +7703,7 @@ window.addEventListener('message', function(event) {
   // v22.33: Outlook Calendar connected
   if (event.data && event.data.type === 'outlook_calendar_connected') {
     _outlookCalConnected = true;
-    // v24.26: Removed connection toast — expected to always be connected
+    // v24.26: Removed connection toast - expected to always be connected
     updateCalendarIntegrationUI();
     // v22.44: Fetch calendar list first, then sync events
     fetchOutlookCalendarList(function() {
@@ -7720,7 +7725,7 @@ document.addEventListener('visibilitychange', function() {
       var config = getMailConfig();
       var gmailStatus = document.getElementById('gmailConnectionStatus');
       var outlookStatus = document.getElementById('outlookConnectionStatus');
-      // v23.9: Multi-account aware — check arrays or legacy fields
+      // v23.9: Multi-account aware - check arrays or legacy fields
       var hasGmail = (config.gmailAccounts && config.gmailAccounts.length > 0) || config.gmailEmail;
       if (gmailStatus && hasGmail && gmailStatus.textContent === 'Not connected') {
         renderMailConnections();
@@ -7852,7 +7857,7 @@ function mailSetAccountDisplayName(provider, email, displayName) {
 }
 
 // --- Inbox ---
-// v23.10: Multi-account inbox state — keyed by email address
+// v23.10: Multi-account inbox state - keyed by email address
 var _mailInboxFilter = 'all'; // 'all' or specific email address
 var _mailCurrentMessages = {}; // { 'user@gmail.com': [msgs], 'user2@gmail.com': [msgs], ... }
 var _mailOpenMessage = { id: null, provider: null, isUnread: false };
@@ -8040,7 +8045,7 @@ function mailRenderInboxFilters() {
   // Only show filters if 2+ accounts connected
   if (totalAccounts < 2) { el.innerHTML = ''; _mailInboxFilter = 'all'; return; }
   var html = '';
-  // v23.13: No inline border-left, no inline color overrides — CSS handles gradient styling
+  // v23.13: No inline border-left, no inline color overrides - CSS handles gradient styling
   html += '<span class="mail-filter-pill' + (_mailInboxFilter === 'all' ? ' active' : '') + '" onclick="mailSetInboxFilter(\'all\')">All</span>';
   gmailAccts.forEach(function(acct) {
     var label = acct.displayName || acct.email;
@@ -8237,7 +8242,7 @@ function toggleMailCompact() {
 function mailRefreshInbox() {
   var fetching = false;
   // v23.10: Fetch from all connected Gmail accounts
-  // v24.20: Proactive token refresh for Gmail (same pattern as Outlook) — prevents 401 round-trip
+  // v24.20: Proactive token refresh for Gmail (same pattern as Outlook) - prevents 401 round-trip
   var gmailAccts = getMailGmailAccounts();
   gmailAccts.forEach(function(acct) {
     if (acct.email && acct.token) {
@@ -8295,7 +8300,7 @@ function mailStopAutoFetch() {
   if (_mailAutoFetchInterval) { clearInterval(_mailAutoFetchInterval); _mailAutoFetchInterval = null; }
 }
 
-// v23.10: Gmail token refresh helper — supports per-account refresh
+// v23.10: Gmail token refresh helper - supports per-account refresh
 function mailRefreshGmailToken(callback, accountEmail) {
   var config = getMailConfig();
   var refreshToken = '';
@@ -8344,7 +8349,7 @@ function mailRefreshGmailToken(callback, accountEmail) {
   });
 }
 
-// v22.28: Outlook token refresh helper — returns fresh access token or null
+// v22.28: Outlook token refresh helper - returns fresh access token or null
 function mailRefreshOutlookToken(callback) {
   var config = getMailConfig();
   var refreshToken = config.outlookRefreshToken || '';
@@ -8380,7 +8385,7 @@ function mailRefreshOutlookToken(callback) {
 // v23.10: Accepts account object { email, token, refreshToken, ... }
 function mailFetchGmailInbox(acct, retried) {
   if (!acct) {
-    // v24.20: Fallback — resolve first Gmail account if no acct passed
+    // v24.20: Fallback - resolve first Gmail account if no acct passed
     var _fallbackAccts = getMailGmailAccounts();
     if (_fallbackAccts.length > 0) { acct = _fallbackAccts[0]; }
     else { showToast('No Gmail account connected', 'error'); return; }
@@ -8397,7 +8402,7 @@ function mailFetchGmailInbox(acct, retried) {
     body: JSON.stringify({ action: 'inbox', accessToken: token, uid: uid, maxResults: 20 })
   }).then(function(r) {
     if (r.status === 401 && !retried) {
-      // Token expired — refresh and retry
+      // Token expired - refresh and retry
       mailRefreshGmailToken(function(newToken) {
         if (newToken) {
           acct.token = newToken;
@@ -8454,7 +8459,7 @@ function mailOpenGmailMessage(msgId, retried, isUnread, accountEmail) {
     // v22.33: Use enriched detail header
     // v25.6: Convert Gmail date to local time for detail view
     mailSetDetailHeader(data.from || '', data.to || '', formatMailDate(data.date), data.subject);
-    // Render body — use iframe sandbox for HTML emails, thread cards for plain text
+    // Render body - use iframe sandbox for HTML emails, thread cards for plain text
     var bodyEl = document.getElementById('mailDetailBody');
     if (data.isHtml && data.body) {
       bodyEl.innerHTML = '<iframe id="mailIframe" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" style="width:100%;border:none;background:#fff;" srcdoc="' + escapeHtml(data.body) + '"></iframe>';
@@ -8487,7 +8492,7 @@ function mailOpenOutlookMessage(msgId, retried, isUnread, accountEmail) {
   fetch('https://graph.microsoft.com/v1.0/me/messages/' + msgId + '?$select=subject,from,toRecipients,receivedDateTime,body,isRead', {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function(r) {
-    // v22.28: Token expired — refresh and retry
+    // v22.28: Token expired - refresh and retry
     if (r.status === 401 && !retried) {
       mailRefreshOutlookTokenForAccount({ email: accountEmail }, function(newToken) {
         if (newToken) mailOpenOutlookMessage(msgId, true, isUnread, accountEmail);
@@ -8759,7 +8764,7 @@ function mailForward() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v22.24: Rich Email Canvas — Commands, Voice Tools, AI Compose
+// v22.24: Rich Email Canvas - Commands, Voice Tools, AI Compose
 // ═══════════════════════════════════════════════════════════════
 
 // v23.2: Email compose loading overlay
@@ -8819,7 +8824,7 @@ function mailAutoCapitalizeSubject() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v23.2: Sprint 3 — Email System Expansion
+// v23.2: Sprint 3 - Email System Expansion
 // ═══════════════════════════════════════════════════════════════
 
 // --- 3.2: Address Book ---
@@ -9570,7 +9575,7 @@ function mailRenderThreadCards(plainText, currentUserEmail) {
   }
 
   if (markers.length === 0) {
-    // No thread detected — return null to use default rendering
+    // No thread detected - return null to use default rendering
     return null;
   }
 
@@ -9682,10 +9687,10 @@ function mailUpdateCanvasCounts() {
         }, 1500);
       });
       canvas.addEventListener('mouseup', function() {
-        // Check for selection — show voice tools hint
+        // Check for selection - show voice tools hint
         var sel = window.getSelection();
         if (sel && sel.toString().trim().length > 0) {
-          // Selection exists — voice tools available
+          // Selection exists - voice tools available
         }
       });
     }
@@ -9968,7 +9973,7 @@ function mailCallAI(system, user, callback) {
     }
     _origCb(text);
   };
-  // v24.25: Use brand's configured API keys — try all available providers
+  // v24.25: Use brand's configured API keys - try all available providers
   var apiKeys = {};
   try { apiKeys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}'); } catch(e) {}
 
@@ -10153,7 +10158,7 @@ if (typeof updateMailBadge === 'function') {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// v22.26: Email Publisher — auto-shown after Email Writer op in Studio
+// v22.26: Email Publisher - auto-shown after Email Writer op in Studio
 // ═══════════════════════════════════════════════════════════════
 function showEmailPublisher(content, op) {
   var outputPanel = document.getElementById('studioOutput');
@@ -10372,14 +10377,14 @@ function emailPubSend() {
     writeDB('profile/main', { sidebarOrder: order }); // v25.1
   }
 
-  // v22.24: Restore order within each section — preserves section titles
+  // v22.24: Restore order within each section - preserves section titles
   function applySidebarOrder() {
     try {
       var saved = JSON.parse(localStorage.getItem('roweos_sidebar_order'));
       if (!saved || !Array.isArray(saved) || saved.length === 0) return;
-      // Support legacy flat array format — convert to per-section
+      // Support legacy flat array format - convert to per-section
       if (typeof saved[0] === 'string') {
-        // Legacy flat format — just clear it and re-save properly
+        // Legacy flat format - just clear it and re-save properly
         localStorage.removeItem('roweos_sidebar_order');
         return;
       }
@@ -10540,7 +10545,7 @@ function emailPubSend() {
 })();
 
 // ============================================================
-// v24.20: WebGL Blob — Ambient AI Presence with Shape & Color Control
+// v24.20: WebGL Blob - Ambient AI Presence with Shape & Color Control
 // ============================================================
 var _blobScene, _blobCamera, _blobRenderer, _blobMesh, _blobUniforms;
 var _blobAnimId = null;
@@ -10549,7 +10554,7 @@ var _blobState = 'idle'; // idle | thinking | responding
 var _blobInitialized = false;
 // v24.21: Blob color stored per light/dark mode as gradient pairs in localStorage
 
-// v24.21: Blob shape presets — control noise, detail, speed for distinct looks
+// v24.21: Blob shape presets - control noise, detail, speed for distinct looks
 var BLOB_SHAPES = {
   none:    null,
   smooth:  { amp: 0.18, freq: 0.7, speed: 0.2, detail: 0.0, fresnel: 3.0, label: 'Smooth' },
@@ -10588,7 +10593,7 @@ function initBlob() {
 
   // v24.21: Load saved shape & color
   var savedShape = localStorage.getItem('roweos_blob_shape') || 'crystal';
-  // v29.0: Symbiote removed — fallback to crystal
+  // v29.0: Symbiote removed - fallback to crystal
   if (savedShape === 'symbiote') { savedShape = 'crystal'; localStorage.setItem('roweos_blob_shape', 'crystal'); }
   // v24.27: Handle "both" mode on init
   if (savedShape === 'both') {
@@ -10604,7 +10609,7 @@ function initBlob() {
     }
     var helixC = document.getElementById('helixContainer');
     if (helixC) helixC.style.display = '';
-    // v30.1: Delay helix init — if agentView is hidden (display:none !important),
+    // v30.1: Delay helix init - if agentView is hidden (display:none !important),
     // WebGL can't render. showView('agent') will re-trigger initHelix when visible.
     if (typeof initHelix === 'function') {
       setTimeout(function() { initHelix(); }, 500);
@@ -10616,7 +10621,7 @@ function initBlob() {
     _blobCurrentShape = (savedShape in BLOB_SHAPES || savedShape === 'helix') ? savedShape : 'crystal';
   }
   if (_blobCurrentShape === 'none') { return; }
-  // v24.24: Helix mode — init helix instead of blob
+  // v24.24: Helix mode - init helix instead of blob
   if (_blobCurrentShape === 'helix' && savedShape !== 'both') {
     // v24.24: Load helix color preset before init
     var savedPreset = localStorage.getItem('roweos_helix_preset') || 'brand';
@@ -10654,7 +10659,7 @@ function initBlob() {
   var vertexShader = document.getElementById('blobVertexShader').textContent;
   var fragmentShader = document.getElementById('blobFragmentShader').textContent;
 
-  // Geometry — high-poly sphere for smooth deformation
+  // Geometry - high-poly sphere for smooth deformation
   var geometry = new THREE.IcosahedronGeometry(1, 5);
 
   var material = new THREE.ShaderMaterial({
@@ -10703,7 +10708,7 @@ function getBlobColor() {
   return accent || '#a89878';
 }
 
-// v24.21: Get blob colors — respects light/dark mode, custom gradient, or brand accent
+// v24.21: Get blob colors - respects light/dark mode, custom gradient, or brand accent
 function getBlobColors() {
   var isLight = document.documentElement.classList.contains('light-mode');
   var suffix = isLight ? '_light' : '_dark';
@@ -10735,7 +10740,7 @@ function setBlobState(state) {
 // v24.24: Blob shape names for cycling (excludes 'none' and 'helix')
 var _blobShapeNames = ['smooth', 'fluid', 'organic', 'crystal', 'sphere'];
 
-// v26.5: Advanced Web Search module — reusable deep crawl + AI analysis pipeline
+// v26.5: Advanced Web Search module - reusable deep crawl + AI analysis pipeline
 var _webSearchState = {
   status: 'idle', // idle|discovering|crawling|analyzing|searching|synthesizing|complete|error
   url: '',
@@ -11069,7 +11074,7 @@ async function _wsCallGemini(prompt, apiKey, model, enableWebSearch) {
   return text;
 }
 
-// v26.5: WebSearchVisualizer — network graph + identity cards + floating pill
+// v26.5: WebSearchVisualizer - network graph + identity cards + floating pill
 var _wsGraphNodes = [];
 var _wsGraphAnimId = null;
 
@@ -11310,10 +11315,10 @@ function renderMiniGraph(canvas, state) {
 
 // v24.21: Set blob shape preset (including 'none' and 'helix')
 function setBlobShape(shapeName) {
-  // v24.27: Handle "both" mode — delegate to setBothAmbient
+  // v24.27: Handle "both" mode - delegate to setBothAmbient
   if (shapeName === 'both') { setBothAmbient(); return; }
   if (shapeName !== 'helix' && !(shapeName in BLOB_SHAPES)) return;
-  // v24.27: Check if "both" mode is active — preserve it when changing blob sub-shape
+  // v24.27: Check if "both" mode is active - preserve it when changing blob sub-shape
   var _isBothMode = (localStorage.getItem('roweos_blob_shape') === 'both');
   _blobCurrentShape = shapeName;
   if (shapeName !== 'helix' && shapeName !== 'none') _blobShapeTarget = BLOB_SHAPES[shapeName];
@@ -11369,7 +11374,7 @@ function setBlobShape(shapeName) {
     var savedOffset = localStorage.getItem('roweos_blob_vertical_offset');
     if (group) group.style.marginTop = (savedOffset !== null ? savedOffset : (window.innerWidth <= 768 ? -400 : -350)) + 'px';
   }
-  // Update settings UI — blob shape buttons
+  // Update settings UI - blob shape buttons
   var btns = document.querySelectorAll('#blobShapeSelector .blob-shape-btn');
   for (var i = 0; i < btns.length; i++) {
     btns[i].classList.toggle('active', btns[i].getAttribute('data-shape') === shapeName);
@@ -11380,7 +11385,7 @@ function setBlobShape(shapeName) {
   var helixSection = document.getElementById('helixColorSection');
   var blobColorControls = document.getElementById('blobColorControls');
   var isBlob = (shapeName !== 'helix' && shapeName !== 'none');
-  // Always show inner sections — parent panels control visibility
+  // Always show inner sections - parent panels control visibility
   if (helixSection) helixSection.style.display = '';
   if (blobColorControls) blobColorControls.style.display = isBlob ? '' : 'none';
   if (shapeName === 'helix') initHelixColorSettings();
@@ -11393,7 +11398,7 @@ function setBlobShape(shapeName) {
   if (typeof updateAmbientSubPanels === 'function') updateAmbientSubPanels();
 }
 
-// v24.26: Open B.L.A.K.E. shape options — select crystal if currently none/helix
+// v24.26: Open B.L.A.K.E. shape options - select crystal if currently none/helix
 function openBlakeShapes() {
   if (_blobCurrentShape === 'none' || _blobCurrentShape === 'helix') {
     setBlobShape('crystal');
@@ -11485,7 +11490,7 @@ function updateHelixDimBtn() {
   }
 }
 
-// v24.24: Click blob to cycle through blob shapes (helix excluded — it's a separate mode)
+// v24.24: Click blob to cycle through blob shapes (helix excluded - it's a separate mode)
 function cycleBlobShape() {
   var current = _blobCurrentShape;
   if (current === 'none' || current === 'helix') return;
@@ -11571,7 +11576,7 @@ var BLOB_COLOR_PRESETS = {
   midnight: { dark: { c1: '#0d0d2b', c2: '#2d1b69' }, light: { c1: '#1a237e', c2: '#4527a0' } }
 };
 
-// v24.27: Unified ambient colors — sets both blob and helix together
+// v24.27: Unified ambient colors - sets both blob and helix together
 var AMBIENT_COLOR_PRESETS = {
   gold: { c1: '#a89878', c2: '#c0a86e' },
   green: { c1: '#00e676', c2: '#00bcd4' },
@@ -11594,11 +11599,11 @@ function setUnifiedAmbientColor(name) {
   localStorage.setItem('roweos_blob_color2_light', preset.c2);
   localStorage.setItem('roweos_blob_preset', 'custom');
   if (typeof updateBlobColor === 'function') updateBlobColor();
-  // Set helix — use matching preset if exists, otherwise set custom colors derived from swatch
+  // Set helix - use matching preset if exists, otherwise set custom colors derived from swatch
   if (typeof HELIX_PRESETS !== 'undefined' && HELIX_PRESETS[name]) {
     if (typeof setHelixPreset === 'function') setHelixPreset(name);
   } else {
-    // Generate 4 ribbon colors from the two swatch colors — set BEFORE calling setHelixPreset
+    // Generate 4 ribbon colors from the two swatch colors - set BEFORE calling setHelixPreset
     var customColors = [
       { a: preset.c1, b: preset.c2 },
       { a: preset.c2, b: preset.c1 },
@@ -11691,7 +11696,7 @@ function initBlobSettings() {
   }
   if (typeof initBlobPresetUI === 'function') initBlobPresetUI();
   if (typeof initBlobPositionSliders === 'function') initBlobPositionSliders();
-  // Init mini preview — blob or helix depending on current shape
+  // Init mini preview - blob or helix depending on current shape
   setTimeout(function() {
     if (saved === 'both') {
       if (typeof initBlobPreview === 'function') initBlobPreview();
@@ -12018,7 +12023,7 @@ function initOnboardingHelixPreview() {
     canvas.width = w; canvas.height = h;
     canvas.style.width = '100%'; canvas.style.height = '100%';
     _onbHelixScene = new THREE.Scene();
-    // v24.26: Match main helix camera — wide FOV, close position for edge-to-edge coverage
+    // v24.26: Match main helix camera - wide FOV, close position for edge-to-edge coverage
     _onbHelixCamera = new THREE.PerspectiveCamera(65, w / h, 0.1, 100);
     _onbHelixCamera.position.z = 10;
     _onbHelixRenderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
@@ -12027,7 +12032,7 @@ function initOnboardingHelixPreview() {
     _onbHelixRenderer.setClearColor(0x000000, 0);
 
     var colors = getHelixColors();
-    // v24.26: Use same curve params as main helix — full diagonal span, thick ribbons
+    // v24.26: Use same curve params as main helix - full diagonal span, thick ribbons
     for (var i = 0; i < 4; i++) {
       var curve = typeof generateHelixCurve === 'function' ? generateHelixCurve(i) : (function() {
         var pts2 = [];
@@ -12178,7 +12183,7 @@ function selectOnboardingBlakeType(type) {
   }
 }
 
-// v24.25: Init onboarding blobPref step UI — both blob and helix previews visible
+// v24.25: Init onboarding blobPref step UI - both blob and helix previews visible
 function initOnboardingBlobPrefUI() {
   // Set theme buttons active state
   var isLight = document.documentElement.classList.contains('light-mode');
@@ -12220,7 +12225,7 @@ function proceedFromBlobPref() {
 }
 
 // ============================================================
-// v24.24: WebGL Helix — Flowing Gradient Ribbons
+// v24.24: WebGL Helix - Flowing Gradient Ribbons
 // ============================================================
 var _helixScene, _helixCamera, _helixRenderer, _helixMeshes = [];
 var _helixAnimId = null;
@@ -12591,13 +12596,13 @@ function initHelixColorSettings() {
   }
 }
 
-// v24.25: Called when blob/helix expander opens — init sections
+// v24.25: Called when blob/helix expander opens - init sections
 function onBlobExpanderOpen() {
   var helixSection = document.getElementById('helixColorSection');
   var blobColorControls = document.getElementById('blobColorControls');
   var isHelix = (_blobCurrentShape === 'helix');
   var isBlob = (!isHelix && _blobCurrentShape !== 'none');
-  // v24.26: Always show inner sections — parent sub-panels control visibility
+  // v24.26: Always show inner sections - parent sub-panels control visibility
   if (helixSection) helixSection.style.display = '';
   if (blobColorControls) blobColorControls.style.display = isBlob ? '' : 'none';
   if (isBlob && typeof initBlobPresetUI === 'function') initBlobPresetUI();
@@ -12786,7 +12791,7 @@ function resizeBlob() {
   _blobCamera.updateProjectionMatrix();
 }
 
-// Initialize blob — retry until container is in DOM and visible
+// Initialize blob - retry until container is in DOM and visible
 function tryInitBlob() {
   if (_blobInitialized) return;
   var container = document.getElementById('blobContainer');

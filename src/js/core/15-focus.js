@@ -68,7 +68,7 @@ function initTodoCategories() {
   } else {
     window.todoCategories = [];
   }
-  // v25.0: Tombstone filtering removed — write-through sync handles deletions immediately
+  // v25.0: Tombstone filtering removed - write-through sync handles deletions immediately
 }
 
 function saveTodoCategories() {
@@ -119,7 +119,7 @@ function initCalendar() {
   rebuildMergedCalendar();
   // v16.12: Init Google Calendar auth (tries silent re-auth if previously connected)
   setTimeout(function() { initGoogleCalendarAuth(); }, 500);
-  // v29.0: Drive auth is lazy — only init when user navigates to Drive tab (no startup popup)
+  // v29.0: Drive auth is lazy - only init when user navigates to Drive tab (no startup popup)
   // v16.12: Sync iCloud if previously connected
   if (_icloudConnected) {
     setTimeout(function() { syncICloudCalendarEvents(); }, 1000);
@@ -2423,7 +2423,7 @@ function renderFocus2CategoryTaskItem(task) {
   html += dragHandle;
   html += '<div class="focus-2-category-task-check ' + (task.completed ? 'checked' : '') + '" onclick="quickToggleFocus2Task(' + task.id + ', event)">' + checkIcon + '</div>';
   html += '<div class="focus-2-category-task-text">' + escapeHtml(task.text);
-  // v18.7: Note badge — subtle indicator for tasks with notes
+  // v18.7: Note badge - subtle indicator for tasks with notes
   if (task.notes && task.notes.trim()) {
     html += '<span title="Has notes" style="display:inline-block;vertical-align:middle;margin-left:4px;opacity:0.5;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>';
   }
@@ -4342,7 +4342,7 @@ function renderFocus2Automations() {
   var container = document.getElementById('focus2AutomationsList');
   if (!container) return;
 
-  // v18.7: Simplified — show compact upcoming automations list, link to Automations Lab for CRUD
+  // v18.7: Simplified - show compact upcoming automations list, link to Automations Lab for CRUD
   var scheduledTasks = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
   var savedAutomations = [];
   try { savedAutomations = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(e) {}
@@ -4572,7 +4572,7 @@ function deleteFocusAutomation(autoId) {
   if (!confirm('Delete this automation?')) return;
   var idStr = String(autoId);
 
-  // v25.1: Write-through delete — remove from localStorage + Firestore immediately
+  // v25.1: Write-through delete - remove from localStorage + Firestore immediately
   var automations = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
   automations = automations.filter(function(a) { return String(a.id) !== idStr; });
   localStorage.setItem('roweos_automations', JSON.stringify(automations));
@@ -4591,7 +4591,7 @@ function deleteFocusAutomation(autoId) {
 /**
  * v13.4: Toggle automation enabled/disabled
  */
-// v23.11: Rewritten — uses getMergedAutomations as source of truth, writes back to BOTH stores
+// v23.11: Rewritten - uses getMergedAutomations as source of truth, writes back to BOTH stores
 function toggleAutomationEnabled(autoId) {
   var idStr = String(autoId);
   var merged = getMergedAutomations();
@@ -4602,7 +4602,7 @@ function toggleAutomationEnabled(autoId) {
       newEnabled = a.enabled;
     }
   });
-  // v24.2: Write back to BOTH stores — update enabled in roweos_automations directly
+  // v24.2: Write back to BOTH stores - update enabled in roweos_automations directly
   try {
     var rawAuto = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
     var nowIso = new Date().toISOString();

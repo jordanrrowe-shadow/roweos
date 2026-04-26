@@ -517,7 +517,7 @@ function renderNCWidgets() {
       } else {
         syncVal.textContent = 'Not synced';
       }
-      // v20.10: Sync status bar — 0% right after sync, grows with time
+      // v20.10: Sync status bar - 0% right after sync, grows with time
       var syncPct = 0;
       if (lastSync) {
         try {
@@ -587,7 +587,7 @@ function renderNCWidgets() {
     }
 
     // --- Automations Widget ---
-    // v22.8: Use getMergedAutomations() — single source of truth with deletion filtering
+    // v22.8: Use getMergedAutomations() - single source of truth with deletion filtering
     var autoVal = document.getElementById('ncAutoValue');
     var autoSub = document.getElementById('ncAutoSub');
     if (autoVal) {
@@ -609,7 +609,7 @@ function renderNCWidgets() {
           var _isRecur = t.recurType && t.recurType !== 'none' && t.recurType !== 'once';
           var _mfn; // minutes from now
           if (t.recurType === 'custom') {
-            // v20.10: Custom interval — find next fixed slot from base time
+            // v20.10: Custom interval - find next fixed slot from base time
             var _cInt = t.recurInterval || 1;
             var _cUnit = t.recurUnit || 'days';
             if (_cUnit === 'hours' || _cUnit === 'minutes') {
@@ -620,12 +620,12 @@ function renderNCWidgets() {
               var _remaining = _intMin - (_elapsed % _intMin);
               _mfn = _remaining >= _intMin ? 0 : _remaining;
             } else {
-              // Days/weeks/months — use base time, wrap to next day if past
+              // Days/weeks/months - use base time, wrap to next day if past
               _mfn = _tMin - _nowMin;
               if (_mfn < -2) _mfn += 1440;
             }
           } else if (_isRecur) {
-            // Daily/weekly/monthly — next occurrence at base time
+            // Daily/weekly/monthly - next occurrence at base time
             _mfn = _tMin - _nowMin;
             if (_mfn < -2) _mfn += 1440;
           } else if (t.scheduledDate) {
@@ -999,7 +999,7 @@ function sendTestPushNotification() {
       });
     });
   }).catch(function(err) {
-    // v20.15: iOS PWA drops fetch when backgrounded — retry once
+    // v20.15: iOS PWA drops fetch when backgrounded - retry once
     if (err.message === 'Load failed' && !sendTestPushNotification._retried) {
       sendTestPushNotification._retried = true;
       showToast('Retrying...', 'info');
@@ -1116,7 +1116,7 @@ function saveNotifications(arr) {
   try {
     localStorage.setItem('roweos_notifications', JSON.stringify(arr));
   } catch(e) {
-    // Quota fallback — trim to 50
+    // Quota fallback - trim to 50
     try {
       localStorage.setItem('roweos_notifications', JSON.stringify(arr.slice(0, 50)));
     } catch(e2) {}
@@ -1125,7 +1125,7 @@ function saveNotifications(arr) {
 
 function addNotification(type, title, message, data) {
   var notifs = getNotifications();
-  // v23.17: Deduplicate — skip if same task created a notification within last 5 minutes
+  // v23.17: Deduplicate - skip if same task created a notification within last 5 minutes
   if (data && data.taskId) {
     var _dupeWindow = 5 * 60 * 1000;
     var _now = Date.now();
@@ -1489,7 +1489,7 @@ document.addEventListener('keydown', function(e) {
     var selector = document.getElementById('brandSelector');
     if (selector) selector.focus();
   }
-  // v23.2: Ctrl+I/U in contenteditable — let browser handle natively
+  // v23.2: Ctrl+I/U in contenteditable - let browser handle natively
   if ((e.metaKey || e.ctrlKey) && (e.key === 'i' || e.key === 'u')) {
     if (e.target && e.target.isContentEditable) return;
   }
@@ -1520,7 +1520,7 @@ document.addEventListener('keydown', function(e) {
     closeModal('importExportModal');
   }
   
-  // v25.1: Guard — never trigger navigation shortcuts while typing in any editable field
+  // v25.1: Guard - never trigger navigation shortcuts while typing in any editable field
   var _isEditing = e.target && (e.target.matches('input, textarea') || e.target.isContentEditable || (e.target.closest && e.target.closest('[contenteditable]')));
 
   // G then B = Go to BrandAI
