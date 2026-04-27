@@ -10015,18 +10015,13 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
   if (!firebaseUser || !firebase) return Promise.resolve();
 
   // v32.0-A: bootstrap tombstone registry on first launch
-  // v32.0-B: After tombstone init, offer to purge legacy Focus residue (idempotent)
-  // v32.0-C: Migrate position-keyed logos to ID-keyed storage between init and purge
+  // v32.0-C: Migrate position-keyed logos to ID-keyed storage
+  // (Focus purge moved to reconcileOnStartup post-pull — needs cloud data hydrated first)
   if (typeof initTombstoneRegistry_v32 === 'function') {
     try {
       initTombstoneRegistry_v32().then(function() {
         if (typeof migrateBrandLogos_v32 === 'function') {
           return migrateBrandLogos_v32().catch(function(e) { console.warn('[v32.0-C] logo migration failed', e); });
-        }
-      }).then(function() {
-        if (typeof runFocusPurgeFlow === 'function') {
-          // 2s delay so UI is settled and user sees toast feedback
-          setTimeout(function() { try { runFocusPurgeFlow().catch(function(){}); } catch(e){} }, 2000);
         }
       }).catch(function(e) { console.warn('[v32.0] post-auth chain failed', e); });
     } catch (initErr) { console.warn('[v32.0] init threw', initErr); }

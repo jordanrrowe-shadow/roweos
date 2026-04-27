@@ -396,6 +396,10 @@ function reconcileOnStartup() {
       // v28.2: Re-check API keys after cloud pull - keys may have been synced from Firestore
       if (typeof checkApiConnection === 'function') checkApiConnection(true);
       if (typeof updateProviderStatuses === 'function') updateProviderStatuses();
+      // v32.0-B: trigger Focus purge AFTER cloud hydration so heuristic sees real counts
+      if (typeof runFocusPurgeFlow === 'function') {
+        setTimeout(function() { try { runFocusPurgeFlow().catch(function(){}); } catch(e){} }, 1500);
+      }
     });
   }
 }
