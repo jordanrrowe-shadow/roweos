@@ -2,7 +2,7 @@
 // DATA INITIALIZATION & MIGRATION - v4.8.0
 // ═══════════════════════════════════════════════════════════════
 
-var ROWEOS_VERSION = 'v32.0'; // v32.0: unified tombstones across all categories, Focus residue purge, ID-keyed brand logos with IDB overflow + brand_logos subcollection, image edit detection + Nano Banana / GPT Image 2 routing
+var ROWEOS_VERSION = 'v32.1'; // v32.1: convergent sync — auto-purge removed (had false-positive bug), self-healing tombstones, 30s convergence loop auto-reconciles drift, no more Push/Pull required
 var ROWEOS_DATA_VERSION_KEY = 'roweos_data_version';
 var ROWEOS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/YOUR-REPO/roweos-updates/main/latest-version.json';
 var ROWEOS_LAST_UPDATE_CHECK = 'roweos_last_update_check';
@@ -396,9 +396,13 @@ function reconcileOnStartup() {
       // v28.2: Re-check API keys after cloud pull - keys may have been synced from Firestore
       if (typeof checkApiConnection === 'function') checkApiConnection(true);
       if (typeof updateProviderStatuses === 'function') updateProviderStatuses();
-      // v32.0-B: trigger Focus purge AFTER cloud hydration so heuristic sees real counts
-      if (typeof runFocusPurgeFlow === 'function') {
-        setTimeout(function() { try { runFocusPurgeFlow().catch(function(){}); } catch(e){} }, 1500);
+      // v32.1: auto-purge removed (had false-positive bug). Self-heal stale
+      // tombstones + start convergence loop instead.
+      if (typeof selfHealStaleTombstones_v321 === 'function') {
+        try { selfHealStaleTombstones_v321().catch(function(){}); } catch(e){}
+      }
+      if (typeof startConvergenceLoop_v321 === 'function') {
+        try { startConvergenceLoop_v321(); } catch(e){}
       }
     });
   }

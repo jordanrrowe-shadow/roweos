@@ -7,3 +7,7 @@ functions/node_modules/
 secrets/
 *adminsdk*.json
 *-firebase-adminsdk-*.json
+scripts/cleanup-cloud-v321.js
+scripts/inspect-cloud.js
+scripts/categorize-pulse.js
+node_modules/

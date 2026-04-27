@@ -1229,6 +1229,19 @@ async function renderSyncInventory() {
     }
   }
 
+  // v32.1: cache local+cloud counts so the convergence loop can detect drift
+  // without re-querying Firestore. Convergence loop reads window._lastSyncCounts.
+  window._lastSyncCounts = {};
+  categories.forEach(function(_c) {
+    try {
+      window._lastSyncCounts[_c.name] = {
+        local: _c.localCount(),
+        cloud: cloudCounts[_c.name] || 0,
+        ts: Date.now()
+      };
+    } catch (_e) {}
+  });
+
   // Build table
   var html = '<table style="width: 100%; border-collapse: collapse;">';
   html += '<thead><tr style="border-bottom: 1px solid var(--border-color);">';

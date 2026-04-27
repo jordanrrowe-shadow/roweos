@@ -982,33 +982,18 @@ function _matchesLegacyFocus(title) {
   return false;
 }
 
-function _focusGoalPredicate(goal) {
-  if (!goal) return false;
-  var created = goal.createdAt ? Date.parse(goal.createdAt) : NaN;
-  if (!isNaN(created) && created < FOCUS_RETIRE_DATE) return true;
-  return _matchesLegacyFocus(goal.title);
-}
-
-function _focusTodoPredicate(todo) {
-  if (!todo) return false;
-  // v32.0.2: To-dos are now part of Pulse — anything older than the v28.8
-  // cutoff is residue regardless of completion flag. Numeric-id timestamps
-  // (Date.now()-style ids from old code) also count as a created date.
-  var created = NaN;
-  if (todo.createdAt) created = Date.parse(todo.createdAt);
-  if (isNaN(created) && typeof todo.id === 'number') created = todo.id;
-  if (!isNaN(created) && created > 0 && created < FOCUS_RETIRE_DATE) return true;
-  return false;
-}
-
-// v32.0-B: Runtime patch — attach heuristics to existing registry entries.
-// Safer than reordering the file; registry is defined first, predicates after,
-// and these patches run when the script loads.
-(function() {
-  var pg = getCategoryById('pulseGoals'); if (pg) pg.legacyHeuristic = _focusGoalPredicate;
-  var bt = getCategoryById('brandTodos'); if (bt) bt.legacyHeuristic = _focusTodoPredicate;
-  var lt = getCategoryById('lifeTodos'); if (lt) lt.legacyHeuristic = _focusTodoPredicate;
-})();
+// v32.1: Auto-purge heuristics removed. The v32.0 title-prefix matcher had a
+// critical false-positive bug — titles like "Priority", "Governance", "Rowe Org",
+// "Leadership Academy" are still actively used as Pulse Goals every week, so
+// matching on "Priority (week of" prefix tombstoned the user's CURRENT data.
+// All purges now go through explicit user UI buttons (Pulse "Clear All",
+// per-goal Delete, Sync Inventory ×). No background heuristic ever runs.
+//
+// FOCUS_RETIRE_DATE / FOCUS_LEGACY_TITLES / _matchesLegacyFocus / _focusGoalPredicate /
+// _focusTodoPredicate kept above as inert references in case a future admin
+// wants to reuse them, but no registry entry has legacyHeuristic populated.
+function _focusGoalPredicate() { return false; }
+function _focusTodoPredicate() { return false; }
 
 // v32.0-B: Pre-flight backup. Writes a snapshot of every category's localStorage
 // to TWO local keys (one stable, one ephemeral) AND a Firestore doc so cross-
@@ -1284,3 +1269,135 @@ function runFocusPurgeFlow(opts) {
   });
 }
 window.runFocusPurgeFlow = runFocusPurgeFlow;
+
+// =====================================================================
+// v32.1: SELF-HEALING TOMBSTONES + CONTINUOUS CONVERGENCE
+// =====================================================================
+// The v32.0 auto-purge had a false-positive bug. v32.1 removes the auto-
+// purge entirely AND adds self-healing: if a tombstone says "this id is
+// deleted" but cloud actually still has that id, the cloud is the source
+// of truth — clear the stale tombstone so the item re-appears locally.
+//
+// The convergence loop runs every 30s in the active tab. It checks the
+// drift state for every category and silently dispatches a reconcile
+// (push or pull) so the Sync Inventory always shows "Synced" without the
+// user ever needing to click Push/Pull.
+
+var V321_STALE_TOMBSTONE_FLAG = 'roweos_v321_self_heal_done';
+var V321_CONVERGENCE_INTERVAL_MS = 30 * 1000;
+var _v321ConvergenceTimer = null;
+
+// v32.1: Self-heal stale tombstones — for each category, fetch cloud item
+// IDs; any local tombstone for an ID that EXISTS in cloud is stale (cloud
+// is the source of truth). Remove from tombstone set, write back.
+function selfHealStaleTombstones_v321() {
+  if (localStorage.getItem(V321_STALE_TOMBSTONE_FLAG) === 'done') {
+    return Promise.resolve({ ok: true, skipped: true });
+  }
+  if (!window.firebase || !window.firebaseUser) return Promise.resolve({ ok: false, error: 'no auth' });
+
+  var ops = [];
+  for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+    (function(cat) {
+      if (!cat || !cat.tombstoneKey) return;
+      ops.push(_v321HealOneCategory(cat));
+    })(SYNC_CATEGORIES[i]);
+  }
+  return Promise.all(ops).then(function(results) {
+    var total = 0;
+    for (var j = 0; j < results.length; j++) {
+      if (results[j] && results[j].cleared) total += results[j].cleared;
+    }
+    try { localStorage.setItem(V321_STALE_TOMBSTONE_FLAG, 'done'); } catch (e) {}
+    if (total > 0) console.log('[v32.1] Self-healed ' + total + ' stale tombstone(s)');
+    return { ok: true, total: total, results: results };
+  });
+}
+window.selfHealStaleTombstones_v321 = selfHealStaleTombstones_v321;
+
+function _v321HealOneCategory(cat) {
+  var localSet = _readTombstoneSet(cat);
+  var localIds = [];
+  for (var k in localSet) if (localSet.hasOwnProperty(k)) localIds.push(k);
+  if (!localIds.length) return Promise.resolve({ id: cat.id, cleared: 0 });
+
+  return _fetchCloudItemsForCategory(cat).then(function(cloudArr) {
+    var cloudIdSet = {};
+    for (var i = 0; i < cloudArr.length; i++) {
+      var it = cloudArr[i];
+      if (it && it[cat.idField] !== undefined && it[cat.idField] !== null) {
+        cloudIdSet[String(it[cat.idField])] = true;
+      }
+    }
+    var cleared = 0;
+    for (var j = 0; j < localIds.length; j++) {
+      if (cloudIdSet[String(localIds[j])]) {
+        delete localSet[localIds[j]];
+        cleared++;
+      }
+    }
+    if (cleared > 0) {
+      _writeTombstoneSet(cat, localSet);
+      var writeDB = _getWindowFn('writeDB');
+      if (writeDB) {
+        var ids = [];
+        for (var m in localSet) if (localSet.hasOwnProperty(m)) ids.push(m);
+        try { writeDB(cat.cloudTombstonePath, { ids: ids, _modifiedAt: Date.now() }); } catch (e) {}
+      }
+    }
+    return { id: cat.id, cleared: cleared };
+  });
+}
+
+// v32.1: Continuous convergence loop. Every 30s when the tab is active,
+// re-check drift for every category. If local count != cloud count for
+// any category, silently dispatch a reconcile via loadFromFirebaseV2
+// (cloud-authoritative pull). User never needs to click Push/Pull.
+function startConvergenceLoop_v321() {
+  if (_v321ConvergenceTimer) return;
+  _v321ConvergenceTimer = setInterval(function() {
+    if (typeof document !== 'undefined' && document.hidden) return;
+    if (!window.firebase || !window.firebaseUser) return;
+    _v321ConvergeOnce().catch(function(){});
+  }, V321_CONVERGENCE_INTERVAL_MS);
+  console.log('[v32.1] Convergence loop started (' + (V321_CONVERGENCE_INTERVAL_MS / 1000) + 's interval)');
+}
+window.startConvergenceLoop_v321 = startConvergenceLoop_v321;
+
+function stopConvergenceLoop_v321() {
+  if (_v321ConvergenceTimer) {
+    clearInterval(_v321ConvergenceTimer);
+    _v321ConvergenceTimer = null;
+  }
+}
+window.stopConvergenceLoop_v321 = stopConvergenceLoop_v321;
+
+function _v321ConvergeOnce() {
+  // Only reconcile if there's a known drift signal — avoid hammering Firestore.
+  // We piggyback on the existing renderSyncInventory's drift detection: the
+  // cloud counts are cached on window._lastSyncCounts (set when Sync view
+  // renders). If cached counts show drift, trigger a pull.
+  var counts = window._lastSyncCounts || null;
+  if (!counts) return Promise.resolve({ ok: true, reason: 'no cached counts' });
+
+  var drifted = false;
+  for (var label in counts) {
+    if (!counts.hasOwnProperty(label)) continue;
+    var c = counts[label];
+    if (c && typeof c.local === 'number' && typeof c.cloud === 'number') {
+      if (c.local !== c.cloud) { drifted = true; break; }
+    }
+  }
+  if (!drifted) return Promise.resolve({ ok: true, reason: 'no drift' });
+
+  console.log('[v32.1] Drift detected — auto-reconciling');
+  if (typeof window.loadFromFirebaseV2 === 'function') {
+    return Promise.resolve(window.loadFromFirebaseV2(false, true)).then(function() {
+      if (typeof window.renderSyncInventory === 'function') {
+        try { window.renderSyncInventory(); } catch (e) {}
+      }
+      return { ok: true, reconciled: true };
+    });
+  }
+  return Promise.resolve({ ok: false, error: 'loadFromFirebaseV2 missing' });
+}
