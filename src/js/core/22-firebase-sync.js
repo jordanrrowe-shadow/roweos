@@ -10304,6 +10304,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       } else {
         console.log('[Sync V3.1] Brands: using individual docs (' + cloudBrands.length + ' brands)');
       }
+      // v32.0-A: Apply tombstone filter to cloud brands (and scrub local stragglers)
+      if (typeof applyTombstoneFilter === 'function') {
+        cloudBrands = applyTombstoneFilter('brands', cloudBrands);
+      }
       if (cloudBrands.length > 0) {
         var _localBrandsV2 = [];
         try { _localBrandsV2 = JSON.parse(localStorage.getItem(USER_DATA_KEYS.brands) || '[]'); } catch(e) {}
@@ -10478,6 +10482,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           _cloudChats = _cloudChats.filter(function(c) { return !(c && c.id && _chatTomb[String(c.id)]); });
           if (_origLen !== _cloudChats.length) console.log('[Firebase V3] Filtered ' + (_origLen - _cloudChats.length) + ' tombstoned chats from cloud');
         }
+        // v32.0-A: Apply unified tombstone filter (union with cloud tombstones) on top of v31.13 scrub
+        if (typeof applyTombstoneFilter === 'function') {
+          _cloudChats = applyTombstoneFilter('brandAIChats', _cloudChats);
+        }
         // Same merge logic as blob path - merge cloud with local by ID
         var _subCloudById = {};
         _cloudChats.forEach(function(cmd) { if (cmd.id) _subCloudById[cmd.id] = cmd; });
@@ -10528,6 +10536,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
               allMerged = allMerged.filter(function(c) { return !(c && c.id && _bTombMap[String(c.id)]); });
             }
           } catch(_btErr) {}
+          // v32.0-A: Apply unified tombstone filter (union with cloud tombstones) on top of v31.13 scrub
+          if (typeof applyTombstoneFilter === 'function') {
+            allMerged = applyTombstoneFilter('brandAIChats', allMerged);
+          }
           // v28.4: Split merged chats by mode - agentHistory stores both brand+life
           var _brandChats = allMerged.filter(function(cmd) { return cmd.mode !== 'life'; });
           var _lifeChats = allMerged.filter(function(cmd) { return cmd.mode === 'life'; });
@@ -10629,7 +10641,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         for (var _llp = 0; _llp < _localLifeProfiles.length; _llp++) {
           if (!_localLifeProfiles[_llp].id) _localLifeProfiles[_llp].id = 'life_local_' + _llp;
         }
-        var _mergedLifeProfiles = mergeByTimestamp(_localLifeProfiles, life.profiles, 'id');
+        // v32.0-A: Tombstone-aware filter on cloud life profiles
+        var _filteredCloudLifeProfiles = (typeof applyTombstoneFilter === 'function')
+          ? applyTombstoneFilter('lifeAIProfiles', life.profiles) : life.profiles;
+        var _mergedLifeProfiles = mergeByTimestamp(_localLifeProfiles, _filteredCloudLifeProfiles, 'id');
         localStorage.setItem('roweos_life_profiles', JSON.stringify(_mergedLifeProfiles));
       }
       if (life.currentProfileIdx !== undefined) localStorage.setItem('roweos_current_life_profile_idx', String(life.currentProfileIdx));
@@ -10663,6 +10678,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         try { localLifeChats = JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]'); } catch(e) {}
         if (!Array.isArray(localLifeChats)) localLifeChats = [];
         if (!Array.isArray(life.agentCommands)) life.agentCommands = [];
+        // v32.0-A: Tombstone-aware filter on cloud LifeAI chats before merge
+        if (typeof applyTombstoneFilter === 'function') {
+          life.agentCommands = applyTombstoneFilter('lifeAIChats', life.agentCommands);
+        }
         if (life.agentCommands.length === 0 && localLifeChats.length > 0) {
           console.log('[Sync] Cloud life chats empty, preserving ' + localLifeChats.length + ' local chats');
         } else if (localLifeChats.length === 0 || life.agentCommands.length >= localLifeChats.length) {
@@ -10671,7 +10690,14 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           console.log('[Sync] Cloud life chats (' + life.agentCommands.length + ') fewer than local (' + localLifeChats.length + '), keeping local');
         }
       }
-      if (life.todos && shouldSyncCategory('life_todos')) safeSyncWrite('roweos_life_todos', life.todos);
+      if (life.todos && shouldSyncCategory('life_todos')) {
+        // v32.0-A: Filter cloud life todos through tombstone set before write
+        var _ltCloud = life.todos;
+        if (Array.isArray(_ltCloud) && typeof applyTombstoneFilter === 'function') {
+          _ltCloud = applyTombstoneFilter('lifeTodos', _ltCloud);
+        }
+        safeSyncWrite('roweos_life_todos', _ltCloud);
+      }
       // v15.25: Merge life memory instead of overwrite (preserves local docs not yet synced)
       if (life.memory) {
         try {
@@ -10736,6 +10762,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       if (typeof _legacyGoals === 'string') { try { _legacyGoals = JSON.parse(_legacyGoals); } catch(e) { _legacyGoals = undefined; } }
       if (_legacyGoals && Array.isArray(_legacyGoals)) _cloudGoalsFromCollection = _legacyGoals;
     }
+    // v32.0-A: Apply tombstone filter to cloud pulse goals before merge
+    if (typeof applyTombstoneFilter === 'function') {
+      _cloudGoalsFromCollection = applyTombstoneFilter('pulseGoals', _cloudGoalsFromCollection);
+    }
     if (_cloudGoalsFromCollection.length > 0) {
       var _localGoals2 = [];
       try {
@@ -10760,12 +10790,22 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       var _todoMainDoc = null;
       todosSnap.forEach(function(doc) { if (doc.id === 'main') _todoMainDoc = doc; });
       if (_todoMainDoc && _todoMainDoc.exists && _todoMainDoc.data().data) {
-        safeSyncWrite('roweosTodos', _todoMainDoc.data().data);
+        // v32.0-A: Tombstone filter cloud todos
+        var _btCloud = _todoMainDoc.data().data;
+        if (Array.isArray(_btCloud) && typeof applyTombstoneFilter === 'function') {
+          _btCloud = applyTombstoneFilter('brandTodos', _btCloud);
+        }
+        safeSyncWrite('roweosTodos', _btCloud);
       } else if (!todosSnap.empty) {
         // Fallback: old per-index subcollection format
         var todos = [];
         todosSnap.forEach(function(doc) { if (doc.id !== 'main') todos.push(doc.data()); });
-        if (todos.length > 0) safeSyncWrite('roweosTodos', todos);
+        if (todos.length > 0) {
+          if (typeof applyTombstoneFilter === 'function') {
+            todos = applyTombstoneFilter('brandTodos', todos);
+          }
+          safeSyncWrite('roweosTodos', todos);
+        }
       }
     }
 
@@ -10774,11 +10814,21 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       var _calMainDoc = null;
       calendarSnap.forEach(function(doc) { if (doc.id === 'main') _calMainDoc = doc; });
       if (_calMainDoc && _calMainDoc.exists && _calMainDoc.data().data) {
-        safeSyncWrite('roweos_calendar', _calMainDoc.data().data);
+        // v32.0-A: Tombstone filter cloud calendar events
+        var _calCloud = _calMainDoc.data().data;
+        if (Array.isArray(_calCloud) && typeof applyTombstoneFilter === 'function') {
+          _calCloud = applyTombstoneFilter('calendar', _calCloud);
+        }
+        safeSyncWrite('roweos_calendar', _calCloud);
       } else if (!calendarSnap.empty) {
         var calendar = [];
         calendarSnap.forEach(function(doc) { if (doc.id !== 'main') calendar.push(doc.data()); });
-        if (calendar.length > 0) safeSyncWrite('roweos_calendar', calendar);
+        if (calendar.length > 0) {
+          if (typeof applyTombstoneFilter === 'function') {
+            calendar = applyTombstoneFilter('calendar', calendar);
+          }
+          safeSyncWrite('roweos_calendar', calendar);
+        }
       }
     }
 
@@ -10788,6 +10838,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     if (!runsSnap.empty && shouldSyncCategory('runs')) {
       var cloudRuns = [];
       runsSnap.forEach(function(doc) { cloudRuns.push(doc.data()); });
+      // v32.0-A: Tombstone filter cloud studio runs before merge
+      if (typeof applyTombstoneFilter === 'function') {
+        cloudRuns = applyTombstoneFilter('studioRuns', cloudRuns);
+      }
       var existingObj = {};
       try { existingObj = JSON.parse(localStorage.getItem('roweos_runs') || '{}'); } catch(e) { console.warn('[Sync] Corrupted roweos_runs:', e.message); }
       if (Array.isArray(existingObj)) existingObj = { runs: existingObj };
@@ -10830,6 +10884,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           console.log('[Firebase V3] Filtered ' + (_beforeCount - cloudAutos.length) + ' deleted automations from cloud pull');
         }
       }
+      // v32.0-A: Apply unified tombstone filter for automations (union with cloud tombstones)
+      if (typeof applyTombstoneFilter === 'function') {
+        cloudAutos = applyTombstoneFilter('automations', cloudAutos);
+      }
       if (cloudAutos.length > 0) {
         // v27.0: Use safeSyncWrite (now merges arrays) instead of blind overwrite
         safeSyncWrite('roweos_automations', cloudAutos);
@@ -10854,6 +10912,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       var cloudInvItems = [];
       if (!inventorySnap.empty) {
         inventorySnap.forEach(function(doc) { cloudInvItems.push(doc.data()); });
+      }
+      // v32.0-A: Apply tombstone filter to cloud inventory items
+      if (typeof applyTombstoneFilter === 'function') {
+        cloudInvItems = applyTombstoneFilter('inventory', cloudInvItems);
       }
       try {
         var localInv = JSON.parse(localStorage.getItem('roweos_inventory') || '{}');
@@ -10887,8 +10949,13 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     if (possessionsDoc && possessionsDoc.exists) {
       var possData = possessionsDoc.data();
       if (possData.items && possData.items.length > 0) {
+        // v32.0-A: Tombstone filter cloud possessions
+        var _possItems = possData.items;
+        if (typeof applyTombstoneFilter === 'function') {
+          _possItems = applyTombstoneFilter('possessions', _possItems);
+        }
         var lifeCats = possData.categories || ['Electronics', 'Home & Furniture', 'Vehicles', 'Clothing & Accessories', 'Collectibles & Art', 'Sports & Outdoors', 'Tools & Equipment', 'Other'];
-        localStorage.setItem('roweos_life_inventory', JSON.stringify({ items: possData.items, categories: lifeCats }));
+        localStorage.setItem('roweos_life_inventory', JSON.stringify({ items: _possItems, categories: lifeCats }));
       }
     }
 
@@ -11014,7 +11081,12 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     if (customOpsDoc && customOpsDoc.exists) {
       var co = customOpsDoc.data();
       if (co && co.data && co.data.length > 0) {
-        localStorage.setItem('roweos_custom_operations', JSON.stringify(co.data));
+        // v32.0-A: Tombstone filter cloud custom ops
+        var _coData = co.data;
+        if (typeof applyTombstoneFilter === 'function') {
+          _coData = applyTombstoneFilter('customOps', _coData);
+        }
+        localStorage.setItem('roweos_custom_operations', JSON.stringify(_coData));
       }
     }
     // v30.0: Legacy roweos_clients restore DISABLED - all client data now in roweos_people
@@ -11023,13 +11095,26 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     if (peopleDoc && peopleDoc.exists) {
       var pd = peopleDoc.data();
       if (pd && pd.data && pd.data.length > 0) {
-        safeSyncWrite('roweos_people', pd.data);
+        // v32.0-A: Apply all three personType-scoped tombstone filters in sequence.
+        // The cloud `people` array is shared across clients/team/directReports - each
+        // category has its own tombstone set, so we filter against all three.
+        var _peopleData = pd.data;
+        if (typeof applyTombstoneFilter === 'function') {
+          _peopleData = applyTombstoneFilter('clients', _peopleData);
+          _peopleData = applyTombstoneFilter('team', _peopleData);
+          _peopleData = applyTombstoneFilter('directReports', _peopleData);
+        }
+        safeSyncWrite('roweos_people', _peopleData);
       }
     }
     // v25.3: Restore inventory from dedicated doc
     if (inventoryV3Doc && inventoryV3Doc.exists) {
       var invData = inventoryV3Doc.data();
       if (invData && invData.data && invData.data.items && invData.data.items.length > 0) {
+        // v32.0-A: Tombstone filter cloud inventory items in v3 dedicated doc
+        if (typeof applyTombstoneFilter === 'function') {
+          invData.data.items = applyTombstoneFilter('inventory', invData.data.items);
+        }
         var localInvRaw = localStorage.getItem('roweos_inventory');
         var localInv = localInvRaw ? JSON.parse(localInvRaw) : { items: [] };
         var localCount = (localInv.items || []).length;
@@ -11193,6 +11278,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       var _folioData = folioDoc.data();
       // v25.3: Check both 'data' and 'items' fields (write-through used 'items' before fix)
       var cloudItems = (_folioData && _folioData.data) || (_folioData && _folioData.items) || [];
+      // v32.0-A: Tombstone filter cloud folio items
+      if (typeof applyTombstoneFilter === 'function') {
+        cloudItems = applyTombstoneFilter('folioItems', cloudItems);
+      }
       if (cloudItems.length > 0) {
         var localFolio = [];
         try {
@@ -11573,6 +11662,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     if (scribeDoc && scribeDoc.exists) {
       var _scribeCloud = scribeDoc.data();
       var _cloudNbs = (_scribeCloud && _scribeCloud.notebooks) ? _scribeCloud.notebooks : [];
+      // v32.0-A: Tombstone filter cloud notebooks
+      if (Array.isArray(_cloudNbs) && typeof applyTombstoneFilter === 'function') {
+        _cloudNbs = applyTombstoneFilter('notebooks', _cloudNbs);
+      }
       if (Array.isArray(_cloudNbs) && _cloudNbs.length > 0) {
         var _localNbs = [];
         try { _localNbs = JSON.parse(localStorage.getItem('roweos_scribe_notebooks') || '[]'); } catch(e) { _localNbs = []; }

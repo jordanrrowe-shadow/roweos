@@ -831,3 +831,65 @@ function clearTombstones(categoryIdOrLabel) {
     });
 }
 window.clearTombstones = clearTombstones;
+
+// v32.0-A: Pull-side enforcement. Called by loadFromFirebaseV2 (this task) and
+// every onSnapshot listener (Task A.4) BEFORE the cloud payload is merged into
+// local state. Loads the union of local+cloud tombstones, persists it back, and
+// filters BOTH the incoming payload AND any local stragglers against the union.
+//
+// Cloud reads are best-effort. Some readDB implementations are sync (cache-
+// backed) and some return a promise. We handle both — promise results are
+// applied on the next pull, never blocking this one.
+function applyTombstoneFilter(categoryIdOrLabel, cloudItems) {
+  var cat = getCategoryById(categoryIdOrLabel);
+  if (!cat) return Array.isArray(cloudItems) ? cloudItems : [];
+  if (!Array.isArray(cloudItems)) cloudItems = [];
+
+  // 1. Read local tombstones into a set
+  var localSet = _readTombstoneSet(cat);
+
+  // 2. Best-effort cloud tombstone hydration (sync or promise both supported)
+  var readDB = _getWindowFn('readDB');
+  if (readDB) {
+    try {
+      var maybe = readDB(cat.cloudTombstonePath);
+      if (maybe && Array.isArray(maybe.ids)) {
+        for (var i = 0; i < maybe.ids.length; i++) localSet[maybe.ids[i]] = true;
+      } else if (maybe && typeof maybe.then === 'function') {
+        // async — apply later on next pull (fire-and-forget update)
+        maybe.then(function(res) {
+          if (res && Array.isArray(res.ids)) {
+            var s = _readTombstoneSet(cat);
+            var changed = false;
+            for (var j = 0; j < res.ids.length; j++) {
+              if (!s[res.ids[j]]) { s[res.ids[j]] = true; changed = true; }
+            }
+            if (changed) _writeTombstoneSet(cat, s);
+          }
+        }, function() { /* ignore */ });
+      }
+    } catch (e) { /* ignore — best effort */ }
+  }
+
+  // 3. Persist union locally so subsequent reads converge
+  _writeTombstoneSet(cat, localSet);
+
+  // 4. Filter cloud payload
+  var filteredCloud = cloudItems.filter(function(item) {
+    return item && !localSet[item[cat.idField]];
+  });
+
+  // 5. Filter local data array (catches dupes that slipped past)
+  if (cat.localKey) {
+    var localArr = _readCategoryArray(cat);
+    var localFiltered = localArr.filter(function(item) {
+      return item && !localSet[item[cat.idField]];
+    });
+    if (localFiltered.length !== localArr.length) {
+      _writeCategoryArray(cat, localFiltered);
+    }
+  }
+
+  return filteredCloud;
+}
+window.applyTombstoneFilter = applyTombstoneFilter;
