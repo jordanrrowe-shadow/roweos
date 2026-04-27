@@ -9941,6 +9941,17 @@ function safeSyncWrite(key, cloudData) {
 function loadFromFirebaseV2(showNotification, skipModeSync) {
   if (!firebaseUser || !firebase) return Promise.resolve();
 
+  // v32.0-A: bootstrap tombstone registry on first launch
+  if (typeof initTombstoneRegistry_v32 === 'function') {
+    try {
+      initTombstoneRegistry_v32().catch(function(e) {
+        console.warn('[v32.0-A] tombstone init failed (will retry next launch)', e);
+      });
+    } catch (initErr) {
+      console.warn('[v32.0-A] tombstone init threw synchronously', initErr);
+    }
+  }
+
   // v25.2: Safety snapshot before cloud pull -- protection against Firestore outage
   try {
     var _prePullBackup = {};

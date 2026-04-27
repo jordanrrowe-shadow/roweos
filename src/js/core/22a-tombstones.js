@@ -917,3 +917,43 @@ function applyTombstoneFilter(categoryIdOrLabel, cloudItems) {
   return filteredCloud;
 }
 window.applyTombstoneFilter = applyTombstoneFilter;
+
+// v32.0-A: One-shot init on first v32.0 launch. Idempotent. Initializes empty
+// tombstone arrays in localStorage for every registered category if missing
+// (preserves any pre-existing data like roweos_deleted_chat_ids), then pushes
+// the current state to Firestore so cross-device convergence works from day 1.
+//
+// Guarded by localStorage flag 'roweos_tombstone_init_v32' === 'done'.
+// Cloud writes are fire-and-forget per the project's write-through architecture
+// — partial failures retry on next launch (flag stays unset).
+function initTombstoneRegistry_v32() {
+  if (localStorage.getItem('roweos_tombstone_init_v32') === 'done') {
+    return Promise.resolve({ ok: true, skipped: true });
+  }
+  var pushes = [];
+  for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+    var cat = SYNC_CATEGORIES[i];
+    if (!cat || !cat.tombstoneKey) continue;
+    if (localStorage.getItem(cat.tombstoneKey) === null) {
+      try { localStorage.setItem(cat.tombstoneKey, '[]'); } catch (e) {}
+    }
+    var set = _readTombstoneSet(cat);
+    pushes.push(_writeCloudTombstone(cat, set));
+  }
+  return Promise.all(pushes).then(function(results) {
+    var allOk = true;
+    for (var j = 0; j < results.length; j++) {
+      if (!results[j] || !results[j].ok) { allOk = false; break; }
+    }
+    if (allOk) {
+      try { localStorage.setItem('roweos_tombstone_init_v32', 'done'); } catch (e) {}
+    }
+    if (typeof console !== 'undefined' && console.log) {
+      console.log('[v32.0-A] tombstone registry init: ' + (allOk ? 'done' : 'partial'));
+    }
+    return { ok: allOk, results: results };
+  }, function(err) {
+    return { ok: false, error: err };
+  });
+}
+window.initTombstoneRegistry_v32 = initTombstoneRegistry_v32;
