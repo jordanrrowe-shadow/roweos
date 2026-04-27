@@ -5,12 +5,18 @@
 // scrub targets, and rerender callbacks. The universal API (tombstoneAndDelete /
 // tombstoneAndDeleteMany / clearTombstones) operates on these entries — no
 // per-category branching anywhere else.
+//
+// Pre-existing tombstone keys (kept for backward compat — do not rename):
+// - brandAIChats uses roweos_deleted_chat_ids / profile/deletedChatIds (v31.13)
+// All other categories use roweos_deleted_<id> / profile/deleted<Id> conventions.
 
 var SYNC_CATEGORIES = [
   {
     id: 'brands',
     label: 'Brands',
     localKey: 'roweos_user_brands',
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'brands',
     cloudShape: 'subcollection',
     blobField: null,
@@ -21,12 +27,14 @@ var SYNC_CATEGORIES = [
     scrubReaders: ['brands', 'window.brands'],
     rerender: ['renderBrandSelector', 'initBrandLogo'],
     legacyHeuristic: null,
-    graceMs: 8000
+    graceMs: 8000 // brands need longer ghost-cleanup window — _all batch + per-doc batch flush
   },
   {
     id: 'brandLogos',
     label: 'Brand Logos',
-    localKey: null, // hybrid storage handled in Spec C
+    localKey: null, // hybrid storage — small inline on brand.logo, oversize via IDB + brand_logos subcollection (Spec C)
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'brand_logos',
     cloudShape: 'subcollection',
     blobField: null,
@@ -34,7 +42,7 @@ var SYNC_CATEGORIES = [
     idField: 'id',
     tombstoneKey: 'roweos_deleted_brand_logos',
     cloudTombstonePath: 'profile/deletedBrandLogos',
-    scrubReaders: [],
+    scrubReaders: [], // logos managed by Spec C (writeBrandLogo / readBrandLogoSync); no top-level array to scrub
     rerender: ['renderSyncInventory', 'initBrandLogo'],
     legacyHeuristic: null,
     graceMs: 5000
@@ -43,6 +51,8 @@ var SYNC_CATEGORIES = [
     id: 'brandAIChats',
     label: 'BrandAI Chats',
     localKey: 'roweos_agentCommands',
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'chats',
     cloudShape: 'subcollection',
     blobField: null,
@@ -59,6 +69,8 @@ var SYNC_CATEGORIES = [
     id: 'lifeAIChats',
     label: 'LifeAI Chats',
     localKey: 'roweos_life_agentCommands',
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'life_chats',
     cloudShape: 'subcollection',
     blobField: null,
@@ -75,6 +87,8 @@ var SYNC_CATEGORIES = [
     id: 'brandTodos',
     label: 'BrandAI To-Dos',
     localKey: 'roweosTodos',
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'todos/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -91,6 +105,8 @@ var SYNC_CATEGORIES = [
     id: 'lifeTodos',
     label: 'LifeAI To-Dos',
     localKey: 'roweos_life_todos', // v32.0-A: actual canonical key (registry spec said 'roweosLifeTodos' but doesn't exist)
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'life_todos/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -107,6 +123,8 @@ var SYNC_CATEGORIES = [
     id: 'calendar',
     label: 'Calendar',
     localKey: 'roweos_calendar', // v32.0-A: actual canonical key (registry spec said 'roweos_calendar_events')
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'calendar/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -123,6 +141,8 @@ var SYNC_CATEGORIES = [
     id: 'journal',
     label: 'Journal',
     localKey: 'roweos_journal', // v32.0-A: actual canonical key (registry spec said 'roweos_journal_entries')
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'journal/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -139,6 +159,8 @@ var SYNC_CATEGORIES = [
     id: 'libraryFiles',
     label: 'Library Files',
     localKey: 'roweosLibrary', // v32.0-A: actual canonical key (camelCase). Life library separately at 'roweos_life_library'
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'library',
     cloudShape: 'subcollection',
     blobField: null,
@@ -155,6 +177,8 @@ var SYNC_CATEGORIES = [
     id: 'inventory',
     label: 'Inventory',
     localKey: 'roweos_inventory',
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'inventory/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -171,6 +195,8 @@ var SYNC_CATEGORIES = [
     id: 'possessions',
     label: 'Possessions',
     localKey: 'roweos_life_inventory', // v32.0-A: actual canonical key. Stored as {items: [...]} - Spec B/C must extract from .items
+    localArrayField: 'items',
+    localFilter: null,
     cloudPath: 'possessions/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -187,6 +213,8 @@ var SYNC_CATEGORIES = [
     id: 'studioRuns',
     label: 'Studio Runs',
     localKey: 'roweos_runs', // v32.0-A: actual canonical key. Stored as {runs: [...]} - Spec B/C must extract from .runs
+    localArrayField: 'runs',
+    localFilter: null,
     cloudPath: 'studio_runs',
     cloudShape: 'subcollection',
     blobField: null,
@@ -203,6 +231,8 @@ var SYNC_CATEGORIES = [
     id: 'pulseGoals',
     label: 'Pulse Goals',
     localKey: 'roweos_pulse_goals',
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'pulse_goals',
     cloudShape: 'subcollection',
     blobField: null,
@@ -219,6 +249,8 @@ var SYNC_CATEGORIES = [
     id: 'automations',
     label: 'Automations',
     localKey: 'roweos_automations',
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'automations',
     cloudShape: 'subcollection',
     blobField: null,
@@ -235,6 +267,8 @@ var SYNC_CATEGORIES = [
     id: 'customOps',
     label: 'Custom Ops',
     localKey: 'roweos_custom_operations', // v32.0-A: actual canonical key (registry spec said 'roweos_custom_ops')
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'custom_ops/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -251,6 +285,8 @@ var SYNC_CATEGORIES = [
     id: 'clients',
     label: 'Clients',
     localKey: 'roweos_people', // v32.0-A: shared with team + directReports, filtered by personType === 'client'
+    localArrayField: null,
+    localFilter: { field: 'personType', value: 'client' },
     cloudPath: 'clients/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -267,6 +303,8 @@ var SYNC_CATEGORIES = [
     id: 'team',
     label: 'Team',
     localKey: 'roweos_people', // v32.0-A: shared with clients + directReports, filtered by personType === 'team'
+    localArrayField: null,
+    localFilter: { field: 'personType', value: 'team' },
     cloudPath: 'team/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -283,6 +321,8 @@ var SYNC_CATEGORIES = [
     id: 'directReports',
     label: 'Direct Reports',
     localKey: 'roweos_people', // v32.0-A: shared with clients + team, filtered by personType === 'report'
+    localArrayField: null,
+    localFilter: { field: 'personType', value: 'report' },
     cloudPath: 'direct_reports/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -299,6 +339,8 @@ var SYNC_CATEGORIES = [
     id: 'lifeAIProfiles',
     label: 'LifeAI Profiles',
     localKey: 'roweos_life_profiles', // v32.0-A: actual canonical key (registry spec said 'roweos_lifeai_profiles')
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'lifeai_profiles',
     cloudShape: 'subcollection',
     blobField: null,
@@ -315,6 +357,8 @@ var SYNC_CATEGORIES = [
     id: 'folioItems',
     label: 'Folio Items',
     localKey: 'roweos_folio_items',
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'folio_items/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -331,6 +375,8 @@ var SYNC_CATEGORIES = [
     id: 'notebooks',
     label: 'Notebooks',
     localKey: 'roweos_scribe_notebooks', // v32.0-A: actual canonical key (registry spec said 'roweos_notebooks')
+    localArrayField: null,
+    localFilter: null,
     cloudPath: 'notebooks/main',
     cloudShape: 'blob',
     blobField: 'data',
@@ -347,12 +393,15 @@ var SYNC_CATEGORIES = [
 
 window.SYNC_CATEGORIES = SYNC_CATEGORIES;
 
-// Helper: lookup by id or label
+// Helper: lookup by id (priority) with label as fallback.
+// Two-pass to ensure deterministic id-first match; an id collision with a label
+// from another entry will always resolve to the id match.
 function getCategoryById(idOrLabel) {
   for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
-    if (SYNC_CATEGORIES[i].id === idOrLabel || SYNC_CATEGORIES[i].label === idOrLabel) {
-      return SYNC_CATEGORIES[i];
-    }
+    if (SYNC_CATEGORIES[i].id === idOrLabel) return SYNC_CATEGORIES[i];
+  }
+  for (var j = 0; j < SYNC_CATEGORIES.length; j++) {
+    if (SYNC_CATEGORIES[j].label === idOrLabel) return SYNC_CATEGORIES[j];
   }
   return null;
 }
