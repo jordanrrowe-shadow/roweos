@@ -2407,6 +2407,14 @@ function setupRealtimeSync() {
     var unsubLibrary = db.doc(basePath + '/library/brand').onSnapshot(function(doc) {
       if (doc.metadata.hasPendingWrites) return; // v25.0: Local echo, skip
       if (!doc.exists) return;
+      // v32.0-A: per-category grace check (libraryFiles filter deferred — nested object shape)
+      var __libCat = (typeof getCategoryById === 'function') ? getCategoryById('libraryFiles') : null;
+      var __libCatGrace = (__libCat && __libCat.graceMs) || (typeof LOCAL_SAVE_GRACE_PERIOD_DEFAULT !== 'undefined' ? LOCAL_SAVE_GRACE_PERIOD_DEFAULT : 5000);
+      var __libCatLast = (window.lastCategoryLocalSave && window.lastCategoryLocalSave['libraryFiles']) || 0;
+      if (Date.now() - __libCatLast < __libCatGrace) {
+        console.log('[v32.0-A] within libraryFiles grace, skipping');
+        return;
+      }
       var libData = doc.data();
       if (libData && libData.data && shouldSyncCategory('library')) {
         console.log('[Firebase V3] Library update from cloud');
@@ -2441,8 +2449,13 @@ function setupRealtimeSync() {
     var unsubBrands = db.collection(basePath + '/brands').onSnapshot(function(snapshot) {
       if (snapshot.metadata.hasPendingWrites) return; // v25.0: Local echo, skip
       // v27.0: Skip if we just saved locally (grace period prevents race condition)
-      if (typeof lastLocalSaveTime !== 'undefined' && Date.now() - lastLocalSaveTime < 10000) {
-        console.log('[Firebase V3] Brands listener skipped -- local save within 10s');
+      // v32.0-A: ALSO skip if per-category brands grace is fresh
+      var __brandsCat = (typeof getCategoryById === 'function') ? getCategoryById('brands') : null;
+      var __brandsCatGrace = (__brandsCat && __brandsCat.graceMs) || (typeof LOCAL_SAVE_GRACE_PERIOD_DEFAULT !== 'undefined' ? LOCAL_SAVE_GRACE_PERIOD_DEFAULT : 5000);
+      var __brandsCatLast = (window.lastCategoryLocalSave && window.lastCategoryLocalSave['brands']) || 0;
+      if ((typeof lastLocalSaveTime !== 'undefined' && Date.now() - lastLocalSaveTime < 10000) ||
+          Date.now() - __brandsCatLast < __brandsCatGrace) {
+        console.log('[v32.0-A] Brands listener skipped -- within grace');
         return;
       }
       // v25.2: Brands should never be truly empty (default brand exists).
@@ -2463,6 +2476,10 @@ function setupRealtimeSync() {
           if (doc.id === '_all' && doc.data().items) { brandsArr = doc.data().items; }
         });
         console.log('[Firebase V3] Brands: fallback to _all doc (' + brandsArr.length + ')');
+      }
+      // v32.0-A: filter incoming payload through tombstone before merging
+      if (typeof applyTombstoneFilter === 'function') {
+        brandsArr = applyTombstoneFilter('brands', brandsArr);
       }
       // v27.0: Merge using brand name as stable ID (old brands lack id field, name is always unique)
       var _localBrandsForMerge = [];
@@ -2614,11 +2631,23 @@ function setupRealtimeSync() {
     var unsubTodos = db.doc(basePath + '/todos/main').onSnapshot(function(doc) {
       if (doc.metadata.hasPendingWrites) return; // v25.0: Local echo, skip
       if (!shouldSyncCategory('brand_todos')) return;
+      // v32.0-A: per-category grace check
+      var __btCat = (typeof getCategoryById === 'function') ? getCategoryById('brandTodos') : null;
+      var __btCatGrace = (__btCat && __btCat.graceMs) || (typeof LOCAL_SAVE_GRACE_PERIOD_DEFAULT !== 'undefined' ? LOCAL_SAVE_GRACE_PERIOD_DEFAULT : 5000);
+      var __btCatLast = (window.lastCategoryLocalSave && window.lastCategoryLocalSave['brandTodos']) || 0;
+      if (Date.now() - __btCatLast < __btCatGrace) {
+        console.log('[v32.0-A] within brandTodos grace, skipping');
+        return;
+      }
       if (!doc.exists) {
         safeSyncWrite('roweosTodos', []);
         return;
       }
       var todosArr = doc.data().data || [];
+      // v32.0-A: filter incoming payload through tombstone before merging
+      if (typeof applyTombstoneFilter === 'function') {
+        todosArr = applyTombstoneFilter('brandTodos', todosArr);
+      }
       safeSyncWrite('roweosTodos', todosArr);
       console.log('[Firebase V3] Todos update from cloud -', todosArr.length, 'items');
       if (typeof initTodos === 'function') initTodos();
@@ -2630,11 +2659,23 @@ function setupRealtimeSync() {
     var unsubCalendar = db.doc(basePath + '/calendar/main').onSnapshot(function(doc) {
       if (doc.metadata.hasPendingWrites) return; // v25.0: Local echo, skip
       if (!shouldSyncCategory('calendar')) return;
+      // v32.0-A: per-category grace check
+      var __calCat = (typeof getCategoryById === 'function') ? getCategoryById('calendar') : null;
+      var __calCatGrace = (__calCat && __calCat.graceMs) || (typeof LOCAL_SAVE_GRACE_PERIOD_DEFAULT !== 'undefined' ? LOCAL_SAVE_GRACE_PERIOD_DEFAULT : 5000);
+      var __calCatLast = (window.lastCategoryLocalSave && window.lastCategoryLocalSave['calendar']) || 0;
+      if (Date.now() - __calCatLast < __calCatGrace) {
+        console.log('[v32.0-A] within calendar grace, skipping');
+        return;
+      }
       if (!doc.exists) {
         safeSyncWrite('roweos_calendar', []);
         return;
       }
       var calArr = doc.data().data || [];
+      // v32.0-A: filter incoming payload through tombstone before merging
+      if (typeof applyTombstoneFilter === 'function') {
+        calArr = applyTombstoneFilter('calendar', calArr);
+      }
       safeSyncWrite('roweos_calendar', calArr);
       console.log('[Firebase V3] Calendar update from cloud -', calArr.length, 'events');
       if (typeof renderCalendar === 'function') renderCalendar();
@@ -2645,12 +2686,24 @@ function setupRealtimeSync() {
     var unsubAutomations = db.collection(basePath + '/automations').onSnapshot(function(snapshot) {
       if (snapshot.metadata.hasPendingWrites) return;
       if (!shouldSyncCategory('automations')) return;
+      // v32.0-A: per-category grace check
+      var __autoCat = (typeof getCategoryById === 'function') ? getCategoryById('automations') : null;
+      var __autoCatGrace = (__autoCat && __autoCat.graceMs) || (typeof LOCAL_SAVE_GRACE_PERIOD_DEFAULT !== 'undefined' ? LOCAL_SAVE_GRACE_PERIOD_DEFAULT : 5000);
+      var __autoCatLast = (window.lastCategoryLocalSave && window.lastCategoryLocalSave['automations']) || 0;
+      if (Date.now() - __autoCatLast < __autoCatGrace) {
+        console.log('[v32.0-A] within automations grace, skipping');
+        return;
+      }
       // v25.2: Cloud-authoritative -- empty snapshot means all automations deleted, safeSyncWrite handles it
       var cloudAutos = [];
       snapshot.forEach(function(doc) { cloudAutos.push(doc.data()); });
       // v28.6: Filter out deleted automations before merge (prevents resurrection)
       if (typeof _deletedAutomationIds !== 'undefined' && Object.keys(_deletedAutomationIds).length > 0) {
         cloudAutos = cloudAutos.filter(function(a) { return !_deletedAutomationIds[String(a.id)]; });
+      }
+      // v32.0-A: filter incoming payload through tombstone before merging
+      if (typeof applyTombstoneFilter === 'function') {
+        cloudAutos = applyTombstoneFilter('automations', cloudAutos);
       }
       // v25.2: Use mergeByTimestamp for automations (per-item array needing merge)
       var _localAutos = [];
@@ -2678,12 +2731,24 @@ function setupRealtimeSync() {
     var unsubPulseGoals = db.collection(basePath + '/pulse_goals').onSnapshot(function(snapshot) {
       if (snapshot.metadata.hasPendingWrites) return;
       if (!shouldSyncCategory('goals')) return;
+      // v32.0-A: per-category grace check
+      var __pgCat = (typeof getCategoryById === 'function') ? getCategoryById('pulseGoals') : null;
+      var __pgCatGrace = (__pgCat && __pgCat.graceMs) || (typeof LOCAL_SAVE_GRACE_PERIOD_DEFAULT !== 'undefined' ? LOCAL_SAVE_GRACE_PERIOD_DEFAULT : 5000);
+      var __pgCatLast = (window.lastCategoryLocalSave && window.lastCategoryLocalSave['pulseGoals']) || 0;
+      if (Date.now() - __pgCatLast < __pgCatGrace) {
+        console.log('[v32.0-A] within pulseGoals grace, skipping');
+        return;
+      }
       var cloudGoals = [];
       snapshot.forEach(function(doc) {
         var g = doc.data();
         if (!g.id) g.id = doc.id;
         cloudGoals.push(g);
       });
+      // v32.0-A: filter incoming payload through tombstone before merging
+      if (typeof applyTombstoneFilter === 'function') {
+        cloudGoals = applyTombstoneFilter('pulseGoals', cloudGoals);
+      }
       var _localGoals = [];
       try { _localGoals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]'); } catch(e) {}
       // Merge cloud goals with local via timestamp

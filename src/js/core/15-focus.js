@@ -100,6 +100,11 @@ function saveTodos() {
   localStorage.setItem(getTodosKey(), JSON.stringify(todos)); // v12.0.1: Mode-specific
   // v11.0.5: Track local save time to prevent same-device reload glitch
   stampLocalSave();
+  // v32.0-A: per-category stamp (mode-aware: brand vs life todos)
+  if (window.lastCategoryLocalSave) {
+    var __todoMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
+    window.lastCategoryLocalSave[__todoMode === 'life' ? 'lifeTodos' : 'brandTodos'] = Date.now();
+  }
   writeDBTodos(); // v25.1: Write-through replaces scheduleAutoSync
 }
 
@@ -141,6 +146,11 @@ function saveCalendar() {
   }
   localStorage.setItem(getCalendarKey(), JSON.stringify(calendar)); // v12.0.1: Mode-specific
   stampLocalSave();
+  // v32.0-A: per-category stamp (calendar registry only covers brand mode)
+  if (window.lastCategoryLocalSave) {
+    var __calMode = localStorage.getItem('roweos_app_mode') || localStorage.getItem('roweos_mode') || 'brand';
+    if (__calMode !== 'life') window.lastCategoryLocalSave['calendar'] = Date.now();
+  }
   writeDBCalendar(); // v25.1: Write-through replaces scheduleAutoSync
   // v16.12: Rebuild merged calendar after native save
   rebuildMergedCalendar();

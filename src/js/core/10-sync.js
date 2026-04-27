@@ -1429,6 +1429,7 @@ function saveBrands() {
       localStorage.setItem(USER_DATA_KEYS.brandSettings, JSON.stringify(_bs));
     } catch(_bse) {}
     stampLocalSave();
+    if (window.lastCategoryLocalSave) window.lastCategoryLocalSave['brands'] = Date.now(); // v32.0-A
     console.log('[saveBrands] Saved', brands.length, 'brands to localStorage');
     // v27.0: Write-through to Firestore -- write each brand individually, then _all doc
     var db = typeof getDB === 'function' ? getDB() : null;

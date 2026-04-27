@@ -5821,6 +5821,7 @@ function savePipeline() {
 
   // v24.7: Stamp local save immediately to protect against onSnapshot/reload overwrites
   stampLocalSave();
+  if (window.lastCategoryLocalSave) window.lastCategoryLocalSave['automations'] = Date.now(); // v32.0-A
   // v24.7: Verify save persisted to localStorage
   try {
     var _verifyAutos = JSON.parse(localStorage.getItem('roweos_automations') || '[]');

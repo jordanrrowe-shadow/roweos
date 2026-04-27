@@ -2318,6 +2318,7 @@ function saveScheduledTasks(tasks) {
   });
   localStorage.setItem('roweos_automations', JSON.stringify(allAutos));
   stampLocalSave();
+  if (window.lastCategoryLocalSave) window.lastCategoryLocalSave['automations'] = Date.now(); // v32.0-A
 }
 
 // v9.1.14: Run a scheduled task manually
