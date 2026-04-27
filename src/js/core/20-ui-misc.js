@@ -5989,6 +5989,12 @@ async function handleSmartImageGeneration(userMessage, btnId) {
 // preferred image provider. Inserts the result inline as an assistant turn —
 // NO redirect to Studio. Provider preference stored in roweos_image_provider_pref.
 var IMAGE_INTENT_RE = /\b(?:create|generate|make|render|draw|design|paint|produce|sketch)\b[^.!?]{0,40}\b(?:an?\s+)?(?:image|picture|photo|illustration|render|render(?:ing)?|graphic|visual|logo|icon|sketch|painting|drawing|design|artwork|wallpaper|mockup|poster|banner|thumbnail|portrait)\b/i;
+// v32.0-D: Image edit intent. Fires when an image attachment is present AND
+// the prompt contains a verb implying mutation of the existing image. Falsy
+// for pure generation phrases ("create", "draw", etc. — those route via
+// IMAGE_INTENT_RE).
+var IMAGE_EDIT_INTENT_RE = /\b(edit|modify|enhance|adjust|fix|change|alter|retouch|remove|replace|crop|resize|recolor|recolour|convert|turn\s+(this\s+)?into|make\s+(this\s+)?(into\s+)?(a\s+)?(transparent|png|jpg|jpeg|webp|black\s+and\s+white|bw|grayscale)|make\s+transparent|background\s+removed?|remove\s+background|upscale|sharpen|blur|brighten|darken|saturate|desaturate|isolate|extract|cut\s*out|cleanup|clean\s*up|clean\s+this\s+up)\b/i;
+window.IMAGE_EDIT_INTENT_RE = IMAGE_EDIT_INTENT_RE;
 function _detectImageGenIntent(text) {
   if (!text || typeof text !== 'string') return null;
   if (text.length > 4000) return null; // long pasted text — probably not an image request
