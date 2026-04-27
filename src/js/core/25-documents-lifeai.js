@@ -8932,7 +8932,7 @@ function renderPulse3Checklists() {
       '<div class="pulse-3-checklist-items">' + itemsHtml + '</div>' +
       '<div class="pulse-3-checklist-actions">' +
         '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="addItemToGoal(\'' + goal.id + '\')">+ Add Item</button>' +
-        '<button class="pulse-3-btn pulse-3-btn-secondary" onclick="showTodoImportForGoal(\'' + goal.id + '\')">Import Tasks</button>' +
+        // v32.0-B: Import Tasks button removed (Focus retired in v28.8)
         '<button class="pulse-3-ai-suggest-btn" onclick="generateAITasksForGoal(\'' + goal.id + '\')" title="AI-generate tasks for this goal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 01-1 1H9a1 1 0 01-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/></svg> AI Tasks</button>' +
         '<button class="pulse-3-btn pulse-3-btn-danger" onclick="deleteGoal(\'' + goal.id + '\')">Delete</button>' +
         (progress === 100 ? '<button class="pulse-3-btn pulse-3-btn-primary" onclick="completeGoal(\'' + goal.id + '\')">Mark Complete</button>' : '') +
@@ -10015,94 +10015,10 @@ function addItemToGoal(goalId) {
   confirmBtn.addEventListener('click', submitItem);
 }
 
-/**
- * v13.2: Show todo import panel for a goal
- */
-function showTodoImportForGoal(goalId) {
-  var card = document.querySelector('.pulse-3-checklist-card[data-goal-id="' + goalId + '"]');
-  if (!card) return;
-
-  // Don't add twice
-  if (card.querySelector('.pulse-3-todo-import-panel')) return;
-
-  var isLifeMode = (localStorage.getItem('roweos_app_mode') || 'brand') === 'life';
-  var pendingTodos = (todos || []).filter(function(t) {
-    if (t.completed) return false;
-    if (isLifeMode) return t.brand === '_life';
-    return t.brand !== '_life';
-  });
-
-  // Group by category
-  var grouped = {};
-  pendingTodos.forEach(function(t) {
-    var cat = t.category || 'Uncategorized';
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(t);
-  });
-
-  var html = '<div class="pulse-3-todo-import-panel" style="margin-top: var(--space-3); padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">';
-  html += '<div style="font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-3); display: flex; justify-content: space-between; align-items: center;">Import Tasks from Focus<button onclick="this.closest(\'.pulse-3-todo-import-panel\').remove()" style="background: none; border: none; color: var(--text-muted); cursor: pointer;">x</button></div>';
-
-  if (pendingTodos.length === 0) {
-    html += '<div style="color: var(--text-muted); font-size: var(--text-sm);">No pending tasks to import.</div>';
-  } else {
-    for (var cat in grouped) {
-      html += '<div style="font-size: var(--text-sm); font-weight: 600; color: var(--text-secondary); margin: var(--space-2) 0;">' + escapeHtml(cat) + '</div>';
-      grouped[cat].forEach(function(t) {
-        html += '<label style="display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: var(--text-sm); color: var(--text-primary); cursor: pointer;">';
-        html += '<input type="checkbox" class="todo-import-check" data-todo-id="' + t.id + '" style="accent-color: var(--accent);">';
-        html += escapeHtml(t.text);
-        html += '</label>';
-      });
-    }
-    html += '<button class="pulse-3-btn pulse-3-btn-primary" onclick="importSelectedTodosToGoal(\'' + goalId + '\')" style="margin-top: var(--space-3);">Import Selected</button>';
-  }
-  html += '</div>';
-
-  var actionsDiv = card.querySelector('.pulse-3-checklist-actions');
-  if (actionsDiv) {
-    actionsDiv.insertAdjacentHTML('beforebegin', html);
-  } else {
-    card.insertAdjacentHTML('beforeend', html);
-  }
-}
-
-/**
- * v13.2: Import selected todos into a goal
- */
-function importSelectedTodosToGoal(goalId) {
-  var goal = pulseGoals.find(function(g) { return g.id === goalId; });
-  if (!goal) return;
-
-  var checks = document.querySelectorAll('.todo-import-check:checked');
-  if (checks.length === 0) {
-    showToast('No tasks selected', 'warning');
-    return;
-  }
-
-  if (!goal.items) goal.items = [];
-  var count = 0;
-  checks.forEach(function(cb) {
-    var todoId = parseInt(cb.getAttribute('data-todo-id'));
-    var todo = todos.find(function(t) { return t.id === todoId; });
-    if (todo) {
-      var newItem = {
-        id: 'item_' + Date.now() + '_' + count,
-        text: todo.text,
-        completed: false,
-        completedAt: null,
-        sourceTodoId: todo.id,
-        sourceCategory: todo.category || null
-      };
-      goal.items.push(newItem);
-      count++;
-    }
-  });
-
-  savePulseGoals();
-  renderPulse3Checklists();
-  showToast('Imported ' + count + ' tasks', 'success');
-}
+// v32.0-B: showTodoImportForGoal + importSelectedTodosToGoal removed
+// (Focus retired in v28.8 — the "Import from Focus" panel is no longer reachable
+// from any UI surface. AI-generate tasks via generateAITasksForGoal is the
+// canonical replacement.)
 
 /**
  * v10.7.11: AI-powered custom LifeAI task creation with category detection
