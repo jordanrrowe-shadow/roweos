@@ -957,3 +957,51 @@ function initTombstoneRegistry_v32() {
   });
 }
 window.initTombstoneRegistry_v32 = initTombstoneRegistry_v32;
+
+// v32.0-B: Focus residue detection. v28.8 (~mid-January 2026) retired Focus.
+// Goals/todos with the legacy titles below or createdAt before the cutoff are
+// candidates for the one-shot purge.
+
+var FOCUS_RETIRE_DATE = Date.parse('2026-01-15T00:00:00Z');
+var FOCUS_LEGACY_TITLES = [
+  'Governance', 'Staff Meeting', 'Mobile', 'Theft', 'Onboarding',
+  'Settings & Sync', 'Library', 'Identity', 'Studio & Pulse', 'Rhythm',
+  'Taxes 2025', 'Infiniti', 'Focus', 'Home', 'BrandAI', 'LifeAI',
+  'Inventory', 'Priority', 'Due by Today', 'Proposal',
+  'Leadership Academy', 'Rowe Org', 'LAA Strategy',
+  'Craig One on One', 'Unassigned'
+];
+
+function _matchesLegacyFocus(title) {
+  if (!title) return false;
+  for (var i = 0; i < FOCUS_LEGACY_TITLES.length; i++) {
+    var t = FOCUS_LEGACY_TITLES[i];
+    if (title === t) return true;
+    if (title.indexOf(t + ' (week of') === 0) return true;
+  }
+  return false;
+}
+
+function _focusGoalPredicate(goal) {
+  if (!goal) return false;
+  var created = goal.createdAt ? Date.parse(goal.createdAt) : NaN;
+  if (!isNaN(created) && created < FOCUS_RETIRE_DATE) return true;
+  return _matchesLegacyFocus(goal.title);
+}
+
+function _focusTodoPredicate(todo) {
+  if (!todo) return false;
+  if (!todo.completed) return false; // only purge old completed todos
+  var created = todo.createdAt ? Date.parse(todo.createdAt) : NaN;
+  if (!isNaN(created) && created < FOCUS_RETIRE_DATE) return true;
+  return false;
+}
+
+// v32.0-B: Runtime patch — attach heuristics to existing registry entries.
+// Safer than reordering the file; registry is defined first, predicates after,
+// and these patches run when the script loads.
+(function() {
+  var pg = getCategoryById('pulseGoals'); if (pg) pg.legacyHeuristic = _focusGoalPredicate;
+  var bt = getCategoryById('brandTodos'); if (bt) bt.legacyHeuristic = _focusTodoPredicate;
+  var lt = getCategoryById('lifeTodos'); if (lt) lt.legacyHeuristic = _focusTodoPredicate;
+})();
