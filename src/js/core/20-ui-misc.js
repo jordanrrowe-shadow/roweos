@@ -6116,6 +6116,111 @@ function _injectChatImageAssistantTurn(userPrompt, dataUrl, provider) {
   } catch (e) {}
 }
 
+// v32.0-D: Image-edit intent detection. Returns { attachments, model } when
+// the user has attached an image AND either the prompt contains an edit verb
+// OR the active model is an explicit image-edit model. Otherwise returns null.
+function detectImageEditIntent(prompt, attachments, currentModel) {
+  var imgAttachments = [];
+  if (Array.isArray(attachments)) {
+    for (var i = 0; i < attachments.length; i++) {
+      var a = attachments[i];
+      if (a && typeof a.type === 'string' && a.type.indexOf('image/') === 0 && (a.status === 'ready' || !a.status)) {
+        imgAttachments.push(a);
+      }
+    }
+  }
+  if (!imgAttachments.length) return null;
+  var explicitEditModels = ['gemini-3-pro-image-preview', 'gemini-2.5-flash-image', 'gpt-image-2'];
+  var explicitModel = false;
+  if (currentModel) {
+    for (var m = 0; m < explicitEditModels.length; m++) {
+      if (explicitEditModels[m] === currentModel) { explicitModel = true; break; }
+    }
+  }
+  var verbMatch = !!(window.IMAGE_EDIT_INTENT_RE && window.IMAGE_EDIT_INTENT_RE.test(prompt || ''));
+  if (!explicitModel && !verbMatch) return null;
+  return { attachments: imgAttachments, model: currentModel || null };
+}
+window.detectImageEditIntent = detectImageEditIntent;
+
+// v32.0-D: Wraps handleImageEditRequest dispatch with the same lifecycle hooks
+// as _maybeHandleChatImageGen — invokes callback(true) on success so the
+// caller skips the LLM text path, callback(false) to fall through.
+function _maybeHandleChatImageEdit(userText, callback) {
+  var attachments = (typeof currentAgentFiles !== 'undefined' && currentAgentFiles) ? currentAgentFiles : [];
+  // currentModel hint — try to use whatever the brand/agent picked, but
+  // detection works without it (verb match is sufficient when an image is
+  // attached).
+  var currentModel = null;
+  try {
+    var brandIdx = 0;
+    var abEl = document.getElementById('agentBrand');
+    if (abEl) brandIdx = parseInt(abEl.value) || 0;
+    if (typeof brandSettings !== 'undefined' && brandSettings[brandIdx]) {
+      currentModel = brandSettings[brandIdx].model || null;
+    }
+  } catch (e) {}
+  var editIntent = detectImageEditIntent(userText, attachments, currentModel);
+  if (!editIntent) { callback(false); return; }
+  if (typeof handleImageEditRequest !== 'function') { callback(false); return; }
+  if (typeof showToast === 'function') showToast('Editing image...', 'info');
+  if (typeof setBlobState === 'function') setBlobState('thinking');
+  handleImageEditRequest(userText, editIntent.attachments, { model: editIntent.model }).then(function(result) {
+    if (typeof setBlobState === 'function') setBlobState('idle');
+    if (result && result.ok) {
+      // v32.0-D: When Nano Banana path is used, handleNanobananaChatImage
+      // already pushed the assistant turn via its onComplete callback. For
+      // the OpenAI direct-edit path we render here.
+      if (result._needsRender && result.dataUrl) {
+        try {
+          if (typeof currentConversation !== 'undefined') {
+            // user turn already pushed by sendFollowup; runAgent pushes via
+            // executeAgentRequest which we skipped — so push user turn here
+            // if missing.
+            var lastMsg = currentConversation[currentConversation.length - 1];
+            var alreadyPushed = lastMsg && lastMsg.role === 'user' && lastMsg.content === userText;
+            if (!alreadyPushed) {
+              currentConversation.push({ role: 'user', content: userText });
+            }
+            currentConversation.push({
+              role: 'assistant',
+              content: 'Edited with ' + (result.providerLabel || result.provider || 'GPT Image 2') + '.',
+              imageUrl: result.dataUrl,
+              _isImageEdit: true,
+              id: 'chatedit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+            });
+            if (typeof renderConversation === 'function') renderConversation();
+            if (typeof showConversationView === 'function') showConversationView();
+          }
+        } catch (e) {}
+        try {
+          var gal = (typeof readStudioGallery === 'function') ? readStudioGallery().slice(0) : [];
+          gal.push({
+            id: 'chatedit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            prompt: userText,
+            model: result.providerLabel || result.model || 'edit',
+            dataUrl: result.dataUrl,
+            source: 'brandai_edit',
+            createdAt: new Date().toISOString()
+          });
+          if (typeof persistStudioGallery === 'function') persistStudioGallery(gal);
+        } catch (e2) {}
+      }
+      if (typeof showToast === 'function') showToast('Image edited', 'success');
+      callback(true);
+    } else {
+      var errMsg = (result && result.error) ? (result.error.message || result.error) : 'Edit failed';
+      if (typeof showToast === 'function') showToast('Image edit failed: ' + errMsg, 'error');
+      callback(false);
+    }
+  }, function(err) {
+    if (typeof setBlobState === 'function') setBlobState('idle');
+    if (typeof showToast === 'function') showToast('Image edit failed: ' + (err && err.message ? err.message : err), 'error');
+    callback(false);
+  });
+}
+window._maybeHandleChatImageEdit = _maybeHandleChatImageEdit;
+
 function _maybeHandleChatImageGen(userText, callback) {
   var intentText = _detectImageGenIntent(userText);
   if (!intentText) { callback(false); return; }
@@ -6137,6 +6242,34 @@ function _maybeHandleChatImageGen(userText, callback) {
 window._maybeHandleChatImageGen = _maybeHandleChatImageGen;
 
 function runAgent() {
+  // v32.0-D: Intercept image-edit intent (image attached + edit verb) BEFORE
+  // image generation. Edit takes precedence over generation when an
+  // attachment is present.
+  try {
+    var _editFirstMsg = document.getElementById('agentCommand');
+    var _editFirstText = _editFirstMsg ? _editFirstMsg.value : '';
+    var _hasImgAttach = (typeof currentAgentFiles !== 'undefined' && currentAgentFiles && currentAgentFiles.some(function(f) {
+      return f && f.type && f.type.indexOf('image/') === 0 && f.status === 'ready';
+    }));
+    if (_hasImgAttach && _editFirstText && typeof detectImageEditIntent === 'function') {
+      var _editIntent = detectImageEditIntent(_editFirstText, currentAgentFiles, null);
+      if (_editIntent && !window._chatImageGenInProgress) {
+        window._chatImageGenInProgress = true;
+        _editFirstMsg.value = '';
+        var _editRunBtn = document.getElementById('agentRunBtn');
+        if (_editRunBtn) { _editRunBtn.disabled = true; _editRunBtn.classList.add('sending'); }
+        _maybeHandleChatImageEdit(_editFirstText, function(handled) {
+          window._chatImageGenInProgress = false;
+          if (_editRunBtn) { _editRunBtn.disabled = false; _editRunBtn.classList.remove('sending'); }
+          if (typeof setBlobState === 'function') setBlobState('idle');
+          if (typeof setAgentStatus === 'function') setAgentStatus('idle');
+          if (!handled && _editFirstMsg) { _editFirstMsg.value = _editFirstText; runAgent(); }
+        });
+        return;
+      }
+    }
+  } catch (eEdit) {}
+
   // v31.17: Intercept image generation intent before LLM call
   // v31.20: Reset send-button + blob state if image gen succeeds OR fails so the
   // UI doesn't freeze in "sending" forever.
@@ -6348,6 +6481,46 @@ function runAgent() {
 }
 
 function sendFollowup() {
+  // v32.0-D: Intercept image-edit intent (image attached + edit verb) BEFORE
+  // image generation. Edit takes precedence over generation when an
+  // attachment is present.
+  try {
+    var _editFInp = document.getElementById('followupCommand');
+    var _editFText = _editFInp ? _editFInp.value : '';
+    var _editHasImgAttach = (typeof currentAgentFiles !== 'undefined' && currentAgentFiles && currentAgentFiles.some(function(f) {
+      return f && f.type && f.type.indexOf('image/') === 0 && f.status === 'ready';
+    }));
+    if (_editHasImgAttach && _editFText && typeof detectImageEditIntent === 'function') {
+      var _editFIntent = detectImageEditIntent(_editFText, currentAgentFiles, null);
+      if (_editFIntent && !window._chatImageGenInProgress) {
+        window._chatImageGenInProgress = true;
+        _editFInp.value = '';
+        _editFInp.style.height = 'auto';
+        var _editFBtn = document.getElementById('followupBtn');
+        if (_editFBtn) { _editFBtn.disabled = true; _editFBtn.classList.add('sending'); }
+        // Push user prompt visually right away (mirrors gen path)
+        try {
+          if (typeof currentConversation !== 'undefined') {
+            currentConversation.push({ role: 'user', content: _editFText });
+            if (typeof renderConversation === 'function') renderConversation();
+          }
+        } catch (e) {}
+        _maybeHandleChatImageEdit(_editFText, function(handled) {
+          window._chatImageGenInProgress = false;
+          if (_editFBtn) { _editFBtn.disabled = false; _editFBtn.classList.remove('sending'); }
+          if (typeof setBlobState === 'function') setBlobState('idle');
+          if (typeof setAgentStatus === 'function') setAgentStatus('idle');
+          if (!handled) {
+            // Edit failed — pop the user message we just added
+            try { if (typeof currentConversation !== 'undefined') currentConversation.pop(); } catch (e) {}
+            if (_editFInp) { _editFInp.value = _editFText; sendFollowup(); }
+          }
+        });
+        return;
+      }
+    }
+  } catch (eEditF) {}
+
   // v31.17: Intercept image generation intent before LLM call
   // v31.20: Reset send-button + blob state regardless of outcome so UI doesn't freeze.
   try {
