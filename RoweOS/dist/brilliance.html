@@ -3,76 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brilliance, Intelligence Platform by RoweOS</title>
-<meta name="description" content="The operating intelligence behind ambitious brands and the people who build them. Brilliance is the intelligence platform by RoweOS.">
-<meta property="og:title" content="Brilliance, Intelligence Platform by RoweOS">
-<meta property="og:description" content="The operating intelligence behind ambitious brands and the people who build them.">
+<title>Brilliance, Intelligence OS by RoweOS</title>
+<meta name="description" content="Brilliance is the operating system for brilliant work. The intelligence layer that knows your brand, your voice, your standards. By RoweOS.">
+<meta property="og:title" content="Brilliance, Intelligence OS by RoweOS">
+<meta property="og:description" content="The operating system for brilliant work.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://roweos.com/brilliance">
 <meta property="og:site_name" content="Brilliance by RoweOS">
-<meta property="og:image" content="https://roweos.com/images/brilliance/wordmark.png">
+<meta property="og:image" content="https://roweos.com/images/brilliance/monogram-circle.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Brilliance, Intelligence Platform by RoweOS">
-<meta name="twitter:description" content="The operating intelligence behind ambitious brands and the people who build them.">
-<meta name="twitter:image" content="https://roweos.com/images/brilliance/wordmark.png">
+<meta name="twitter:title" content="Brilliance, Intelligence OS by RoweOS">
+<meta name="twitter:description" content="The operating system for brilliant work.">
+<meta name="twitter:image" content="https://roweos.com/images/brilliance/monogram-circle.png">
 <link rel="icon" type="image/png" href="/images/brilliance/monogram.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/images/brilliance/monogram.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Brilliance">
 <meta name="theme-color" content="#000000">
-<link rel="preload" as="image" href="/images/brilliance/wordmark.png">
+<link rel="preload" as="image" href="/images/brilliance/monogram-circle.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   BRILLIANCE v1.0
-   Intelligence Platform by RoweOS
+   BRILLIANCE v2.0 — Simplified Manifesto Edition
+   Intelligence OS by RoweOS
    Brand layer namespace: .b-* / --b-*
-   Shared with /info: gold tokens, serif/sans pairing
    ============================================================ */
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
 :root{
-  /* Warm dark base - aligned with /info, elevated */
   --b-bg:#0a0a0a;
   --b-bg-elev:#111111;
-  --b-bg-deep:#070707;
+  --b-bg-deep:#060606;
   --b-surface:rgba(255,255,255,0.03);
-  --b-surface-2:rgba(255,255,255,0.05);
   --b-border:rgba(255,255,255,0.08);
-  --b-border-strong:rgba(255,255,255,0.12);
+  --b-hairline:rgba(255,255,255,0.05);
   --b-border-gold:rgba(201,169,97,0.22);
-  --b-hairline:rgba(255,255,255,0.06);
 
-  /* Gold - shared with /info, refined for Brilliance */
   --gold-1:#f5e6c8;
   --gold-2:#e2c79b;
   --gold-3:#c9a961;
   --gold-4:#a88a4a;
   --gold-5:#6b5a3d;
-  --gold-glow:rgba(201,169,97,0.20);
+  --gold-glow:rgba(201,169,97,0.22);
 
-  /* Text */
   --b-text:#ece4d8;
   --b-text-muted:#9e9487;
   --b-text-dim:#655e54;
 
-  /* Type — matched to The Rowe Collection family */
   --b-serif:'Old Standard TT',Georgia,serif;
   --b-sans:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --b-track-luxury:0.25em;
 
-  /* Spacing rhythm - generous */
-  --b-space-section:clamp(80px,12vw,160px);
-  --b-space-block:clamp(40px,6vw,80px);
-  --b-container:1200px;
-
-  /* Motion */
+  --b-container:1180px;
   --b-ease:cubic-bezier(0.22,1,0.36,1);
-  --b-ease-back:cubic-bezier(0.34,1.4,0.64,1);
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -84,7 +71,7 @@ body{
   font-family:var(--b-sans);
   background:var(--b-bg);
   color:var(--b-text);
-  line-height:1.65;
+  line-height:1.7;
   font-weight:300;
   letter-spacing:0.005em;
   overflow-x:hidden;
@@ -97,25 +84,12 @@ button{font-family:inherit}
 
 .b-container{max-width:var(--b-container);margin:0 auto;padding:0 28px}
 
-.b-gold{
-  background:linear-gradient(135deg,var(--gold-1) 0%,var(--gold-2) 50%,var(--gold-3) 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-
 /* ====================== ANIMATIONS ====================== */
-@keyframes b-fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes b-fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @keyframes b-fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes b-shimmer{0%,100%{opacity:0.85}50%{opacity:1}}
-@keyframes b-drift{
-  0%{transform:translate(0,0)}
-  50%{transform:translate(40px,-30px)}
-  100%{transform:translate(0,0)}
-}
-@keyframes b-twinkle{
-  0%,100%{opacity:0.4;transform:scale(1)}
-  50%{opacity:1;transform:scale(1.1)}
+@keyframes b-glow{
+  0%,100%{filter:drop-shadow(0 0 60px rgba(201,169,97,0.30)) drop-shadow(0 0 18px rgba(201,169,97,0.16))}
+  50%{filter:drop-shadow(0 0 90px rgba(201,169,97,0.42)) drop-shadow(0 0 26px rgba(201,169,97,0.22))}
 }
 
 /* ====================== TOP BAR ====================== */
@@ -129,36 +103,53 @@ button{font-family:inherit}
 .b-topbar-inner{
   max-width:var(--b-container);
   margin:0 auto;
-  padding:18px 28px;
+  padding:16px 28px;
   display:flex;align-items:center;justify-content:space-between;gap:20px;
 }
-.b-topbar-brand{display:flex;align-items:center;gap:14px;text-decoration:none}
-.b-topbar-mark{height:24px;width:auto;opacity:0.95}
-.b-topbar-divider{width:1px;height:18px;background:var(--b-hairline)}
+.b-topbar-brand{
+  display:flex;align-items:center;gap:12px;
+  font-family:var(--b-serif);
+  font-size:18px;
+  color:var(--gold-2);
+  letter-spacing:0.02em;
+}
+.b-topbar-brand .b-mark{
+  width:32px;height:32px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(201,169,97,0.22),transparent 70%);
+}
+.b-topbar-brand .b-mark img{width:32px;height:32px;border-radius:50%;object-fit:contain}
 .b-topbar-by{
+  font-family:var(--b-sans);
   font-size:10px;
-  letter-spacing:0.22em;
+  letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
   color:var(--b-text-dim);
+  margin-left:4px;
 }
 .b-topbar-by strong{color:var(--gold-3);font-weight:500}
-.b-topbar-nav{display:flex;align-items:center;gap:28px}
+.b-topbar-nav{display:flex;align-items:center;gap:26px}
 .b-topbar-link{
-  font-size:12px;
-  letter-spacing:0.06em;
+  font-family:var(--b-sans);
+  font-size:11px;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
   color:var(--b-text-muted);
   transition:color 0.25s var(--b-ease);
 }
 .b-topbar-link:hover{color:var(--gold-2)}
 .b-topbar-cta{
-  display:inline-flex;align-items:center;gap:8px;
+  display:inline-flex;align-items:center;
   padding:10px 22px;
   background:transparent;
   border:1px solid var(--gold-4);
   border-radius:2px;
   color:var(--gold-2);
+  font-family:var(--b-sans);
   font-size:11px;
-  letter-spacing:0.18em;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
   transition:all 0.3s var(--b-ease);
 }
@@ -167,137 +158,12 @@ button{font-family:inherit}
   color:#000;
   border-color:var(--gold-3);
 }
-
-/* ====================== HERO ====================== */
-.b-hero{
-  position:relative;
-  min-height:100vh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:120px 28px 80px;
-  text-align:center;
-  overflow:hidden;
-  isolation:isolate;
-}
-.b-hero::after{
-  content:'';position:absolute;
-  bottom:0;left:0;right:0;height:160px;
-  background:linear-gradient(transparent,var(--b-bg));
-  pointer-events:none;
-  z-index:1;
-}
-.b-hero-glow{
-  position:absolute;inset:0;
-  pointer-events:none;
-  z-index:-1;
-}
-.b-hero-glow::before,
-.b-hero-glow::after{
-  content:'';position:absolute;border-radius:50%;
-  filter:blur(120px);
-}
-.b-hero-glow::before{
-  top:38%;left:50%;
-  width:780px;height:780px;
-  background:radial-gradient(circle,rgba(201,169,97,0.16) 0%,transparent 65%);
-  transform:translate(-50%,-50%);
-  animation:b-drift 18s ease-in-out infinite;
-  opacity:0.7;
-}
-.b-hero-glow::after{
-  bottom:5%;left:18%;
-  width:480px;height:480px;
-  background:radial-gradient(circle,rgba(201,169,97,0.10) 0%,transparent 70%);
-  animation:b-drift 24s ease-in-out infinite reverse;
-  opacity:0.6;
+@media (max-width:720px){
+  .b-topbar-link{display:none}
+  .b-topbar-by{display:none}
 }
 
-.b-hero-particles{
-  position:absolute;inset:0;pointer-events:none;z-index:-1;
-}
-.b-hero-particle{
-  position:absolute;
-  width:2px;height:2px;
-  background:var(--gold-2);
-  border-radius:50%;
-  box-shadow:0 0 8px var(--gold-3),0 0 14px var(--gold-glow);
-  animation:b-twinkle 4s ease-in-out infinite;
-}
-
-.b-hero-eyebrow{
-  font-size:11px;
-  letter-spacing:0.42em;
-  text-transform:uppercase;
-  color:var(--gold-3);
-  margin-bottom:48px;
-  opacity:0;animation:b-fadeUp 1s var(--b-ease) 0.1s forwards;
-}
-.b-hero-eyebrow span{color:var(--b-text-dim)}
-
-.b-hero-wordmark{
-  width:clamp(300px,58vw,780px);
-  margin:0 auto 28px;
-  opacity:0;animation:b-fadeUp 1.2s var(--b-ease) 0.3s forwards;
-  filter:drop-shadow(0 0 60px var(--gold-glow)) drop-shadow(0 0 20px rgba(201,169,97,0.12));
-}
-
-.b-hero-by{
-  display:flex;align-items:center;justify-content:center;gap:18px;
-  margin-bottom:64px;
-  opacity:0;animation:b-fadeUp 1s var(--b-ease) 0.6s forwards;
-  max-width:560px;
-  width:100%;
-  margin-left:auto;margin-right:auto;
-}
-.b-hero-by-rule{
-  flex:1;height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold-5),transparent);
-  max-width:120px;
-}
-.b-hero-by-text{
-  font-family:var(--b-sans);
-  font-size:11px;
-  letter-spacing:0.32em;
-  text-transform:uppercase;
-  color:var(--gold-4);
-  white-space:nowrap;
-}
-.b-hero-by-text strong{
-  color:var(--gold-2);
-  font-weight:500;
-  letter-spacing:0.22em;
-}
-.b-hero-by-dot{margin:0 8px;color:var(--b-text-dim)}
-
-.b-hero-headline{
-  font-family:var(--b-serif);
-  font-weight:400;
-  font-size:clamp(28px,4.2vw,56px);
-  line-height:1.18;
-  letter-spacing:-0.015em;
-  max-width:920px;
-  margin:0 auto 28px;
-  color:var(--b-text);
-  opacity:0;animation:b-fadeUp 1s var(--b-ease) 0.85s forwards;
-}
-.b-hero-headline em{
-  font-style:italic;
-  color:var(--gold-2);
-}
-
-.b-hero-sub{
-  font-size:15px;
-  line-height:1.85;
-  color:var(--b-text-muted);
-  max-width:560px;
-  margin:0 auto 56px;
-  opacity:0;animation:b-fadeUp 1s var(--b-ease) 1.05s forwards;
-}
-
-.b-hero-ctas{
-  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
-  opacity:0;animation:b-fadeUp 1s var(--b-ease) 1.25s forwards;
-}
-
+/* ====================== CTA BUTTONS ====================== */
 .b-cta-primary{
   display:inline-flex;align-items:center;gap:10px;
   padding:16px 38px;
@@ -305,9 +171,10 @@ button{font-family:inherit}
   color:#000;
   border:none;
   border-radius:2px;
-  font-size:12px;
+  font-family:var(--b-sans);
+  font-size:11px;
   font-weight:500;
-  letter-spacing:0.22em;
+  letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
   cursor:pointer;
   transition:all 0.35s var(--b-ease);
@@ -320,7 +187,7 @@ button{font-family:inherit}
 }
 .b-cta-primary:hover{
   transform:translateY(-1px);
-  box-shadow:0 12px 40px rgba(201,169,97,0.28);
+  box-shadow:0 12px 40px rgba(201,169,97,0.30);
 }
 .b-cta-primary:hover::before{opacity:1}
 .b-cta-primary span{position:relative;z-index:1}
@@ -332,9 +199,10 @@ button{font-family:inherit}
   color:var(--gold-2);
   border:1px solid var(--gold-5);
   border-radius:2px;
-  font-size:12px;
+  font-family:var(--b-sans);
+  font-size:11px;
   font-weight:400;
-  letter-spacing:0.22em;
+  letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
   cursor:pointer;
   transition:all 0.35s var(--b-ease);
@@ -345,109 +213,129 @@ button{font-family:inherit}
   color:var(--gold-1);
 }
 
+/* ====================== HERO ====================== */
+.b-hero{
+  position:relative;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 28px 80px;
+  text-align:center;
+  overflow:hidden;
+  isolation:isolate;
+}
+.b-hero-glow{
+  position:absolute;inset:0;
+  pointer-events:none;
+  z-index:-1;
+}
+.b-hero-glow::before{
+  content:'';position:absolute;
+  top:50%;left:50%;
+  width:920px;height:920px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(201,169,97,0.16) 0%,transparent 65%);
+  transform:translate(-50%,-50%);
+  filter:blur(80px);
+}
+.b-hero-monogram{
+  width:clamp(280px,42vw,520px);
+  margin:0 auto 48px;
+  opacity:0;
+  animation:b-fadeUp 1.2s var(--b-ease) 0.2s forwards,b-glow 8s ease-in-out 1.4s infinite;
+}
+.b-hero-headline{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:clamp(48px,9vw,108px);
+  line-height:1.0;
+  letter-spacing:-0.015em;
+  color:var(--b-text);
+  margin-bottom:28px;
+  opacity:0;animation:b-fadeUp 1s var(--b-ease) 0.7s forwards;
+}
+.b-hero-headline em{
+  font-style:italic;
+  color:var(--gold-2);
+}
+.b-hero-sub{
+  font-family:var(--b-sans);
+  font-size:14px;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--b-text-muted);
+  max-width:580px;
+  margin:0 auto 56px;
+  opacity:0;animation:b-fadeUp 1s var(--b-ease) 0.95s forwards;
+}
+.b-hero-sub strong{color:var(--gold-3);font-weight:500}
+.b-hero-ctas{
+  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+  opacity:0;animation:b-fadeUp 1s var(--b-ease) 1.15s forwards;
+}
 .b-hero-trust{
-  margin-top:96px;
+  margin-top:80px;
+  font-family:var(--b-sans);
   font-size:10px;
   letter-spacing:0.32em;
   text-transform:uppercase;
   color:var(--b-text-dim);
-  opacity:0;animation:b-fadeIn 1.2s var(--b-ease) 1.6s forwards;
+  opacity:0;animation:b-fadeIn 1.2s var(--b-ease) 1.5s forwards;
 }
-.b-hero-trust strong{color:var(--gold-3);font-weight:500;letter-spacing:0.18em}
+.b-hero-trust strong{color:var(--gold-3);font-weight:500}
 
-.b-hero-divider{
-  position:absolute;
-  left:50%;bottom:40px;
-  width:1px;height:80px;
-  background:linear-gradient(transparent,var(--gold-4),transparent);
-  transform:translateX(-50%);
-  opacity:0;animation:b-fadeIn 1s var(--b-ease) 1.8s forwards;
-}
-
-/* ====================== SECTION SHELL ====================== */
-.b-section{
-  padding:var(--b-space-section) 0;
+/* ====================== MANIFESTO ====================== */
+.b-manifesto{
   position:relative;
-}
-.b-section + .b-section{
-  margin-top:0;
-  border-top:1px solid var(--b-hairline);
-}
-.b-section-head{
+  min-height:62vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:clamp(80px,14vw,180px) 28px;
   text-align:center;
-  margin-bottom:var(--b-space-block);
-  max-width:760px;
-  margin-left:auto;margin-right:auto;
-  padding:0 28px;
-  position:relative;
+  border-top:1px solid var(--b-hairline);
+  border-bottom:1px solid var(--b-hairline);
+  background:var(--b-bg-deep);
 }
-.b-section-chapter{
-  display:inline-flex;align-items:center;justify-content:center;gap:18px;
+.b-manifesto + .b-manifesto{border-top:none}
+.b-manifesto-rule{
+  width:48px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-4),transparent);
+  margin:0 auto 36px;
+}
+.b-manifesto-eyebrow{
   font-family:var(--b-sans);
   font-size:10px;
   font-weight:500;
   letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
   color:var(--gold-3);
-  margin-bottom:18px;
+  margin-bottom:32px;
 }
-.b-section-chapter::before,
-.b-section-chapter::after{
-  content:'';
-  display:inline-block;
-  width:42px;height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold-5),transparent);
-}
-.b-section-chapter em{
-  font-family:var(--b-serif);
-  font-style:italic;
-  font-weight:400;
-  font-size:13px;
-  letter-spacing:0.06em;
-  color:var(--gold-2);
-  text-transform:none;
-}
-.b-section-eyebrow{
-  font-family:var(--b-sans);
-  font-size:10px;
-  font-weight:500;
-  letter-spacing:var(--b-track-luxury);
-  text-transform:uppercase;
-  color:var(--gold-3);
-  margin-bottom:18px;
-}
-.b-section-title{
+.b-manifesto-line{
   font-family:var(--b-serif);
   font-weight:400;
-  font-size:clamp(28px,3.6vw,46px);
-  line-height:1.2;
-  letter-spacing:-0.012em;
+  font-size:clamp(34px,5.6vw,72px);
+  line-height:1.15;
+  letter-spacing:-0.01em;
   color:var(--b-text);
-  margin-bottom:20px;
-}
-.b-section-title em{font-style:italic;color:var(--gold-2)}
-.b-section-desc{
-  font-size:15px;
-  line-height:1.85;
-  color:var(--b-text-muted);
-  max-width:580px;
+  max-width:14ch;
   margin:0 auto;
 }
+.b-manifesto-line em{font-style:italic;color:var(--gold-2)}
+.b-manifesto-wide .b-manifesto-line{max-width:22ch}
 
 /* ====================== BACKED BY GOOGLE ====================== */
 .b-backed{
-  padding:clamp(56px,8vw,96px) 0;
+  padding:clamp(72px,10vw,120px) 0;
   background:var(--b-bg);
   border-top:1px solid var(--b-hairline);
 }
 .b-backed-card{
   max-width:760px;
   margin:0 auto;
-  padding:48px 40px;
+  padding:52px 44px;
   text-align:center;
-  background:linear-gradient(180deg,rgba(201,169,97,0.045),rgba(201,169,97,0.015));
+  background:linear-gradient(180deg,rgba(201,169,97,0.045),rgba(201,169,97,0.012));
   border:1px solid var(--b-border-gold);
-  border-radius:6px;
+  border-radius:8px;
   position:relative;
   isolation:isolate;
 }
@@ -455,7 +343,7 @@ button{font-family:inherit}
   content:'';position:absolute;inset:0;
   background:radial-gradient(circle at 50% 0%,rgba(201,169,97,0.08),transparent 60%);
   pointer-events:none;
-  border-radius:6px;
+  border-radius:8px;
   z-index:-1;
 }
 .b-backed-eyebrow{
@@ -475,14 +363,12 @@ button{font-family:inherit}
   margin-bottom:28px;
   box-shadow:0 4px 24px rgba(201,169,97,0.18),0 0 0 1px rgba(255,255,255,0.06);
 }
-.b-backed-pill img{
-  height:24px;width:auto;display:block;
-}
+.b-backed-pill img{height:24px;width:auto;display:block}
 .b-backed-title{
   font-family:var(--b-serif);
   font-weight:400;
-  font-size:clamp(28px,3.4vw,42px);
-  line-height:1.2;
+  font-size:clamp(26px,3vw,38px);
+  line-height:1.25;
   color:var(--b-text);
   margin-bottom:18px;
   letter-spacing:-0.005em;
@@ -493,7 +379,7 @@ button{font-family:inherit}
   line-height:1.85;
   color:var(--b-text-muted);
   max-width:560px;
-  margin:0 auto 8px;
+  margin:0 auto;
 }
 .b-backed-body strong{color:var(--b-text);font-weight:500}
 .b-backed-meta{
@@ -506,578 +392,63 @@ button{font-family:inherit}
 }
 .b-backed-meta strong{color:var(--gold-3);font-weight:500}
 @media (max-width:640px){
-  .b-backed-card{padding:36px 24px;border-radius:4px}
+  .b-backed-card{padding:40px 24px;border-radius:6px}
   .b-backed-pill{padding:12px 22px;margin-bottom:22px}
 }
 
-/* ====================== THESIS ====================== */
-.b-thesis{background:var(--b-bg)}
-.b-thesis-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:1px;
-  background:var(--b-hairline);
-  border:1px solid var(--b-hairline);
-  margin-top:60px;
-}
-.b-thesis-cell{
+/* ====================== WHAT IT IS ====================== */
+.b-what{
+  padding:clamp(96px,14vw,180px) 28px;
   background:var(--b-bg);
-  padding:56px 40px;
-  position:relative;
+  border-top:1px solid var(--b-hairline);
+  text-align:center;
 }
-.b-thesis-num{
-  font-family:var(--b-serif);
-  font-style:italic;
-  font-size:14px;
-  color:var(--gold-4);
-  letter-spacing:0.05em;
-  margin-bottom:24px;
+.b-what-wordmark{
+  width:clamp(280px,46vw,560px);
+  margin:0 auto 56px;
+  filter:drop-shadow(0 0 40px rgba(201,169,97,0.18));
 }
-.b-thesis-stmt{
-  font-family:var(--b-serif);
-  font-weight:400;
-  font-size:24px;
-  line-height:1.35;
-  color:var(--b-text);
-  margin-bottom:18px;
-}
-.b-thesis-stmt em{color:var(--gold-2);font-style:italic}
-.b-thesis-body{
-  font-size:14px;
-  line-height:1.8;
-  color:var(--b-text-muted);
-}
-
-.b-thesis-compare{
-  margin-top:80px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:1px;
-  background:var(--b-hairline);
-  border:1px solid var(--b-hairline);
-  border-radius:2px;
-  overflow:hidden;
-}
-.b-compare-side{
-  background:var(--b-bg-elev);
-  padding:40px;
-}
-.b-compare-side.b-after{
-  background:linear-gradient(180deg,rgba(201,169,97,0.04),transparent);
-}
-.b-compare-label{
+.b-what-eyebrow{
+  font-family:var(--b-sans);
   font-size:10px;
-  letter-spacing:0.32em;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
-  margin-bottom:18px;
-  color:var(--b-text-dim);
+  color:var(--gold-3);
+  margin-bottom:28px;
 }
-.b-compare-side.b-after .b-compare-label{color:var(--gold-3)}
-.b-compare-quote{
+.b-what-body{
   font-family:var(--b-serif);
-  font-weight:400;
-  font-size:18px;
+  font-size:clamp(18px,2vw,22px);
   line-height:1.6;
   color:var(--b-text);
-}
-.b-compare-side.b-before .b-compare-quote{
-  color:var(--b-text-dim);
-  font-style:italic;
-}
-
-/* ====================== TWO MODES ====================== */
-.b-modes{
-  background:linear-gradient(180deg,var(--b-bg),var(--b-bg-elev) 50%,var(--b-bg));
-}
-.b-modes-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:32px;
-  margin-top:60px;
-}
-.b-mode{
-  background:var(--b-surface);
-  border:1px solid var(--b-border);
-  border-radius:3px;
-  padding:56px 48px;
-  position:relative;
-  transition:all 0.5s var(--b-ease);
-  backdrop-filter:blur(8px);
-}
-.b-mode::before{
-  content:'';position:absolute;inset:0;
-  border-radius:3px;
-  padding:1px;
-  background:linear-gradient(135deg,transparent,var(--gold-4),transparent);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;
-  opacity:0;transition:opacity 0.5s var(--b-ease);
-}
-.b-mode:hover{
-  border-color:var(--b-border-strong);
-  transform:translateY(-3px);
-}
-.b-mode:hover::before{opacity:0.5}
-.b-mode-tag{
-  font-size:10px;
-  letter-spacing:0.32em;
-  text-transform:uppercase;
-  color:var(--gold-4);
-  margin-bottom:18px;
-}
-.b-mode-name{
-  font-family:var(--b-serif);
+  max-width:680px;
+  margin:0 auto 36px;
   font-weight:400;
-  font-size:36px;
-  line-height:1.1;
-  color:var(--b-text);
-  margin-bottom:8px;
 }
-.b-mode-name em{color:var(--gold-2);font-style:italic}
-.b-mode-tagline{
-  font-size:13px;
-  color:var(--b-text-muted);
-  letter-spacing:0.04em;
-  margin-bottom:32px;
-  padding-bottom:24px;
-  border-bottom:1px solid var(--b-hairline);
-}
-.b-mode-list{list-style:none;padding:0;margin:0}
-.b-mode-list li{
-  display:flex;
-  align-items:baseline;
-  gap:14px;
-  padding:12px 0;
-  font-size:13.5px;
-  line-height:1.55;
-  color:var(--b-text);
-  border-bottom:1px solid rgba(255,255,255,0.04);
-}
-.b-mode-list li:last-child{border-bottom:none}
-.b-mode-list .b-li-name{
-  font-family:var(--b-serif);
-  font-style:italic;
-  color:var(--gold-2);
-  min-width:130px;
-  font-size:14px;
-}
-.b-mode-list .b-li-desc{color:var(--b-text-muted);font-size:13px}
-
-.b-modes-bridge{
-  margin-top:48px;
-  text-align:center;
-  font-family:var(--b-serif);
-  font-style:italic;
-  font-size:18px;
-  color:var(--b-text-muted);
-  letter-spacing:0.01em;
-}
-.b-modes-bridge em{color:var(--gold-2);font-style:italic}
-
-/* ====================== ARCHITECTURE ====================== */
-.b-architecture{background:var(--b-bg)}
-.b-pillars{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:1px;
-  background:var(--b-hairline);
-  border:1px solid var(--b-hairline);
-  margin-top:60px;
-}
-.b-pillar{
-  background:var(--b-bg);
-  padding:48px 40px;
-  position:relative;
-  transition:background 0.4s var(--b-ease);
-}
-.b-pillar:hover{background:rgba(201,169,97,0.025)}
-.b-pillar-icon{
-  width:32px;height:32px;
-  margin-bottom:24px;
-  color:var(--gold-3);
-}
-.b-pillar-icon svg{width:100%;height:100%;stroke-width:1.25;fill:none;stroke:currentColor}
-.b-pillar-num{
-  position:absolute;top:32px;right:36px;
-  font-family:var(--b-serif);
-  font-style:italic;
-  font-size:14px;
-  color:var(--b-text-dim);
-  letter-spacing:0.05em;
-}
-.b-pillar-title{
-  font-family:var(--b-serif);
-  font-weight:400;
-  font-size:22px;
-  color:var(--b-text);
-  margin-bottom:14px;
-  letter-spacing:-0.005em;
-}
-.b-pillar-body{
-  font-size:13.5px;
-  line-height:1.8;
-  color:var(--b-text-muted);
-}
-
-/* ====================== SHOWCASE ====================== */
-.b-showcase{
-  background:linear-gradient(180deg,var(--b-bg) 0%,var(--b-bg-deep) 50%,var(--b-bg) 100%);
-  overflow:hidden;
-  position:relative;
-}
-.b-showcase::before{
-  content:'';position:absolute;
-  top:50%;left:50%;
-  width:1100px;height:1100px;
-  background:radial-gradient(circle,var(--gold-glow) 0%,transparent 65%);
-  transform:translate(-50%,-50%);
-  filter:blur(100px);
-  opacity:0.5;
-  pointer-events:none;
-}
-.b-showcase-tabs{
-  display:flex;justify-content:center;gap:6px;
-  margin:48px auto 28px;
-  flex-wrap:wrap;
-}
-.b-showcase-tab{
-  padding:8px 18px;
-  background:transparent;
-  border:1px solid var(--b-border);
-  border-radius:2px;
-  color:var(--b-text-muted);
+.b-what-body em{font-style:italic;color:var(--gold-2)}
+.b-what-link{
+  display:inline-flex;align-items:center;gap:10px;
   font-family:var(--b-sans);
   font-size:11px;
-  font-weight:400;
-  letter-spacing:0.18em;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
-  cursor:pointer;
+  color:var(--gold-2);
+  border-bottom:1px solid var(--gold-5);
+  padding-bottom:8px;
   transition:all 0.3s var(--b-ease);
-  -webkit-tap-highlight-color:transparent;
 }
-.b-showcase-tab:hover{
-  border-color:var(--gold-5);
-  color:var(--gold-2);
-}
-.b-showcase-tab.b-active{
-  background:rgba(201,169,97,0.08);
-  border-color:var(--gold-4);
-  color:var(--gold-1);
-}
-
-.b-showcase-frame{
-  max-width:1080px;
-  margin:0 auto 80px;
-  border-radius:14px;
-  overflow:hidden;
-  border:1px solid var(--b-border-strong);
-  background:#0a0a0a;
-  box-shadow:0 40px 100px rgba(0,0,0,0.7),0 0 80px rgba(201,169,97,0.06);
-}
-.b-showcase-bezel{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 18px;
-  background:linear-gradient(180deg,#161616,#0e0e0e);
-  border-bottom:1px solid var(--b-hairline);
-}
-.b-showcase-dots{display:flex;gap:6px}
-.b-showcase-dots span{
-  width:10px;height:10px;border-radius:50%;
-  background:#2a2a2a;
-}
-.b-showcase-dots span:nth-child(1){background:#3a3a3a}
-.b-showcase-dots span:nth-child(2){background:#3a3a3a}
-.b-showcase-dots span:nth-child(3){background:#3a3a3a}
-.b-showcase-url{
-  font-family:var(--b-sans);
-  font-size:11px;
-  letter-spacing:0.08em;
-  color:var(--b-text-dim);
-  flex:1;text-align:center;
-  margin-right:42px;
-}
-.b-showcase-screen{
-  position:relative;
-  aspect-ratio:16/10;
-  overflow:hidden;
-  background:#0a0a0a;
-}
-.b-showcase-screen img{
-  position:absolute;inset:0;
-  width:100%;height:100%;
-  object-fit:cover;
-  object-position:center center;
-  opacity:0;
-  transition:opacity 0.6s var(--b-ease);
-}
-.b-showcase-screen img.b-active{opacity:1}
-/* Per-image positioning to show the meaningful content area */
-.b-showcase-screen img[data-slide="0"]{object-position:center center}
-.b-showcase-screen img[data-slide="1"]{object-position:center center}
-.b-showcase-screen img[data-slide="2"]{object-position:center center}
-.b-showcase-screen img[data-slide="3"]{object-position:center center}
-.b-showcase-screen img[data-slide="4"]{object-position:center center}
-
-/* Stat row */
-.b-numbers{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:1px;
-  background:var(--b-hairline);
-  border:1px solid var(--b-hairline);
-  margin-top:40px;
-}
-.b-number{
-  background:var(--b-bg);
-  padding:48px 24px;
-  text-align:center;
-  transition:background 0.4s var(--b-ease);
-}
-.b-number:hover{background:rgba(201,169,97,0.03)}
-.b-number-val{
-  font-family:var(--b-serif);
-  font-weight:400;
-  font-size:54px;
-  line-height:1;
-  color:var(--b-text);
-  margin-bottom:14px;
-  letter-spacing:-0.02em;
-  background:linear-gradient(135deg,var(--gold-1),var(--gold-3));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-.b-number-lbl{
-  font-size:10px;
-  letter-spacing:0.28em;
-  text-transform:uppercase;
-  color:var(--b-text-muted);
-}
-
-/* ====================== MODULES ====================== */
-.b-modules{
-  background:linear-gradient(180deg,var(--b-bg),var(--b-bg-elev));
-}
-.b-modules-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-  margin-top:60px;
-}
-.b-module{
-  background:var(--b-surface);
-  border:1px solid var(--b-border);
-  border-radius:3px;
-  padding:32px 28px;
-  transition:all 0.35s var(--b-ease);
-  cursor:default;
-  min-height:200px;
-  display:flex;flex-direction:column;
-  position:relative;
-  overflow:hidden;
-}
-.b-module::after{
-  content:'';position:absolute;
-  top:0;left:0;right:0;
-  height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold-3),transparent);
-  opacity:0;transition:opacity 0.35s var(--b-ease);
-}
-.b-module:hover{
-  border-color:var(--b-border-strong);
-  background:var(--b-surface-2);
-  transform:translateY(-2px);
-}
-.b-module:hover::after{opacity:1}
-.b-module-icon{
-  width:24px;height:24px;
-  margin-bottom:24px;
-  color:var(--gold-3);
-}
-.b-module-icon svg{width:100%;height:100%;stroke-width:1.25;fill:none;stroke:currentColor}
-.b-module-name{
-  font-family:var(--b-serif);
-  font-weight:400;
-  font-size:20px;
-  color:var(--b-text);
-  margin-bottom:8px;
-  letter-spacing:-0.005em;
-}
-.b-module-desc{
-  font-size:12.5px;
-  line-height:1.65;
-  color:var(--b-text-muted);
-  margin-top:auto;
-}
-
-/* ====================== AUDIENCE ====================== */
-.b-audience{background:var(--b-bg)}
-.b-audience-list{
-  margin-top:60px;
-  display:flex;flex-direction:column;
-  border-top:1px solid var(--b-hairline);
-}
-.b-aud-row{
-  display:grid;
-  grid-template-columns:120px 1fr auto;
-  align-items:center;
-  gap:48px;
-  padding:48px 8px;
-  border-bottom:1px solid var(--b-hairline);
-  transition:padding-left 0.4s var(--b-ease);
-}
-.b-aud-row:hover{padding-left:32px}
-.b-aud-num{
-  font-family:var(--b-serif);
-  font-style:italic;
-  font-size:48px;
-  font-weight:400;
-  color:var(--gold-3);
-  letter-spacing:-0.02em;
-  line-height:1;
-}
-.b-aud-content{flex:1}
-.b-aud-name{
-  font-family:var(--b-serif);
-  font-weight:400;
-  font-size:28px;
-  color:var(--b-text);
-  margin-bottom:8px;
-  letter-spacing:-0.01em;
-}
-.b-aud-stmt{
-  font-size:14px;
-  line-height:1.75;
-  color:var(--b-text-muted);
-  max-width:520px;
-}
-.b-aud-arrow{
-  width:24px;height:24px;
-  color:var(--gold-4);
-  opacity:0;transition:opacity 0.4s var(--b-ease),transform 0.4s var(--b-ease);
-}
-.b-aud-row:hover .b-aud-arrow{opacity:1;transform:translateX(8px)}
-
-/* ====================== BRILLI TEASER ====================== */
-.b-brilli{background:var(--b-bg);padding-top:0;padding-bottom:var(--b-space-section)}
-.b-brilli-card{
-  display:grid;
-  grid-template-columns:auto 1fr;
-  gap:48px;
-  align-items:center;
-  padding:56px 48px;
-  background:linear-gradient(135deg,rgba(201,169,97,0.05),rgba(255,255,255,0.02) 60%,transparent);
-  border:1px solid var(--b-border);
-  border-radius:3px;
-  position:relative;
-  overflow:hidden;
-}
-.b-brilli-card::before{
-  content:'';position:absolute;
-  top:-100px;right:-100px;
-  width:340px;height:340px;
-  background:radial-gradient(circle,var(--gold-glow) 0%,transparent 60%);
-  filter:blur(60px);
-  opacity:0.6;
-  pointer-events:none;
-}
-.b-brilli-orb{
-  position:relative;
-  width:120px;height:120px;
-  border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,var(--gold-1),var(--gold-3) 50%,var(--gold-5) 100%);
-  box-shadow:0 0 40px var(--gold-glow),inset 0 0 30px rgba(0,0,0,0.3);
-  flex-shrink:0;
-  animation:b-shimmer 4s ease-in-out infinite;
-}
-.b-brilli-orb-spark{
-  position:absolute;
-  top:18%;right:18%;
-  width:8px;height:8px;
-  border-radius:50%;
-  background:#fff;
-  box-shadow:0 0 12px #fff,0 0 24px var(--gold-1);
-  animation:b-twinkle 2.5s ease-in-out infinite;
-}
-.b-brilli-content{position:relative;z-index:1}
-.b-brilli-eyebrow{
-  font-size:10px;
-  letter-spacing:0.32em;
-  text-transform:uppercase;
-  color:var(--gold-3);
-  margin-bottom:14px;
-}
-.b-brilli-name{
-  font-family:var(--b-serif);
-  font-weight:400;
-  font-size:42px;
-  line-height:1.1;
-  color:var(--b-text);
-  margin-bottom:18px;
-  letter-spacing:-0.015em;
-}
-.b-brilli-name em{font-style:italic;color:var(--gold-2)}
-.b-brilli-body{
-  font-size:15px;
-  line-height:1.85;
-  color:var(--b-text-muted);
-  margin-bottom:18px;
-  max-width:560px;
-}
-.b-brilli-meta{
-  font-size:10px;
-  letter-spacing:0.22em;
-  text-transform:uppercase;
-  color:var(--b-text-dim);
-}
-
-/* ====================== CREDIBILITY ====================== */
-.b-credibility{
-  background:var(--b-bg-elev);
-  border-top:1px solid var(--b-hairline);
-  border-bottom:1px solid var(--b-hairline);
-}
-.b-cred-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:48px;
-  margin-top:0;
-  align-items:center;
-}
-.b-cred-item{text-align:center}
-.b-cred-eyebrow{
-  font-size:9px;
-  letter-spacing:0.32em;
-  text-transform:uppercase;
-  color:var(--b-text-dim);
-  margin-bottom:14px;
-}
-.b-cred-value{
-  font-family:var(--b-serif);
-  font-weight:400;
-  font-size:18px;
-  color:var(--gold-2);
-  letter-spacing:0.02em;
-}
-.b-cred-stack{
-  display:flex;justify-content:center;gap:18px;
-  flex-wrap:wrap;
-}
-.b-cred-pill{
-  font-size:11px;
-  letter-spacing:0.12em;
-  text-transform:uppercase;
-  color:var(--b-text-muted);
-  padding:6px 14px;
-  border:1px solid var(--b-hairline);
-  border-radius:2px;
-}
+.b-what-link:hover{color:var(--gold-1);border-color:var(--gold-3)}
+.b-what-link svg{width:14px;height:14px}
 
 /* ====================== INVITATION ====================== */
 .b-invitation{
-  background:var(--b-bg);
   position:relative;
-  padding:var(--b-space-section) 0 calc(var(--b-space-section) - 20px);
+  padding:clamp(110px,16vw,200px) 28px;
+  text-align:center;
+  background:radial-gradient(ellipse at 50% 50%,rgba(201,169,97,0.06),var(--b-bg) 65%);
+  border-top:1px solid var(--b-hairline);
   overflow:hidden;
   isolation:isolate;
 }
@@ -1086,281 +457,98 @@ button{font-family:inherit}
 }
 .b-invitation-glow::before{
   content:'';position:absolute;
-  top:50%;left:50%;
-  width:800px;height:800px;
-  background:radial-gradient(circle,var(--gold-glow) 0%,transparent 60%);
+  top:30%;left:50%;
+  width:780px;height:780px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,169,97,0.10),transparent 60%);
+  filter:blur(60px);
   transform:translate(-50%,-50%);
-  filter:blur(80px);
-  opacity:0.6;
-}
-.b-invitation-inner{
-  max-width:760px;margin:0 auto;
-  text-align:center;
-  padding:0 28px;
 }
 .b-invitation-mark{
-  width:clamp(240px,38vw,480px);
-  margin:0 auto 56px;
-  filter:drop-shadow(0 0 40px var(--gold-glow)) drop-shadow(0 0 16px rgba(201,169,97,0.12));
+  width:clamp(220px,30vw,360px);
+  margin:0 auto 48px;
+  animation:b-glow 8s ease-in-out infinite;
 }
 .b-invitation-headline{
   font-family:var(--b-serif);
   font-weight:400;
-  font-size:clamp(26px,3.4vw,42px);
-  line-height:1.25;
+  font-size:clamp(36px,6vw,72px);
+  line-height:1.1;
+  letter-spacing:-0.015em;
   color:var(--b-text);
-  margin-bottom:32px;
-  letter-spacing:-0.01em;
+  margin-bottom:28px;
+  max-width:18ch;
+  margin-left:auto;margin-right:auto;
 }
 .b-invitation-headline em{font-style:italic;color:var(--gold-2)}
 .b-invitation-sub{
+  font-family:var(--b-sans);
   font-size:14px;
-  line-height:1.85;
+  letter-spacing:0.04em;
   color:var(--b-text-muted);
-  max-width:520px;
-  margin:0 auto 56px;
+  max-width:480px;
+  margin:0 auto 48px;
+  line-height:1.85;
 }
 .b-invitation-ctas{
-  display:flex;gap:14px;justify-content:center;flex-wrap:wrap;
+  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
 }
 
 /* ====================== FOOTER ====================== */
 .b-footer{
-  background:var(--b-bg);
+  padding:64px 28px 56px;
+  background:var(--b-bg-deep);
   border-top:1px solid var(--b-hairline);
-  padding:64px 0 40px;
-}
-.b-footer-inner{
-  max-width:var(--b-container);margin:0 auto;
-  padding:0 28px;
+  text-align:center;
 }
 .b-footer-lockup{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:24px;
-  margin-bottom:32px;
+  display:inline-flex;align-items:center;gap:12px;
+  margin-bottom:24px;
 }
-.b-footer-mark{height:22px;opacity:0.85}
-.b-footer-divider{
-  width:1px;height:24px;background:var(--b-hairline);
+.b-footer-mark{height:28px;width:28px;border-radius:50%;object-fit:contain;opacity:0.85}
+.b-footer-name{
+  font-family:var(--b-serif);
+  font-size:18px;
+  color:var(--gold-2);
+  letter-spacing:0.02em;
 }
-.b-footer-rowe{
+.b-footer-by{
   font-family:var(--b-sans);
-  font-size:11px;
-  letter-spacing:0.32em;
+  font-size:10px;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+  margin-left:6px;
+}
+.b-footer-by strong{color:var(--gold-3);font-weight:500}
+.b-footer-row{
+  display:flex;flex-wrap:wrap;gap:24px;justify-content:center;
+  margin-top:18px;
+  padding-top:24px;
+  border-top:1px solid var(--b-hairline);
+  max-width:780px;
+  margin-left:auto;margin-right:auto;
+}
+.b-footer-link{
+  font-family:var(--b-sans);
+  font-size:10px;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+  transition:color 0.25s var(--b-ease);
+}
+.b-footer-link:hover{color:var(--gold-3)}
+.b-footer-meta{
+  margin-top:24px;
+  font-family:var(--b-sans);
+  font-size:10px;
+  letter-spacing:0.18em;
   text-transform:uppercase;
   color:var(--b-text-dim);
 }
-.b-footer-rowe strong{color:var(--gold-3);font-weight:500}
-.b-footer-meta{
-  text-align:center;
-  font-size:11px;
-  color:var(--b-text-dim);
-  letter-spacing:0.04em;
-  line-height:1.9;
-}
-.b-footer-meta a{color:var(--gold-4);transition:color 0.25s}
-.b-footer-meta a:hover{color:var(--gold-2)}
-.b-footer-row{
-  display:flex;justify-content:center;gap:24px;
-  margin-top:18px;
-  flex-wrap:wrap;
-}
 
-/* ====================== RESPONSIVE ====================== */
-@media (max-width:960px){
-  .b-thesis-grid{grid-template-columns:1fr}
-  .b-modes-grid{grid-template-columns:1fr}
-  .b-pillars{grid-template-columns:1fr}
-  .b-modules-grid{grid-template-columns:repeat(2,1fr)}
-  .b-cred-grid{grid-template-columns:1fr 1fr;gap:32px}
-  .b-numbers{grid-template-columns:repeat(2,1fr)}
-  .b-showcase-stage{height:380px}
-  .b-number-val{font-size:42px}
-}
-@media (max-width:640px){
-  :root{--b-container:100%;--b-space-section:clamp(64px,14vw,96px)}
-  .b-container{padding:0 20px}
-  .b-section-head{padding:0 20px;margin-bottom:40px}
-
-  .b-topbar-inner{padding:12px 18px}
-  .b-topbar-link{display:none}
-  .b-topbar-by{display:none}
-  .b-topbar-divider{display:none}
-  .b-topbar-mark{height:20px}
-  .b-topbar-cta{padding:8px 16px;font-size:10px;letter-spacing:0.16em}
-
-  .b-hero{padding:64px 20px 80px;min-height:auto}
-  .b-hero-eyebrow{font-size:9px;letter-spacing:0.32em;margin-bottom:32px}
-  .b-hero-wordmark{width:78%;max-width:340px;margin-bottom:22px}
-  .b-hero-by{margin-bottom:42px;gap:10px}
-  .b-hero-by-rule{max-width:40px}
-  .b-hero-by-text{font-size:9px;letter-spacing:0.22em;white-space:normal;text-align:center;line-height:1.6}
-  .b-hero-headline{font-size:26px;line-height:1.22;margin-bottom:20px}
-  .b-hero-headline br{display:none}
-  .b-hero-sub{font-size:14px;line-height:1.75;margin-bottom:36px;padding:0 4px}
-  .b-hero-trust{margin-top:48px;font-size:9px;letter-spacing:0.22em}
-  .b-hero-ctas{flex-direction:column;width:100%;max-width:300px;margin:0 auto;gap:10px}
-  .b-cta-primary,.b-cta-secondary{width:100%;justify-content:center;padding:15px 24px;font-size:11px;letter-spacing:0.18em}
-  .b-hero-divider{height:48px;bottom:24px}
-
-  .b-section-title{font-size:26px;line-height:1.22}
-  .b-section-desc{font-size:14px;line-height:1.75}
-
-  .b-thesis-grid{grid-template-columns:1fr;margin-top:40px}
-  .b-thesis-cell{padding:32px 24px}
-  .b-thesis-stmt{font-size:20px}
-  .b-thesis-compare{grid-template-columns:1fr;margin-top:48px}
-  .b-compare-side{padding:28px 24px}
-  .b-compare-quote{font-size:16px}
-
-  .b-modes-grid{grid-template-columns:1fr;margin-top:40px;gap:20px}
-  .b-mode{padding:36px 24px}
-  .b-mode-name{font-size:30px}
-  .b-mode-tagline{font-size:12px;margin-bottom:24px;padding-bottom:18px}
-  .b-mode-list .b-li-name{min-width:auto;display:block;margin-bottom:2px}
-  .b-mode-list li{flex-direction:column;align-items:flex-start;gap:2px;padding:10px 0}
-  .b-modes-bridge{font-size:15px;margin-top:36px;padding:0 16px}
-
-  .b-pillars{grid-template-columns:1fr;margin-top:40px}
-  .b-pillar{padding:32px 24px}
-  .b-pillar-num{top:24px;right:24px}
-  .b-pillar-title{font-size:20px}
-
-  .b-modules-grid{grid-template-columns:1fr;margin-top:40px;gap:10px}
-  .b-module{padding:28px 24px;min-height:auto}
-  .b-module-icon{margin-bottom:18px}
-
-  .b-audience-list{margin-top:40px}
-  .b-aud-row{grid-template-columns:48px 1fr;gap:18px;padding:28px 4px;align-items:start}
-  .b-aud-row:hover{padding-left:4px}
-  .b-aud-arrow{display:none}
-  .b-aud-num{font-size:30px}
-  .b-aud-name{font-size:20px;margin-bottom:6px}
-  .b-aud-stmt{font-size:13.5px;line-height:1.7}
-
-  .b-brilli-card{
-    grid-template-columns:1fr;
-    gap:24px;
-    padding:36px 24px;
-    text-align:center;
-  }
-  .b-brilli-orb{width:88px;height:88px;margin:0 auto}
-  .b-brilli-name{font-size:32px}
-  .b-brilli-body{font-size:14px;line-height:1.75;margin-left:auto;margin-right:auto}
-  .b-brilli-meta{font-size:9px}
-
-  .b-cred-grid{grid-template-columns:1fr;gap:32px}
-  .b-cred-value{font-size:16px}
-
-  .b-invitation{padding:80px 0 60px}
-  .b-invitation-mark{width:60%;max-width:280px;margin-bottom:36px}
-  .b-invitation-headline{font-size:24px;line-height:1.28}
-  .b-invitation-headline br{display:none}
-  .b-invitation-sub{font-size:13.5px;line-height:1.75;margin-bottom:36px}
-  .b-invitation-ctas{flex-direction:column;width:100%;max-width:300px;margin:0 auto;gap:10px}
-
-  .b-footer{padding:48px 0 32px}
-  .b-footer-lockup{flex-direction:column;gap:12px;margin-bottom:24px}
-  .b-footer-mark{height:20px}
-  .b-footer-divider{width:32px;height:1px}
-  .b-footer-rowe{font-size:10px}
-  .b-footer-meta{font-size:10px}
-  .b-footer-row{flex-direction:row;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:14px}
-  .b-footer-row a{font-size:10px}
-
-  /* Showcase mobile */
-  .b-showcase-tabs{margin:32px 20px 20px;gap:6px;padding:0 4px}
-  .b-showcase-tab{padding:6px 12px;font-size:9px;letter-spacing:0.16em;flex:0 0 auto}
-  .b-showcase-frame{margin:0 20px 48px;border-radius:10px}
-  .b-showcase-bezel{padding:8px 12px}
-  .b-showcase-dots span{width:8px;height:8px}
-  .b-showcase-url{font-size:9px;margin-right:32px}
-  .b-showcase-screen{aspect-ratio:16/11}
-  .b-showcase-screen img{object-position:center center !important}
-
-  /* Stat row mobile */
-  .b-numbers{grid-template-columns:repeat(2,1fr);margin-top:32px}
-  .b-number{padding:32px 16px}
-  .b-number-val{font-size:38px;margin-bottom:10px}
-  .b-number-lbl{font-size:9px;letter-spacing:0.22em}
-}
-
-@media (max-width:380px){
-  .b-hero-headline{font-size:23px}
-  .b-section-title{font-size:23px}
-  .b-mode-name{font-size:26px}
-  .b-aud-num{font-size:26px}
-  .b-brilli-name{font-size:28px}
-}
-
-/* iOS safe-area + tap targets */
-@supports (padding:max(0px)){
-  .b-topbar-inner{padding-left:max(28px,env(safe-area-inset-left));padding-right:max(28px,env(safe-area-inset-right))}
-  .b-hero,.b-section,.b-footer{padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right))}
-}
-.b-cta-primary,.b-cta-secondary,.b-topbar-cta{-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:44px}
-
-/* ====================== SCROLL EXPERIENCE ====================== */
-/* Section transition - each major block fades + lifts in as you scroll */
-.b-reveal{
-  opacity:0;
-  transform:translateY(56px) scale(0.985);
-  transition:opacity 1.2s var(--b-ease),transform 1.2s var(--b-ease);
-  will-change:opacity,transform;
-}
-.b-reveal.b-in{opacity:1;transform:translateY(0) scale(1)}
-
-/* Stagger children inside revealed sections */
-.b-reveal-stagger > *{
-  opacity:0;
-  transform:translateY(28px);
-  transition:opacity 0.9s var(--b-ease),transform 0.9s var(--b-ease);
-}
-.b-reveal-stagger.b-in > *{opacity:1;transform:translateY(0)}
-.b-reveal-stagger.b-in > *:nth-child(1){transition-delay:0.05s}
-.b-reveal-stagger.b-in > *:nth-child(2){transition-delay:0.18s}
-.b-reveal-stagger.b-in > *:nth-child(3){transition-delay:0.31s}
-.b-reveal-stagger.b-in > *:nth-child(4){transition-delay:0.44s}
-.b-reveal-stagger.b-in > *:nth-child(5){transition-delay:0.57s}
-.b-reveal-stagger.b-in > *:nth-child(6){transition-delay:0.7s}
-.b-reveal-stagger.b-in > *:nth-child(7){transition-delay:0.83s}
-.b-reveal-stagger.b-in > *:nth-child(8){transition-delay:0.96s}
-
-/* Section divider rules - gold hairline between sections, fades in with section */
-.b-section + .b-section{
-  position:relative;
-}
-.b-section + .b-section::before{
-  content:'';
-  position:absolute;
-  top:0;left:50%;
-  width:80px;height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold-4),transparent);
-  transform:translateX(-50%);
-  opacity:0.6;
-}
-
-/* Scroll progress bar - thin gold thread tracking page progress */
-.b-progress{
-  position:fixed;
-  top:0;left:0;
-  height:1px;
-  width:var(--b-progress,0%);
-  background:linear-gradient(90deg,var(--gold-4),var(--gold-2));
-  z-index:60;
-  transition:width 0.1s linear;
-  pointer-events:none;
-}
-
-/* Hero subtle parallax - wordmark drifts slightly as you scroll out */
-.b-hero-wordmark{will-change:transform,opacity}
-
-@media (prefers-reduced-motion:reduce){
-  .b-reveal,.b-reveal-stagger > *{opacity:1 !important;transform:none !important}
-  .b-progress{display:none}
-}
+/* ====================== REVEAL ====================== */
+.b-reveal{opacity:0;transform:translateY(18px);transition:opacity 1s var(--b-ease),transform 1s var(--b-ease)}
+.b-reveal.b-in{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -1368,13 +556,13 @@ button{font-family:inherit}
 <!-- =================== TOP BAR =================== -->
 <header class="b-topbar">
   <div class="b-topbar-inner">
-    <a href="/brilliance" class="b-topbar-brand" aria-label="Brilliance, Intelligence Platform by RoweOS">
-      <img src="/images/brilliance/wordmark.png" alt="Brilliance" class="b-topbar-mark">
-      <span class="b-topbar-divider"></span>
+    <a href="/brilliance" class="b-topbar-brand" aria-label="Brilliance, Intelligence OS by RoweOS">
+      <span class="b-mark"><img src="/images/brilliance/monogram.png" alt="Brilliance"></span>
+      Brilliance
       <span class="b-topbar-by">by <strong>RoweOS</strong></span>
     </a>
     <nav class="b-topbar-nav">
-      <a href="/portfolio" class="b-topbar-link">Platform</a>
+      <a href="/info" class="b-topbar-link">Platform</a>
       <a href="/purchase" class="b-topbar-link">Pricing</a>
       <a href="/" class="b-topbar-cta">Begin</a>
     </nav>
@@ -1384,43 +572,30 @@ button{font-family:inherit}
 <!-- =================== HERO =================== -->
 <section class="b-hero">
   <div class="b-hero-glow" aria-hidden="true"></div>
-  <div class="b-hero-particles" aria-hidden="true">
-    <span class="b-hero-particle" style="top:18%;left:22%;animation-delay:0s"></span>
-    <span class="b-hero-particle" style="top:32%;left:78%;animation-delay:0.6s"></span>
-    <span class="b-hero-particle" style="top:62%;left:14%;animation-delay:1.2s"></span>
-    <span class="b-hero-particle" style="top:74%;left:88%;animation-delay:1.8s"></span>
-    <span class="b-hero-particle" style="top:48%;left:50%;animation-delay:2.4s"></span>
-    <span class="b-hero-particle" style="top:24%;left:62%;animation-delay:3s"></span>
-    <span class="b-hero-particle" style="top:84%;left:42%;animation-delay:3.6s"></span>
-  </div>
 
-  <p class="b-hero-eyebrow">Brilliance <span>·</span> by RoweOS</p>
+  <img src="/images/brilliance/monogram-circle.png" alt="Brilliance by RoweOS" class="b-hero-monogram">
 
-  <img src="/images/brilliance/wordmark.png" alt="Brilliance" class="b-hero-wordmark">
-
-  <div class="b-hero-by" aria-label="Brilliance by RoweOS">
-    <span class="b-hero-by-rule"></span>
-    <span class="b-hero-by-text">Intelligence Platform <span class="b-hero-by-dot">·</span> by <strong>RoweOS</strong></span>
-    <span class="b-hero-by-rule"></span>
-  </div>
-
-  <h1 class="b-hero-headline">
-    The operating intelligence behind ambitious brands<br>
-    and the <em>people who build them</em>.
-  </h1>
+  <h1 class="b-hero-headline">Be <em>Brilliant</em>.</h1>
 
   <p class="b-hero-sub">
-    Brilliance is not a chatbot. It is not a dashboard. It is the intelligence layer that learns who you are, how you operate, and what your work demands. Then it becomes that.
+    Brilliance &nbsp;·&nbsp; <strong>Intelligence OS</strong> &nbsp;·&nbsp; by RoweOS
   </p>
 
   <div class="b-hero-ctas">
     <a href="/" class="b-cta-primary"><span>Begin</span></a>
-    <a href="/purchase" class="b-cta-secondary">View Pricing</a>
+    <a href="/info" class="b-cta-secondary">See the Platform</a>
   </div>
 
   <p class="b-hero-trust"><strong>Class of</strong> &nbsp;·&nbsp; Google for Startups 2026</p>
+</section>
 
-  <div class="b-hero-divider" aria-hidden="true"></div>
+<!-- =================== MANIFESTO 1 =================== -->
+<section class="b-manifesto b-manifesto-wide">
+  <div>
+    <div class="b-manifesto-rule" aria-hidden="true"></div>
+    <p class="b-manifesto-eyebrow">The Thesis</p>
+    <p class="b-manifesto-line">The operating system for <em>brilliant work</em>.</p>
+  </div>
 </section>
 
 <!-- =================== BACKED BY GOOGLE =================== -->
@@ -1440,392 +615,80 @@ button{font-family:inherit}
   </div>
 </section>
 
-<!-- =================== THESIS =================== -->
-<section class="b-section b-thesis">
-  <div class="b-section-head">
-    <p class="b-section-chapter">Chapter <em>i</em></p>
-    <p class="b-section-eyebrow">The Thesis</p>
-    <h2 class="b-section-title">Generic intelligence produces <em>generic outcomes</em>.</h2>
-    <p class="b-section-desc">The most powerful AI in the world will give you the same answer it gives a stranger. Operators do not need that. They need intelligence that knows them.</p>
-  </div>
-
-  <div class="b-container">
-    <div class="b-thesis-grid">
-      <div class="b-thesis-cell">
-        <p class="b-thesis-num">i.</p>
-        <p class="b-thesis-stmt">Generic AI does not know <em>who you are</em>.</p>
-        <p class="b-thesis-body">It does not know your brand voice, your standards, your portfolio, your obligations. It is a tool that resets at every prompt.</p>
-      </div>
-      <div class="b-thesis-cell">
-        <p class="b-thesis-num">ii.</p>
-        <p class="b-thesis-stmt">Brilliance <em>does</em>.</p>
-        <p class="b-thesis-body">Identity is the substrate. Brand context, life context, voice, and standards are injected at the infrastructure level, not pasted into a prompt.</p>
-      </div>
-      <div class="b-thesis-cell">
-        <p class="b-thesis-num">iii.</p>
-        <p class="b-thesis-stmt">That changes <em>everything downstream</em>.</p>
-        <p class="b-thesis-body">Strategy that compounds. Marketing that sounds like you. Operations that respect your obligations. The output is no longer generic. It is yours.</p>
-      </div>
-    </div>
-
-    <div class="b-thesis-compare">
-      <div class="b-compare-side b-before">
-        <p class="b-compare-label">Generic Tool</p>
-        <p class="b-compare-quote">"Here are five general marketing tips for small businesses."</p>
-      </div>
-      <div class="b-compare-side b-after">
-        <p class="b-compare-label">Brilliance</p>
-        <p class="b-compare-quote">"For Rowe Retreats, lean on the November Domain occupancy gap. Your voice tightens to two-line cadence in posts that convert. Draft attached."</p>
-      </div>
-    </div>
+<!-- =================== MANIFESTO 2 =================== -->
+<section class="b-manifesto b-manifesto-wide">
+  <div>
+    <div class="b-manifesto-rule" aria-hidden="true"></div>
+    <p class="b-manifesto-eyebrow">Yours, end to end</p>
+    <p class="b-manifesto-line">Your brand. Your voice. Your <em>brilliance</em>.</p>
   </div>
 </section>
 
-<!-- =================== TWO MODES =================== -->
-<section class="b-section b-modes">
-  <div class="b-section-head">
-    <p class="b-section-chapter">Chapter <em>ii</em></p>
-    <p class="b-section-eyebrow">The Architecture</p>
-    <h2 class="b-section-title">Two modes. <em>One operating intelligence</em>.</h2>
-    <p class="b-section-desc">Brand and life are not separate problems. They share the same operator. Brilliance lets each mode act on its own context, and lets them inform each other when it matters.</p>
-  </div>
-
-  <div class="b-container">
-    <div class="b-modes-grid">
-      <article class="b-mode">
-        <p class="b-mode-tag">Mode I</p>
-        <h3 class="b-mode-name"><em>Brand</em>AI</h3>
-        <p class="b-mode-tagline">Eight specialized agents. One brand identity at the core.</p>
-        <ul class="b-mode-list">
-          <li><span class="b-li-name">Strategy</span><span class="b-li-desc">Direction, positioning, decisions worth making.</span></li>
-          <li><span class="b-li-name">Marketing</span><span class="b-li-desc">Voice-true campaigns, posts, and copy.</span></li>
-          <li><span class="b-li-name">Operations</span><span class="b-li-desc">Pipelines, automations, the work behind the work.</span></li>
-          <li><span class="b-li-name">Documents</span><span class="b-li-desc">Contracts, briefs, proposals on your standard.</span></li>
-          <li><span class="b-li-name">Research</span><span class="b-li-desc">Deep, sourced answers to questions that matter.</span></li>
-          <li><span class="b-li-name">Intelligence</span><span class="b-li-desc">Live web search inside your brand context.</span></li>
-          <li><span class="b-li-name">Image</span><span class="b-li-desc">Generation tuned to your visual identity.</span></li>
-          <li><span class="b-li-name">Helper</span><span class="b-li-desc">Quick, fluent answers without ceremony.</span></li>
-        </ul>
-      </article>
-
-      <article class="b-mode">
-        <p class="b-mode-tag">Mode II</p>
-        <h3 class="b-mode-name"><em>Life</em>AI</h3>
-        <p class="b-mode-tagline">Five coaches. The operator behind the work.</p>
-        <ul class="b-mode-list">
-          <li><span class="b-li-name">Life Coach</span><span class="b-li-desc">Goals, rhythm, the longer arc.</span></li>
-          <li><span class="b-li-name">Wellness Guide</span><span class="b-li-desc">Sleep, training, recovery, mind.</span></li>
-          <li><span class="b-li-name">Tax Copilot</span><span class="b-li-desc">Filings, deductions, posture year-round.</span></li>
-          <li><span class="b-li-name">Personal Assistant</span><span class="b-li-desc">Calendar, errands, the quiet logistics.</span></li>
-          <li><span class="b-li-name">Standard AI</span><span class="b-li-desc">Anything else, with your context attached.</span></li>
-        </ul>
-      </article>
-    </div>
-
-    <p class="b-modes-bridge">Brand and life share a single memory. <em>Cross-mode intelligence</em> is the moat.</p>
-  </div>
+<!-- =================== WHAT IT IS =================== -->
+<section class="b-what">
+  <img src="/images/brilliance/wordmark-os.png" alt="Brilliance, Intelligence OS" class="b-what-wordmark">
+  <p class="b-what-eyebrow">What it is</p>
+  <p class="b-what-body">
+    Brilliance is the intelligence layer that learns who you are, how you operate, and what your work demands. Brand and life, one operating system. Sovereign by design. <em>Yours, completely</em>.
+  </p>
+  <a href="/info" class="b-what-link">
+    See the full platform
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </a>
 </section>
 
-<!-- =================== ARCHITECTURE PILLARS =================== -->
-<section class="b-section b-architecture">
-  <div class="b-section-head">
-    <p class="b-section-chapter">Chapter <em>iii</em></p>
-    <p class="b-section-eyebrow">Why It Is Different</p>
-    <h2 class="b-section-title">The mechanism, <em>plainly stated</em>.</h2>
-    <p class="b-section-desc">Most AI products are a thin wrapper. Brilliance is built on four decisions that compound into the difference operators feel.</p>
-  </div>
-
-  <div class="b-container">
-    <div class="b-pillars">
-      <article class="b-pillar">
-        <div class="b-pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4Z"/><path d="M9 12l2 2 4-4"/></svg>
-        </div>
-        <p class="b-pillar-num">01</p>
-        <h3 class="b-pillar-title">Sovereign by design</h3>
-        <p class="b-pillar-body">Bring your own keys. Conversations route directly from your browser to the model providers. RoweOS does not see, store, or relay your prompts. Your data lives where you decide it lives.</p>
-      </article>
-
-      <article class="b-pillar">
-        <div class="b-pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/></svg>
-        </div>
-        <p class="b-pillar-num">02</p>
-        <h3 class="b-pillar-title">Identity at the infrastructure level</h3>
-        <p class="b-pillar-body">Your brand voice, standards, portfolio, and obligations are injected into every request before the model sees it. You do not paste your brand into a prompt. Your brand is the prompt.</p>
-      </article>
-
-      <article class="b-pillar">
-        <div class="b-pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
-        </div>
-        <p class="b-pillar-num">03</p>
-        <h3 class="b-pillar-title">Dynamic model routing</h3>
-        <p class="b-pillar-body">Claude for nuance and judgment. Gemini for speed and breadth. GPT for reach and reasoning. Brilliance routes intelligently across providers and falls back gracefully. One platform, the strengths of all.</p>
-      </article>
-
-      <article class="b-pillar">
-        <div class="b-pillar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>
-        </div>
-        <p class="b-pillar-num">04</p>
-        <h3 class="b-pillar-title">Zero-framework build</h3>
-        <p class="b-pillar-body">A single-file installable PWA. No build pipeline, no node_modules, no dependency drift. The result is a platform that is fast, durable, and forkable, and that loads in a single request.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- =================== SHOWCASE =================== -->
-<section class="b-section b-showcase">
-  <div class="b-section-head">
-    <p class="b-section-chapter">Chapter <em>iv</em></p>
-    <p class="b-section-eyebrow">The Surface</p>
-    <h2 class="b-section-title">A platform that <em>looks like the work</em>.</h2>
-    <p class="b-section-desc">Calm interface, ambient brand color, a sidebar that listens. The product disappears and the work shows through.</p>
-  </div>
-
-  <div class="b-container">
-    <div class="b-showcase-tabs">
-      <button class="b-showcase-tab b-active" data-target="0">Studio</button>
-      <button class="b-showcase-tab" data-target="1">Chat</button>
-      <button class="b-showcase-tab" data-target="2">Pulse</button>
-      <button class="b-showcase-tab" data-target="3">Identity</button>
-      <button class="b-showcase-tab" data-target="4">Library</button>
-    </div>
-    <div class="b-showcase-frame">
-      <div class="b-showcase-bezel">
-        <div class="b-showcase-dots"><span></span><span></span><span></span></div>
-        <div class="b-showcase-url">brilliance.app</div>
-      </div>
-      <div class="b-showcase-screen">
-        <img src="/images/desktop/full_screen_brandAI.png" alt="Brilliance Studio" data-slide="0" class="b-active">
-        <img src="/images/desktop/long_chat_brandAI.png" alt="Brilliance Chat" data-slide="1">
-        <img src="/images/desktop/pulse_brandAI.png" alt="Brilliance Pulse" data-slide="2">
-        <img src="/images/desktop/idenitity_brandAI.png" alt="Brilliance Identity" data-slide="3">
-        <img src="/images/desktop/library_brandAI.png" alt="Brilliance Library" data-slide="4">
-      </div>
-    </div>
-  </div>
-
-  <div class="b-container">
-    <div class="b-numbers">
-      <div class="b-number">
-        <p class="b-number-val">8</p>
-        <p class="b-number-lbl">Brand Agents</p>
-      </div>
-      <div class="b-number">
-        <p class="b-number-val">5</p>
-        <p class="b-number-lbl">Life Coaches</p>
-      </div>
-      <div class="b-number">
-        <p class="b-number-val">150+</p>
-        <p class="b-number-lbl">Studio Operations</p>
-      </div>
-      <div class="b-number">
-        <p class="b-number-val">3</p>
-        <p class="b-number-lbl">Model Providers</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =================== MODULES =================== -->
-<section class="b-section b-modules">
-  <div class="b-section-head">
-    <p class="b-section-chapter">Chapter <em>v</em></p>
-    <p class="b-section-eyebrow">The Surfaces</p>
-    <h2 class="b-section-title">Where the work <em>actually happens</em>.</h2>
-    <p class="b-section-desc">Eight surfaces, each tuned to the kind of thinking it serves.</p>
-  </div>
-
-  <div class="b-container">
-    <div class="b-modules-grid">
-      <article class="b-module">
-        <div class="b-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0Z"/><path d="m21 21-4.3-4.3"/></svg></div>
-        <h3 class="b-module-name">Studio</h3>
-        <p class="b-module-desc">150+ operations across writing, research, analysis, and image. Run one. Pipe many.</p>
-      </article>
-      <article class="b-module">
-        <div class="b-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4l-5 1.6 1.6-5A8.5 8.5 0 1 1 21 11.5Z"/></svg></div>
-        <h3 class="b-module-name">Chat</h3>
-        <p class="b-module-desc">A conversation that remembers your brand, your tone, and the work in progress.</p>
-      </article>
-      <article class="b-module">
-        <div class="b-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
-        <h3 class="b-module-name">Pulse</h3>
-        <p class="b-module-desc">Goals, calendar, and rhythm in one frame. The day, made legible.</p>
-      </article>
-      <article class="b-module">
-        <div class="b-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-        <h3 class="b-module-name">Rhythm</h3>
-        <p class="b-module-desc">Habits and cadence tracked alongside the work they support.</p>
-      </article>
-      <article class="b-module">
-        <div class="b-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c-3 4-3 8 0 12 3 4 3 8 0 8M12 2c3 4 3 8 0 12-3 4-3 8 0 8"/></svg></div>
-        <h3 class="b-module-name">Bloom</h3>
-        <p class="b-module-desc">A continuously generated brand feed. Twenty fresh angles on demand.</p>
-      </article>
-      <article class="b-module">
-        <div class="b-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
-        <h3 class="b-module-name">Identity &amp; Memory</h3>
-        <p class="b-module-desc">The substrate the platform thinks from. Curated by you, used everywhere.</p>
-      </article>
-      <article class="b-module">
-        <div class="b-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-        <h3 class="b-module-name">Automations</h3>
-        <p class="b-module-desc">Scheduled work, multi-step pipelines, approvals, the operator's leverage.</p>
-      </article>
-      <article class="b-module">
-        <div class="b-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h18l-2 13H5L3 7Z"/><path d="M8 7V4a4 4 0 0 1 8 0v3"/></svg></div>
-        <h3 class="b-module-name">Image &amp; Video</h3>
-        <p class="b-module-desc">On-brand generation across the major models, including Veo and Nano Banana.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- =================== AUDIENCE =================== -->
-<section class="b-section b-audience">
-  <div class="b-section-head">
-    <p class="b-section-chapter">Chapter <em>vi</em></p>
-    <p class="b-section-eyebrow">Who It Is For</p>
-    <h2 class="b-section-title">Built for the operator who refuses to <em>compromise</em>.</h2>
-    <p class="b-section-desc">Three kinds of people install Brilliance. They are not personas. They are postures.</p>
-  </div>
-
-  <div class="b-container">
-    <div class="b-audience-list">
-      <div class="b-aud-row">
-        <p class="b-aud-num">01</p>
-        <div class="b-aud-content">
-          <h3 class="b-aud-name">The Solo Operator</h3>
-          <p class="b-aud-stmt">Runs one brand and one life with rigor. Treats their tools the way a craftsman treats a workbench.</p>
-        </div>
-        <svg class="b-aud-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </div>
-
-      <div class="b-aud-row">
-        <p class="b-aud-num">02</p>
-        <div class="b-aud-content">
-          <h3 class="b-aud-name">The Multi-Brand Founder</h3>
-          <p class="b-aud-stmt">Holds a portfolio. Switches contexts every hour. Needs the platform to switch with them and never bleed one brand's voice into another.</p>
-        </div>
-        <svg class="b-aud-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </div>
-
-      <div class="b-aud-row">
-        <p class="b-aud-num">03</p>
-        <div class="b-aud-content">
-          <h3 class="b-aud-name">The Boutique Studio</h3>
-          <p class="b-aud-stmt">A small team that ships luxury work. Wants leverage that does not show up in the output as machine.</p>
-        </div>
-        <svg class="b-aud-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =================== BRILLI TEASER =================== -->
-<section class="b-section b-brilli">
-  <div class="b-container">
-    <div class="b-brilli-card">
-      <div class="b-brilli-orb" aria-hidden="true">
-        <span class="b-brilli-orb-spark"></span>
-      </div>
-      <div class="b-brilli-content">
-        <p class="b-brilli-eyebrow">Coming to Brilliance</p>
-        <h3 class="b-brilli-name">Meet <em>Brilli</em>.</h3>
-        <p class="b-brilli-body">Your platform's voice. A single intelligence that knows your brand, your day, and your standards. Brilli is not another chatbot. Brilli is the conversation Brilliance has with you.</p>
-        <p class="b-brilli-meta">In development &nbsp;·&nbsp; Available to Founding Members first</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =================== CREDIBILITY =================== -->
-<section class="b-section b-credibility">
-  <div class="b-container">
-    <div class="b-cred-grid">
-      <div class="b-cred-item">
-        <p class="b-cred-eyebrow">Powered by</p>
-        <div class="b-cred-stack">
-          <span class="b-cred-pill">Claude</span>
-          <span class="b-cred-pill">Gemini</span>
-          <span class="b-cred-pill">GPT</span>
-        </div>
-      </div>
-      <div class="b-cred-item">
-        <p class="b-cred-eyebrow">Architecture</p>
-        <p class="b-cred-value">Sovereign · BYOK</p>
-        <p class="b-cred-eyebrow" style="margin-top:6px;color:var(--gold-4)">Browser-local</p>
-      </div>
-      <div class="b-cred-item">
-        <p class="b-cred-eyebrow">Built in</p>
-        <p class="b-cred-value">Austin, Texas</p>
-        <p class="b-cred-eyebrow" style="margin-top:6px;color:var(--gold-4)">The Rowe Collection</p>
-      </div>
-    </div>
+<!-- =================== MANIFESTO 3 =================== -->
+<section class="b-manifesto">
+  <div>
+    <div class="b-manifesto-rule" aria-hidden="true"></div>
+    <p class="b-manifesto-eyebrow">The difference</p>
+    <p class="b-manifesto-line">Less noise. <em>Pure brilliance</em>.</p>
   </div>
 </section>
 
 <!-- =================== INVITATION =================== -->
 <section class="b-invitation">
   <div class="b-invitation-glow" aria-hidden="true"></div>
-  <div class="b-invitation-inner">
-    <img src="/images/brilliance/wordmark.png" alt="Brilliance" class="b-invitation-mark">
 
-    <h2 class="b-invitation-headline">
-      Brilliance is <em>not for everyone</em>.<br>
-      It is for those who refuse to settle.
-    </h2>
+  <img src="/images/brilliance/monogram-circle.png" alt="Brilliance" class="b-invitation-mark">
 
-    <p class="b-invitation-sub">
-      Begin with a free month. Bring your keys, your brand, your work. Decide on your own terms whether the difference is real.
-    </p>
+  <h2 class="b-invitation-headline">
+    Stop settling. <em>Start brilliant</em>.
+  </h2>
 
-    <div class="b-invitation-ctas">
-      <a href="/" class="b-cta-primary"><span>Begin</span></a>
-      <a href="/purchase" class="b-cta-secondary">View Pricing</a>
-    </div>
+  <p class="b-invitation-sub">
+    Begin with a free month. Bring your keys, your brand, your work. Decide on your own terms whether the difference is real.
+  </p>
+
+  <div class="b-invitation-ctas">
+    <a href="/" class="b-cta-primary"><span>Begin</span></a>
+    <a href="/purchase" class="b-cta-secondary">View Pricing</a>
   </div>
 </section>
 
 <!-- =================== FOOTER =================== -->
 <footer class="b-footer">
-  <div class="b-footer-inner">
-    <div class="b-footer-lockup">
-      <img src="/images/brilliance/wordmark.png" alt="Brilliance" class="b-footer-mark">
-      <span class="b-footer-divider"></span>
-      <p class="b-footer-rowe">by <strong>RoweOS</strong></p>
-    </div>
-    <p class="b-footer-meta">
-      The Rowe Collection &nbsp;·&nbsp; Austin, Texas &nbsp;·&nbsp; &copy; 2026
-    </p>
-    <div class="b-footer-row">
-      <a href="/info" class="b-footer-meta">Platform Overview</a>
-      <a href="/portfolio" class="b-footer-meta">Capabilities</a>
-      <a href="/purchase" class="b-footer-meta">Pricing</a>
-      <a href="/privacy" class="b-footer-meta">Privacy</a>
-      <a href="/terms" class="b-footer-meta">Terms</a>
-    </div>
+  <div class="b-footer-lockup">
+    <img src="/images/brilliance/monogram.png" alt="Brilliance" class="b-footer-mark">
+    <span class="b-footer-name">Brilliance</span>
+    <span class="b-footer-by">by <strong>RoweOS</strong></span>
   </div>
+  <div class="b-footer-row">
+    <a href="/info" class="b-footer-link">Platform</a>
+    <a href="/portfolio" class="b-footer-link">Capabilities</a>
+    <a href="/purchase" class="b-footer-link">Pricing</a>
+    <a href="/privacy" class="b-footer-link">Privacy</a>
+    <a href="/terms" class="b-footer-link">Terms</a>
+  </div>
+  <p class="b-footer-meta">The Rowe Collection &nbsp;·&nbsp; Austin, Texas &nbsp;·&nbsp; &copy; 2026</p>
 </footer>
-
-<div class="b-progress" aria-hidden="true"></div>
 
 <script>
 (function(){
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* Scroll-driven reveals — section-level, then staggered children */
   if ('IntersectionObserver' in window && !reduced){
-    var sections = document.querySelectorAll('.b-section, .b-thesis-grid, .b-thesis-compare, .b-modes-grid, .b-pillars, .b-modules-grid, .b-audience-list, .b-cred-grid, .b-brilli-card');
-    sections.forEach(function(el){ el.classList.add('b-reveal'); });
-
-    var grids = document.querySelectorAll('.b-thesis-grid, .b-modes-grid, .b-pillars, .b-modules-grid, .b-audience-list, .b-cred-grid');
-    grids.forEach(function(el){ el.classList.add('b-reveal-stagger'); });
-
+    var els = document.querySelectorAll('.b-manifesto, .b-backed-card, .b-what, .b-invitation');
+    els.forEach(function(el){ el.classList.add('b-reveal'); });
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(e){
         if (e.isIntersecting){
@@ -1833,81 +696,8 @@ button{font-family:inherit}
           io.unobserve(e.target);
         }
       });
-    },{rootMargin:'-12% 0px -8% 0px',threshold:0.08});
-
-    sections.forEach(function(el){ io.observe(el); });
-  }
-
-  /* Scroll progress bar */
-  if (!reduced){
-    var progress = document.querySelector('.b-progress');
-    var ticking = false;
-    function updateProgress(){
-      var doc = document.documentElement;
-      var max = doc.scrollHeight - doc.clientHeight;
-      var pct = max > 0 ? (window.scrollY / max) * 100 : 0;
-      if (progress) progress.style.setProperty('--b-progress', pct + '%');
-      ticking = false;
-    }
-    window.addEventListener('scroll', function(){
-      if (!ticking){ requestAnimationFrame(updateProgress); ticking = true; }
-    }, { passive: true });
-    updateProgress();
-  }
-
-  /* Showcase tab switching with auto-advance */
-  (function(){
-    var tabs = document.querySelectorAll('.b-showcase-tab');
-    var slides = document.querySelectorAll('.b-showcase-screen img');
-    if (!tabs.length || !slides.length) return;
-    var current = 0;
-    var autoplay = null;
-    var paused = false;
-
-    function show(idx){
-      current = idx;
-      tabs.forEach(function(t,i){ t.classList.toggle('b-active', i === idx); });
-      slides.forEach(function(s,i){ s.classList.toggle('b-active', i === idx); });
-    }
-    tabs.forEach(function(t,i){
-      t.addEventListener('click', function(){
-        paused = true;
-        clearInterval(autoplay);
-        show(i);
-      });
-    });
-
-    function tick(){ if (!paused) show((current + 1) % slides.length); }
-    autoplay = setInterval(tick, 4500);
-
-    var frame = document.querySelector('.b-showcase-frame');
-    if (frame){
-      frame.addEventListener('mouseenter', function(){ paused = true; });
-      frame.addEventListener('mouseleave', function(){ paused = false; });
-    }
-  })();
-
-  /* Hero parallax — wordmark drifts and fades as user scrolls past */
-  if (!reduced){
-    var wordmark = document.querySelector('.b-hero-wordmark');
-    var hero = document.querySelector('.b-hero');
-    if (wordmark && hero){
-      var ticking2 = false;
-      function updateHero(){
-        var rect = hero.getBoundingClientRect();
-        var heroHeight = hero.offsetHeight;
-        var scrolledPast = Math.max(0, -rect.top);
-        var pct = Math.min(1, scrolledPast / heroHeight);
-        var translate = pct * 60;
-        var opacity = Math.max(0.2, 1 - pct * 1.4);
-        wordmark.style.transform = 'translateY(-' + translate + 'px)';
-        wordmark.style.opacity = opacity;
-        ticking2 = false;
-      }
-      window.addEventListener('scroll', function(){
-        if (!ticking2){ requestAnimationFrame(updateHero); ticking2 = true; }
-      }, { passive: true });
-    }
+    },{rootMargin:'-10% 0px -8% 0px',threshold:0.1});
+    els.forEach(function(el){ io.observe(el); });
   }
 })();
 </script>
