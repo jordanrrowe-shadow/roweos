@@ -6016,14 +6016,20 @@ function _resolveImageProvider() {
   } catch (e) { return 'nano-banana-3-pro'; }
 }
 
-function showImageProviderPickerOnce(callback) {
+// v32.0-D: opts.headerText overrides default header. opts.subText overrides
+// the subtitle. Used by handleImageEditRequest to show "Edit image with..."
+// instead of "Pick your image generator" when the user attached an image.
+function showImageProviderPickerOnce(callback, opts) {
+  opts = opts || {};
   if (localStorage.getItem('roweos_image_provider_pref')) { callback(_resolveImageProvider()); return; }
+  var headerText = opts.headerText || 'Pick your image generator';
+  var subText = opts.subText || 'RoweOS detected an image request. Which generator should we use? You can change this later in System.';
   var modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200000;display:flex;align-items:center;justify-content:center;padding:20px;';
   var box = document.createElement('div');
   box.style.cssText = 'background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;padding:24px;max-width:420px;width:100%;';
-  box.innerHTML = '<div style="font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">Pick your image generator</div>' +
-    '<div style="font-size:12px;color:var(--text-muted);margin-bottom:18px;">RoweOS detected an image request. Which generator should we use? You can change this later in System.</div>' +
+  box.innerHTML = '<div style="font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">' + (typeof escapeHtml === 'function' ? escapeHtml(headerText) : headerText) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-muted);margin-bottom:18px;">' + (typeof escapeHtml === 'function' ? escapeHtml(subText) : subText) + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px;">' +
     '<button data-pref="nano-banana-3-pro" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">Nano Banana 3.0 Pro <span style="color:var(--text-muted);font-size:11px;">— Google, multimodal, refs</span></button>' +
     '<button data-pref="imagen3" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">Imagen 4 <span style="color:var(--text-muted);font-size:11px;">— Google, photorealistic</span></button>' +
