@@ -3350,7 +3350,13 @@ async function executeScheduledTask(task, idx) {
         var accent = '#a89878';
         try { accent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
         var logo = '';
-        try { logo = localStorage.getItem('roweos_brand_' + brandIdx + '_logo') || ''; } catch(e) {}
+        // v32.0-C: prefer brand object + ID-keyed storage; fall back to legacy position key
+        try {
+          if (typeof window.readBrandLogoSync === 'function' && brand) {
+            logo = window.readBrandLogoSync(brand) || '';
+          }
+          if (!logo) logo = localStorage.getItem('roweos_brand_' + brandIdx + '_logo') || '';
+        } catch(e) {}
         if (!logo) { try { var logoEl = document.querySelector('.brand-logo-img'); if (logoEl) logo = logoEl.src; } catch(e) {} }
         window._studioEmailContext = {
           contentHtml: '<div style="font-size:15px;line-height:1.7;white-space:pre-wrap;">' + escapeHtml(emailBody).replace(/\n/g, '<br>') + '</div>',

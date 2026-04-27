@@ -4369,7 +4369,14 @@ function executeWorkflowStep(step, context) {
       try { _obAccent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
       var _obLogo = '';
       var _obBrandIdx = (context && context._brandIdx !== undefined) ? context._brandIdx : (typeof selectedBrand !== 'undefined' ? selectedBrand : 0);
-      try { _obLogo = localStorage.getItem('roweos_brand_' + _obBrandIdx + '_logo') || ''; } catch(e) {}
+      // v32.0-C: prefer brand object + ID-keyed storage; fall back to legacy position key for in-flight migrations
+      try {
+        var _obBrand = (typeof brands !== 'undefined' && brands[_obBrandIdx]) ? brands[_obBrandIdx] : null;
+        if (typeof window.readBrandLogoSync === 'function' && _obBrand) {
+          _obLogo = window.readBrandLogoSync(_obBrand) || '';
+        }
+        if (!_obLogo) _obLogo = localStorage.getItem('roweos_brand_' + _obBrandIdx + '_logo') || '';
+      } catch(e) {}
       if (!_obLogo) { try { var _obLogoEl = document.querySelector('.brand-logo-img'); if (_obLogoEl) _obLogo = _obLogoEl.src; } catch(e) {} }
       window._studioEmailContext = {
         contentHtml: '<div style="font-size:15px;line-height:1.7;">' + _obRendered + '</div>',

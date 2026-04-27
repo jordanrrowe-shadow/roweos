@@ -8050,7 +8050,13 @@ function openStudioEmailComposer() {
   var brandName = brand.shortName || brand.name || 'Brand';
   var accentColor = brand.brandColor || '#a89878';
   var brandLogo = '';
-  try { brandLogo = localStorage.getItem('roweos_brand_' + brandIdx + '_logo') || ''; } catch(e) {}
+  // v32.0-C: prefer brand object + ID-keyed storage; fall back to legacy position key
+  try {
+    if (typeof window.readBrandLogoSync === 'function' && brand) {
+      brandLogo = window.readBrandLogoSync(brand) || '';
+    }
+    if (!brandLogo) brandLogo = localStorage.getItem('roweos_brand_' + brandIdx + '_logo') || '';
+  } catch(e) {}
   var contentHtml = '';
   try { contentHtml = markdownToHtml(run.deliv); } catch(e) { contentHtml = '<p>' + escapeHtml(run.deliv) + '</p>'; }
   var opName = run.op || 'Studio Output';

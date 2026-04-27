@@ -5179,6 +5179,9 @@ function reorderBrand(fromIdx, toIdx) {
   var currentBrand = parseInt(document.getElementById('brand').value) || 0;
   var activeBrandId = brands[currentBrand] ? (brands[currentBrand].id || brands[currentBrand].name) : null;
 
+  // v32.0-C: Logos travel with brand.id (stored on brand.logo or in IDB at
+  // roweos_brand_logo_<id>) — splicing the array does NOT need to move logo
+  // localStorage entries. Position-keyed legacy keys are migrated separately.
   // Move the brand in the array
   var moved = brands.splice(fromIdx, 1)[0];
   brands.splice(toIdx, 0, moved);
@@ -6297,13 +6300,13 @@ function handleBrandLogoUpload(input) {
         var _brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
         var _brand = (typeof brands !== 'undefined' && brands[_brandIdx]) ? brands[_brandIdx] : null;
         if (_brand) {
-          try {
-            if (_brand.id) localStorage.setItem('roweos_brandlogo_' + _brand.id, base64Logo);
-            var _origIdx = (typeof _brand._order === 'number') ? _brand._order : _brandIdx;
-            localStorage.setItem('roweos_brand_' + _origIdx + '_logo', base64Logo);
-          } catch(e) { /* best-effort dual save */ }
-          // Sync to brands array so dark/light system stays in sync
-          _brand.logo = base64Logo;
+          // v32.0-C: route through writeBrandLogo for ID-keyed + oversize handling
+          if (typeof window.writeBrandLogo === 'function' && _brand.id) {
+            try { window.writeBrandLogo(_brand, base64Logo); } catch(e) {}
+          } else {
+            // Fallback if writeBrandLogo unavailable
+            _brand.logo = base64Logo;
+          }
           if (typeof saveBrands === 'function') saveBrands();
         }
       }
@@ -6327,18 +6330,17 @@ function handleBrandLogoUpload(input) {
         showToast('Error saving logo. File may be too large.', 'error');
         return;
       }
-      // v29.1: Dual-key save for SVG path
+      // v32.0-C: route SVG path through writeBrandLogo for ID-keyed + oversize handling
       var isLife = typeof isLifeMode === 'function' && isLifeMode();
       if (!isLife) {
         var _brandIdx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
         var _brand = (typeof brands !== 'undefined' && brands[_brandIdx]) ? brands[_brandIdx] : null;
         if (_brand) {
-          try {
-            if (_brand.id) localStorage.setItem('roweos_brandlogo_' + _brand.id, rawBase64);
-            var _origIdx = (typeof _brand._order === 'number') ? _brand._order : _brandIdx;
-            localStorage.setItem('roweos_brand_' + _origIdx + '_logo', rawBase64);
-          } catch(e) {}
-          _brand.logo = rawBase64;
+          if (typeof window.writeBrandLogo === 'function' && _brand.id) {
+            try { window.writeBrandLogo(_brand, rawBase64); } catch(e) {}
+          } else {
+            _brand.logo = rawBase64;
+          }
           if (typeof saveBrands === 'function') saveBrands();
         }
       }

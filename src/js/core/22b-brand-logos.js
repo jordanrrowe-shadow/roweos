@@ -162,3 +162,49 @@ function migrateBrandLogos_v32() {
   });
 }
 window.migrateBrandLogos_v32 = migrateBrandLogos_v32;
+
+// v32.0-C: ID-stable brand reorder. Logos travel with brand.id, never with
+// array position. Pass an array of brand IDs in the desired order, OR an array
+// of brand objects (we extract .id from each).
+function reorderBrands(newOrderArray) {
+  if (!Array.isArray(newOrderArray)) return;
+  var brands = (window.brands && Array.isArray(window.brands)) ? window.brands : [];
+  var byId = {};
+  for (var i = 0; i < brands.length; i++) {
+    if (brands[i] && brands[i].id) byId[brands[i].id] = brands[i];
+  }
+  var reordered = [];
+  for (var j = 0; j < newOrderArray.length; j++) {
+    var entry = newOrderArray[j];
+    var id = (typeof entry === 'string') ? entry : (entry && entry.id);
+    if (id && byId[id]) reordered.push(byId[id]);
+  }
+  if (reordered.length !== brands.length) {
+    console.warn('[v32.0-C] reorderBrands length mismatch — aborting', reordered.length, brands.length);
+    return;
+  }
+  // Mutate the live array in place so all references stay valid
+  if (window.brands && Array.isArray(window.brands)) {
+    window.brands.length = 0;
+    for (var r = 0; r < reordered.length; r++) {
+      window.brands.push(reordered[r]);
+      // Refresh _order so saveBrands sort behavior is consistent
+      reordered[r]._order = r;
+    }
+  }
+  try { localStorage.setItem('roweos_user_brands', JSON.stringify(reordered)); } catch (e) {}
+  // Logos travel with brand.id — no logo localStorage edits here.
+  if (typeof window.saveBrands === 'function') {
+    try { window.saveBrands(); } catch (e2) {}
+  }
+  if (typeof window.initBrandLogo === 'function') {
+    try { window.initBrandLogo(); } catch (e3) {}
+  }
+  if (typeof window.renderBrandSelector === 'function') {
+    try { window.renderBrandSelector(); } catch (e4) {}
+  }
+  if (typeof window.populateSidebarBrandDropdown === 'function') {
+    try { window.populateSidebarBrandDropdown(); } catch (e5) {}
+  }
+}
+window.reorderBrands = reorderBrands;
