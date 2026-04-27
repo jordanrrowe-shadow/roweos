@@ -7796,6 +7796,208 @@ async function handleNanobananaChatImage(model, userMessage, onChunk, onComplete
   }
 }
 
+// v32.0-D: Routes edit requests to the right provider. Calls
+// generateImageWithNanobanana directly for Gemini paths (already accepts
+// referenceImages). GPT Image 2 routes to /v1/images/edits via
+// _handleOpenAIImageEdit.
+function handleImageEditRequest(prompt, attachments, opts) {
+  opts = opts || {};
+  var model = opts.model;
+  if (!attachments || !attachments.length) {
+    if (typeof showToast === 'function') showToast('No image attached for edit', 'error');
+    return Promise.resolve({ ok: false, error: 'no attachment' });
+  }
+  // v32.0-D: First-time picker — invoked when no preference is stored AND no
+  // explicit model was passed AND no opts.provider was forced.
+  var hasPref = false;
+  try { hasPref = !!localStorage.getItem('roweos_image_provider_pref'); } catch (e) {}
+  if (!hasPref && !opts.provider && !opts.model && typeof showImageProviderPickerOnce === 'function') {
+    return new Promise(function(resolve) {
+      showImageProviderPickerOnce(function(chosen) {
+        try { localStorage.setItem('roweos_image_provider_pref', chosen); } catch (eSet) {}
+        // Recurse with the chosen provider forced — avoids infinite loop because
+        // pref is now set.
+        handleImageEditRequest(prompt, attachments, { provider: chosen, model: opts.model }).then(resolve);
+      }, { headerText: 'Edit image with...' });
+    });
+  }
+  var pref = opts.provider || '';
+  if (!pref) {
+    try { pref = localStorage.getItem('roweos_image_provider_pref') || 'auto'; } catch (e2) { pref = 'auto'; }
+  }
+  return _downscaleAttachmentsForEdit(attachments).then(function(scaled) {
+    // OpenAI path: explicit gpt-image model OR pref points at OpenAI.
+    if (pref === 'openai' || pref === 'gpt-image-2' || (model && model.indexOf('gpt-image') === 0)) {
+      return _handleOpenAIImageEdit(prompt, scaled[0], { model: model || 'gpt-image-2' });
+    }
+    // Imagen does not support edits — fall back to Nano Banana 3.0 Pro.
+    if (pref === 'imagen' || pref === 'imagen3') {
+      if (typeof showToast === 'function') showToast("Imagen doesn't support edits — using Nano Banana 3.0 Pro", 'info');
+    }
+    // Default / nano-banana / auto: Nano Banana 3.0 Pro (or model override).
+    var pickModel = (model && model.indexOf('gemini') === 0) ? model : 'gemini-3-pro-image-preview';
+    return _handleNanobananaImageEdit(prompt, scaled, { model: pickModel });
+  });
+}
+window.handleImageEditRequest = handleImageEditRequest;
+
+// v32.0-D: Nano Banana edit path. Calls generateImageWithNanobanana directly
+// with downscaled reference images so the existing function's currentAgentFiles
+// auto-pickup is bypassed (we pass scaled refs explicitly).
+function _handleNanobananaImageEdit(prompt, scaledAttachments, opts) {
+  opts = opts || {};
+  var refImages = [];
+  for (var i = 0; i < scaledAttachments.length; i++) {
+    var att = scaledAttachments[i];
+    if (!att) continue;
+    var dataUrl = att.dataUrl || att.content || att.url;
+    if (!dataUrl || typeof dataUrl !== 'string') continue;
+    var commaIdx = dataUrl.indexOf(',');
+    var base64 = commaIdx >= 0 ? dataUrl.substring(commaIdx + 1) : dataUrl;
+    refImages.push({
+      base64: base64,
+      mimeType: att.type || 'image/png',
+      name: att.name || 'source'
+    });
+  }
+  if (!refImages.length) {
+    return Promise.resolve({ ok: false, error: 'no usable image data' });
+  }
+  if (typeof generateImageWithNanobanana !== 'function') {
+    return Promise.resolve({ ok: false, error: 'generateImageWithNanobanana missing' });
+  }
+  return generateImageWithNanobanana(prompt, {
+    model: opts.model || 'gemini-3-pro-image-preview',
+    referenceImages: refImages,
+    aspectRatio: '1:1'
+  }).then(function(result) {
+    if (result && result.images && result.images.length > 0 && result.images[0].base64) {
+      var dUrl = 'data:' + (result.images[0].mimeType || 'image/png') + ';base64,' + result.images[0].base64;
+      return {
+        ok: true,
+        dataUrl: dUrl,
+        provider: 'gemini',
+        providerLabel: (typeof _friendlyImageProvider === 'function') ? _friendlyImageProvider(opts.model || 'gemini-3-pro-image-preview') : 'Nano Banana 3.0 Pro',
+        model: opts.model || 'gemini-3-pro-image-preview',
+        _needsRender: true
+      };
+    }
+    if (result && result.imageData) {
+      return {
+        ok: true,
+        dataUrl: result.imageData,
+        provider: 'gemini',
+        providerLabel: (typeof _friendlyImageProvider === 'function') ? _friendlyImageProvider(opts.model || 'gemini-3-pro-image-preview') : 'Nano Banana 3.0 Pro',
+        model: opts.model || 'gemini-3-pro-image-preview',
+        _needsRender: true
+      };
+    }
+    return {
+      ok: false,
+      error: (result && result.text) ? ('Model returned text only: ' + result.text.substring(0, 200)) : 'No image data'
+    };
+  }, function(err) {
+    return { ok: false, error: (err && err.message) || err || 'unknown error' };
+  });
+}
+
+// v32.0-D: Downscale large attachments to <=2048px max edge (provider limits).
+function _downscaleAttachmentsForEdit(attachments) {
+  var promises = [];
+  for (var i = 0; i < attachments.length; i++) {
+    promises.push(_downscaleOneIfNeeded(attachments[i]));
+  }
+  return Promise.all(promises);
+}
+
+function _downscaleOneIfNeeded(att) {
+  return new Promise(function(resolve) {
+    if (!att) { resolve(att); return; }
+    var src = att.dataUrl || att.content || att.url || att.preview;
+    if (!src) { resolve(att); return; }
+    try {
+      var img = new Image();
+      img.onload = function() {
+        var max = Math.max(img.width, img.height);
+        if (max <= 2048) {
+          // Ensure dataUrl key is set so downstream consumers don't need to
+          // probe both content and dataUrl.
+          var copyNoOp = {};
+          for (var k in att) if (att.hasOwnProperty(k)) copyNoOp[k] = att[k];
+          copyNoOp.dataUrl = src;
+          resolve(copyNoOp);
+          return;
+        }
+        var scale = 2048 / max;
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        var ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(att); return; }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        var ds = canvas.toDataURL(att.type || 'image/png', 0.92);
+        var copy = {};
+        for (var k2 in att) if (att.hasOwnProperty(k2)) copy[k2] = att[k2];
+        copy.dataUrl = ds;
+        resolve(copy);
+      };
+      img.onerror = function() { resolve(att); };
+      img.src = src;
+    } catch (e) {
+      resolve(att);
+    }
+  });
+}
+
+// v32.0-D: OpenAI /v1/images/edits multipart upload.
+function _handleOpenAIImageEdit(prompt, attachment, opts) {
+  opts = opts || {};
+  var apiKeys;
+  try { apiKeys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}'); }
+  catch (e) { apiKeys = {}; }
+  var key = apiKeys.openai;
+  if (!key) {
+    if (typeof showToast === 'function') showToast('OpenAI key required for GPT Image 2 edits', 'error');
+    return Promise.resolve({ ok: false, error: 'no key' });
+  }
+  if (!attachment) return Promise.resolve({ ok: false, error: 'no attachment' });
+  var dataUrl = attachment.dataUrl || attachment.content || attachment.url;
+  if (!dataUrl) return Promise.resolve({ ok: false, error: 'no dataUrl on attachment' });
+  try {
+    var commaIdx = dataUrl.indexOf(',');
+    if (commaIdx < 0) return Promise.resolve({ ok: false, error: 'malformed dataUrl' });
+    var bin = atob(dataUrl.substring(commaIdx + 1));
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    var blob = new Blob([arr], { type: attachment.type || 'image/png' });
+    var fd = new FormData();
+    fd.append('image', blob, (attachment.name || 'source.png'));
+    fd.append('prompt', prompt);
+    fd.append('model', opts.model || 'gpt-image-2');
+    return fetch('https://api.openai.com/v1/images/edits', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + key },
+      body: fd
+    }).then(function(r) { return r.json(); }).then(function(json) {
+      if (json && json.data && json.data[0] && json.data[0].b64_json) {
+        return {
+          ok: true,
+          dataUrl: 'data:image/png;base64,' + json.data[0].b64_json,
+          provider: 'openai',
+          providerLabel: (typeof _friendlyImageProvider === 'function') ? _friendlyImageProvider(opts.model || 'gpt-image-2') : 'GPT Image 2',
+          model: opts.model || 'gpt-image-2',
+          _needsRender: true
+        };
+      }
+      return { ok: false, error: (json && json.error && json.error.message) || 'unknown error' };
+    }, function(err) {
+      return { ok: false, error: (err && err.message) || err || 'request failed' };
+    });
+  } catch (e) {
+    return Promise.resolve({ ok: false, error: (e && e.message) || e });
+  }
+}
+
 // ─── v13.9: DEEP RESEARCH (Gemini 3.1 Pro) ────────────────────────────
 
 /**
