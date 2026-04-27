@@ -2788,8 +2788,18 @@ function renderSyncStatus(containerId) {
   if (!container) return;
 
   // v30.1: Removed misleading "Sync v4 not active" early-return - v4 is disabled but v2/v3 sync works fine
-  var lastSync = localStorage.getItem('roweos_v4_last_sync');
-  var lastSyncText = lastSync ? new Date(parseInt(lastSync)).toLocaleString() : 'Never';
+  // v32.1.1: fall back to v2/v3's roweos_last_sync since v4 is disabled, otherwise it always shows Never
+  var lastSync = localStorage.getItem('roweos_v4_last_sync') || localStorage.getItem('roweos_last_sync');
+  var lastSyncText = 'Never';
+  if (lastSync) {
+    var _ms = parseInt(lastSync, 10);
+    if (!isNaN(_ms) && _ms > 1000000000000) {
+      lastSyncText = new Date(_ms).toLocaleString();
+    } else {
+      // localized date string from v2/v3 path
+      lastSyncText = lastSync;
+    }
+  }
   var queueStatus = (typeof syncEngine !== 'undefined' && typeof syncEngine.getQueueStatus === 'function') ? syncEngine.getQueueStatus() : { pending: 0, errors: 0, total: 0 };
   var deviceId = _getDeviceId();
   var deviceName = _getDeviceName();

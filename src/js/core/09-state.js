@@ -398,6 +398,10 @@ function reconcileOnStartup() {
       if (typeof updateProviderStatuses === 'function') updateProviderStatuses();
       // v32.1: auto-purge removed (had false-positive bug). Self-heal stale
       // tombstones + start convergence loop instead.
+      // v32.1.1: force-align from cloud first (cloud-newer overrides stale local).
+      if (typeof forceAlignFromCloud_v321 === 'function') {
+        try { forceAlignFromCloud_v321().catch(function(){}); } catch(e){}
+      }
       if (typeof selfHealStaleTombstones_v321 === 'function') {
         try { selfHealStaleTombstones_v321().catch(function(){}); } catch(e){}
       }

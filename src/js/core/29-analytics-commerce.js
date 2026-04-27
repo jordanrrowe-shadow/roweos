@@ -1261,32 +1261,28 @@ async function renderSyncInventory() {
     var statusColor = '';
     var actionBtn = '';
 
-    // v28.2: Status logic - always compare real local vs cloud counts. Baseline only used as tiebreaker.
+    // v32.1.1: Timestamp-based status — last write wins. If local _modifiedAt
+    // > cloud _modifiedAt, push; if cloud > local, pull. Status row only shows
+    // "Synced" or "Aligning…". No more "Push needed" / "Pull available" buttons.
     if (local === 0 && cloud === 0) {
       status = 'Empty';
       statusColor = '#666';
-    } else if (local === cloud && local > 0) {
+    } else if (local === cloud) {
       status = 'Synced';
       statusColor = '#22c55e';
-    } else if (local > cloud) {
-      status = 'Push needed';
-      statusColor = '#f59e0b';
-      actionBtn = '<button onclick="event.stopPropagation(); pushSyncCategory(this);" style="font-size: 11px; padding: 2px 8px; margin-left: 8px; cursor: pointer; background: var(--accent); color: var(--accent-text, #fff); border: none; border-radius: 4px;">Push</button>';
-    } else if (cloud > local) {
-      status = 'Pull available';
-      statusColor = '#3b82f6';
-      actionBtn = '<button onclick="event.stopPropagation(); pullSyncCategory(this);" style="font-size: 11px; padding: 2px 8px; margin-left: 8px; cursor: pointer; background: #3b82f6; color: #fff; border: none; border-radius: 4px;">Pull</button>';
     } else {
-      // Fallback: use baseline for ambiguous cases (e.g. local !== cloud but items differ by content not count)
-      var baselineKey = 'roweos_sync_baseline_' + cat.syncKey;
-      var baseline = parseInt(localStorage.getItem(baselineKey) || '0', 10);
-      if (baseline > 0 && local === baseline) {
-        status = 'Synced';
-        statusColor = '#22c55e';
-      } else {
-        status = 'Synced';
-        statusColor = '#22c55e';
-      }
+      // Drift detected — auto-resolve via timestamp.
+      status = 'Aligning…';
+      statusColor = '#888';
+      // Fire convergence on next tick (don't block render)
+      try {
+        var __cat = cat;
+        setTimeout(function() {
+          if (typeof window._v321ResolveDrift === 'function') {
+            window._v321ResolveDrift(__cat).catch(function(){});
+          }
+        }, 50);
+      } catch (_re) {}
     }
     // v28.2: Show count diff indicator when local != cloud
     var countDiff = '';

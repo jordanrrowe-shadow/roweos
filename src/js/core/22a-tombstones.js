@@ -1401,3 +1401,292 @@ function _v321ConvergeOnce() {
   }
   return Promise.resolve({ ok: false, error: 'loadFromFirebaseV2 missing' });
 }
+
+// =====================================================================
+// v32.1.1: TIMESTAMP-BASED DRIFT RESOLVER
+// =====================================================================
+// Called from renderSyncInventory when local count != cloud count.
+// Compares local-array max _modifiedAt vs cloud-doc _modifiedAt.
+// - If cloud is newer (cloud was modified more recently) → pull-only
+//   (loadFromFirebaseV2 will replace local with cloud, including
+//   empty-cloud-clears-local for wiped categories).
+// - If local is newer → push-only (call category-specific save fn).
+// - If timestamps tie or are missing → cloud-authoritative pull (safe default).
+// Throttled to once per category per 10s to avoid hammering Firestore.
+
+var _v321DriftLast = {}; // { categoryName: timestampMs }
+var V321_DRIFT_THROTTLE_MS = 10 * 1000;
+
+function _v321ResolveDrift(syncCat) {
+  if (!syncCat || !syncCat.name) return Promise.resolve({ ok: false, error: 'no cat' });
+  var name = syncCat.name;
+  var last = _v321DriftLast[name] || 0;
+  if (Date.now() - last < V321_DRIFT_THROTTLE_MS) {
+    return Promise.resolve({ ok: true, throttled: true });
+  }
+  _v321DriftLast[name] = Date.now();
+
+  // Map UI category name → registry category id
+  var nameToId = {
+    'Brands': 'brands', 'BrandAI Chats': 'brandAIChats', 'LifeAI Chats': 'lifeAIChats',
+    'BrandAI To-Dos': 'brandTodos', 'LifeAI To-Dos': 'lifeTodos',
+    'Calendar': 'calendar', 'Journal': 'journal', 'Library Files': 'libraryFiles',
+    'Inventory': 'inventory', 'Possessions': 'possessions', 'Studio Runs': 'studioRuns',
+    'Pulse Goals': 'pulseGoals', 'Automations': 'automations', 'Custom Ops': 'customOps',
+    'Clients': 'clients', 'Team': 'team', 'Direct Reports': 'directReports',
+    'LifeAI Profiles': 'lifeAIProfiles', 'Brand Logos': 'brandLogos',
+    'Folio Items': 'folioItems', 'Notebooks': 'notebooks'
+  };
+  var catId = nameToId[name];
+  if (!catId) return Promise.resolve({ ok: false, error: 'unmapped: ' + name });
+  var cat = getCategoryById(catId);
+  if (!cat) return Promise.resolve({ ok: false, error: 'no registry: ' + catId });
+
+  return _v321FetchModifiedTimestamps(cat).then(function(ts) {
+    var localTs = ts.local || 0;
+    var cloudTs = ts.cloud || 0;
+    var direction;
+    if (cloudTs > localTs) direction = 'pull';
+    else if (localTs > cloudTs) direction = 'push';
+    else direction = 'pull'; // tie → cloud-authoritative default
+    if (direction === 'pull') {
+      return _v321DoPull(cat).then(function(r) { return { ok: true, direction: 'pull', result: r }; });
+    } else {
+      return _v321DoPush(cat).then(function(r) { return { ok: true, direction: 'push', result: r }; });
+    }
+  }, function(err) {
+    return { ok: false, error: err };
+  });
+}
+window._v321ResolveDrift = _v321ResolveDrift;
+
+function _v321FetchModifiedTimestamps(cat) {
+  // Local: max _modifiedAt across items in localKey OR localStorage key timestamp
+  var localTs = 0;
+  if (cat.localKey) {
+    try {
+      var raw = localStorage.getItem(cat.localKey);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        var arr = parsed;
+        if (cat.localArrayField && parsed && parsed[cat.localArrayField]) arr = parsed[cat.localArrayField];
+        if (Array.isArray(arr)) {
+          for (var i = 0; i < arr.length; i++) {
+            var ts = 0;
+            if (arr[i] && arr[i]._modifiedAt) {
+              ts = typeof arr[i]._modifiedAt === 'number' ? arr[i]._modifiedAt : Date.parse(arr[i]._modifiedAt);
+            }
+            if (ts > localTs) localTs = ts;
+          }
+        }
+        if (parsed && parsed._modifiedAt) {
+          var topTs = typeof parsed._modifiedAt === 'number' ? parsed._modifiedAt : Date.parse(parsed._modifiedAt);
+          if (topTs > localTs) localTs = topTs;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Cloud: top-level _modifiedAt on cloud doc (blob) or aggregate from subcollection
+  var cloudTs = 0;
+  if (!window.firebase || !window.firebaseUser) return Promise.resolve({ local: localTs, cloud: 0 });
+  var db = firebase.firestore();
+  var basePath = 'roweos_users/' + window.firebaseUser.uid;
+  if (cat.cloudShape === 'blob') {
+    return db.doc(basePath + '/' + cat.cloudPath).get().then(function(snap) {
+      if (snap.exists) {
+        var d = snap.data();
+        if (d._modifiedAt) {
+          cloudTs = typeof d._modifiedAt === 'number' ? d._modifiedAt : Date.parse(d._modifiedAt);
+        }
+      }
+      return { local: localTs, cloud: cloudTs };
+    }, function() { return { local: localTs, cloud: 0 }; });
+  }
+  if (cat.cloudShape === 'subcollection') {
+    return db.collection(basePath + '/' + cat.cloudPath).get().then(function(snap) {
+      snap.forEach(function(d) {
+        var data = d.data();
+        if (data && data._modifiedAt) {
+          var ts2 = typeof data._modifiedAt === 'number' ? data._modifiedAt : Date.parse(data._modifiedAt);
+          if (ts2 > cloudTs) cloudTs = ts2;
+        }
+      });
+      return { local: localTs, cloud: cloudTs };
+    }, function() { return { local: localTs, cloud: 0 }; });
+  }
+  return Promise.resolve({ local: localTs, cloud: 0 });
+}
+
+function _v321DoPull(cat) {
+  if (typeof window.loadFromFirebaseV2 === 'function') {
+    return Promise.resolve(window.loadFromFirebaseV2(false, true)).then(function() {
+      if (typeof window.renderSyncInventory === 'function') {
+        try { window.renderSyncInventory(); } catch (e) {}
+      }
+      return { pulled: true };
+    });
+  }
+  return Promise.resolve({ pulled: false, error: 'loadFromFirebaseV2 missing' });
+}
+
+function _v321DoPush(cat) {
+  // Map category id → existing save function for that category
+  var saveMap = {
+    'brands': 'saveBrands',
+    'brandTodos': 'saveTodos',
+    'lifeTodos': 'saveTodos',
+    'calendar': 'saveCalendar',
+    'journal': 'saveJournal',
+    'pulseGoals': 'savePulseGoals',
+    'automations': 'saveAutomations',
+    'inventory': 'saveInventory',
+    'possessions': 'savePossessions',
+    'studioRuns': 'saveStudioRuns',
+    'customOps': 'saveCustomOps',
+    'clients': 'saveClients',
+    'team': 'saveTeam',
+    'directReports': 'saveDirectReports',
+    'lifeAIProfiles': 'saveLifeAIProfiles',
+    'folioItems': 'saveFolioItems',
+    'notebooks': 'saveNotebooks',
+    'libraryFiles': 'saveLibrary',
+    'brandLogos': 'saveBrands',
+    'brandAIChats': null, // chat saves are inline per-message; no aggregate save
+    'lifeAIChats': null
+  };
+  var fnName = saveMap[cat.id];
+  if (!fnName) return Promise.resolve({ pushed: false, reason: 'no save fn for ' + cat.id });
+  var fn = window[fnName];
+  if (typeof fn !== 'function') return Promise.resolve({ pushed: false, reason: fnName + ' not loaded' });
+  try {
+    var p = fn();
+    return Promise.resolve(p).then(function() {
+      if (typeof window.renderSyncInventory === 'function') {
+        try { setTimeout(function(){ window.renderSyncInventory(); }, 800); } catch (e) {}
+      }
+      return { pushed: true, fn: fnName };
+    }, function(err) { return { pushed: false, error: err }; });
+  } catch (e) {
+    return Promise.resolve({ pushed: false, error: e });
+  }
+}
+
+// =====================================================================
+// v32.1.1: FORCE-ALIGN ON FIRST LAUNCH
+// =====================================================================
+// One-shot. For each registered category, fetch cloud's _modifiedAt and
+// compare against local items' max _modifiedAt. If cloud is strictly
+// NEWER, overwrite local with cloud's data — including the empty-cloud
+// case where local should clear to match. This fixes the situation where
+// Firebase Admin wiped cloud (with fresh _modifiedAt) but the user's
+// browser still has old local items showing as "Push needed".
+//
+// Guarded by roweos_v321_force_align flag so it never re-runs.
+
+var V321_FORCE_ALIGN_FLAG = 'roweos_v321_force_align';
+
+function forceAlignFromCloud_v321() {
+  if (localStorage.getItem(V321_FORCE_ALIGN_FLAG) === 'done') {
+    return Promise.resolve({ ok: true, skipped: true });
+  }
+  if (!window.firebase || !window.firebaseUser) return Promise.resolve({ ok: false, error: 'no auth' });
+
+  var db = firebase.firestore();
+  var basePath = 'roweos_users/' + window.firebaseUser.uid;
+  var ops = [];
+  for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+    (function(cat) {
+      if (!cat || !cat.localKey) return;
+      if (cat.cloudShape !== 'blob') return; // only blob shape — subcollection items handle individually
+      ops.push(_v321AlignBlobCategory(cat, db, basePath));
+    })(SYNC_CATEGORIES[i]);
+  }
+  return Promise.all(ops).then(function(results) {
+    var aligned = 0;
+    for (var j = 0; j < results.length; j++) {
+      if (results[j] && results[j].aligned) aligned++;
+    }
+    try { localStorage.setItem(V321_FORCE_ALIGN_FLAG, 'done'); } catch (e) {}
+    if (aligned > 0) {
+      console.log('[v32.1.1] Force-aligned ' + aligned + ' category(ies) from newer cloud');
+      if (typeof window.renderSyncInventory === 'function') {
+        try { window.renderSyncInventory(); } catch (e) {}
+      }
+    }
+    return { ok: true, aligned: aligned, results: results };
+  });
+}
+window.forceAlignFromCloud_v321 = forceAlignFromCloud_v321;
+
+function _v321AlignBlobCategory(cat, db, basePath) {
+  return db.doc(basePath + '/' + cat.cloudPath).get().then(function(snap) {
+    if (!snap.exists) return { id: cat.id, aligned: false, reason: 'no cloud doc' };
+    var d = snap.data();
+    var cloudTs = 0;
+    if (d._modifiedAt) {
+      cloudTs = typeof d._modifiedAt === 'number' ? d._modifiedAt : Date.parse(d._modifiedAt);
+    }
+    if (!cloudTs) return { id: cat.id, aligned: false, reason: 'no cloud ts' };
+
+    // Read local max ts
+    var localTs = 0;
+    try {
+      var raw = localStorage.getItem(cat.localKey);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        var arr = parsed;
+        if (cat.localArrayField && parsed && parsed[cat.localArrayField]) arr = parsed[cat.localArrayField];
+        if (Array.isArray(arr)) {
+          for (var i = 0; i < arr.length; i++) {
+            if (arr[i] && arr[i]._modifiedAt) {
+              var ts = typeof arr[i]._modifiedAt === 'number' ? arr[i]._modifiedAt : Date.parse(arr[i]._modifiedAt);
+              if (ts > localTs) localTs = ts;
+            }
+          }
+        }
+        if (parsed && parsed._modifiedAt) {
+          var topTs = typeof parsed._modifiedAt === 'number' ? parsed._modifiedAt : Date.parse(parsed._modifiedAt);
+          if (topTs > localTs) localTs = topTs;
+        }
+      }
+    } catch (e) {}
+
+    if (cloudTs <= localTs) return { id: cat.id, aligned: false, reason: 'local newer or equal' };
+
+    // Cloud is newer → overwrite local with cloud's array
+    var cloudArr = d[cat.blobField || 'data'] || [];
+    if (!Array.isArray(cloudArr)) return { id: cat.id, aligned: false, reason: 'cloud not array' };
+
+    var payload;
+    if (cat.localArrayField) {
+      var existing = {};
+      try { existing = JSON.parse(localStorage.getItem(cat.localKey) || '{}'); } catch (e2) {}
+      if (typeof existing !== 'object' || existing === null || Array.isArray(existing)) existing = {};
+      existing[cat.localArrayField] = cloudArr;
+      existing._modifiedAt = cloudTs;
+      payload = existing;
+    } else if (cat.localFilter && cat.localFilter.field) {
+      // Shared storage: preserve other-category items, replace this category's
+      var raw2 = {};
+      try { raw2 = JSON.parse(localStorage.getItem(cat.localKey) || '[]'); } catch (e3) {}
+      var existingAll = Array.isArray(raw2) ? raw2 : [];
+      var others = existingAll.filter(function(x) { return !(x && x[cat.localFilter.field] === cat.localFilter.value); });
+      payload = others.concat(cloudArr);
+    } else {
+      payload = cloudArr;
+    }
+    try { localStorage.setItem(cat.localKey, JSON.stringify(payload)); } catch (e4) {}
+
+    // Trigger any rerender callbacks
+    if (cat.rerender) {
+      for (var r = 0; r < cat.rerender.length; r++) {
+        try { var fn = window[cat.rerender[r]]; if (typeof fn === 'function') fn(); } catch (e5) {}
+      }
+    }
+
+    return { id: cat.id, aligned: true, cloudCount: cloudArr.length, cloudTs: cloudTs, localTs: localTs };
+  }, function(err) {
+    return { id: cat.id, aligned: false, error: err };
+  });
+}
