@@ -3092,10 +3092,73 @@ function applyAccessibilityScale() {
   var textLevel = parseInt(localStorage.getItem('roweos_text_size') || '100') || 100;
   var root = document.documentElement;
 
+  // v31.9 (iPad fix): Detect touch tablets in the iPad size range. The desktop +
+  // mobile compensation paths both produce wrong results on iPad Safari — at 75%
+  // the JS-applied compensated widths cause the entire UI to render at ~60% of the
+  // viewport with massive black margins. iPadOS 13+ reports as MacIntel so we use
+  // the CSS hover/pointer test plus maxTouchPoints to identify a real iPad.
+  var _isIPad = (typeof window !== 'undefined') && (
+    window.matchMedia('(hover: none) and (pointer: coarse) and (min-width: 769px)').matches ||
+    (navigator && navigator.maxTouchPoints > 1 && /MacIntel|iPad/.test(navigator.platform || ''))
+  );
+
   // v25.1: Apply interface zoom via CSS zoom on the main app container
   // This scales EVERYTHING proportionally - works on both desktop and iOS Safari
   var appContainer = document.getElementById('app') || document.body;
   var zoomFactor = zoomLevel / 100;
+
+  // v31.9 (iPad fix): On iPad, take a SIMPLIFIED zoom path — apply CSS zoom to body
+  // and let the browser handle layout naturally. No JS width compensation, no sidebar
+  // margin override. Those compensations are the source of the 75% distortion.
+  // Desktop + mobile branches below remain UNTOUCHED.
+  if (_isIPad) {
+    // Clear any leftover desktop/mobile compensation that may already be on the DOM
+    appContainer.style.removeProperty('width');
+    appContainer.style.removeProperty('min-height');
+    appContainer.style.removeProperty('max-width');
+    root.style.removeProperty('width');
+    root.style.removeProperty('max-width');
+    root.style.removeProperty('overflow-x');
+    root.style.removeProperty('--compensated-vw');
+    var _ipadMW = document.querySelector('.main-wrapper');
+    if (_ipadMW) {
+      _ipadMW.style.removeProperty('min-height');
+      _ipadMW.style.removeProperty('overflow-x');
+      _ipadMW.style.removeProperty('margin-left');
+    }
+    var _ipadPanels = document.querySelectorAll('.panel-view');
+    for (var _ipv = 0; _ipv < _ipadPanels.length; _ipv++) {
+      _ipadPanels[_ipv].style.removeProperty('min-height');
+      _ipadPanels[_ipv].style.removeProperty('max-width');
+      _ipadPanels[_ipv].style.removeProperty('width');
+      _ipadPanels[_ipv].style.removeProperty('height');
+      _ipadPanels[_ipv].style.removeProperty('bottom');
+    }
+    // Apply zoom directly to body so CSS zoom flows through naturally
+    if (zoomLevel !== 100) {
+      document.body.style.zoom = zoomFactor.toString();
+      appContainer.style.zoom = '';
+    } else {
+      document.body.style.zoom = '';
+      appContainer.style.zoom = '';
+    }
+    // Expose for CSS rules to react
+    root.style.setProperty('--zoom-factor', zoomFactor.toString());
+    root.setAttribute('data-ipad', 'true');
+    // Trigger helix/blob resize after zoom settles
+    if (typeof resizeHelix === 'function') { setTimeout(resizeHelix, 100); setTimeout(resizeHelix, 500); }
+    if (typeof resizeBlob === 'function') { setTimeout(resizeBlob, 100); }
+    // Text size still applies independently
+    if (textLevel !== 100) {
+      root.style.fontSize = (16 * (textLevel / 100)) + 'px';
+    } else {
+      root.style.fontSize = '';
+    }
+    root.style.setProperty('--text-scale', String(textLevel / 100));
+    root.style.setProperty('--zoom-scale', String(zoomFactor));
+    return;
+  }
+
   if (zoomLevel !== 100) {
     // v30.1: Capture viewport BEFORE zoom - Safari changes innerWidth after zoom is applied
     var _preZoomW = window.innerWidth;
@@ -5335,11 +5398,19 @@ function renderTuningConversations() {
   }
   
   // v10.5.25: Separate conversations by mode
+  // v31.18: Filter out tombstoned chats so Purge / individual deletes actually hide them.
+  var _hideTomb = {};
+  try {
+    var _tArr = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+    if (Array.isArray(_tArr)) _tArr.forEach(function(id) { _hideTomb[String(id)] = true; });
+  } catch(e) {}
+
   var brandConvos = [];
   var lifeConvos = [];
-  
+
   agentCommands.forEach(function(cmd, idx) {
     cmd._originalIndex = idx; // Store original index for actions
+    if (cmd && cmd.id && _hideTomb[String(cmd.id)]) return; // hide tombstoned
     if (cmd.mode === 'life') {
       lifeConvos.push(cmd);
     } else {
@@ -5417,7 +5488,8 @@ function buildConversationItem(cmd, mode) {
   var continueLabel = mode === 'life' ? 'Continue in LifeAI' : 'Continue in BrandAI';
   
   // v10.5.32: Additional action buttons
-  var additionalActions = 
+  // v31.18: Add per-conversation Delete button (writes tombstone + removes from cloud).
+  var additionalActions =
     '<button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); uploadHistoryToStudio(' + realIndex + ')" style="margin-left: var(--space-2);">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>' +
       'Upload to Studio' +
@@ -5425,6 +5497,10 @@ function buildConversationItem(cmd, mode) {
     '<button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); chatWithHistoryItem(' + realIndex + ')" style="margin-left: var(--space-2);">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
       'Chat' +
+    '</button>' +
+    '<button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); deleteHistoryConversation(' + realIndex + ')" style="margin-left: var(--space-2);color:#f87171;border-color:rgba(248,113,113,0.4);">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+      'Delete' +
     '</button>';
   
   item.innerHTML = 
@@ -5518,6 +5594,48 @@ function toggleTuningConversation(index) {
     }
   });
 }
+
+// v31.18: Delete a single conversation from History (per-item button).
+// Writes tombstone + Firestore delete so it stays gone across devices and pulls.
+function deleteHistoryConversation(index) {
+  var cmd = agentCommands[index];
+  if (!cmd) return;
+  if (!confirm('Delete this conversation? This adds a tombstone so it will not return on next sync.')) return;
+  var id = cmd.id;
+  // Splice out of in-memory + correct localStorage key
+  agentCommands.splice(index, 1);
+  if (cmd.mode === 'life') {
+    try {
+      var lifeArr = JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]');
+      lifeArr = lifeArr.filter(function(c) { return !(c && id && c.id === id); });
+      localStorage.setItem('roweos_life_agentCommands', JSON.stringify(lifeArr));
+    } catch(e) {}
+  } else {
+    try {
+      var brandArr = JSON.parse(localStorage.getItem('roweos_agentCommands') || '[]');
+      brandArr = brandArr.filter(function(c) { return !(c && id && c.id === id); });
+      localStorage.setItem('roweos_agentCommands', JSON.stringify(brandArr));
+    } catch(e) {}
+  }
+  // Tombstone
+  if (id) {
+    try {
+      var tArr = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+      if (tArr.indexOf(id) < 0) tArr.push(id);
+      localStorage.setItem('roweos_deleted_chat_ids', JSON.stringify(tArr));
+      if (typeof writeDB === 'function') {
+        writeDB('profile/deletedChatIds', { ids: tArr, _modifiedAt: Date.now() }, { category: 'profile' });
+      }
+    } catch(e) {}
+    // Delete from Firestore subcollection
+    if (typeof deleteDBDoc === 'function') {
+      try { deleteDBDoc('chats', String(id), 'brandai_chats'); } catch(e) {}
+    }
+  }
+  if (typeof renderTuningConversations === 'function') renderTuningConversations();
+  showToast('Conversation deleted (tombstone written)', 'success');
+}
+window.deleteHistoryConversation = deleteHistoryConversation;
 
 // v9.1.14: Continue conversation from History in BrandAI
 function continueConversationFromHistory(index) {

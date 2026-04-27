@@ -1926,7 +1926,7 @@ function selectAgent(agentId) {
   // v28.9: Hide/show action bar based on panel type
   var studioActionBar = document.getElementById('studioActionBar');
   var studioExpander = document.getElementById('studioExpanderPanel');
-  if (agentId === 'imagechat' || agentId === 'videochat' || agentId === 'blog') {
+  if (agentId === 'imagechat' || agentId === 'videochat' || agentId === 'blog' || agentId === 'gallery') {
     // Hide normal operations + action bar, show media panel
     if (studioContent) studioContent.style.display = 'none';
     if (studioActionBar) studioActionBar.style.display = 'none';
@@ -1944,6 +1944,9 @@ function selectAgent(agentId) {
       renderStudioImageChat(studioMediaPanel);
     } else if (agentId === 'videochat') {
       renderStudioVideoChat(studioMediaPanel);
+    } else if (agentId === 'gallery') {
+      // v31.10: Studio Gallery — aggregator over all generated/uploaded image + video assets
+      renderStudioGallery(studioMediaPanel);
     } else {
       renderStudioBlog(studioMediaPanel);
     }
@@ -2009,6 +2012,254 @@ function renderStudioVideoChat(container) {
     renderAutoLabVideoLab('studioVideoLabPanel');
   } else {
     container.innerHTML = '<div style="padding:40px;text-align:center;opacity:0.5;">Video Chat not available.</div>';
+  }
+}
+
+// v31.10: Studio Gallery — aggregates Image Lab + Image Chat outputs into a single
+// inline grid right inside the Studio. NO Visual-Assets-style auto-pull from brand
+// library; this surface is for content the user generated in Studio. Each item gets
+// per-item actions: Expand, Download, Save to Library, Save to Folio, Delete.
+// Reads from canonical roweos_auto_lab_images (already syncs to gallery via
+// generateAutoLabImage + sendImageLabMessage). Folder/library save is explicit.
+function renderStudioGallery(container) {
+  if (!container) return;
+  // v31.11: Use in-memory cache so IDB-backed images render without needing the
+  // async lazy-restore. Without this we always show "0 items" on first render.
+  var images = [];
+  try {
+    if (typeof readStudioGallery === 'function') {
+      images = readStudioGallery().slice(0);
+    } else {
+      var raw = localStorage.getItem('roweos_auto_lab_images') || '[]';
+      images = JSON.parse(raw);
+    }
+    if (!Array.isArray(images)) images = [];
+  } catch (e) { images = []; }
+
+  // v31.12: Aggregate videos into the gallery alongside images.
+  var videos = [];
+  try {
+    var rawV = localStorage.getItem('roweos_auto_lab_videos') || '[]';
+    videos = JSON.parse(rawV);
+    if (!Array.isArray(videos)) videos = [];
+  } catch (e) { videos = []; }
+
+  // Tag for unified rendering
+  var imageItems = images.map(function(it) { it._kind = 'image'; return it; });
+  var videoItems = videos.map(function(it) { it._kind = 'video'; return it; });
+  var allItems = imageItems.concat(videoItems);
+  allItems.sort(function(a, b) {
+    var ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    var tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return tb - ta;
+  });
+
+  // v31.12: Filter state (default 'all')
+  if (typeof window._studioGalleryFilter === 'undefined') window._studioGalleryFilter = 'all';
+  var filter = window._studioGalleryFilter;
+  var filtered = allItems.filter(function(it) {
+    if (filter === 'all') return true;
+    if (filter === 'images') return it._kind === 'image';
+    if (filter === 'videos') return it._kind === 'video';
+    return true;
+  });
+
+  var html = '';
+  html += '<div style="margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">';
+  html += '<div>';
+  html += '<div style="font-size:18px;font-weight:600;color:var(--text-primary);">Studio Gallery</div>';
+  html += '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">All images and videos you generate in Studio land here. Save to Library or Folio when you want them in your brand assets.</div>';
+  html += '</div>';
+  html += '<div style="font-size:12px;color:var(--text-muted);">' + filtered.length + ' item' + (filtered.length === 1 ? '' : 's') + '</div>';
+  html += '</div>';
+
+  // Filter pills
+  var filterDef = [
+    { id: 'all', label: 'All', count: allItems.length },
+    { id: 'images', label: 'Images', count: imageItems.length },
+    { id: 'videos', label: 'Videos', count: videoItems.length }
+  ];
+  html += '<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">';
+  filterDef.forEach(function(f) {
+    var active = (filter === f.id);
+    var bg = active ? 'rgba(168,152,120,0.18)' : 'transparent';
+    var color = active ? 'var(--brand-accent)' : 'var(--text-muted)';
+    var border = active ? '1px solid rgba(168,152,120,0.4)' : '1px solid var(--border-color)';
+    html += '<button onclick="setStudioGalleryFilter(\'' + f.id + '\')" style="padding:5px 12px;border-radius:14px;font-size:11px;cursor:pointer;background:' + bg + ';color:' + color + ';border:' + border + ';font-weight:500;">' + f.label + ' (' + f.count + ')</button>';
+  });
+  html += '</div>';
+
+  if (filtered.length === 0) {
+    html += '<div style="padding:60px 20px;text-align:center;border:1px dashed var(--border-color);border-radius:12px;color:var(--text-muted);">';
+    html += '<div style="font-size:14px;margin-bottom:6px;">No items match this filter.</div>';
+    html += '<div style="font-size:12px;">Use the Image, Image Chat, or Video tabs above to generate content.</div>';
+    html += '</div>';
+    container.innerHTML = html;
+    return;
+  }
+
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">';
+  for (var i = 0; i < filtered.length; i++) {
+    var it = filtered[i];
+    if (!it) continue;
+    var src = it.dataUrl || it.videoUrl || it.url || '';
+    if (!src) continue;
+    var prompt = (it.prompt || 'Untitled');
+    var dateStr = '';
+    try { if (it.createdAt) dateStr = new Date(it.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch(e) {}
+    var isVideo = (it._kind === 'video');
+    var sourceBadge = isVideo
+      ? 'Video'
+      : (it.source === 'image_chat' ? 'Image Chat' : (it.model || 'Image'));
+    var itemId = it.id || ('legacy_' + i);
+
+    html += '<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">';
+    html += '<div style="position:relative;background:#0a0a0a;aspect-ratio:1/1;cursor:pointer;" onclick="' + (isVideo ? 'expandStudioGalleryVideo' : 'expandStudioGalleryImage') + '(\'' + itemId + '\')">';
+    if (isVideo) {
+      html += '<video src="' + src + '" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block;"></video>';
+      html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.18);">';
+      html += '<svg viewBox="0 0 24 24" width="40" height="40" fill="rgba(255,255,255,0.85)"><polygon points="6 4 20 12 6 20"/></svg>';
+      html += '</div>';
+    } else {
+      html += '<img src="' + src + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">';
+    }
+    html += '<div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.6);color:#d4b896;font-size:10px;padding:3px 8px;border-radius:6px;letter-spacing:0.4px;text-transform:uppercase;">' + escapeHtml(sourceBadge) + '</div>';
+    html += '</div>';
+    html += '<div style="padding:10px 12px;display:flex;flex-direction:column;gap:6px;">';
+    html += '<div style="font-size:12px;color:var(--text-primary);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + escapeHtml(prompt) + '</div>';
+    if (dateStr) html += '<div style="font-size:10px;color:var(--text-muted);">' + escapeHtml(dateStr) + '</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">';
+    if (!isVideo) {
+      html += '<button onclick="event.stopPropagation();saveStudioGalleryToLibrary(\'' + itemId + '\')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Save to Library</button>';
+      html += '<button onclick="event.stopPropagation();downloadStudioGalleryImage(\'' + itemId + '\')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Download</button>';
+      html += '<button onclick="event.stopPropagation();deleteStudioGalleryImage(\'' + itemId + '\')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid rgba(248,113,113,0.3);background:transparent;color:#f87171;cursor:pointer;">Delete</button>';
+    } else {
+      html += '<button onclick="event.stopPropagation();downloadStudioGalleryVideo(\'' + itemId + '\')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Download</button>';
+      html += '<button onclick="event.stopPropagation();deleteStudioGalleryVideo(\'' + itemId + '\')" style="font-size:10px;padding:4px 8px;border-radius:6px;border:1px solid rgba(248,113,113,0.3);background:transparent;color:#f87171;cursor:pointer;">Delete</button>';
+    }
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function setStudioGalleryFilter(filter) {
+  window._studioGalleryFilter = filter;
+  var panel = document.getElementById('studioMediaPanel');
+  if (panel) renderStudioGallery(panel);
+}
+
+function _studioGalleryFindVideo(vidId) {
+  var videos = [];
+  try { videos = JSON.parse(localStorage.getItem('roweos_auto_lab_videos') || '[]'); } catch (e) { return null; }
+  for (var i = 0; i < videos.length; i++) {
+    if (videos[i] && (videos[i].id === vidId || ('legacy_' + i) === vidId)) return videos[i];
+  }
+  return null;
+}
+
+function expandStudioGalleryVideo(vidId) {
+  var v = _studioGalleryFindVideo(vidId);
+  var src = v && (v.videoUrl || v.url || v.dataUrl);
+  if (!src) return;
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:100000;display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.onclick = function(e) { if (e.target === modal) document.body.removeChild(modal); };
+  modal.innerHTML = '<video src="' + src + '" controls autoplay style="max-width:95vw;max-height:90vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.6);"></video>';
+  document.body.appendChild(modal);
+}
+
+function downloadStudioGalleryVideo(vidId) {
+  var v = _studioGalleryFindVideo(vidId);
+  var src = v && (v.videoUrl || v.url || v.dataUrl);
+  if (!src) return;
+  var a = document.createElement('a');
+  a.href = src;
+  a.download = 'roweos-video-' + (vidId || Date.now()) + '.mp4';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function deleteStudioGalleryVideo(vidId) {
+  if (!confirm('Delete this video from the Studio Gallery?')) return;
+  try {
+    var videos = JSON.parse(localStorage.getItem('roweos_auto_lab_videos') || '[]');
+    videos = videos.filter(function(v, i) { return !(v && (v.id === vidId || ('legacy_' + i) === vidId)); });
+    localStorage.setItem('roweos_auto_lab_videos', JSON.stringify(videos));
+    if (typeof writeDB === 'function') {
+      writeDB('library/studio_videos', { data: JSON.stringify(videos) }, { category: 'library' });
+    }
+  } catch (e) { console.warn('[StudioGallery] video delete failed:', e); }
+  var panel = document.getElementById('studioMediaPanel');
+  if (panel) renderStudioGallery(panel);
+  showToast('Video deleted from gallery', 'success');
+}
+
+function _studioGalleryFindImage(imgId) {
+  var images = [];
+  try {
+    images = (typeof readStudioGallery === 'function')
+      ? readStudioGallery().slice(0)
+      : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+  } catch (e) { return null; }
+  for (var i = 0; i < images.length; i++) { if (images[i] && images[i].id === imgId) return images[i]; }
+  return null;
+}
+
+function expandStudioGalleryImage(imgId) {
+  var img = _studioGalleryFindImage(imgId);
+  if (!img || !img.dataUrl) return;
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:100000;display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.onclick = function() { document.body.removeChild(modal); };
+  modal.innerHTML = '<img src="' + img.dataUrl + '" style="max-width:95vw;max-height:90vh;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.6);">';
+  document.body.appendChild(modal);
+}
+
+function downloadStudioGalleryImage(imgId) {
+  var img = _studioGalleryFindImage(imgId);
+  if (!img || !img.dataUrl) return;
+  var a = document.createElement('a');
+  a.href = img.dataUrl;
+  a.download = 'roweos-' + (imgId || Date.now()) + '.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function deleteStudioGalleryImage(imgId) {
+  if (!confirm('Delete this image from the Studio Gallery? It will also be removed from any chat threads that reference it.')) return;
+  try {
+    var images = (typeof readStudioGallery === 'function')
+      ? readStudioGallery().slice(0)
+      : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+    images = images.filter(function(im) { return im && im.id !== imgId; });
+    if (typeof persistStudioGallery === 'function') {
+      persistStudioGallery(images);
+    } else {
+      localStorage.setItem('roweos_auto_lab_images', JSON.stringify(images));
+    }
+  } catch (e) { console.warn('[StudioGallery] delete failed:', e); }
+  // Re-render gallery
+  var panel = document.getElementById('studioMediaPanel');
+  if (panel) renderStudioGallery(panel);
+  showToast('Image deleted from gallery', 'success');
+}
+
+// v31.10: Save a Studio Gallery image into the brand library so it shows in Visual
+// Assets / Library and syncs to Firebase. Replaces the v31.9 auto-push behavior —
+// this is now an explicit user action (button on each gallery card).
+function saveStudioGalleryToLibrary(imgId) {
+  var img = _studioGalleryFindImage(imgId);
+  if (!img || !img.dataUrl) return;
+  if (typeof _saveImageToBrandLibrary === 'function') {
+    _saveImageToBrandLibrary(img.prompt || 'Generated image', img.dataUrl, img.model || '');
+    showToast('Saved to Library + synced to Firebase', 'success');
+  } else {
+    showToast('Library save helper missing', 'error');
   }
 }
 

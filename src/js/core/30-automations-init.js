@@ -3050,12 +3050,27 @@ async function executeScheduledTask(task, idx) {
         imgDataUrl = 'data:' + (imgResult.images[0].mimeType || 'image/png') + ';base64,' + imgResult.images[0].base64;
       } else if (imgResult && imgResult.imageData) imgDataUrl = 'data:image/png;base64,' + imgResult.imageData;
       else if (imgResult && imgResult.base64) imgDataUrl = 'data:image/png;base64,' + imgResult.base64;
-      // Save to image gallery
+      // Save to image gallery (v31.11: cache + Firebase write-through)
       var labImages = [];
-      try { labImages = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]'); } catch(e) {}
-      labImages.push({ prompt: imgPrompt, model: 'auto', dataUrl: imgDataUrl, createdAt: new Date().toISOString() });
-      if (labImages.length > 50) labImages = labImages.slice(-50);
-      localStorage.setItem('roweos_auto_lab_images', JSON.stringify(labImages));
+      try {
+        labImages = (typeof readStudioGallery === 'function')
+          ? readStudioGallery().slice(0)
+          : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+      } catch(e) {}
+      labImages.push({
+        id: 'auto_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+        prompt: imgPrompt,
+        model: 'auto',
+        dataUrl: imgDataUrl,
+        source: 'automation',
+        createdAt: new Date().toISOString()
+      });
+      if (typeof persistStudioGallery === 'function') {
+        persistStudioGallery(labImages);
+      } else {
+        if (labImages.length > 50) labImages = labImages.slice(-50);
+        localStorage.setItem('roweos_auto_lab_images', JSON.stringify(labImages));
+      }
       if (typeof addAutoLabHistory === 'function') addAutoLabHistory(task, true, 'Image generated', { imageUrl: imgDataUrl || '' });
       if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, true);
       // v18.6: Save to task history so Focus can find it

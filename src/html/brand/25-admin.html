@@ -114,6 +114,36 @@
                   <button onclick="adminLoadBrandConfigs()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>
                 </div>
                 <div id="adminBrandConfigList" style="font-size:var(--text-sm);color:var(--text-secondary);">Click Refresh to load</div>
+                <!-- v31.13: Admin-only conversation purge with count preview -->
+                <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border-color);">
+                  <div style="font-weight:600;margin-bottom:6px;color:var(--text-primary);">Conversation History Purge</div>
+                  <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">Removes BrandAI + LifeAI chats from this device, writes deletion tombstones (so cloud pull won't resurrect them), and deletes from Firestore. Admin-only.</div>
+                  <div id="adminPurgeCounts" style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;font-family:'SF Mono',Monaco,monospace;">Click Preview to see counts</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button onclick="adminPreviewPurgeCounts()" style="padding:5px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Preview Counts</button>
+                    <button onclick="adminPurgeAllConversations()" style="padding:5px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);border-radius:var(--radius-sm);color:#ef4444;cursor:pointer;font-size:var(--text-xs);">Purge All Conversations</button>
+                  </div>
+                </div>
+                <!-- v31.17: Admin AI awareness toggle (no console needed) -->
+                <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border-color);">
+                  <div style="font-weight:600;margin-bottom:6px;color:var(--text-primary);">AI Awareness (Admin Mode)</div>
+                  <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">Inject a snapshot of users, signups, emails, clicks, access keys, and API key pool into BrandAI/LifeAI chat. Cached 60s. Ask "How many signups this week?" and get real numbers.</div>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);">
+                    <input type="checkbox" id="adminAwarenessToggle" onchange="adminToggleAiAwareness(this.checked)" style="width:16px;height:16px;cursor:pointer;">
+                    <span>Include admin Firestore data in chat context</span>
+                  </label>
+                </div>
+                <!-- v31.17: Image provider preference -->
+                <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border-color);">
+                  <div style="font-weight:600;margin-bottom:6px;color:var(--text-primary);">Image Generator Preference</div>
+                  <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">When BrandAI/LifeAI chat detects an image request ("create an image of..."), it routes to this generator instead of the text LLM.</div>
+                  <select id="imageProviderPref" onchange="adminSetImageProvider(this.value)" style="padding:6px 10px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;">
+                    <option value="">(Ask me first time)</option>
+                    <option value="nano-banana-3-pro">Nano Banana 3.0 Pro</option>
+                    <option value="imagen3">Imagen 4</option>
+                    <option value="gpt-image-2">GPT Image 2</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>

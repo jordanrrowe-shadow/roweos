@@ -40269,6 +40269,62 @@
         bottom: env(safe-area-inset-bottom, 8px) !important;
       }
 
+    /* v31.9 (iPad fix): Touch tablets in iPad size range get explicit anchoring rules.
+       This block is GATED by hover:none + pointer:coarse + width >= 769px so it ONLY
+       affects iPad-class touch tablets. It does not touch desktop CSS (desktops have
+       hover:hover or pointer:fine) and does not touch phone CSS (phones are <769px).
+       Mobile + desktop blocks elsewhere in this file are deliberately untouched.
+
+       Goals (per Jordan):
+         1. At all zoom levels: chat input is anchored to the BOTTOM of the screen
+            (mirrors what mobile + desktop do) so it never floats mid-page.
+         2. The helix fills viewport edge-to-edge on the right of the sidebar.
+         3. Chat conversation surface uses available width; no narrow centered column. */
+    @media (hover: none) and (pointer: coarse) and (min-width: 769px) {
+      /* Helix fills from sidebar to the right edge */
+      #helixContainer {
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        left: var(--sidebar-collapsed-width, 64px) !important;
+      }
+      html.sidebar-pinned #helixContainer { left: var(--sidebar-expanded-width, 220px) !important; }
+      html.sidebar-hover-expanded #helixContainer { left: var(--sidebar-expanded-width, 220px) !important; }
+
+      /* Chat input anchored to bottom of viewport. Width tracks the sidebar so the
+         input never floats inside a narrow centered column on iPad. */
+      #agentView .chat-input-area {
+        position: fixed !important;
+        bottom: env(safe-area-inset-bottom, 12px) !important;
+        left: calc(var(--sidebar-collapsed-width, 64px) + 16px) !important;
+        right: 16px !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 100 !important;
+        box-sizing: border-box !important;
+      }
+      html.sidebar-pinned #agentView .chat-input-area,
+      html.sidebar-hover-expanded #agentView .chat-input-area {
+        left: calc(var(--sidebar-expanded-width, 220px) + 16px) !important;
+      }
+      /* Conversation thread uses full available width */
+      #agentView.conversation-active #agentConversation,
+      #agentView.conversation-active .conversation-thread {
+        max-width: none !important;
+        width: auto !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        box-sizing: border-box !important;
+      }
+      /* Make sure conversation has room for the fixed input bar at the bottom */
+      #agentView.conversation-active .conversation-thread {
+        padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+    }
+
     /* v31.4 / v31.5: Landscape mobile - mirror portrait edge-to-edge.
        max-height:500px is universally safe (no desktop is that short, iPad landscape is 820px).
        Touches ONLY landscape-mobile rules — desktop + mobile-portrait untouched. */

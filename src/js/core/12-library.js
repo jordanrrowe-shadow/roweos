@@ -33,7 +33,66 @@ function initLibrary() {
       };
     }
   });
-  
+
+  // v31.8: ONE-TIME MIGRATION — recover legacy `roweos_brand_library_<idx>` per-brand
+  // localStorage keys into the canonical `fileLibrary` global, then push to Firebase.
+  // Pre-v31.7, saveBrandLibrary() wrote ONLY to that legacy per-brand key — never to
+  // fileLibrary, never to roweosLibrary, never to Firestore. So uploads + folders made
+  // via that path existed only on the device that created them. This loop salvages any
+  // legacy data still cached locally and promotes it to the canonical, synced store.
+  // Files are merged by id (legacy wins for ids the canonical doesn't have, never overwrites).
+  // Folders are merged by id with the same rule.
+  try {
+    if (localStorage.getItem('roweos_brand_library_migration_v31_8') !== 'done') {
+      var migrationCount = 0;
+      brands.forEach(function(brand, brandIdx) {
+        try {
+          var legacyRaw = localStorage.getItem('roweos_brand_library_' + brandIdx);
+          if (!legacyRaw) return;
+          var legacy = JSON.parse(legacyRaw);
+          if (!legacy || (!legacy.files && !legacy.folders)) return;
+          var brandKey = brand.name;
+          var canonical = fileLibrary[brandKey] || { folders: [{ id: 'root', name: 'Root', parentId: null, children: [] }], files: [] };
+          // Merge files by id
+          var canonFileIds = {};
+          (canonical.files || []).forEach(function(f) { if (f && f.id) canonFileIds[f.id] = true; });
+          (legacy.files || []).forEach(function(f) {
+            if (f && f.id && !canonFileIds[f.id]) {
+              canonical.files.push(f);
+              migrationCount++;
+            }
+          });
+          // Merge folders by id
+          var canonFolderIds = {};
+          (canonical.folders || []).forEach(function(fo) { if (fo && fo.id) canonFolderIds[fo.id] = true; });
+          (legacy.folders || []).forEach(function(fo) {
+            if (fo && fo.id && !canonFolderIds[fo.id]) {
+              canonical.folders.push(fo);
+            }
+          });
+          fileLibrary[brandKey] = canonical;
+        } catch (innerErr) {
+          console.warn('[Library Migration] Brand', brandIdx, 'failed:', innerErr.message);
+        }
+      });
+      if (migrationCount > 0) {
+        // Persist canonical + push to Firebase write-through
+        try {
+          localStorage.setItem('roweosLibrary', JSON.stringify(fileLibrary));
+          if (typeof writeDB === 'function') {
+            writeDB('library/brand', { data: JSON.stringify(fileLibrary) }, { category: 'library' });
+          }
+          console.log('[Library Migration] Promoted', migrationCount, 'legacy files to canonical + Firebase');
+        } catch (saveErr) {
+          console.error('[Library Migration] Save failed:', saveErr.message);
+        }
+      }
+      localStorage.setItem('roweos_brand_library_migration_v31_8', 'done');
+    }
+  } catch (migErr) {
+    console.error('[Library Migration] Outer error:', migErr.message);
+  }
+
   // v10.5.25: Also hydrate LifeAI library from its own localStorage key
   var lifeSaved = localStorage.getItem('roweos_life_library');
   if (lifeSaved) {
@@ -2710,13 +2769,15 @@ function uploadFileToModeLibrary() {
           if (processedCount === files.length) {
             saveBrandLibrary(brandIdx, lib);
             showToast(files.length + ' file' + (files.length > 1 ? 's' : '') + ' uploaded', 'success');
-            // v31.5: If the user is currently viewing inside a folder, re-render the
-            // folder's file list so newly uploaded files appear immediately. Otherwise
-            // re-render the top-level folder grid.
+            // v31.9: Always go through the folder-view renderer when the user is inside
+            // a brand. Previously fell back to renderLibrary() (legacy) which targets a
+            // dead #libraryContent element — uploads at the top-level didn't repaint.
             if (libraryCurrentFolder && libraryCurrentFolder !== 'all' && typeof openLibraryFolderForBrand === 'function') {
               openLibraryFolderForBrand(libraryViewingBrandIdx != null ? libraryViewingBrandIdx : brandIdx, libraryCurrentFolder);
-            } else {
-              renderLibrary();
+            } else if (typeof libraryViewingBrandIdx === 'number' && libraryViewingBrandIdx !== null && typeof openLibraryFolderForBrand === 'function') {
+              openLibraryFolderForBrand(libraryViewingBrandIdx, 'all');
+            } else if (typeof renderLibraryView === 'function') {
+              renderLibraryView();
             }
           }
         };
@@ -2733,9 +2794,24 @@ function uploadFileToModeLibrary() {
 
 function saveBrandLibrary(brandIdx, lib) {
   try {
+    // v31.6: Per-brand snapshot (legacy local key — used by some callers as a quick lookup).
     localStorage.setItem('roweos_brand_library_' + brandIdx, JSON.stringify(lib));
+    // v31.6 CRITICAL FIX: This function previously wrote ONLY to localStorage. The canonical
+    // library lives on the in-memory `fileLibrary` global (keyed by brand.name), persisted as
+    // `roweosLibrary`, and synced to Firestore at `library/brand` via saveLibrary(). Without
+    // this update + sync, folders + uploads created in a brand library never propagated to
+    // Firebase — users wiping a device or installing on iPad lost everything.
+    if (brands && brands[brandIdx] && typeof fileLibrary === 'object' && fileLibrary) {
+      var brandKey = brands[brandIdx].name;
+      if (brandKey) {
+        fileLibrary[brandKey] = lib;
+        if (typeof saveLibrary === 'function') {
+          saveLibrary(); // writes roweosLibrary + writeDB('library/brand', ...) for cloud sync
+        }
+      }
+    }
   } catch(e) {
-    console.error('Error saving brand library:', e);
+    console.error('[saveBrandLibrary] error:', e);
   }
 }
 
@@ -2896,10 +2972,17 @@ function createNewLibraryFolder() {
   }
   
   closeNewFolderModal();
-  
-  // v11.0.5: Always refresh the main library view after creating a folder
-  renderLibraryView();
-  
+
+  // v31.9 (folder render fix): If the user was inside a brand's folder view when they
+  // created the folder, re-render that view so the new folder appears immediately.
+  // Previously renderLibraryView() bounced back to brand cards, so the folder didn't
+  // show until the user toggled tabs (the "bounce to Visual Assets and back" workaround).
+  if (typeof libraryViewingBrandIdx === 'number' && libraryViewingBrandIdx !== null && typeof openLibraryFolderForBrand === 'function') {
+    openLibraryFolderForBrand(libraryViewingBrandIdx, libraryCurrentFolder || 'all');
+  } else {
+    renderLibraryView();
+  }
+
   showToast('Folder "' + name + '" created', 'success');
 }
 
@@ -7709,7 +7792,15 @@ function openVisualAssetPreview(idx) {
     actionsEl.innerHTML = actionsHtml;
   }
 
-  document.getElementById('libraryVisualLightbox').classList.remove('hidden');
+  // v31.9 (iPad sidebar overlap fix): Move the lightbox to be a direct child of body so
+  // its position:fixed escapes any positioned/transformed ancestor (libraryView is
+  // position:fixed left:sidebar-width — the lightbox was inheriting that left offset on
+  // iPad and rendering clipped behind the sidebar).
+  var _lb = document.getElementById('libraryVisualLightbox');
+  if (_lb && _lb.parentNode !== document.body) {
+    document.body.appendChild(_lb);
+  }
+  if (_lb) _lb.classList.remove('hidden');
 }
 
 /**
@@ -7787,12 +7878,20 @@ function deleteVisualAsset() {
 
   if (asset.assetType === 'lab') {
     // Delete from Image Lab storage
+    // v31.11: Use cache + Firebase write-through so deletes propagate cross-device.
     var images = [];
-    try { images = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]'); } catch(e) {}
-    // Sort same as collectVisualAssets uses for lab items, find by labIndex
+    try {
+      images = (typeof readStudioGallery === 'function')
+        ? readStudioGallery().slice(0)
+        : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+    } catch(e) {}
     if (typeof asset.labIndex === 'number' && asset.labIndex >= 0 && asset.labIndex < images.length) {
       images.splice(asset.labIndex, 1);
-      localStorage.setItem('roweos_auto_lab_images', JSON.stringify(images));
+      if (typeof persistStudioGallery === 'function') {
+        persistStudioGallery(images);
+      } else {
+        localStorage.setItem('roweos_auto_lab_images', JSON.stringify(images));
+      }
     }
   } else if (asset.assetType === 'library') {
     // Delete from library files

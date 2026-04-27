@@ -999,8 +999,21 @@ async function renderSyncInventory() {
   // v15.10: Category definitions - local counts always from localStorage
   var categories = [
     { name: 'Brands', syncKey: 'brands', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_user_brands') || '[]').length; } catch(e) { return 0; } } },
-    { name: 'BrandAI Chats', syncKey: 'brandai_chats', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_agentCommands') || '[]').length; } catch(e) { return 0; } } },
-    { name: 'LifeAI Chats', syncKey: 'lifeai_chats', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]').length; } catch(e) { return 0; } } },
+    // v31.18: Local chat counts now exclude tombstoned ids so Sync/History stay consistent.
+    { name: 'BrandAI Chats', syncKey: 'brandai_chats', localCount: function() {
+      try {
+        var arr = JSON.parse(localStorage.getItem('roweos_agentCommands') || '[]');
+        var tomb = {}; try { var t = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]'); t.forEach(function(id) { tomb[String(id)] = true; }); } catch(e2) {}
+        return arr.filter(function(c) { return !(c && c.id && tomb[String(c.id)]); }).length;
+      } catch(e) { return 0; }
+    } },
+    { name: 'LifeAI Chats', syncKey: 'lifeai_chats', localCount: function() {
+      try {
+        var arr = JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]');
+        var tomb = {}; try { var t = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]'); t.forEach(function(id) { tomb[String(id)] = true; }); } catch(e2) {}
+        return arr.filter(function(c) { return !(c && c.id && tomb[String(c.id)]); }).length;
+      } catch(e) { return 0; }
+    } },
     { name: 'BrandAI To-Dos', syncKey: 'brand_todos', localCount: function() { try { return JSON.parse(localStorage.getItem('roweosTodos') || '[]').length; } catch(e) { return 0; } } },
     { name: 'LifeAI To-Dos', syncKey: 'life_todos', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_life_todos') || '[]').length; } catch(e) { return 0; } } },
     { name: 'Calendar', syncKey: 'calendar', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_calendar') || '[]').length; } catch(e) { return 0; } } },
@@ -1447,8 +1460,15 @@ function loadSyncCategoryItems(catId, catName) {
   // Map category names to localStorage keys and item extractors
   var catMap = {
     'Brands': { key: 'roweos_user_brands', extract: function(d) { return d.map(function(b) { return { name: b.shortName || b.name || 'Brand', id: b.id || b.name, date: '' }; }); } },
-    'BrandAI Chats': { key: 'roweos_agentCommands', extract: function(d) { return d.map(function(c) { return { name: (c.brand || c.agent || 'Chat') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id, date: c.date || c.timestamp || c.time || '' }; }); } },
-    'LifeAI Chats': { key: 'roweos_life_agentCommands', extract: function(d) { return d.map(function(c) { return { name: (c.brand || c.lifeName || 'LifeAI') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id, date: c.date || c.timestamp || c.time || '' }; }); } },
+    // v31.18: Hide tombstoned chats from the Sync inventory list too.
+    'BrandAI Chats': { key: 'roweos_agentCommands', filter: function(d) {
+      var tomb = {}; try { var t = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]'); t.forEach(function(id) { tomb[String(id)] = true; }); } catch(e) {}
+      return d.filter(function(c) { return !(c && c.id && tomb[String(c.id)]); });
+    }, extract: function(d) { return d.map(function(c) { return { name: (c.brand || c.agent || 'Chat') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id, date: c.date || c.timestamp || c.time || '' }; }); } },
+    'LifeAI Chats': { key: 'roweos_life_agentCommands', filter: function(d) {
+      var tomb = {}; try { var t = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]'); t.forEach(function(id) { tomb[String(id)] = true; }); } catch(e) {}
+      return d.filter(function(c) { return !(c && c.id && tomb[String(c.id)]); });
+    }, extract: function(d) { return d.map(function(c) { return { name: (c.brand || c.lifeName || 'LifeAI') + ': ' + (c.command || c.query || '').substring(0, 50), id: c.id, date: c.date || c.timestamp || c.time || '' }; }); } },
     'BrandAI To-Dos': { key: 'roweosTodos', extract: function(d) { return d.map(function(t) { return { name: t.text || t.title || 'Task', id: t.id, date: t.createdAt || '' }; }); } },
     'LifeAI To-Dos': { key: 'roweos_life_todos', extract: function(d) { return d.map(function(t) { return { name: t.text || t.title || 'Task', id: t.id, date: t.createdAt || '' }; }); } },
     'Calendar': { key: 'roweos_calendar', extract: function(d) { return d.map(function(e) { return { name: e.title || 'Event', id: e.id, date: e.date || e.start || '' }; }); } },
@@ -2559,17 +2579,61 @@ function clearStorageCategory(category) {
 
     } else if (category === 'brandai_chats') {
       // v12.2.6: Clear all BrandAI chats
+      // v31.13: Track deletions so cloud pull doesn't resurrect them. Also delete
+      // from Firestore subcollection to free server storage. Without this, every
+      // login pulls the cloud chats back into local — the "2/9 chat resurrection bug."
+      var _delIds = [];
+      try {
+        if (typeof agentCommands !== 'undefined' && agentCommands) {
+          agentCommands.forEach(function(c) { if (c && c.id) _delIds.push(c.id); });
+        }
+      } catch(e) {}
+      try {
+        var _existingTomb = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+        _delIds.forEach(function(id) { if (_existingTomb.indexOf(id) < 0) _existingTomb.push(id); });
+        if (_existingTomb.length > 5000) _existingTomb = _existingTomb.slice(-5000);
+        localStorage.setItem('roweos_deleted_chat_ids', JSON.stringify(_existingTomb));
+        if (typeof writeDB === 'function') {
+          writeDB('profile/deletedChatIds', { ids: _existingTomb, _modifiedAt: Date.now() }, { category: 'profile' });
+        }
+      } catch(e) {}
+      // Delete from Firestore subcollection
+      try {
+        if (typeof deleteDBDoc === 'function') {
+          _delIds.forEach(function(id) { deleteDBDoc('chats', String(id), 'brandai_chats'); });
+        }
+      } catch(e) {}
       localStorage.removeItem('roweos_agentCommands');
       if (typeof agentCommands !== 'undefined') agentCommands = [];
       if (typeof currentConversation !== 'undefined') currentConversation = [];
       var agentConv = document.getElementById('agentConversation');
       if (agentConv) agentConv.classList.add('hidden');
-      showToast('Cleared all BrandAI conversations', 'success');
+      showToast('Cleared all BrandAI conversations (' + _delIds.length + ' tombstoned)', 'success');
 
     } else if (category === 'lifeai_chats') {
       // v12.2.6: Clear all LifeAI chats
+      // v31.13: Same tombstone treatment for life-side chats.
+      var _lifeIds = [];
+      try {
+        var _lifeArr = JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]');
+        _lifeArr.forEach(function(c) { if (c && c.id) _lifeIds.push(c.id); });
+      } catch(e) {}
+      try {
+        var _existingLifeTomb = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+        _lifeIds.forEach(function(id) { if (_existingLifeTomb.indexOf(id) < 0) _existingLifeTomb.push(id); });
+        if (_existingLifeTomb.length > 5000) _existingLifeTomb = _existingLifeTomb.slice(-5000);
+        localStorage.setItem('roweos_deleted_chat_ids', JSON.stringify(_existingLifeTomb));
+        if (typeof writeDB === 'function') {
+          writeDB('profile/deletedChatIds', { ids: _existingLifeTomb, _modifiedAt: Date.now() }, { category: 'profile' });
+        }
+      } catch(e) {}
+      try {
+        if (typeof deleteDBDoc === 'function') {
+          _lifeIds.forEach(function(id) { deleteDBDoc('chats', String(id), 'brandai_chats'); });
+        }
+      } catch(e) {}
       localStorage.removeItem('roweos_life_agentCommands');
-      showToast('Cleared all LifeAI conversations', 'success');
+      showToast('Cleared all LifeAI conversations (' + _lifeIds.length + ' tombstoned)', 'success');
 
     } else if (category === 'library') {
       var brandLib = JSON.parse(localStorage.getItem('roweosLibrary') || '{}');
@@ -8341,6 +8405,28 @@ function renderClientsView() {
   var subtitle = document.getElementById('clientsSubtitle');
   if (subtitle) {
     subtitle.textContent = totalCount === 0 ? 'Add your first client to get started' : totalCount + ' client' + (totalCount !== 1 ? 's' : '') + ' across ' + CLIENT_PIPELINE_STAGES.filter(function(s) { return filtered.some(function(c) { return c.stage === s.id; }); }).length + ' stages';
+  }
+
+  // v31.19: When current brand has 0 clients but other brands have some, surface a
+  // hint that explains the mismatch (Dashboard counts are global, Pipeline is brand-scoped).
+  // Without this hint users see "9 clients" on Dashboard and "0" in Pipeline and assume
+  // data is broken.
+  if (totalCount === 0 && !clientsShowAllBrands) {
+    var allPeople = getClients();
+    if (allPeople.length > 0) {
+      var hint = document.createElement('div');
+      hint.id = 'clientsBrandMismatchHint';
+      hint.style.cssText = 'margin:12px 0;padding:12px 14px;background:rgba(168,139,250,0.08);border:1px solid rgba(168,139,250,0.25);border-radius:10px;font-size:12px;color:var(--text-secondary);';
+      hint.innerHTML = '<strong style="color:#a78bfa;">' + allPeople.length + ' client' + (allPeople.length !== 1 ? 's' : '') + ' exist in other brands.</strong> The Pipeline view is filtered to your current brand. ' +
+        '<button onclick="clientsShowAllBrands=true;var cb=document.getElementById(\'clientsShowAllBrands\');if(cb)cb.checked=true;localStorage.setItem(\'roweos_clients_show_all_brands\',\'true\');renderClientsView();" style="margin-left:6px;padding:4px 10px;background:rgba(168,139,250,0.18);border:1px solid rgba(168,139,250,0.4);border-radius:6px;color:#a78bfa;cursor:pointer;font-size:11px;">Show all brands</button>';
+      // Insert above the cards
+      var prev = document.getElementById('clientsBrandMismatchHint');
+      if (prev) prev.parentNode.removeChild(prev);
+      container.parentNode.insertBefore(hint, container);
+    }
+  } else {
+    var prev2 = document.getElementById('clientsBrandMismatchHint');
+    if (prev2) prev2.parentNode.removeChild(prev2);
   }
 
   // Stage SVG icons

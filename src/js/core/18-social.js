@@ -2,6 +2,97 @@
 // v17.0: SOCIAL MEDIA INTEGRATION
 // ═══════════════════════════════════════════════════════════════
 
+// v31.11: Studio Gallery cache + persistence layer.
+// CRITICAL BUG (v31.10): The localStorage shim in 08-foundation.js offloads
+// `roweos_auto_lab_images` to IndexedDB when it gets big. localStorage.getItem then
+// returns null synchronously while triggering an async restore — so the gallery
+// renders "0 items" right after generation even though the data exists. The Image
+// Chat rehydration also fails because it reads localStorage and gets null.
+// Fix: keep an in-memory mirror that ALL reads go through, and ensure writes hit
+// the in-memory cache + localStorage + IDB-direct + Firebase atomically.
+window._studioGalleryMem = window._studioGalleryMem || null;
+
+function _hydrateStudioGalleryCache(callback) {
+  if (window._studioGalleryMem !== null) { if (callback) callback(window._studioGalleryMem); return; }
+  // Try localStorage first (synchronous if not offloaded)
+  try {
+    var raw = (typeof _origGetItemFn === 'function')
+      ? _origGetItemFn.call(localStorage, 'roweos_auto_lab_images')
+      : localStorage.getItem('roweos_auto_lab_images');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        window._studioGalleryMem = parsed;
+        if (callback) callback(parsed);
+        return;
+      }
+    }
+  } catch (e) {}
+  // Fall back to IDB (async). Render functions get an empty array now and a
+  // re-render fires once IDB completes.
+  if (typeof _idbKeys !== 'undefined' && _idbKeys && _idbKeys['roweos_auto_lab_images'] && typeof _idbGet === 'function') {
+    _idbGet('roweos_auto_lab_images', function(idbVal) {
+      var arr = [];
+      if (idbVal) {
+        try { var p = JSON.parse(idbVal); if (Array.isArray(p)) arr = p; } catch (e) {}
+      }
+      window._studioGalleryMem = arr;
+      if (callback) callback(arr);
+      // Re-render any visible gallery surfaces now that data is loaded
+      try {
+        var sg = document.getElementById('studioMediaPanel');
+        if (sg && typeof renderStudioGallery === 'function') renderStudioGallery(sg);
+      } catch (e) {}
+      try { if (typeof renderImageLabChatThread === 'function') renderImageLabChatThread(); } catch (e) {}
+      try { if (typeof renderAutoLabImageLab === 'function' && window._imageLabTargetId) renderAutoLabImageLab(window._imageLabTargetId); } catch (e) {}
+    });
+  } else {
+    window._studioGalleryMem = [];
+    if (callback) callback([]);
+  }
+}
+
+function readStudioGallery() {
+  if (window._studioGalleryMem === null) _hydrateStudioGalleryCache();
+  return Array.isArray(window._studioGalleryMem) ? window._studioGalleryMem : [];
+}
+window.readStudioGallery = readStudioGallery;
+
+function persistStudioGallery(images) {
+  if (!Array.isArray(images)) images = [];
+  // Cap to last 50 — keeps quota reasonable; oldest fall off
+  if (images.length > 50) images = images.slice(-50);
+  // 1. In-memory cache (primary source of truth — survives quota eviction)
+  window._studioGalleryMem = images;
+  var serialized = JSON.stringify(images);
+  // 2. IDB direct (always — base64 is too big for localStorage long-term)
+  try {
+    if (typeof _idbPut === 'function') {
+      _idbPut('roweos_auto_lab_images', serialized);
+      if (typeof _markIdbKey === 'function') _markIdbKey('roweos_auto_lab_images');
+    }
+  } catch (e) {}
+  // 3. localStorage (best-effort — shim will offload to IDB on quota anyway)
+  try { localStorage.setItem('roweos_auto_lab_images', serialized); }
+  catch (e) { console.warn('[StudioGallery] localStorage write failed:', e); }
+  // 4. Firebase write-through
+  try {
+    if (typeof writeDB === 'function') {
+      writeDB('library/studio_gallery', { data: serialized }, { category: 'library' });
+    }
+  } catch (e) { console.warn('[StudioGallery] Firebase write failed:', e); }
+}
+window.persistStudioGallery = persistStudioGallery;
+
+// Hydrate as soon as possible after page load
+try {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { _hydrateStudioGalleryCache(); });
+  } else {
+    setTimeout(function() { _hydrateStudioGalleryCache(); }, 100);
+  }
+} catch (e) {}
+
 // --- Social Account State ---
 var SOCIAL_PLATFORMS = ['x', 'threads', 'instagram', 'tiktok'];
 var SOCIAL_PLATFORM_LIMITS = { x: 280, threads: 500, instagram: 2200, tiktok: 2200 };
@@ -3760,12 +3851,13 @@ function executeWorkflowStep(step, context) {
       } else if (imgResult && imgResult.base64) {
         imgDataUrl = 'data:image/png;base64,' + imgResult.base64;
       }
-      // Save to image gallery
+      // Save to image gallery (v31.11: cache + Firebase write-through)
       try {
-        var labImages = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
-        labImages.push({ prompt: imgPrompt, model: 'auto', dataUrl: imgDataUrl, createdAt: new Date().toISOString() });
-        if (labImages.length > 50) labImages = labImages.slice(-50);
-        localStorage.setItem('roweos_auto_lab_images', JSON.stringify(labImages));
+        var labImages = (typeof readStudioGallery === 'function')
+          ? readStudioGallery().slice(0)
+          : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+        labImages.push({ id: 'pipe_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9), prompt: imgPrompt, model: 'auto', dataUrl: imgDataUrl, source: 'pipeline', createdAt: new Date().toISOString() });
+        persistStudioGallery(labImages);
       } catch(e) {}
       // v18.1: FEATURE 9 - Also push to Image Lab chat messages
       if (typeof _imageLabChatMessages !== 'undefined' && imgDataUrl) {
@@ -5370,10 +5462,28 @@ function renderAutoLabImageLab(targetId) {
   }
   html += '</div>';
 
-  // Gallery
+  // v31.11: Inline "Just Generated" preview — sits between input and gallery so
+  // the user immediately sees the result directly below the prompt bar.
+  if (window._lastGeneratedImage && window._lastGeneratedImage.dataUrl) {
+    var lg = window._lastGeneratedImage;
+    html += '<div style="margin:14px 0;padding:14px;background:var(--bg-secondary);border:1px solid rgba(168,139,250,0.3);border-radius:12px;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
+    html += '<div style="font-size:11px;color:#a78bfa;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Just Generated</div>';
+    html += '<button onclick="window._lastGeneratedImage=null;renderAutoLabImageLab(window._imageLabTargetId);" style="padding:2px 8px;font-size:11px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;">Dismiss</button>';
+    html += '</div>';
+    html += '<img src="' + lg.dataUrl + '" alt="Just generated" style="display:block;max-width:100%;max-height:480px;border-radius:8px;cursor:pointer;" onclick="window.open(this.src)">';
+    if (lg.prompt) html += '<div style="margin-top:8px;font-size:12px;color:var(--text-muted);">' + escapeHtml(lg.prompt) + '</div>';
+    html += '</div>';
+  }
+
+  // Gallery (v31.11: read from cache so IDB-backed images render synchronously)
   html += '<div class="auto-lab-section-title">Gallery</div>';
   var images = [];
-  try { images = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]'); } catch(e) {}
+  try {
+    images = (typeof readStudioGallery === 'function')
+      ? readStudioGallery().slice(0)
+      : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+  } catch(e) {}
   images.sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
 
   if (images.length > 0) {
@@ -5494,7 +5604,9 @@ function renderImageLabGalleryStrip() {
   if (!strip) return;
   var images = [];
   try {
-    images = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+    images = (typeof readStudioGallery === 'function')
+      ? readStudioGallery().slice(0)
+      : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
     if (!Array.isArray(images)) images = [];
   } catch(e) { images = []; }
   if (images.length === 0) {
@@ -5519,6 +5631,9 @@ function renderImageLabGalleryStrip() {
 }
 
 // v15.18: Render the chat thread from _imageLabChatMessages
+// v31.9: Now rehydrates image data from the gallery (roweos_auto_lab_images) when
+// saveImageLabChatMessages stripped imageUrl to dodge localStorage quota. Lookup is
+// by message id when present, otherwise by prompt+timestamp match.
 function renderImageLabChatThread() {
   var thread = document.getElementById('imageLabChatThread');
   if (!thread) return;
@@ -5532,6 +5647,19 @@ function renderImageLabChatThread() {
     return;
   }
 
+  // v31.11: Build id→dataUrl lookup from in-memory gallery cache (survives quota
+  // offload to IDB; the prior localStorage.getItem call returned null synchronously
+  // for IDB-backed keys, which was why the placeholder kept firing).
+  var galleryById = {};
+  try {
+    var gal = (typeof readStudioGallery === 'function')
+      ? readStudioGallery()
+      : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+    gal.forEach(function(g) {
+      if (g && g.id && g.dataUrl) galleryById[g.id] = g.dataUrl;
+    });
+  } catch(e) {}
+
   var html = '';
   _imageLabChatMessages.forEach(function(msg, idx) {
     html += '<div class="imagelab-chat-message ' + escapeHtml(msg.role) + '">';
@@ -5542,11 +5670,29 @@ function renderImageLabChatThread() {
     } else if (msg.content) {
       html += '<div>' + escapeHtml(msg.content) + '</div>';
     }
-    if (msg._hasImage && !msg.imageUrl) {
-      html += '<div style="padding:8px;background:var(--bg-tertiary);border-radius:8px;font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px;">Image generated (view in gallery below)</div>';
+    // v31.9: Rehydrate stripped imageUrl from gallery by id (saveImageLabChatMessages
+    // dropped the base64 to fit in localStorage; the gallery still has it).
+    var imgUrl = msg.imageUrl;
+    if (!imgUrl && msg._hasImage && msg.id && galleryById[msg.id]) {
+      imgUrl = galleryById[msg.id];
     }
-    if (msg.imageUrl) {
-      html += '<img src="' + msg.imageUrl + '" alt="Generated image" onclick="window.open(this.src)" style="max-width:400px;border-radius:8px;">';
+    if (imgUrl) {
+      html += '<img src="' + imgUrl + '" alt="Generated image" onclick="window.open(this.src)" style="max-width:480px;width:100%;border-radius:8px;cursor:pointer;display:block;margin-top:6px;">';
+      // v31.16: Per-message actions on every image bubble.
+      var actionId = msg.id || ('chatmsg_' + idx);
+      html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">';
+      html += '<button onclick="event.stopPropagation();imageChatSaveToLibrary(\'' + actionId + '\')" style="font-size:10px;padding:4px 9px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Save to Library</button>';
+      html += '<button onclick="event.stopPropagation();imageChatSaveToFolio(\'' + actionId + '\')" style="font-size:10px;padding:4px 9px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Save to Folio</button>';
+      html += '<button onclick="event.stopPropagation();imageChatUseAsReference(\'' + actionId + '\')" style="font-size:10px;padding:4px 9px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Use as Reference</button>';
+      html += '<button onclick="event.stopPropagation();imageChatDownload(\'' + actionId + '\')" style="font-size:10px;padding:4px 9px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Download</button>';
+      html += '<button onclick="event.stopPropagation();imageChatDelete(\'' + actionId + '\')" style="font-size:10px;padding:4px 9px;border-radius:6px;border:1px solid rgba(248,113,113,0.3);background:transparent;color:#f87171;cursor:pointer;">Delete</button>';
+      html += '</div>';
+    } else if (msg._hasImage) {
+      // v31.11: Last-resort placeholder. Most common cause: a prior version generated
+      // this image before the in-memory cache existed and the data was evicted.
+      html += '<div style="padding:10px 12px;background:var(--bg-tertiary);border:1px dashed var(--border-color);border-radius:8px;font-size:11px;color:var(--text-muted);margin-top:6px;">';
+      html += 'Image preview unavailable on this device. Re-run the prompt to regenerate, or open the Gallery tab to find a saved copy.';
+      html += '</div>';
     }
     if (msg.timestamp) {
       html += '<div style="font-size:10px;color:var(--text-muted);margin-top:4px;">' + formatDateTimeDisplay(new Date(msg.timestamp)) + '</div>';
@@ -5559,6 +5705,141 @@ function renderImageLabChatThread() {
   // v28.4: Update gallery strip after thread render
   if (typeof renderImageLabGalleryStrip === 'function') renderImageLabGalleryStrip();
 }
+
+// v31.9: Push generated image into the canonical brand library (fileLibrary[brandKey].files)
+// and trigger Firebase write-through via saveLibrary(). This guarantees images survive
+// device wipes and propagate to iPad / web. Mirrors the saveBrandLibrary() pattern.
+function _saveImageToBrandLibrary(promptText, dataUrl, model) {
+  if (!dataUrl || typeof brands === 'undefined' || !brands) return;
+  var brandIdx = (typeof selectedBrand === 'number') ? selectedBrand : 0;
+  var brand = brands[brandIdx];
+  if (!brand || !brand.name) return;
+  if (typeof fileLibrary !== 'object' || !fileLibrary) return;
+  if (!fileLibrary[brand.name]) {
+    fileLibrary[brand.name] = { folders: [{ id: 'root', name: 'Root', parentId: null, children: [] }], files: [] };
+  }
+  var entry = {
+    id: 'studio_img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    name: (promptText || 'Generated image').substring(0, 80),
+    type: 'image',
+    content: dataUrl,
+    fileType: 'image/png',
+    folderId: null, // root
+    savedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    isUploaded: false,
+    isGenerated: true,
+    sourceModel: model || ''
+  };
+  fileLibrary[brand.name].files.push(entry);
+  if (typeof saveLibrary === 'function') {
+    saveLibrary(); // writes roweosLibrary + writeDB to Firestore
+  }
+}
+
+// v31.16: Image Chat per-message action helpers. Resolve dataUrl from message
+// in-memory imageUrl, falling back to the gallery cache by id.
+function _imageChatResolveByActionId(actionId) {
+  var msg = null;
+  if (Array.isArray(_imageLabChatMessages)) {
+    for (var i = 0; i < _imageLabChatMessages.length; i++) {
+      var m = _imageLabChatMessages[i];
+      if (m && (m.id === actionId || ('chatmsg_' + i) === actionId)) { msg = m; break; }
+    }
+  }
+  var dataUrl = msg && msg.imageUrl ? msg.imageUrl : '';
+  if (!dataUrl && msg && msg.id) {
+    try {
+      var gal = (typeof readStudioGallery === 'function') ? readStudioGallery() : [];
+      for (var g = 0; g < gal.length; g++) {
+        if (gal[g] && gal[g].id === msg.id && gal[g].dataUrl) { dataUrl = gal[g].dataUrl; break; }
+      }
+    } catch (e) {}
+  }
+  return { msg: msg, dataUrl: dataUrl };
+}
+
+function imageChatSaveToLibrary(actionId) {
+  var r = _imageChatResolveByActionId(actionId);
+  if (!r.dataUrl) { showToast('Image data not available on this device', 'error'); return; }
+  var prompt = (r.msg && r.msg.content) || (r.msg && r.msg.prompt) || 'Image Chat output';
+  if (typeof _saveImageToBrandLibrary === 'function') {
+    _saveImageToBrandLibrary(prompt, r.dataUrl, (r.msg && r.msg.model) || 'image-chat');
+    showToast('Saved to Library', 'success');
+  }
+}
+
+function imageChatSaveToFolio(actionId) {
+  var r = _imageChatResolveByActionId(actionId);
+  if (!r.dataUrl) { showToast('Image data not available on this device', 'error'); return; }
+  try {
+    var folio = JSON.parse(localStorage.getItem('roweos_folio_main') || '{"items":[]}');
+    if (!folio.items) folio.items = [];
+    folio.items.push({
+      id: 'folio_img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+      type: 'image',
+      title: ((r.msg && r.msg.content) || 'Image Chat output').substring(0, 80),
+      content: r.dataUrl,
+      addedAt: new Date().toISOString()
+    });
+    localStorage.setItem('roweos_folio_main', JSON.stringify(folio));
+    if (typeof writeDB === 'function') {
+      writeDB('folio/main', folio, { category: 'folio' });
+    }
+    showToast('Saved to Folio', 'success');
+  } catch (e) { showToast('Folio save failed: ' + e.message, 'error'); }
+}
+
+function imageChatUseAsReference(actionId) {
+  var r = _imageChatResolveByActionId(actionId);
+  if (!r.dataUrl) { showToast('Image data not available', 'error'); return; }
+  var parts = r.dataUrl.split(',');
+  var base64 = parts.length > 1 ? parts[1] : parts[0];
+  var mimeMatch = r.dataUrl.match(/data:([^;]+);/);
+  var mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+  if (!window._imageLabChatRefImages) window._imageLabChatRefImages = [];
+  window._imageLabChatRefImages.push({ base64: base64, mimeType: mimeType, name: 'Reference from chat' });
+  showToast('Added as reference for next message', 'success');
+  renderAutoLabImageLab(window._imageLabTargetId);
+}
+
+function imageChatDownload(actionId) {
+  var r = _imageChatResolveByActionId(actionId);
+  if (!r.dataUrl) { showToast('Image data not available', 'error'); return; }
+  var a = document.createElement('a');
+  a.href = r.dataUrl;
+  a.download = 'roweos-chat-' + (actionId || Date.now()) + '.png';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function imageChatDelete(actionId) {
+  if (!confirm('Delete this message and its image?')) return;
+  var idx = -1;
+  for (var i = 0; i < _imageLabChatMessages.length; i++) {
+    var m = _imageLabChatMessages[i];
+    if (m && (m.id === actionId || ('chatmsg_' + i) === actionId)) { idx = i; break; }
+  }
+  if (idx >= 0) {
+    var deletedMsg = _imageLabChatMessages.splice(idx, 1)[0];
+    saveImageLabChatMessages();
+    // Also remove from gallery if matched by id
+    if (deletedMsg && deletedMsg.id) {
+      try {
+        var gal = (typeof readStudioGallery === 'function') ? readStudioGallery().slice(0) : [];
+        gal = gal.filter(function(g) { return !(g && g.id === deletedMsg.id); });
+        if (typeof persistStudioGallery === 'function') persistStudioGallery(gal);
+      } catch (e) {}
+    }
+    renderImageLabChatThread();
+    showToast('Message deleted', 'success');
+  }
+}
+
+window.imageChatSaveToLibrary = imageChatSaveToLibrary;
+window.imageChatSaveToFolio = imageChatSaveToFolio;
+window.imageChatUseAsReference = imageChatUseAsReference;
+window.imageChatDownload = imageChatDownload;
+window.imageChatDelete = imageChatDelete;
 
 // v15.23: Handle multi-file reference image upload for Image Lab Chat
 function handleImageLabChatRefUploads(input) {
@@ -5624,6 +5905,56 @@ async function sendImageLabMessage() {
   }
 
   try {
+    // v31.11: GPT Image 2 — OpenAI route
+    if (model === 'gpt-image-2' || window._imageLabChatModel === 'gpt-image-2') {
+      var gptOpts = { aspectRatio: aspectRatio };
+      if (window._imageLabChatRefImages && window._imageLabChatRefImages.length > 0) {
+        gptOpts.referenceImages = window._imageLabChatRefImages;
+      }
+      var gptResult = await generateImageWithGptImage(prompt, gptOpts);
+      var loadingG = document.getElementById('imageLabChatLoading');
+      if (loadingG) loadingG.remove();
+      if (gptResult && gptResult.images && gptResult.images.length > 0) {
+        var gImg = gptResult.images[0];
+        var gDataUrl = 'data:' + (gImg.mimeType || 'image/png') + ';base64,' + gImg.base64;
+        var gMsgId = 'imgmsg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        _imageLabChatMessages.push({
+          id: gMsgId,
+          role: 'assistant',
+          content: gptResult.revisedPrompt || '',
+          imageUrl: gDataUrl,
+          timestamp: new Date().toISOString()
+        });
+        try {
+          var gGallery = (typeof readStudioGallery === 'function')
+            ? readStudioGallery().slice(0)
+            : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+          gGallery.push({
+            id: gMsgId,
+            prompt: prompt,
+            model: 'gpt-image-2',
+            aspectRatio: aspectRatio,
+            dataUrl: gDataUrl,
+            source: 'image_chat',
+            createdAt: new Date().toISOString()
+          });
+          persistStudioGallery(gGallery);
+        } catch (gErr) { console.warn('[ImageChat/GPT] Gallery push failed:', gErr); }
+        renderImageLabChatThread();
+        saveImageLabChatMessages();
+        renderAutoLabImageLab(window._imageLabTargetId);
+      } else {
+        showToast('GPT Image 2 returned no image. Try a different prompt.', 'warning');
+        _imageLabChatMessages.pop();
+        renderImageLabChatThread();
+      }
+      window._imageLabChatSending = false;
+      _imageLabChatSending = false;
+      if (sendBtn) sendBtn.disabled = false;
+      if (input) input.focus();
+      return;
+    }
+
     // v25.4: Imagen 4 path
     if (window._imageLabChatModel === 'imagen3') {
       var imgResult = await generateImageWithImagen3(prompt, window._imageLabAspectRatio || aspectRatio || '1:1');
@@ -5700,13 +6031,43 @@ async function sendImageLabMessage() {
         _imageLabChatHistory.push({ role: 'model', parts: modelParts });
       }
 
+      // v31.9: Persist a stable id on the message so we can rehydrate the image from
+      // the gallery after saveImageLabChatMessages() strips imageUrl to dodge quota.
+      var msgId = 'imgmsg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
       // Add assistant message to display
       _imageLabChatMessages.push({
+        id: msgId,
         role: 'assistant',
         content: responseText,
         imageUrl: dataUrl,
         timestamp: new Date().toISOString()
       });
+
+      // v31.9 BUG FIX: Push every chat-generated image to the canonical gallery
+      // (roweos_auto_lab_images) so the "view in gallery below" promise is actually
+      // true. Previously chat images lived only in _imageLabChatMessages — the gallery
+      // strip was always empty for chat-only sessions. Tag with msgId so we can rehydrate.
+      // v31.10: Single helper writes localStorage + Firebase atomically.
+      // v31.11: Read via in-memory cache so IDB-backed history isn't wiped on push.
+      try {
+        var galleryImages = (typeof readStudioGallery === 'function')
+          ? readStudioGallery().slice(0)
+          : [];
+        if (!Array.isArray(galleryImages)) galleryImages = [];
+        galleryImages.push({
+          id: msgId,
+          prompt: prompt,
+          model: model,
+          aspectRatio: aspectRatio,
+          dataUrl: dataUrl,
+          source: 'image_chat',
+          createdAt: new Date().toISOString()
+        });
+        persistStudioGallery(galleryImages);
+      } catch (galErr) {
+        console.warn('[ImageChat] Gallery push failed:', galErr);
+      }
 
       renderImageLabChatThread();
       saveImageLabChatMessages();
@@ -6040,9 +6401,14 @@ async function generateAutoLabImage() {
 
   try {
     // v25.4: Route Imagen 4 to its own API
+    // v31.11: Route GPT Image 2 to OpenAI API
     var result;
     if (model === 'imagen3') {
       result = await generateImageWithImagen3(imgPrompt, aspect);
+    } else if (model === 'gpt-image-2') {
+      var gptOpts2 = { aspectRatio: aspect };
+      if (window.autoLabRefImage) gptOpts2.referenceImage = window.autoLabRefImage;
+      result = await generateImageWithGptImage(imgPrompt, gptOpts2);
     } else {
       // v13.9: Pass reference image for image-to-image if uploaded
       var genOpts = { model: model, aspectRatio: aspect };
@@ -6068,20 +6434,45 @@ async function generateAutoLabImage() {
       dataUrl = result;
     }
 
+    // v31.9 BUG FIX: Validate dataUrl is present before claiming success. The previous
+    // code pushed an empty entry to the gallery and showed "Image generated!" even when
+    // the API returned a text-only response (e.g. content policy refusal, model fell back
+    // to descriptive text instead of image bytes). Now we treat a missing dataUrl as the
+    // explicit failure it is, surface the model's text reply if present, and don't pollute
+    // the gallery with empty entries.
+    if (!dataUrl) {
+      var modelText = (result && result.text) ? result.text : '';
+      var failMsg = modelText
+        ? 'Model responded with text instead of an image: ' + modelText.substring(0, 200)
+        : 'No image data received from the model. Try a more specific prompt.';
+      showToast(failMsg, 'warning');
+      addAutoLabHistory({ name: 'Image: ' + imgPrompt.substring(0, 50), action: 'image' }, false, failMsg);
+      return;
+    }
+
     var images = [];
-    try { images = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]'); } catch(e) {}
+    try {
+      images = (typeof readStudioGallery === 'function')
+        ? readStudioGallery().slice(0)
+        : JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]');
+    } catch(e) {}
+    var newImgId = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     images.push({
+      id: newImgId,
       prompt: imgPrompt,
       model: model,
       aspectRatio: aspect,
       dataUrl: dataUrl,
       createdAt: new Date().toISOString()
     });
-    // Keep last 50 images
-    if (images.length > 50) images = images.slice(-50);
-    localStorage.setItem('roweos_auto_lab_images', JSON.stringify(images));
+    // v31.10: Persist localStorage + Firebase atomically. Helper handles cap to 50.
+    persistStudioGallery(images);
 
     promptEl.value = '';
+    // v31.11: Show the just-generated image in an inline preview slot above the
+    // gallery so the user sees it DIRECTLY after pressing Generate, even if the
+    // gallery render is paginated/cached.
+    window._lastGeneratedImage = { dataUrl: dataUrl, prompt: imgPrompt, id: newImgId };
     renderAutoLabImageLab(window._imageLabTargetId);
     addAutoLabHistory({ name: 'Image: ' + imgPrompt.substring(0, 50), action: 'image' }, true, 'Image generated successfully');
     showToast('Image generated!', 'success');
@@ -6099,7 +6490,9 @@ function deleteAutoLabImage(idx) {
   try { images = JSON.parse(localStorage.getItem('roweos_auto_lab_images') || '[]'); } catch(e) {}
   images.sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
   images.splice(idx, 1);
-  localStorage.setItem('roweos_auto_lab_images', JSON.stringify(images));
+  // v31.10: Persist deletion to Firebase too — without this, the deleted image
+  // would resurrect on the next cloud pull.
+  persistStudioGallery(images);
   renderAutoLabImageLab(window._imageLabTargetId);
   showToast('Image deleted', 'success');
 }

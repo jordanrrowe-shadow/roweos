@@ -4591,8 +4591,25 @@ async function getApiKey(provider) {
         console.log('[getApiKey] ✓ Retrieved', provider, 'key from localStorage');
         return key;
       }
+      // v31.5: Provider-aliased fallback. Nano Banana / Imagen run on the Google
+      // Gemini API, so when no separate `nanobanana` key is set, transparently
+      // use the Google key (matches getNanobananaKey() in 13-studio.js). Same idea
+      // for `imagen` / `imagen-4` (Google Vertex/Imagen). Without this fallback,
+      // BrandAI chat threw "API key not configured" the moment a user picked
+      // Nano Banana 3.0 Pro despite their Google key working in Studio.
+      var aliasMap = {
+        nanobanana: 'google',
+        imagen: 'google',
+        'imagen-4': 'google',
+        gemini: 'google'
+      };
+      var aliasFor = aliasMap[String(provider).toLowerCase()];
+      if (aliasFor && apiKeys[aliasFor]) {
+        console.log('[getApiKey] ✓ Retrieved', provider, 'key via alias →', aliasFor);
+        return apiKeys[aliasFor];
+      }
     }
-    
+
     // Fallback: try old individual key storage
     var oldKey = localStorage.getItem(provider + 'ApiKey');
     if (oldKey) {
@@ -4611,6 +4628,17 @@ async function getApiKey(provider) {
         localStorage.setItem('roweos_api_keys', JSON.stringify(canonicalKeys));
       } catch(e) {}
       return marketplaceKey;
+    }
+
+    // v31.5: Final alias fallback for legacy storage (no roweos_api_keys at all yet)
+    var legacyAliasMap = { nanobanana: 'google', imagen: 'google', 'imagen-4': 'google', gemini: 'google' };
+    var legacyAlias = legacyAliasMap[String(provider).toLowerCase()];
+    if (legacyAlias) {
+      var aliasOldKey = localStorage.getItem(legacyAlias + 'ApiKey') || localStorage.getItem('roweos_' + legacyAlias + '_key');
+      if (aliasOldKey) {
+        console.log('[getApiKey] ✓ Retrieved', provider, 'via legacy alias →', legacyAlias);
+        return aliasOldKey;
+      }
     }
 
     console.warn('[getApiKey] ✗ No', provider, 'API key found in any storage location');

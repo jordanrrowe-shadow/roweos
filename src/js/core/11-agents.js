@@ -2812,7 +2812,8 @@ function showView(view) {
       { id: 'video', label: 'Video', secondary: true },
       { id: 'videochat', label: 'Video Chat', secondary: true },
       { id: 'social', label: 'Social', secondary: true },
-      { id: 'blog', label: 'Blog', secondary: true }
+      { id: 'blog', label: 'Blog', secondary: true },
+      { id: 'gallery', label: 'Gallery', secondary: true } // v31.10: Studio Gallery sub-tab
     ];
     renderPillNav('studioPillNav', studioAgents, currentAgent || 'all', function(id) {
       selectAgent(id);
@@ -3274,6 +3275,10 @@ function onBrandChange() {
     var brandColor = typeof getBrandColorForTheme === 'function' ? getBrandColorForTheme(brandIdx) : (brands[brandIdx].brandColor || '#a89878');
     applyBrandAccentColor(brandColor);
   }
+  // v31.15: Refresh brand logo on every brand change. Without this, after a brand
+  // reorder the sidebar logo stays as the old primary brand because the logo init
+  // resolved by index at startup time and never re-ran.
+  try { if (typeof initBrandLogo === 'function') initBrandLogo(); } catch(e) {}
 
   // v15.3: Persist last active brand for mode switching
   window.lastActiveBrandIdx = brandIdx;

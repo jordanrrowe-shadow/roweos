@@ -268,6 +268,133 @@ async function generateImageWithNanobanana(prompt, options) {
   };
 }
 
+// v31.11: GPT Image 2 (OpenAI gpt-image-1) — direct browser call
+// Returns same shape as generateImageWithNanobanana: { images: [{base64, mimeType}], text, model, provider }
+async function generateImageWithGptImage(prompt, options) {
+  if (!options) options = {};
+  var apiKey = '';
+  try {
+    if (typeof getApiKey === 'function') {
+      apiKey = await getApiKey('openai');
+    }
+  } catch (e) {}
+  if (!apiKey) {
+    try {
+      var apiKeys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}');
+      apiKey = apiKeys.openai || '';
+    } catch (e) {}
+  }
+  if (!apiKey) {
+    showToast('OpenAI API key not configured. Add your OpenAI key in Settings.', 'error');
+    throw new Error('OpenAI API key not configured');
+  }
+
+  // Map aspect ratio to gpt-image-1 supported sizes
+  var aspectRatio = options.aspectRatio || '1:1';
+  var size = '1024x1024';
+  if (aspectRatio === '16:9' || aspectRatio === '4:3') size = '1536x1024';
+  else if (aspectRatio === '9:16' || aspectRatio === '3:4') size = '1024x1536';
+
+  var body = {
+    model: 'gpt-image-1',
+    prompt: prompt,
+    size: size,
+    n: 1
+  };
+
+  // Reference image → use /v1/images/edits with multipart, otherwise /v1/images/generations JSON
+  var hasRef = (options.referenceImages && options.referenceImages.length > 0)
+    || (options.referenceImage && options.referenceImage.base64);
+
+  var url, fetchInit;
+  if (hasRef) {
+    url = 'https://api.openai.com/v1/images/edits';
+    var fd = new FormData();
+    fd.append('model', 'gpt-image-1');
+    fd.append('prompt', prompt);
+    fd.append('size', size);
+    fd.append('n', '1');
+    var addRef = function(ref, idx) {
+      if (!ref || !ref.base64) return;
+      var byteString = atob(ref.base64);
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+      var blob = new Blob([ab], { type: ref.mimeType || 'image/png' });
+      fd.append('image[]', blob, (ref.name || ('ref_' + idx + '.png')));
+    };
+    if (options.referenceImages && options.referenceImages.length > 0) {
+      for (var ri = 0; ri < options.referenceImages.length; ri++) addRef(options.referenceImages[ri], ri);
+    } else if (options.referenceImage) {
+      addRef(options.referenceImage, 0);
+    }
+    fetchInit = {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + apiKey },
+      body: fd
+    };
+  } else {
+    url = 'https://api.openai.com/v1/images/generations';
+    fetchInit = {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    };
+  }
+
+  console.log('[GPTImage2] Generating, size=' + size + ', edit=' + hasRef);
+  var resp = await fetch(url, fetchInit);
+  if (!resp.ok) {
+    var errData = await resp.json().catch(function() { return {}; });
+    var msg = (errData && errData.error && errData.error.message) ? errData.error.message : resp.statusText;
+    console.error('[GPTImage2] Error', resp.status, msg);
+    if (resp.status === 401 || resp.status === 403) showToast('OpenAI API key invalid. Check Settings.', 'error');
+    else if (resp.status === 429) showToast('OpenAI rate limit reached. Wait and retry.', 'warning');
+    else showToast('GPT Image 2 error: ' + msg, 'error');
+    throw new Error('GPT Image 2: ' + msg);
+  }
+
+  var data = await resp.json();
+  var images = [];
+  if (data && data.data && data.data.length > 0) {
+    for (var i = 0; i < data.data.length; i++) {
+      var d = data.data[i];
+      if (d.b64_json) {
+        images.push({ base64: d.b64_json, mimeType: 'image/png' });
+      } else if (d.url) {
+        // Fetch the URL and convert to base64 (rare for gpt-image-1; defaults to b64)
+        try {
+          var imgResp = await fetch(d.url);
+          var blob = await imgResp.blob();
+          var base64 = await new Promise(function(resolve) {
+            var reader = new FileReader();
+            reader.onloadend = function() { resolve(reader.result.split(',')[1]); };
+            reader.readAsDataURL(blob);
+          });
+          images.push({ base64: base64, mimeType: blob.type || 'image/png' });
+        } catch (e) { console.warn('[GPTImage2] URL fetch failed:', e); }
+      }
+    }
+  }
+
+  if (images.length === 0) {
+    throw new Error('GPT Image 2 returned no image data');
+  }
+
+  return {
+    images: images,
+    text: null,
+    model: 'gpt-image-1',
+    aspectRatio: aspectRatio,
+    provider: 'openai',
+    revisedPrompt: (data && data.data && data.data[0] && data.data[0].revised_prompt) || null
+  };
+}
+window.generateImageWithGptImage = generateImageWithGptImage;
+
 // v21.15: Google Veo Video Generation (async predictLongRunning)
 async function generateVideoWithVeo(prompt, options) {
   // v24.26: TEMP BLOCKER - video generation disabled to investigate billing. Remove this block to re-enable.

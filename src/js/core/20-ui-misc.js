@@ -5984,7 +5984,175 @@ async function handleSmartImageGeneration(userMessage, btnId) {
   }
 }
 
+// v31.17: Smart cross-provider image routing for BrandAI/LifeAI chat.
+// Detects "create/generate/draw an image of X" prompts and routes to the user's
+// preferred image provider. Inserts the result inline as an assistant turn —
+// NO redirect to Studio. Provider preference stored in roweos_image_provider_pref.
+var IMAGE_INTENT_RE = /\b(?:create|generate|make|render|draw|design|paint|produce|sketch)\b[^.!?]{0,40}\b(?:an?\s+)?(?:image|picture|photo|illustration|render|render(?:ing)?|graphic|visual|logo|icon|sketch|painting|drawing|design|artwork|wallpaper|mockup|poster|banner|thumbnail|portrait)\b/i;
+function _detectImageGenIntent(text) {
+  if (!text || typeof text !== 'string') return null;
+  if (text.length > 4000) return null; // long pasted text — probably not an image request
+  if (!IMAGE_INTENT_RE.test(text)) return null;
+  return text.trim();
+}
+
+function _resolveImageProvider() {
+  var stored = '';
+  try { stored = localStorage.getItem('roweos_image_provider_pref') || ''; } catch (e) {}
+  if (stored) return stored;
+  // Fall back to active LLM provider
+  try {
+    var settings = JSON.parse(localStorage.getItem('roweos_settings') || '{}');
+    var prov = settings.provider || 'gemini';
+    if (prov === 'openai') return 'gpt-image-2';
+    if (prov === 'anthropic') return 'nano-banana-3-pro';
+    return 'nano-banana-3-pro';
+  } catch (e) { return 'nano-banana-3-pro'; }
+}
+
+function showImageProviderPickerOnce(callback) {
+  if (localStorage.getItem('roweos_image_provider_pref')) { callback(_resolveImageProvider()); return; }
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  var box = document.createElement('div');
+  box.style.cssText = 'background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;padding:24px;max-width:420px;width:100%;';
+  box.innerHTML = '<div style="font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">Pick your image generator</div>' +
+    '<div style="font-size:12px;color:var(--text-muted);margin-bottom:18px;">RoweOS detected an image request. Which generator should we use? You can change this later in System.</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;">' +
+    '<button data-pref="nano-banana-3-pro" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">Nano Banana 3.0 Pro <span style="color:var(--text-muted);font-size:11px;">— Google, multimodal, refs</span></button>' +
+    '<button data-pref="imagen3" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">Imagen 4 <span style="color:var(--text-muted);font-size:11px;">— Google, photorealistic</span></button>' +
+    '<button data-pref="gpt-image-2" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">GPT Image 2 <span style="color:var(--text-muted);font-size:11px;">— OpenAI, edits</span></button>' +
+    '</div>';
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+  box.querySelectorAll('.image-pref-btn').forEach(function(btn) {
+    btn.onclick = function() {
+      var pref = btn.getAttribute('data-pref');
+      try { localStorage.setItem('roweos_image_provider_pref', pref); } catch (e) {}
+      document.body.removeChild(modal);
+      callback(pref);
+    };
+  });
+}
+
+async function _runChatImageGen(prompt, provider) {
+  var result;
+  try {
+    if (provider === 'gpt-image-2' && typeof generateImageWithGptImage === 'function') {
+      result = await generateImageWithGptImage(prompt, { aspectRatio: '1:1' });
+    } else if (provider === 'imagen3' && typeof generateImageWithImagen3 === 'function') {
+      result = await generateImageWithImagen3(prompt, '1:1');
+    } else if (typeof generateImageWithNanobanana === 'function') {
+      result = await generateImageWithNanobanana(prompt, { aspectRatio: '1:1' });
+    } else {
+      throw new Error('No image generator available');
+    }
+    if (result && result.images && result.images.length > 0) {
+      return 'data:' + (result.images[0].mimeType || 'image/png') + ';base64,' + result.images[0].base64;
+    }
+    if (result && result.imageData) return 'data:image/png;base64,' + result.imageData;
+    if (result && result.base64) return 'data:image/png;base64,' + result.base64;
+    throw new Error(result && result.text ? 'Model responded with text only: ' + result.text.substring(0, 200) : 'No image data');
+  } catch (err) {
+    throw err;
+  }
+}
+
+// v31.20: Friendly provider name lookup for the assistant turn label.
+function _friendlyImageProvider(provider) {
+  if (provider === 'imagen3') return 'Imagen 4';
+  if (provider === 'gpt-image-2') return 'GPT Image 2';
+  if (provider === 'nano-banana-3-pro' || provider === 'gemini-3-pro-image-preview') return 'Nano Banana 3.0 Pro';
+  if (provider === 'gemini-2.5-flash-image') return 'Nano Banana 3.0';
+  return provider;
+}
+
+function _injectChatImageAssistantTurn(userPrompt, dataUrl, provider) {
+  // v31.20: Use msg.imageUrl + plain text for content. renderConversation auto-injects
+  // the <img> when imageUrl is present and content has no <img>. Embedding raw HTML
+  // in content was failing because formatMessageContent escapes/processes it as text.
+  if (typeof currentConversation !== 'undefined') {
+    // Don't double-push the user message if sendFollowup already pushed it
+    var lastMsg = currentConversation[currentConversation.length - 1];
+    var alreadyPushed = lastMsg && lastMsg.role === 'user' && lastMsg.content === userPrompt;
+    if (!alreadyPushed) {
+      currentConversation.push({ role: 'user', content: userPrompt });
+    }
+    currentConversation.push({
+      role: 'assistant',
+      content: 'Generated with ' + _friendlyImageProvider(provider) + '.',
+      imageUrl: dataUrl,
+      _isImageGen: true,
+      id: 'chatimg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+    });
+  }
+  // Push to Studio Gallery so it lives in cross-device store
+  try {
+    var gal = (typeof readStudioGallery === 'function') ? readStudioGallery().slice(0) : [];
+    gal.push({
+      id: 'chatgen_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+      prompt: userPrompt,
+      model: _friendlyImageProvider(provider),
+      dataUrl: dataUrl,
+      source: 'brandai_chat',
+      createdAt: new Date().toISOString()
+    });
+    if (typeof persistStudioGallery === 'function') persistStudioGallery(gal);
+  } catch (e) {}
+  // Re-render conversation
+  if (typeof renderConversation === 'function') renderConversation();
+  if (typeof showConversationView === 'function') showConversationView();
+  // v31.20: Reset blob/send button state in case caller didn't
+  try { if (typeof setBlobState === 'function') setBlobState('idle'); } catch (e) {}
+  try {
+    var btn = document.getElementById('agentRunBtn') || document.getElementById('followupBtn');
+    if (btn) { btn.disabled = false; btn.classList.remove('sending'); }
+  } catch (e) {}
+}
+
+function _maybeHandleChatImageGen(userText, callback) {
+  var intentText = _detectImageGenIntent(userText);
+  if (!intentText) { callback(false); return; }
+  showImageProviderPickerOnce(function(provider) {
+    if (typeof showToast === 'function') showToast('Generating image with ' + provider + '...', 'info');
+    if (typeof setBlobState === 'function') setBlobState('thinking');
+    _runChatImageGen(intentText, provider).then(function(dataUrl) {
+      _injectChatImageAssistantTurn(userText, dataUrl, provider);
+      if (typeof setBlobState === 'function') setBlobState('idle');
+      if (typeof showToast === 'function') showToast('Image generated', 'success');
+      callback(true);
+    }).catch(function(err) {
+      if (typeof setBlobState === 'function') setBlobState('idle');
+      if (typeof showToast === 'function') showToast('Image gen failed: ' + (err.message || err), 'error');
+      callback(false); // fall back to LLM text response
+    });
+  });
+}
+window._maybeHandleChatImageGen = _maybeHandleChatImageGen;
+
 function runAgent() {
+  // v31.17: Intercept image generation intent before LLM call
+  // v31.20: Reset send-button + blob state if image gen succeeds OR fails so the
+  // UI doesn't freeze in "sending" forever.
+  try {
+    var _firstMsg = document.getElementById('agentCommand');
+    var _firstText = _firstMsg ? _firstMsg.value : '';
+    if (_firstText && _detectImageGenIntent(_firstText) && !window._chatImageGenInProgress) {
+      window._chatImageGenInProgress = true;
+      _firstMsg.value = '';
+      var _runBtn = document.getElementById('agentRunBtn');
+      if (_runBtn) { _runBtn.disabled = true; _runBtn.classList.add('sending'); }
+      _maybeHandleChatImageGen(_firstText, function(handled) {
+        window._chatImageGenInProgress = false;
+        if (_runBtn) { _runBtn.disabled = false; _runBtn.classList.remove('sending'); }
+        if (typeof setBlobState === 'function') setBlobState('idle');
+        if (typeof setAgentStatus === 'function') setAgentStatus('idle');
+        if (!handled && _firstMsg) { _firstMsg.value = _firstText; runAgent(); }
+      });
+      return;
+    }
+  } catch (e) {}
+
   // v24.20: Blob thinking state
   if (typeof setBlobState === 'function') setBlobState('thinking');
   // v22.39: Always hide stale progress bars on new message (mobile fix)
@@ -6174,6 +6342,39 @@ function runAgent() {
 }
 
 function sendFollowup() {
+  // v31.17: Intercept image generation intent before LLM call
+  // v31.20: Reset send-button + blob state regardless of outcome so UI doesn't freeze.
+  try {
+    var _fInp = document.getElementById('followupCommand');
+    var _fText = _fInp ? _fInp.value : '';
+    if (_fText && _detectImageGenIntent(_fText) && !window._chatImageGenInProgress) {
+      window._chatImageGenInProgress = true;
+      _fInp.value = '';
+      _fInp.style.height = 'auto';
+      var _fBtn = document.getElementById('followupBtn');
+      if (_fBtn) { _fBtn.disabled = true; _fBtn.classList.add('sending'); }
+      // Push the user's prompt visually right away
+      try {
+        if (typeof currentConversation !== 'undefined') {
+          currentConversation.push({ role: 'user', content: _fText });
+          if (typeof renderConversation === 'function') renderConversation();
+        }
+      } catch (e) {}
+      _maybeHandleChatImageGen(_fText, function(handled) {
+        window._chatImageGenInProgress = false;
+        if (_fBtn) { _fBtn.disabled = false; _fBtn.classList.remove('sending'); }
+        if (typeof setBlobState === 'function') setBlobState('idle');
+        if (typeof setAgentStatus === 'function') setAgentStatus('idle');
+        if (!handled) {
+          // Image gen failed — pop the user message we just added (the inject didn't run)
+          try { if (typeof currentConversation !== 'undefined') currentConversation.pop(); } catch (e) {}
+          if (_fInp) { _fInp.value = _fText; sendFollowup(); }
+        }
+      });
+      return;
+    }
+  } catch (e) {}
+
   // v24.20: Blob thinking state
   if (typeof setBlobState === 'function') setBlobState('thinking');
   expandChatInput(); // v15.43: Ensure chat input visible after send
@@ -7577,10 +7778,33 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     // v24.25: Add inline visual capability
     prompt += VISUAL_CAPABILITY_HINT;
 
+    // v31.14: Inject admin context snapshot when admin opts in (toggle stored in
+    // localStorage 'roweos_admin_ai_awareness'). Async resolution before stream call.
+    var _adminAwarenessOn = (typeof isAdmin === 'function' && isAdmin())
+      && localStorage.getItem('roweos_admin_ai_awareness') === 'true';
+
     // v16.4: Set up abort controller and stop button
     _streamAbortController = new AbortController();
     setSendButtonStopping('followupBtn');
     var _brandSignal = _streamAbortController.signal;
+
+    var _proceedStream = function(finalPrompt) {
+      if (provider === 'anthropic') {
+        callAnthropicStreaming(model, apiKey, messages, finalPrompt, onChunk, onComplete, onError, _brandSignal);
+      } else if (provider === 'openai') {
+        callOpenAIStreaming(model, apiKey, messages, finalPrompt, onChunk, onComplete, onError, _brandSignal);
+      } else if (provider === 'google') {
+        callGoogleStreaming(model, apiKey, messages, finalPrompt, onChunk, onComplete, onError, _brandSignal);
+      }
+    };
+
+    if (_adminAwarenessOn && (provider === 'anthropic' || provider === 'openai' || provider === 'google') && typeof getAdminContextSnapshot === 'function') {
+      getAdminContextSnapshot().then(function(adminCtx) {
+        var withAdmin = adminCtx ? (prompt + adminCtx) : prompt;
+        _proceedStream(withAdmin);
+      }).catch(function() { _proceedStream(prompt); });
+      return;
+    }
 
     // v8.0: Use streaming API calls
     if (provider === 'anthropic') {

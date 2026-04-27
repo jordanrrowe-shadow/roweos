@@ -4032,6 +4032,230 @@ function adminLoadBrandConfigs() {
     });
 }
 
+// v31.14: Admin AI awareness — pulls counts + recent items from admin Firestore
+// collections so admin can ask BrandAI questions like "How many users this week?"
+// and get real numbers. Returns a string suitable for system-prompt injection.
+// Token budget: keep under ~2000 tokens by capping recent items + summarizing.
+window._adminContextSnapshot = null;
+window._adminContextSnapshotTs = 0;
+async function getAdminContextSnapshot() {
+  if (!isAdmin || !isAdmin()) return '';
+  // Cache for 60s to avoid hammering Firestore on every chat turn
+  if (window._adminContextSnapshot && (Date.now() - window._adminContextSnapshotTs) < 60000) {
+    return window._adminContextSnapshot;
+  }
+  if (!firebase || !firebase.firestore) return '';
+  var db = firebase.firestore();
+  try {
+    var weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    var dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    var results = await Promise.all([
+      db.collection('roweos_users').get().catch(function() { return { size: 0, docs: [] }; }),
+      db.collection('signups').orderBy('createdAt', 'desc').limit(20).get().catch(function() { return { size: 0, docs: [] }; }),
+      db.collection('email_log').orderBy('sentAt', 'desc').limit(50).get().catch(function() { return { size: 0, docs: [] }; }),
+      db.collection('campaign_clicks').orderBy('clickedAt', 'desc').limit(50).get().catch(function() { return { size: 0, docs: [] }; }),
+      db.collection('access_keys').get().catch(function() { return { size: 0, docs: [] }; }),
+      db.collection('api_key_pool').get().catch(function() { return { size: 0, docs: [] }; })
+    ]);
+    var users = results[0], signups = results[1], emails = results[2], clicks = results[3], keys = results[4], pool = results[5];
+
+    var newSignupsWeek = 0, newSignupsDay = 0;
+    signups.docs.forEach(function(d) {
+      var data = d.data();
+      var ts = data.createdAt && data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt || 0);
+      if (ts >= weekAgo) newSignupsWeek++;
+      if (ts >= dayAgo) newSignupsDay++;
+    });
+
+    var emailsWeek = 0;
+    emails.docs.forEach(function(d) {
+      var data = d.data();
+      var ts = data.sentAt && data.sentAt.toDate ? data.sentAt.toDate() : new Date(data.sentAt || 0);
+      if (ts >= weekAgo) emailsWeek++;
+    });
+
+    var clicksWeek = 0;
+    clicks.docs.forEach(function(d) {
+      var data = d.data();
+      var ts = data.clickedAt && data.clickedAt.toDate ? data.clickedAt.toDate() : new Date(data.clickedAt || 0);
+      if (ts >= weekAgo) clicksWeek++;
+    });
+
+    var availableKeys = 0;
+    pool.docs.forEach(function(d) { if (!d.data().assignedTo) availableKeys++; });
+
+    var summary = '\n\n## Admin Context (current as of ' + new Date().toISOString() + ')\n';
+    summary += '- Total users: ' + users.size + '\n';
+    summary += '- New signups: ' + newSignupsDay + ' (24h), ' + newSignupsWeek + ' (7d)\n';
+    summary += '- Recent signups (last 20): ' + signups.docs.slice(0, 5).map(function(d) {
+      var data = d.data();
+      return (data.email || 'anonymous') + ' (' + (data.tier || 'unknown') + ')';
+    }).join(', ') + (signups.size > 5 ? ' +' + (signups.size - 5) + ' more' : '') + '\n';
+    summary += '- Emails sent in past 7d: ' + emailsWeek + ' (of ' + emails.size + ' tracked)\n';
+    summary += '- Email clicks in past 7d: ' + clicksWeek + ' (of ' + clicks.size + ' tracked)\n';
+    summary += '- Access keys: ' + keys.size + ' total\n';
+    summary += '- API key pool: ' + pool.size + ' total, ' + availableKeys + ' available\n';
+    summary += '\nUse these numbers when answering admin questions. If the user asks for details, say what is and is not in this snapshot.\n';
+
+    window._adminContextSnapshot = summary;
+    window._adminContextSnapshotTs = Date.now();
+    return summary;
+  } catch (e) {
+    console.warn('[AdminContext] snapshot failed:', e);
+    return '';
+  }
+}
+window.getAdminContextSnapshot = getAdminContextSnapshot;
+
+// v31.13: Admin-only conversation purge with explicit count preview + confirm.
+// Investigation note: the "old conversations resurrect" bug was caused by cloud
+// chats being merged in without tombstones. Tombstones added in v31.13 prevent
+// resurrection; this purge button gives admin a manual scrub when state is bad.
+// v31.18: One-shot scrub at startup that prunes tombstoned chats from the local
+// arrays. Without this, devices that never re-sync from cloud keep stale chats
+// in History/Sync indefinitely even after a Purge.
+function scrubTombstonedChatsFromLocal() {
+  try {
+    var tombArr = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+    if (!Array.isArray(tombArr) || tombArr.length === 0) return;
+    var tomb = {};
+    tombArr.forEach(function(id) { tomb[String(id)] = true; });
+    // BrandAI commands (in-memory + storage)
+    var brandRaw = localStorage.getItem('roweos_agentCommands');
+    if (brandRaw) {
+      try {
+        var bArr = JSON.parse(brandRaw);
+        if (Array.isArray(bArr)) {
+          var bFiltered = bArr.filter(function(c) { return !(c && c.id && tomb[String(c.id)]); });
+          if (bFiltered.length !== bArr.length) {
+            localStorage.setItem('roweos_agentCommands', JSON.stringify(bFiltered));
+            if (typeof agentCommands !== 'undefined' && Array.isArray(agentCommands)) {
+              agentCommands.length = 0;
+              Array.prototype.push.apply(agentCommands, bFiltered.filter(function(c) { return c.mode !== 'life'; }));
+            }
+          }
+        }
+      } catch(e) {}
+    }
+    // LifeAI commands
+    var lifeRaw = localStorage.getItem('roweos_life_agentCommands');
+    if (lifeRaw) {
+      try {
+        var lArr = JSON.parse(lifeRaw);
+        if (Array.isArray(lArr)) {
+          var lFiltered = lArr.filter(function(c) { return !(c && c.id && tomb[String(c.id)]); });
+          if (lFiltered.length !== lArr.length) {
+            localStorage.setItem('roweos_life_agentCommands', JSON.stringify(lFiltered));
+          }
+        }
+      } catch(e) {}
+    }
+  } catch(e) { console.warn('[ChatTombstones] scrub failed:', e); }
+}
+window.scrubTombstonedChatsFromLocal = scrubTombstonedChatsFromLocal;
+// Run on script load + after pulls
+try { setTimeout(scrubTombstonedChatsFromLocal, 1000); } catch(e) {}
+
+// v31.17: Admin AI awareness toggle (UI handler — no console needed).
+function adminToggleAiAwareness(checked) {
+  if (!isAdmin || !isAdmin()) { showToast('Admin only', 'error'); return; }
+  try {
+    if (checked) localStorage.setItem('roweos_admin_ai_awareness', 'true');
+    else localStorage.removeItem('roweos_admin_ai_awareness');
+    showToast(checked ? 'Admin AI awareness enabled' : 'Admin AI awareness disabled', 'success');
+    window._adminContextSnapshot = null; // force refresh next call
+  } catch (e) { showToast('Toggle failed: ' + e.message, 'error'); }
+}
+window.adminToggleAiAwareness = adminToggleAiAwareness;
+
+function adminSetImageProvider(provider) {
+  try {
+    if (provider) localStorage.setItem('roweos_image_provider_pref', provider);
+    else localStorage.removeItem('roweos_image_provider_pref');
+    showToast('Image generator preference saved', 'success');
+  } catch (e) { showToast('Save failed: ' + e.message, 'error'); }
+}
+window.adminSetImageProvider = adminSetImageProvider;
+
+function _adminInitAwarenessUI() {
+  try {
+    var t = document.getElementById('adminAwarenessToggle');
+    if (t) t.checked = localStorage.getItem('roweos_admin_ai_awareness') === 'true';
+    var p = document.getElementById('imageProviderPref');
+    if (p) p.value = localStorage.getItem('roweos_image_provider_pref') || '';
+  } catch (e) {}
+}
+window._adminInitAwarenessUI = _adminInitAwarenessUI;
+
+function adminPreviewPurgeCounts() {
+  if (!isAdmin || !isAdmin()) { showToast('Admin only', 'error'); return; }
+  var brandCount = 0, lifeCount = 0, galleryCount = 0;
+  try { brandCount = (JSON.parse(localStorage.getItem('roweos_agentCommands') || '[]') || []).length; } catch(e) {}
+  try { lifeCount = (JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]') || []).length; } catch(e) {}
+  try {
+    var gal = (typeof readStudioGallery === 'function') ? readStudioGallery() : [];
+    galleryCount = gal.length;
+  } catch(e) {}
+  var el = document.getElementById('adminPurgeCounts');
+  if (el) {
+    el.innerHTML = 'Local: ' + brandCount + ' BrandAI &middot; ' + lifeCount + ' LifeAI &middot; ' + galleryCount + ' Studio Gallery items';
+  }
+  showToast('Counts loaded', 'info');
+}
+window.adminPreviewPurgeCounts = adminPreviewPurgeCounts;
+
+function adminPurgeAllConversations() {
+  if (!isAdmin || !isAdmin()) { showToast('Admin only', 'error'); return; }
+  var brandIds = [];
+  var lifeIds = [];
+  try {
+    var bArr = JSON.parse(localStorage.getItem('roweos_agentCommands') || '[]');
+    bArr.forEach(function(c) { if (c && c.id) brandIds.push(c.id); });
+  } catch(e) {}
+  try {
+    var lArr = JSON.parse(localStorage.getItem('roweos_life_agentCommands') || '[]');
+    lArr.forEach(function(c) { if (c && c.id) lifeIds.push(c.id); });
+  } catch(e) {}
+  var total = brandIds.length + lifeIds.length;
+  if (!confirm('Permanently purge ' + total + ' conversations (' + brandIds.length + ' BrandAI + ' + lifeIds.length + ' LifeAI) from this device, the cloud, and add tombstones so they cannot resurrect?\n\nThis is irreversible.')) return;
+  // Tombstone everything
+  try {
+    var allIds = brandIds.concat(lifeIds);
+    var existing = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+    allIds.forEach(function(id) { if (existing.indexOf(id) < 0) existing.push(id); });
+    localStorage.setItem('roweos_deleted_chat_ids', JSON.stringify(existing));
+    if (typeof writeDB === 'function') writeDB('profile/deletedChatIds', { ids: existing, _modifiedAt: Date.now() }, { category: 'profile' });
+  } catch(e) {}
+  // Delete from Firestore subcollection
+  try {
+    if (typeof deleteDBDoc === 'function') {
+      brandIds.concat(lifeIds).forEach(function(id) { deleteDBDoc('chats', String(id), 'brandai_chats'); });
+    }
+  } catch(e) {}
+  // Clear locally
+  localStorage.removeItem('roweos_agentCommands');
+  localStorage.removeItem('roweos_life_agentCommands');
+  if (typeof agentCommands !== 'undefined') agentCommands.length = 0;
+  if (typeof currentConversation !== 'undefined') currentConversation = [];
+  // v31.20 FIX: The pull reads `convCurrent.messages`, not `convCurrent.data`. Writing
+  // `{ data: '[]' }` left the old `messages` array intact in the cloud doc, so the next
+  // pull restored the deleted chats. ROOT CAUSE OF 2/9 CHAT RESURRECTION.
+  // Also clear in-memory currentConversation so the user immediately sees a clean slate.
+  try {
+    if (typeof writeDB === 'function') {
+      writeDB('conversations/agent', { json: '[]', _modifiedAt: Date.now() }, { category: 'brandai_chats' });
+      writeDB('conversations/current', { messages: [], _modifiedAt: Date.now() }, { category: 'brandai_chats' });
+      writeDB('conversations/history', { json: '[]', data: '[]', _modifiedAt: Date.now() }, { category: 'brandai_chats' });
+    }
+    if (typeof currentConversation !== 'undefined') {
+      currentConversation.length = 0;
+    }
+  } catch(e) {}
+  adminPreviewPurgeCounts();
+  showToast('Purged ' + total + ' conversations + tombstoned', 'success');
+}
+window.adminPurgeAllConversations = adminPurgeAllConversations;
+
 function adminToggleBrandConfig(code, newActive) {
   if (!isAdmin() || !firebase) return;
   firebase.firestore().collection('brand_configs').doc(code).update({ active: newActive })
@@ -6483,6 +6707,10 @@ function showAdminTab(tabName) {
   if (tabName === 'feedback' && typeof renderAdminFeedback === 'function') renderAdminFeedback();
   if (tabName === 'signups' && typeof adminLoadSignups === 'function') adminLoadSignups();
   if (tabName === 'emails' && typeof adminLoadEmailData === 'function') adminLoadEmailData();
+  // v31.17: Hydrate awareness toggle + image provider preference UI
+  if (tabName === 'configs' && typeof _adminInitAwarenessUI === 'function') {
+    setTimeout(_adminInitAwarenessUI, 50);
+  }
   // v31.0: Auto-load Campaigns tab - adminRenderCampaigns (25-admin-emails.js) owns the panel
   // and renders the rich green-stat dashboard via innerHTML. Falls back to modular
   // adminLoadCampaigns (25-admin-campaigns.js) only if the legacy renderer isn't loaded.
@@ -7426,6 +7654,13 @@ function sendComposedEmail() {
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (data.success) {
         showToast('Email sent to ' + to, 'success');
+        // v31.19: Server only writes email_log when FIREBASE_SERVICE_ACCOUNT env var is
+        // configured. If `data.logged === false`, fall back to client-side write (admin
+        // session has Firestore write perms). Without this fallback, the dashboard never
+        // shows sent welcome/template emails because env was missing.
+        if (data.logged === false) {
+          console.warn('[email_log] Server did not log this send (env vars likely missing). Falling back to client write.');
+        }
         _logSentEmail(to, subject, selectedTemplate);
         closeModal('betaEmailPreviewModal');
         // v30.3: Refresh admin email tab if open so new log entry appears
@@ -9713,8 +9948,63 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     db.doc(basePath + '/profile/deletedAutomationIds').get(), // v28.6: Load deletion tombstones
     db.doc(basePath + '/scribe/notebooks').get(), // v29.2: Scribe notebooks
     db.doc(basePath + '/pulse/main').get(), // v29.3: Legacy pulse/main for non-goal data + migration fallback
-    db.collection(basePath + '/chats').get() // v30.3: Per-doc chat subcollection
+    db.collection(basePath + '/chats').get(), // v30.3: Per-doc chat subcollection
+    db.doc(basePath + '/library/studio_gallery').get(), // v31.11: Studio Gallery cross-device sync
+    db.doc(basePath + '/profile/deletedChatIds').get() // v31.13: Chat deletion tombstones
   ]).then(function(results) {
+    // v31.13: Chat deletion tombstones — apply BEFORE the chat merge below.
+    try {
+      var delChatDoc = results[results.length - 1];
+      if (delChatDoc && delChatDoc.exists) {
+        var delChatData = delChatDoc.data();
+        var cloudIds = (delChatData && Array.isArray(delChatData.ids)) ? delChatData.ids : [];
+        if (cloudIds.length > 0) {
+          var localIds = [];
+          try { localIds = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]'); } catch(e) {}
+          var merged = {};
+          localIds.forEach(function(id) { merged[String(id)] = true; });
+          cloudIds.forEach(function(id) { merged[String(id)] = true; });
+          var mergedArr = Object.keys(merged);
+          localStorage.setItem('roweos_deleted_chat_ids', JSON.stringify(mergedArr));
+          // v31.18: Immediately scrub local arrays so post-pull rendering is clean.
+          if (typeof scrubTombstonedChatsFromLocal === 'function') scrubTombstonedChatsFromLocal();
+        }
+      }
+    } catch(dcErr) { console.warn('[ChatTombstones] sync failed:', dcErr); }
+
+    // v31.11: Studio Gallery doc — pull and merge into the cache
+    try {
+      var studioGalleryDoc = results[results.length - 2];
+      if (studioGalleryDoc && studioGalleryDoc.exists) {
+        var sgData = studioGalleryDoc.data();
+        if (sgData && sgData.data) {
+          var cloudGallery = JSON.parse(sgData.data);
+          if (Array.isArray(cloudGallery)) {
+            // Merge by id with local cache (cloud-authoritative on conflict)
+            var localGallery = (typeof readStudioGallery === 'function') ? readStudioGallery() : [];
+            var byId = {};
+            for (var i = 0; i < localGallery.length; i++) { if (localGallery[i] && localGallery[i].id) byId[localGallery[i].id] = localGallery[i]; }
+            for (var j = 0; j < cloudGallery.length; j++) { if (cloudGallery[j] && cloudGallery[j].id) byId[cloudGallery[j].id] = cloudGallery[j]; }
+            var merged = [];
+            for (var k in byId) { if (byId.hasOwnProperty(k)) merged.push(byId[k]); }
+            merged.sort(function(a, b) { return new Date(a.createdAt || 0) - new Date(b.createdAt || 0); });
+            window._studioGalleryMem = merged;
+            try {
+              if (typeof _idbPut === 'function') {
+                _idbPut('roweos_auto_lab_images', JSON.stringify(merged));
+                if (typeof _markIdbKey === 'function') _markIdbKey('roweos_auto_lab_images');
+              }
+            } catch (e) {}
+            try { localStorage.setItem('roweos_auto_lab_images', JSON.stringify(merged)); } catch (e) {}
+            // Re-render any visible gallery surfaces
+            try { var sg = document.getElementById('studioMediaPanel'); if (sg && typeof renderStudioGallery === 'function') renderStudioGallery(sg); } catch (e) {}
+            try { if (typeof renderImageLabChatThread === 'function') renderImageLabChatThread(); } catch (e) {}
+            console.log('[StudioGallery] Pulled', cloudGallery.length, 'cloud entries, merged total', merged.length);
+          }
+        }
+      }
+    } catch (sgErr) { console.warn('[StudioGallery] Cloud pull failed:', sgErr); }
+
     var profileDoc = results[0];
     var brandsSnap = results[1];
     var convCurrentDoc = results[2];
@@ -10105,11 +10395,16 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
 
     // Conversations
     // v23.7: Merge-based sync - never overwrite local with fewer conversations
+    // v31.20: Skip apply when cloud array is empty (admin Purge wrote messages:[]).
+    // Also skip if this conversation's messages match a tombstoned id pattern.
     if (convCurrentDoc.exists && shouldSyncCategory('brandai_chats')) {
       var convCurrent = convCurrentDoc.data();
-      if (convCurrent.messages && typeof currentConversation !== 'undefined') {
-        // Only apply cloud current conversation if local is empty or cloud has more messages
-        if (currentConversation.length === 0 || (convCurrent.messages.length > currentConversation.length)) {
+      if (Array.isArray(convCurrent.messages) && typeof currentConversation !== 'undefined') {
+        var cloudCurrentLen = convCurrent.messages.length;
+        // Empty cloud = admin purge took effect; honor it instead of preserving local
+        if (cloudCurrentLen === 0) {
+          currentConversation.length = 0;
+        } else if (currentConversation.length === 0 || (cloudCurrentLen > currentConversation.length)) {
           currentConversation.length = 0;
           Array.prototype.push.apply(currentConversation, convCurrent.messages);
         }
@@ -10172,6 +10467,17 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       try {
         var _cloudChats = [];
         chatsSubSnap.forEach(function(doc) { _cloudChats.push(doc.data()); });
+        // v31.13: Apply chat deletion tombstones so cleared chats don't resurrect on pull.
+        var _chatTomb = {};
+        try {
+          var _tArr = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+          if (Array.isArray(_tArr)) _tArr.forEach(function(id) { _chatTomb[String(id)] = true; });
+        } catch(_te) {}
+        if (Object.keys(_chatTomb).length > 0) {
+          var _origLen = _cloudChats.length;
+          _cloudChats = _cloudChats.filter(function(c) { return !(c && c.id && _chatTomb[String(c.id)]); });
+          if (_origLen !== _cloudChats.length) console.log('[Firebase V3] Filtered ' + (_origLen - _cloudChats.length) + ' tombstoned chats from cloud');
+        }
         // Same merge logic as blob path - merge cloud with local by ID
         var _subCloudById = {};
         _cloudChats.forEach(function(cmd) { if (cmd.id) _subCloudById[cmd.id] = cmd; });
@@ -10213,6 +10519,15 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             if (cmd.id && !cloudById[cmd.id]) localOnly.push(cmd);
           });
           var allMerged = localOnly.concat(parsed);
+          // v31.13: Apply tombstones in the blob fallback path too.
+          try {
+            var _bTomb = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+            if (Array.isArray(_bTomb) && _bTomb.length > 0) {
+              var _bTombMap = {};
+              _bTomb.forEach(function(id) { _bTombMap[String(id)] = true; });
+              allMerged = allMerged.filter(function(c) { return !(c && c.id && _bTombMap[String(c.id)]); });
+            }
+          } catch(_btErr) {}
           // v28.4: Split merged chats by mode - agentHistory stores both brand+life
           var _brandChats = allMerged.filter(function(cmd) { return cmd.mode !== 'life'; });
           var _lifeChats = allMerged.filter(function(cmd) { return cmd.mode === 'life'; });
