@@ -92,8 +92,9 @@ concat_sorted() {
 
   # Core JS (numbered order, excluding 07-early-inline which was in SECTION 5)
   # Concat order is alphabetical via concat_sorted, so files load in name order:
-  #   ... 22-firebase-sync.js -> 22a-tombstones.js -> 23-offline.js ...
+  #   ... 22-firebase-sync.js -> 22a-tombstones.js -> 22b-brand-logos.js -> 23-offline.js ...
   # v32.0-A: 22a-tombstones.js MUST load after 22-firebase-sync.js (uses Firestore helpers).
+  # v32.0-C: 22b-brand-logos.js MUST load after 22a-tombstones.js (registers postDelete hook on brandLogos category).
   concat_sorted "$SRC/js/core" "js" "07-early-inline"
   # Shared JS (excluding mail.js which goes in SECTION 13)
   concat_sorted "$SRC/js/shared" "js" "mail"
