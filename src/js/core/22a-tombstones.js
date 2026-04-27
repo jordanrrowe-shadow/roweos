@@ -1005,3 +1005,123 @@ function _focusTodoPredicate(todo) {
   var bt = getCategoryById('brandTodos'); if (bt) bt.legacyHeuristic = _focusTodoPredicate;
   var lt = getCategoryById('lifeTodos'); if (lt) lt.legacyHeuristic = _focusTodoPredicate;
 })();
+
+// v32.0-B: Pre-flight backup. Writes a snapshot of every category's localStorage
+// to TWO local keys (one stable, one ephemeral) AND a Firestore doc so cross-
+// device restore is possible.
+
+function _snapshotForBackup() {
+  var snap = {};
+  var keys = [];
+  for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+    var cat = SYNC_CATEGORIES[i];
+    if (cat.localKey) keys.push(cat.localKey);
+    if (cat.tombstoneKey) keys.push(cat.tombstoneKey);
+  }
+  for (var j = 0; j < keys.length; j++) {
+    try {
+      var v = localStorage.getItem(keys[j]);
+      if (v !== null) snap[keys[j]] = v;
+    } catch (e) { /* ignore */ }
+  }
+  snap._capturedAt = new Date().toISOString();
+  snap._version = (window.ROWEOS_VERSION || 'unknown');
+  return snap;
+}
+
+function writePrePurgeBackup_v32() {
+  var snap = _snapshotForBackup();
+  try { localStorage.setItem('roweos_pre_pull_backup', JSON.stringify(snap)); } catch (e) {}
+  try { localStorage.setItem('roweos_pre_purge_backup_v32', JSON.stringify(snap)); } catch (e2) {}
+  var writeDB = _getWindowFn('writeDB');
+  if (!writeDB) return Promise.resolve({ ok: false, error: 'writeDB unavailable' });
+  return Promise.resolve(writeDB('profile/preBackup_v32', { snapshot: snap, _modifiedAt: Date.now() }))
+    .then(function() { return { ok: true }; }, function(err) { return { ok: false, error: err }; });
+}
+window.writePrePurgeBackup_v32 = writePrePurgeBackup_v32;
+
+function previewLegacyFocusCounts() {
+  var out = { pulseGoals: 0, brandTodos: 0, lifeTodos: 0 };
+  for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+    var cat = SYNC_CATEGORIES[i];
+    if (!cat.legacyHeuristic || !cat.localKey) continue;
+    var arr = (typeof window._readCategoryArray === 'function') ? window._readCategoryArray(cat) : [];
+    var n = 0;
+    for (var k = 0; k < arr.length; k++) {
+      if (cat.legacyHeuristic(arr[k])) n++;
+    }
+    if (out.hasOwnProperty(cat.id)) out[cat.id] = n;
+  }
+  return out;
+}
+window.previewLegacyFocusCounts = previewLegacyFocusCounts;
+
+// v32.0-B: Purge function. Runs all categories with legacyHeuristic. Does NOT
+// prompt — caller is responsible for confirmation (B.3 wraps with the modal flow).
+function purgeLegacyFocusResidue(opts) {
+  opts = opts || {};
+  var force = opts.force === true;
+  if (!force && localStorage.getItem('roweos_focus_purge_v32') === 'done') {
+    return Promise.resolve({ ok: true, skipped: true, message: 'already purged' });
+  }
+  return writePrePurgeBackup_v32().then(function(backupRes) {
+    if (!backupRes.ok && !force) {
+      return { ok: false, error: 'backup failed: ' + (backupRes.error || 'unknown'), results: null };
+    }
+    var perCategory = [];
+    var chain = Promise.resolve();
+    for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+      (function(cat) {
+        if (!cat.legacyHeuristic || !cat.localKey) return;
+        chain = chain.then(function() {
+          var arr = (typeof window._readCategoryArray === 'function') ? window._readCategoryArray(cat) : [];
+          var killIds = [];
+          for (var k = 0; k < arr.length; k++) {
+            if (cat.legacyHeuristic(arr[k])) {
+              if (arr[k] && arr[k][cat.idField] !== undefined) killIds.push(arr[k][cat.idField]);
+            }
+          }
+          if (!killIds.length) {
+            perCategory.push({ id: cat.id, count: 0, ok: true });
+            return;
+          }
+          return tombstoneAndDeleteMany(cat.id, killIds).then(function(res) {
+            perCategory.push({ id: cat.id, count: res.count, ok: res.ok, failed: res.failed });
+          });
+        });
+      })(SYNC_CATEGORIES[i]);
+    }
+    return chain.then(function() {
+      var allOk = true;
+      for (var pi = 0; pi < perCategory.length; pi++) {
+        if (!perCategory[pi].ok) { allOk = false; break; }
+      }
+      if (allOk) {
+        try { localStorage.setItem('roweos_focus_purge_v32', 'done'); } catch (e) {}
+      }
+      return { ok: allOk, results: perCategory, backup: backupRes };
+    });
+  });
+}
+window.purgeLegacyFocusResidue = purgeLegacyFocusResidue;
+
+function restoreFromPrePurgeBackup_v32() {
+  var raw = localStorage.getItem('roweos_pre_purge_backup_v32');
+  if (!raw) {
+    return Promise.resolve({ ok: false, error: 'no local backup; try cloud restore' });
+  }
+  try {
+    var snap = JSON.parse(raw);
+    var restored = 0;
+    for (var k in snap) {
+      if (!snap.hasOwnProperty(k)) continue;
+      if (k.charAt(0) === '_') continue;
+      try { localStorage.setItem(k, snap[k]); restored++; } catch (e) {}
+    }
+    try { localStorage.removeItem('roweos_focus_purge_v32'); } catch (e2) {}
+    return Promise.resolve({ ok: true, restored: restored, capturedAt: snap._capturedAt });
+  } catch (e3) {
+    return Promise.resolve({ ok: false, error: e3 });
+  }
+}
+window.restoreFromPrePurgeBackup_v32 = restoreFromPrePurgeBackup_v32;
