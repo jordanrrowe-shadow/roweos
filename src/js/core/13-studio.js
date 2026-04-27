@@ -2498,6 +2498,11 @@ function buildBrandSystemPrompt(brand, agent) {
 
   systemPrompt += '\n\nGUIDELINES:\n- Maintain the brand voice consistently throughout your response\n- Be professional, thorough, and helpful\n- Focus on quality and attention to detail\n- Tailor content to the target audience\n- Never use em-dashes or en-dashes in any output. Use commas, periods, semicolons, or hyphens instead.\n- When the user\'s message contains "[Web page content from ...]", that is REAL fetched content from that URL. Use it directly. Never say you cannot access URLs. The system fetches pages for you automatically. If no web page content block is present, say you could not retrieve the page.';
 
+  // v32.0-D: image edit refusal guard. If the user asks to edit an image but
+  // no image is attached, tell them to drag one in — don't say the system
+  // can't edit images, because it can.
+  systemPrompt += '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images — it can.';
+
   // v11.0.5: Check for custom agent prompt from Guardrails
   if (agent) {
     var customAgentPrompts = JSON.parse(localStorage.getItem('roweos_brand_agent_prompts') || '{}');
@@ -2819,8 +2824,10 @@ function buildLifeAISystemPrompt() {
   if (customPrompt && customPrompt.trim()) {
     console.log('[LifeAI] Using custom main system prompt from Settings');
     // v19.7: Append automation capability to custom prompt + v20.6: URL guidance
+    // v32.0-D: image edit refusal guard
     return customPrompt + buildAutomationCapabilityPrompt() +
-      '\n\nWhen the user\'s message contains "[Web page content from ...]", that is REAL fetched content from that URL. Use it directly. Never say you cannot access URLs.';
+      '\n\nWhen the user\'s message contains "[Web page content from ...]", that is REAL fetched content from that URL. Use it directly. Never say you cannot access URLs.' +
+      '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images — it can.';
   }
 
   // v10.5.25: Check agent type for specialized prompts
@@ -2828,6 +2835,8 @@ function buildLifeAISystemPrompt() {
   // v19.7: Append automation capability + v20.6: URL + identity guidance
   var prompt = buildLifeAISystemPromptForCategory(agentType) + buildAutomationCapabilityPrompt();
   prompt += '\n\nWhen the user\'s message contains "[Web page content from ...]", that is REAL fetched content from that URL. Use it directly. Never say you cannot access URLs. The system fetches pages for you automatically.';
+  // v32.0-D: image edit refusal guard
+  prompt += '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images — it can.';
   return prompt;
 }
 

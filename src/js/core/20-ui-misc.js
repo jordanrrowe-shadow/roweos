@@ -6174,9 +6174,10 @@ function _maybeHandleChatImageEdit(userText, callback) {
   handleImageEditRequest(userText, editIntent.attachments, { model: editIntent.model }).then(function(result) {
     if (typeof setBlobState === 'function') setBlobState('idle');
     if (result && result.ok) {
-      // v32.0-D: When Nano Banana path is used, handleNanobananaChatImage
-      // already pushed the assistant turn via its onComplete callback. For
-      // the OpenAI direct-edit path we render here.
+      // v32.0-D: handleImageEditRequest calls generateImageWithNanobanana /
+      // _handleOpenAIImageEdit directly (bypassing the streaming UI), so we
+      // render the assistant turn here. result._needsRender is set true by
+      // both provider paths.
       if (result._needsRender && result.dataUrl) {
         try {
           if (typeof currentConversation !== 'undefined') {
@@ -6213,6 +6214,10 @@ function _maybeHandleChatImageEdit(userText, callback) {
         } catch (e2) {}
       }
       if (typeof showToast === 'function') showToast('Image edited', 'success');
+      // v32.0-D: Clear attached file chips after successful edit (the
+      // attachment was consumed). Mirrors removeAgentFile() in runAgent's
+      // normal flow.
+      try { if (typeof removeAgentFile === 'function') removeAgentFile(); } catch (eClr) {}
       callback(true);
     } else {
       var errMsg = (result && result.error) ? (result.error.message || result.error) : 'Edit failed';
@@ -6264,6 +6269,14 @@ function runAgent() {
         _editFirstMsg.value = '';
         var _editRunBtn = document.getElementById('agentRunBtn');
         if (_editRunBtn) { _editRunBtn.disabled = true; _editRunBtn.classList.add('sending'); }
+        // v32.0-D: runAgent always starts a fresh conversation. Reset before
+        // the edit path so the rendering branch's user-turn push lands in a
+        // clean array (mirrors how _injectChatImageAssistantTurn behaves).
+        try {
+          if (typeof currentConversation !== 'undefined') {
+            currentConversation.length = 0;
+          }
+        } catch (eR) {}
         _maybeHandleChatImageEdit(_editFirstText, function(handled) {
           window._chatImageGenInProgress = false;
           if (_editRunBtn) { _editRunBtn.disabled = false; _editRunBtn.classList.remove('sending'); }
