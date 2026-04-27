@@ -991,9 +991,13 @@ function _focusGoalPredicate(goal) {
 
 function _focusTodoPredicate(todo) {
   if (!todo) return false;
-  if (!todo.completed) return false; // only purge old completed todos
-  var created = todo.createdAt ? Date.parse(todo.createdAt) : NaN;
-  if (!isNaN(created) && created < FOCUS_RETIRE_DATE) return true;
+  // v32.0.2: To-dos are now part of Pulse — anything older than the v28.8
+  // cutoff is residue regardless of completion flag. Numeric-id timestamps
+  // (Date.now()-style ids from old code) also count as a created date.
+  var created = NaN;
+  if (todo.createdAt) created = Date.parse(todo.createdAt);
+  if (isNaN(created) && typeof todo.id === 'number') created = todo.id;
+  if (!isNaN(created) && created > 0 && created < FOCUS_RETIRE_DATE) return true;
   return false;
 }
 
@@ -1056,6 +1060,46 @@ function previewLegacyFocusCounts() {
 }
 window.previewLegacyFocusCounts = previewLegacyFocusCounts;
 
+// v32.0.2: Fetch cloud items for a category directly via Firestore — returns
+// an array of items the same shape as _readCategoryArray. Lets the purge see
+// cloud-only ghosts that haven't been pulled into local yet.
+function _fetchCloudItemsForCategory(cat) {
+  if (!cat || !window.firebase || !window.firebaseUser) return Promise.resolve([]);
+  try {
+    var db = firebase.firestore();
+    var basePath = 'roweos_users/' + window.firebaseUser.uid;
+    if (cat.cloudShape === 'subcollection') {
+      return db.collection(basePath + '/' + cat.cloudPath).get().then(function(snap) {
+        var items = [];
+        snap.forEach(function(doc) {
+          var d = doc.data() || {};
+          if (!d[cat.idField]) d[cat.idField] = doc.id;
+          items.push(d);
+        });
+        return items;
+      }, function() { return []; });
+    }
+    if (cat.cloudShape === 'blob') {
+      return db.doc(basePath + '/' + cat.cloudPath).get().then(function(snap) {
+        var d = snap && snap.exists ? snap.data() : null;
+        if (!d) return [];
+        var arr = d[cat.blobField || 'data'];
+        if (!Array.isArray(arr)) return [];
+        if (cat.localFilter && cat.localFilter.field) {
+          var f = cat.localFilter.field;
+          var v = cat.localFilter.value;
+          arr = arr.filter(function(x) { return x && x[f] === v; });
+        }
+        return arr;
+      }, function() { return []; });
+    }
+    return Promise.resolve([]);
+  } catch (e) {
+    return Promise.resolve([]);
+  }
+}
+window._fetchCloudItemsForCategory = _fetchCloudItemsForCategory;
+
 // v32.0-B: Purge function. Runs all categories with legacyHeuristic. Does NOT
 // prompt — caller is responsible for confirmation (B.3 wraps with the modal flow).
 function purgeLegacyFocusResidue(opts) {
@@ -1074,19 +1118,34 @@ function purgeLegacyFocusResidue(opts) {
       (function(cat) {
         if (!cat.legacyHeuristic || !cat.localKey) return;
         chain = chain.then(function() {
-          var arr = (typeof window._readCategoryArray === 'function') ? window._readCategoryArray(cat) : [];
-          var killIds = [];
-          for (var k = 0; k < arr.length; k++) {
-            if (cat.legacyHeuristic(arr[k])) {
-              if (arr[k] && arr[k][cat.idField] !== undefined) killIds.push(arr[k][cat.idField]);
+          // v32.0.2: union of local + cloud items so cloud-only ghosts get caught
+          var localArr = (typeof window._readCategoryArray === 'function') ? window._readCategoryArray(cat) : [];
+          return _fetchCloudItemsForCategory(cat).then(function(cloudArr) {
+            var seen = {};
+            var union = [];
+            var src = localArr.concat(cloudArr);
+            for (var s = 0; s < src.length; s++) {
+              var it = src[s];
+              if (!it) continue;
+              var iid = it[cat.idField];
+              if (iid === undefined || iid === null) continue;
+              if (seen[iid]) continue;
+              seen[iid] = true;
+              union.push(it);
             }
-          }
-          if (!killIds.length) {
-            perCategory.push({ id: cat.id, count: 0, ok: true });
-            return;
-          }
-          return tombstoneAndDeleteMany(cat.id, killIds).then(function(res) {
-            perCategory.push({ id: cat.id, count: res.count, ok: res.ok, failed: res.failed });
+            var killIds = [];
+            for (var k = 0; k < union.length; k++) {
+              if (cat.legacyHeuristic(union[k])) {
+                killIds.push(union[k][cat.idField]);
+              }
+            }
+            if (!killIds.length) {
+              perCategory.push({ id: cat.id, count: 0, ok: true });
+              return;
+            }
+            return tombstoneAndDeleteMany(cat.id, killIds).then(function(res) {
+              perCategory.push({ id: cat.id, count: res.count, ok: res.ok, failed: res.failed });
+            });
           });
         });
       })(SYNC_CATEGORIES[i]);
@@ -1158,12 +1217,44 @@ function _showFocusPurgeModal(counts, onProceed, onSkip, onRestore) {
   }
 }
 
+// v32.0.2: cloud-aware count preview — counts cloud-only ghosts too, so the
+// modal shows the real number of items the purge will tombstone.
+function previewLegacyFocusCountsAsync() {
+  var out = { pulseGoals: 0, brandTodos: 0, lifeTodos: 0 };
+  var ops = [];
+  for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+    var cat = SYNC_CATEGORIES[i];
+    if (!cat.legacyHeuristic || !cat.localKey) continue;
+    if (!out.hasOwnProperty(cat.id)) continue;
+    (function(cat) {
+      var localArr = (typeof window._readCategoryArray === 'function') ? window._readCategoryArray(cat) : [];
+      ops.push(_fetchCloudItemsForCategory(cat).then(function(cloudArr) {
+        var seen = {};
+        var src = localArr.concat(cloudArr);
+        var n = 0;
+        for (var s = 0; s < src.length; s++) {
+          var it = src[s];
+          if (!it) continue;
+          var iid = it[cat.idField];
+          if (iid === undefined || iid === null) continue;
+          if (seen[iid]) continue;
+          seen[iid] = true;
+          if (cat.legacyHeuristic(it)) n++;
+        }
+        out[cat.id] = n;
+      }));
+    })(cat);
+  }
+  return Promise.all(ops).then(function() { return out; });
+}
+window.previewLegacyFocusCountsAsync = previewLegacyFocusCountsAsync;
+
 function runFocusPurgeFlow(opts) {
   opts = opts || {};
   var force = opts.force === true;
   if (!force && localStorage.getItem('roweos_focus_purge_v32') === 'done') return Promise.resolve({ skipped: true });
 
-  var counts = previewLegacyFocusCounts();
+  return previewLegacyFocusCountsAsync().then(function(counts) {
   return new Promise(function(resolve) {
     _showFocusPurgeModal(counts,
       function onProceed() {
@@ -1189,6 +1280,7 @@ function runFocusPurgeFlow(opts) {
         });
       }
     );
+  });
   });
 }
 window.runFocusPurgeFlow = runFocusPurgeFlow;
