@@ -124,6 +124,24 @@
                     <button onclick="adminPurgeAllConversations()" style="padding:5px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);border-radius:var(--radius-sm);color:#ef4444;cursor:pointer;font-size:var(--text-xs);">Purge All Conversations</button>
                   </div>
                 </div>
+                <!-- v32.0-B: Legacy Focus Data Purge (admin-only) -->
+                <div id="adminFocusPurgeCard" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border-color);">
+                  <div style="font-weight:600;margin-bottom:6px;color:var(--text-primary);">Legacy Focus Data Purge</div>
+                  <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px;">Removes pre-v28.8 Focus residue (Pulse Goals + completed BrandAI/LifeAI to-dos older than the cutoff). Writes a backup before purge. Re-run safe.</div>
+                  <div id="adminFocusPurgeBody">
+                    <div id="adminFocusPurgeCounts" style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;font-family:'SF Mono',Monaco,monospace;">
+                      <div>Pulse Goals: <span id="focusPurgeCountGoals">-</span></div>
+                      <div>BrandAI To-Dos: <span id="focusPurgeCountBrandTodos">-</span></div>
+                      <div>LifeAI To-Dos: <span id="focusPurgeCountLifeTodos">-</span></div>
+                    </div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                      <button onclick="adminRefreshFocusPurgeCounts()" style="padding:5px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh Counts</button>
+                      <button onclick="adminRunFocusPurge()" style="padding:5px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.4);border-radius:var(--radius-sm);color:#ef4444;cursor:pointer;font-size:var(--text-xs);">Re-Run Purge</button>
+                      <button onclick="adminRestoreFocusBackup()" style="padding:5px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Restore from v32 Backup</button>
+                      <button onclick="adminExportFocusBackup()" style="padding:5px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Export Backup as JSON</button>
+                    </div>
+                  </div>
+                </div>
                 <!-- v31.17: Admin AI awareness toggle (no console needed) -->
                 <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border-color);">
                   <div style="font-weight:600;margin-bottom:6px;color:var(--text-primary);">AI Awareness (Admin Mode)</div>

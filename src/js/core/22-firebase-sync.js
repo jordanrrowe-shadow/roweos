@@ -4321,6 +4321,73 @@ function adminPurgeAllConversations() {
 }
 window.adminPurgeAllConversations = adminPurgeAllConversations;
 
+// v32.0-B: Admin handlers for the Legacy Focus Data Purge panel.
+function adminRefreshFocusPurgeCounts() {
+  if (typeof previewLegacyFocusCounts !== 'function') {
+    if (typeof showToast === 'function') showToast('Preview unavailable', 'error');
+    return;
+  }
+  var c = previewLegacyFocusCounts();
+  var g = document.getElementById('focusPurgeCountGoals');
+  var bt = document.getElementById('focusPurgeCountBrandTodos');
+  var lt = document.getElementById('focusPurgeCountLifeTodos');
+  if (g) g.textContent = c.pulseGoals;
+  if (bt) bt.textContent = c.brandTodos;
+  if (lt) lt.textContent = c.lifeTodos;
+}
+window.adminRefreshFocusPurgeCounts = adminRefreshFocusPurgeCounts;
+
+function adminRunFocusPurge() {
+  if (typeof isAdmin !== 'function' || !isAdmin()) {
+    if (typeof showToast === 'function') showToast('Admin only', 'error');
+    return;
+  }
+  if (typeof runFocusPurgeFlow !== 'function') {
+    if (typeof showToast === 'function') showToast('Purge unavailable', 'error');
+    return;
+  }
+  runFocusPurgeFlow({ force: true }).then(function() {
+    adminRefreshFocusPurgeCounts();
+    if (typeof renderSyncInventory === 'function') renderSyncInventory();
+  });
+}
+window.adminRunFocusPurge = adminRunFocusPurge;
+
+function adminRestoreFocusBackup() {
+  if (typeof isAdmin !== 'function' || !isAdmin()) {
+    if (typeof showToast === 'function') showToast('Admin only', 'error');
+    return;
+  }
+  restoreFromPrePurgeBackup_v32().then(function(res) {
+    var msg = res.ok ? ('Restored ' + res.restored + ' keys (snapshot ' + (res.capturedAt || '') + ')') : 'Restore failed';
+    if (typeof showToast === 'function') showToast(msg, res.ok ? 'success' : 'error');
+    if (res.ok) setTimeout(function() { location.reload(); }, 1500);
+  });
+}
+window.adminRestoreFocusBackup = adminRestoreFocusBackup;
+
+function adminExportFocusBackup() {
+  var raw = localStorage.getItem('roweos_pre_purge_backup_v32');
+  if (!raw) {
+    if (typeof showToast === 'function') showToast('No backup found', 'error');
+    return;
+  }
+  try {
+    var blob = new Blob([raw], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'roweos-pre-purge-backup-v32-' + (new Date().toISOString().slice(0,10)) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() { try { URL.revokeObjectURL(url); a.remove(); } catch(e){} }, 100);
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Export failed', 'error');
+    console.error('[v32.0-B] export backup failed', e);
+  }
+}
+window.adminExportFocusBackup = adminExportFocusBackup;
+
 function adminToggleBrandConfig(code, newActive) {
   if (!isAdmin() || !firebase) return;
   firebase.firestore().collection('brand_configs').doc(code).update({ active: newActive })
