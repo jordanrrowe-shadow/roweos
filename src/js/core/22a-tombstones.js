@@ -415,11 +415,14 @@ window.getCategoryById = getCategoryById;
 // branching outside the registry. Helpers honor localArrayField (wrapper-
 // object storage) and localFilter (shared-storage discriminator).
 
-// v32.0-A: Per-category last-save timestamps. Replaces the single global var
-// that the v27.0 onSnapshot grace period used. Keyed by category id.
-var lastLocalSaveTime = {};
+// v32.0-A: Per-category last-save timestamps map. Used for category-scoped
+// onSnapshot grace-period checks. Keyed by category id. NOTE: The single
+// numeric `lastLocalSaveTime` (declared in 22-firebase-sync.js) is left
+// untouched — that global is still consulted by the v27.0 grace path. Both
+// stay fresh because tombstoneAndDelete[Many] stamp BOTH on every delete.
+var lastCategoryLocalSave = {};
 var LOCAL_SAVE_GRACE_PERIOD_DEFAULT = 5000;
-window.lastLocalSaveTime = lastLocalSaveTime;
+window.lastCategoryLocalSave = lastCategoryLocalSave;
 window.LOCAL_SAVE_GRACE_PERIOD_DEFAULT = LOCAL_SAVE_GRACE_PERIOD_DEFAULT;
 
 // v32.0-A: LOCAL ARRAY READ/WRITE (honors wrapper objects + shared filters)
@@ -511,9 +514,9 @@ function _readTombstoneSet(cat) {
   } catch (e) {
     arr = [];
   }
-  var set = {};
-  for (var i = 0; i < arr.length; i++) set[arr[i]] = true;
-  return set;
+  var tombSet = {};
+  for (var i = 0; i < arr.length; i++) tombSet[arr[i]] = true;
+  return tombSet;
 }
 
 function _writeTombstoneSet(cat, set) {
@@ -540,7 +543,7 @@ function _runRerenders(cat) {
   }
 }
 
-function _fn(name) {
+function _getWindowFn(name) {
   return (typeof window[name] === 'function') ? window[name] : null;
 }
 
@@ -554,7 +557,7 @@ function _fn(name) {
 function _deleteCloudItem(cat, itemId) {
   return new Promise(function(resolve) {
     if (cat.cloudShape === 'subcollection') {
-      var deleteDBDoc = _fn('deleteDBDoc');
+      var deleteDBDoc = _getWindowFn('deleteDBDoc');
       if (!deleteDBDoc) { resolve({ ok: false, error: 'deleteDBDoc unavailable' }); return; }
       try {
         var p = deleteDBDoc(cat.cloudPath, itemId);
@@ -569,7 +572,7 @@ function _deleteCloudItem(cat, itemId) {
     if (cat.cloudShape === 'blob') {
       // Re-write the blob doc minus the item. Cloud doc shape mirrors localStorage:
       // { [blobField]: arr, _modifiedAt }.
-      var writeDB = _fn('writeDB');
+      var writeDB = _getWindowFn('writeDB');
       if (!writeDB) { resolve({ ok: false, error: 'writeDB unavailable' }); return; }
       try {
         var local = _readCategoryArray(cat);
@@ -586,7 +589,7 @@ function _deleteCloudItem(cat, itemId) {
       return;
     }
     if (cat.cloudShape === 'inline-field') {
-      var writeDB2 = _fn('writeDB');
+      var writeDB2 = _getWindowFn('writeDB');
       if (!writeDB2) { resolve({ ok: false, error: 'writeDB unavailable' }); return; }
       try {
         var local2 = _readCategoryArray(cat);
@@ -608,7 +611,7 @@ function _deleteCloudItem(cat, itemId) {
 
 // v32.0-A: Push the tombstone set to cloud as a blob doc.
 function _writeCloudTombstone(cat, set) {
-  var writeDB = _fn('writeDB');
+  var writeDB = _getWindowFn('writeDB');
   if (!writeDB) return Promise.resolve({ ok: false, error: 'writeDB unavailable' });
   var ids = [];
   for (var k in set) if (set.hasOwnProperty(k)) ids.push(k);
@@ -618,6 +621,26 @@ function _writeCloudTombstone(cat, set) {
 
 // v32.0-A: PUBLIC API
 
+// v32.0-A: tombstoneAndDelete(categoryIdOrLabel, itemId)
+// Marks an item as deleted across all storage layers. Local writes are
+// synchronous and authoritative; cloud writes are fire-and-forget per the
+// project's write-through architecture (writeDB/deleteDBDoc do not return
+// promises — they dispatch to Firestore in the background and update the
+// sync indicator on completion).
+//
+// Returns: Promise<{
+//   ok:           boolean,  // local writes succeeded AND cloud calls dispatched
+//   id:           string,
+//   ts:           number,
+//   tombstoneOk:  boolean,  // tombstone push DISPATCHED (not confirmed)
+//   deleteOk:     boolean,  // delete call DISPATCHED (not confirmed)
+//   error:        any|null
+// }>
+//
+// Cloud failures surface via writeDB's own error toast / sync indicator;
+// they do not propagate here. The local tombstone is authoritative — on
+// the next pull, applyTombstoneFilter (Spec A.3) re-pushes any pending
+// tombstones if the cloud has lost track.
 function tombstoneAndDelete(categoryIdOrLabel, itemId) {
   var cat = getCategoryById(categoryIdOrLabel);
   if (!cat) return Promise.resolve({ ok: false, error: 'unknown category: ' + categoryIdOrLabel });
@@ -626,9 +649,9 @@ function tombstoneAndDelete(categoryIdOrLabel, itemId) {
   }
 
   // 1. Append to local tombstone set
-  var set = _readTombstoneSet(cat);
-  set[itemId] = true;
-  _writeTombstoneSet(cat, set);
+  var tombSet = _readTombstoneSet(cat);
+  tombSet[itemId] = true;
+  _writeTombstoneSet(cat, tombSet);
 
   // 2. Filter local data array (no-op when localKey is null)
   if (cat.localKey) {
@@ -639,12 +662,13 @@ function tombstoneAndDelete(categoryIdOrLabel, itemId) {
     _writeCategoryArray(cat, filtered);
   }
 
-  // 3. Update grace period
-  lastLocalSaveTime[cat.id] = Date.now();
+  // 3. Update grace period (per-category map + legacy numeric global)
+  lastCategoryLocalSave[cat.id] = Date.now();
+  if (typeof stampLocalSave === 'function') stampLocalSave(); // v32.0-A: keep v27.0 numeric grace fresh
 
   // 4 & 5. Push tombstone + delete cloud doc(s) in parallel
   return Promise.all([
-    _writeCloudTombstone(cat, set),
+    _writeCloudTombstone(cat, tombSet),
     _deleteCloudItem(cat, itemId)
   ]).then(function(results) {
     var tombRes = results[0];
@@ -671,6 +695,25 @@ function tombstoneAndDelete(categoryIdOrLabel, itemId) {
 }
 window.tombstoneAndDelete = tombstoneAndDelete;
 
+// v32.0-A: tombstoneAndDeleteMany(categoryIdOrLabel, itemIds)
+// Bulk variant of tombstoneAndDelete. Same semantics:
+//   - Local writes (tombstone set, array filter) are synchronous and authoritative.
+//   - Cloud writes are fire-and-forget. For subcollection categories, one cloud
+//     delete is dispatched per item; for blob/inline-field categories the local
+//     re-write covers all items in a single cloud call.
+//
+// Returns: Promise<{
+//   ok:           boolean,           // tombstone push dispatched AND no per-item failures
+//   count:        number,            // items the local-side believes succeeded
+//   failed:       Array<{id, ok, error}>,
+//   tombstoneOk:  boolean,           // tombstone push DISPATCHED (not confirmed)
+//   error:        any|null
+// }>
+//
+// As with tombstoneAndDelete, cloud failures surface via writeDB's own
+// telemetry — they do not propagate here. The local tombstone is the
+// authoritative record and applyTombstoneFilter (Spec A.3) re-pushes
+// anything the cloud has lost on next pull.
 function tombstoneAndDeleteMany(categoryIdOrLabel, itemIds) {
   var cat = getCategoryById(categoryIdOrLabel);
   if (!cat) return Promise.resolve({ ok: false, count: 0, failed: [], error: 'unknown category' });
@@ -679,9 +722,9 @@ function tombstoneAndDeleteMany(categoryIdOrLabel, itemIds) {
   }
 
   // 1. Append all to local tombstone set
-  var set = _readTombstoneSet(cat);
-  for (var i = 0; i < itemIds.length; i++) set[itemIds[i]] = true;
-  _writeTombstoneSet(cat, set);
+  var tombSet = _readTombstoneSet(cat);
+  for (var i = 0; i < itemIds.length; i++) tombSet[itemIds[i]] = true;
+  _writeTombstoneSet(cat, tombSet);
 
   // 2. Filter local data array
   if (cat.localKey) {
@@ -694,11 +737,12 @@ function tombstoneAndDeleteMany(categoryIdOrLabel, itemIds) {
     _writeCategoryArray(cat, filtered);
   }
 
-  // 3. Update grace period
-  lastLocalSaveTime[cat.id] = Date.now();
+  // 3. Update grace period (per-category map + legacy numeric global)
+  lastCategoryLocalSave[cat.id] = Date.now();
+  if (typeof stampLocalSave === 'function') stampLocalSave(); // v32.0-A: keep v27.0 numeric grace fresh
 
   // 4. Push tombstone (single write)
-  var pTomb = _writeCloudTombstone(cat, set);
+  var pTomb = _writeCloudTombstone(cat, tombSet);
 
   // 5. Delete cloud docs. For blob/inline-field, the local-array re-write
   // covers all items in one cloud call, so we only need ONE _deleteCloudItem
@@ -749,6 +793,23 @@ function tombstoneAndDeleteMany(categoryIdOrLabel, itemIds) {
 }
 window.tombstoneAndDeleteMany = tombstoneAndDeleteMany;
 
+// v32.0-A: clearTombstones(categoryIdOrLabel)
+// Wipes the local tombstone set for a category and dispatches a cloud
+// overwrite to mirror the empty state. Local clear is synchronous and
+// authoritative; the cloud write is fire-and-forget per the project's
+// write-through architecture (writeDB does not return a promise — it
+// dispatches in the background and updates the sync indicator on
+// completion).
+//
+// Returns: Promise<{
+//   ok:       boolean,  // true if writeDB was reachable and dispatch wrapped without throwing
+//   cleared:  number,   // count of locally-removed tombstones
+//   error:    any|null
+// }>
+//
+// Use case: admin tooling / sync inventory reset. Typical app code does
+// NOT call this — once an item is tombstoned it should stay tombstoned
+// until the next pull confirms the cloud has caught up.
 function clearTombstones(categoryIdOrLabel) {
   var cat = getCategoryById(categoryIdOrLabel);
   if (!cat) return Promise.resolve({ ok: false, cleared: 0, error: 'unknown category' });
@@ -759,7 +820,7 @@ function clearTombstones(categoryIdOrLabel) {
     if (!Array.isArray(existing)) existing = [];
   } catch (e) { existing = []; }
   try { localStorage.setItem(cat.tombstoneKey, '[]'); } catch (e) {}
-  var writeDB = _fn('writeDB');
+  var writeDB = _getWindowFn('writeDB');
   if (!writeDB) return Promise.resolve({ ok: false, cleared: existing.length, error: 'writeDB unavailable' });
   return Promise.resolve(writeDB(cat.cloudTombstonePath, { ids: [], _modifiedAt: Date.now() }))
     .then(function() {
