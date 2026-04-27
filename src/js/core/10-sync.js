@@ -1470,31 +1470,33 @@ function saveBrands() {
             batch.delete(doc.ref);
           }
         });
+        // v32.0-A: Build _all payload AFTER the per-brand strip so it matches what we just wrote,
+        // then add it to the SAME batch so the entire brand state commits atomically. This closes
+        // the race window where onSnapshot would fire on the individual-doc commit and merge a
+        // stale _all back into local state before a separate _all setDoc landed.
+        try {
+          var allBrandsData = brands.map(function(b) {
+            var d = JSON.parse(JSON.stringify(b));
+            Object.keys(d).forEach(function(k) {
+              if (typeof d[k] === 'string' && d[k].indexOf('data:') === 0 && d[k].length > 50000) {
+                d[k] = '';
+              }
+            });
+            return d;
+          });
+          batch.set(db.doc(basePath + '/brands/_all'), {
+            items: allBrandsData, count: allBrandsData.length, updatedAt: new Date().toISOString()
+          });
+        } catch(_allErr) {
+          console.warn('[saveBrands] v32.0-A: failed to build _all payload, skipping _all write:', _allErr && _allErr.message);
+        }
         return batch.commit();
       }).then(function() {
-        console.log('[saveBrands] v28.3 batch: All', brands.length, 'brands synced + ghosts deleted atomically');
+        console.log('[saveBrands] v32.0-A batch: All', brands.length, 'brands + _all synced + ghosts deleted atomically');
         localStorage.setItem('roweos_last_sync', String(Date.now()));
       }).catch(function(err) {
-        console.error('[saveBrands] v28.3 batch write failed:', err.message);
+        console.error('[saveBrands] v32.0-A batch write failed:', err.message);
       });
-      // v28.3: Write _all doc with ALL brand fields (not a subset). Strip only large base64 data.
-      try {
-        var allBrandsData = brands.map(function(b) {
-          var d = JSON.parse(JSON.stringify(b));
-          // Strip large base64 to fit Firestore 1MB doc limit
-          Object.keys(d).forEach(function(k) {
-            if (typeof d[k] === 'string' && d[k].indexOf('data:') === 0 && d[k].length > 50000) {
-              d[k] = '';
-            }
-          });
-          return d;
-        });
-        db.doc(basePath + '/brands/_all').set({
-          items: allBrandsData, count: allBrandsData.length, updatedAt: new Date().toISOString()
-        }).catch(function(err) {
-          console.warn('[saveBrands] _all doc write failed (OK, individual docs are primary):', err.message);
-        });
-      } catch(e) {}
     }
 
     // v28.0: Dual-write brands to v4 namespace
