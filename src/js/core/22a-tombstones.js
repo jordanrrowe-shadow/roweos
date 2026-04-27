@@ -406,3 +406,367 @@ function getCategoryById(idOrLabel) {
   return null;
 }
 window.getCategoryById = getCategoryById;
+
+// v32.0-A: Universal delete API. Three exported functions:
+//   - tombstoneAndDelete(categoryIdOrLabel, itemId)
+//   - tombstoneAndDeleteMany(categoryIdOrLabel, itemIds)
+//   - clearTombstones(categoryIdOrLabel)
+// All deletes from anywhere in the app go through these - no per-category
+// branching outside the registry. Helpers honor localArrayField (wrapper-
+// object storage) and localFilter (shared-storage discriminator).
+
+// v32.0-A: Per-category last-save timestamps. Replaces the single global var
+// that the v27.0 onSnapshot grace period used. Keyed by category id.
+var lastLocalSaveTime = {};
+var LOCAL_SAVE_GRACE_PERIOD_DEFAULT = 5000;
+window.lastLocalSaveTime = lastLocalSaveTime;
+window.LOCAL_SAVE_GRACE_PERIOD_DEFAULT = LOCAL_SAVE_GRACE_PERIOD_DEFAULT;
+
+// v32.0-A: LOCAL ARRAY READ/WRITE (honors wrapper objects + shared filters)
+
+// v32.0-A: Read the localStorage value as a parsed object (or null).
+function _readRaw(key) {
+  if (!key) return null;
+  try {
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+// v32.0-A: Read the array of items belonging to a category, honoring
+// localArrayField and localFilter. Returns [] if missing.
+function _readCategoryArray(cat) {
+  if (!cat || !cat.localKey) return [];
+  var raw = _readRaw(cat.localKey);
+  if (raw == null) return [];
+  // Extract array - wrapper or direct
+  var arr;
+  if (cat.localArrayField) {
+    arr = (raw && Array.isArray(raw[cat.localArrayField])) ? raw[cat.localArrayField] : [];
+  } else {
+    arr = Array.isArray(raw) ? raw : [];
+  }
+  // Apply filter for shared storage
+  if (cat.localFilter && cat.localFilter.field) {
+    var f = cat.localFilter.field;
+    var v = cat.localFilter.value;
+    arr = arr.filter(function(item) { return item && item[f] === v; });
+  }
+  return arr;
+}
+window._readCategoryArray = _readCategoryArray;
+
+// v32.0-A: Write the array of items belonging to a category, preserving any
+// sibling items in shared storage and any wrapper-object sibling fields.
+function _writeCategoryArray(cat, newArr) {
+  if (!cat || !cat.localKey) return;
+  var raw = _readRaw(cat.localKey);
+
+  // For shared storage: combine our filtered items with the others' items.
+  var combined;
+  if (cat.localFilter && cat.localFilter.field) {
+    var existingAll = [];
+    if (cat.localArrayField) {
+      existingAll = (raw && Array.isArray(raw[cat.localArrayField])) ? raw[cat.localArrayField] : [];
+    } else {
+      existingAll = Array.isArray(raw) ? raw : [];
+    }
+    var f = cat.localFilter.field;
+    var v = cat.localFilter.value;
+    // Keep items that DON'T belong to us; replace ours with newArr.
+    var others = existingAll.filter(function(item) { return !(item && item[f] === v); });
+    combined = others.concat(newArr);
+  } else {
+    combined = newArr;
+  }
+
+  var payload;
+  if (cat.localArrayField) {
+    // Preserve other fields on the wrapper object.
+    payload = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
+    payload[cat.localArrayField] = combined;
+  } else {
+    payload = combined;
+  }
+
+  try {
+    localStorage.setItem(cat.localKey, JSON.stringify(payload));
+  } catch (e) {
+    console.warn('[v32.0-A] _writeCategoryArray failed for ' + cat.localKey, e);
+  }
+}
+window._writeCategoryArray = _writeCategoryArray;
+
+// v32.0-A: TOMBSTONE SET HELPERS
+
+function _readTombstoneSet(cat) {
+  var arr;
+  try {
+    var raw = localStorage.getItem(cat.tombstoneKey);
+    arr = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(arr)) arr = [];
+  } catch (e) {
+    arr = [];
+  }
+  var set = {};
+  for (var i = 0; i < arr.length; i++) set[arr[i]] = true;
+  return set;
+}
+
+function _writeTombstoneSet(cat, set) {
+  var arr = [];
+  for (var k in set) if (set.hasOwnProperty(k)) arr.push(k);
+  try {
+    localStorage.setItem(cat.tombstoneKey, JSON.stringify(arr));
+  } catch (e) {
+    console.warn('[v32.0-A] _writeTombstoneSet failed for ' + cat.tombstoneKey, e);
+  }
+}
+
+// v32.0-A: RERENDER + LOOKUP
+
+function _runRerenders(cat) {
+  if (!cat || !cat.rerender || !cat.rerender.length) return;
+  for (var i = 0; i < cat.rerender.length; i++) {
+    var fnName = cat.rerender[i];
+    try {
+      if (typeof window[fnName] === 'function') window[fnName]();
+    } catch (e) {
+      console.warn('[v32.0-A] rerender ' + fnName + ' threw', e);
+    }
+  }
+}
+
+function _fn(name) {
+  return (typeof window[name] === 'function') ? window[name] : null;
+}
+
+// v32.0-A: CLOUD WRITES
+
+// v32.0-A: Delete one item from cloud. Strategy depends on cloudShape.
+// Note: writeDB/deleteDBDoc in 09-state.js are fire-and-forget (no promise
+// returned) - we wrap with Promise.resolve() so the API surface stays
+// promise-shaped for callers, but the actual cloud sync happens in the
+// background via writeDB's internal .then()/.catch().
+function _deleteCloudItem(cat, itemId) {
+  return new Promise(function(resolve) {
+    if (cat.cloudShape === 'subcollection') {
+      var deleteDBDoc = _fn('deleteDBDoc');
+      if (!deleteDBDoc) { resolve({ ok: false, error: 'deleteDBDoc unavailable' }); return; }
+      try {
+        var p = deleteDBDoc(cat.cloudPath, itemId);
+        if (p && typeof p.then === 'function') {
+          p.then(function() { resolve({ ok: true }); }, function(err) { resolve({ ok: false, error: err }); });
+        } else {
+          resolve({ ok: true });
+        }
+      } catch (e) { resolve({ ok: false, error: e }); }
+      return;
+    }
+    if (cat.cloudShape === 'blob') {
+      // Re-write the blob doc minus the item. Cloud doc shape mirrors localStorage:
+      // { [blobField]: arr, _modifiedAt }.
+      var writeDB = _fn('writeDB');
+      if (!writeDB) { resolve({ ok: false, error: 'writeDB unavailable' }); return; }
+      try {
+        var local = _readCategoryArray(cat);
+        var payload = {};
+        payload[cat.blobField || 'data'] = local;
+        payload._modifiedAt = Date.now();
+        var p2 = writeDB(cat.cloudPath, payload);
+        if (p2 && typeof p2.then === 'function') {
+          p2.then(function() { resolve({ ok: true }); }, function(err) { resolve({ ok: false, error: err }); });
+        } else {
+          resolve({ ok: true });
+        }
+      } catch (e2) { resolve({ ok: false, error: e2 }); }
+      return;
+    }
+    if (cat.cloudShape === 'inline-field') {
+      var writeDB2 = _fn('writeDB');
+      if (!writeDB2) { resolve({ ok: false, error: 'writeDB unavailable' }); return; }
+      try {
+        var local2 = _readCategoryArray(cat);
+        var pld = {};
+        pld[cat.blobField || 'data'] = local2;
+        pld._modifiedAt = Date.now();
+        var p3 = writeDB2(cat.parentDoc, pld);
+        if (p3 && typeof p3.then === 'function') {
+          p3.then(function() { resolve({ ok: true }); }, function(err) { resolve({ ok: false, error: err }); });
+        } else {
+          resolve({ ok: true });
+        }
+      } catch (e3) { resolve({ ok: false, error: e3 }); }
+      return;
+    }
+    resolve({ ok: false, error: 'unknown cloudShape: ' + cat.cloudShape });
+  });
+}
+
+// v32.0-A: Push the tombstone set to cloud as a blob doc.
+function _writeCloudTombstone(cat, set) {
+  var writeDB = _fn('writeDB');
+  if (!writeDB) return Promise.resolve({ ok: false, error: 'writeDB unavailable' });
+  var ids = [];
+  for (var k in set) if (set.hasOwnProperty(k)) ids.push(k);
+  return Promise.resolve(writeDB(cat.cloudTombstonePath, { ids: ids, _modifiedAt: Date.now() }))
+    .then(function() { return { ok: true }; }, function(err) { return { ok: false, error: err }; });
+}
+
+// v32.0-A: PUBLIC API
+
+function tombstoneAndDelete(categoryIdOrLabel, itemId) {
+  var cat = getCategoryById(categoryIdOrLabel);
+  if (!cat) return Promise.resolve({ ok: false, error: 'unknown category: ' + categoryIdOrLabel });
+  if (itemId === undefined || itemId === null || itemId === '') {
+    return Promise.resolve({ ok: false, error: 'itemId required' });
+  }
+
+  // 1. Append to local tombstone set
+  var set = _readTombstoneSet(cat);
+  set[itemId] = true;
+  _writeTombstoneSet(cat, set);
+
+  // 2. Filter local data array (no-op when localKey is null)
+  if (cat.localKey) {
+    var localArr = _readCategoryArray(cat);
+    var filtered = localArr.filter(function(item) {
+      return item && item[cat.idField] !== itemId;
+    });
+    _writeCategoryArray(cat, filtered);
+  }
+
+  // 3. Update grace period
+  lastLocalSaveTime[cat.id] = Date.now();
+
+  // 4 & 5. Push tombstone + delete cloud doc(s) in parallel
+  return Promise.all([
+    _writeCloudTombstone(cat, set),
+    _deleteCloudItem(cat, itemId)
+  ]).then(function(results) {
+    var tombRes = results[0];
+    var delRes = results[1];
+    var ok = tombRes.ok && delRes.ok;
+
+    // 6. Optional postDelete hook (used by Spec C for brand logos)
+    if (typeof cat.postDelete === 'function') {
+      try { cat.postDelete(itemId); } catch (e) { console.warn('[v32.0-A] postDelete threw', e); }
+    }
+
+    // 7. Trigger rerenders
+    _runRerenders(cat);
+
+    return {
+      ok: ok,
+      id: itemId,
+      ts: Date.now(),
+      tombstoneOk: tombRes.ok,
+      deleteOk: delRes.ok,
+      error: ok ? null : (tombRes.error || delRes.error)
+    };
+  });
+}
+window.tombstoneAndDelete = tombstoneAndDelete;
+
+function tombstoneAndDeleteMany(categoryIdOrLabel, itemIds) {
+  var cat = getCategoryById(categoryIdOrLabel);
+  if (!cat) return Promise.resolve({ ok: false, count: 0, failed: [], error: 'unknown category' });
+  if (!Array.isArray(itemIds) || !itemIds.length) {
+    return Promise.resolve({ ok: true, count: 0, failed: [] });
+  }
+
+  // 1. Append all to local tombstone set
+  var set = _readTombstoneSet(cat);
+  for (var i = 0; i < itemIds.length; i++) set[itemIds[i]] = true;
+  _writeTombstoneSet(cat, set);
+
+  // 2. Filter local data array
+  if (cat.localKey) {
+    var localArr = _readCategoryArray(cat);
+    var killSet = {};
+    for (var j = 0; j < itemIds.length; j++) killSet[itemIds[j]] = true;
+    var filtered = localArr.filter(function(item) {
+      return item && !killSet[item[cat.idField]];
+    });
+    _writeCategoryArray(cat, filtered);
+  }
+
+  // 3. Update grace period
+  lastLocalSaveTime[cat.id] = Date.now();
+
+  // 4. Push tombstone (single write)
+  var pTomb = _writeCloudTombstone(cat, set);
+
+  // 5. Delete cloud docs. For blob/inline-field, the local-array re-write
+  // covers all items in one cloud call, so we only need ONE _deleteCloudItem
+  // invocation; for subcollection we iterate.
+  var pDeletes;
+  if (cat.cloudShape === 'subcollection') {
+    var promises = [];
+    for (var d = 0; d < itemIds.length; d++) {
+      (function(id) {
+        promises.push(_deleteCloudItem(cat, id).then(function(r) {
+          return { id: id, ok: r.ok, error: r.error };
+        }));
+      })(itemIds[d]);
+    }
+    pDeletes = Promise.all(promises);
+  } else {
+    // blob / inline-field: one re-write covers all
+    pDeletes = _deleteCloudItem(cat, itemIds[0]).then(function(r) {
+      var arr = [];
+      for (var z = 0; z < itemIds.length; z++) arr.push({ id: itemIds[z], ok: r.ok, error: r.error });
+      return arr;
+    });
+  }
+
+  return Promise.all([pTomb, pDeletes]).then(function(results) {
+    var tombRes = results[0];
+    var perItem = results[1];
+    var failed = perItem.filter(function(x) { return !x.ok; });
+    var ok = tombRes.ok && failed.length === 0;
+
+    // postDelete hooks (only useful for subcollection deletes per item)
+    if (typeof cat.postDelete === 'function') {
+      for (var p = 0; p < itemIds.length; p++) {
+        try { cat.postDelete(itemIds[p]); } catch (e) {}
+      }
+    }
+
+    _runRerenders(cat);
+
+    return {
+      ok: ok,
+      count: itemIds.length - failed.length,
+      failed: failed,
+      tombstoneOk: tombRes.ok,
+      error: ok ? null : (tombRes.error || (failed[0] && failed[0].error))
+    };
+  });
+}
+window.tombstoneAndDeleteMany = tombstoneAndDeleteMany;
+
+function clearTombstones(categoryIdOrLabel) {
+  var cat = getCategoryById(categoryIdOrLabel);
+  if (!cat) return Promise.resolve({ ok: false, cleared: 0, error: 'unknown category' });
+  var existing = [];
+  try {
+    var raw = localStorage.getItem(cat.tombstoneKey);
+    existing = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(existing)) existing = [];
+  } catch (e) { existing = []; }
+  try { localStorage.setItem(cat.tombstoneKey, '[]'); } catch (e) {}
+  var writeDB = _fn('writeDB');
+  if (!writeDB) return Promise.resolve({ ok: false, cleared: existing.length, error: 'writeDB unavailable' });
+  return Promise.resolve(writeDB(cat.cloudTombstonePath, { ids: [], _modifiedAt: Date.now() }))
+    .then(function() {
+      _runRerenders(cat);
+      return { ok: true, cleared: existing.length };
+    }, function(err) {
+      return { ok: false, cleared: existing.length, error: err };
+    });
+}
+window.clearTombstones = clearTombstones;
