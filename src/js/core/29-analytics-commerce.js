@@ -1029,7 +1029,24 @@ async function renderSyncInventory() {
     { name: 'Team', syncKey: 'team', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_people') || '[]').filter(function(p) { return p.personType === 'team'; }).length; } catch(e) { return 0; } } },
     { name: 'Direct Reports', syncKey: 'reports', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_people') || '[]').filter(function(p) { return p.personType === 'report'; }).length; } catch(e) { return 0; } } },
     { name: 'LifeAI Profiles', syncKey: 'life_profiles', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]').length; } catch(e) { return 0; } } },
-    { name: 'Brand Logos', syncKey: 'logos', localCount: function() { var c = 0; for (var i = 0; i < 10; i++) { if (localStorage.getItem('roweos_brand_' + i + '_logo')) c++; } for (var pi = 0; pi < 5; pi++) { if (localStorage.getItem('roweos_lifeai_logo_profile_' + pi)) c++; } return c; } },
+    { name: 'Brand Logos', syncKey: 'logos', localCount: function() {
+      // v32.0-C: count brands with non-empty inline logo OR logoOversize flag
+      var c = 0;
+      var bs = (window.brands && Array.isArray(window.brands)) ? window.brands : [];
+      for (var bi = 0; bi < bs.length; bi++) {
+        var b = bs[bi]; if (!b || !b.id) continue;
+        if (b.logo && b.logo.length > 0) c++;
+        else if (b.logoOversize) c++;
+        else {
+          // Legacy fallback: check position-keyed key (pre-migration)
+          if (localStorage.getItem('roweos_brand_' + bi + '_logo')) c++;
+          else if (b.id && localStorage.getItem('roweos_brandlogo_' + b.id)) c++;
+        }
+      }
+      // LifeAI logo profiles (still position-based — separate system)
+      for (var pi = 0; pi < 5; pi++) { if (localStorage.getItem('roweos_lifeai_logo_profile_' + pi)) c++; }
+      return c;
+    } },
     { name: 'Folio Items', syncKey: 'folio', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_folio_items') || '[]').length; } catch(e) { return 0; } } },
     { name: 'Notebooks', syncKey: 'scribe', localCount: function() { try { return JSON.parse(localStorage.getItem('roweos_scribe_notebooks') || '[]').length; } catch(e) { return 0; } } }
   ];
@@ -1140,23 +1157,44 @@ async function renderSyncInventory() {
           }
         } catch(ce) { cloudCounts['Clients'] = 0; cloudCounts['Team'] = 0; cloudCounts['Direct Reports'] = 0; }
         cloudCounts['LifeAI Profiles'] = lifeData.profiles ? lifeData.profiles.length : 0;
-        // v28.3: Brand logos are stored IN brand docs (brand.logo field), not as separate rootData.logos
-        // Count cloud brands that have a logo field
+        // v32.0-C: Brand logos can be inline (brand.logo) for small logos OR
+        // pushed to brand_logos/<id> subcollection for oversize. Count both.
         var _cloudLogoCount = 0;
         try {
           var _brandSnap = results[0]; // brands collection from earlier query
           _brandSnap.forEach(function(doc) {
             if (doc.id === '_all') return;
             var d = doc.data();
-            if (d.logo || d.logoLight) _cloudLogoCount++;
+            if (d.logo || d.logoLight || d.logoOversize || d.logoLightOversize) _cloudLogoCount++;
           });
         } catch(le) {}
-        // v28.3: Logos are too large for Firestore (base64 stripped). Match local count to show "Synced"
+        // Add brand_logos subcollection count (oversize logos that aren't inline on the brand doc)
+        try {
+          var _logosSnap = await db.collection(basePath + '/brand_logos').get();
+          _logosSnap.forEach(function(doc) {
+            // Only count if NOT already counted via inline brand.logo above
+            // Match by id with the brands snapshot
+            var alreadyCounted = false;
+            try {
+              _brandSnap.forEach(function(bdoc) {
+                if (bdoc.id === doc.id) {
+                  var bd = bdoc.data();
+                  if (bd.logo || bd.logoLight) alreadyCounted = true;
+                }
+              });
+            } catch (innerErr) {}
+            if (!alreadyCounted) _cloudLogoCount++;
+          });
+        } catch (lse) { /* subcollection may not exist yet */ }
         cloudCounts['Brand Logos'] = _cloudLogoCount;
         if (_cloudLogoCount === 0) {
-          // Logos can't be stored in Firestore (>1MB base64). Show local count as cloud count so status shows "Synced"
+          // Fallback: still show local count so status reads "Synced" pre-migration
           var _localLogoCount = 0;
-          for (var _li = 0; _li < 10; _li++) { if (localStorage.getItem('roweos_brand_' + _li + '_logo')) _localLogoCount++; }
+          var _bs = (window.brands && Array.isArray(window.brands)) ? window.brands : [];
+          for (var _bi = 0; _bi < _bs.length; _bi++) {
+            var _b = _bs[_bi]; if (!_b) continue;
+            if (_b.logo || _b.logoOversize) _localLogoCount++;
+          }
           for (var _lpi = 0; _lpi < 5; _lpi++) { if (localStorage.getItem('roweos_lifeai_logo_profile_' + _lpi)) _localLogoCount++; }
           cloudCounts['Brand Logos'] = _localLogoCount;
         }
@@ -1280,7 +1318,18 @@ function _saveSyncBaselines() {
       custom_ops: function() { return JSON.parse(localStorage.getItem('roweos_custom_operations') || '[]').length; },
       clients: function() { return JSON.parse(localStorage.getItem('roweos_clients') || '[]').length; },
       life_profiles: function() { return JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]').length; },
-      logos: function() { var c = 0; for (var i = 0; i < 10; i++) { if (localStorage.getItem('roweos_brand_' + i + '_logo')) c++; } for (var pi = 0; pi < 5; pi++) { if (localStorage.getItem('roweos_lifeai_logo_profile_' + pi)) c++; } return c; },
+      logos: function() {
+        // v32.0-C: prefer brand-object inline / oversize flags
+        var c = 0;
+        var bs = (window.brands && Array.isArray(window.brands)) ? window.brands : [];
+        for (var bi = 0; bi < bs.length; bi++) {
+          var b = bs[bi]; if (!b) continue;
+          if (b.logo || b.logoOversize) c++;
+          else if (localStorage.getItem('roweos_brand_' + bi + '_logo')) c++;
+        }
+        for (var pi = 0; pi < 5; pi++) { if (localStorage.getItem('roweos_lifeai_logo_profile_' + pi)) c++; }
+        return c;
+      },
       folio: function() { try { return JSON.parse(localStorage.getItem('roweos_folio_items') || '[]').length; } catch(e) { return 0; } }
     };
     for (var key in baselines) {

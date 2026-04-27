@@ -208,3 +208,40 @@ function reorderBrands(newOrderArray) {
   }
 }
 window.reorderBrands = reorderBrands;
+
+// v32.0-C: orphan-safe brand logo deletion. Wired into the registry's
+// postDelete hook so tombstoneAndDelete('brandLogos', stableId) calls this
+// after the cloud delete. Also clears IDB and inline brand fields.
+function deleteBrandLogo(brandId) {
+  if (!brandId) return Promise.resolve({ ok: false, error: 'brandId required' });
+  if (typeof window._idbPut === 'function') {
+    try { window._idbPut('roweos_brand_logo_' + brandId, null); } catch (e) {}
+    try { window._idbPut('roweos_brand_logo_' + brandId + '_light', null); } catch (e2) {}
+  }
+  // Also clear any legacy ID-based key
+  try { localStorage.removeItem('roweos_brandlogo_' + brandId); } catch (e3) {}
+  try { localStorage.removeItem('roweos_brandlogo_' + brandId + '_size'); } catch (e4) {}
+  var bs = (window.brands && Array.isArray(window.brands)) ? window.brands : [];
+  for (var i = 0; i < bs.length; i++) {
+    var b = bs[i];
+    if (b && b.id === brandId) {
+      b.logo = '';
+      b.logoLight = '';
+      b.logoOversize = false;
+      b.logoLightOversize = false;
+      if (typeof window.saveBrands === 'function') {
+        try { window.saveBrands(); } catch (e5) {}
+      }
+      break;
+    }
+  }
+  return Promise.resolve({ ok: true });
+}
+window.deleteBrandLogo = deleteBrandLogo;
+
+// Wire into registry as postDelete hook (must run AFTER deleteBrandLogo is defined)
+(function() {
+  if (typeof window.getCategoryById !== 'function') return;
+  var cat = window.getCategoryById('brandLogos');
+  if (cat) cat.postDelete = deleteBrandLogo;
+})();
