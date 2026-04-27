@@ -1615,44 +1615,38 @@ function _fetchCloudCategoryItems(catName) {
 
 // v28.2: Render side-by-side comparison of local vs cloud items
 // v30.0: Delete a single item from a sync category by ID
+// v32.0-A: route every per-row delete through the universal tombstone API.
+// Single source of truth for delete semantics across all 21 categories.
 function deleteSyncCategoryItem(catName, itemId) {
-  if (!confirm('Permanently delete this item?')) return;
-  var configs = {
-    'Clients': { key: 'roweos_people', idField: 'id', cloudPath: 'profile/people', cloudDataKey: 'data' },
-    'Team': { key: 'roweos_people', idField: 'id', cloudPath: 'profile/people', cloudDataKey: 'data' },
-    'Direct Reports': { key: 'roweos_people', idField: 'id', cloudPath: 'profile/people', cloudDataKey: 'data' },
-    'Pulse Goals': { key: 'roweos_pulse_goals', idField: 'id', cloudPath: null },
-    'BrandAI To-Dos': { key: 'roweosTodos', idField: 'id', cloudPath: 'profile/main', cloudDataKey: 'todos' },
-    'Journal': { key: 'roweos_journal', idField: 'id', cloudPath: 'profile/main', cloudDataKey: 'journal' },
-    'Automations': { key: 'roweos_automations', idField: 'id', cloudPath: null }
-  };
-  var cfg = configs[catName];
-  if (!cfg) { return; } // v30.0: silently ignore - delete buttons hidden for unsupported categories
-  try {
-    var data = JSON.parse(localStorage.getItem(cfg.key) || '[]');
-    var before = data.length;
-    data = data.filter(function(d) { return String(d[cfg.idField]) !== String(itemId); });
-    if (data.length === before) { showToast('Item not found', 'error'); return; }
-    localStorage.setItem(cfg.key, JSON.stringify(data));
-    // Write to cloud
-    if (cfg.cloudPath && typeof writeDB === 'function') {
-      var payload = {};
-      payload[cfg.cloudDataKey] = data;
-      writeDB(cfg.cloudPath, payload);
+  if (!catName || !itemId) {
+    if (typeof showToast === 'function') showToast('Invalid delete request', 'error');
+    return;
+  }
+  var cat = (typeof getCategoryById === 'function') ? getCategoryById(catName) : null;
+  if (!cat) {
+    if (typeof showToast === 'function') showToast('Unknown category: ' + catName, 'error');
+    return;
+  }
+  if (typeof tombstoneAndDelete !== 'function') {
+    if (typeof showToast === 'function') showToast('Delete API unavailable - try refreshing', 'error');
+    console.error('[v32.0-A] tombstoneAndDelete not loaded');
+    return;
+  }
+  if (typeof showToast === 'function') showToast('Removing...', 'info');
+  tombstoneAndDelete(cat.id, itemId).then(function(res) {
+    if (typeof showToast === 'function') {
+      if (res && res.ok) {
+        showToast('Removed', 'success');
+      } else {
+        showToast('Removed locally - cloud retry pending', 'warning');
+        console.warn('[v32.0-A] partial delete', res);
+      }
     }
-    // Special: pulse goals per-doc delete
-    if (catName === 'Pulse Goals' && typeof deleteDBDoc === 'function') {
-      deleteDBDoc('pulse_goals', itemId, 'goals');
-    }
-    // Special: clients - write full people array
-    if (catName === 'Clients' && typeof writeDB === 'function') {
-      var cleaned = JSON.parse(JSON.stringify(data));
-      cleaned.forEach(function(p) { if (p.logo && p.logo.length > 50000) p.logo = ''; });
-      writeDB('profile/people', { data: cleaned });
-    }
-    showToast('Item deleted', 'success');
     if (typeof renderSyncInventory === 'function') renderSyncInventory();
-  } catch(e) { showToast('Delete failed', 'error'); }
+  }, function(err) {
+    if (typeof showToast === 'function') showToast('Delete failed', 'error');
+    console.error('[v32.0-A] tombstoneAndDelete rejected', err);
+  });
 }
 
 // v30.0: Categories that support item deletion via deleteSyncCategoryItem()
