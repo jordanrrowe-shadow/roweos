@@ -2,7 +2,7 @@
 // DATA INITIALIZATION & MIGRATION - v4.8.0
 // ═══════════════════════════════════════════════════════════════
 
-var ROWEOS_VERSION = 'v31.20'; // v31.20: ROOT CAUSE chat resurrection fix - admin Purge wrote {data:[]} but pull reads .messages; now writes {messages:[]}. Image gen in chat: friendly provider names (Imagen 4 not imagen3), inline img via msg.imageUrl not embedded HTML, send-button + blob state always reset on completion
+var ROWEOS_VERSION = 'v32.0'; // v32.0: unified tombstones across all categories, Focus residue purge, ID-keyed brand logos with IDB overflow + brand_logos subcollection, image edit detection + Nano Banana / GPT Image 2 routing
 var ROWEOS_DATA_VERSION_KEY = 'roweos_data_version';
 var ROWEOS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/YOUR-REPO/roweos-updates/main/latest-version.json';
 var ROWEOS_LAST_UPDATE_CHECK = 'roweos_last_update_check';
