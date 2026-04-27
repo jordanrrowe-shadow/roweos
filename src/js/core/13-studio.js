@@ -7817,16 +7817,19 @@ function handleImageEditRequest(prompt, attachments, opts) {
     return Promise.resolve({ ok: false, error: 'no attachment' });
   }
   // v32.0-D: First-time picker — invoked when no preference is stored AND no
-  // explicit model was passed AND no opts.provider was forced.
+  // image-specific model was forced AND no opts.provider was forced. A
+  // non-image text model in opts.model (e.g. claude-sonnet-4-6 from the
+  // active brand) does NOT bypass the picker.
   var hasPref = false;
   try { hasPref = !!localStorage.getItem('roweos_image_provider_pref'); } catch (e) {}
-  if (!hasPref && !opts.provider && !opts.model && typeof showImageProviderPickerOnce === 'function') {
+  var modelIsImageModel = !!(opts.model && (opts.model.indexOf('gemini') === 0 || opts.model.indexOf('gpt-image') === 0));
+  if (!hasPref && !opts.provider && !modelIsImageModel && typeof showImageProviderPickerOnce === 'function') {
     return new Promise(function(resolve) {
       showImageProviderPickerOnce(function(chosen) {
         try { localStorage.setItem('roweos_image_provider_pref', chosen); } catch (eSet) {}
         // Recurse with the chosen provider forced — avoids infinite loop because
         // pref is now set.
-        handleImageEditRequest(prompt, attachments, { provider: chosen, model: opts.model }).then(resolve);
+        handleImageEditRequest(prompt, attachments, { provider: chosen }).then(resolve);
       }, { headerText: 'Edit image with...' });
     });
   }
@@ -7835,16 +7838,20 @@ function handleImageEditRequest(prompt, attachments, opts) {
     try { pref = localStorage.getItem('roweos_image_provider_pref') || 'auto'; } catch (e2) { pref = 'auto'; }
   }
   return _downscaleAttachmentsForEdit(attachments).then(function(scaled) {
+    var modelIsGpt = !!(model && model.indexOf('gpt-image') === 0);
+    var modelIsGemini = !!(model && model.indexOf('gemini') === 0);
     // OpenAI path: explicit gpt-image model OR pref points at OpenAI.
-    if (pref === 'openai' || pref === 'gpt-image-2' || (model && model.indexOf('gpt-image') === 0)) {
-      return _handleOpenAIImageEdit(prompt, scaled[0], { model: model || 'gpt-image-2' });
+    if (pref === 'openai' || pref === 'gpt-image-2' || modelIsGpt) {
+      var openAIModel = modelIsGpt ? model : 'gpt-image-2';
+      return _handleOpenAIImageEdit(prompt, scaled[0], { model: openAIModel });
     }
     // Imagen does not support edits — fall back to Nano Banana 3.0 Pro.
     if (pref === 'imagen' || pref === 'imagen3') {
       if (typeof showToast === 'function') showToast("Imagen doesn't support edits — using Nano Banana 3.0 Pro", 'info');
     }
-    // Default / nano-banana / auto: Nano Banana 3.0 Pro (or model override).
-    var pickModel = (model && model.indexOf('gemini') === 0) ? model : 'gemini-3-pro-image-preview';
+    // Default / nano-banana / auto: Nano Banana 3.0 Pro (only honour model
+    // override if it's an image-capable Gemini model).
+    var pickModel = modelIsGemini ? model : 'gemini-3-pro-image-preview';
     return _handleNanobananaImageEdit(prompt, scaled, { model: pickModel });
   });
 }
