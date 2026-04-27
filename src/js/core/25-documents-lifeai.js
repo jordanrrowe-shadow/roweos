@@ -8135,9 +8135,14 @@ function renderPulseCompletedGoals() {
     return;
   }
 
-  var html = '<div style="cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:12px;" onclick="_pulseCompletedExpanded=!_pulseCompletedExpanded;renderPulseCompletedGoals();">';
+  // v32.0-B: header row with collapse toggle + Clear All button
+  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">';
+  html += '<div style="cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="_pulseCompletedExpanded=!_pulseCompletedExpanded;renderPulseCompletedGoals();">';
   html += '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.2s;transform:rotate(' + (_pulseCompletedExpanded ? '0' : '-90') + 'deg);"><path d="M6 9l6 6 6-6"/></svg>';
   html += '<span style="font-size:13px;font-weight:600;opacity:0.5;">Completed Goals (' + completedGoals.length + ')</span>';
+  html += '</div>';
+  // v32.0-B: clear all completed goals (tombstoned + synced)
+  html += '<button onclick="clearAllCompletedPulseGoals()" style="background:none;border:1px solid var(--border-color);color:var(--text-secondary);cursor:pointer;font-size:11px;padding:4px 10px;border-radius:6px;" title="Tombstone all completed goals (syncs to all devices)">Clear All</button>';
   html += '</div>';
 
   if (_pulseCompletedExpanded) {
@@ -8187,14 +8192,82 @@ function renderPulseCompletedGoals() {
   container.innerHTML = html;
 }
 
+// v32.0-B: rewired to use tombstoneAndDelete so cloud + tombstone stay in sync
 function deleteCompletedGoal(goalId) {
   if (!confirm('Delete this completed goal?')) return;
-  pulseGoals = pulseGoals.filter(function(g) { return g.id !== goalId; });
-  savePulseGoals();
-  renderPulseCompletedGoals();
-  renderPulse3Overview();
-  showToast('Goal deleted', 'success');
+  if (typeof tombstoneAndDelete !== 'function') {
+    if (typeof showToast === 'function') showToast('Delete API unavailable', 'error');
+    return;
+  }
+  return tombstoneAndDelete('pulseGoals', goalId).then(function(res) {
+    // Keep in-memory pulseGoals in sync (registry filtered localStorage; we filter the in-memory copy too)
+    if (typeof pulseGoals !== 'undefined' && Array.isArray(pulseGoals)) {
+      var idx = -1;
+      for (var i = 0; i < pulseGoals.length; i++) { if (pulseGoals[i] && pulseGoals[i].id === goalId) { idx = i; break; } }
+      if (idx >= 0) pulseGoals.splice(idx, 1);
+    }
+    if (typeof renderPulseCompletedGoals === 'function') renderPulseCompletedGoals();
+    if (typeof renderPulse3Overview === 'function') renderPulse3Overview();
+    if (typeof renderPulseView === 'function') renderPulseView();
+    if (typeof showToast === 'function') showToast(res.ok ? 'Goal deleted' : 'Delete dispatched (cloud pending)', 'success');
+    return res;
+  });
 }
+window.deleteCompletedGoal = deleteCompletedGoal;
+
+// v32.0-B: alias for spec parity — universal delete entry point for any pulse goal
+function deletePulseGoal(goalId) {
+  if (typeof tombstoneAndDelete !== 'function') {
+    if (typeof showToast === 'function') showToast('Delete API unavailable', 'error');
+    return Promise.resolve({ ok: false });
+  }
+  return tombstoneAndDelete('pulseGoals', goalId).then(function(res) {
+    if (typeof pulseGoals !== 'undefined' && Array.isArray(pulseGoals)) {
+      var idx = -1;
+      for (var i = 0; i < pulseGoals.length; i++) { if (pulseGoals[i] && pulseGoals[i].id === goalId) { idx = i; break; } }
+      if (idx >= 0) pulseGoals.splice(idx, 1);
+    }
+    if (typeof renderPulseView === 'function') renderPulseView();
+    if (typeof renderPulse3Overview === 'function') renderPulse3Overview();
+    if (typeof renderPulseCompletedGoals === 'function') renderPulseCompletedGoals();
+    return res;
+  });
+}
+window.deletePulseGoal = deletePulseGoal;
+
+// v32.0-B: bulk Clear All handler for the Completed Goals section
+function clearAllCompletedPulseGoals() {
+  var pg = (typeof window.pulseGoals !== 'undefined' && Array.isArray(window.pulseGoals)) ? window.pulseGoals
+         : ((typeof pulseGoals !== 'undefined' && Array.isArray(pulseGoals)) ? pulseGoals : []);
+  var ids = [];
+  for (var i = 0; i < pg.length; i++) {
+    if (pg[i] && (pg[i].completed || pg[i].archived)) ids.push(pg[i].id);
+  }
+  if (!ids.length) {
+    if (typeof showToast === 'function') showToast('Nothing to clear', 'info');
+    return;
+  }
+  if (!window.confirm('Tombstone ' + ids.length + ' completed goals? This syncs to all devices.')) return;
+  if (typeof tombstoneAndDeleteMany !== 'function') {
+    if (typeof showToast === 'function') showToast('API unavailable', 'error');
+    return;
+  }
+  tombstoneAndDeleteMany('pulseGoals', ids).then(function(res) {
+    // Mirror in-memory removal
+    if (typeof pulseGoals !== 'undefined' && Array.isArray(pulseGoals)) {
+      var killSet = {};
+      for (var k = 0; k < ids.length; k++) killSet[ids[k]] = true;
+      for (var j = pulseGoals.length - 1; j >= 0; j--) {
+        if (pulseGoals[j] && killSet[pulseGoals[j].id]) pulseGoals.splice(j, 1);
+      }
+    }
+    if (typeof showToast === 'function') showToast(res.ok ? ('Cleared ' + res.count + ' completed goals') : 'Partial clear - check console', res.ok ? 'success' : 'warning');
+    if (typeof renderPulseView === 'function') renderPulseView();
+    if (typeof renderPulseCompletedGoals === 'function') renderPulseCompletedGoals();
+    if (typeof renderPulse3Overview === 'function') renderPulse3Overview();
+  });
+}
+window.clearAllCompletedPulseGoals = clearAllCompletedPulseGoals;
 
 function renderPulseCalendarTab() {
   var widget = document.getElementById('pulseCalendarWidget');

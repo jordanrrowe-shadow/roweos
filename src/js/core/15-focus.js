@@ -108,6 +108,50 @@ function saveTodos() {
   writeDBTodos(); // v25.1: Write-through replaces scheduleAutoSync
 }
 
+// v32.0-B: Bulk clear completed to-dos via universal tombstone API. Scope:
+// 'brand' (default) | 'life'. Mirrors in-memory `todos`/`window.lifeTodos` after.
+function clearCompletedTodos(scope) {
+  var catId = scope === 'life' ? 'lifeTodos' : 'brandTodos';
+  var arr;
+  if (scope === 'life') {
+    arr = (typeof window.lifeTodos !== 'undefined' && Array.isArray(window.lifeTodos)) ? window.lifeTodos : [];
+  } else {
+    arr = (typeof todos !== 'undefined' && Array.isArray(todos)) ? todos : [];
+  }
+  var ids = [];
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i] && arr[i].completed) ids.push(arr[i].id);
+  }
+  if (!ids.length) {
+    if (typeof showToast === 'function') showToast('Nothing to clear', 'info');
+    return;
+  }
+  if (!window.confirm('Tombstone ' + ids.length + ' completed to-dos?')) return;
+  if (typeof tombstoneAndDeleteMany !== 'function') {
+    if (typeof showToast === 'function') showToast('API unavailable', 'error');
+    return;
+  }
+  tombstoneAndDeleteMany(catId, ids).then(function(res) {
+    // Mirror in-memory removal so re-render is consistent without a reload
+    var killSet = {};
+    for (var k = 0; k < ids.length; k++) killSet[ids[k]] = true;
+    if (scope === 'life' && Array.isArray(window.lifeTodos)) {
+      for (var lj = window.lifeTodos.length - 1; lj >= 0; lj--) {
+        if (window.lifeTodos[lj] && killSet[window.lifeTodos[lj].id]) window.lifeTodos.splice(lj, 1);
+      }
+    } else if (typeof todos !== 'undefined' && Array.isArray(todos)) {
+      for (var bj = todos.length - 1; bj >= 0; bj--) {
+        if (todos[bj] && killSet[todos[bj].id]) todos.splice(bj, 1);
+      }
+    }
+    if (typeof showToast === 'function') showToast(res.ok ? ('Cleared ' + res.count) : 'Partial', res.ok ? 'success' : 'warning');
+    if (typeof renderFocus2Categories === 'function') renderFocus2Categories();
+    if (typeof renderRhythmTodos === 'function') renderRhythmTodos();
+    if (typeof renderPulseView === 'function') renderPulseView();
+  });
+}
+window.clearCompletedTodos = clearCompletedTodos;
+
 // Calendar persistence
 function initCalendar() {
   var saved = localStorage.getItem(getCalendarKey()); // v12.0.1: Mode-specific
@@ -1544,13 +1588,26 @@ function _renderFocus2CategoriesActual() {
   });
   
   var html = '';
-  
+
+  // v32.0-B: Clear Completed button — tombstones every completed todo in the current scope
+  var __scopeArg = isLife ? 'life' : 'brand';
+  var __completedCount = allTasks.filter(function(t) { return t && t.completed; }).length;
+  if (__completedCount > 0) {
+    html += '<div style="display:flex;justify-content:flex-end;margin-bottom:8px;">';
+    html += '<button onclick="event.stopPropagation();clearCompletedTodos(\'' + __scopeArg + '\')" '
+         + 'style="background:none;border:1px solid var(--border-color);color:var(--text-secondary);'
+         + 'cursor:pointer;font-size:11px;padding:4px 10px;border-radius:6px;" '
+         + 'title="Tombstone all completed to-dos (syncs to all devices)">'
+         + 'Clear Completed (' + __completedCount + ')</button>';
+    html += '</div>';
+  }
+
   // v13.9: Add fade-in animation class, remove after transition completes
   container.classList.remove('focus-2-categories-animating');
   requestAnimationFrame(function() {
     container.classList.add('focus-2-categories-animating');
   });
-  
+
   // Render ALL categories in BrandAI, show empty state if no tasks
   categories.forEach(function(cat, idx) {
     var catTasks = tasksByCategory[cat.name] || [];
