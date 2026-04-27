@@ -1125,3 +1125,70 @@ function restoreFromPrePurgeBackup_v32() {
   }
 }
 window.restoreFromPrePurgeBackup_v32 = restoreFromPrePurgeBackup_v32;
+
+// v32.0-B: Modal helpers. Uses the existing modal system if available; falls
+// back to confirm() prompts if openModal isn't reachable.
+
+function _showFocusPurgeModal(counts, onProceed, onSkip, onRestore) {
+  var total = counts.pulseGoals + counts.brandTodos + counts.lifeTodos;
+  if (total === 0) {
+    if (onSkip) onSkip();
+    return;
+  }
+  var msg =
+    'v32.0 detected legacy Focus data:\n\n' +
+    ' - ' + counts.pulseGoals + ' Pulse Goals\n' +
+    ' - ' + counts.brandTodos + ' BrandAI To-Dos older than v28.8 cutoff\n' +
+    ' - ' + counts.lifeTodos + ' LifeAI To-Dos older than v28.8 cutoff\n\n' +
+    'A backup will be written before purge. Proceed?';
+
+  if (typeof window.openModal === 'function') {
+    window.openModal({
+      title: 'v32.0 Cleanup',
+      body: msg.split('\n').join('<br>'),
+      buttons: [
+        { label: 'Proceed', primary: true, onClick: function() { if (typeof window.closeModal === 'function') window.closeModal(); onProceed(); } },
+        { label: 'Skip (mark done)', onClick: function() { if (typeof window.closeModal === 'function') window.closeModal(); onSkip(); } },
+        { label: 'Restore from backup', onClick: function() { if (typeof window.closeModal === 'function') window.closeModal(); onRestore(); } }
+      ]
+    });
+  } else {
+    if (window.confirm(msg + '\n\nClick OK to proceed, Cancel to skip.')) onProceed();
+    else onSkip();
+  }
+}
+
+function runFocusPurgeFlow(opts) {
+  opts = opts || {};
+  var force = opts.force === true;
+  if (!force && localStorage.getItem('roweos_focus_purge_v32') === 'done') return Promise.resolve({ skipped: true });
+
+  var counts = previewLegacyFocusCounts();
+  return new Promise(function(resolve) {
+    _showFocusPurgeModal(counts,
+      function onProceed() {
+        if (typeof showToast === 'function') showToast('Purging legacy Focus data...', 'info');
+        purgeLegacyFocusResidue({ force: force }).then(function(res) {
+          var totalCount = 0;
+          if (res.results) for (var i = 0; i < res.results.length; i++) totalCount += (res.results[i].count || 0);
+          var msg = res.ok
+            ? 'Purged ' + totalCount + ' legacy items. Backup written.'
+            : 'Purge incomplete - see console';
+          if (typeof showToast === 'function') showToast(msg, res.ok ? 'success' : 'warning');
+          resolve(res);
+        });
+      },
+      function onSkip() {
+        try { localStorage.setItem('roweos_focus_purge_v32', 'done'); } catch (e) {}
+        resolve({ ok: true, skipped: true });
+      },
+      function onRestore() {
+        restoreFromPrePurgeBackup_v32().then(function(res) {
+          if (typeof showToast === 'function') showToast(res.ok ? 'Restored from backup' : 'No backup found', res.ok ? 'success' : 'error');
+          resolve(res);
+        });
+      }
+    );
+  });
+}
+window.runFocusPurgeFlow = runFocusPurgeFlow;

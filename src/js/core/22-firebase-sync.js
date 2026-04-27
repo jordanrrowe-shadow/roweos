@@ -9942,14 +9942,16 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
   if (!firebaseUser || !firebase) return Promise.resolve();
 
   // v32.0-A: bootstrap tombstone registry on first launch
+  // v32.0-B: After tombstone init, offer to purge legacy Focus residue (idempotent)
   if (typeof initTombstoneRegistry_v32 === 'function') {
     try {
-      initTombstoneRegistry_v32().catch(function(e) {
-        console.warn('[v32.0-A] tombstone init failed (will retry next launch)', e);
-      });
-    } catch (initErr) {
-      console.warn('[v32.0-A] tombstone init threw synchronously', initErr);
-    }
+      initTombstoneRegistry_v32().then(function() {
+        if (typeof runFocusPurgeFlow === 'function') {
+          // 2s delay so UI is settled and user sees toast feedback
+          setTimeout(function() { try { runFocusPurgeFlow().catch(function(){}); } catch(e){} }, 2000);
+        }
+      }).catch(function(e) { console.warn('[v32.0] init failed', e); });
+    } catch (initErr) { console.warn('[v32.0] init threw', initErr); }
   }
 
   // v25.2: Safety snapshot before cloud pull -- protection against Firestore outage
