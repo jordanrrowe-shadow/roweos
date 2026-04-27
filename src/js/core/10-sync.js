@@ -1451,8 +1451,30 @@ function saveBrands() {
       db.collection(basePath + '/brands').get().then(function(existingSnap) {
         var batch = db.batch();
         // Write all current brands
+        var _logoThreshold = (typeof window !== 'undefined' && window.LOGO_SIZE_THRESHOLD) || (100 * 1024);
         brands.forEach(function(brand, idx) {
           var data = JSON.parse(JSON.stringify(brand));
+          // v32.0-C: if logo is oversize, strip from brand doc and write to brand_logos subcollection
+          if (data.logo && typeof data.logo === 'string' && data.logo.length >= _logoThreshold) {
+            var _logoData = data.logo;
+            data.logo = '';
+            data.logoOversize = true;
+            try {
+              batch.set(db.doc(basePath + '/brand_logos/' + (brand.id || 'unknown')), {
+                logo: _logoData, _modifiedAt: Date.now()
+              }, { merge: true });
+            } catch (eA) { console.warn('[v32.0-C] brand_logos write failed', brand.id, eA); }
+          }
+          if (data.logoLight && typeof data.logoLight === 'string' && data.logoLight.length >= _logoThreshold) {
+            var _lightData = data.logoLight;
+            data.logoLight = '';
+            data.logoLightOversize = true;
+            try {
+              batch.set(db.doc(basePath + '/brand_logos/' + (brand.id || 'unknown')), {
+                logoLight: _lightData, _modifiedAt: Date.now()
+              }, { merge: true });
+            } catch (eB) { console.warn('[v32.0-C] brand_logos write failed (light)', brand.id, eB); }
+          }
           Object.keys(data).forEach(function(k) {
             if (typeof data[k] === 'string' && data[k].indexOf('data:') === 0 && data[k].length > 50000) {
               data[k] = '';
