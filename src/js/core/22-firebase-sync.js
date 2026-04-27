@@ -10550,6 +10550,38 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           brands.length = 0;
           for (var _mb2 = 0; _mb2 < _mergedBrandsV2.length; _mb2++) { brands.push(_mergedBrandsV2[_mb2]); }
         }
+        // v32.0-C: hydrate oversize brand logos from brand_logos subcollection.
+        // In-memory only — do NOT persist to localStorage (full base64 stays in
+        // IDB / Firestore). Sidebar refresh will pick up hydrated logos.
+        try {
+          for (var _hi = 0; _hi < _mergedBrandsV2.length; _hi++) {
+            (function(b) {
+              if (!b || !b.id) return;
+              if (!b.logoOversize && !b.logoLightOversize) return;
+              db.doc(basePath + '/brand_logos/' + b.id).get().then(function(snap) {
+                if (!snap || !snap.exists) return;
+                var d = snap.data() || {};
+                if (d.logo) {
+                  b.logo = d.logo;
+                  if (typeof window._idbPut === 'function') {
+                    try { window._idbPut('roweos_brand_logo_' + b.id, d.logo); } catch (e) {}
+                  }
+                }
+                if (d.logoLight) {
+                  b.logoLight = d.logoLight;
+                  if (typeof window._idbPut === 'function') {
+                    try { window._idbPut('roweos_brand_logo_' + b.id + '_light', d.logoLight); } catch (e) {}
+                  }
+                }
+                if (typeof window.initBrandLogo === 'function') {
+                  try { window.initBrandLogo(); } catch (e2) {}
+                }
+              }, function(err) {
+                console.warn('[v32.0-C] brand_logos hydration failed for ' + b.id, err && err.message);
+              });
+            })(_mergedBrandsV2[_hi]);
+          }
+        } catch (_hyErr) { console.warn('[v32.0-C] brand logo hydration error', _hyErr); }
       }
     }
 
