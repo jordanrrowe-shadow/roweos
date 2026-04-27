@@ -11,3 +11,4 @@ scripts/cleanup-cloud-v321.js
 scripts/inspect-cloud.js
 scripts/categorize-pulse.js
 node_modules/
+scripts/cleanup-cloud-v321-comprehensive.js

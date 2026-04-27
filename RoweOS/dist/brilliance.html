@@ -24,7 +24,7 @@
 <link rel="preload" as="image" href="/images/brilliance/wordmark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    BRILLIANCE v1.0
@@ -60,9 +60,10 @@
   --b-text-muted:#9e9487;
   --b-text-dim:#655e54;
 
-  /* Type */
-  --b-serif:'Cormorant Garamond',serif;
+  /* Type — matched to The Rowe Collection family */
+  --b-serif:'Old Standard TT',Georgia,serif;
   --b-sans:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --b-track-luxury:0.25em;
 
   /* Spacing rhythm - generous */
   --b-space-section:clamp(80px,12vw,160px);
@@ -269,7 +270,7 @@ button{font-family:inherit}
 
 .b-hero-headline{
   font-family:var(--b-serif);
-  font-weight:300;
+  font-weight:400;
   font-size:clamp(28px,4.2vw,56px);
   line-height:1.18;
   letter-spacing:-0.015em;
@@ -368,24 +369,56 @@ button{font-family:inherit}
   padding:var(--b-space-section) 0;
   position:relative;
 }
-.b-section + .b-section{margin-top:0}
+.b-section + .b-section{
+  margin-top:0;
+  border-top:1px solid var(--b-hairline);
+}
 .b-section-head{
   text-align:center;
   margin-bottom:var(--b-space-block);
   max-width:760px;
   margin-left:auto;margin-right:auto;
   padding:0 28px;
+  position:relative;
+}
+.b-section-chapter{
+  display:inline-flex;align-items:center;justify-content:center;gap:18px;
+  font-family:var(--b-sans);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--gold-3);
+  margin-bottom:18px;
+}
+.b-section-chapter::before,
+.b-section-chapter::after{
+  content:'';
+  display:inline-block;
+  width:42px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-5),transparent);
+}
+.b-section-chapter em{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:13px;
+  letter-spacing:0.06em;
+  color:var(--gold-2);
+  text-transform:none;
 }
 .b-section-eyebrow{
+  font-family:var(--b-sans);
   font-size:10px;
-  letter-spacing:0.4em;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
   color:var(--gold-3);
   margin-bottom:18px;
 }
 .b-section-title{
   font-family:var(--b-serif);
-  font-weight:300;
+  font-weight:400;
   font-size:clamp(28px,3.6vw,46px);
   line-height:1.2;
   letter-spacing:-0.012em;
@@ -399,6 +432,82 @@ button{font-family:inherit}
   color:var(--b-text-muted);
   max-width:580px;
   margin:0 auto;
+}
+
+/* ====================== BACKED BY GOOGLE ====================== */
+.b-backed{
+  padding:clamp(56px,8vw,96px) 0;
+  background:var(--b-bg);
+  border-top:1px solid var(--b-hairline);
+}
+.b-backed-card{
+  max-width:760px;
+  margin:0 auto;
+  padding:48px 40px;
+  text-align:center;
+  background:linear-gradient(180deg,rgba(201,169,97,0.045),rgba(201,169,97,0.015));
+  border:1px solid var(--b-border-gold);
+  border-radius:6px;
+  position:relative;
+  isolation:isolate;
+}
+.b-backed-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(201,169,97,0.08),transparent 60%);
+  pointer-events:none;
+  border-radius:6px;
+  z-index:-1;
+}
+.b-backed-eyebrow{
+  font-family:var(--b-sans);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--gold-3);
+  margin-bottom:22px;
+}
+.b-backed-pill{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:14px 28px;
+  background:#ffffff;
+  border-radius:999px;
+  margin-bottom:28px;
+  box-shadow:0 4px 24px rgba(201,169,97,0.18),0 0 0 1px rgba(255,255,255,0.06);
+}
+.b-backed-pill img{
+  height:24px;width:auto;display:block;
+}
+.b-backed-title{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:clamp(28px,3.4vw,42px);
+  line-height:1.2;
+  color:var(--b-text);
+  margin-bottom:18px;
+  letter-spacing:-0.005em;
+}
+.b-backed-title em{font-style:italic;color:var(--gold-2)}
+.b-backed-body{
+  font-size:14.5px;
+  line-height:1.85;
+  color:var(--b-text-muted);
+  max-width:560px;
+  margin:0 auto 8px;
+}
+.b-backed-body strong{color:var(--b-text);font-weight:500}
+.b-backed-meta{
+  margin-top:22px;
+  font-family:var(--b-sans);
+  font-size:10px;
+  letter-spacing:0.32em;
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+}
+.b-backed-meta strong{color:var(--gold-3);font-weight:500}
+@media (max-width:640px){
+  .b-backed-card{padding:36px 24px;border-radius:4px}
+  .b-backed-pill{padding:12px 22px;margin-bottom:22px}
 }
 
 /* ====================== THESIS ====================== */
@@ -426,7 +535,7 @@ button{font-family:inherit}
 }
 .b-thesis-stmt{
   font-family:var(--b-serif);
-  font-weight:300;
+  font-weight:400;
   font-size:24px;
   line-height:1.35;
   color:var(--b-text);
@@ -466,7 +575,7 @@ button{font-family:inherit}
 .b-compare-side.b-after .b-compare-label{color:var(--gold-3)}
 .b-compare-quote{
   font-family:var(--b-serif);
-  font-weight:300;
+  font-weight:400;
   font-size:18px;
   line-height:1.6;
   color:var(--b-text);
@@ -727,7 +836,7 @@ button{font-family:inherit}
 .b-number:hover{background:rgba(201,169,97,0.03)}
 .b-number-val{
   font-family:var(--b-serif);
-  font-weight:300;
+  font-weight:400;
   font-size:54px;
   line-height:1;
   color:var(--b-text);
@@ -822,7 +931,7 @@ button{font-family:inherit}
   font-family:var(--b-serif);
   font-style:italic;
   font-size:48px;
-  font-weight:300;
+  font-weight:400;
   color:var(--gold-3);
   letter-spacing:-0.02em;
   line-height:1;
@@ -900,7 +1009,7 @@ button{font-family:inherit}
 }
 .b-brilli-name{
   font-family:var(--b-serif);
-  font-weight:300;
+  font-weight:400;
   font-size:42px;
   line-height:1.1;
   color:var(--b-text);
@@ -930,7 +1039,7 @@ button{font-family:inherit}
 }
 .b-cred-grid{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(3,1fr);
   gap:48px;
   margin-top:0;
   align-items:center;
@@ -996,7 +1105,7 @@ button{font-family:inherit}
 }
 .b-invitation-headline{
   font-family:var(--b-serif);
-  font-weight:300;
+  font-weight:400;
   font-size:clamp(26px,3.4vw,42px);
   line-height:1.25;
   color:var(--b-text);
@@ -1309,14 +1418,32 @@ button{font-family:inherit}
     <a href="/purchase" class="b-cta-secondary">View Pricing</a>
   </div>
 
-  <p class="b-hero-trust"><strong>Accepted</strong> &nbsp;·&nbsp; Google for Startups 2026</p>
+  <p class="b-hero-trust"><strong>Class of</strong> &nbsp;·&nbsp; Google for Startups 2026</p>
 
   <div class="b-hero-divider" aria-hidden="true"></div>
+</section>
+
+<!-- =================== BACKED BY GOOGLE =================== -->
+<section class="b-backed" aria-label="Backed by Google for Startups">
+  <div class="b-container">
+    <div class="b-backed-card">
+      <p class="b-backed-eyebrow">Backed by</p>
+      <div class="b-backed-pill">
+        <img src="/images/promo/google-for-startups.png" alt="Google for Startups">
+      </div>
+      <h2 class="b-backed-title">Selected for the <em>Google for Startups Cloud Program</em>.</h2>
+      <p class="b-backed-body">
+        Brilliance is a member of the <strong>Google for Startups Cloud Program</strong>. Vetted infrastructure, technical mentorship, and direct access to Google's AI roadmap. Built independently. Backed by serious cloud.
+      </p>
+      <p class="b-backed-meta"><strong>Class of 2026</strong> &nbsp;·&nbsp; Cloud Program</p>
+    </div>
+  </div>
 </section>
 
 <!-- =================== THESIS =================== -->
 <section class="b-section b-thesis">
   <div class="b-section-head">
+    <p class="b-section-chapter">Chapter <em>i</em></p>
     <p class="b-section-eyebrow">The Thesis</p>
     <h2 class="b-section-title">Generic intelligence produces <em>generic outcomes</em>.</h2>
     <p class="b-section-desc">The most powerful AI in the world will give you the same answer it gives a stranger. Operators do not need that. They need intelligence that knows them.</p>
@@ -1357,6 +1484,7 @@ button{font-family:inherit}
 <!-- =================== TWO MODES =================== -->
 <section class="b-section b-modes">
   <div class="b-section-head">
+    <p class="b-section-chapter">Chapter <em>ii</em></p>
     <p class="b-section-eyebrow">The Architecture</p>
     <h2 class="b-section-title">Two modes. <em>One operating intelligence</em>.</h2>
     <p class="b-section-desc">Brand and life are not separate problems. They share the same operator. Brilliance lets each mode act on its own context, and lets them inform each other when it matters.</p>
@@ -1401,6 +1529,7 @@ button{font-family:inherit}
 <!-- =================== ARCHITECTURE PILLARS =================== -->
 <section class="b-section b-architecture">
   <div class="b-section-head">
+    <p class="b-section-chapter">Chapter <em>iii</em></p>
     <p class="b-section-eyebrow">Why It Is Different</p>
     <h2 class="b-section-title">The mechanism, <em>plainly stated</em>.</h2>
     <p class="b-section-desc">Most AI products are a thin wrapper. Brilliance is built on four decisions that compound into the difference operators feel.</p>
@@ -1450,6 +1579,7 @@ button{font-family:inherit}
 <!-- =================== SHOWCASE =================== -->
 <section class="b-section b-showcase">
   <div class="b-section-head">
+    <p class="b-section-chapter">Chapter <em>iv</em></p>
     <p class="b-section-eyebrow">The Surface</p>
     <h2 class="b-section-title">A platform that <em>looks like the work</em>.</h2>
     <p class="b-section-desc">Calm interface, ambient brand color, a sidebar that listens. The product disappears and the work shows through.</p>
@@ -1503,6 +1633,7 @@ button{font-family:inherit}
 <!-- =================== MODULES =================== -->
 <section class="b-section b-modules">
   <div class="b-section-head">
+    <p class="b-section-chapter">Chapter <em>v</em></p>
     <p class="b-section-eyebrow">The Surfaces</p>
     <h2 class="b-section-title">Where the work <em>actually happens</em>.</h2>
     <p class="b-section-desc">Eight surfaces, each tuned to the kind of thinking it serves.</p>
@@ -1557,6 +1688,7 @@ button{font-family:inherit}
 <!-- =================== AUDIENCE =================== -->
 <section class="b-section b-audience">
   <div class="b-section-head">
+    <p class="b-section-chapter">Chapter <em>vi</em></p>
     <p class="b-section-eyebrow">Who It Is For</p>
     <h2 class="b-section-title">Built for the operator who refuses to <em>compromise</em>.</h2>
     <p class="b-section-desc">Three kinds of people install Brilliance. They are not personas. They are postures.</p>
@@ -1615,11 +1747,6 @@ button{font-family:inherit}
 <section class="b-section b-credibility">
   <div class="b-container">
     <div class="b-cred-grid">
-      <div class="b-cred-item">
-        <p class="b-cred-eyebrow">Accepted</p>
-        <p class="b-cred-value">Google for Startups</p>
-        <p class="b-cred-eyebrow" style="margin-top:6px;color:var(--gold-4)">Class of 2026</p>
-      </div>
       <div class="b-cred-item">
         <p class="b-cred-eyebrow">Powered by</p>
         <div class="b-cred-stack">

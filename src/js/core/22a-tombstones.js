@@ -1584,12 +1584,8 @@ function _v321DoPush(cat) {
 //
 // Guarded by roweos_v321_force_align flag so it never re-runs.
 
-var V321_FORCE_ALIGN_FLAG = 'roweos_v321_force_align';
-
+// v32.1.2: removed flag — run every launch. Cheap (one .get() per blob category).
 function forceAlignFromCloud_v321() {
-  if (localStorage.getItem(V321_FORCE_ALIGN_FLAG) === 'done') {
-    return Promise.resolve({ ok: true, skipped: true });
-  }
   if (!window.firebase || !window.firebaseUser) return Promise.resolve({ ok: false, error: 'no auth' });
 
   var db = firebase.firestore();
@@ -1598,8 +1594,8 @@ function forceAlignFromCloud_v321() {
   for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
     (function(cat) {
       if (!cat || !cat.localKey) return;
-      if (cat.cloudShape !== 'blob') return; // only blob shape — subcollection items handle individually
-      ops.push(_v321AlignBlobCategory(cat, db, basePath));
+      if (cat.cloudShape === 'blob') ops.push(_v321AlignBlobCategory(cat, db, basePath));
+      else if (cat.cloudShape === 'subcollection') ops.push(_v321AlignSubcollCategory(cat, db, basePath));
     })(SYNC_CATEGORIES[i]);
   }
   return Promise.all(ops).then(function(results) {
@@ -1607,9 +1603,8 @@ function forceAlignFromCloud_v321() {
     for (var j = 0; j < results.length; j++) {
       if (results[j] && results[j].aligned) aligned++;
     }
-    try { localStorage.setItem(V321_FORCE_ALIGN_FLAG, 'done'); } catch (e) {}
     if (aligned > 0) {
-      console.log('[v32.1.1] Force-aligned ' + aligned + ' category(ies) from newer cloud');
+      console.log('[v32.1.2] Force-aligned ' + aligned + ' category(ies) from newer cloud');
       if (typeof window.renderSyncInventory === 'function') {
         try { window.renderSyncInventory(); } catch (e) {}
       }
@@ -1629,7 +1624,8 @@ function _v321AlignBlobCategory(cat, db, basePath) {
     }
     if (!cloudTs) return { id: cat.id, aligned: false, reason: 'no cloud ts' };
 
-    // Read local max ts
+    // Read local max ts. v32.1.2: fall back to createdAt, updatedAt, and numeric
+    // id when _modifiedAt is missing (most existing local records lack it).
     var localTs = 0;
     try {
       var raw = localStorage.getItem(cat.localKey);
@@ -1639,10 +1635,14 @@ function _v321AlignBlobCategory(cat, db, basePath) {
         if (cat.localArrayField && parsed && parsed[cat.localArrayField]) arr = parsed[cat.localArrayField];
         if (Array.isArray(arr)) {
           for (var i = 0; i < arr.length; i++) {
-            if (arr[i] && arr[i]._modifiedAt) {
-              var ts = typeof arr[i]._modifiedAt === 'number' ? arr[i]._modifiedAt : Date.parse(arr[i]._modifiedAt);
-              if (ts > localTs) localTs = ts;
-            }
+            var item = arr[i];
+            if (!item) continue;
+            var iTs = 0;
+            if (item._modifiedAt) iTs = typeof item._modifiedAt === 'number' ? item._modifiedAt : Date.parse(item._modifiedAt);
+            if (!iTs && item.updatedAt) iTs = typeof item.updatedAt === 'number' ? item.updatedAt : Date.parse(item.updatedAt);
+            if (!iTs && item.createdAt) iTs = typeof item.createdAt === 'number' ? item.createdAt : Date.parse(item.createdAt);
+            if (!iTs && typeof item.id === 'number' && item.id > 1000000000000) iTs = item.id;
+            if (iTs && iTs > localTs) localTs = iTs;
           }
         }
         if (parsed && parsed._modifiedAt) {
@@ -1652,7 +1652,7 @@ function _v321AlignBlobCategory(cat, db, basePath) {
       }
     } catch (e) {}
 
-    if (cloudTs <= localTs) return { id: cat.id, aligned: false, reason: 'local newer or equal' };
+    if (cloudTs <= localTs) return { id: cat.id, aligned: false, reason: 'local newer or equal', cloudTs: cloudTs, localTs: localTs };
 
     // Cloud is newer → overwrite local with cloud's array
     var cloudArr = d[cat.blobField || 'data'] || [];
@@ -1689,4 +1689,48 @@ function _v321AlignBlobCategory(cat, db, basePath) {
   }, function(err) {
     return { id: cat.id, aligned: false, error: err };
   });
+}
+
+// v32.1.2: subcollection-shape force-align. For per-doc collections (chats,
+// pulse_goals, brands), drop any local item whose id doesn't exist in cloud
+// AND whose timestamp is older than 2026-04-15. This catches chats wiped via
+// Firebase Admin that local hasn't seen yet.
+var V321_STALE_CUTOFF = Date.parse('2026-04-15T00:00:00Z');
+
+function _v321AlignSubcollCategory(cat, db, basePath) {
+  if (!cat.localKey) return Promise.resolve({ id: cat.id, aligned: false, reason: 'no localKey' });
+  return db.collection(basePath + '/' + cat.cloudPath).get().then(function(snap) {
+    var cloudIdSet = {};
+    snap.forEach(function(d) { cloudIdSet[d.id] = true; });
+    var localArr;
+    try { localArr = JSON.parse(localStorage.getItem(cat.localKey) || '[]'); } catch (e) { localArr = []; }
+    if (!Array.isArray(localArr)) return { id: cat.id, aligned: false, reason: 'local not array' };
+    var kept = [];
+    var killed = 0;
+    for (var i = 0; i < localArr.length; i++) {
+      var item = localArr[i];
+      if (!item) continue;
+      var iid = String(item[cat.idField || 'id']);
+      if (cloudIdSet[iid]) { kept.push(item); continue; }
+      // Not in cloud — check ts
+      var ts = 0;
+      if (item._modifiedAt) ts = typeof item._modifiedAt === 'number' ? item._modifiedAt : Date.parse(item._modifiedAt);
+      if (!ts && item.updatedAt) ts = typeof item.updatedAt === 'number' ? item.updatedAt : Date.parse(item.updatedAt);
+      if (!ts && item.createdAt) ts = typeof item.createdAt === 'number' ? item.createdAt : Date.parse(item.createdAt);
+      if (!ts && typeof item.id === 'number' && item.id > 1000000000000) ts = item.id;
+      if (ts && ts < V321_STALE_CUTOFF) { killed++; continue; }
+      kept.push(item); // recent + missing from cloud — keep (likely uncommitted)
+    }
+    if (killed > 0) {
+      try { localStorage.setItem(cat.localKey, JSON.stringify(kept)); } catch (e) {}
+      console.log('[v32.1.2] ' + cat.id + ': dropped ' + killed + ' local item(s) absent from cloud + older than cutoff');
+      if (cat.rerender) {
+        for (var r = 0; r < cat.rerender.length; r++) {
+          try { var fn = window[cat.rerender[r]]; if (typeof fn === 'function') fn(); } catch (e2) {}
+        }
+      }
+      return { id: cat.id, aligned: true, killed: killed };
+    }
+    return { id: cat.id, aligned: false, reason: 'no stale local items' };
+  }, function(err) { return { id: cat.id, aligned: false, error: err }; });
 }

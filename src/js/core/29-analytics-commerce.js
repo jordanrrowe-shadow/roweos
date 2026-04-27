@@ -2489,10 +2489,18 @@ function manualSyncNow() {
     showToast('Firebase not connected', 'error');
     return;
   }
-  showToast('Syncing all data to cloud...', 'info');
-  // v28.7: Full bidirectional sync - push ALL categories first, then pull everything.
-  // Previously only pushed brands, leaving logos/folio/inventory/chats out of sync.
+  showToast('Pulling latest from cloud...', 'info');
+  // v32.1.2: Sync Now is PULL-ONLY (cloud-authoritative). Write-through handles
+  // all pushes on every local save. The v28.7 bidirectional-push phase was a
+  // band-aid that re-uploaded stale local data over cloud-cleaned state — it's
+  // gone. If a category is missing the write-through, fix that path, not Sync.
   try {
+    if (typeof forceAlignFromCloud_v321 === 'function') {
+      forceAlignFromCloud_v321().catch(function(){});
+    }
+  } catch (alignErr) {}
+  // v32.1.2: skip the entire push phase below — pull is now the only direction.
+  if (false) try {
     if (typeof saveBrands === 'function') saveBrands();
     if (typeof writeDBConversations === 'function') writeDBConversations();
     if (typeof writeDBTodos === 'function') writeDBTodos();
@@ -2569,7 +2577,8 @@ function manualSyncNow() {
   } catch(pushErr) { console.warn('[manualSyncNow] Push phase error:', pushErr); }
 
   // Wait for async writes to propagate, then pull everything from cloud
-  var _pushWait = new Promise(function(resolve) { setTimeout(resolve, 4000); });
+  // v32.1.2: pull-only — no need to wait 4s for push to propagate
+  var _pushWait = Promise.resolve();
   _pushWait.then(function() {
     return loadFromFirebaseV2(true);
   }).then(function() {
