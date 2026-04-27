@@ -1627,6 +1627,10 @@ function deleteSyncCategoryItem(catName, itemId) {
     if (typeof showToast === 'function') showToast('Unknown category: ' + catName, 'error');
     return;
   }
+  // v32.0-A: gate destructive deletes behind a confirmation
+  if (typeof confirm === 'function') {
+    if (!confirm('Permanently delete this item?')) return;
+  }
   if (typeof tombstoneAndDelete !== 'function') {
     if (typeof showToast === 'function') showToast('Delete API unavailable - try refreshing', 'error');
     console.error('[v32.0-A] tombstoneAndDelete not loaded');

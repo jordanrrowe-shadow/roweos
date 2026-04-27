@@ -287,7 +287,7 @@ var SYNC_CATEGORIES = [
     localKey: 'roweos_people', // v32.0-A: shared with team + directReports, filtered by personType === 'client'
     localArrayField: null,
     localFilter: { field: 'personType', value: 'client' },
-    cloudPath: 'clients/main',
+    cloudPath: 'profile/people', // v32.0-A: shared with team + directReports — single Firestore doc
     cloudShape: 'blob',
     blobField: 'data',
     parentDoc: null,
@@ -305,7 +305,7 @@ var SYNC_CATEGORIES = [
     localKey: 'roweos_people', // v32.0-A: shared with clients + directReports, filtered by personType === 'team'
     localArrayField: null,
     localFilter: { field: 'personType', value: 'team' },
-    cloudPath: 'team/main',
+    cloudPath: 'profile/people', // v32.0-A: shared with clients + directReports — single Firestore doc
     cloudShape: 'blob',
     blobField: 'data',
     parentDoc: null,
@@ -323,7 +323,7 @@ var SYNC_CATEGORIES = [
     localKey: 'roweos_people', // v32.0-A: shared with clients + team, filtered by personType === 'report'
     localArrayField: null,
     localFilter: { field: 'personType', value: 'report' },
-    cloudPath: 'direct_reports/main',
+    cloudPath: 'profile/people', // v32.0-A: shared with clients + team — single Firestore doc
     cloudShape: 'blob',
     blobField: 'data',
     parentDoc: null,
@@ -572,12 +572,26 @@ function _deleteCloudItem(cat, itemId) {
     if (cat.cloudShape === 'blob') {
       // Re-write the blob doc minus the item. Cloud doc shape mirrors localStorage:
       // { [blobField]: arr, _modifiedAt }.
+      // For SHARED storage (localFilter set), we send the FULL localStorage array
+      // — all categories' items combined — so we don't wipe siblings.
       var writeDB = _getWindowFn('writeDB');
       if (!writeDB) { resolve({ ok: false, error: 'writeDB unavailable' }); return; }
       try {
-        var local = _readCategoryArray(cat);
+        var fullArr;
+        if (cat.localFilter && cat.localFilter.field) {
+          // Shared storage: read raw localStorage without category filter
+          var raw = _readRaw(cat.localKey);
+          if (cat.localArrayField) {
+            fullArr = (raw && Array.isArray(raw[cat.localArrayField])) ? raw[cat.localArrayField] : [];
+          } else {
+            fullArr = Array.isArray(raw) ? raw : [];
+          }
+        } else {
+          // Non-shared: this category owns the entire array
+          fullArr = _readCategoryArray(cat);
+        }
         var payload = {};
-        payload[cat.blobField || 'data'] = local;
+        payload[cat.blobField || 'data'] = fullArr;
         payload._modifiedAt = Date.now();
         var p2 = writeDB(cat.cloudPath, payload);
         if (p2 && typeof p2.then === 'function') {
@@ -592,9 +606,19 @@ function _deleteCloudItem(cat, itemId) {
       var writeDB2 = _getWindowFn('writeDB');
       if (!writeDB2) { resolve({ ok: false, error: 'writeDB unavailable' }); return; }
       try {
-        var local2 = _readCategoryArray(cat);
+        var fullArr2;
+        if (cat.localFilter && cat.localFilter.field) {
+          var raw2 = _readRaw(cat.localKey);
+          if (cat.localArrayField) {
+            fullArr2 = (raw2 && Array.isArray(raw2[cat.localArrayField])) ? raw2[cat.localArrayField] : [];
+          } else {
+            fullArr2 = Array.isArray(raw2) ? raw2 : [];
+          }
+        } else {
+          fullArr2 = _readCategoryArray(cat);
+        }
         var pld = {};
-        pld[cat.blobField || 'data'] = local2;
+        pld[cat.blobField || 'data'] = fullArr2;
         pld._modifiedAt = Date.now();
         var p3 = writeDB2(cat.parentDoc, pld);
         if (p3 && typeof p3.then === 'function') {
