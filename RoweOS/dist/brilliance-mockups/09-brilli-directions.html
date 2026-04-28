@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Brilli Directions - Animated Comparison Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+.wrap{max-width:1320px;margin:0 auto;padding:64px 24px}
+
+.back-link{display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-muted);text-decoration:none;margin-bottom:32px}
+.back-link:hover{color:var(--gold-2)}
+
+header{text-align:center;margin-bottom:48px;padding-bottom:36px;border-bottom:1px solid var(--b-hairline)}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-3);margin-bottom:18px}
+h1{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(34px,5vw,56px);line-height:1.1;color:var(--b-text);margin-bottom:18px;letter-spacing:-0.01em}
+h1 em{color:var(--gold-2);font-style:italic}
+.lead{font-size:15px;color:var(--b-text-muted);max-width:680px;margin:0 auto;line-height:1.85}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.tile{
+  background:var(--b-bg-elev);
+  border:1px solid var(--b-border);
+  border-radius:8px;
+  padding:24px 20px 20px;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  text-align:left;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+.tile:hover{border-color:rgba(201,169,97,0.35);background:rgba(201,169,97,0.03);transform:translateY(-2px)}
+.tile-num{
+  font-family:'Old Standard TT',serif;
+  font-style:italic;
+  font-size:13px;
+  color:var(--gold-3);
+  margin-bottom:8px;
+}
+.tile-canvas-wrap{
+  width:100%;height:200px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+  position:relative;
+  background:radial-gradient(circle at 50% 50%,rgba(201,169,97,0.04),transparent 70%);
+  border-radius:6px;
+  overflow:hidden;
+}
+.tile-canvas-wrap canvas{display:block;background:transparent}
+.tile-name{
+  font-family:'Old Standard TT',serif;
+  font-weight:400;
+  font-size:18px;
+  color:var(--b-text);
+  margin-bottom:6px;
+  letter-spacing:-0.005em;
+}
+.tile-name em{color:var(--gold-2);font-style:italic}
+.tile-desc{
+  font-size:12.5px;
+  color:var(--b-text-muted);
+  line-height:1.6;
+  flex:1;
+}
+.tile-tag{
+  display:inline-block;
+  font-family:'DM Sans',sans-serif;
+  font-size:9px;font-weight:500;
+  letter-spacing:0.22em;text-transform:uppercase;
+  padding:4px 9px;border-radius:99px;
+  background:rgba(255,255,255,0.04);
+  color:var(--b-text-dim);
+  margin-top:12px;
+  align-self:flex-start;
+}
+.tile-tag.cute{background:rgba(232,199,155,0.10);color:var(--gold-2)}
+.tile-tag.refined{background:rgba(168,138,74,0.10);color:var(--gold-3)}
+.tile-tag.abstract{background:rgba(107,90,61,0.18);color:var(--gold-4)}
+.tile-tag.geometric{background:rgba(255,255,255,0.05);color:var(--b-text-muted)}
+
+/* Fullscreen modal */
+.modal{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.92);backdrop-filter:blur(28px);
+  z-index:100;
+  display:none;align-items:center;justify-content:center;
+  padding:32px;
+}
+.modal.open{display:flex}
+.modal-inner{
+  width:min(720px,92vw);
+  max-height:90vh;
+  background:var(--b-bg-elev);
+  border:1px solid var(--b-border);
+  border-radius:8px;
+  padding:48px 44px 36px;
+  text-align:center;
+  position:relative;
+  overflow-y:auto;
+}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  width:36px;height:36px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--b-border);
+  border-radius:50%;color:var(--b-text-muted);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:18px;line-height:1;
+}
+.modal-close:hover{color:var(--gold-2);border-color:rgba(201,169,97,0.3)}
+.modal-canvas-wrap{
+  width:380px;height:380px;
+  margin:0 auto 32px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.modal-wordmark{
+  font-family:'Old Standard TT',serif;
+  font-weight:400;
+  font-size:46px;
+  background:linear-gradient(135deg,var(--gold-1),var(--gold-2) 50%,var(--gold-3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:6px;letter-spacing:-0.01em;
+}
+.modal-os{
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;
+  letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-3);
+  margin-bottom:30px;
+}
+.modal-num{font-family:'Old Standard TT',serif;font-style:italic;font-size:14px;color:var(--gold-3);margin-bottom:8px}
+.modal-name{
+  font-family:'Old Standard TT',serif;font-weight:400;
+  font-size:32px;color:var(--b-text);margin-bottom:14px;
+  letter-spacing:-0.005em;
+}
+.modal-name em{color:var(--gold-2);font-style:italic}
+.modal-desc{font-size:14.5px;line-height:1.85;color:var(--b-text-muted);max-width:520px;margin:0 auto 24px}
+.modal-fit{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;
+  text-align:left;margin-top:24px;padding-top:24px;border-top:1px solid var(--b-hairline);
+}
+.modal-fit-block{padding:0}
+.modal-fit-label{font-size:9px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-3);margin-bottom:6px}
+.modal-fit-text{font-size:12.5px;color:var(--b-text-muted);line-height:1.6}
+.modal-fit-text strong{color:var(--b-text);font-weight:500}
+
+footer{text-align:center;margin-top:64px;padding-top:36px;border-top:1px solid var(--b-hairline);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim)}
+footer strong{color:var(--gold-3);font-weight:500}
+
+@media (max-width:760px){
+  .grid{grid-template-columns:1fr 1fr;gap:12px}
+  .tile{padding:18px 14px 14px}
+  .tile-canvas-wrap{height:160px}
+  .tile-name{font-size:16px}
+  .modal-canvas-wrap{width:280px;height:280px}
+  .modal-inner{padding:36px 24px 28px}
+  .modal-wordmark{font-size:34px}
+}
+@media (max-width:420px){
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <a href="/brilliance-mockups/00-index.html" class="back-link">&larr; All Mockups</a>
+
+  <header>
+    <p class="eyebrow">Brilli Direction Gallery</p>
+    <h1>Thirteen <em>directions</em>, side by side</h1>
+    <p class="lead">Each tile is a live Canvas 2D animation showing one possible direction for Brilli, the visible AI presence inside Brilliance. Click any tile to view it large with Brilliance wordmark and direction notes. The chosen direction slots into the existing Brilli module spec without rebuilding the surrounding surfaces.</p>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <p>Brilliance &middot; <strong>by RoweOS</strong> &middot; Brilli direction comparison &middot; v33.0</p>
+  </footer>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+  <div class="modal-inner">
+    <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+    <div class="modal-canvas-wrap"><canvas id="modalCanvas" width="380" height="380"></canvas></div>
+    <h3 class="modal-wordmark">Brilliance</h3>
+    <p class="modal-os">Intelligence OS</p>
+    <p class="modal-num" id="modalNum">i.</p>
+    <h2 class="modal-name" id="modalName">&nbsp;</h2>
+    <p class="modal-desc" id="modalDesc">&nbsp;</p>
+    <div class="modal-fit">
+      <div class="modal-fit-block"><p class="modal-fit-label">Voice fit</p><p class="modal-fit-text" id="modalVoice">&nbsp;</p></div>
+      <div class="modal-fit-block"><p class="modal-fit-label">Complexity</p><p class="modal-fit-text" id="modalComplexity">&nbsp;</p></div>
+      <div class="modal-fit-block"><p class="modal-fit-label">Risk</p><p class="modal-fit-text" id="modalRisk">&nbsp;</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   BRILLI DIRECTION GALLERY
+   13 self-contained Canvas 2D animations for evaluation
+   ============================================================ */
+(function(){
+
+  var GOLD = ['#f5e6c8','#e2c79b','#c9a961','#a88a4a','#6b5a3d'];
+  var instances = [];
+  var rafId = null;
+
+  /* Helper: spawn particles */
+  function spawnTrail(state, x, y, opts) {
+    opts = opts || {};
+    if (state.particles.length >= (opts.cap || 18)) return;
+    state.particles.push({
+      x: x + (Math.random()-0.5) * (opts.spread || 8),
+      y: y + (Math.random()-0.5) * (opts.spread || 8),
+      vx: (opts.vx || 0) + (Math.random()-0.5) * 0.4,
+      vy: (opts.vy || 0.1) + Math.random() * 0.18,
+      life: 0,
+      maxLife: 1200 + Math.random() * 1500,
+      size: 0.7 + Math.random() * 1.2
+    });
+  }
+
+  function drawParticles(ctx, state, dt, alpha) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = state.particles.length - 1; i >= 0; i--) {
+      var p = state.particles[i];
+      p.life += dt;
+      if (p.life >= p.maxLife) { state.particles.splice(i, 1); continue; }
+      p.x += p.vx; p.y += p.vy;
+      var lifePct = p.life / p.maxLife;
+      var a = (1 - lifePct) * (alpha || 0.85);
+      ctx.fillStyle = 'rgba(245,230,200,' + a + ')';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function radialGlow(ctx, x, y, r, color, alpha) {
+    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(' + color + ',' + (alpha || 0.4) + ')');
+    g.addColorStop(0.4, 'rgba(' + color + ',' + (alpha * 0.4 || 0.16) + ')');
+    g.addColorStop(1, 'rgba(' + color + ',0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
+  /* ============================================================
+     RENDERERS — one per direction
+     Each takes (ctx, w, h, t, dt, state)
+     ============================================================ */
+
+  // 1. STAR BRILLI - smiley star with twinkles
+  function r_star(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2 + 4;
+    state.phase = (state.phase || 0) + dt * 0.001 * Math.PI * 0.6;
+    state.spawn = (state.spawn || 0) + dt;
+    while (state.spawn > 240) { spawnTrail(state, cx + (Math.random()-0.5)*60, cy + 30, {cap:14}); state.spawn -= 240; }
+
+    radialGlow(ctx, cx, cy, w*0.55, '201,169,97', 0.32);
+
+    var bob = Math.sin(state.phase) * 3;
+    drawStar(ctx, cx, cy + bob, w * 0.32);
+
+    // smile
+    ctx.strokeStyle = '#5a4520';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, cy + bob - 2, 8, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+    // eyes
+    drawEyeDot(ctx, cx - 8, cy - 6 + bob, 2.4);
+    drawEyeDot(ctx, cx + 8, cy - 6 + bob, 2.4);
+
+    drawParticles(ctx, state, dt, 0.7);
+  }
+
+  function drawStar(ctx, cx, cy, r) {
+    var pts = 5;
+    var angle = -Math.PI/2;
+    var inner = r * 0.45;
+    ctx.save();
+    var grad = ctx.createRadialGradient(cx, cy-r*0.2, r*0.1, cx, cy, r*1.2);
+    grad.addColorStop(0, '#fff8e8');
+    grad.addColorStop(0.4, '#f5e6c8');
+    grad.addColorStop(0.8, '#c9a961');
+    grad.addColorStop(1, 'rgba(168,138,74,0.4)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    for (var i = 0; i < pts * 2; i++) {
+      var rr = (i % 2 === 0) ? r : inner;
+      var a = angle + i * Math.PI / pts;
+      var x = cx + Math.cos(a) * rr;
+      var y = cy + Math.sin(a) * rr;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#f5e6c8';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawEyeDot(ctx, x, y, r) {
+    ctx.fillStyle = '#3a2810';
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff8e8';
+    ctx.beginPath();
+    ctx.arc(x - r*0.3, y - r*0.3, r*0.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 2. HYBRID BRILLI - star with wings + trail
+  function r_hybrid(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.phase = (state.phase || 0) + dt * 0.001 * 2 * Math.PI;
+    state.bodyPhase = (state.bodyPhase || 0) + dt * 0.001 * Math.PI * 0.5;
+    state.spawn = (state.spawn || 0) + dt;
+    while (state.spawn > 100) { spawnTrail(state, cx, cy + 20, {cap:24, vx:-0.4}); state.spawn -= 100; }
+
+    radialGlow(ctx, cx, cy, w*0.5, '201,169,97', 0.3);
+
+    // wings around the star
+    var ws = Math.cos(state.phase) * 0.35 + 0.65;
+    drawWing(ctx, cx - 18, cy, -1, w*0.32, h*0.18, ws, 0.28);
+    drawWing(ctx, cx + 18, cy, 1, w*0.32, h*0.18, ws, 0.28);
+
+    var bob = Math.sin(state.bodyPhase) * 2;
+    drawStar(ctx, cx, cy + bob, w * 0.26);
+    drawEyeDot(ctx, cx - 6, cy - 4 + bob, 2);
+    drawEyeDot(ctx, cx + 6, cy - 4 + bob, 2);
+
+    drawParticles(ctx, state, dt, 0.85);
+  }
+
+  function drawWing(ctx, x, y, dir, ww, hh, scaleY, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(dir * 0.4);
+    ctx.scale(dir, scaleY);
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < 3; i++) {
+      ctx.fillStyle = 'rgba(232,199,155,' + (alpha * (1 - i*0.25)) + ')';
+      ctx.beginPath();
+      ctx.ellipse(ww*0.4, 0, ww*(1-i*0.04), hh*(1-i*0.04), 0, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 3. FIREFLY BRILLI - same as the prototype, simplified
+  function r_firefly(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.phase = (state.phase || 0) + dt * 0.001 * 2 * Math.PI * 2;
+    state.bodyPhase = (state.bodyPhase || 0) + dt * 0.001 * Math.PI * 0.6;
+    state.spawn = (state.spawn || 0) + dt;
+    while (state.spawn > 160) { spawnTrail(state, cx, cy + h*0.18, {cap:14}); state.spawn -= 160; }
+
+    radialGlow(ctx, cx, cy, w*0.5, '201,169,97', 0.4);
+
+    var ws = Math.cos(state.phase) * 0.45 + 0.55;
+    drawWing(ctx, cx - 12, cy - 6, -1, 50, 28, ws, 0.32);
+    drawWing(ctx, cx + 12, cy - 6, 1, 50, 28, ws, 0.32);
+
+    var pulse = 1 + Math.sin(state.bodyPhase) * 0.04;
+    var bg = ctx.createRadialGradient(cx, cy - 4, 0, cx, cy, 26);
+    bg.addColorStop(0, '#fff8e8'); bg.addColorStop(0.3, '#f5e6c8');
+    bg.addColorStop(0.7, '#c9a961'); bg.addColorStop(1, 'rgba(168,138,74,0)');
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 16*pulse, 24*pulse, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#f5e6c8'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 16*pulse, 24*pulse, 0, 0, Math.PI*2);
+    ctx.stroke();
+
+    // head
+    ctx.strokeStyle = '#e2c79b'; ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.arc(cx, cy - 28, 16, 0, Math.PI*2); ctx.stroke();
+
+    // eyes (no smile - more refined)
+    drawEyeGlow(ctx, cx - 6, cy - 26, 4, 4.2);
+    drawEyeGlow(ctx, cx + 5, cy - 26, 3.6, 3.8);
+
+    drawParticles(ctx, state, dt, 0.85);
+  }
+
+  function drawEyeGlow(ctx, x, y, w, hh) {
+    var g = ctx.createRadialGradient(x - w*0.2, y - hh*0.2, 0, x, y, w*1.2);
+    g.addColorStop(0, '#fff9e8');
+    g.addColorStop(0.6, '#f5e6c8');
+    g.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.ellipse(x, y, w, hh, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // 4. CELESTIAL ORB - contained internal sparks
+  function r_orb(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    var R = w * 0.32;
+    state.phase = (state.phase || 0) + dt * 0.001 * 0.6;
+    state.sparks = state.sparks || initOrbSparks(R, cx, cy);
+    state.outerPulse = (state.outerPulse || 0) + dt * 0.001 * Math.PI * 0.3;
+
+    var pulse = 1 + Math.sin(state.outerPulse) * 0.04;
+
+    radialGlow(ctx, cx, cy, R*1.8*pulse, '201,169,97', 0.36);
+
+    // orb body
+    var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R*pulse);
+    g.addColorStop(0, 'rgba(245,230,200,0.2)');
+    g.addColorStop(0.6, 'rgba(201,169,97,0.18)');
+    g.addColorStop(0.9, 'rgba(168,138,74,0.4)');
+    g.addColorStop(1, 'rgba(201,169,97,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R*pulse, 0, Math.PI*2);
+    ctx.fill();
+
+    // orb edge ring
+    ctx.strokeStyle = 'rgba(232,199,155,0.5)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R*pulse, 0, Math.PI*2);
+    ctx.stroke();
+
+    // internal sparks - clipped to circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, R*0.95, 0, Math.PI*2);
+    ctx.clip();
+    ctx.globalCompositeOperation = 'lighter';
+    state.sparks.forEach(function(s){
+      s.angle += s.speed * dt * 0.001;
+      s.life += dt;
+      var x = cx + Math.cos(s.angle) * s.r;
+      var y = cy + Math.sin(s.angle) * s.r * 0.6;
+      var twinkle = Math.sin(s.life * 0.005) * 0.5 + 0.5;
+      ctx.fillStyle = 'rgba(245,230,200,' + (0.6 * twinkle) + ')';
+      ctx.beginPath();
+      ctx.arc(x, y, s.size, 0, Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
+
+    // bright core
+    var coreG = ctx.createRadialGradient(cx, cy, 0, cx, cy, R*0.3);
+    coreG.addColorStop(0, '#fff8e8');
+    coreG.addColorStop(0.5, 'rgba(245,230,200,0.6)');
+    coreG.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = coreG;
+    ctx.fillRect(cx - R, cy - R, R*2, R*2);
+  }
+
+  function initOrbSparks(R, cx, cy) {
+    var s = [];
+    for (var i = 0; i < 14; i++) {
+      s.push({
+        angle: Math.random() * Math.PI * 2,
+        r: R * (0.3 + Math.random() * 0.55),
+        speed: (Math.random() - 0.5) * 0.8,
+        life: Math.random() * 1000,
+        size: 0.6 + Math.random() * 1.2
+      });
+    }
+    return s;
+  }
+
+  // 5. MONOGRAM AS ENTITY - the B comes alive
+  function r_monogram(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.phase = (state.phase || 0) + dt * 0.001 * Math.PI * 0.4;
+    state.sweep = (state.sweep || 0) + dt * 0.001;
+    if (state.sweep > 4) state.sweep = -0.2;
+
+    var pulse = 1 + Math.sin(state.phase) * 0.04;
+
+    radialGlow(ctx, cx, cy, w*0.45*pulse, '201,169,97', 0.3);
+
+    // halo ring
+    ctx.strokeStyle = 'rgba(201,169,97,0.25)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, w*0.34, 0, Math.PI*2);
+    ctx.stroke();
+
+    // letter B - styled gold
+    ctx.save();
+    ctx.translate(cx, cy);
+    var size = w * 0.42 * pulse;
+    var gradB = ctx.createLinearGradient(-size*0.4, -size*0.5, size*0.4, size*0.5);
+    gradB.addColorStop(0, '#fff8e8');
+    gradB.addColorStop(0.5, '#e2c79b');
+    gradB.addColorStop(1, '#a88a4a');
+    ctx.fillStyle = gradB;
+    ctx.font = 'italic 400 ' + size + 'px "Old Standard TT", serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('B', 0, 4);
+
+    // sweep highlight - moving white shimmer
+    ctx.save();
+    var sweepX = (state.sweep / 4) * w - w*0.5;
+    var sweepGrad = ctx.createLinearGradient(sweepX - 30, 0, sweepX + 30, 0);
+    sweepGrad.addColorStop(0, 'rgba(255,248,232,0)');
+    sweepGrad.addColorStop(0.5, 'rgba(255,248,232,0.8)');
+    sweepGrad.addColorStop(1, 'rgba(255,248,232,0)');
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.fillStyle = sweepGrad;
+    ctx.fillText('B', 0, 4);
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  // 6. GEOMETRIC FORMS - rotating wireframe icosahedron-ish
+  function r_geometric(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.rot = (state.rot || 0) + dt * 0.001 * 0.3;
+    var R = w * 0.28;
+
+    radialGlow(ctx, cx, cy, w*0.4, '201,169,97', 0.22);
+
+    // Generate vertices for a 3D-ish icosahedron projected to 2D
+    var verts = [];
+    var phi = (1 + Math.sqrt(5)) / 2;
+    var raw = [
+      [0,1,phi],[0,-1,phi],[0,1,-phi],[0,-1,-phi],
+      [1,phi,0],[-1,phi,0],[1,-phi,0],[-1,-phi,0],
+      [phi,0,1],[phi,0,-1],[-phi,0,1],[-phi,0,-1]
+    ];
+    var s = R * 0.5;
+    raw.forEach(function(v){
+      var x = v[0]*s, y = v[1]*s, z = v[2]*s;
+      // rotate around Y
+      var x2 = x * Math.cos(state.rot) - z * Math.sin(state.rot);
+      var z2 = x * Math.sin(state.rot) + z * Math.cos(state.rot);
+      // rotate around X (slight)
+      var y2 = y * Math.cos(state.rot * 0.5) - z2 * Math.sin(state.rot * 0.5);
+      var z3 = y * Math.sin(state.rot * 0.5) + z2 * Math.cos(state.rot * 0.5);
+      // perspective
+      var pp = 250 / (250 + z3);
+      verts.push({x: cx + x2 * pp, y: cy + y2 * pp, z: z3, alpha: pp});
+    });
+
+    // edges (icosahedron has many but we approximate a subset)
+    var edges = [
+      [0,1],[0,4],[0,5],[0,8],[0,10],
+      [1,6],[1,7],[1,8],[1,10],
+      [2,3],[2,4],[2,5],[2,9],[2,11],
+      [3,6],[3,7],[3,9],[3,11],
+      [4,5],[4,8],[4,9],
+      [5,10],[5,11],
+      [6,7],[6,8],[6,9],
+      [7,10],[7,11],
+      [8,9],[10,11]
+    ];
+
+    edges.forEach(function(e){
+      var a = verts[e[0]], b = verts[e[1]];
+      var alpha = Math.min(a.alpha, b.alpha);
+      ctx.strokeStyle = 'rgba(232,199,155,' + (alpha * 0.55) + ')';
+      ctx.lineWidth = alpha * 1;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    });
+
+    // vertices (glowing)
+    verts.forEach(function(v, i){
+      var twinkle = Math.sin(state.rot * 4 + i * 0.5) * 0.4 + 0.6;
+      var g = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, 5 * v.alpha);
+      g.addColorStop(0, 'rgba(245,230,200,' + (twinkle * v.alpha) + ')');
+      g.addColorStop(1, 'rgba(245,230,200,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(v.x - 5*v.alpha, v.y - 5*v.alpha, 10*v.alpha, 10*v.alpha);
+    });
+  }
+
+  // 7. LIGHT SIGNATURE / TRAIL SYSTEM - flowing trails
+  function r_trail(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.phase = (state.phase || 0) + dt * 0.001;
+    state.particles = state.particles || [];
+
+    radialGlow(ctx, cx, cy, w*0.45, '201,169,97', 0.24);
+
+    // Curved sweeping trail
+    ctx.save();
+    ctx.lineCap = 'round';
+    var segments = 60;
+    for (var s = 0; s < segments; s++) {
+      var p = s / segments;
+      var phase = state.phase * 1.4;
+      var ang = p * Math.PI * 4 + phase;
+      var r = 30 + p * 50 + Math.sin(p * Math.PI * 3 + phase) * 10;
+      var x = cx + Math.cos(ang) * r;
+      var y = cy + Math.sin(ang) * r * 0.7;
+      var alpha = (1 - p) * 0.7;
+      var size = (1 - p) * 3 + 0.8;
+
+      var g = ctx.createRadialGradient(x, y, 0, x, y, size * 3);
+      g.addColorStop(0, 'rgba(245,230,200,' + alpha + ')');
+      g.addColorStop(0.6, 'rgba(201,169,97,' + (alpha * 0.4) + ')');
+      g.addColorStop(1, 'rgba(201,169,97,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - size*3, y - size*3, size*6, size*6);
+    }
+    ctx.restore();
+
+    // central bright source
+    var coreG = ctx.createRadialGradient(cx, cy, 0, cx, cy, 14);
+    coreG.addColorStop(0, '#fff8e8');
+    coreG.addColorStop(0.5, '#f5e6c8');
+    coreG.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = coreG;
+    ctx.fillRect(cx - 14, cy - 14, 28, 28);
+  }
+
+  // 8. CONSTELLATION SYSTEM - connected dots
+  function r_constellation(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.phase = (state.phase || 0) + dt * 0.001;
+    state.nodes = state.nodes || initConstellation(w, h);
+
+    radialGlow(ctx, cx, cy, w*0.4, '201,169,97', 0.18);
+
+    // breathing
+    var breath = Math.sin(state.phase * 0.8) * 0.06 + 1;
+
+    // edges (drawn first so dots overlay)
+    state.nodes.forEach(function(n){
+      n.connections.forEach(function(j){
+        var other = state.nodes[j];
+        var dx = other.x - n.x, dy = other.y - n.y;
+        var dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist > 80) return;
+        var alpha = (1 - dist / 80) * 0.4;
+        // pulse traveling along edge
+        var travelPhase = (state.phase + n.travelOffset) % 2;
+        if (travelPhase < 1) {
+          var tx = n.x + dx * travelPhase;
+          var ty = n.y + dy * travelPhase;
+          var g = ctx.createRadialGradient(tx, ty, 0, tx, ty, 6);
+          g.addColorStop(0, 'rgba(245,230,200,0.7)');
+          g.addColorStop(1, 'rgba(245,230,200,0)');
+          ctx.fillStyle = g;
+          ctx.fillRect(tx-6, ty-6, 12, 12);
+        }
+        ctx.strokeStyle = 'rgba(232,199,155,' + alpha + ')';
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(cx + (n.x - cx) * breath, cy + (n.y - cy) * breath);
+        ctx.lineTo(cx + (other.x - cx) * breath, cy + (other.y - cy) * breath);
+        ctx.stroke();
+      });
+    });
+
+    // nodes
+    state.nodes.forEach(function(n, i){
+      var twinkle = Math.sin(state.phase * 2 + i * 0.4) * 0.4 + 0.6;
+      var x = cx + (n.x - cx) * breath;
+      var y = cy + (n.y - cy) * breath;
+      var g = ctx.createRadialGradient(x, y, 0, x, y, 4);
+      g.addColorStop(0, 'rgba(245,230,200,' + twinkle + ')');
+      g.addColorStop(1, 'rgba(245,230,200,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - 4, y - 4, 8, 8);
+    });
+  }
+
+  function initConstellation(w, h) {
+    var nodes = [];
+    var count = 14;
+    var cx = w/2, cy = h/2;
+    for (var i = 0; i < count; i++) {
+      var angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
+      var r = 30 + Math.random() * 50;
+      nodes.push({
+        x: cx + Math.cos(angle) * r,
+        y: cy + Math.sin(angle) * r * 0.7,
+        connections: [],
+        travelOffset: Math.random() * 2
+      });
+    }
+    // connect nearest few
+    nodes.forEach(function(n, i){
+      var dists = [];
+      nodes.forEach(function(o, j){
+        if (j === i) return;
+        var d = Math.sqrt((o.x-n.x)*(o.x-n.x) + (o.y-n.y)*(o.y-n.y));
+        dists.push({i:j, d:d});
+      });
+      dists.sort(function(a,b){return a.d - b.d;});
+      n.connections = dists.slice(0, 2 + Math.floor(Math.random()*2)).map(function(x){return x.i;});
+    });
+    return nodes;
+  }
+
+  // 9. PRISM REFRACTION
+  function r_prism(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.phase = (state.phase || 0) + dt * 0.001;
+
+    radialGlow(ctx, cx, cy, w*0.4, '201,169,97', 0.14);
+
+    // Pyramid
+    var pyHeight = h * 0.32;
+    var pyBase = w * 0.25;
+    ctx.strokeStyle = 'rgba(232,199,155,0.7)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - pyHeight);
+    ctx.lineTo(cx - pyBase, cy + pyHeight*0.6);
+    ctx.lineTo(cx + pyBase, cy + pyHeight*0.6);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Subtle inner gradient
+    var g = ctx.createLinearGradient(cx - pyBase, cy + pyHeight*0.6, cx + pyBase, cy - pyHeight);
+    g.addColorStop(0, 'rgba(232,199,155,0.05)');
+    g.addColorStop(0.5, 'rgba(245,230,200,0.12)');
+    g.addColorStop(1, 'rgba(232,199,155,0.05)');
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    // incoming light from left
+    ctx.strokeStyle = 'rgba(245,230,200,0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, cy);
+    ctx.lineTo(cx - pyBase * 0.5, cy);
+    ctx.stroke();
+
+    // refracted spectrum - 5 thin lines
+    var colors = ['rgba(245,200,180,0.6)','rgba(245,225,170,0.6)','rgba(220,245,180,0.6)','rgba(180,220,245,0.6)','rgba(220,180,245,0.6)'];
+    var spread = 36;
+    var startX = cx - pyBase * 0.5;
+    var startY = cy;
+    var pulsePhase = state.phase * 2;
+    for (var i = 0; i < 5; i++) {
+      var p = i / 4;
+      var endX = w;
+      var endY = cy - spread*0.5 + p * spread + Math.sin(pulsePhase + i) * 1.2;
+      ctx.strokeStyle = colors[i];
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+    }
+  }
+
+  // 10. AURA / FIELD PRESENCE - ring with subtle field
+  function r_aura(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.phase = (state.phase || 0) + dt * 0.001;
+
+    var ringR = w * 0.28;
+    var pulse = Math.sin(state.phase * 0.7) * 0.04 + 1;
+
+    // outer field
+    radialGlow(ctx, cx, cy, w*0.5*pulse, '201,169,97', 0.22);
+
+    // shimmer field - dotted concentric
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (var d = 0; d < 80; d++) {
+      var ang = (d / 80) * Math.PI * 2 + state.phase * 0.3;
+      var rr = ringR + Math.sin(d * 0.7 + state.phase * 1.2) * 8;
+      var x = cx + Math.cos(ang) * rr;
+      var y = cy + Math.sin(ang) * rr * 0.85;
+      var twinkle = Math.sin(d + state.phase * 2) * 0.5 + 0.5;
+      ctx.fillStyle = 'rgba(232,199,155,' + (twinkle * 0.4) + ')';
+      ctx.beginPath();
+      ctx.arc(x, y, 0.8, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // bright ring
+    ctx.strokeStyle = 'rgba(245,230,200,0.55)';
+    ctx.lineWidth = 1.6 * pulse;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringR * pulse, 0, Math.PI*2);
+    ctx.stroke();
+
+    // inner ring (thinner)
+    ctx.strokeStyle = 'rgba(201,169,97,0.35)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringR * 0.85, 0, Math.PI*2);
+    ctx.stroke();
+  }
+
+  // 11. MINIMAL SYMBOLIC OBJECT - rotating ring
+  function r_ring(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.rot = (state.rot || 0) + dt * 0.001 * 0.5;
+
+    radialGlow(ctx, cx, cy, w*0.36, '201,169,97', 0.18);
+
+    // 3D ring projection
+    var ringR = w * 0.26;
+    var thickness = 8;
+    var tilt = Math.sin(state.rot) * 0.7;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // perspective: tilt is the "rotation around X axis"
+    // we draw an ellipse with varying width
+    var ellipseRy = ringR * Math.abs(Math.cos(tilt));
+    var thicknessAdj = thickness * (0.5 + Math.abs(Math.sin(tilt)) * 0.7);
+
+    // outer
+    var grad = ctx.createLinearGradient(-ringR, 0, ringR, 0);
+    grad.addColorStop(0, '#a88a4a');
+    grad.addColorStop(0.4, '#f5e6c8');
+    grad.addColorStop(0.6, '#fff8e8');
+    grad.addColorStop(1, '#a88a4a');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = thicknessAdj;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, ringR, ellipseRy, 0, 0, Math.PI*2);
+    ctx.stroke();
+
+    // highlight glint that moves around the ring
+    var glintAng = state.rot * 2 % (Math.PI * 2);
+    var gx = Math.cos(glintAng) * ringR;
+    var gy = Math.sin(glintAng) * ellipseRy;
+    var glintG = ctx.createRadialGradient(gx, gy, 0, gx, gy, 14);
+    glintG.addColorStop(0, 'rgba(255,248,232,0.9)');
+    glintG.addColorStop(1, 'rgba(255,248,232,0)');
+    ctx.fillStyle = glintG;
+    ctx.fillRect(gx - 14, gy - 14, 28, 28);
+
+    ctx.restore();
+  }
+
+  // 12. ENERGY CORE - core with orbital rings
+  function r_core(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2;
+    state.phase = (state.phase || 0) + dt * 0.001;
+    state.orbitals = state.orbitals || initOrbitals(w);
+
+    radialGlow(ctx, cx, cy, w*0.45, '201,169,97', 0.36);
+
+    // 3 orbital rings
+    [w*0.18, w*0.26, w*0.34].forEach(function(r, i){
+      var tilt = (i + 1) * 0.4 + state.phase * 0.2;
+      ctx.strokeStyle = 'rgba(168,138,74,' + (0.35 - i*0.07) + ')';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, r, r * Math.abs(Math.cos(tilt)), tilt * 0.3, 0, Math.PI*2);
+      ctx.stroke();
+    });
+
+    // orbital particles
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    state.orbitals.forEach(function(o){
+      o.angle += o.speed * dt * 0.001;
+      var tilt = (o.ringIdx + 1) * 0.4 + state.phase * 0.2;
+      var rr = [w*0.18, w*0.26, w*0.34][o.ringIdx];
+      var x = cx + Math.cos(o.angle) * rr;
+      var y = cy + Math.sin(o.angle) * rr * Math.abs(Math.cos(tilt));
+      var g = ctx.createRadialGradient(x, y, 0, x, y, 3.5);
+      g.addColorStop(0, 'rgba(245,230,200,0.9)');
+      g.addColorStop(1, 'rgba(245,230,200,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x-3.5, y-3.5, 7, 7);
+    });
+    ctx.restore();
+
+    // bright core
+    var pulse = Math.sin(state.phase * 1.6) * 0.1 + 1;
+    var coreR = w * 0.08 * pulse;
+    var coreG = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 2);
+    coreG.addColorStop(0, '#fff8e8');
+    coreG.addColorStop(0.4, '#f5e6c8');
+    coreG.addColorStop(0.8, 'rgba(201,169,97,0.6)');
+    coreG.addColorStop(1, 'rgba(201,169,97,0)');
+    ctx.fillStyle = coreG;
+    ctx.fillRect(cx - coreR*2, cy - coreR*2, coreR*4, coreR*4);
+  }
+
+  function initOrbitals(w) {
+    var os = [];
+    for (var ring = 0; ring < 3; ring++) {
+      for (var n = 0; n < 3; n++) {
+        os.push({
+          ringIdx: ring,
+          angle: Math.random() * Math.PI * 2,
+          speed: (0.4 + Math.random() * 0.5) * (ring % 2 === 0 ? 1 : -1)
+        });
+      }
+    }
+    return os;
+  }
+
+  // 13. ABSTRACT COMPANION - figure of light, no face
+  function r_companion(ctx, w, h, t, dt, state) {
+    var cx = w/2, cy = h/2 + 8;
+    state.phase = (state.phase || 0) + dt * 0.001 * 0.4;
+
+    var pulse = Math.sin(state.phase * 1.2) * 0.04 + 1;
+
+    radialGlow(ctx, cx, cy - h*0.05, w*0.45, '201,169,97', 0.32);
+
+    // Base/ground glow
+    var groundG = ctx.createRadialGradient(cx, cy + h*0.18, 0, cx, cy + h*0.18, w*0.32);
+    groundG.addColorStop(0, 'rgba(201,169,97,0.4)');
+    groundG.addColorStop(1, 'rgba(201,169,97,0)');
+    ctx.fillStyle = groundG;
+    ctx.fillRect(cx - w*0.32, cy + h*0.05, w*0.64, h*0.26);
+
+    // Figure body - elegant elongated shape (head + flowing body)
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(pulse, pulse);
+
+    // body (flowing shape)
+    var bodyGrad = ctx.createLinearGradient(0, -h*0.22, 0, h*0.18);
+    bodyGrad.addColorStop(0, 'rgba(245,230,200,0.85)');
+    bodyGrad.addColorStop(0.4, 'rgba(232,199,155,0.7)');
+    bodyGrad.addColorStop(0.85, 'rgba(168,138,74,0.5)');
+    bodyGrad.addColorStop(1, 'rgba(168,138,74,0)');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(-12, -h*0.16);
+    ctx.bezierCurveTo(-22, -h*0.05, -28, h*0.05, -22, h*0.18);
+    ctx.lineTo(22, h*0.18);
+    ctx.bezierCurveTo(28, h*0.05, 22, -h*0.05, 12, -h*0.16);
+    ctx.bezierCurveTo(8, -h*0.18, -8, -h*0.18, -12, -h*0.16);
+    ctx.closePath();
+    ctx.fill();
+
+    // outline
+    ctx.strokeStyle = 'rgba(245,230,200,0.45)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-12, -h*0.16);
+    ctx.bezierCurveTo(-22, -h*0.05, -28, h*0.05, -22, h*0.18);
+    ctx.moveTo(12, -h*0.16);
+    ctx.bezierCurveTo(22, -h*0.05, 28, h*0.05, 22, h*0.18);
+    ctx.stroke();
+
+    // head (small smooth oval, no face)
+    var headG = ctx.createRadialGradient(0, -h*0.22, 0, 0, -h*0.22, 14);
+    headG.addColorStop(0, '#fff8e8');
+    headG.addColorStop(0.5, '#f5e6c8');
+    headG.addColorStop(1, 'rgba(232,199,155,0.4)');
+    ctx.fillStyle = headG;
+    ctx.beginPath();
+    ctx.ellipse(0, -h*0.22, 11, 13, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(245,230,200,0.55)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(0, -h*0.22, 11, 13, 0, 0, Math.PI*2);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  /* ============================================================
+     DIRECTIONS — name, description, fit notes, render fn
+     ============================================================ */
+  var DIRECTIONS = [
+    { id:'star', num:'i', tag:'cute', name:'<em>Star</em> Brilli',
+      desc:'A smiley five-point star. Cute and friendly.',
+      voice:'Warm, approachable, <strong>almost playful</strong>. Risks reading childish for a luxury platform.',
+      complexity:'<strong>Low.</strong> Static silhouette + bob + twinkles.',
+      risk:'Hardest to take seriously next to "Intelligence OS." Best for a lifestyle/consumer pivot.',
+      render: r_star },
+    { id:'hybrid', num:'ii', tag:'cute', name:'<em>Hybrid</em> Brilli',
+      desc:'Star with translucent wings and a particle trail. Bridge between cute and magical.',
+      voice:'<strong>Whimsical but lifted.</strong> Keeps the smile but adds flight. Less childish than pure star.',
+      complexity:'<strong>Medium.</strong> Star + wing flap + particle trail.',
+      risk:'Identity feels mixed. Easier to refine into firefly than into pure star.',
+      render: r_hybrid },
+    { id:'firefly', num:'iii', tag:'refined', name:'<em>Firefly</em> Brilli',
+      desc:'The current direction. Insect-like luminous body, two glowing eyes, no smile, gossamer wings, particle trail.',
+      voice:'<strong>Mystical, refined, attentive.</strong> Has personality without being a mascot.',
+      complexity:'<strong>Medium-high.</strong> Wings, eyes, body pulse, particle trail. Already prototyped.',
+      risk:'Insect motif divides taste. Some find it magical, some find it strange.',
+      render: r_firefly },
+    { id:'orb', num:'iv', tag:'refined', name:'Celestial <em>Orb</em>',
+      desc:'A contained sphere with internal swirling sparks. Pure intelligence held in a vessel.',
+      voice:'<strong>Quiet, premium, anticipatory.</strong> No face, just presence. Easiest to take seriously.',
+      complexity:'<strong>Medium.</strong> Internal particle clip + outer glow + pulse.',
+      risk:'Might feel generic next to Siri Glow / Gemini sparkle. Differentiation depends on execution.',
+      render: r_orb },
+    { id:'monogram', num:'v', tag:'refined', name:'Monogram as <em>Entity</em>',
+      desc:'The Brilliance B comes alive. Glowing serif letterform that pulses and catches light.',
+      voice:'<strong>Confident, brand-forward.</strong> The platform IS the wordmark. Strongest brand-recall.',
+      complexity:'<strong>Low-medium.</strong> Static B with shimmer sweep + halo + pulse.',
+      risk:'Cannot show emotion or AI state. "Thinking" mode is just a faster shimmer. Limits Brilli\'s expressive range.',
+      render: r_monogram },
+    { id:'geometric', num:'vi', tag:'geometric', name:'Geometric <em>Forms</em>',
+      desc:'Rotating wireframe polyhedron drawn in fine gold lines. Engineering aesthetic.',
+      voice:'<strong>Precise, structured, technical.</strong> "Built, not born."',
+      complexity:'<strong>Medium.</strong> 3D vertex math + rotating projection. Reuses existing pattern in /portfolio architecture diagrams.',
+      risk:'Cold. Operators looking for warmth may bounce. Better suited to /portfolio than chat landing.',
+      render: r_geometric },
+    { id:'trail', num:'vii', tag:'abstract', name:'Light <em>Signature</em>',
+      desc:'Pure flowing trails of golden light. No body. Intelligence drawn as motion only.',
+      voice:'<strong>Elusive, kinetic, cinematic.</strong> Feels alive without being a being.',
+      complexity:'<strong>Medium.</strong> Procedural curve sweep + per-segment radial gradient.',
+      risk:'Cannot easily indicate state (idle vs thinking) without changing the curve, which may read as restless.',
+      render: r_trail },
+    { id:'constellation', num:'viii', tag:'abstract', name:'<em>Constellation</em>',
+      desc:'Network of connected dots. Pulses of light travel along the edges. The network breathes and evolves.',
+      voice:'<strong>Networked, intelligent, plural.</strong> Suggests "many models, one platform" - matches the multi-model routing pillar.',
+      complexity:'<strong>Medium-high.</strong> Node graph + edge travel + breath. Heaviest of the abstract set.',
+      risk:'Density is hard to scale down. At pin scale (24px) becomes incoherent. Needs separate small-size SVG.',
+      render: r_constellation },
+    { id:'prism', num:'ix', tag:'abstract', name:'<em>Prism</em> Refraction',
+      desc:'A pyramid catches a beam of light and refracts it into a restrained spectrum.',
+      voice:'<strong>Conceptual, intellectual.</strong> Brilliance "refracts" your input into multiple perspectives.',
+      complexity:'<strong>Low.</strong> Static pyramid + fixed beam + 5 spectrum lines with subtle wobble.',
+      risk:'Single visual idea. Doesn\'t breathe. Hard to use in 6 contexts without it feeling repetitive.',
+      render: r_prism },
+    { id:'aura', num:'x', tag:'abstract', name:'Aura / <em>Field</em>',
+      desc:'A bright ring with a shimmering field around it. No body. Felt through presence alone.',
+      voice:'<strong>Atmospheric, ambient, restrained.</strong> The most "background" of all directions.',
+      complexity:'<strong>Low-medium.</strong> Ring + shimmer dots + breath.',
+      risk:'May not draw enough attention in chat hero context. Best as ambient backdrop, not primary AI indicator.',
+      render: r_aura },
+    { id:'ring', num:'xi', tag:'refined', name:'Minimal <em>Ring</em>',
+      desc:'A clean rotating ring object. Catches light. Jewelry-like.',
+      voice:'<strong>Refined, luxurious, elemental.</strong> Most quiet of the refined set.',
+      complexity:'<strong>Low.</strong> 3D ellipse projection + traveling glint.',
+      risk:'Risks reading as "loading spinner" when it rotates. Only safe if rotation is very slow.',
+      render: r_ring },
+    { id:'core', num:'xii', tag:'refined', name:'Energy <em>Core</em>',
+      desc:'A bright core surrounded by orbital rings with traveling particles. Solar-system of intelligence.',
+      voice:'<strong>Powerful, contained, alive.</strong> "There is a system here."',
+      complexity:'<strong>Medium-high.</strong> 3 orbital ellipses + per-orbital particles + core pulse.',
+      risk:'Busy. May feel scientific where Brilliance wants to feel intuitive.',
+      render: r_core },
+    { id:'companion', num:'xiii', tag:'abstract', name:'Abstract <em>Companion</em>',
+      desc:'A figure of light. Faceless, formless, present. Like a meditating silhouette made of gold energy.',
+      voice:'<strong>Intimate, dignified, almost spiritual.</strong> Suggests "Brilliance is with you" without being a mascot.',
+      complexity:'<strong>Medium.</strong> Bezier silhouette + pulse + glow + ground halo.',
+      risk:'Easy to fall into "ghost" or "spirit guide" territory. Form must read as elegant minimalist, not new-age.',
+      render: r_companion }
+  ];
+
+  /* ============================================================
+     RENDER LOOP for tile canvases
+     ============================================================ */
+  function mountTile(direction, sizeOverride) {
+    var canvas = document.createElement('canvas');
+    var size = sizeOverride || 180;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    var state = { particles: [] };
+    var lastT = performance.now();
+    var instance = {
+      canvas: canvas, ctx: ctx, state: state, dir: direction,
+      size: size, lastT: lastT, paused: false,
+      sizeOverride: sizeOverride
+    };
+    instances.push(instance);
+    return instance;
+  }
+
+  function tick(t) {
+    instances.forEach(function(inst){
+      if (inst.paused) return;
+      var dt = t - inst.lastT;
+      inst.lastT = t;
+      if (dt > 100) dt = 16;
+      inst.ctx.clearRect(0, 0, inst.size, inst.size);
+      try {
+        inst.dir.render(inst.ctx, inst.size, inst.size, t, dt, inst.state);
+      } catch(e){ /* swallow */ }
+    });
+    rafId = requestAnimationFrame(tick);
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    instances.forEach(function(i){ i.paused = document.hidden; if (!i.paused) i.lastT = performance.now(); });
+  });
+
+  /* ============================================================
+     Render the grid
+     ============================================================ */
+  var grid = document.getElementById('grid');
+  DIRECTIONS.forEach(function(d, idx){
+    var tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.dataset.dir = d.id;
+
+    var num = document.createElement('p');
+    num.className = 'tile-num';
+    num.textContent = d.num + '.';
+    tile.appendChild(num);
+
+    var canvasWrap = document.createElement('div');
+    canvasWrap.className = 'tile-canvas-wrap';
+    tile.appendChild(canvasWrap);
+
+    var name = document.createElement('h3');
+    name.className = 'tile-name';
+    name.innerHTML = d.name;
+    tile.appendChild(name);
+
+    var desc = document.createElement('p');
+    desc.className = 'tile-desc';
+    desc.textContent = d.desc;
+    tile.appendChild(desc);
+
+    var tag = document.createElement('span');
+    tag.className = 'tile-tag ' + d.tag;
+    tag.textContent = d.tag;
+    tile.appendChild(tag);
+
+    grid.appendChild(tile);
+
+    var inst = mountTile(d, 180);
+    canvasWrap.appendChild(inst.canvas);
+
+    tile.addEventListener('click', function(){ openModal(d); });
+  });
+
+  rafId = requestAnimationFrame(tick);
+
+  /* ============================================================
+     Modal
+     ============================================================ */
+  var modal = document.getElementById('modal');
+  var modalCanvas = document.getElementById('modalCanvas');
+  var modalCtx = modalCanvas.getContext('2d');
+  var modalDpr = Math.min(window.devicePixelRatio || 1, 2);
+  var modalSize = 380;
+  modalCanvas.width = modalSize * modalDpr;
+  modalCanvas.height = modalSize * modalDpr;
+  modalCanvas.style.width = modalSize + 'px';
+  modalCanvas.style.height = modalSize + 'px';
+  modalCtx.scale(modalDpr, modalDpr);
+
+  var modalState = { particles: [] };
+  var modalDir = null;
+  var modalLastT = performance.now();
+  var modalRaf = null;
+
+  function modalTick(t) {
+    if (!modalDir) return;
+    var dt = t - modalLastT;
+    modalLastT = t;
+    if (dt > 100) dt = 16;
+    modalCtx.clearRect(0, 0, modalSize, modalSize);
+    try { modalDir.render(modalCtx, modalSize, modalSize, t, dt, modalState); } catch(e){}
+    modalRaf = requestAnimationFrame(modalTick);
+  }
+
+  function openModal(d) {
+    modalDir = d;
+    modalState = { particles: [] };
+    modalLastT = performance.now();
+    document.getElementById('modalNum').textContent = d.num + '.';
+    document.getElementById('modalName').innerHTML = d.name;
+    document.getElementById('modalDesc').textContent = d.desc;
+    document.getElementById('modalVoice').innerHTML = d.voice;
+    document.getElementById('modalComplexity').innerHTML = d.complexity;
+    document.getElementById('modalRisk').textContent = d.risk;
+    modal.classList.add('open');
+    if (!modalRaf) modalRaf = requestAnimationFrame(modalTick);
+  }
+
+  function closeModal() {
+    modal.classList.remove('open');
+    modalDir = null;
+    if (modalRaf) cancelAnimationFrame(modalRaf);
+    modalRaf = null;
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', function(e){
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+
+})();
+</script>
+
+</body>
+</html>
