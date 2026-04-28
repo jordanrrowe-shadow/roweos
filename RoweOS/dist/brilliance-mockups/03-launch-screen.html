@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Brilliance Launch Screen Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --b-bg:#0a0a0a; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+}
+html,body{
+  height:100%;background:var(--b-bg);color:var(--b-text);
+  font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;
+  overflow:hidden;
+}
+.launch{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 38%,rgba(201,169,97,0.10),var(--b-bg) 60%);
+  isolation:isolate;
+}
+.launch::before{
+  content:'';position:absolute;
+  top:38%;left:50%;
+  width:780px;height:780px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,169,97,0.14),transparent 60%);
+  filter:blur(70px);
+  transform:translate(-50%,-50%);
+  z-index:-1;
+  animation:drift 18s ease-in-out infinite;
+}
+@keyframes drift{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(calc(-50% + 30px),calc(-50% - 20px))}}
+
+.launch-brilli{
+  width:280px;height:280px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:48px;
+}
+.launch-wordmark{
+  font-family:'Old Standard TT',serif;
+  font-weight:400;
+  font-size:clamp(56px,9vw,108px);
+  line-height:1;
+  letter-spacing:-0.015em;
+  margin-bottom:14px;
+  background:linear-gradient(135deg,var(--gold-1),var(--gold-2) 50%,var(--gold-3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  opacity:0;animation:fadeUp 1s ease-out 1.4s forwards;
+}
+.launch-os{
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:500;
+  letter-spacing:0.36em;text-transform:uppercase;
+  color:var(--gold-3);
+  margin-bottom:18px;
+  opacity:0;animation:fadeUp 800ms ease-out 1.7s forwards;
+}
+.launch-rule{
+  width:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-4),transparent);
+  margin:0 auto 18px;
+  animation:rule 1s ease-out 2s forwards;
+}
+@keyframes rule{from{width:0}to{width:160px}}
+.launch-by{
+  font-family:'DM Sans',sans-serif;
+  font-size:11px;font-weight:400;
+  letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--b-text-dim);
+  opacity:0;animation:fadeUp 800ms ease-out 2.2s forwards;
+}
+.launch-by strong{color:var(--gold-3);font-weight:500}
+
+.launch-loader{
+  position:absolute;
+  bottom:48px;left:50%;
+  transform:translateX(-50%);
+  display:flex;align-items:center;gap:14px;
+  font-family:'DM Sans',sans-serif;
+  font-size:10px;letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--b-text-dim);
+  opacity:0;animation:fadeUp 800ms ease-out 2.6s forwards;
+}
+.launch-loader::before{
+  content:'';
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gold-3);
+  box-shadow:0 0 8px var(--gold-3);
+  animation:pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:0.4;transform:scale(0.85)}50%{opacity:1;transform:scale(1.1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.label{
+  position:fixed;top:16px;left:16px;z-index:10;
+  font-family:'DM Sans',sans-serif;font-size:10px;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--b-text-dim);
+  background:rgba(0,0,0,0.5);padding:8px 14px;border-radius:2px;
+  border:1px solid rgba(255,255,255,0.05);
+}
+</style>
+</head>
+<body>
+
+<div class="label">Mockup &middot; Launch Screen &middot; v33.0</div>
+
+<div class="launch">
+  <div class="launch-brilli"><canvas id="launchBrilli" width="280" height="280" aria-label="Brilli"></canvas></div>
+  <h1 class="launch-wordmark">Brilliance</h1>
+  <p class="launch-os">Intelligence OS</p>
+  <div class="launch-rule" aria-hidden="true"></div>
+  <p class="launch-by">by <strong>RoweOS</strong></p>
+  <div class="launch-loader">Loading your platform</div>
+</div>
+
+<script>
+/* Same Brilli renderer as welcome modal, sized for launch */
+(function(){
+  var c = document.getElementById('launchBrilli');
+  var ctx = c.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c.width = 280 * dpr; c.height = 280 * dpr; ctx.scale(dpr, dpr);
+
+  var phase = 0, bodyPhase = 0, particles = [], spawn = 0;
+  var lastT = performance.now();
+  var fadeIn = 0;
+
+  function spawnP() {
+    if (particles.length >= 24) return;
+    particles.push({
+      x: 140 + (Math.random() - 0.5) * 30,
+      y: 175 + Math.random() * 14,
+      vx: (Math.random() - 0.7) * 0.5,
+      vy: 0.05 + Math.random() * 0.18,
+      life: 0,
+      maxLife: 1500 + Math.random() * 1800,
+      size: 1.0 + Math.random() * 1.5
+    });
+  }
+
+  function tick(t) {
+    var dt = t - lastT; lastT = t; if (dt > 100) dt = 16;
+    fadeIn = Math.min(1, fadeIn + dt / 1400);
+    phase += dt * 0.001 * 2 * Math.PI * 2;
+    bodyPhase += dt * 0.001 * Math.PI * 0.6;
+    spawn += dt;
+    while (spawn > (200 / fadeIn)) { spawnP(); spawn -= 200; }
+
+    ctx.clearRect(0,0,280,280);
+    ctx.globalAlpha = fadeIn;
+
+    var x = 140, y = 145;
+
+    // outer body glow
+    var gradGlow = ctx.createRadialGradient(x, y, 0, x, y, 120);
+    gradGlow.addColorStop(0, 'rgba(201,169,97,' + (0.42 * fadeIn) + ')');
+    gradGlow.addColorStop(0.4, 'rgba(201,169,97,' + (0.16 * fadeIn) + ')');
+    gradGlow.addColorStop(1, 'rgba(201,169,97,0)');
+    ctx.fillStyle = gradGlow;
+    ctx.fillRect(0, 30, 280, 250);
+
+    // wings
+    var wingScaleY = Math.cos(phase) * 0.45 + 0.55;
+    drawWing(x - 18, y - 12, -1, 70, 42, wingScaleY, 0.32);
+    drawWing(x + 18, y - 12, 1, 70, 42, wingScaleY, 0.32);
+
+    // body
+    var pulse = 1 + Math.sin(bodyPhase) * 0.04;
+    var bodyGrad = ctx.createRadialGradient(x, y - 6, 0, x, y, 38);
+    bodyGrad.addColorStop(0, '#fff8e8');
+    bodyGrad.addColorStop(0.3, '#f5e6c8');
+    bodyGrad.addColorStop(0.7, '#c9a961');
+    bodyGrad.addColorStop(1, 'rgba(168,138,74,0)');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 25 * pulse, 36 * pulse, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#f5e6c8';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 25 * pulse, 36 * pulse, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // head
+    var hx = 140, hy = 90, hr = 25;
+    ctx.strokeStyle = '#e2c79b';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(hx, hy, hr, 0, Math.PI * 2);
+    ctx.stroke();
+
+    drawEye(hx - 9, hy + 2, 6.5, 6.8);
+    drawEye(hx + 8, hy + 2, 6, 6.4);
+
+    drawAntenna(hx - 12, hy - 14, -1, 30);
+    drawAntenna(hx + 10, hy - 16, 1, 30);
+
+    // particles
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      p.life += dt;
+      if (p.life >= p.maxLife) { particles.splice(i, 1); continue; }
+      p.x += p.vx; p.y += p.vy;
+      var alpha = (1 - p.life / p.maxLife) * 0.85 * fadeIn;
+      ctx.fillStyle = 'rgba(245,230,200,' + alpha + ')';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+
+    requestAnimationFrame(tick);
+  }
+
+  function drawWing(x, y, dir, w, h, scaleY, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(dir * 0.45);
+    ctx.scale(dir, scaleY);
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < 3; i++) {
+      ctx.fillStyle = 'rgba(232,199,155,' + (alpha * (1 - i * 0.25)) + ')';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.4, 0, w * (1 - i * 0.04), h * (1 - i * 0.04), 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawEye(x, y, w, h) {
+    var grad = ctx.createRadialGradient(x - w * 0.2, y - h * 0.2, 0, x, y, w * 1.2);
+    grad.addColorStop(0, '#fff9e8');
+    grad.addColorStop(0.6, '#f5e6c8');
+    grad.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawAntenna(bx, by, dir, len) {
+    ctx.strokeStyle = '#e2c79b';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    var ex = bx + dir * len * 0.55;
+    var ey = by - len * 1.1;
+    ctx.quadraticCurveTo(bx + dir * len * 0.5, by - len * 0.7, ex, ey);
+    ctx.stroke();
+    var grad = ctx.createRadialGradient(ex, ey, 0, ex, ey, 6);
+    grad.addColorStop(0, '#fff9e8');
+    grad.addColorStop(0.6, '#f5e6c8');
+    grad.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(ex - 6, ey - 6, 12, 12);
+  }
+
+  requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>

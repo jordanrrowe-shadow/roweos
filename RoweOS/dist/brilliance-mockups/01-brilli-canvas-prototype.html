@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Brilli Canvas Prototype - Brilliance v33</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-hairline:rgba(255,255,255,0.06);
+}
+html,body{height:100%;background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;line-height:1.65}
+body{display:grid;grid-template-rows:auto 1fr auto;min-height:100vh}
+header{padding:24px 28px;border-bottom:1px solid var(--b-hairline);display:flex;align-items:center;justify-content:space-between}
+header .lockup{font-family:'Old Standard TT',serif;font-size:18px;color:var(--gold-2)}
+header .lockup small{font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--b-text-dim);margin-left:10px}
+header nav{display:flex;gap:16px}
+header nav a{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-muted);text-decoration:none}
+header nav a:hover{color:var(--gold-2)}
+main{display:grid;grid-template-columns:1fr 320px;gap:0;min-height:0}
+.stage{position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(201,169,97,0.05),var(--b-bg) 60%);overflow:hidden}
+.stage-inner{display:flex;flex-direction:column;align-items:center;gap:24px}
+.stage canvas{display:block;background:transparent}
+.stage-label{font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);text-align:center}
+.stage-mode{font-family:'Old Standard TT',serif;font-style:italic;color:var(--b-text);font-size:14px;text-align:center}
+aside{background:var(--b-bg-deep);border-left:1px solid var(--b-hairline);padding:32px 28px;overflow-y:auto}
+aside h2{font-family:'Old Standard TT',serif;font-weight:400;font-size:22px;margin-bottom:8px;color:var(--b-text)}
+aside .sub{font-size:12px;color:var(--b-text-muted);margin-bottom:28px;line-height:1.7}
+aside h3{font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);margin:24px 0 12px;font-weight:500}
+.ctrl-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.ctrl-btn{padding:10px 8px;background:transparent;border:1px solid var(--b-hairline);color:var(--b-text-muted);font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:all 0.25s;font-weight:500}
+.ctrl-btn:hover{border-color:rgba(201,169,97,0.3);color:var(--gold-2)}
+.ctrl-btn.active{background:rgba(201,169,97,0.08);border-color:var(--gold-4);color:var(--gold-1)}
+.metric{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--b-hairline);font-size:12px}
+.metric:last-child{border-bottom:none}
+.metric span:first-child{color:var(--b-text-muted)}
+.metric span:last-child{color:var(--gold-2);font-family:'DM Sans',monospace;font-variant-numeric:tabular-nums}
+footer{padding:18px 28px;border-top:1px solid var(--b-hairline);font-size:11px;color:var(--b-text-dim);text-align:center;letter-spacing:0.06em}
+@media (max-width:760px){
+  main{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  aside{border-left:none;border-top:1px solid var(--b-hairline);max-height:50vh}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="lockup">Brilliance <small>by RoweOS</small></div>
+  <nav>
+    <a href="00-index.html">Mockups Index</a>
+  </nav>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="stage-inner">
+      <canvas id="brilliCanvas" width="560" height="560" aria-label="Brilli, the Brilliance AI"></canvas>
+      <div class="stage-label" id="stageMode">Idle</div>
+      <div class="stage-mode" id="stageDesc">Brilli is awake and present.</div>
+    </div>
+  </section>
+
+  <aside>
+    <h2>Brilli</h2>
+    <p class="sub">The intelligence behind the platform, given form. This is a Canvas 2D procedural prototype matching the spec in <em>05-brilli-animation.md</em>.</p>
+
+    <h3>State</h3>
+    <div class="ctrl-group" id="modeButtons">
+      <button class="ctrl-btn active" data-mode="idle">Idle</button>
+      <button class="ctrl-btn" data-mode="attending">Attending</button>
+      <button class="ctrl-btn" data-mode="thinking">Thinking</button>
+      <button class="ctrl-btn" data-mode="delivering">Delivering</button>
+      <button class="ctrl-btn" data-mode="pleased">Pleased</button>
+      <button class="ctrl-btn" data-mode="asleep">Asleep</button>
+    </div>
+
+    <h3>Size</h3>
+    <div class="ctrl-group" id="sizeButtons">
+      <button class="ctrl-btn active" data-size="hero">Hero (560)</button>
+      <button class="ctrl-btn" data-size="inline">Inline (220)</button>
+      <button class="ctrl-btn" data-size="pin">Pin (96)</button>
+    </div>
+
+    <h3>Performance</h3>
+    <div class="metric"><span>FPS</span><span id="metricFps">--</span></div>
+    <div class="metric"><span>Frame ms</span><span id="metricMs">--</span></div>
+    <div class="metric"><span>Particles</span><span id="metricParticles">--</span></div>
+    <div class="metric"><span>Wing phase</span><span id="metricPhase">--</span></div>
+    <div class="metric"><span>DPR</span><span id="metricDpr">--</span></div>
+
+    <h3>Notes</h3>
+    <p class="sub">Visibility is gated: switch tabs and Brilli pauses cleanly. Reduced-motion fallback is active when system preference is set.</p>
+  </aside>
+</main>
+
+<footer>
+  Mockup &middot; Canvas 2D procedural &middot; ES5 module pattern &middot; ~10KB target
+</footer>
+
+<script>
+/* ============================================================
+   Brilli prototype
+   Canvas 2D procedural firefly + particles
+   Mirrors the production module shape from docs/brilliance/05-brilli-animation.md
+   ============================================================ */
+(function(){
+
+  var canvas = document.getElementById('brilliCanvas');
+  var ctx = canvas.getContext('2d');
+
+  var CONFIG = {
+    GOLD_1: '#f5e6c8',
+    GOLD_2: '#e2c79b',
+    GOLD_3: '#c9a961',
+    GOLD_4: '#a88a4a',
+    GOLD_GLOW: 'rgba(201,169,97,0.22)'
+  };
+
+  var state = {
+    mode: 'idle',
+    size: 'hero',
+    pixelSize: 560,
+    bodyW: 70,
+    bodyH: 95,
+    particles: [],
+    particleCap: 30,
+    wingPhase: 0,
+    bodyPhase: 0,
+    pleasedFlashAt: 0,
+    centerX: 280,
+    centerY: 280,
+    headOffset: -110,
+    eyeBlink: 0,
+    breath: 0,
+    spawnAccum: 0,
+    fpsSamples: [],
+    lastFrameT: performance.now(),
+    paused: false
+  };
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  document.getElementById('metricDpr').textContent = dpr.toFixed(1);
+
+  function resizeCanvas() {
+    var rect = canvas.getBoundingClientRect();
+    var w = state.pixelSize;
+    var h = state.pixelSize;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+    state.centerX = w / 2;
+    state.centerY = h / 2;
+    if (state.size === 'hero') {
+      state.bodyW = 70; state.bodyH = 95; state.headOffset = -110;
+    } else if (state.size === 'inline') {
+      state.bodyW = 28; state.bodyH = 38; state.headOffset = -44;
+    } else { /* pin */
+      state.bodyW = 12; state.bodyH = 16; state.headOffset = -19;
+    }
+  }
+
+  /* ---------- Drawing ---------- */
+  function drawBody() {
+    var x = state.centerX;
+    var y = state.centerY + state.bodyH * 0.2;
+    var bw = state.bodyW;
+    var bh = state.bodyH;
+
+    // outer glow
+    var gradGlow = ctx.createRadialGradient(x, y, 0, x, y, bw * 3);
+    gradGlow.addColorStop(0, 'rgba(201,169,97,0.45)');
+    gradGlow.addColorStop(0.4, 'rgba(201,169,97,0.18)');
+    gradGlow.addColorStop(1, 'rgba(201,169,97,0)');
+    ctx.fillStyle = gradGlow;
+    ctx.fillRect(x - bw * 3, y - bw * 3, bw * 6, bw * 6);
+
+    // body teardrop
+    var pulse = 1 + Math.sin(state.bodyPhase) * 0.04;
+    if (state.mode === 'pleased' && performance.now() - state.pleasedFlashAt < 500) {
+      pulse = 1.1 + (1 - (performance.now() - state.pleasedFlashAt) / 500) * 0.15;
+    }
+    var bodyGrad = ctx.createRadialGradient(x, y - bh * 0.2, 0, x, y, bw * pulse * 1.2);
+    bodyGrad.addColorStop(0, '#fff8e8');
+    bodyGrad.addColorStop(0.3, CONFIG.GOLD_1);
+    bodyGrad.addColorStop(0.7, CONFIG.GOLD_3);
+    bodyGrad.addColorStop(1, 'rgba(168,138,74,0)');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, bw * pulse, bh * pulse, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // body outline
+    ctx.strokeStyle = CONFIG.GOLD_1;
+    ctx.lineWidth = state.size === 'hero' ? 1.4 : (state.size === 'inline' ? 1 : 0.6);
+    ctx.beginPath();
+    ctx.ellipse(x, y, bw * pulse, bh * pulse, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  function drawHead() {
+    var x = state.centerX;
+    var y = state.centerY + state.headOffset;
+    var headR = state.size === 'hero' ? 50 : (state.size === 'inline' ? 20 : 9);
+
+    // head glow
+    var glow = ctx.createRadialGradient(x, y, 0, x, y, headR * 2.4);
+    glow.addColorStop(0, 'rgba(245,230,200,0.30)');
+    glow.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(x - headR * 2.4, y - headR * 2.4, headR * 4.8, headR * 4.8);
+
+    // head outline (open ring)
+    ctx.strokeStyle = CONFIG.GOLD_2;
+    ctx.lineWidth = state.size === 'hero' ? 1.6 : (state.size === 'inline' ? 1.1 : 0.8);
+    ctx.beginPath();
+    ctx.arc(x, y, headR, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // eyes
+    var eyeR = headR * 0.32;
+    var eyeOffset = headR * 0.42;
+    var eyeY = y + headR * 0.05;
+    drawEye(x - eyeOffset, eyeY, eyeR, eyeR * 1.05);
+    drawEye(x + eyeOffset * 0.9, eyeY, eyeR * 0.92, eyeR * 0.95);
+
+    // antennae (curved Bezier)
+    var antLen = headR * 1.4;
+    var antSway = state.mode === 'attending' ? -0.2 : (Math.sin(state.bodyPhase * 0.5) * 0.1);
+    drawAntenna(x - headR * 0.5, y - headR * 0.6, -1, antLen, antSway);
+    drawAntenna(x + headR * 0.4, y - headR * 0.7, 1, antLen, antSway);
+  }
+
+  function drawEye(x, y, w, h) {
+    if (state.eyeBlink > 0.7) {
+      // closed: line
+      ctx.strokeStyle = CONFIG.GOLD_2;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x - w * 0.6, y);
+      ctx.lineTo(x + w * 0.6, y);
+      ctx.stroke();
+      return;
+    }
+    var grad = ctx.createRadialGradient(x - w * 0.2, y - h * 0.2, 0, x, y, w * 1.2);
+    grad.addColorStop(0, '#fff9e8');
+    grad.addColorStop(0.6, CONFIG.GOLD_1);
+    grad.addColorStop(1, 'rgba(245,230,200,0.0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawAntenna(baseX, baseY, dir, len, sway) {
+    var ctrlX = baseX + dir * len * 0.5;
+    var ctrlY = baseY - len * 0.7 + Math.sin(sway) * 6;
+    var endX = baseX + dir * len * 0.55 + Math.sin(sway) * 4;
+    var endY = baseY - len * 1.1 + Math.cos(sway) * 4;
+
+    ctx.strokeStyle = CONFIG.GOLD_2;
+    ctx.lineWidth = state.size === 'hero' ? 1.3 : (state.size === 'inline' ? 0.9 : 0.7);
+    ctx.beginPath();
+    ctx.moveTo(baseX, baseY);
+    ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+    ctx.stroke();
+
+    // tip orb
+    var orbR = state.size === 'hero' ? 5 : (state.size === 'inline' ? 2.4 : 1.4);
+    var orbGrad = ctx.createRadialGradient(endX, endY, 0, endX, endY, orbR * 2);
+    orbGrad.addColorStop(0, '#fff9e8');
+    orbGrad.addColorStop(0.5, CONFIG.GOLD_1);
+    orbGrad.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = orbGrad;
+    ctx.fillRect(endX - orbR * 2, endY - orbR * 2, orbR * 4, orbR * 4);
+  }
+
+  function drawWings() {
+    var x = state.centerX;
+    var y = state.centerY - state.bodyH * 0.1;
+    var bw = state.bodyW;
+    var wingFlap = Math.sin(state.wingPhase);
+    var wingScaleY = Math.cos(state.wingPhase) * 0.45 + 0.55;
+
+    drawWingPair(x - bw * 0.5, y, -1, bw * 2.6, bw * 1.6, wingScaleY, wingFlap, 0.34);
+    drawWingPair(x + bw * 0.5, y, 1, bw * 2.6, bw * 1.6, wingScaleY, wingFlap, 0.34);
+    drawWingPair(x - bw * 0.4, y + bh(0.4), -1, bw * 1.9, bw * 1.0, wingScaleY * 0.85, wingFlap, 0.26);
+    drawWingPair(x + bw * 0.4, y + bh(0.4), 1, bw * 1.9, bw * 1.0, wingScaleY * 0.85, wingFlap, 0.26);
+  }
+
+  function bh(mult) { return state.bodyH * mult; }
+
+  function drawWingPair(x, y, dir, w, h, scaleY, flap, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(dir * 0.5 + flap * 0.08);
+    ctx.scale(dir, scaleY);
+    ctx.globalCompositeOperation = 'lighter';
+
+    // 3 stacked translucent ellipses for gossamer effect
+    for (var i = 0; i < 3; i++) {
+      var a = alpha * (1 - i * 0.25);
+      ctx.fillStyle = 'rgba(232,199,155,' + a + ')';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.4, 0, w * (1 - i * 0.04), h * (1 - i * 0.04), 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // wing veins
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = 'rgba(232,199,155,0.45)';
+    ctx.lineWidth = state.size === 'hero' ? 0.6 : (state.size === 'inline' ? 0.4 : 0.3);
+    for (var v = 0; v < 5; v++) {
+      var startX = w * 0.05;
+      var startY = -h * 0.3 + v * (h * 0.15);
+      var endX = w * 0.85;
+      var endY = -h * 0.4 + v * (h * 0.2);
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.quadraticCurveTo(w * 0.5, startY * 0.4 + endY * 0.6, endX, endY);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  function spawnParticle() {
+    if (state.particles.length >= state.particleCap) return;
+    var bw = state.bodyW;
+    var bh = state.bodyH;
+    state.particles.push({
+      x: state.centerX + (Math.random() - 0.5) * bw * 0.6,
+      y: state.centerY + bh * 1.0 + Math.random() * bh * 0.3,
+      vx: (Math.random() - 0.7) * 0.6,
+      vy: 0.05 + Math.random() * 0.2,
+      life: 0,
+      maxLife: 1500 + Math.random() * 1800,
+      size: state.size === 'hero' ? (1.2 + Math.random() * 1.6) : (state.size === 'inline' ? (0.8 + Math.random() * 1) : (0.4 + Math.random() * 0.5))
+    });
+  }
+
+  function drawParticles(dt) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = state.particles.length - 1; i >= 0; i--) {
+      var p = state.particles[i];
+      p.life += dt;
+      if (p.life >= p.maxLife) { state.particles.splice(i, 1); continue; }
+      p.x += p.vx;
+      p.y += p.vy;
+      var lifePct = p.life / p.maxLife;
+      var alpha = (1 - lifePct) * 0.85;
+      ctx.fillStyle = 'rgba(245,230,200,' + alpha + ')';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* ---------- Loop ---------- */
+  function tick(t) {
+    if (state.paused) return;
+    var dt = t - state.lastFrameT;
+    state.lastFrameT = t;
+    if (dt > 100) dt = 16; // tab return guard
+
+    // FPS metric
+    state.fpsSamples.push(dt);
+    if (state.fpsSamples.length > 60) state.fpsSamples.shift();
+
+    updateMetrics(dt);
+    updatePhases(dt);
+    updateSpawn(dt);
+
+    // clear
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+
+    if (state.mode !== 'asleep') {
+      drawWings();
+      drawBody();
+      drawHead();
+      drawParticles(dt);
+    } else {
+      // asleep: dim body, eyes closed
+      drawBody();
+      state.eyeBlink = 1;
+      drawHead();
+      state.eyeBlink = 0;
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  function updatePhases(dt) {
+    var wingHz = { idle: 2, attending: 2.4, thinking: 5, delivering: 3, pleased: 4, asleep: 0 }[state.mode] || 2;
+    state.wingPhase += dt * 0.001 * wingHz * Math.PI * 2;
+    state.bodyPhase += dt * 0.001 * Math.PI * 0.6;
+
+    // Pleased flash decay
+    if (state.mode === 'pleased' && performance.now() - state.pleasedFlashAt > 800) {
+      setMode('idle');
+    }
+  }
+
+  function updateSpawn(dt) {
+    var rate = { idle: 200, attending: 150, thinking: 50, delivering: 100, pleased: 30, asleep: Infinity }[state.mode] || 200;
+    state.spawnAccum += dt;
+    while (state.spawnAccum > rate) {
+      spawnParticle();
+      state.spawnAccum -= rate;
+    }
+  }
+
+  function updateMetrics(dt) {
+    var avg = state.fpsSamples.reduce(function(a,b){return a+b;}, 0) / state.fpsSamples.length;
+    document.getElementById('metricFps').textContent = (1000 / avg).toFixed(0);
+    document.getElementById('metricMs').textContent = avg.toFixed(1);
+    document.getElementById('metricParticles').textContent = state.particles.length;
+    document.getElementById('metricPhase').textContent = (state.wingPhase % (Math.PI * 2)).toFixed(2);
+  }
+
+  /* ---------- State Control ---------- */
+  function setMode(m) {
+    state.mode = m;
+    state.particleCap = { idle: 12, attending: 14, thinking: 30, delivering: 22, pleased: 40, asleep: 0 }[m] || 12;
+    if (m === 'pleased') {
+      state.pleasedFlashAt = performance.now();
+      // burst particles
+      for (var i = 0; i < 15; i++) spawnParticle();
+    }
+    document.getElementById('stageMode').textContent = m.charAt(0).toUpperCase() + m.slice(1);
+    document.getElementById('stageDesc').textContent = {
+      idle: 'Brilli is awake and present.',
+      attending: 'Brilli is paying attention.',
+      thinking: 'Brilli is processing your request.',
+      delivering: 'Brilli is responding.',
+      pleased: 'Brilli is satisfied.',
+      asleep: 'Brilli is resting.'
+    }[m];
+    document.querySelectorAll('#modeButtons .ctrl-btn').forEach(function(b){
+      b.classList.toggle('active', b.dataset.mode === m);
+    });
+  }
+
+  function setSize(s) {
+    state.size = s;
+    state.pixelSize = { hero: 560, inline: 220, pin: 96 }[s];
+    resizeCanvas();
+    document.querySelectorAll('#sizeButtons .ctrl-btn').forEach(function(b){
+      b.classList.toggle('active', b.dataset.size === s);
+    });
+  }
+
+  /* ---------- Wire Up ---------- */
+  document.querySelectorAll('#modeButtons .ctrl-btn').forEach(function(b){
+    b.addEventListener('click', function(){ setMode(b.dataset.mode); });
+  });
+  document.querySelectorAll('#sizeButtons .ctrl-btn').forEach(function(b){
+    b.addEventListener('click', function(){ setSize(b.dataset.size); });
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    state.paused = document.hidden;
+    if (!state.paused) { state.lastFrameT = performance.now(); requestAnimationFrame(tick); }
+  });
+
+  // reduced motion respected
+  var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (rm && rm.matches) {
+    // static render only
+    resizeCanvas();
+    drawBody();
+    drawHead();
+    drawWings();
+    document.getElementById('stageDesc').textContent = 'Brilli (reduced-motion fallback).';
+    return;
+  }
+
+  resizeCanvas();
+  setMode('idle');
+  setSize('hero');
+  requestAnimationFrame(tick);
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sidebar Rebrand Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.04);
+  --brand-accent:#a89878;
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;min-height:100vh}
+.app{display:grid;grid-template-columns:64px 1fr;min-height:100vh}
+.app.expanded{grid-template-columns:220px 1fr}
+
+/* Sidebar */
+.sidebar{
+  background:rgba(8,8,8,0.92);
+  backdrop-filter:blur(28px);
+  border-right:1px solid var(--b-hairline);
+  display:flex;flex-direction:column;
+  padding:18px 0 0;
+  position:sticky;top:0;height:100vh;
+  transition:width 0.3s ease;
+  overflow:hidden;
+}
+.sidebar-header{
+  padding:0 14px 18px;
+  border-bottom:1px solid var(--b-hairline);
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:18px;
+  position:relative;
+}
+.sidebar-mark{
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  border-radius:8px;
+  background:radial-gradient(circle,rgba(201,169,97,0.15),transparent 70%);
+}
+.sidebar-mark img{width:32px;height:32px;border-radius:8px;object-fit:contain;display:block}
+.sidebar-name{
+  font-family:'Old Standard TT',serif;
+  font-size:18px;color:var(--gold-2);
+  letter-spacing:0.01em;
+  white-space:nowrap;
+  opacity:0;transition:opacity 0.25s;
+  display:none;
+}
+.app.expanded .sidebar-name{opacity:1;display:block}
+
+.sidebar-nav{flex:1;padding:0 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;overflow-x:hidden}
+.sidebar-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;
+  border-radius:6px;color:var(--b-text-muted);
+  cursor:pointer;text-decoration:none;
+  transition:all 0.2s;font-size:13px;
+  white-space:nowrap;
+}
+.sidebar-item:hover{background:rgba(255,255,255,0.04);color:var(--b-text)}
+.sidebar-item.active{background:rgba(201,169,97,0.10);color:var(--gold-2)}
+.sidebar-item svg{width:18px;height:18px;flex-shrink:0}
+.sidebar-item-label{opacity:0;transition:opacity 0.25s;display:none}
+.app.expanded .sidebar-item-label{opacity:1;display:inline}
+
+.sidebar-footer{
+  padding:14px;
+  border-top:1px solid var(--b-hairline);
+  margin-top:auto;
+}
+.footer-lockup{
+  display:flex;align-items:center;gap:10px;
+  position:relative;
+}
+.footer-status{
+  width:8px;height:8px;border-radius:50%;
+  background:radial-gradient(circle,var(--gold-1),var(--gold-3));
+  box-shadow:0 0 6px rgba(201,169,97,0.55);
+  flex-shrink:0;
+  animation:statusPulse 3s ease-in-out infinite;
+}
+@keyframes statusPulse{0%,100%{opacity:0.6;transform:scale(0.95)}50%{opacity:1;transform:scale(1.05)}}
+.footer-text{
+  font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--b-text-dim);line-height:1.4;
+  white-space:nowrap;
+  opacity:0;transition:opacity 0.25s;display:none;
+}
+.app.expanded .footer-text{opacity:1;display:block}
+.footer-text strong{color:var(--gold-3);font-weight:500}
+.footer-version{font-size:9px;letter-spacing:0.1em;text-transform:none;color:var(--b-text-dim);margin-top:2px;display:block}
+
+/* Main */
+main{padding:32px 48px;overflow-y:auto}
+main h1{font-family:'Old Standard TT',serif;font-weight:400;font-size:34px;color:var(--b-text);margin-bottom:6px}
+main .sub{color:var(--b-text-muted);margin-bottom:32px;line-height:1.7}
+main .card{background:var(--b-bg-elev);border:1px solid var(--b-border);border-radius:8px;padding:24px;margin-bottom:18px}
+main .card h3{font-family:'Old Standard TT',serif;font-weight:400;font-size:18px;color:var(--b-text);margin-bottom:8px}
+main .card .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--b-hairline);font-size:13px}
+main .card .row:last-child{border-bottom:none}
+main .card .row .label{color:var(--b-text-muted)}
+main .card .row .val{color:var(--gold-2);font-family:'DM Sans',sans-serif;font-variant-numeric:tabular-nums}
+.delta{font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-3);margin-bottom:12px;font-weight:500}
+.before-after{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px}
+.before-after .card{margin-bottom:0}
+.before-after .label-row{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.before-after .label-row .pill{font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:0.22em;text-transform:uppercase;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,0.05);color:var(--b-text-dim)}
+.before-after .after .pill{background:rgba(201,169,97,0.10);color:var(--gold-2)}
+
+.controls{display:flex;gap:12px;margin-bottom:28px;align-items:center}
+.controls button{padding:8px 16px;background:transparent;border:1px solid var(--b-border);color:var(--b-text-muted);font-family:inherit;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all 0.25s}
+.controls button:hover{border-color:rgba(201,169,97,0.3);color:var(--gold-2)}
+.controls button.active{background:rgba(201,169,97,0.08);border-color:var(--gold-4);color:var(--gold-1)}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-mark"><img src="../images/brilliance/monogram.png" alt="Brilliance"></div>
+      <div class="sidebar-name">Brilliance</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4l-5 1.6 1.6-5A8.5 8.5 0 1 1 21 11.5Z"/></svg><span class="sidebar-item-label">Chat</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span class="sidebar-item-label">Pulse</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 11.5a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0Z"/><path d="m21 21-4.3-4.3"/></svg><span class="sidebar-item-label">Studio</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c-3 4-3 8 0 12 3 4 3 8 0 8M12 2c3 4 3 8 0 12-3 4-3 8 0 8"/></svg><span class="sidebar-item-label">Bloom</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span class="sidebar-item-label">Identity</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg><span class="sidebar-item-label">Automations</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18l-2 13H5L3 7Z"/></svg><span class="sidebar-item-label">Library</span></a>
+      <a class="sidebar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="sidebar-item-label">Settings</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="footer-lockup">
+        <div class="footer-status" aria-label="Brilli active"></div>
+        <div class="footer-text">
+          Brilliance &middot; by <strong>RoweOS</strong>
+          <span class="footer-version">v33.0</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="delta">Sidebar &middot; v33.0 rebrand preview</div>
+    <h1>Sidebar &amp; chrome rebrand</h1>
+    <p class="sub">Same structure, every visible string updated. The footer reads "Brilliance &middot; by RoweOS" with a Brilli status dot. Hover the sidebar to expand.</p>
+
+    <div class="controls">
+      <button id="collapseBtn" class="active">Collapsed</button>
+      <button id="expandBtn">Expanded</button>
+    </div>
+
+    <div class="before-after">
+      <div class="card">
+        <div class="label-row"><span class="pill">Before (v32.x)</span></div>
+        <h3>Footer reads</h3>
+        <div class="row"><span class="label">Brand text</span><span class="val">RoweOS</span></div>
+        <div class="row"><span class="label">Status</span><span class="val">Online indicator</span></div>
+        <div class="row"><span class="label">Version</span><span class="val">v32.1</span></div>
+        <div class="row"><span class="label">Mark</span><span class="val">RoweOS gold B</span></div>
+      </div>
+      <div class="card after">
+        <div class="label-row"><span class="pill">After (v33.0)</span></div>
+        <h3>Footer reads</h3>
+        <div class="row"><span class="label">Brand text</span><span class="val">Brilliance &middot; by RoweOS</span></div>
+        <div class="row"><span class="label">Status</span><span class="val">Brilli pulse dot</span></div>
+        <div class="row"><span class="label">Version</span><span class="val">v33.0</span></div>
+        <div class="row"><span class="label">Mark</span><span class="val">Brilliance B (same icon)</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>What changed</h3>
+      <div class="row"><span class="label">Sidebar header logo + name</span><span class="val">Brilliance</span></div>
+      <div class="row"><span class="label">Sidebar footer credit</span><span class="val">by RoweOS</span></div>
+      <div class="row"><span class="label">Status dot becomes Brilli</span><span class="val">Pulses on automation completion</span></div>
+      <div class="row"><span class="label">Sidebar item labels</span><span class="val">Unchanged (Chat, Pulse, Studio, etc.)</span></div>
+      <div class="row"><span class="label">Per-brand accent color</span><span class="val">Unchanged (--brand-accent)</span></div>
+      <div class="row"><span class="label">Mode pickers (BrandAI / LifeAI)</span><span class="val">Unchanged</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Why this works</h3>
+      <p style="color:var(--b-text-muted);font-size:13px;line-height:1.7">The mark stays familiar (existing app icon), reducing recognition disruption. The brand name updates without rearranging muscle memory. The Brilli status dot is the only new affordance, and it earns its place by signaling presence (pulses softly when an automation completes silently).</p>
+    </div>
+  </main>
+</div>
+
+<script>
+document.getElementById('collapseBtn').addEventListener('click', function(){
+  document.getElementById('app').classList.remove('expanded');
+  this.classList.add('active');
+  document.getElementById('expandBtn').classList.remove('active');
+});
+document.getElementById('expandBtn').addEventListener('click', function(){
+  document.getElementById('app').classList.add('expanded');
+  this.classList.add('active');
+  document.getElementById('collapseBtn').classList.remove('active');
+});
+// auto-expand for first 2 seconds so visitors see the labels
+setTimeout(function(){ document.getElementById('expandBtn').click(); }, 600);
+</script>
+
+</body>
+</html>

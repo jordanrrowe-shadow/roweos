@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Welcome to Brilliance - Modal Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-hairline:rgba(255,255,255,0.06);
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',-apple-system,sans-serif;font-weight:300;line-height:1.7;min-height:100vh;overflow-x:hidden}
+
+/* Stage simulating "the app behind the modal" */
+.fake-app{position:fixed;inset:0;background:#1a1a1a;z-index:1;opacity:0.4}
+.fake-app::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#1a1410,#0a0a0a)}
+.fake-app::after{content:'(app underneath - dimmed by modal)';position:absolute;top:24px;left:32px;color:var(--b-text-dim);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.6}
+
+/* Modal */
+.welcome-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.78);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  z-index:100;
+  display:flex;align-items:center;justify-content:center;
+  animation:overlayIn 600ms ease-out;
+}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+.welcome-modal{
+  position:relative;
+  width:min(620px,92vw);
+  padding:64px 56px 56px;
+  text-align:center;
+  background:radial-gradient(ellipse at 50% 0%,rgba(201,169,97,0.10),var(--b-bg) 65%);
+  border:1px solid var(--b-hairline);
+  border-radius:6px;
+  isolation:isolate;
+}
+.welcome-modal::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% -20%,rgba(201,169,97,0.18),transparent 55%);
+  pointer-events:none;border-radius:6px;z-index:-1;
+}
+.welcome-brilli{
+  width:200px;height:200px;
+  margin:0 auto 36px;
+  display:flex;align-items:center;justify-content:center;
+}
+.welcome-brilli canvas{display:block}
+.welcome-wordmark{
+  font-family:'Old Standard TT',serif;
+  font-size:54px;
+  font-weight:400;
+  color:var(--gold-1);
+  letter-spacing:-0.01em;
+  line-height:1;
+  margin-bottom:6px;
+  opacity:0;animation:fadeUp 800ms ease-out 1.1s forwards;
+  background:linear-gradient(135deg,var(--gold-1),var(--gold-2) 50%,var(--gold-3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.welcome-os{
+  font-family:'DM Sans',sans-serif;
+  font-size:11px;font-weight:500;
+  letter-spacing:0.32em;text-transform:uppercase;
+  color:var(--gold-3);
+  margin-bottom:6px;
+  opacity:0;animation:fadeUp 800ms ease-out 1.3s forwards;
+}
+.welcome-by{
+  font-family:'DM Sans',sans-serif;
+  font-size:10px;font-weight:400;
+  letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--b-text-dim);
+  margin-bottom:24px;
+  opacity:0;animation:fadeUp 800ms ease-out 1.5s forwards;
+}
+.welcome-by strong{color:var(--gold-3);font-weight:500}
+.welcome-rule{
+  width:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-4),transparent);
+  margin:0 auto 36px;
+  animation:ruleGrow 1s ease-out 1.7s forwards;
+}
+@keyframes ruleGrow{from{width:0}to{width:140px}}
+.welcome-body{
+  font-family:'Old Standard TT',serif;
+  font-size:21px;
+  line-height:1.65;
+  color:var(--b-text);
+  max-width:480px;
+  margin:0 auto 40px;
+  text-align:left;
+  opacity:0;animation:fadeUp 800ms ease-out 1.9s forwards;
+}
+.welcome-body p{margin-bottom:18px}
+.welcome-body p:last-child{margin-bottom:0}
+.welcome-body em{color:var(--gold-2);font-style:italic}
+.welcome-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:16px 44px;
+  background:linear-gradient(135deg,var(--gold-2),var(--gold-3) 60%,var(--gold-4));
+  color:#000;
+  border:none;border-radius:2px;
+  font-family:'DM Sans',sans-serif;
+  font-size:11px;font-weight:500;
+  letter-spacing:0.25em;text-transform:uppercase;
+  cursor:pointer;
+  transition:all 0.35s ease;
+  position:relative;overflow:hidden;
+  opacity:0;animation:fadeUp 800ms ease-out 2.2s forwards,btnGlow 2s ease-in-out 4s infinite;
+}
+@keyframes btnGlow{0%,100%{box-shadow:0 0 0 rgba(201,169,97,0)}50%{box-shadow:0 0 30px rgba(201,169,97,0.35)}}
+.welcome-cta:hover{
+  transform:translateY(-1px);
+  box-shadow:0 12px 40px rgba(201,169,97,0.30) !important;
+}
+.welcome-attr{
+  margin-top:32px;
+  font-family:'DM Sans',sans-serif;
+  font-size:10px;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--b-text-dim);
+  opacity:0;animation:fadeUp 800ms ease-out 2.4s forwards;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* Variant switcher (mockup-only) */
+.variant-switcher{
+  position:fixed;top:24px;right:24px;
+  z-index:200;
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);
+  border:1px solid var(--b-hairline);border-radius:6px;
+  padding:14px 18px;
+  font-family:'DM Sans',sans-serif;
+  font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+  display:flex;flex-direction:column;gap:8px;align-items:flex-start;
+}
+.variant-switcher span{color:var(--b-text-dim);font-weight:500}
+.variant-switcher button{
+  background:transparent;border:1px solid var(--b-hairline);
+  color:var(--b-text-muted);
+  padding:6px 12px;border-radius:2px;cursor:pointer;
+  font-family:inherit;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+}
+.variant-switcher button.active{border-color:var(--gold-4);color:var(--gold-2);background:rgba(201,169,97,0.05)}
+
+@media (max-width:600px){
+  .welcome-modal{padding:48px 28px 36px;border-radius:0;width:100vw;min-height:100vh}
+  .welcome-wordmark{font-size:42px}
+  .welcome-body{font-size:18px}
+  .welcome-cta{padding:14px 28px;width:100%;max-width:320px;justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<div class="variant-switcher">
+  <span>Copy variant</span>
+  <button class="active" data-variant="A">A - declarative-warm</button>
+  <button data-variant="B">B - confident-terse</button>
+  <button data-variant="C">C - poetic</button>
+</div>
+
+<div class="fake-app"></div>
+
+<div class="welcome-overlay" role="dialog" aria-modal="true" aria-labelledby="welcomeHeading">
+  <div class="welcome-modal">
+    <div class="welcome-brilli"><canvas id="welcomeBrilli" width="200" height="200" aria-label="Brilli"></canvas></div>
+    <h1 class="welcome-wordmark" id="welcomeHeading">Brilliance</h1>
+    <p class="welcome-os">Intelligence OS</p>
+    <p class="welcome-by">by <strong>RoweOS</strong></p>
+    <div class="welcome-rule" aria-hidden="true"></div>
+    <div class="welcome-body" id="welcomeBody">
+      <p>Welcome to <em>Brilliance</em>.</p>
+      <p>The platform you have been using is the same platform. Same brands, same automations, same memory, same work. We have given it a name that fits.</p>
+      <p>Brilli is the <em>intelligence</em> you will see throughout. The platform thinks, you decide. Everything you have built is exactly where you left it.</p>
+    </div>
+    <button class="welcome-cta" type="button">Continue</button>
+    <p class="welcome-attr">Brilliance &nbsp;&middot;&nbsp; by RoweOS &nbsp;&middot;&nbsp; The Rowe Collection</p>
+  </div>
+</div>
+
+<script>
+/* Inline mini-Brilli for the modal */
+(function(){
+  var c = document.getElementById('welcomeBrilli');
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c.width = 200 * dpr; c.height = 200 * dpr; ctx.scale(dpr, dpr);
+
+  var phase = 0, bodyPhase = 0, particles = [], spawn = 0;
+  var lastT = performance.now();
+
+  var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reduced = rm && rm.matches;
+
+  function spawnP() {
+    if (particles.length >= 18) return;
+    particles.push({
+      x: 100 + (Math.random() - 0.5) * 30,
+      y: 130 + Math.random() * 10,
+      vx: (Math.random() - 0.7) * 0.5,
+      vy: 0.05 + Math.random() * 0.18,
+      life: 0,
+      maxLife: 1500 + Math.random() * 1500,
+      size: 0.8 + Math.random() * 1.2
+    });
+  }
+
+  function tick(t) {
+    var dt = t - lastT; lastT = t; if (dt > 100) dt = 16;
+    phase += dt * 0.001 * 2 * Math.PI * 2;
+    bodyPhase += dt * 0.001 * Math.PI * 0.6;
+    spawn += dt;
+    while (spawn > 200) { spawnP(); spawn -= 200; }
+
+    ctx.clearRect(0,0,200,200);
+
+    // body glow
+    var x = 100, y = 110;
+    var gradGlow = ctx.createRadialGradient(x, y, 0, x, y, 80);
+    gradGlow.addColorStop(0, 'rgba(201,169,97,0.42)');
+    gradGlow.addColorStop(0.4, 'rgba(201,169,97,0.16)');
+    gradGlow.addColorStop(1, 'rgba(201,169,97,0)');
+    ctx.fillStyle = gradGlow;
+    ctx.fillRect(0, 30, 200, 170);
+
+    // wings
+    var wingPhase = Math.sin(phase);
+    var wingScaleY = Math.cos(phase) * 0.45 + 0.55;
+    drawWing(x - 12, y - 8, -1, 50, 30, wingScaleY, 0.32);
+    drawWing(x + 12, y - 8, 1, 50, 30, wingScaleY, 0.32);
+
+    // body
+    var pulse = 1 + Math.sin(bodyPhase) * 0.04;
+    var bodyGrad = ctx.createRadialGradient(x, y - 5, 0, x, y, 28);
+    bodyGrad.addColorStop(0, '#fff8e8');
+    bodyGrad.addColorStop(0.3, '#f5e6c8');
+    bodyGrad.addColorStop(0.7, '#c9a961');
+    bodyGrad.addColorStop(1, 'rgba(168,138,74,0)');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 18 * pulse, 26 * pulse, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#f5e6c8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(x, y, 18 * pulse, 26 * pulse, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // head
+    var hx = 100, hy = 70, hr = 18;
+    ctx.strokeStyle = '#e2c79b';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(hx, hy, hr, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // eyes
+    drawEye(hx - 7, hy + 2, 5, 5);
+    drawEye(hx + 6, hy + 2, 4.5, 4.7);
+
+    // antennae
+    drawAntenna(hx - 9, hy - 10, -1, 22);
+    drawAntenna(hx + 7, hy - 12, 1, 22);
+
+    // particles
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      p.life += dt;
+      if (p.life >= p.maxLife) { particles.splice(i, 1); continue; }
+      p.x += p.vx; p.y += p.vy;
+      var alpha = (1 - p.life / p.maxLife) * 0.85;
+      ctx.fillStyle = 'rgba(245,230,200,' + alpha + ')';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (!reduced) requestAnimationFrame(tick);
+  }
+
+  function drawWing(x, y, dir, w, h, scaleY, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(dir * 0.4);
+    ctx.scale(dir, scaleY);
+    ctx.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < 3; i++) {
+      ctx.fillStyle = 'rgba(232,199,155,' + (alpha * (1 - i * 0.25)) + ')';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.4, 0, w * (1 - i * 0.04), h * (1 - i * 0.04), 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawEye(x, y, w, h) {
+    var grad = ctx.createRadialGradient(x - w * 0.2, y - h * 0.2, 0, x, y, w * 1.2);
+    grad.addColorStop(0, '#fff9e8');
+    grad.addColorStop(0.6, '#f5e6c8');
+    grad.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawAntenna(bx, by, dir, len) {
+    ctx.strokeStyle = '#e2c79b';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    var ex = bx + dir * len * 0.55;
+    var ey = by - len * 1.1;
+    ctx.quadraticCurveTo(bx + dir * len * 0.5, by - len * 0.7, ex, ey);
+    ctx.stroke();
+    var grad = ctx.createRadialGradient(ex, ey, 0, ex, ey, 5);
+    grad.addColorStop(0, '#fff9e8');
+    grad.addColorStop(0.6, '#f5e6c8');
+    grad.addColorStop(1, 'rgba(245,230,200,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(ex - 5, ey - 5, 10, 10);
+  }
+
+  if (reduced) {
+    // static render once
+    tick(performance.now());
+  } else {
+    requestAnimationFrame(tick);
+  }
+})();
+
+/* Variant switcher */
+(function(){
+  var bodyEl = document.getElementById('welcomeBody');
+  var variants = {
+    'A': '<p>Welcome to <em>Brilliance</em>.</p><p>The platform you have been using is the same platform. Same brands, same automations, same memory, same work. We have given it a name that fits.</p><p>Brilli is the <em>intelligence</em> you will see throughout. The platform thinks, you decide. Everything you have built is exactly where you left it.</p>',
+    'B': '<p>Welcome to <em>Brilliance</em>.</p><p>Same platform. Same memory. Same work. New name.</p><p>Meet Brilli, the intelligence behind the platform. Everything is where you left it.</p>',
+    'C': '<p>Welcome to <em>Brilliance</em>.</p><p>What you built has a name now. What you built has a <em>face</em> now. Brilli is the platform you have been talking to all along.</p><p>Nothing has moved. Everything has settled.</p>'
+  };
+  document.querySelectorAll('.variant-switcher button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.variant-switcher button').forEach(function(x){x.classList.remove('active');});
+      b.classList.add('active');
+      bodyEl.innerHTML = variants[b.dataset.variant];
+    });
+  });
+})();
+
+/* Continue button - just for the mockup, dismiss the modal */
+document.querySelector('.welcome-cta').addEventListener('click', function(){
+  document.querySelector('.welcome-overlay').style.transition = 'opacity 400ms ease-out, transform 400ms ease-out';
+  document.querySelector('.welcome-overlay').style.opacity = '0';
+  document.querySelector('.welcome-overlay').style.transform = 'translateY(8px)';
+  setTimeout(function(){
+    alert('Continue clicked. (In production: flag set, modal removed, user lands on last view.)');
+    document.querySelector('.welcome-overlay').style.opacity = '1';
+    document.querySelector('.welcome-overlay').style.transform = '';
+  }, 400);
+});
+
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') document.querySelector('.welcome-cta').click();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>/info Overhaul Preview - Brilliance</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7}
+
+/* nav */
+.nav{position:sticky;top:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(28px);border-bottom:1px solid var(--b-hairline);z-index:50}
+.nav-inner{max-width:1200px;margin:0 auto;padding:18px 28px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{display:flex;align-items:center;gap:10px;color:var(--gold-2);text-decoration:none}
+.nav-brand img{width:28px;height:28px;border-radius:6px}
+.nav-brand-name{font-family:'Old Standard TT',serif;font-size:18px}
+.nav-brand-by{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim);margin-left:8px}
+.nav-brand-by strong{color:var(--gold-3);font-weight:500}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-muted);text-decoration:none}
+.nav-links a:hover{color:var(--gold-2)}
+.nav-cta{padding:10px 22px;border:1px solid var(--gold-4);border-radius:2px;color:var(--gold-2)!important;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;transition:all 0.3s}
+.nav-cta:hover{background:var(--gold-3);color:#000!important}
+@media (max-width:760px){.nav-links a:not(.nav-cta){display:none}}
+
+/* sections */
+section{padding:clamp(72px,10vw,128px) 28px;border-top:1px solid var(--b-hairline)}
+section:first-of-type{border-top:none;padding-top:80px}
+.container{max-width:1200px;margin:0 auto}
+.eyebrow{font-size:10px;font-weight:500;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);margin-bottom:18px;text-align:center}
+.section-title{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(28px,3.6vw,46px);line-height:1.2;letter-spacing:-0.012em;color:var(--b-text);text-align:center;margin-bottom:16px}
+.section-title em{font-style:italic;color:var(--gold-2)}
+.section-desc{font-size:15px;line-height:1.85;color:var(--b-text-muted);max-width:580px;margin:0 auto;text-align:center}
+
+/* hero */
+.hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;text-align:center;position:relative;overflow:hidden;isolation:isolate}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 35%,rgba(201,169,97,0.10),var(--b-bg) 60%);z-index:-1}
+.hero-eyebrow{font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-4);margin-bottom:24px}
+.hero-wordmark{width:clamp(280px,42vw,460px);margin:0 auto 36px;display:block;filter:drop-shadow(0 0 60px var(--gold-glow))}
+.hero-h1{font-family:'Old Standard TT',serif;font-size:clamp(36px,5vw,68px);font-weight:400;line-height:1.15;letter-spacing:-0.015em;margin-bottom:22px;color:var(--b-text)}
+.hero-h1 em{color:var(--gold-2);font-style:italic}
+.hero-sub{font-size:14px;letter-spacing:0.04em;color:var(--b-text-muted);max-width:540px;margin:0 auto 40px;line-height:1.85}
+.hero-ctas{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+.cta-primary{display:inline-flex;align-items:center;padding:16px 38px;background:linear-gradient(135deg,var(--gold-2),var(--gold-3) 60%,var(--gold-4));color:#000;border:none;border-radius:2px;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none}
+.cta-secondary{display:inline-flex;align-items:center;padding:16px 32px;background:transparent;color:var(--gold-2);border:1px solid var(--gold-5);border-radius:2px;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none}
+
+/* backed */
+.backed{padding:clamp(72px,10vw,120px) 28px;background:var(--b-bg);border-top:1px solid var(--b-hairline)}
+.backed-card{max-width:760px;margin:0 auto;padding:48px 40px;text-align:center;background:linear-gradient(180deg,rgba(201,169,97,0.045),rgba(201,169,97,0.012));border:1px solid rgba(201,169,97,0.22);border-radius:6px}
+.backed-pill{display:inline-flex;padding:14px 28px;background:#fff;border-radius:999px;margin-bottom:28px;box-shadow:0 4px 24px rgba(201,169,97,0.18)}
+.backed-pill img{height:24px;width:auto}
+.backed-h2{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(26px,3vw,38px);line-height:1.25;color:var(--b-text);margin-bottom:18px}
+.backed-h2 em{color:var(--gold-2);font-style:italic}
+.backed-body{font-size:14.5px;line-height:1.85;color:var(--b-text-muted);max-width:560px;margin:0 auto}
+.backed-body strong{color:var(--b-text);font-weight:500}
+
+/* what */
+.what-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--b-hairline);border-radius:6px;margin-top:64px;background:var(--b-hairline)}
+.what-col{background:var(--b-bg);padding:48px 40px}
+.what-tag{font-size:10px;font-weight:500;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);margin-bottom:14px}
+.what-name{font-family:'Old Standard TT',serif;font-weight:400;font-size:30px;line-height:1.1;color:var(--b-text);margin-bottom:8px}
+.what-name em{color:var(--gold-2);font-style:italic}
+.what-tagline{font-size:13px;color:var(--b-text-muted);margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--b-hairline)}
+.what-list{list-style:none;padding:0;margin:0}
+.what-list li{padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13.5px}
+.what-list li:last-child{border-bottom:none}
+.what-list .feat{font-family:'Old Standard TT',serif;font-style:italic;color:var(--gold-2);margin-bottom:4px;font-size:15px;display:block}
+.what-list .desc{color:var(--b-text-muted);font-size:13px;line-height:1.6}
+@media (max-width:760px){.what-grid{grid-template-columns:1fr}}
+
+/* meet brilli */
+.brilli-section{padding:clamp(80px,12vw,140px) 28px;background:var(--b-bg);border-top:1px solid var(--b-hairline);text-align:center}
+.brilli-canvas-wrap{width:200px;height:200px;margin:0 auto 32px;display:flex;align-items:center;justify-content:center}
+.brilli-h{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(36px,5vw,60px);color:var(--b-text);margin-bottom:24px;letter-spacing:-0.01em}
+.brilli-h em{color:var(--gold-2);font-style:italic}
+.brilli-body{font-family:'DM Sans',sans-serif;font-size:15.5px;line-height:1.85;color:var(--b-text-muted);max-width:560px;margin:0 auto}
+.brilli-body strong{color:var(--b-text);font-weight:500}
+
+/* cross-mode */
+.cross{padding:clamp(72px,10vw,120px) 28px;background:var(--b-bg-deep);border-top:1px solid var(--b-hairline);text-align:center}
+.cross-h{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(28px,3.6vw,42px);line-height:1.25;color:var(--b-text);margin-bottom:24px;max-width:680px;margin-left:auto;margin-right:auto}
+.cross-h em{color:var(--gold-2);font-style:italic}
+.cross-body{font-size:15px;line-height:1.85;color:var(--b-text-muted);max-width:560px;margin:0 auto 48px}
+.cross-pair{display:flex;align-items:center;justify-content:center;gap:32px;margin:0 auto;max-width:600px}
+.cross-side{flex:1;padding:28px 24px;background:var(--b-bg);border:1px solid var(--b-border);border-radius:6px;text-align:left}
+.cross-side .lab{font-size:10px;font-weight:500;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);margin-bottom:10px}
+.cross-side h4{font-family:'Old Standard TT',serif;font-weight:400;font-size:18px;color:var(--b-text);margin-bottom:8px}
+.cross-side p{font-size:13px;color:var(--b-text-muted);line-height:1.6}
+.cross-arrow{color:var(--gold-3);font-size:24px;font-family:'Old Standard TT',serif;font-style:italic}
+@media (max-width:600px){.cross-pair{flex-direction:column;gap:16px}}
+
+/* invitation */
+.invitation{padding:clamp(110px,16vw,200px) 28px;background:radial-gradient(ellipse at 50% 50%,rgba(201,169,97,0.06),var(--b-bg) 65%);text-align:center;border-top:1px solid var(--b-hairline)}
+.invitation-h{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(36px,6vw,68px);line-height:1.1;color:var(--b-text);margin-bottom:28px;max-width:18ch;margin-left:auto;margin-right:auto}
+.invitation-h em{color:var(--gold-2);font-style:italic}
+.invitation-sub{font-size:14px;color:var(--b-text-muted);max-width:480px;margin:0 auto 48px;line-height:1.85}
+.invitation-ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* footer */
+footer{padding:48px 28px 56px;background:var(--b-bg-deep);border-top:1px solid var(--b-hairline);text-align:center}
+footer .lockup{display:inline-flex;align-items:center;gap:12px;margin-bottom:18px}
+footer .lockup img{width:24px;height:24px;border-radius:6px}
+footer .lockup .name{font-family:'Old Standard TT',serif;font-size:18px;color:var(--gold-2)}
+footer .meta{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--b-text-dim)}
+
+.preview-banner{background:rgba(201,169,97,0.08);border-bottom:1px solid rgba(201,169,97,0.2);padding:10px 28px;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-3);text-align:center}
+</style>
+</head>
+<body>
+
+<div class="preview-banner">Mockup &middot; /info overhaul preview &middot; v33.0</div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <img src="../images/brilliance/monogram.png" alt="Brilliance">
+      <span class="nav-brand-name">Brilliance</span>
+      <span class="nav-brand-by">by <strong>RoweOS</strong></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#what">Platform</a>
+      <a href="#cross">Why</a>
+      <a href="#brilli">Brilli</a>
+      <a href="#" class="nav-cta">Begin</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <p class="hero-eyebrow">The Rowe Collection, LLC</p>
+    <img src="../images/brilliance/wordmark-os.png" alt="Brilliance, Intelligence OS" class="hero-wordmark">
+    <h1 class="hero-h1">The intelligence platform<br>for <em>brands and life</em>.</h1>
+    <p class="hero-sub">One interface. Two intelligences. Complete data sovereignty. By RoweOS.</p>
+    <div class="hero-ctas">
+      <a href="#" class="cta-primary">Begin</a>
+      <a href="#" class="cta-secondary">Read the Story</a>
+    </div>
+  </div>
+</section>
+
+<section class="backed" aria-label="Backed by Google for Startups">
+  <div class="container">
+    <div class="backed-card">
+      <p style="font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);margin-bottom:22px">Backed by</p>
+      <div class="backed-pill"><img src="../images/promo/google-for-startups.png" alt="Google for Startups"></div>
+      <h2 class="backed-h2">Selected for <em>Google for Startups</em>.</h2>
+      <p class="backed-body">Brilliance is backed by <strong>Google for Startups</strong>. Vetted infrastructure, technical mentorship, and direct access to Google's AI roadmap. Built independently. Backed by serious cloud.</p>
+    </div>
+  </div>
+</section>
+
+<section id="what">
+  <div class="container">
+    <p class="eyebrow">Intelligence Platform</p>
+    <h2 class="section-title">What is <em>Brilliance</em>?</h2>
+    <p class="section-desc">Brilliance replaces fragmented workflows with a single intelligent layer that understands your brand as deeply as you do, and knows your life as intimately as you need it to.</p>
+
+    <div class="what-grid">
+      <div class="what-col">
+        <p class="what-tag">Mode I</p>
+        <h3 class="what-name"><em>Brand</em>AI</h3>
+        <p class="what-tagline">Eight agents. One brand identity at the core.</p>
+        <ul class="what-list">
+          <li><span class="feat">Identity Substrate</span><span class="desc">Voice and standards injected into every output.</span></li>
+          <li><span class="feat">Studio</span><span class="desc">150+ operations. Run one. Pipe many.</span></li>
+          <li><span class="feat">Bloom</span><span class="desc">Twenty fresh brand angles on demand.</span></li>
+          <li><span class="feat">Library</span><span class="desc">Your work, indexed across every brand.</span></li>
+          <li><span class="feat">Automations</span><span class="desc">Multi-step pipelines and scheduled work.</span></li>
+        </ul>
+      </div>
+      <div class="what-col">
+        <p class="what-tag">Mode II</p>
+        <h3 class="what-name"><em>Life</em>AI</h3>
+        <p class="what-tagline">Five coaches. The operator behind the work.</p>
+        <ul class="what-list">
+          <li><span class="feat">Pulse</span><span class="desc">Goals, calendar, rhythm in one frame.</span></li>
+          <li><span class="feat">Identity Intelligence</span><span class="desc">Finances, health, family understood deeply.</span></li>
+          <li><span class="feat">Tax Copilot</span><span class="desc">Aware of every brand's revenue, year-round.</span></li>
+          <li><span class="feat">Wellness Guide</span><span class="desc">Sleep, training, recovery, mind.</span></li>
+          <li><span class="feat">Reminders</span><span class="desc">Goals tracked alongside the work they support.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="brilli" class="brilli-section">
+  <div class="brilli-canvas-wrap"><canvas id="brilliPreview" width="200" height="200" aria-label="Brilli"></canvas></div>
+  <p class="eyebrow">The Entity</p>
+  <h2 class="brilli-h">Meet <em>Brilli</em>.</h2>
+  <p class="brilli-body"><strong>Brilli is the brilliance behind the platform.</strong> The intelligence that knows your brand, your life, your day, your standards. One name. One presence. Yours.</p>
+</section>
+
+<section id="cross" class="cross">
+  <div class="container">
+    <p class="eyebrow">The Moat</p>
+    <h2 class="cross-h">Brand and life share <em>one memory</em>.</h2>
+    <p class="cross-body">Most platforms silo brand work from personal life. Brilliance doesn't. Your Tax Copilot sees every brand's revenue. Your Life Coach knows your ventures. Cross-mode intelligence is the difference operators feel.</p>
+    <div class="cross-pair">
+      <div class="cross-side">
+        <p class="lab">BrandAI knows</p>
+        <h4>Brand revenue</h4>
+        <p>Every brand's financials flow into shared memory.</p>
+      </div>
+      <div class="cross-arrow">&rarr;</div>
+      <div class="cross-side">
+        <p class="lab">LifeAI uses it</p>
+        <h4>Tax Copilot</h4>
+        <p>Quarterly posture aware of all your brand income.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="invitation">
+  <h2 class="invitation-h">Finally, a platform<br>as <em>brilliant as you</em>.</h2>
+  <p class="invitation-sub">Begin with a free month. Bring your keys, your brand, your work. Decide on your own terms whether the difference is real.</p>
+  <div class="invitation-ctas">
+    <a href="#" class="cta-primary">Begin</a>
+    <a href="#" class="cta-secondary">View Pricing</a>
+  </div>
+</section>
+
+<footer>
+  <div class="lockup">
+    <img src="../images/brilliance/monogram.png" alt="Brilliance">
+    <span class="name">Brilliance</span>
+    <span style="font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim);margin-left:6px">by <strong style="color:var(--gold-3);font-weight:500">RoweOS</strong></span>
+  </div>
+  <p class="meta">The Rowe Collection &middot; Austin, Texas &middot; &copy; 2026</p>
+</footer>
+
+<script>
+/* Mini Brilli for Meet Brilli section */
+(function(){
+  var c = document.getElementById('brilliPreview');
+  if (!c) return;
+  var ctx = c.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c.width = 200 * dpr; c.height = 200 * dpr; ctx.scale(dpr, dpr);
+  var phase = 0, bodyPhase = 0, particles = [], spawn = 0, lastT = performance.now();
+  function spawnP(){if(particles.length>=18)return;particles.push({x:100+(Math.random()-.5)*30,y:130+Math.random()*10,vx:(Math.random()-.7)*.5,vy:.05+Math.random()*.18,life:0,maxLife:1500+Math.random()*1500,size:.8+Math.random()*1.2});}
+  function tick(t){var dt=t-lastT;lastT=t;if(dt>100)dt=16;phase+=dt*.001*4*Math.PI;bodyPhase+=dt*.001*Math.PI*.6;spawn+=dt;while(spawn>200){spawnP();spawn-=200;}ctx.clearRect(0,0,200,200);var x=100,y=110;var g=ctx.createRadialGradient(x,y,0,x,y,80);g.addColorStop(0,'rgba(201,169,97,0.42)');g.addColorStop(.4,'rgba(201,169,97,0.16)');g.addColorStop(1,'rgba(201,169,97,0)');ctx.fillStyle=g;ctx.fillRect(0,30,200,170);var ws=Math.cos(phase)*.45+.55;dw(x-12,y-8,-1,50,30,ws,.32);dw(x+12,y-8,1,50,30,ws,.32);var p=1+Math.sin(bodyPhase)*.04;var bg=ctx.createRadialGradient(x,y-5,0,x,y,28);bg.addColorStop(0,'#fff8e8');bg.addColorStop(.3,'#f5e6c8');bg.addColorStop(.7,'#c9a961');bg.addColorStop(1,'rgba(168,138,74,0)');ctx.fillStyle=bg;ctx.beginPath();ctx.ellipse(x,y,18*p,26*p,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#f5e6c8';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(x,y,18*p,26*p,0,0,Math.PI*2);ctx.stroke();var hx=100,hy=70,hr=18;ctx.strokeStyle='#e2c79b';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(hx,hy,hr,0,Math.PI*2);ctx.stroke();de(hx-7,hy+2,5,5);de(hx+6,hy+2,4.5,4.7);da(hx-9,hy-10,-1,22);da(hx+7,hy-12,1,22);ctx.globalCompositeOperation='lighter';for(var i=particles.length-1;i>=0;i--){var pp=particles[i];pp.life+=dt;if(pp.life>=pp.maxLife){particles.splice(i,1);continue;}pp.x+=pp.vx;pp.y+=pp.vy;var a=(1-pp.life/pp.maxLife)*.85;ctx.fillStyle='rgba(245,230,200,'+a+')';ctx.beginPath();ctx.arc(pp.x,pp.y,pp.size,0,Math.PI*2);ctx.fill();}ctx.globalCompositeOperation='source-over';requestAnimationFrame(tick);}
+  function dw(x,y,dir,w,h,scaleY,alpha){ctx.save();ctx.translate(x,y);ctx.rotate(dir*.4);ctx.scale(dir,scaleY);ctx.globalCompositeOperation='lighter';for(var i=0;i<3;i++){ctx.fillStyle='rgba(232,199,155,'+(alpha*(1-i*.25))+')';ctx.beginPath();ctx.ellipse(w*.4,0,w*(1-i*.04),h*(1-i*.04),0,0,Math.PI*2);ctx.fill();}ctx.restore();}
+  function de(x,y,w,h){var g=ctx.createRadialGradient(x-w*.2,y-h*.2,0,x,y,w*1.2);g.addColorStop(0,'#fff9e8');g.addColorStop(.6,'#f5e6c8');g.addColorStop(1,'rgba(245,230,200,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,y,w,h,0,0,Math.PI*2);ctx.fill();}
+  function da(bx,by,dir,len){ctx.strokeStyle='#e2c79b';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(bx,by);var ex=bx+dir*len*.55;var ey=by-len*1.1;ctx.quadraticCurveTo(bx+dir*len*.5,by-len*.7,ex,ey);ctx.stroke();var g=ctx.createRadialGradient(ex,ey,0,ex,ey,5);g.addColorStop(0,'#fff9e8');g.addColorStop(.6,'#f5e6c8');g.addColorStop(1,'rgba(245,230,200,0)');ctx.fillStyle=g;ctx.fillRect(ex-5,ey-5,10,10);}
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

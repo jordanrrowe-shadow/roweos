@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Brilliance v33.0 Mockups Index</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --b-bg:#0a0a0a; --b-bg-elev:#111111;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+.wrap{max-width:980px;margin:0 auto;padding:80px 28px}
+header{text-align:center;margin-bottom:64px;padding-bottom:48px;border-bottom:1px solid var(--b-hairline)}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-3);margin-bottom:20px}
+h1{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(36px,5vw,56px);line-height:1.1;color:var(--b-text);margin-bottom:18px;letter-spacing:-0.01em}
+h1 em{color:var(--gold-2);font-style:italic}
+.lead{font-size:16px;color:var(--b-text-muted);max-width:600px;margin:0 auto;line-height:1.85}
+
+h2{font-family:'Old Standard TT',serif;font-weight:400;font-size:28px;color:var(--b-text);margin:48px 0 18px;letter-spacing:-0.005em}
+h2 em{color:var(--gold-2);font-style:italic}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:18px}
+.card{
+  display:block;text-decoration:none;
+  padding:28px 26px;
+  background:var(--b-bg-elev);
+  border:1px solid var(--b-border);
+  border-radius:6px;
+  color:inherit;
+  transition:all 0.3s ease;
+  position:relative;
+}
+.card:hover{border-color:rgba(201,169,97,0.35);background:rgba(201,169,97,0.025);transform:translateY(-2px)}
+.card-num{
+  font-family:'Old Standard TT',serif;
+  font-style:italic;
+  font-size:13px;
+  color:var(--gold-3);
+  margin-bottom:10px;
+}
+.card h3{
+  font-family:'Old Standard TT',serif;
+  font-weight:400;
+  font-size:22px;
+  color:var(--b-text);
+  margin-bottom:8px;
+  letter-spacing:-0.005em;
+}
+.card h3 em{color:var(--gold-2);font-style:italic}
+.card p{
+  font-size:13.5px;
+  color:var(--b-text-muted);
+  line-height:1.65;
+  margin-bottom:16px;
+}
+.card .meta{
+  display:flex;align-items:center;gap:12px;
+  font-size:10px;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--b-text-dim);
+}
+.card .meta-pill{padding:4px 10px;background:rgba(255,255,255,0.05);border-radius:99px;color:var(--b-text-muted)}
+.card .meta-arrow{color:var(--gold-3);font-size:14px;font-family:'Old Standard TT',serif;font-style:italic;margin-left:auto}
+
+.docs{margin-top:80px;padding-top:48px;border-top:1px solid var(--b-hairline)}
+.docs h2{margin-bottom:14px}
+.docs .lead{text-align:left;margin:0 0 32px;color:var(--b-text-muted);font-size:14px}
+.docs ul{list-style:none;padding:0}
+.docs li{padding:14px 0;border-bottom:1px solid var(--b-hairline);display:flex;align-items:baseline;gap:14px;font-size:14px}
+.docs li:last-child{border-bottom:none}
+.docs li .num{font-family:'Old Standard TT',serif;font-style:italic;color:var(--gold-3);width:30px;flex-shrink:0;font-size:13px}
+.docs li .name{font-family:'Old Standard TT',serif;color:var(--b-text);flex:1;font-size:15px}
+.docs li .name em{color:var(--gold-2);font-style:italic}
+.docs li .where{font-size:11px;color:var(--b-text-dim);font-family:'DM Sans',monospace;letter-spacing:0.04em}
+
+footer{text-align:center;margin-top:64px;padding-top:32px;border-top:1px solid var(--b-hairline);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim)}
+footer strong{color:var(--gold-3);font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Brilliance v33.0 &middot; Welcome Release</p>
+    <h1>Mockups <em>&amp;</em> Strategy</h1>
+    <p class="lead">Live previews of the v33.0 surfaces and the strategy docs that drive them. Built overnight 2026-04-27 in auto mode while you slept. Click a mockup to see it live.</p>
+  </header>
+
+  <h2>Live <em>mockups</em></h2>
+  <div class="card-grid">
+
+    <a class="card" href="01-brilli-canvas-prototype.html">
+      <p class="card-num">i.</p>
+      <h3>Brilli, the <em>entity</em></h3>
+      <p>Working Canvas 2D prototype of Brilli the firefly. Six states (idle, attending, thinking, delivering, pleased, asleep). Three sizes (hero, inline, pin). Live FPS metrics. Reduced-motion aware.</p>
+      <div class="meta">
+        <span class="meta-pill">Most important</span>
+        <span class="meta-pill">Interactive</span>
+        <span class="meta-arrow">&rarr;</span>
+      </div>
+    </a>
+
+    <a class="card" href="02-welcome-modal.html">
+      <p class="card-num">ii.</p>
+      <h3>Welcome to <em>Brilliance</em></h3>
+      <p>First-launch announcement modal that fires once per existing user on next open after v33.0 deploys. Three copy variants you can switch between.</p>
+      <div class="meta">
+        <span class="meta-pill">Variants A/B/C</span>
+        <span class="meta-arrow">&rarr;</span>
+      </div>
+    </a>
+
+    <a class="card" href="03-launch-screen.html">
+      <p class="card-num">iii.</p>
+      <h3>Launch <em>screen</em></h3>
+      <p>The new app boot/loading screen. Brilli at hero scale. Wordmark with gold gradient. Subtle background drift. Replaces the current splash.</p>
+      <div class="meta">
+        <span class="meta-pill">Boot moment</span>
+        <span class="meta-arrow">&rarr;</span>
+      </div>
+    </a>
+
+    <a class="card" href="04-sidebar-rebrand.html">
+      <p class="card-num">iv.</p>
+      <h3>Sidebar <em>rebrand</em></h3>
+      <p>Before/after of the in-app sidebar. Same structure, same icons, new wordmark and footer credit. Brilli pulse status dot. Toggle collapsed/expanded.</p>
+      <div class="meta">
+        <span class="meta-pill">Before/after</span>
+        <span class="meta-arrow">&rarr;</span>
+      </div>
+    </a>
+
+    <a class="card" href="05-info-overhaul-preview.html">
+      <p class="card-num">v.</p>
+      <h3>/info <em>overhaul</em></h3>
+      <p>Preview of /info reskinned to match Brilliance design language. New hero with wordmark. Meet Brilli section. Cross-mode intelligence story. Old Standard TT throughout.</p>
+      <div class="meta">
+        <span class="meta-pill">Phase F</span>
+        <span class="meta-arrow">&rarr;</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="docs">
+    <h2>Strategy <em>docs</em></h2>
+    <p class="lead">All written tonight. Living in <code style="font-family:'DM Sans',monospace;font-size:13px;color:var(--gold-2)">docs/brilliance/</code> in the repo. Read in numerical order or jump to whichever is most useful.</p>
+    <ul>
+      <li><span class="num">00.</span><span class="name">v33.0 <em>Master Plan</em></span><span class="where">docs/brilliance/00-v33-master-plan.md</span></li>
+      <li><span class="num">01.</span><span class="name">Brilli <em>Entity</em> Spec</span><span class="where">docs/brilliance/01-brilli-entity.md</span></li>
+      <li><span class="num">02.</span><span class="name">Welcome to Brilliance <em>Experience</em></span><span class="where">docs/brilliance/02-welcome-experience.md</span></li>
+      <li><span class="num">03.</span><span class="name">In-App <em>Rename</em> Plan</span><span class="where">docs/brilliance/03-in-app-rename.md</span></li>
+      <li><span class="num">04.</span><span class="name"><em>Cleanup</em> Targets</span><span class="where">docs/brilliance/04-cleanup-targets.md</span></li>
+      <li><span class="num">05.</span><span class="name">Brilli <em>Animation</em> Tech Spec</span><span class="where">docs/brilliance/05-brilli-animation.md</span></li>
+      <li><span class="num">06.</span><span class="name">/info <em>Overhaul</em> Plan</span><span class="where">docs/brilliance/06-info-overhaul.md</span></li>
+      <li><span class="num">07.</span><span class="name"><em>Investor</em> Framework (deferred)</span><span class="where">docs/brilliance/07-investor-framework.md</span></li>
+      <li><span class="num">09.</span><span class="name"><em>Wakeup</em> Summary</span><span class="where">docs/brilliance/09-wakeup-summary.md</span></li>
+    </ul>
+  </div>
+
+  <footer>
+    <p>Brilliance &middot; <strong>by RoweOS</strong> &middot; v33.0 mockups &middot; built 2026-04-27 overnight</p>
+  </footer>
+</div>
+
+</body>
+</html>
