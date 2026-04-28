@@ -263,7 +263,7 @@ footer .meta{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color
   var c = document.getElementById('brilliPreview');
   if (!c) return;
   var ctx = c.getContext('2d');
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   c.width = 200 * dpr; c.height = 200 * dpr; ctx.scale(dpr, dpr);
   var phase = 0, bodyPhase = 0, particles = [], spawn = 0, lastT = performance.now();
   function spawnP(){if(particles.length>=18)return;particles.push({x:100+(Math.random()-.5)*30,y:130+Math.random()*10,vx:(Math.random()-.7)*.5,vy:.05+Math.random()*.18,life:0,maxLife:1500+Math.random()*1500,size:.8+Math.random()*1.2});}

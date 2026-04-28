@@ -127,7 +127,7 @@ body{
 (function(){
   var c = document.getElementById('launchBrilli');
   var ctx = c.getContext('2d');
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   c.width = 200 * dpr; c.height = 200 * dpr; ctx.scale(dpr, dpr);
 
   var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');

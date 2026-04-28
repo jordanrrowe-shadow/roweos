@@ -1075,7 +1075,7 @@ footer strong{color:var(--gold-3);font-weight:500}
   function mountTile(direction, sizeOverride) {
     var canvas = document.createElement('canvas');
     var size = sizeOverride || 180;
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5); // capped at 1.5 for memory
     canvas.width = size * dpr;
     canvas.height = size * dpr;
     canvas.style.width = size + 'px';
@@ -1087,7 +1087,9 @@ footer strong{color:var(--gold-3);font-weight:500}
     var lastT = performance.now();
     var instance = {
       canvas: canvas, ctx: ctx, state: state, dir: direction,
-      size: size, lastT: lastT, paused: false,
+      size: size, lastT: lastT,
+      paused: true, // start paused; IntersectionObserver wakes it
+      visible: false,
       sizeOverride: sizeOverride
     };
     instances.push(instance);
@@ -1095,8 +1097,11 @@ footer strong{color:var(--gold-3);font-weight:500}
   }
 
   function tick(t) {
-    instances.forEach(function(inst){
-      if (inst.paused) return;
+    var anyActive = false;
+    for (var i = 0; i < instances.length; i++) {
+      var inst = instances[i];
+      if (inst.paused || !inst.visible) continue;
+      anyActive = true;
       var dt = t - inst.lastT;
       inst.lastT = t;
       if (dt > 100) dt = 16;
@@ -1104,12 +1109,29 @@ footer strong{color:var(--gold-3);font-weight:500}
       try {
         inst.dir.render(inst.ctx, inst.size, inst.size, t, dt, inst.state);
       } catch(e){ /* swallow */ }
-    });
-    rafId = requestAnimationFrame(tick);
+    }
+    if (anyActive) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      rafId = null; // stop the loop entirely when nothing visible
+    }
+  }
+
+  function startLoopIfNeeded() {
+    if (!rafId) {
+      instances.forEach(function(i){ i.lastT = performance.now(); });
+      rafId = requestAnimationFrame(tick);
+    }
   }
 
   document.addEventListener('visibilitychange', function(){
-    instances.forEach(function(i){ i.paused = document.hidden; if (!i.paused) i.lastT = performance.now(); });
+    if (document.hidden) {
+      instances.forEach(function(i){ i.paused = true; });
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    } else {
+      instances.forEach(function(i){ i.paused = false; i.lastT = performance.now(); });
+      startLoopIfNeeded();
+    }
   });
 
   /* ============================================================
@@ -1153,7 +1175,30 @@ footer strong{color:var(--gold-3);font-weight:500}
     tile.addEventListener('click', function(){ openModal(d); });
   });
 
-  rafId = requestAnimationFrame(tick);
+  /* IntersectionObserver: only animate visible tiles */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var inst = instances.filter(function(i){ return i.canvas === entry.target.querySelector('canvas'); })[0];
+        if (!inst) return;
+        if (entry.isIntersecting) {
+          inst.visible = true;
+          inst.paused = document.hidden;
+          inst.lastT = performance.now();
+          startLoopIfNeeded();
+        } else {
+          inst.visible = false;
+          // clear the canvas to free GPU buffer (helps Safari)
+          inst.ctx.clearRect(0, 0, inst.size, inst.size);
+        }
+      });
+    }, { rootMargin: '50px', threshold: 0.1 });
+    document.querySelectorAll('.tile-canvas-wrap').forEach(function(w){ io.observe(w); });
+  } else {
+    // No IO support: just mark all visible
+    instances.forEach(function(i){ i.visible = true; i.paused = false; });
+    startLoopIfNeeded();
+  }
 
   /* ============================================================
      Modal
@@ -1161,7 +1206,7 @@ footer strong{color:var(--gold-3);font-weight:500}
   var modal = document.getElementById('modal');
   var modalCanvas = document.getElementById('modalCanvas');
   var modalCtx = modalCanvas.getContext('2d');
-  var modalDpr = Math.min(window.devicePixelRatio || 1, 2);
+  var modalDpr = Math.min(window.devicePixelRatio || 1, 1.5);
   var modalSize = 380;
   modalCanvas.width = modalSize * modalDpr;
   modalCanvas.height = modalSize * modalDpr;

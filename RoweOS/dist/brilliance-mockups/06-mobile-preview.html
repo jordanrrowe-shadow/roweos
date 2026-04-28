@@ -67,6 +67,43 @@ h1 em{color:var(--gold-2);font-style:italic}
   display:block;
   background:#0a0a0a;
 }
+.iphone-placeholder{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:28px;text-align:center;
+  background:radial-gradient(circle at 50% 30%,rgba(201,169,97,0.10),#0a0a0a 70%);
+  cursor:pointer;
+  transition:all 0.3s;
+}
+.iphone-placeholder:hover{background:radial-gradient(circle at 50% 30%,rgba(201,169,97,0.18),#0a0a0a 70%)}
+.iphone-placeholder .ph-mark{
+  width:60px;height:60px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,230,200,0.7),rgba(201,169,97,0.3) 60%,transparent 80%);
+  filter:drop-shadow(0 0 24px rgba(201,169,97,0.4));
+  margin-bottom:6px;
+}
+.iphone-placeholder .ph-title{
+  font-family:'Old Standard TT',serif;font-size:22px;color:var(--b-text);
+  letter-spacing:-0.005em;
+}
+.iphone-placeholder .ph-cta{
+  font-family:'DM Sans',sans-serif;
+  font-size:10px;font-weight:500;
+  letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--gold-2);
+  border:1px solid var(--gold-5);
+  padding:8px 16px;border-radius:99px;
+  transition:all 0.25s;
+}
+.iphone-placeholder:hover .ph-cta{
+  border-color:var(--gold-3);
+  background:rgba(201,169,97,0.05);
+}
+.iphone-placeholder .ph-note{
+  font-family:'DM Sans',sans-serif;
+  font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--b-text-dim);margin-top:8px;
+}
 .iphone-link{
   display:inline-flex;align-items:center;gap:8px;
   font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;
@@ -98,11 +135,11 @@ footer strong{color:var(--gold-3);font-weight:500}
   <header>
     <p class="eyebrow">Mobile Preview Hub</p>
     <h1>Every surface, <em>at iPhone width</em></h1>
-    <p class="lead">All five v33.0 surfaces previewed inside iPhone frames. Each frame is a real iframe rendering the same mockup file at iPhone width, so you can see exactly what mobile users will see. Hover the labels to open in a full mobile-sized browser tab.</p>
+    <p class="lead">All five v33.0 surfaces previewed inside iPhone frames. Tap any frame to load that mockup live (lazy-loaded to keep memory in check). Tap "Open full size" to view in a full mobile-sized browser tab.</p>
   </header>
 
   <div class="intro-card">
-    <strong>How to read this page.</strong> Each iPhone shell contains a real iframe loading the mockup. Frames render at 340x720 (close to iPhone 14 viewport at this scale). For an even more accurate test, open Safari on a real iPhone and visit the linked URLs below. Read the full mobile design considerations at <a href="/docs/brilliance/08-mobile-design-spec.md">docs/brilliance/08-mobile-design-spec.md</a>.
+    <strong>How to read this page.</strong> Each iPhone shell shows a placeholder until tapped. Tapping loads the live mockup as an iframe inside the shell at iPhone width (340x720). This is a memory optimization: previously all five frames loaded on page open and shared their canvas RAF loops, ballooning Safari's per-origin memory. Now only the frames you tap consume resources. For the most accurate test, visit the linked URLs in Safari on a real iPhone.
   </div>
 
   <div class="frame-grid">
@@ -116,7 +153,14 @@ footer strong{color:var(--gold-3);font-weight:500}
       </div>
       <div class="iphone">
         <div class="iphone-notch"></div>
-        <div class="iphone-screen"><iframe src="/brilliance-mockups/02-welcome-modal.html" loading="lazy" title="Welcome modal mobile"></iframe></div>
+        <div class="iphone-screen">
+          <div class="iphone-placeholder" data-src="/brilliance-mockups/02-welcome-modal.html">
+            <div class="ph-mark"></div>
+            <div class="ph-title">Welcome modal</div>
+            <div class="ph-cta">Tap to load &rarr;</div>
+            <div class="ph-note">Lazy-loaded for memory</div>
+          </div>
+        </div>
       </div>
       <a class="iphone-link" href="/brilliance-mockups/02-welcome-modal.html" target="_blank">Open full size &rarr;</a>
     </div>
@@ -130,7 +174,14 @@ footer strong{color:var(--gold-3);font-weight:500}
       </div>
       <div class="iphone">
         <div class="iphone-notch"></div>
-        <div class="iphone-screen"><iframe src="/brilliance-mockups/07-mobile-launch.html" loading="lazy" title="Mobile launch screen"></iframe></div>
+        <div class="iphone-screen">
+          <div class="iphone-placeholder" data-src="/brilliance-mockups/07-mobile-launch.html">
+            <div class="ph-mark"></div>
+            <div class="ph-title">Launch screen</div>
+            <div class="ph-cta">Tap to load &rarr;</div>
+            <div class="ph-note">Lazy-loaded for memory</div>
+          </div>
+        </div>
       </div>
       <a class="iphone-link" href="/brilliance-mockups/07-mobile-launch.html" target="_blank">Open full size &rarr;</a>
     </div>
@@ -144,7 +195,14 @@ footer strong{color:var(--gold-3);font-weight:500}
       </div>
       <div class="iphone">
         <div class="iphone-notch"></div>
-        <div class="iphone-screen"><iframe src="/brilliance-mockups/08-mobile-liquid-nav.html" loading="lazy" title="Mobile liquid-nav rebrand"></iframe></div>
+        <div class="iphone-screen">
+          <div class="iphone-placeholder" data-src="/brilliance-mockups/08-mobile-liquid-nav.html">
+            <div class="ph-mark"></div>
+            <div class="ph-title">Liquid-nav</div>
+            <div class="ph-cta">Tap to load &rarr;</div>
+            <div class="ph-note">Lazy-loaded for memory</div>
+          </div>
+        </div>
       </div>
       <a class="iphone-link" href="/brilliance-mockups/08-mobile-liquid-nav.html" target="_blank">Open full size &rarr;</a>
     </div>
@@ -158,7 +216,14 @@ footer strong{color:var(--gold-3);font-weight:500}
       </div>
       <div class="iphone">
         <div class="iphone-notch"></div>
-        <div class="iphone-screen"><iframe src="/brilliance-mockups/05-info-overhaul-preview.html" loading="lazy" title="/info mobile preview"></iframe></div>
+        <div class="iphone-screen">
+          <div class="iphone-placeholder" data-src="/brilliance-mockups/05-info-overhaul-preview.html">
+            <div class="ph-mark"></div>
+            <div class="ph-title">/info mobile</div>
+            <div class="ph-cta">Tap to load &rarr;</div>
+            <div class="ph-note">Lazy-loaded for memory</div>
+          </div>
+        </div>
       </div>
       <a class="iphone-link" href="/brilliance-mockups/05-info-overhaul-preview.html" target="_blank">Open full size &rarr;</a>
     </div>
@@ -172,7 +237,14 @@ footer strong{color:var(--gold-3);font-weight:500}
       </div>
       <div class="iphone">
         <div class="iphone-notch"></div>
-        <div class="iphone-screen"><iframe src="/brilliance-mockups/01-brilli-canvas-prototype.html" loading="lazy" title="Brilli prototype mobile"></iframe></div>
+        <div class="iphone-screen">
+          <div class="iphone-placeholder" data-src="/brilliance-mockups/01-brilli-canvas-prototype.html">
+            <div class="ph-mark"></div>
+            <div class="ph-title">Brilli prototype</div>
+            <div class="ph-cta">Tap to load &rarr;</div>
+            <div class="ph-note">Lazy-loaded for memory</div>
+          </div>
+        </div>
       </div>
       <a class="iphone-link" href="/brilliance-mockups/01-brilli-canvas-prototype.html" target="_blank">Open full size &rarr;</a>
     </div>
@@ -182,6 +254,23 @@ footer strong{color:var(--gold-3);font-weight:500}
   <div class="intro-card" style="margin-top:64px">
     <strong>Note on Brilli's form.</strong> Per the spec, the canvas module is implementation-flexible. Whether Brilli stays a firefly, becomes an orb, or takes another form, the surfaces above all keep their layout. The Brilli area is sized predictably at each viewport and can host any silhouette without rebuilding the surrounding screens.
   </div>
+
+  <script>
+  /* Click-to-load: replace placeholder with iframe on tap. Click a loaded iframe label to unload. */
+  (function(){
+    document.querySelectorAll('.iphone-placeholder').forEach(function(ph){
+      ph.addEventListener('click', function(){
+        var src = ph.dataset.src;
+        var screen = ph.parentElement;
+        var iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.title = ph.querySelector('.ph-title').textContent;
+        screen.innerHTML = '';
+        screen.appendChild(iframe);
+      });
+    });
+  })();
+  </script>
 
   <footer>
     <p>Brilliance &middot; <strong>by RoweOS</strong> &middot; v33.0 mobile preview &middot; <a href="/brilliance-mockups/00-index.html" style="color:var(--b-text-muted);text-decoration:none">all mockups index</a></p>
