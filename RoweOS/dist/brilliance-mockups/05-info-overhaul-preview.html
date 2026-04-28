@@ -30,7 +30,24 @@ html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-
 .nav-links a:hover{color:var(--gold-2)}
 .nav-cta{padding:10px 22px;border:1px solid var(--gold-4);border-radius:2px;color:var(--gold-2)!important;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;transition:all 0.3s}
 .nav-cta:hover{background:var(--gold-3);color:#000!important}
-@media (max-width:760px){.nav-links a:not(.nav-cta){display:none}}
+@media (max-width:760px){
+  .nav-links a:not(.nav-cta){display:none}
+  .nav-cta{padding:8px 16px;font-size:10px}
+  .nav-brand-by{display:none}
+  .nav-brand-name{font-size:16px}
+  section{padding:64px 22px}
+  .hero{min-height:78vh;padding-top:48px}
+  .what-grid{margin-top:40px}
+  .cross-h{font-size:28px}
+  .cross-pair{flex-direction:column;gap:14px}
+  .cross-arrow{transform:rotate(90deg);font-size:20px}
+  .invitation{padding:80px 22px}
+  .invitation-h{font-size:36px}
+  .backed-card{padding:36px 22px;border-radius:6px}
+  .backed-pill{padding:12px 22px}
+  .brilli-section{padding:80px 22px}
+  .brilli-h{font-size:34px}
+}
 
 /* sections */
 section{padding:clamp(72px,10vw,128px) 28px;border-top:1px solid var(--b-hairline)}

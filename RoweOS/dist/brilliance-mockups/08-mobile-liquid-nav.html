@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Liquid-Nav Rebrand (Mobile) - Brilliance v33</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
+}
+html,body{
+  background:var(--b-bg);color:var(--b-text);
+  font-family:'DM Sans',sans-serif;font-weight:300;
+  min-height:100vh;min-height:-webkit-fill-available;
+  margin:0;
+}
+body{padding:0 0 calc(70px + var(--safe-bottom))}
+
+/* Top bar (mobile) */
+.topbar{
+  position:sticky;top:0;
+  background:rgba(0,0,0,0.78);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--b-hairline);
+  padding:calc(10px + var(--safe-top)) 18px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:30;
+}
+.topbar-brand{display:flex;align-items:center;gap:8px}
+.topbar-brand img{width:24px;height:24px;border-radius:6px}
+.topbar-brand .name{font-family:'Old Standard TT',serif;font-size:16px;color:var(--gold-2)}
+.topbar-actions{display:flex;gap:8px}
+.topbar-btn{
+  width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.04);border:1px solid var(--b-hairline);
+  border-radius:50%;color:var(--b-text-muted);
+}
+.topbar-btn svg{width:16px;height:16px}
+
+/* Demo content */
+.content{padding:24px 18px 16px}
+.content h1{
+  font-family:'Old Standard TT',serif;font-weight:400;
+  font-size:24px;color:var(--b-text);
+  margin-bottom:8px;letter-spacing:-0.005em;
+}
+.content .sub{font-size:13px;color:var(--b-text-muted);margin-bottom:24px;line-height:1.7}
+.content .card{
+  background:var(--b-bg-elev);border:1px solid var(--b-border);
+  border-radius:8px;padding:18px;margin-bottom:14px;
+}
+.content .card h3{
+  font-family:'Old Standard TT',serif;font-weight:400;
+  font-size:16px;color:var(--b-text);margin-bottom:6px;
+}
+.content .card p{font-size:13px;color:var(--b-text-muted);line-height:1.6}
+.delta-pill{
+  display:inline-block;
+  font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;
+  letter-spacing:0.22em;text-transform:uppercase;
+  padding:4px 10px;border-radius:99px;
+  background:rgba(201,169,97,0.10);color:var(--gold-2);
+  margin-bottom:10px;
+}
+
+/* Liquid-nav (the mobile sidebar surrogate) */
+.liquid-nav-wrap{
+  position:fixed;
+  bottom:calc(8px + var(--safe-bottom));left:50%;
+  transform:translateX(-50%);
+  z-index:50;
+  width:calc(100% - 28px);max-width:380px;
+}
+.liquid-nav{
+  background:rgba(8,8,8,0.92);backdrop-filter:blur(28px);
+  -webkit-backdrop-filter:blur(28px);
+  border:1px solid var(--b-hairline);
+  border-radius:99px;
+  padding:8px 10px 8px 12px;
+  display:flex;align-items:center;gap:2px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(201,169,97,0.04);
+  position:relative;
+}
+.brilli-status{
+  width:8px;height:8px;border-radius:50%;
+  background:radial-gradient(circle,var(--gold-1),var(--gold-3));
+  box-shadow:0 0 6px rgba(201,169,97,0.55);
+  flex-shrink:0;margin-right:6px;
+  animation:statusPulse 3s ease-in-out infinite;
+}
+@keyframes statusPulse{0%,100%{opacity:0.55;transform:scale(0.92)}50%{opacity:1;transform:scale(1.1)}}
+
+.liquid-tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 4px;border-radius:99px;
+  color:var(--b-text-muted);cursor:pointer;text-decoration:none;
+  transition:all 0.25s;position:relative;
+}
+.liquid-tab svg{width:18px;height:18px}
+.liquid-tab span{
+  font-size:9px;letter-spacing:0.06em;font-weight:500;
+  text-transform:uppercase;color:var(--b-text-dim);
+}
+.liquid-tab.active{color:var(--gold-2)}
+.liquid-tab.active span{color:var(--gold-3)}
+.liquid-tab.active::after{
+  content:'';position:absolute;
+  bottom:-2px;left:50%;transform:translateX(-50%);
+  width:14px;height:1px;background:var(--gold-3);
+}
+
+/* Status callout */
+.status-callout{
+  position:fixed;
+  bottom:calc(80px + var(--safe-bottom));
+  left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);
+  border:1px solid var(--gold-5);
+  border-radius:99px;padding:8px 14px;
+  font-family:'DM Sans',sans-serif;font-size:11px;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--gold-2);
+  display:flex;align-items:center;gap:8px;
+  opacity:0;animation:calloutFade 4s ease 1.5s forwards;
+  pointer-events:none;
+  z-index:40;
+  white-space:nowrap;
+}
+.status-callout::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--gold-3);box-shadow:0 0 8px var(--gold-3);
+}
+@keyframes calloutFade{
+  0%{opacity:0;transform:translate(-50%,8px)}
+  18%{opacity:1;transform:translate(-50%,0)}
+  82%{opacity:1;transform:translate(-50%,0)}
+  100%{opacity:0;transform:translate(-50%,-4px)}
+}
+
+/* Annotations */
+.annotations{
+  position:fixed;top:80px;right:14px;
+  z-index:25;
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+  max-width:220px;
+}
+.annotation{
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);
+  border:1px solid var(--b-hairline);
+  border-radius:8px;padding:10px 12px;
+  font-family:'DM Sans',sans-serif;font-size:10px;
+  color:var(--b-text-muted);line-height:1.5;
+  pointer-events:auto;
+}
+.annotation strong{color:var(--gold-2);font-weight:500;display:block;margin-bottom:2px;letter-spacing:0.18em;text-transform:uppercase;font-size:9px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <img src="/images/brilliance/monogram.png" alt="Brilliance">
+    <span class="name">Brilliance</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="topbar-btn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+    <button class="topbar-btn" aria-label="Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></button>
+  </div>
+</header>
+
+<div class="annotations">
+  <div class="annotation">
+    <strong>Top bar</strong>
+    Identity lockup at top-left. Tappable to a Settings &gt; About sheet that shows the full lockup.
+  </div>
+  <div class="annotation">
+    <strong>Brilli dot</strong>
+    Bottom-left of liquid-nav. Pulses softly during idle. Flashes on automation completion.
+  </div>
+  <div class="annotation">
+    <strong>Liquid-nav</strong>
+    Sidebar doesn't exist on mobile. The pill is the equivalent surface. Six tabs. Same as today, no rearrangement.
+  </div>
+</div>
+
+<main class="content">
+  <span class="delta-pill">v33.0 mobile preview</span>
+  <h1>Chat</h1>
+  <p class="sub">This is a placeholder for the chat view to demonstrate the rebranded chrome around it. The actual chat experience is unchanged. Brilli appears in the chat landing per the desktop spec.</p>
+
+  <div class="card">
+    <h3>What changed on mobile</h3>
+    <p>Top bar reads "Brilliance" with the existing app icon. The liquid-nav at the bottom gains a Brilli status dot at the left edge - the only new affordance. Six tabs unchanged in order, label, or icon.</p>
+  </div>
+  <div class="card">
+    <h3>What did NOT change</h3>
+    <p>Tab order. Tab icons. Active-tab gold underline. Backdrop blur. Pill width. Safe-area insets. Existing scroll-padding rules. The keyboard-close reflow hack stays per CLAUDE.md.</p>
+  </div>
+  <div class="card">
+    <h3>Settings &gt; About</h3>
+    <p>The full "Brilliance, Intelligence OS by RoweOS" lockup lives there on mobile. Reachable from Settings or by tapping the top bar identity.</p>
+  </div>
+</main>
+
+<div class="status-callout" aria-hidden="true">
+  Brilli &middot; Automation complete
+</div>
+
+<nav class="liquid-nav-wrap">
+  <div class="liquid-nav">
+    <span class="brilli-status" aria-label="Brilli active"></span>
+    <a class="liquid-tab active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4l-5 1.6 1.6-5A8.5 8.5 0 1 1 21 11.5Z"/></svg><span>Chat</span></a>
+    <a class="liquid-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Pulse</span></a>
+    <a class="liquid-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 11.5a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0Z"/><path d="m21 21-4.3-4.3"/></svg><span>Studio</span></a>
+    <a class="liquid-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2c-3 4-3 8 0 12 3 4 3 8 0 8M12 2c3 4 3 8 0 12-3 4-3 8 0 8"/></svg><span>Bloom</span></a>
+    <a class="liquid-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>ID</span></a>
+    <a class="liquid-tab" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="1.4"/><circle cx="6" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></svg><span>More</span></a>
+  </div>
+</nav>
+
+<script>
+/* Cycle the active tab every 2s for demo */
+(function(){
+  var tabs = document.querySelectorAll('.liquid-tab');
+  var idx = 0;
+  setInterval(function(){
+    tabs.forEach(function(t,i){t.classList.toggle('active', i===idx);});
+    idx = (idx + 1) % tabs.length;
+  }, 2400);
+})();
+</script>
+
+</body>
+</html>

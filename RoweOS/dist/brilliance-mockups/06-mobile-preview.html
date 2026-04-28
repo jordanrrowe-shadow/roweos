@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mobile Preview Hub - Brilliance v33</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+.wrap{max-width:1280px;margin:0 auto;padding:64px 24px}
+header{text-align:center;margin-bottom:48px;padding-bottom:36px;border-bottom:1px solid var(--b-hairline)}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-3);margin-bottom:18px}
+h1{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(32px,5vw,48px);line-height:1.1;color:var(--b-text);margin-bottom:18px;letter-spacing:-0.01em}
+h1 em{color:var(--gold-2);font-style:italic}
+.lead{font-size:15px;color:var(--b-text-muted);max-width:640px;margin:0 auto;line-height:1.85}
+
+.back-link{display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-muted);text-decoration:none;margin-bottom:32px}
+.back-link:hover{color:var(--gold-2)}
+
+.intro-card{background:rgba(201,169,97,0.04);border:1px solid var(--b-border);border-radius:6px;padding:24px 28px;margin-bottom:48px;font-size:14px;line-height:1.85;color:var(--b-text-muted)}
+.intro-card strong{color:var(--gold-2);font-weight:500}
+.intro-card a{color:var(--gold-2);text-decoration:none;border-bottom:1px solid var(--gold-5)}
+
+.frame-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:48px;align-items:start}
+.frame-card{display:flex;flex-direction:column;align-items:center;gap:20px}
+.frame-label{text-align:center}
+.frame-num{font-family:'Old Standard TT',serif;font-style:italic;font-size:14px;color:var(--gold-3);margin-bottom:6px}
+.frame-name{font-family:'Old Standard TT',serif;font-weight:400;font-size:22px;color:var(--b-text);margin-bottom:6px}
+.frame-name em{color:var(--gold-2);font-style:italic}
+.frame-desc{font-size:13px;color:var(--b-text-muted);max-width:340px;margin:0 auto;line-height:1.7}
+
+/* iPhone shell */
+.iphone{
+  width:340px;height:720px;
+  background:#000;
+  border-radius:48px;
+  padding:14px 12px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),inset 0 0 0 2px rgba(255,255,255,0.06),0 0 0 1px rgba(255,255,255,0.04);
+  position:relative;
+  overflow:hidden;
+}
+.iphone-screen{
+  width:100%;height:100%;
+  border-radius:34px;
+  overflow:hidden;
+  position:relative;
+  background:#0a0a0a;
+}
+.iphone-notch{
+  position:absolute;top:14px;left:50%;
+  transform:translateX(-50%);
+  width:108px;height:32px;
+  background:#000;border-radius:18px;
+  z-index:10;pointer-events:none;
+}
+.iphone-screen iframe{
+  width:100%;height:100%;border:none;
+  display:block;
+  background:#0a0a0a;
+}
+.iphone-link{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;
+  letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--b-text-muted);text-decoration:none;
+  border:1px solid var(--b-border);
+  padding:8px 14px;border-radius:99px;
+  transition:all 0.25s;
+}
+.iphone-link:hover{border-color:rgba(201,169,97,0.3);color:var(--gold-2)}
+
+footer{text-align:center;margin-top:80px;padding-top:36px;border-top:1px solid var(--b-hairline);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim)}
+footer strong{color:var(--gold-3);font-weight:500}
+
+@media (max-width:760px){
+  .iphone{width:300px;height:640px;border-radius:42px}
+  .iphone-screen{border-radius:28px}
+  .frame-grid{grid-template-columns:1fr;gap:36px}
+  h1{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <a href="/brilliance-mockups/00-index.html" class="back-link">&larr; All Mockups</a>
+
+  <header>
+    <p class="eyebrow">Mobile Preview Hub</p>
+    <h1>Every surface, <em>at iPhone width</em></h1>
+    <p class="lead">All five v33.0 surfaces previewed inside iPhone frames. Each frame is a real iframe rendering the same mockup file at iPhone width, so you can see exactly what mobile users will see. Hover the labels to open in a full mobile-sized browser tab.</p>
+  </header>
+
+  <div class="intro-card">
+    <strong>How to read this page.</strong> Each iPhone shell contains a real iframe loading the mockup. Frames render at 340x720 (close to iPhone 14 viewport at this scale). For an even more accurate test, open Safari on a real iPhone and visit the linked URLs below. Read the full mobile design considerations at <a href="/docs/brilliance/08-mobile-design-spec.md">docs/brilliance/08-mobile-design-spec.md</a>.
+  </div>
+
+  <div class="frame-grid">
+
+    <!-- 1. Welcome Modal -->
+    <div class="frame-card">
+      <div class="frame-label">
+        <p class="frame-num">i.</p>
+        <h2 class="frame-name">Welcome <em>modal</em></h2>
+        <p class="frame-desc">Full-bleed on mobile. Brilli at 180px. CTA expands to 80vw, sits above safe-area-inset-bottom.</p>
+      </div>
+      <div class="iphone">
+        <div class="iphone-notch"></div>
+        <div class="iphone-screen"><iframe src="/brilliance-mockups/02-welcome-modal.html" loading="lazy" title="Welcome modal mobile"></iframe></div>
+      </div>
+      <a class="iphone-link" href="/brilliance-mockups/02-welcome-modal.html" target="_blank">Open full size &rarr;</a>
+    </div>
+
+    <!-- 2. Launch Screen -->
+    <div class="frame-card">
+      <div class="frame-label">
+        <p class="frame-num">ii.</p>
+        <h2 class="frame-name">Launch <em>screen</em></h2>
+        <p class="frame-desc">Brilli at 200px. Wordmark scales via clamp. Loader pulse 32px above safe-area home indicator.</p>
+      </div>
+      <div class="iphone">
+        <div class="iphone-notch"></div>
+        <div class="iphone-screen"><iframe src="/brilliance-mockups/07-mobile-launch.html" loading="lazy" title="Mobile launch screen"></iframe></div>
+      </div>
+      <a class="iphone-link" href="/brilliance-mockups/07-mobile-launch.html" target="_blank">Open full size &rarr;</a>
+    </div>
+
+    <!-- 3. Liquid-Nav (mobile sidebar surrogate) -->
+    <div class="frame-card">
+      <div class="frame-label">
+        <p class="frame-num">iii.</p>
+        <h2 class="frame-name">Liquid-<em>nav</em></h2>
+        <p class="frame-desc">Mobile has no sidebar. The 50px liquid-nav pill is the equivalent. Brilli status dot at left edge.</p>
+      </div>
+      <div class="iphone">
+        <div class="iphone-notch"></div>
+        <div class="iphone-screen"><iframe src="/brilliance-mockups/08-mobile-liquid-nav.html" loading="lazy" title="Mobile liquid-nav rebrand"></iframe></div>
+      </div>
+      <a class="iphone-link" href="/brilliance-mockups/08-mobile-liquid-nav.html" target="_blank">Open full size &rarr;</a>
+    </div>
+
+    <!-- 4. /info Mobile -->
+    <div class="frame-card">
+      <div class="frame-label">
+        <p class="frame-num">iv.</p>
+        <h2 class="frame-name">/info <em>mobile</em></h2>
+        <p class="frame-desc">Hero stacks vertically. Two-col grids collapse. Cross-mode arrow rotates 90deg.</p>
+      </div>
+      <div class="iphone">
+        <div class="iphone-notch"></div>
+        <div class="iphone-screen"><iframe src="/brilliance-mockups/05-info-overhaul-preview.html" loading="lazy" title="/info mobile preview"></iframe></div>
+      </div>
+      <a class="iphone-link" href="/brilliance-mockups/05-info-overhaul-preview.html" target="_blank">Open full size &rarr;</a>
+    </div>
+
+    <!-- 5. Brilli Prototype Mobile -->
+    <div class="frame-card">
+      <div class="frame-label">
+        <p class="frame-num">v.</p>
+        <h2 class="frame-name">Brilli <em>prototype</em></h2>
+        <p class="frame-desc">Stage and controls stack vertically. Canvas scales to 320px max. Mode buttons in 2-col grid.</p>
+      </div>
+      <div class="iphone">
+        <div class="iphone-notch"></div>
+        <div class="iphone-screen"><iframe src="/brilliance-mockups/01-brilli-canvas-prototype.html" loading="lazy" title="Brilli prototype mobile"></iframe></div>
+      </div>
+      <a class="iphone-link" href="/brilliance-mockups/01-brilli-canvas-prototype.html" target="_blank">Open full size &rarr;</a>
+    </div>
+
+  </div>
+
+  <div class="intro-card" style="margin-top:64px">
+    <strong>Note on Brilli's form.</strong> Per the spec, the canvas module is implementation-flexible. Whether Brilli stays a firefly, becomes an orb, or takes another form, the surfaces above all keep their layout. The Brilli area is sized predictably at each viewport and can host any silhouette without rebuilding the surrounding screens.
+  </div>
+
+  <footer>
+    <p>Brilliance &middot; <strong>by RoweOS</strong> &middot; v33.0 mobile preview &middot; <a href="/brilliance-mockups/00-index.html" style="color:var(--b-text-muted);text-decoration:none">all mockups index</a></p>
+  </footer>
+</div>
+
+</body>
+</html>
