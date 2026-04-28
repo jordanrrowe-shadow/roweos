@@ -268,6 +268,11 @@ button{font-family:inherit}
   opacity:0;animation:b-fadeUp 1s var(--b-ease) 0.95s forwards;
 }
 .b-hero-sub strong{color:var(--gold-3);font-weight:500}
+.b-hero-sub-brand{display:inline}
+@media (max-width:520px){
+  .b-hero-sub{font-size:12px;letter-spacing:0.18em}
+  .b-hero-sub-brand{display:none}
+}
 .b-hero-ctas{
   display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
   opacity:0;animation:b-fadeUp 1s var(--b-ease) 1.15s forwards;
@@ -312,15 +317,229 @@ button{font-family:inherit}
 .b-manifesto-line{
   font-family:var(--b-serif);
   font-weight:400;
-  font-size:clamp(32px,5.2vw,68px);
+  font-size:clamp(30px,5.2vw,68px);
   line-height:1.18;
   letter-spacing:-0.01em;
   color:var(--b-text);
-  max-width:24ch;
+  max-width:none;
   margin:0 auto;
 }
 .b-manifesto-line em{font-style:italic;color:var(--gold-2)}
 .b-manifesto-line br{display:block}
+@media (max-width:520px){
+  .b-manifesto-line{font-size:30px;line-height:1.2}
+}
+
+/* ====================== CHAPTER OVERVIEW ====================== */
+.b-chapter-intro{
+  margin-top:48px;
+  font-family:var(--b-sans);
+  font-size:15.5px;
+  line-height:1.85;
+  color:var(--b-text-muted);
+  max-width:620px;
+  margin-left:auto;margin-right:auto;
+}
+.b-chapter-intro strong{color:var(--b-text);font-weight:500}
+.b-chapter-intro em{color:var(--gold-2);font-style:italic}
+
+.b-twocol{
+  margin-top:72px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  text-align:left;
+  max-width:980px;
+  margin-left:auto;margin-right:auto;
+  border-top:1px solid var(--b-hairline);
+  border-bottom:1px solid var(--b-hairline);
+}
+.b-twocol-col{
+  padding:48px 44px;
+  position:relative;
+}
+.b-twocol-col + .b-twocol-col{
+  border-left:1px solid var(--b-hairline);
+}
+.b-twocol-tag{
+  font-family:var(--b-sans);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--gold-3);
+  margin-bottom:14px;
+}
+.b-twocol-name{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:30px;
+  line-height:1.1;
+  color:var(--b-text);
+  margin-bottom:8px;
+}
+.b-twocol-name em{color:var(--gold-2);font-style:italic}
+.b-twocol-tagline{
+  font-family:var(--b-sans);
+  font-size:13px;
+  color:var(--b-text-muted);
+  margin-bottom:28px;
+  padding-bottom:22px;
+  border-bottom:1px solid var(--b-hairline);
+}
+.b-twocol-list{list-style:none;padding:0;margin:0}
+.b-twocol-list li{
+  display:flex;flex-direction:column;
+  gap:4px;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.b-twocol-list li:last-child{border-bottom:none}
+.b-twocol-list .b-feat-name{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:16px;
+  color:var(--gold-2);
+  letter-spacing:0.01em;
+}
+.b-twocol-list .b-feat-desc{
+  font-family:var(--b-sans);
+  font-size:13px;
+  line-height:1.6;
+  color:var(--b-text-muted);
+}
+@media (max-width:760px){
+  .b-twocol{grid-template-columns:1fr;border-left:none;border-right:none}
+  .b-twocol-col{padding:36px 24px}
+  .b-twocol-col + .b-twocol-col{border-left:none;border-top:1px solid var(--b-hairline)}
+}
+
+/* ====================== DIFFERENCE CARDS ====================== */
+.b-diff-grid{
+  margin-top:64px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  max-width:980px;
+  margin-left:auto;margin-right:auto;
+  text-align:left;
+}
+.b-diff-card{
+  padding:36px 32px;
+  background:var(--b-surface);
+  border:1px solid var(--b-border);
+  border-radius:4px;
+  transition:all 0.4s var(--b-ease);
+}
+.b-diff-card:hover{
+  border-color:var(--b-border-gold);
+  background:rgba(201,169,97,0.025);
+  transform:translateY(-2px);
+}
+.b-diff-num{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:16px;
+  color:var(--gold-3);
+  margin-bottom:14px;
+}
+.b-diff-title{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:24px;
+  line-height:1.2;
+  color:var(--b-text);
+  margin-bottom:14px;
+  letter-spacing:-0.005em;
+}
+.b-diff-title em{color:var(--gold-2);font-style:italic}
+.b-diff-them{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-size:14px;
+  line-height:1.6;
+  color:var(--b-text-dim);
+  margin-bottom:16px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--b-hairline);
+}
+.b-diff-us{
+  font-family:var(--b-sans);
+  font-size:14.5px;
+  line-height:1.7;
+  color:var(--b-text);
+}
+.b-diff-us strong{color:var(--gold-2);font-weight:500}
+
+/* ====================== BRILLI INTERLUDE ====================== */
+.b-brilli{
+  padding:clamp(80px,12vw,140px) 28px;
+  background:var(--b-bg);
+  border-top:1px solid var(--b-hairline);
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.b-brilli-orb{
+  width:120px;height:120px;
+  margin:0 auto 36px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,var(--gold-1),var(--gold-3) 45%,var(--gold-5) 100%);
+  box-shadow:0 0 80px rgba(201,169,97,0.35),inset -10px -16px 40px rgba(0,0,0,0.35),inset 8px 10px 28px rgba(255,255,255,0.18);
+  position:relative;
+  animation:b-glow 6s ease-in-out infinite;
+}
+.b-brilli-orb::after{
+  content:'';position:absolute;
+  top:18%;left:24%;
+  width:22px;height:22px;
+  border-radius:50%;
+  background:radial-gradient(circle,#fff,transparent 70%);
+  filter:blur(2px);
+  opacity:0.85;
+}
+.b-brilli-eyebrow{
+  font-family:var(--b-sans);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--gold-3);
+  margin-bottom:18px;
+}
+.b-brilli-name{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:clamp(40px,5.6vw,68px);
+  line-height:1.1;
+  color:var(--b-text);
+  margin-bottom:24px;
+  letter-spacing:-0.01em;
+}
+.b-brilli-name em{font-style:italic;color:var(--gold-2)}
+.b-brilli-body{
+  font-family:var(--b-sans);
+  font-size:15.5px;
+  line-height:1.85;
+  color:var(--b-text-muted);
+  max-width:560px;
+  margin:0 auto 22px;
+}
+.b-brilli-body strong{color:var(--b-text);font-weight:500}
+.b-brilli-meta{
+  font-family:var(--b-sans);
+  font-size:10px;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+}
+.b-brilli-meta strong{color:var(--gold-3);font-weight:500}
+@media (max-width:760px){
+  .b-diff-grid{grid-template-columns:1fr;gap:14px}
+  .b-diff-card{padding:28px 24px}
+}
 
 /* ====================== BACKED BY GOOGLE ====================== */
 .b-backed{
@@ -578,7 +797,7 @@ button{font-family:inherit}
   <h1 class="b-hero-headline">Be <em>Brilliant</em>.</h1>
 
   <p class="b-hero-sub">
-    Brilliance &nbsp;·&nbsp; <strong>Intelligence OS</strong> &nbsp;·&nbsp; by RoweOS
+    <span class="b-hero-sub-brand">Brilliance &nbsp;·&nbsp; </span><strong>Intelligence OS</strong> &nbsp;·&nbsp; by RoweOS
   </p>
 
   <div class="b-hero-ctas">
@@ -589,12 +808,48 @@ button{font-family:inherit}
   <p class="b-hero-trust"><strong>Backed by</strong> &nbsp;·&nbsp; Google for Startups</p>
 </section>
 
-<!-- =================== MANIFESTO 1 =================== -->
+<!-- =================== CHAPTER I — THESIS / BRAND + LIFE =================== -->
 <section class="b-manifesto">
-  <div>
+  <div class="b-container">
     <div class="b-manifesto-rule" aria-hidden="true"></div>
-    <p class="b-manifesto-eyebrow">The Thesis</p>
+    <p class="b-manifesto-eyebrow">Chapter i &nbsp;·&nbsp; The Thesis</p>
     <p class="b-manifesto-line">The operating system<br>for <em>brilliant work</em>.</p>
+
+    <p class="b-chapter-intro">
+      Brand and life are not separate problems. They share the same operator. Brilliance treats both as one system, with two modes that act on their own context and inform each other when it matters.
+    </p>
+
+    <div class="b-twocol">
+      <div class="b-twocol-col">
+        <p class="b-twocol-tag">Mode I</p>
+        <h3 class="b-twocol-name"><em>Brand</em>AI</h3>
+        <p class="b-twocol-tagline">Eight agents. One brand identity at the core.</p>
+        <ul class="b-twocol-list">
+          <li><span class="b-feat-name">Identity Substrate</span><span class="b-feat-desc">Voice and standards injected into every output.</span></li>
+          <li><span class="b-feat-name">Studio</span><span class="b-feat-desc">150+ operations. Run one. Pipe many.</span></li>
+          <li><span class="b-feat-name">Bloom</span><span class="b-feat-desc">Twenty fresh brand angles on demand.</span></li>
+          <li><span class="b-feat-name">Library</span><span class="b-feat-desc">Your work, indexed across every brand.</span></li>
+          <li><span class="b-feat-name">Automations</span><span class="b-feat-desc">Multi-step pipelines and scheduled work.</span></li>
+        </ul>
+      </div>
+
+      <div class="b-twocol-col">
+        <p class="b-twocol-tag">Mode II</p>
+        <h3 class="b-twocol-name"><em>Life</em>AI</h3>
+        <p class="b-twocol-tagline">Five coaches. The operator behind the work.</p>
+        <ul class="b-twocol-list">
+          <li><span class="b-feat-name">Pulse</span><span class="b-feat-desc">Goals, calendar, rhythm in one frame.</span></li>
+          <li><span class="b-feat-name">Identity Intelligence</span><span class="b-feat-desc">Finances, health, family understood deeply.</span></li>
+          <li><span class="b-feat-name">Tax Copilot</span><span class="b-feat-desc">Aware of every brand's revenue, year-round.</span></li>
+          <li><span class="b-feat-name">Wellness Guide</span><span class="b-feat-desc">Sleep, training, recovery, mind.</span></li>
+          <li><span class="b-feat-name">Reminders</span><span class="b-feat-desc">Goals tracked alongside the work they support.</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="b-chapter-intro" style="margin-top:48px;font-style:italic;font-family:var(--b-serif);font-size:18px;color:var(--b-text);">
+      Brand and life share a single memory. <em>Cross-mode intelligence is the moat</em>.
+    </p>
   </div>
 </section>
 
@@ -623,6 +878,17 @@ button{font-family:inherit}
   </div>
 </section>
 
+<!-- =================== MEET BRILLI =================== -->
+<section class="b-brilli">
+  <div class="b-brilli-orb" aria-hidden="true"></div>
+  <p class="b-brilli-eyebrow">Coming to Brilliance</p>
+  <h3 class="b-brilli-name">Meet <em>Brilli</em>.</h3>
+  <p class="b-brilli-body">
+    The platform's voice. A single intelligence that knows your brand, your day, and your standards. <strong>Not another chatbot.</strong> The conversation Brilliance has with you.
+  </p>
+  <p class="b-brilli-meta"><strong>In development</strong> &nbsp;·&nbsp; Founding Members first</p>
+</section>
+
 <!-- =================== WHAT IT IS =================== -->
 <section class="b-what">
   <img src="/images/brilliance/wordmark-os.png" alt="Brilliance, Intelligence OS" class="b-what-wordmark">
@@ -636,21 +902,46 @@ button{font-family:inherit}
   </a>
 </section>
 
-<!-- =================== MANIFESTO 3 =================== -->
+<!-- =================== CHAPTER III — THE DIFFERENCE =================== -->
 <section class="b-manifesto">
-  <div>
+  <div class="b-container">
     <div class="b-manifesto-rule" aria-hidden="true"></div>
-    <p class="b-manifesto-eyebrow">The difference</p>
+    <p class="b-manifesto-eyebrow">Chapter iii &nbsp;·&nbsp; The Difference</p>
     <p class="b-manifesto-line">Less noise.<br><em>Pure brilliance</em>.</p>
-  </div>
-</section>
 
-<!-- =================== MANIFESTO 4 =================== -->
-<section class="b-manifesto">
-  <div>
-    <div class="b-manifesto-rule" aria-hidden="true"></div>
-    <p class="b-manifesto-eyebrow">At long last</p>
-    <p class="b-manifesto-line">Finally, a platform<br>as <em>brilliant as you</em>.</p>
+    <p class="b-chapter-intro">
+      Most AI products are a thin wrapper on someone else's model. Brilliance is built on four decisions that compound into the difference operators feel.
+    </p>
+
+    <div class="b-diff-grid">
+      <article class="b-diff-card">
+        <p class="b-diff-num">i.</p>
+        <h3 class="b-diff-title">Sovereign by <em>design</em>.</h3>
+        <p class="b-diff-them">Most platforms hold your data and mediate every prompt.</p>
+        <p class="b-diff-us">Brilliance routes <strong>browser-direct</strong> to the model. We do not see, store, or relay your work.</p>
+      </article>
+
+      <article class="b-diff-card">
+        <p class="b-diff-num">ii.</p>
+        <h3 class="b-diff-title">Identity at the <em>infrastructure level</em>.</h3>
+        <p class="b-diff-them">Most platforms make you paste your brand into every prompt.</p>
+        <p class="b-diff-us">Brilliance <strong>injects your identity</strong> before the model sees the request. Your brand is the prompt.</p>
+      </article>
+
+      <article class="b-diff-card">
+        <p class="b-diff-num">iii.</p>
+        <h3 class="b-diff-title">Cross-mode <em>intelligence</em>.</h3>
+        <p class="b-diff-them">Most platforms silo brand work from personal life.</p>
+        <p class="b-diff-us">Brand and life share <strong>one memory</strong>. Your Tax Copilot sees every brand's revenue.</p>
+      </article>
+
+      <article class="b-diff-card">
+        <p class="b-diff-num">iv.</p>
+        <h3 class="b-diff-title">Multi-model <em>routing</em>.</h3>
+        <p class="b-diff-them">Most platforms lock you to one model family.</p>
+        <p class="b-diff-us">Claude, Gemini, GPT. Brilliance <strong>routes intelligently</strong> and falls back gracefully.</p>
+      </article>
+    </div>
   </div>
 </section>
 
@@ -661,7 +952,7 @@ button{font-family:inherit}
   <img src="/images/brilliance/monogram-circle.png" alt="Brilliance" class="b-invitation-mark">
 
   <h2 class="b-invitation-headline">
-    Stop settling. <em>Start brilliant</em>.
+    Finally, a platform<br>as <em>brilliant as you</em>.
   </h2>
 
   <p class="b-invitation-sub">
