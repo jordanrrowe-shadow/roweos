@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Evolve - Brilliance v33.5</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+  --paper:#ece4d8;
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+
+/* Top bar */
+.bar{position:sticky;top:0;z-index:50;background:rgba(0,0,0,0.85);backdrop-filter:blur(28px);border-bottom:1px solid var(--b-hairline);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.bar-left{display:flex;align-items:center;gap:18px;flex:1;min-width:0}
+.bar-back{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.bar-back:hover{color:var(--gold-2)}
+.bar-divider{width:1px;height:18px;background:var(--b-hairline)}
+.bar-info{display:flex;flex-direction:column}
+.bar-num{font-family:'Old Standard TT',serif;font-style:italic;font-size:11px;color:var(--gold-3);line-height:1}
+.bar-name{font-family:'Old Standard TT',serif;font-size:18px;color:var(--b-text);letter-spacing:-0.005em;line-height:1.2}
+.bar-name em{color:var(--gold-2);font-style:italic}
+.tabs{display:flex;background:rgba(255,255,255,0.04);border:1px solid var(--b-hairline);border-radius:99px;padding:3px}
+.tab{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;background:transparent;border:none;color:var(--b-text-muted);padding:8px 18px;border-radius:99px;cursor:pointer;transition:all 0.25s}
+.tab:hover{color:var(--gold-2)}
+.tab.active{background:rgba(201,169,97,0.15);color:var(--gold-1)}
+
+/* Stage */
+.stage{display:flex;align-items:center;justify-content:center;padding:24px;min-height:calc(100vh - 60px);background:radial-gradient(ellipse at 50% 40%,rgba(201,169,97,0.04),var(--b-bg) 70%)}
+.stage-desktop{width:100%;max-width:1280px;height:calc(100vh - 110px);background:var(--b-bg);border:1px solid var(--b-hairline);border-radius:8px;overflow:hidden;box-shadow:0 12px 60px rgba(0,0,0,0.4)}
+.stage-mobile{width:380px;height:760px;background:#000;border-radius:46px;padding:14px 12px;box-shadow:0 24px 80px rgba(0,0,0,0.5),inset 0 0 0 2px rgba(255,255,255,0.06);position:relative}
+.stage-mobile .phone-screen{width:100%;height:100%;border-radius:34px;overflow:hidden;background:var(--b-bg);position:relative}
+.stage-mobile .phone-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:108px;height:30px;background:#000;border-radius:18px;z-index:10;pointer-events:none}
+
+/* Evolve Layout */
+.evolve{height:100%;display:grid;grid-template-columns:240px 1fr;background:#0a0a0a;font-family:'DM Sans',sans-serif}
+.evolve-side{background:#080808;border-right:1px solid var(--b-hairline);display:flex;flex-direction:column;overflow:hidden}
+.evolve-side-head{padding:24px 22px 18px;border-bottom:1px solid var(--b-hairline)}
+.evolve-side-head h2{font-family:'Old Standard TT',serif;font-weight:400;font-size:24px;color:var(--gold-2);letter-spacing:-0.01em;line-height:1}
+.evolve-side-head h2 em{font-style:italic;color:var(--gold-1)}
+.evolve-side-head p{font-size:11px;color:var(--b-text-dim);letter-spacing:0.18em;text-transform:uppercase;margin-top:6px;font-weight:500}
+.evolve-tabs{padding:14px 12px;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid var(--b-hairline)}
+.evolve-tab{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:6px;color:var(--b-text-muted);cursor:pointer;font-size:13px;text-decoration:none;transition:all 0.2s}
+.evolve-tab:hover{background:rgba(255,255,255,0.03);color:var(--b-text)}
+.evolve-tab.active{background:rgba(201,169,97,0.10);color:var(--gold-2)}
+.evolve-tab svg{width:16px;height:16px;flex-shrink:0}
+.evolve-list{flex:1;overflow-y:auto;padding:10px 12px}
+.evolve-list-head{font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);padding:14px 14px 8px;font-weight:500}
+.evolve-list-item{padding:10px 14px;border-radius:6px;cursor:pointer;font-size:12.5px;color:var(--b-text-muted);display:flex;justify-content:space-between;align-items:center}
+.evolve-list-item:hover{background:rgba(255,255,255,0.03);color:var(--b-text)}
+.evolve-list-item.selected{background:rgba(201,169,97,0.06);color:var(--gold-2)}
+.evolve-list-item .level{font-size:10px;color:var(--gold-3);font-style:italic;font-family:'Old Standard TT',serif}
+.evolve-list-item .level em{font-style:italic}
+
+/* Main pane */
+.evolve-main{padding:0;overflow-y:auto;position:relative;display:flex;flex-direction:column}
+
+/* Tab: Skills (Constellation) */
+.evolve-skills{flex:1;position:relative;background:radial-gradient(ellipse at 50% 50%,rgba(201,169,97,0.05),#0a0a0a 70%);overflow:hidden}
+.evolve-skills svg.lines{position:absolute;inset:0;width:100%;height:100%}
+.evolve-skills .skill-node{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transform:translate(-50%,-50%)}
+.evolve-skills .skill-dot{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,#fff8e8,rgba(201,169,97,0.4) 60%,transparent);animation:tw 3s ease-in-out infinite}
+.evolve-skills .skill-dot.l5{width:24px;height:24px;background:radial-gradient(circle,#fff8e8,rgba(201,169,97,0.6) 50%,transparent)}
+.evolve-skills .skill-dot.l4{width:21px;height:21px}
+.evolve-skills .skill-dot.l2{width:14px;height:14px;opacity:0.8}
+.evolve-skills .skill-dot.l1{width:11px;height:11px;opacity:0.6}
+.evolve-skills .skill-name{font-family:'Old Standard TT',serif;font-size:12px;color:var(--gold-2);font-style:italic;text-shadow:0 0 12px rgba(0,0,0,0.7);white-space:nowrap}
+.evolve-skills .skill-meta{font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--b-text-dim);margin-top:-2px}
+@keyframes tw{0%,100%{opacity:0.65;transform:scale(0.92)}50%{opacity:1;transform:scale(1.1)}}
+.evolve-skills .domain-label{position:absolute;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-4);opacity:0.6}
+
+/* Detail panel */
+.evolve-detail{position:absolute;right:24px;bottom:24px;width:340px;background:rgba(13,13,13,0.95);backdrop-filter:blur(20px);border:1px solid var(--b-border);border-radius:8px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,0.5)}
+.evolve-detail-tag{font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);margin-bottom:8px;font-weight:500}
+.evolve-detail h3{font-family:'Old Standard TT',serif;font-weight:400;font-size:22px;color:var(--b-text);margin-bottom:6px;letter-spacing:-0.005em}
+.evolve-detail h3 em{color:var(--gold-2);font-style:italic}
+.evolve-detail .level-bar{display:flex;gap:3px;margin:14px 0 8px}
+.evolve-detail .lv{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px}
+.evolve-detail .lv.on{background:linear-gradient(90deg,var(--gold-3),var(--gold-1))}
+.evolve-detail-body{font-size:13px;color:var(--b-text-muted);line-height:1.65;margin-bottom:14px}
+.evolve-detail-meta{display:flex;justify-content:space-between;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--b-text-dim);padding-top:14px;border-top:1px solid var(--b-hairline)}
+.evolve-detail-meta strong{color:var(--gold-3);font-weight:500}
+
+/* Tab: Sources (Living Document) */
+.evolve-sources{flex:1;overflow-y:auto;padding:48px 64px;font-family:'Old Standard TT',serif;color:var(--b-text);max-width:840px;margin:0 auto;width:100%}
+.evolve-sources .head{font-style:italic;font-size:24px;color:var(--gold-2);margin-bottom:6px}
+.evolve-sources .meta{font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim);margin-bottom:32px;font-weight:500}
+.evolve-sources h3{font-family:'Old Standard TT',serif;font-weight:400;font-size:18px;color:var(--gold-3);font-style:italic;margin:32px 0 12px}
+.evolve-sources p{font-size:15px;line-height:1.85;color:var(--b-text-muted);margin-bottom:14px}
+.evolve-sources p strong{color:var(--b-text);font-weight:500}
+.evolve-sources .takeaway{padding:14px 18px;border-left:1px solid var(--gold-5);background:rgba(201,169,97,0.04);font-size:14px;line-height:1.7;color:var(--gold-2);font-style:italic;margin:14px 0;border-radius:0 4px 4px 0}
+.evolve-sources .retention{margin:24px 0;padding:18px 20px;background:rgba(255,255,255,0.02);border:1px solid var(--b-border);border-radius:6px;font-family:'DM Sans',sans-serif}
+.evolve-sources .retention .lab{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-3);margin-bottom:8px;font-weight:500}
+.evolve-sources .retention .q{font-family:'Old Standard TT',serif;font-style:italic;font-size:16px;color:var(--b-text);margin-bottom:6px}
+.evolve-sources .retention .a{font-size:12px;color:var(--b-text-dim);line-height:1.6}
+
+/* Tab: Reflections (Letter Series cream) */
+.evolve-reflections{flex:1;background:#15110c;padding:32px;overflow-y:auto;display:flex;flex-direction:column;gap:18px;align-items:center}
+.evolve-reflections .letter{background:#ece4d8;color:#3a2c1e;padding:36px 44px;max-width:680px;width:100%;border-radius:2px;box-shadow:0 8px 32px rgba(0,0,0,0.45);position:relative;font-family:'Old Standard TT',serif}
+.evolve-reflections .letter::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(168,138,74,0.06),transparent 70%);pointer-events:none}
+.evolve-reflections .letter .meta{font-size:10px;color:#a88a4a;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:10px;font-family:'DM Sans',sans-serif;font-weight:500}
+.evolve-reflections .letter .body{font-size:14px;line-height:1.75;color:#5a4520}
+.evolve-reflections .letter .skill-tag{display:inline-block;font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:#a88a4a;background:rgba(168,138,74,0.10);padding:4px 10px;border-radius:99px;margin-top:14px}
+
+/* Tab: SOPs (Pinboard) */
+.evolve-sops{flex:1;background:#0a0a0a;background-image:radial-gradient(rgba(255,255,255,0.04) 1px,transparent 1px);background-size:18px 18px;position:relative;overflow:hidden}
+.evolve-sops .sop-card{position:absolute;background:rgba(20,18,14,0.95);border:1px solid var(--b-border);border-radius:6px;padding:14px 16px;width:240px;box-shadow:0 8px 24px rgba(0,0,0,0.5);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--b-text-muted)}
+.evolve-sops .sop-card.gold{border-color:var(--gold-5);background:rgba(201,169,97,0.05)}
+.evolve-sops .sop-card .pin{position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,#fff8e8,#a88a4a);box-shadow:0 2px 6px rgba(0,0,0,0.6)}
+.evolve-sops .sop-card .ptag{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-3);margin-bottom:6px;font-weight:500}
+.evolve-sops .sop-card h4{font-family:'Old Standard TT',serif;font-weight:400;font-size:15px;color:var(--b-text);margin-bottom:6px;font-style:italic}
+.evolve-sops svg.threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+/* Tab: Repetition (Negative Space) */
+.evolve-repetition{flex:1;background:#0a0a0a;display:flex;align-items:center;justify-content:center;padding:48px;position:relative;flex-direction:column;gap:32px}
+.evolve-repetition .quiet-tag{font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-3);font-weight:500}
+.evolve-repetition .question{font-family:'Old Standard TT',serif;font-style:italic;font-size:32px;color:var(--gold-2);text-align:center;line-height:1.45;max-width:580px}
+.evolve-repetition .actions{display:flex;gap:12px}
+.evolve-repetition .actions button{padding:10px 22px;background:transparent;border:1px solid var(--gold-5);color:var(--gold-2);border-radius:99px;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;cursor:pointer;font-weight:500}
+.evolve-repetition .actions button:hover{background:rgba(201,169,97,0.05);border-color:var(--gold-3)}
+.evolve-repetition .brilli{position:absolute;bottom:48px;left:50%;transform:translateX(-50%);width:42px;height:42px;border-radius:50%;background:radial-gradient(circle,var(--gold-1),rgba(168,138,74,0.4) 70%,transparent);box-shadow:0 0 28px rgba(201,169,97,0.5);animation:tw 3s ease-in-out infinite}
+.evolve-repetition .skill-context{position:absolute;top:32px;left:50%;transform:translateX(-50%);font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim)}
+.evolve-repetition .skill-context strong{color:var(--gold-3);font-weight:500}
+
+/* Mobile responsive */
+.stage-mobile .evolve{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+.stage-mobile .evolve-side{border-right:none;border-bottom:1px solid var(--b-hairline);max-height:180px}
+.stage-mobile .evolve-side-head{padding:18px 16px 12px}
+.stage-mobile .evolve-side-head h2{font-size:18px}
+.stage-mobile .evolve-tabs{flex-direction:row;flex-wrap:wrap;padding:8px 8px;border-bottom:none}
+.stage-mobile .evolve-tab{flex:1;min-width:30%;justify-content:center;font-size:11px;padding:8px 10px}
+.stage-mobile .evolve-tab svg{display:none}
+.stage-mobile .evolve-list{display:none}
+.stage-mobile .evolve-skills .skill-name{font-size:10px}
+.stage-mobile .evolve-detail{position:fixed;left:14px;right:14px;bottom:14px;width:auto;padding:18px}
+.stage-mobile .evolve-sources{padding:24px 22px}
+.stage-mobile .evolve-sources .head{font-size:18px}
+.stage-mobile .evolve-sources p{font-size:13px}
+.stage-mobile .evolve-reflections{padding:14px}
+.stage-mobile .evolve-reflections .letter{padding:24px 22px}
+.stage-mobile .evolve-reflections .letter .body{font-size:13px}
+.stage-mobile .evolve-repetition .question{font-size:22px}
+.stage-mobile .evolve-sops .sop-card{width:160px;font-size:11px}
+
+@media (max-width:760px){
+  .stage-desktop{display:none !important}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-left">
+    <a href="/brilliance-mockups/00-index.html" class="bar-back">&larr; Mockups</a>
+    <span class="bar-divider"></span>
+    <div class="bar-info">
+      <p class="bar-num">v33.5 / new view</p>
+      <h1 class="bar-name"><em>Evolve</em></h1>
+    </div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-mode="desktop">Desktop</button>
+    <button class="tab" data-mode="mobile">Mobile</button>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="stage-desktop" id="stageDesktop"></div>
+  <div class="stage-mobile" id="stageMobile" style="display:none">
+    <div class="phone-notch"></div>
+    <div class="phone-screen" id="stageMobileInner"></div>
+  </div>
+</div>
+
+<script>
+function renderEvolve(){
+  return `
+<div class="evolve">
+  <aside class="evolve-side">
+    <div class="evolve-side-head">
+      <h2><em>Evolve</em></h2>
+      <p>Skills &middot; Brand SOPs</p>
+    </div>
+    <nav class="evolve-tabs">
+      <a class="evolve-tab active" data-tab="skills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/><circle cx="6" cy="6" r="1.5"/><circle cx="18" cy="6" r="1.5"/><circle cx="6" cy="18" r="1.5"/></svg>Skills</a>
+      <a class="evolve-tab" data-tab="sources"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h12a4 4 0 0 1 4 4v14H8a4 4 0 0 1-4-4V4z"/><path d="M4 4l4 4M4 18h16"/></svg>Sources</a>
+      <a class="evolve-tab" data-tab="reflections"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4l-5 1.6 1.6-5A8.5 8.5 0 1 1 21 11.5Z"/></svg>Reflections</a>
+      <a class="evolve-tab" data-tab="sops"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg>Brand SOPs</a>
+      <a class="evolve-tab" data-tab="repetition"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Repetition</a>
+    </nav>
+    <div class="evolve-list">
+      <p class="evolve-list-head">Active skills</p>
+      <div class="evolve-list-item selected">November cadence <span class="level">L<em>iv</em></span></div>
+      <div class="evolve-list-item">Tax posture <span class="level">L<em>iii</em></span></div>
+      <div class="evolve-list-item">Concise email <span class="level">L<em>iv</em></span></div>
+      <div class="evolve-list-item">Wellness rhythm <span class="level">L<em>ii</em></span></div>
+      <div class="evolve-list-item">Reserve voice <span class="level">L<em>v</em></span></div>
+      <div class="evolve-list-item">Strategy reading <span class="level">L<em>ii</em></span></div>
+      <p class="evolve-list-head" style="margin-top:14px">Recent sources</p>
+      <div class="evolve-list-item">Atomic Habits</div>
+      <div class="evolve-list-item">Inversion - Charlie Munger</div>
+      <div class="evolve-list-item">Hospitality at scale</div>
+    </div>
+  </aside>
+  <main class="evolve-main">
+    <div class="evolve-skills" id="evolveSkills">
+      <svg class="lines" viewBox="0 0 1000 600" preserveAspectRatio="none">
+        <line x1="500" y1="280" x2="280" y2="160" stroke="rgba(232,199,155,0.35)" stroke-width="0.8"/>
+        <line x1="500" y1="280" x2="720" y2="200" stroke="rgba(232,199,155,0.35)" stroke-width="0.8"/>
+        <line x1="500" y1="280" x2="380" y2="420" stroke="rgba(232,199,155,0.25)" stroke-width="0.8"/>
+        <line x1="500" y1="280" x2="700" y2="420" stroke="rgba(232,199,155,0.25)" stroke-width="0.8"/>
+        <line x1="280" y1="160" x2="180" y2="280" stroke="rgba(232,199,155,0.18)" stroke-width="0.8"/>
+        <line x1="720" y1="200" x2="850" y2="280" stroke="rgba(232,199,155,0.18)" stroke-width="0.8"/>
+        <line x1="380" y1="420" x2="240" y2="500" stroke="rgba(232,199,155,0.18)" stroke-width="0.8"/>
+        <line x1="700" y1="420" x2="820" y2="500" stroke="rgba(232,199,155,0.18)" stroke-width="0.8"/>
+      </svg>
+      <p class="domain-label" style="top:10%;left:10%">Brand &middot; Reserve</p>
+      <p class="domain-label" style="top:62%;right:14%">Life</p>
+
+      <div class="skill-node" style="top:46%;left:50%">
+        <span class="skill-dot l5"></span>
+        <span class="skill-name">Reserve voice</span>
+        <span class="skill-meta">Level v &middot; Brand</span>
+      </div>
+      <div class="skill-node" style="top:26%;left:28%">
+        <span class="skill-dot l4"></span>
+        <span class="skill-name">November cadence</span>
+        <span class="skill-meta">Level iv</span>
+      </div>
+      <div class="skill-node" style="top:33%;left:72%">
+        <span class="skill-dot l4"></span>
+        <span class="skill-name">Concise email</span>
+        <span class="skill-meta">Level iv</span>
+      </div>
+      <div class="skill-node" style="top:70%;left:38%">
+        <span class="skill-dot l3"></span>
+        <span class="skill-name">Tax posture</span>
+        <span class="skill-meta">Level iii &middot; Life</span>
+      </div>
+      <div class="skill-node" style="top:70%;left:70%">
+        <span class="skill-dot l2"></span>
+        <span class="skill-name">Wellness rhythm</span>
+        <span class="skill-meta">Level ii &middot; Life</span>
+      </div>
+      <div class="skill-node" style="top:46%;left:18%">
+        <span class="skill-dot l2"></span>
+        <span class="skill-name">Strategy reading</span>
+        <span class="skill-meta">Level ii</span>
+      </div>
+      <div class="skill-node" style="top:46%;left:85%">
+        <span class="skill-dot l1"></span>
+        <span class="skill-name">Spanish</span>
+        <span class="skill-meta">Level i &middot; Life</span>
+      </div>
+      <div class="skill-node" style="top:84%;left:24%">
+        <span class="skill-dot l1"></span>
+      </div>
+      <div class="skill-node" style="top:84%;left:80%">
+        <span class="skill-dot l1"></span>
+      </div>
+
+      <aside class="evolve-detail">
+        <p class="evolve-detail-tag">Selected skill</p>
+        <h3>November <em>cadence</em></h3>
+        <div class="level-bar">
+          <div class="lv on"></div><div class="lv on"></div><div class="lv on"></div><div class="lv on"></div><div class="lv"></div>
+        </div>
+        <p style="font-size:10px;color:var(--gold-3);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:14px">Level iv of v &middot; one to go</p>
+        <p class="evolve-detail-body">Tightening Reserve booking-window copy to two-line cadence on Threads. Audience that converted last fall responds to deliberate rhythm.</p>
+        <div class="evolve-detail-meta">
+          <span><strong>3</strong> sources</span>
+          <span><strong>11</strong> reflections</span>
+          <span><strong>9d</strong> streak</span>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>`;
+}
+
+(function(){
+  document.getElementById('stageDesktop').innerHTML = renderEvolve();
+  document.getElementById('stageMobileInner').innerHTML = renderEvolve();
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+      t.classList.add('active');
+      var m = t.dataset.mode;
+      document.getElementById('stageDesktop').style.display = m === 'desktop' ? 'block' : 'none';
+      document.getElementById('stageMobile').style.display = m === 'mobile' ? 'block' : 'none';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
