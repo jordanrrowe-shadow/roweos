@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Chat Interface Concepts - Brilliance v33</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+  --paper:#ece4d8; --paper-text:#3a2c1e;
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+.wrap{max-width:1320px;margin:0 auto;padding:64px 24px}
+
+.back-link{display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-muted);text-decoration:none;margin-bottom:32px}
+.back-link:hover{color:var(--gold-2)}
+
+header{text-align:center;margin-bottom:48px;padding-bottom:36px;border-bottom:1px solid var(--b-hairline)}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-3);margin-bottom:18px}
+h1{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(34px,5vw,56px);line-height:1.1;color:var(--b-text);margin-bottom:18px;letter-spacing:-0.01em}
+h1 em{color:var(--gold-2);font-style:italic}
+.lead{font-size:15px;color:var(--b-text-muted);max-width:680px;margin:0 auto;line-height:1.85}
+
+.intro{background:rgba(201,169,97,0.04);border:1px solid var(--b-border);border-radius:6px;padding:24px 28px;margin-bottom:48px;font-size:14px;line-height:1.85;color:var(--b-text-muted)}
+.intro strong{color:var(--gold-2);font-weight:500}
+
+.family-label{
+  font-family:'Old Standard TT',serif;font-weight:400;font-size:24px;
+  color:var(--b-text);margin:48px 0 8px;letter-spacing:-0.005em;
+}
+.family-label em{color:var(--gold-2);font-style:italic}
+.family-sub{font-size:13px;color:var(--b-text-muted);margin-bottom:24px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:18px}
+.concept{
+  background:var(--b-bg-elev);
+  border:1px solid var(--b-border);
+  border-radius:8px;
+  padding:0;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+.concept:hover{border-color:rgba(201,169,97,0.35);background:rgba(201,169,97,0.03);transform:translateY(-2px)}
+
+.concept-canvas{
+  height:240px;
+  background:var(--b-bg-deep);
+  position:relative;
+  overflow:hidden;
+}
+.concept-info{padding:20px 22px}
+.concept-num{font-family:'Old Standard TT',serif;font-style:italic;font-size:13px;color:var(--gold-3);margin-bottom:6px}
+.concept-name{
+  font-family:'Old Standard TT',serif;font-weight:400;
+  font-size:20px;color:var(--b-text);margin-bottom:6px;letter-spacing:-0.005em;
+}
+.concept-name em{color:var(--gold-2);font-style:italic}
+.concept-desc{font-size:13px;color:var(--b-text-muted);line-height:1.65;margin-bottom:12px}
+.concept-tags{display:flex;gap:6px;flex-wrap:wrap}
+.concept-tag{
+  display:inline-block;font-family:'DM Sans',sans-serif;
+  font-size:9px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;
+  padding:4px 9px;border-radius:99px;background:rgba(255,255,255,0.04);color:var(--b-text-dim);
+}
+.concept-tag.refined{background:rgba(168,138,74,0.10);color:var(--gold-3)}
+.concept-tag.bold{background:rgba(232,199,155,0.10);color:var(--gold-2)}
+.concept-tag.utility{background:rgba(255,255,255,0.05);color:var(--b-text-muted)}
+
+/* CONCEPT VISUAL STYLES (CSS-only, no canvas) */
+
+/* A1 - Living Document */
+.viz-document{padding:24px 28px;font-family:'Old Standard TT',serif;color:#ece4d8;background:linear-gradient(180deg,#0a0a0a,#0d0d0d)}
+.viz-document .pseudo-h{font-style:italic;font-size:14px;color:var(--gold-3);margin-bottom:8px}
+.viz-document .pseudo-p{font-size:13px;line-height:1.7;color:var(--b-text-muted);margin-bottom:14px}
+.viz-document .pseudo-p::after{content:'';display:inline-block;width:6px;height:13px;background:var(--gold-3);margin-left:3px;vertical-align:-2px;animation:caret 1s ease-in-out infinite}
+@keyframes caret{0%,100%{opacity:1}50%{opacity:0}}
+
+/* A2 - Letter */
+.viz-letter{padding:32px 36px;background:#ece4d8;color:#3a2c1e;font-family:'Old Standard TT',serif;height:100%;position:relative}
+.viz-letter::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(168,138,74,0.06),transparent 70%);pointer-events:none}
+.viz-letter .initial{font-size:48px;float:left;line-height:0.85;color:#a88a4a;margin:6px 8px 0 0;font-style:italic}
+.viz-letter .body{font-size:13px;line-height:1.55;color:#5a4520}
+.viz-letter .seal{position:absolute;bottom:16px;right:18px;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle,#c9a961,#6b5a3d);box-shadow:0 0 18px rgba(201,169,97,0.4);animation:sealPulse 4s ease-in-out infinite}
+@keyframes sealPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* A3 - Magazine */
+.viz-magazine{padding:0;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b-hairline);height:100%}
+.viz-magazine .col{padding:18px 16px;background:#0a0a0a;font-family:'Old Standard TT',serif;font-size:11px;line-height:1.55;color:var(--b-text-muted);overflow:hidden}
+.viz-magazine .col h4{font-size:14px;color:var(--gold-2);margin-bottom:8px;font-style:italic}
+.viz-magazine .pull{font-size:13px;color:var(--gold-2);margin:8px 0;font-style:italic;border-top:1px solid var(--b-hairline);border-bottom:1px solid var(--b-hairline);padding:8px 0}
+
+/* A4 - Margin Notes */
+.viz-margin{display:grid;grid-template-columns:1fr 2fr 1fr;gap:1px;background:var(--b-hairline);height:100%;padding:0}
+.viz-margin .pane{padding:14px 12px;background:#0a0a0a;font-family:'Old Standard TT',serif;font-size:10px;line-height:1.55;color:var(--b-text-muted)}
+.viz-margin .pane.center{font-size:13px;color:var(--gold-2);font-style:italic;background:#0d0d0d}
+.viz-margin .pane h5{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-3);margin-bottom:6px;font-family:'DM Sans',sans-serif;font-weight:500}
+
+/* B1 - Constellation */
+.viz-const{position:relative;height:100%;background:radial-gradient(ellipse at 50% 50%,rgba(201,169,97,0.06),#0a0a0a 70%)}
+.viz-const .node{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,#fff8e8,rgba(201,169,97,0.4) 60%,transparent);animation:twinkle 3s ease-in-out infinite}
+.viz-const .node.big{width:14px;height:14px}
+.viz-const .label{position:absolute;font-family:'Old Standard TT',serif;font-style:italic;font-size:9px;color:var(--gold-2);white-space:nowrap}
+@keyframes twinkle{0%,100%{opacity:0.6;transform:scale(0.95)}50%{opacity:1;transform:scale(1.1)}}
+.viz-const svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+/* B2 - Pinboard */
+.viz-pinboard{position:relative;height:100%;padding:16px;background:#0a0a0a;background-image:radial-gradient(rgba(255,255,255,0.03) 1px,transparent 1px);background-size:14px 14px}
+.viz-pinboard .card{position:absolute;background:rgba(20,18,14,0.88);border:1px solid var(--b-border);border-radius:4px;padding:10px;font-size:10px;line-height:1.4;color:var(--b-text-muted);box-shadow:0 4px 12px rgba(0,0,0,0.4);width:130px}
+.viz-pinboard .card.gold{border-color:var(--gold-5);background:rgba(201,169,97,0.06)}
+.viz-pinboard .card .pin{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:var(--gold-3);box-shadow:0 0 6px var(--gold-3)}
+.viz-pinboard svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+
+/* B3 - Time Ribbon */
+.viz-ribbon{display:flex;flex-direction:column;justify-content:center;height:100%;padding:24px;background:#0a0a0a;position:relative}
+.viz-ribbon .track{position:relative;height:1px;background:linear-gradient(90deg,transparent,var(--gold-4) 30%,var(--gold-3) 70%,transparent);margin:0 0 20px}
+.viz-ribbon .marker{position:absolute;top:-6px;width:1px;height:13px;background:var(--gold-3)}
+.viz-ribbon .marker.now{height:20px;top:-10px;background:var(--gold-1);box-shadow:0 0 10px var(--gold-3)}
+.viz-ribbon .marker .lab{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-family:'DM Sans',sans-serif;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--b-text-dim);white-space:nowrap}
+.viz-ribbon .preview{font-family:'Old Standard TT',serif;font-style:italic;font-size:13px;color:var(--gold-2);text-align:center;line-height:1.5;max-width:280px;margin:0 auto}
+
+/* C1 - Concierge */
+.viz-concierge{padding:24px;height:100%;background:linear-gradient(180deg,#0d0d0d,#0a0a0a);display:flex;flex-direction:column}
+.viz-concierge .greeting{font-family:'Old Standard TT',serif;font-style:italic;font-size:14px;color:var(--gold-2);margin-bottom:14px}
+.viz-concierge .row{display:flex;gap:8px;margin-bottom:8px;font-size:10px}
+.viz-concierge .row .lab{font-family:'DM Sans',sans-serif;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-3);flex-shrink:0;width:80px;font-weight:500}
+.viz-concierge .row .val{color:var(--b-text-muted);flex:1}
+.viz-concierge .input{margin-top:auto;background:rgba(255,255,255,0.04);border:1px solid var(--b-border);border-radius:99px;padding:8px 14px;font-size:11px;color:var(--b-text-dim);font-family:'DM Sans',sans-serif}
+
+/* C2 - Studio */
+.viz-studio{display:grid;grid-template-columns:1fr 80px;gap:1px;height:100%;background:var(--b-hairline)}
+.viz-studio .easel{background:#0d0d0d;display:flex;align-items:center;justify-content:center;padding:20px;position:relative}
+.viz-studio .easel .canvas-frame{width:80%;height:75%;background:rgba(232,199,155,0.06);border:1px solid var(--gold-5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Old Standard TT',serif;font-style:italic;font-size:13px;color:var(--gold-2)}
+.viz-studio .tools{background:#080808;display:flex;flex-direction:column;gap:8px;padding:12px 8px;align-items:center}
+.viz-studio .tool{width:32px;height:32px;background:rgba(255,255,255,0.04);border:1px solid var(--b-hairline);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--gold-3);font-size:14px;font-family:'Old Standard TT',serif;font-style:italic}
+
+/* D1 - Split Pane */
+.viz-split{display:grid;grid-template-columns:1fr 1fr;gap:1px;height:100%;background:var(--b-hairline)}
+.viz-split .pane{padding:18px;background:#0a0a0a;font-size:11px;line-height:1.55;color:var(--b-text-muted)}
+.viz-split .pane.left{background:linear-gradient(180deg,#0a0a0a,#0d0d0d)}
+.viz-split .pane.right{background:#0d0d0d}
+.viz-split .pane h5{font-family:'DM Sans',sans-serif;font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-3);margin-bottom:8px;font-weight:500}
+.viz-split .pane .b{font-family:'Old Standard TT',serif;font-size:12px;color:var(--b-text);margin-bottom:8px}
+.viz-split .pane .stream-line{height:8px;background:linear-gradient(90deg,var(--gold-3),var(--gold-5),transparent);margin:4px 0;border-radius:2px;animation:streamPulse 2s ease-in-out infinite}
+.viz-split .pane .stream-line:nth-child(2){width:80%}
+.viz-split .pane .stream-line:nth-child(3){width:60%}
+@keyframes streamPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.viz-split .gutter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,var(--gold-2),rgba(168,138,74,0.4) 60%,transparent);box-shadow:0 0 16px rgba(201,169,97,0.5);animation:twinkle 2s ease-in-out infinite}
+
+/* D2 - Dashboard Chat */
+.viz-dashboard{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;height:100%;background:var(--b-hairline);font-size:9px}
+.viz-dashboard .card{background:#0a0a0a;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.viz-dashboard .card.chat{grid-column:span 2;grid-row:span 2;background:#0d0d0d;font-family:'Old Standard TT',serif;font-size:11px;color:var(--gold-2);font-style:italic;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px}
+.viz-dashboard .card .lab{font-family:'DM Sans',sans-serif;font-size:8px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-3);font-weight:500}
+.viz-dashboard .card .val{font-family:'Old Standard TT',serif;font-size:14px;color:var(--b-text)}
+.viz-dashboard .card .delta{color:var(--gold-2);font-size:9px}
+
+/* E1 - Negative Space */
+.viz-negative{display:flex;align-items:center;justify-content:center;height:100%;background:#0a0a0a;position:relative;padding:32px}
+.viz-negative .line{font-family:'Old Standard TT',serif;font-size:18px;color:var(--gold-2);font-style:italic;text-align:center;line-height:1.5;max-width:240px}
+.viz-negative .dot{position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--gold-3);box-shadow:0 0 6px var(--gold-3);cursor:pointer}
+.viz-negative .brilli{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,var(--gold-1),rgba(168,138,74,0.5) 70%,transparent);box-shadow:0 0 14px rgba(201,169,97,0.5);animation:twinkle 3s ease-in-out infinite}
+
+footer{text-align:center;margin-top:80px;padding-top:36px;border-top:1px solid var(--b-hairline);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim)}
+footer strong{color:var(--gold-3);font-weight:500}
+
+@media (max-width:760px){
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <a href="/brilliance-mockups/00-index.html" class="back-link">&larr; All Mockups</a>
+
+  <header>
+    <p class="eyebrow">Chat Surface Concepts</p>
+    <h1>Twelve answers to <em>"what does a Brilliance conversation look like"</em></h1>
+    <p class="lead">The Brilli direction is the <em>presence</em>. The chat surface is the <em>structure</em>. Most AI products use bubbles. Brilliance can do better. Twelve concepts grouped by family. Static CSS visualizations only - no canvas loops, no memory cost.</p>
+  </header>
+
+  <div class="intro">
+    <strong>How to read.</strong> Each concept is a different answer to "what is the conversation, structurally." The visual on each card is a static sketch (no animation cost). Hover over any concept for details. Read the full concept doc at <code style="font-family:'DM Sans',monospace;font-size:13px;color:var(--gold-2)">docs/brilliance/11-chat-interface-concepts.md</code> for pros/cons, voice fit, and recommendation.
+  </div>
+
+  <h3 class="family-label">Family A: Conversation as <em>document</em></h3>
+  <p class="family-sub">The chat is reading material. Old Standard TT shines.</p>
+  <div class="grid">
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-document">
+          <p class="pseudo-h">November Domain occupancy</p>
+          <p class="pseudo-p">Three weeks remain in the booking window. Lean on the audience that converted last fall. Draft attached.</p>
+          <p class="pseudo-h">Strategy</p>
+          <p class="pseudo-p">A two-line cadence in the post copy outperforms three-line</p>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">A1.</p>
+        <h2 class="concept-name">Living <em>Document</em></h2>
+        <p class="concept-desc">A growing lab notebook. Your input becomes a heading; AI's response becomes prose. No bubbles. Reads like thinking.</p>
+        <div class="concept-tags"><span class="concept-tag refined">refined</span><span class="concept-tag">archival</span></div>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-letter">
+          <span class="initial">D</span>
+          <p class="body">earest operator,<br><br>The Domain occupancy gap in November is real. Lean into the audience that converted last fall.</p>
+          <div class="seal"></div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">A2.</p>
+        <h2 class="concept-name">Letter <em>Series</em></h2>
+        <p class="concept-desc">Each exchange is a letter. Cream parchment, gold initial caps, wax seal animation when AI completes. Maximum luxury.</p>
+        <div class="concept-tags"><span class="concept-tag refined">most luxury</span><span class="concept-tag">slow</span></div>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-magazine">
+          <div class="col">
+            <h4>The brand question</h4>
+            How do we lean into the gap that opened in November without sounding desperate? The voice has to stay assured. The data
+          </div>
+          <div class="col">
+            <p class="pull">"Lean on the cadence that worked last fall."</p>
+            <p>Three-line posts converted at half the rate of two-line. The audience read tighter copy as more deliberate.</p>
+          </div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">A3.</p>
+        <h2 class="concept-name">Magazine <em>Column</em></h2>
+        <p class="concept-desc">AI responses laid out as a multi-column magazine. Pull quotes, sidebars, callouts. Conversation is being typeset live.</p>
+        <div class="concept-tags"><span class="concept-tag bold">most distinctive</span><span class="concept-tag">complex</span></div>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-margin">
+          <div class="pane">
+            <h5>Marketing</h5>
+            Voice is the issue. Not the timing. Cadence tightens this season.
+          </div>
+          <div class="pane center">
+            "How do I lean into November without losing the brand voice?"
+          </div>
+          <div class="pane">
+            <h5>Strategy</h5>
+            Audience is right. Channel mix needs Threads tilt. Hold IG steady.
+          </div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">A4.</p>
+        <h2 class="concept-name">Margin <em>Notes</em></h2>
+        <p class="concept-desc">Talmudic layout. Your message in center. Multiple agents weigh in as marginalia. Operators see who said what.</p>
+        <div class="concept-tags"><span class="concept-tag refined">multi-agent</span><span class="concept-tag">dense</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="family-label">Family B: Conversation as <em>space</em></h3>
+  <p class="family-sub">Messages live in a navigable canvas, not a linear feed.</p>
+  <div class="grid">
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-const">
+          <svg viewBox="0 0 380 240"><line x1="200" y1="120" x2="100" y2="60" stroke="rgba(232,199,155,0.3)" stroke-width="0.6"/><line x1="200" y1="120" x2="280" y2="80" stroke="rgba(232,199,155,0.3)" stroke-width="0.6"/><line x1="200" y1="120" x2="150" y2="180" stroke="rgba(232,199,155,0.3)" stroke-width="0.6"/><line x1="200" y1="120" x2="290" y2="170" stroke="rgba(232,199,155,0.3)" stroke-width="0.6"/><line x1="100" y1="60" x2="60" y2="100" stroke="rgba(232,199,155,0.2)" stroke-width="0.6"/><line x1="280" y1="80" x2="320" y2="40" stroke="rgba(232,199,155,0.2)" stroke-width="0.6"/></svg>
+          <span class="node big" style="top:114px;left:194px"></span>
+          <span class="node" style="top:54px;left:94px;animation-delay:0.5s"></span>
+          <span class="node" style="top:74px;left:274px;animation-delay:1s"></span>
+          <span class="node" style="top:174px;left:144px;animation-delay:1.5s"></span>
+          <span class="node" style="top:164px;left:284px;animation-delay:0.7s"></span>
+          <span class="node" style="top:94px;left:54px;animation-delay:2s"></span>
+          <span class="node" style="top:34px;left:314px;animation-delay:1.3s"></span>
+          <span class="label" style="top:114px;left:215px">November plan</span>
+          <span class="label" style="top:78px;left:295px">Threads</span>
+          <span class="label" style="top:182px;left:165px">Voice</span>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">B1.</p>
+        <h2 class="concept-name">Spatial <em>Constellation</em></h2>
+        <p class="concept-desc">2D zoomable canvas. Messages cluster by topic. Long conversations become beautiful artifacts you navigate.</p>
+        <div class="concept-tags"><span class="concept-tag bold">most striking</span><span class="concept-tag">brand-defining</span></div>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-pinboard">
+          <svg viewBox="0 0 380 240"><line x1="80" y1="60" x2="220" y2="80" stroke="rgba(201,169,97,0.4)" stroke-width="0.7"/><line x1="220" y1="80" x2="280" y2="180" stroke="rgba(201,169,97,0.4)" stroke-width="0.7"/></svg>
+          <div class="card gold" style="top:30px;left:30px"><div class="pin"></div>How do we lean in?</div>
+          <div class="card" style="top:50px;left:170px"><div class="pin"></div>Two-line cadence outperforms</div>
+          <div class="card" style="top:150px;left:230px"><div class="pin"></div>Threads draft attached</div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">B2.</p>
+        <h2 class="concept-name">Branching <em>Pinboard</em></h2>
+        <p class="concept-desc">Messages are cards on a corkboard. Pin, drag, branch, fork. Best for research and multi-thread work.</p>
+        <div class="concept-tags"><span class="concept-tag">investigative</span><span class="concept-tag utility">workflow-heavy</span></div>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-ribbon">
+          <p class="preview">"Lean on the November cadence."</p>
+          <div class="track">
+            <div class="marker" style="left:8%"><span class="lab">9:14</span></div>
+            <div class="marker" style="left:26%"><span class="lab">9:18</span></div>
+            <div class="marker" style="left:42%"><span class="lab">9:22</span></div>
+            <div class="marker" style="left:58%"><span class="lab">9:31</span></div>
+            <div class="marker now" style="left:78%"><span class="lab">now</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">B3.</p>
+        <h2 class="concept-name">Time <em>Ribbon</em></h2>
+        <p class="concept-desc">Horizontal scrubbing timeline. Each message a chapter mark. Edit any past moment to branch the timeline.</p>
+        <div class="concept-tags"><span class="concept-tag">cinematic</span><span class="concept-tag">history-aware</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="family-label">Family C: Conversation as <em>theater</em></h3>
+  <p class="family-sub">A scene with a setting. The platform has a place.</p>
+  <div class="grid">
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-concierge">
+          <p class="greeting">Welcome back, Jordan.</p>
+          <div class="row"><span class="lab">Pulse</span><span class="val">3 goals on track. 1 needs review.</span></div>
+          <div class="row"><span class="lab">Brand</span><span class="val">Rowe Reserve - Bloom batch ready.</span></div>
+          <div class="row"><span class="lab">Today</span><span class="val">2 calls. Chest day. November draft.</span></div>
+          <div class="row"><span class="lab">Standing</span><span class="val">Studio set up. Brilli watching.</span></div>
+          <div class="input">How can I help today?</div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">C1.</p>
+        <h2 class="concept-name">Concierge <em>Desk</em></h2>
+        <p class="concept-desc">Brilliance "checks you in" with what's relevant. You make a request; the concierge handles it or calls the right specialist.</p>
+        <div class="concept-tags"><span class="concept-tag refined">most on-brand</span><span class="concept-tag">anticipatory</span></div>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-studio">
+          <div class="easel">
+            <div class="canvas-frame">November draft<br>in progress...</div>
+          </div>
+          <div class="tools">
+            <div class="tool">S</div>
+            <div class="tool">B</div>
+            <div class="tool">L</div>
+            <div class="tool">A</div>
+            <div class="tool">I</div>
+          </div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">C2.</p>
+        <h2 class="concept-name">Studio <em>at Work</em></h2>
+        <p class="concept-desc">Chat lives inside a studio. Easel center, tools on the side, work-in-progress visible. Brilli is the studio cat.</p>
+        <div class="concept-tags"><span class="concept-tag">creative</span><span class="concept-tag">themed</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="family-label">Family D: Conversation as <em>workspace</em></h3>
+  <p class="family-sub">Utility-forward. The chat earns its keep on Day 1.</p>
+  <div class="grid">
+    <div class="concept">
+      <div class="concept-canvas" style="position:relative">
+        <div class="viz-split">
+          <div class="pane left">
+            <h5>Conversation</h5>
+            <div class="b">November draft?</div>
+            <p>Tightening to two-line cadence; pulling November audience...</p>
+          </div>
+          <div class="pane right">
+            <h5>Output streaming</h5>
+            <div class="stream-line"></div>
+            <div class="stream-line"></div>
+            <div class="stream-line"></div>
+            <div class="stream-line"></div>
+            <div class="stream-line" style="width:40%"></div>
+          </div>
+          <div class="gutter"></div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">D1.</p>
+        <h2 class="concept-name">Split-Pane <em>Workspace</em></h2>
+        <p class="concept-desc">Left: chat. Right: live artifact streaming (Studio output, generated images). Brilli sits in the gutter showing where attention flows.</p>
+        <div class="concept-tags"><span class="concept-tag utility">most pragmatic</span><span class="concept-tag">IDE-like</span></div>
+      </div>
+    </div>
+
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-dashboard">
+          <div class="card chat">"Tighten the November draft to two-line cadence."</div>
+          <div class="card"><span class="lab">Pulse</span><span class="val">3</span><span class="delta">on track</span></div>
+          <div class="card"><span class="lab">Bloom</span><span class="val">20</span><span class="delta">fresh angles</span></div>
+          <div class="card"><span class="lab">Studio</span><span class="val">7</span><span class="delta">runs today</span></div>
+          <div class="card"><span class="lab">Mail</span><span class="val">4</span><span class="delta">in outbox</span></div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">D2.</p>
+        <h2 class="concept-name">Dashboard <em>Chat</em></h2>
+        <p class="concept-desc">Chat embedded in a dashboard. Brand context cards visible: Pulse, Bloom, Studio runs. Conversation IS the command - cards react.</p>
+        <div class="concept-tags"><span class="concept-tag utility">top pick</span><span class="concept-tag">leverage-forward</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="family-label">Family E: Conversation as <em>state</em></h3>
+  <p class="family-sub">Radical minimalism.</p>
+  <div class="grid">
+    <div class="concept">
+      <div class="concept-canvas">
+        <div class="viz-negative">
+          <span class="dot" title="Past messages collapse here"></span>
+          <p class="line">Lean on November.<br>Two lines, not three.</p>
+          <div class="brilli"></div>
+        </div>
+      </div>
+      <div class="concept-info">
+        <p class="concept-num">E1.</p>
+        <h2 class="concept-name">Negative <em>Space</em></h2>
+        <p class="concept-desc">One message at a time. Previous collapse to a dot. Brilli is the only persistent visual element. Boldest, most distinctive.</p>
+        <div class="concept-tags"><span class="concept-tag bold">boldest</span><span class="concept-tag">monastic</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="intro" style="margin-top:64px">
+    <strong>My top 3 to prototype.</strong>
+    <strong style="color:var(--b-text)">D2 Dashboard Chat</strong> (top pick - utility-forward, earns keep on Day 1).
+    <strong style="color:var(--b-text)">A1 Living Document</strong> (refined choice - the premium thinker experience).
+    <strong style="color:var(--b-text)">B1 Spatial Constellation</strong> (brand-defining choice - highest visual ceiling).
+    If forced to ship one: D2. If two: D2 + A1. If three: D2 + A1 + B1. Read <code style="font-family:'DM Sans',monospace;font-size:13px;color:var(--gold-2)">docs/brilliance/11-chat-interface-concepts.md</code> for the full rationale.
+  </div>
+
+  <footer>
+    <p>Brilliance &middot; <strong>by RoweOS</strong> &middot; Chat surface concepts &middot; CSS-only (zero canvas loops)</p>
+  </footer>
+</div>
+
+</body>
+</html>
