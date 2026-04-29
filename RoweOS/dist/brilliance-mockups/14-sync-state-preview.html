@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sync v5 - State Visualization</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+  --green:#4ade80; --amber:#f5b042; --red:#ef5350; --blue:#7cb1ff;
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+.wrap{max-width:1320px;margin:0 auto;padding:48px 24px}
+
+.back-link{display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-muted);text-decoration:none;margin-bottom:32px}
+.back-link:hover{color:var(--gold-2)}
+
+header{margin-bottom:40px;padding-bottom:32px;border-bottom:1px solid var(--b-hairline)}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-3);margin-bottom:14px}
+h1{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(32px,5vw,48px);line-height:1.1;color:var(--b-text);margin-bottom:14px;letter-spacing:-0.01em}
+h1 em{color:var(--gold-2);font-style:italic}
+.lead{font-size:15px;color:var(--b-text-muted);max-width:700px;line-height:1.85}
+
+.controls{display:flex;gap:8px;margin-bottom:32px;flex-wrap:wrap}
+.btn{padding:10px 18px;background:transparent;border:1px solid var(--b-border);color:var(--b-text-muted);font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;cursor:pointer;border-radius:99px;transition:all 0.25s;font-weight:500}
+.btn:hover{border-color:rgba(201,169,97,0.3);color:var(--gold-2)}
+.btn.active{background:rgba(201,169,97,0.1);border-color:var(--gold-4);color:var(--gold-1)}
+
+/* Aggregate panel */
+.aggregate{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:32px}
+.agg-card{padding:24px 26px;background:var(--b-bg-elev);border:1px solid var(--b-border);border-radius:8px}
+.agg-card h3{font-size:10px;font-weight:500;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold-3);margin-bottom:14px}
+.agg-card .big{font-family:'Old Standard TT',serif;font-weight:400;font-size:36px;color:var(--b-text);letter-spacing:-0.01em;line-height:1;margin-bottom:6px}
+.agg-card .small{font-size:12px;color:var(--b-text-muted)}
+
+.brilli-status{display:flex;align-items:center;gap:14px}
+.brilli-dot{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,var(--gold-1),rgba(168,138,74,0.5) 60%,transparent);box-shadow:0 0 14px rgba(201,169,97,0.55);animation:pulseSoft 3s ease-in-out infinite;flex-shrink:0}
+.brilli-dot.idle{animation:pulseSoft 3s ease-in-out infinite}
+.brilli-dot.pushing{background:radial-gradient(circle,var(--gold-1),rgba(232,199,155,0.6) 60%,transparent);animation:pulseFast 0.8s ease-in-out infinite}
+.brilli-dot.pulling{background:radial-gradient(circle,var(--gold-2),rgba(201,169,97,0.5) 60%,transparent);animation:pulseSlow 4s ease-in-out infinite}
+.brilli-dot.offline{background:radial-gradient(circle,var(--gold-5),rgba(107,90,61,0.4) 60%,transparent);box-shadow:none;animation:none;opacity:0.5}
+.brilli-dot.error{background:radial-gradient(circle,var(--red),rgba(239,83,80,0.4) 60%,transparent);box-shadow:0 0 14px rgba(239,83,80,0.4);animation:pulseFast 1.2s ease-in-out infinite}
+@keyframes pulseSoft{0%,100%{opacity:0.6;transform:scale(0.95)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes pulseFast{0%,100%{opacity:0.7;transform:scale(0.92)}50%{opacity:1;transform:scale(1.15)}}
+@keyframes pulseSlow{0%,100%{opacity:0.5;transform:scale(0.94)}50%{opacity:0.95;transform:scale(1.06)}}
+
+.status-label{font-family:'Old Standard TT',serif;font-size:24px;color:var(--b-text);font-style:italic;letter-spacing:-0.005em}
+.status-label em{color:var(--gold-2)}
+
+/* Collections table */
+.collections-section{background:var(--b-bg-elev);border:1px solid var(--b-border);border-radius:8px;padding:0;overflow:hidden;margin-bottom:32px}
+.collections-section h2{font-family:'Old Standard TT',serif;font-weight:400;font-size:22px;color:var(--b-text);padding:24px 28px 18px;border-bottom:1px solid var(--b-hairline);letter-spacing:-0.005em}
+.collections-section h2 em{color:var(--gold-2);font-style:italic}
+.coll-table{width:100%;border-collapse:collapse}
+.coll-table th{font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold-3);padding:14px 28px;text-align:left;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--b-hairline)}
+.coll-table th:last-child{text-align:right}
+.coll-table td{padding:14px 28px;border-bottom:1px solid var(--b-hairline);font-size:13px;color:var(--b-text-muted)}
+.coll-table tr:last-child td{border-bottom:none}
+.coll-name{font-family:'Old Standard TT',serif;font-style:italic;color:var(--gold-2);font-size:15px}
+.coll-status-pill{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,0.04);color:var(--b-text-muted);font-weight:500}
+.coll-status-pill::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--b-text-dim)}
+.coll-status-pill.idle{background:rgba(74,222,128,0.06);color:#a3e8c0}
+.coll-status-pill.idle::before{background:var(--green);box-shadow:0 0 6px var(--green)}
+.coll-status-pill.pushing{background:rgba(245,176,66,0.08);color:#f5cd8e}
+.coll-status-pill.pushing::before{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:pulseFast 0.8s infinite}
+.coll-status-pill.pulling{background:rgba(124,177,255,0.08);color:#a9c8ff}
+.coll-status-pill.pulling::before{background:var(--blue);box-shadow:0 0 6px var(--blue);animation:pulseSlow 2s infinite}
+.coll-status-pill.offline{background:rgba(107,90,61,0.10);color:var(--b-text-dim)}
+.coll-status-pill.offline::before{background:var(--gold-5)}
+.coll-status-pill.error{background:rgba(239,83,80,0.08);color:#ff9b97}
+.coll-status-pill.error::before{background:var(--red);box-shadow:0 0 6px var(--red);animation:pulseFast 1s infinite}
+.coll-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold-2);text-align:right;font-variant-numeric:tabular-nums}
+.coll-time{font-size:11px;color:var(--b-text-dim);font-family:'DM Sans',sans-serif}
+
+/* Audit log */
+.audit-section{background:var(--b-bg-elev);border:1px solid var(--b-border);border-radius:8px;padding:24px 28px;margin-bottom:32px}
+.audit-section h2{font-family:'Old Standard TT',serif;font-weight:400;font-size:22px;color:var(--b-text);margin-bottom:6px;letter-spacing:-0.005em}
+.audit-section h2 em{color:var(--gold-2);font-style:italic}
+.audit-section .desc{font-size:13px;color:var(--b-text-muted);margin-bottom:18px}
+.audit-log{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.7;color:var(--b-text-muted);background:#080808;border:1px solid var(--b-hairline);border-radius:6px;padding:14px 18px;max-height:280px;overflow-y:auto}
+.audit-log .row{display:flex;gap:14px;padding:2px 0}
+.audit-log .ts{color:var(--b-text-dim);flex-shrink:0;width:80px}
+.audit-log .lvl{flex-shrink:0;width:48px;text-transform:uppercase;font-weight:500;letter-spacing:0.06em;font-size:10px;padding-top:1px}
+.audit-log .lvl.info{color:var(--gold-3)}
+.audit-log .lvl.warn{color:var(--amber)}
+.audit-log .lvl.err{color:var(--red)}
+.audit-log .msg{flex:1;color:var(--b-text)}
+.audit-log .msg .name{color:var(--gold-2)}
+.audit-log .msg .num{color:var(--gold-1)}
+
+.intro-card{background:rgba(201,169,97,0.04);border:1px solid var(--b-border);border-radius:6px;padding:18px 22px;margin-bottom:32px;font-size:13px;line-height:1.75;color:var(--b-text-muted)}
+.intro-card strong{color:var(--gold-2);font-weight:500}
+
+footer{text-align:center;margin-top:56px;padding-top:32px;border-top:1px solid var(--b-hairline);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim)}
+footer strong{color:var(--gold-3);font-weight:500}
+
+@media (max-width:760px){
+  .aggregate{grid-template-columns:1fr}
+  .coll-table th, .coll-table td{padding:10px 14px;font-size:12px}
+  .coll-table th:nth-child(4), .coll-table td:nth-child(4){display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <a href="/brilliance-mockups/00-index.html" class="back-link">&larr; All Mockups</a>
+
+  <header>
+    <p class="eyebrow">Sync v5 &middot; State Visualization</p>
+    <h1>Settings <em>&rsaquo;</em> Sync</h1>
+    <p class="lead">Per-collection sync state, the aggregate Brilli pulse, and the audit log. This is what the user sees when they want to know "is everything saved?" Toggle scenarios below to see how the surface reacts to network conditions.</p>
+  </header>
+
+  <div class="intro-card">
+    <strong>Note.</strong> All values below are simulated for the mockup. The real Sync v5 surface reads live state from <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold-2)">SyncEngine.aggregateStatus()</code> and per-Collection <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold-2)">.watch()</code> subscriptions. See <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold-2)">docs/brilliance/16-sync-v5.md</code>.
+  </div>
+
+  <div class="controls">
+    <button class="btn active" data-scenario="idle">Idle (all synced)</button>
+    <button class="btn" data-scenario="busy">Busy (writing burst)</button>
+    <button class="btn" data-scenario="pulling">Pulling (snapshot stream)</button>
+    <button class="btn" data-scenario="offline">Offline (queued)</button>
+    <button class="btn" data-scenario="error">Error (retry)</button>
+  </div>
+
+  <div class="aggregate">
+    <div class="agg-card">
+      <h3>Brilli pulse</h3>
+      <div class="brilli-status">
+        <span class="brilli-dot idle" id="brilliDot"></span>
+        <span class="status-label" id="statusLabel">All <em>synced</em></span>
+      </div>
+      <p class="small" style="margin-top:10px" id="statusDetail">Every change saved across all devices.</p>
+    </div>
+    <div class="agg-card">
+      <h3>Pending writes</h3>
+      <p class="big" id="pendingCount">0</p>
+      <p class="small" id="pendingDetail">Queue empty. Average flush time 180ms.</p>
+    </div>
+    <div class="agg-card">
+      <h3>Last synced</h3>
+      <p class="big" id="lastSynced">just now</p>
+      <p class="small" id="lastSyncedDetail">3 collections received updates.</p>
+    </div>
+  </div>
+
+  <div class="collections-section">
+    <h2><em>Collections</em></h2>
+    <table class="coll-table">
+      <thead>
+        <tr>
+          <th>Collection</th>
+          <th>Status</th>
+          <th>Items</th>
+          <th>Pending</th>
+          <th>Last synced</th>
+        </tr>
+      </thead>
+      <tbody id="collTbody">
+      </tbody>
+    </table>
+  </div>
+
+  <div class="audit-section">
+    <h2><em>Audit log</em></h2>
+    <p class="desc">Live stream of Sync v5 events. Visible to admins for debugging conflicts and reconciliation. Last 40 events.</p>
+    <div class="audit-log" id="auditLog"></div>
+  </div>
+
+  <footer>
+    <p>Brilliance &middot; <strong>by RoweOS</strong> &middot; Sync v5 state visualization</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+
+var COLLECTIONS = [
+  { name: 'brands', items: 5 },
+  { name: 'conversations', items: 142 },
+  { name: 'automations', items: 18 },
+  { name: 'scribes', items: 9 },
+  { name: 'evolve_skills', items: 7 },
+  { name: 'evolve_sources', items: 24 },
+  { name: 'evolve_reflections', items: 38 },
+  { name: 'evolve_sops', items: 12 },
+  { name: 'pulse_goals', items: 14 },
+  { name: 'library', items: 89 }
+];
+
+var SCENARIOS = {
+  idle: {
+    statusClass: 'idle',
+    label: 'All <em>synced</em>',
+    detail: 'Every change saved across all devices.',
+    pending: 0,
+    pendingDetail: 'Queue empty. Average flush time 180ms.',
+    lastSynced: 'just now',
+    lastSyncedDetail: '3 collections received updates in the last minute.',
+    coll: function(c){ return { status: 'idle', pending: 0, lastSynced: rand(['just now','12s','38s','1m','2m','4m']) }; },
+    audit: [
+      ['09:42:18','info','snapshot received: <span class="name">conversations</span> (1 change applied)'],
+      ['09:42:11','info','flush complete: <span class="name">brands</span> (<span class="num">2</span> writes, 142ms)'],
+      ['09:41:54','info','snapshot received: <span class="name">evolve_skills</span> (1 change applied)'],
+      ['09:41:37','info','put <span class="name">conversations</span> id <span class="num">8c41...</span> queued'],
+      ['09:41:37','info','flush complete: <span class="name">conversations</span> (<span class="num">1</span> write, 89ms)'],
+      ['09:40:22','info','snapshot received: <span class="name">automations</span> (1 change applied)']
+    ]
+  },
+  busy: {
+    statusClass: 'pushing',
+    label: 'Saving <em>changes</em>',
+    detail: '47 changes currently flushing to Firestore.',
+    pending: 47,
+    pendingDetail: 'Burst of writes. Will clear in ~2 seconds.',
+    lastSynced: '2s',
+    lastSyncedDetail: 'Brands and Studio runs updating now.',
+    coll: function(c){
+      var busy = ['brands','automations','conversations','library'].indexOf(c.name) >= 0;
+      return {
+        status: busy ? 'pushing' : 'idle',
+        pending: busy ? Math.floor(Math.random() * 18) + 3 : 0,
+        lastSynced: busy ? 'now' : rand(['18s','42s','1m','3m'])
+      };
+    },
+    audit: [
+      ['09:42:21','info','put <span class="name">brands</span> id <span class="num">b7e3...</span> queued (write #<span class="num">12</span>)'],
+      ['09:42:21','info','put <span class="name">automations</span> id <span class="num">a91d...</span> queued (write #<span class="num">13</span>)'],
+      ['09:42:21','info','flush starting: <span class="name">brands</span> (<span class="num">5</span> writes batched)'],
+      ['09:42:21','info','flush starting: <span class="name">conversations</span> (<span class="num">8</span> writes batched)'],
+      ['09:42:20','info','put <span class="name">library</span> id <span class="num">l4f8...</span> queued (write #<span class="num">9</span>)'],
+      ['09:42:20','info','put <span class="name">conversations</span> id <span class="num">c2a1...</span> queued (write #<span class="num">8</span>)']
+    ]
+  },
+  pulling: {
+    statusClass: 'pulling',
+    label: 'Receiving <em>changes</em>',
+    detail: 'Snapshot updates streaming from another device.',
+    pending: 0,
+    pendingDetail: 'No outbound writes. Inbound from another session.',
+    lastSynced: 'now',
+    lastSyncedDetail: 'Conversations and Notebook receiving updates.',
+    coll: function(c){
+      var pulling = ['conversations','scribes'].indexOf(c.name) >= 0;
+      return {
+        status: pulling ? 'pulling' : 'idle',
+        pending: 0,
+        lastSynced: pulling ? 'now' : rand(['1m','3m','6m'])
+      };
+    },
+    audit: [
+      ['09:42:24','info','snapshot received: <span class="name">scribes</span> (<span class="num">3</span> changes applied)'],
+      ['09:42:24','info','snapshot received: <span class="name">conversations</span> (<span class="num">2</span> changes applied)'],
+      ['09:42:23','info','LWW resolution: <span class="name">scribes</span> id <span class="num">s7c2...</span> incoming wins (newer _modifiedAt)'],
+      ['09:42:23','info','LWW resolution: <span class="name">conversations</span> id <span class="num">c91a...</span> incoming wins'],
+      ['09:42:22','info','onSnapshot fire: <span class="name">conversations</span>'],
+      ['09:42:22','info','onSnapshot fire: <span class="name">scribes</span>']
+    ]
+  },
+  offline: {
+    statusClass: 'offline',
+    label: '<em>Offline</em>',
+    detail: '12 changes queued. Will sync when connection returns.',
+    pending: 12,
+    pendingDetail: 'Network unreachable. localStorage durable; nothing lost.',
+    lastSynced: '2 min ago',
+    lastSyncedDetail: 'Last successful sync just before disconnect.',
+    coll: function(c){
+      var queued = Math.floor(Math.random() * 4);
+      return { status: 'offline', pending: queued, lastSynced: rand(['2m','3m','4m','5m']) };
+    },
+    audit: [
+      ['09:42:30','warn','network unreachable - entering offline mode'],
+      ['09:42:30','warn','queueing locally: <span class="num">12</span> writes pending across <span class="num">4</span> collections'],
+      ['09:42:28','info','put <span class="name">brands</span> id <span class="num">b7e3...</span> queued offline'],
+      ['09:42:25','info','put <span class="name">conversations</span> id <span class="num">c2a1...</span> queued offline'],
+      ['09:42:18','info','navigator.onLine = false detected'],
+      ['09:42:11','info','flush complete: <span class="name">automations</span> (last successful sync)']
+    ]
+  },
+  error: {
+    statusClass: 'error',
+    label: 'Sync <em>error</em>',
+    detail: 'Retry attempt 3 of 5. Will keep trying.',
+    pending: 8,
+    pendingDetail: 'Firestore returned a permission error. Investigating.',
+    lastSynced: '4 min ago',
+    lastSyncedDetail: 'Last clean sync before the error chain started.',
+    coll: function(c){
+      var err = c.name === 'conversations';
+      return {
+        status: err ? 'error' : 'idle',
+        pending: err ? 8 : 0,
+        lastSynced: err ? '4m' : rand(['1m','3m','5m'])
+      };
+    },
+    audit: [
+      ['09:42:35','err','flush failed: <span class="name">conversations</span> - PERMISSION_DENIED'],
+      ['09:42:35','warn','retry scheduled: attempt <span class="num">3</span> of <span class="num">5</span> in 12s'],
+      ['09:42:23','err','flush failed: <span class="name">conversations</span> - PERMISSION_DENIED'],
+      ['09:42:23','warn','retry scheduled: attempt <span class="num">2</span> of <span class="num">5</span> in 4s'],
+      ['09:42:19','err','flush failed: <span class="name">conversations</span> - PERMISSION_DENIED'],
+      ['09:42:19','warn','retry scheduled: attempt <span class="num">1</span> of <span class="num">5</span> in 1s'],
+      ['09:38:42','info','flush complete: <span class="name">conversations</span> (last clean)']
+    ]
+  }
+};
+
+function rand(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+function applyScenario(name){
+  var s = SCENARIOS[name];
+  document.getElementById('brilliDot').className = 'brilli-dot ' + s.statusClass;
+  document.getElementById('statusLabel').innerHTML = s.label;
+  document.getElementById('statusDetail').textContent = s.detail;
+  document.getElementById('pendingCount').textContent = s.pending;
+  document.getElementById('pendingDetail').textContent = s.pendingDetail;
+  document.getElementById('lastSynced').textContent = s.lastSynced;
+  document.getElementById('lastSyncedDetail').textContent = s.lastSyncedDetail;
+
+  var tbody = document.getElementById('collTbody');
+  tbody.innerHTML = '';
+  COLLECTIONS.forEach(function(c){
+    var st = s.coll(c);
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span class="coll-name">' + c.name + '</span></td>' +
+      '<td><span class="coll-status-pill ' + st.status + '">' + st.status + '</span></td>' +
+      '<td class="coll-num">' + c.items + '</td>' +
+      '<td class="coll-num">' + (st.pending || 0) + '</td>' +
+      '<td class="coll-time">' + st.lastSynced + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  var log = document.getElementById('auditLog');
+  log.innerHTML = '';
+  s.audit.forEach(function(line){
+    var div = document.createElement('div');
+    div.className = 'row';
+    div.innerHTML = '<span class="ts">' + line[0] + '</span><span class="lvl ' + line[1] + '">' + line[1] + '</span><span class="msg">' + line[2] + '</span>';
+    log.appendChild(div);
+  });
+}
+
+document.querySelectorAll('.btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.btn').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    applyScenario(b.dataset.scenario);
+  });
+});
+
+applyScenario('idle');
+
+})();
+</script>
+
+</body>
+</html>
