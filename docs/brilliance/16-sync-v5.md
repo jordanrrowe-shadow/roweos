@@ -626,7 +626,18 @@ This is sequenced AFTER v33.0 brand layer ships. v33.0 doesn't touch sync. Sync 
 
 5. **Banner thresholds** — 5 minutes offline before banner, 1 minute error before banner. Adjust to taste. Recommend defaults.
 
-6. **Cross-collection cascade** — services layer handles "delete brand → tombstone conversations." Confirm services layer (not sync) owns this.
+6. **Cross-collection cascade** — services layer handles "delete brand → tombstone conversations." **CONFIRMED 2026-04-29.** Each `services/<domain>` module is responsible for cascading. Pattern:
+   ```typescript
+   // services/brand/index.ts
+   export async function deleteBrand(id: BrandId): Promise<void> {
+     const conversations = await brandConversations(id);
+     conversations.forEach(c => services.conversations.delete(c.id));
+     services.bloom.scrubForBrand(id);
+     services.automations.unbindBrand(id);
+     services.brand.collection.delete(id);  // last
+   }
+   ```
+   Sync layer never knows about cross-collection relationships. Services layer is the orchestrator. Tested at the services layer.
 
 7. **Multi-user / team mode** — strictly out of scope for v5. Confirm.
 
