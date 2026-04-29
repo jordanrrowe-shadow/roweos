@@ -49,7 +49,23 @@ h1 em{color:var(--gold-2);font-style:italic}
   overflow:hidden;
   display:flex;flex-direction:column;
   position:relative;
+  text-decoration:none;
+  color:inherit;
 }
+.concept::after{
+  content:'View demo \2192';
+  position:absolute;top:14px;right:14px;
+  font-family:'DM Sans',sans-serif;font-size:9px;
+  letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--gold-2);
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
+  padding:5px 10px;border-radius:99px;
+  border:1px solid var(--gold-5);
+  opacity:0;transition:opacity 0.3s;
+  z-index:2;
+  pointer-events:none;
+}
+.concept:hover::after{opacity:1}
 .concept:hover{border-color:rgba(201,169,97,0.35);background:rgba(201,169,97,0.03);transform:translateY(-2px)}
 
 .concept-canvas{
@@ -469,6 +485,20 @@ footer strong{color:var(--gold-3);font-weight:500}
     <p>Brilliance &middot; <strong>by RoweOS</strong> &middot; Chat surface concepts &middot; CSS-only (zero canvas loops)</p>
   </footer>
 </div>
+
+<script>
+/* Click any concept tile to view the full demo (Desktop/Mobile tabs) */
+(function(){
+  document.querySelectorAll('.concept').forEach(function(c){
+    var numEl = c.querySelector('.concept-num');
+    if (!numEl) return;
+    var id = numEl.textContent.trim().replace(/\./g, '').toLowerCase();
+    c.addEventListener('click', function(){
+      location.href = '/brilliance-mockups/11-concept-demo.html?id=' + id;
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
