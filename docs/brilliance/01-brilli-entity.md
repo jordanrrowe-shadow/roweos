@@ -6,9 +6,27 @@
 
 ---
 
-## What Brilli is
+## DECISION LOCKED 2026-04-29: Celestial Orb primary + Aura/Field as user-selectable secondary
 
-Brilli is the platform's intelligence given visual form. A small luminous firefly drawn entirely in soft golden light against a black field. Two glowing eyes, two antennae tipped with light orbs, two pairs of translucent gossamer wings, a teardrop body that fades into a trailing particle stream.
+Jordan picked the **Celestial Orb** as Brilli's primary direction (per `10-brilli-directions.md` direction iv). **Aura/Field** (direction x) remains as a secondary option, made user-selectable in Settings post-v33.0. Other forms (Firefly, Light Signature, Minimal Ring, Energy Core, Classic BLAKE) are deferred — may resurface as user-selectable options later if demand exists.
+
+This document below was originally written for the Firefly direction. The behavior, state machine, mounting points, sizes, and accessibility rules ALL transfer unchanged to the Orb. Only the silhouette (the *what Brilli looks like*) is different. Treat references to "firefly," "wings," "antennae" below as legacy detail; the Orb has none of these. The Orb's equivalent expressive moves:
+- "Wing flap rate" → internal-spark velocity
+- "Antennae forward" → outer-glow leaning toward cursor
+- "Particle trail" → halo bloom + drifting outer sparks
+- "Body pulse" → orb pulse (same idea, simpler)
+
+The replacement implementation is in `05-brilli-animation.md` `r_orb` renderer (shipped as the live preview in directions gallery direction iv).
+
+---
+
+## What Brilli is (Orb edition)
+
+Brilli is the platform's intelligence given visual form. A glowing celestial orb against a dark field. A contained sphere of warm gold light with internal sparks orbiting and twinkling within. The orb breathes (subtly pulses) at idle, intensifies when thinking, blooms with particle release when delivering, and dims gracefully when asleep. No face. No body parts. Pure presence.
+
+The form was chosen for: highest brand confidence, easiest to scale (recognizable from 24px to 280px without redesign), most refined fit with the "Intelligence OS" framing, lowest risk against luxury voice.
+
+The original firefly direction text below is preserved as historical reference and contains correct details about behavior, state machine, mounting, sizes, accessibility — all of which apply to the Orb. The form factor differs; the architecture is identical.
 
 Brilli is not:
 - A mascot. Mascots sell things. Brilli is the platform itself, looking back at you.

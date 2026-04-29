@@ -358,10 +358,10 @@ Bundle size, FPS budgets, frame-time budgets per surface. Fail tests if regressi
 
 ## Decisions still open (and when they need to resolve)
 
-| Decision | Resolves by | Doc | Recommendation |
+| Decision | Resolves by | Doc | Status |
 |---|---|---|---|
-| Final Brilli direction | v33.0 Phase C start | `10-brilli-directions.md` | Hybrid: Celestial Orb primary, Firefly for chat hero |
-| Welcome modal copy variant | v33.0 Phase E start | `02-welcome-experience.md` | Variant A (declarative-warm) |
+| ~~Final Brilli direction~~ | ~~v33.0 Phase C start~~ | `10-brilli-directions.md` | **LOCKED 2026-04-29: Celestial Orb primary; Aura/Field as secondary user-selectable option later. Other forms deferred.** |
+| ~~Welcome modal copy variant~~ | ~~v33.0 Phase E start~~ | `02-welcome-experience.md` | **LOCKED 2026-04-29: Variant B (confident-terse).** |
 | brillianceos.ai domain | Anytime, low urgency | `00-master-plan.md` | Reserve, don't switch |
 | /info overhaul Option 1 vs 2 | v33.0 Phase F start | `06-info-overhaul.md` | Option 1 for v33.0; Option 2 in v34 if drift visible |
 | Hamburger menu scope | v33.0 Phase F start | `08-mobile-design-spec.md` | /info only for v33.0 |

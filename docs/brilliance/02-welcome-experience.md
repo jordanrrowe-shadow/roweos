@@ -152,6 +152,22 @@ function markWelcomed() {
 
 **Recommendation: ship Variant A.** It does the most reassurance work for the existing 10 paying clients. Variant B is too terse for a brand-transition moment. Variant C is beautiful but slightly mystifying for users who just want to get into their work.
 
+---
+
+## DECISION LOCKED 2026-04-29: Variant B (confident-terse)
+
+Jordan picked Variant B. Reasoning: Brilliance's voice is sovereign and intentional, not reassuring. The user does not need to be coddled through the rebrand; the brand should land with confidence. Variant B reads like a product that knows what it is.
+
+Final copy locked:
+
+> Welcome to *Brilliance*.
+>
+> Same platform. Same memory. Same work. New name.
+>
+> Meet Brilli, the intelligence behind the platform. Everything is where you left it.
+
+The welcome modal mockup at `/brilliance-mockups/02-welcome-modal.html` defaults to Variant B. Variant A and C remain as toggleable options in the mockup for reference.
+
 ## Post-launch behavior (after Continue)
 
 - Modal dismissal animates out
