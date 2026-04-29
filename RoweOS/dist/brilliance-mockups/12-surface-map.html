@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Brilliance Surface System Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold-1:#f5e6c8; --gold-2:#e2c79b; --gold-3:#c9a961;
+  --gold-4:#a88a4a; --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.22);
+  --b-bg:#0a0a0a; --b-bg-elev:#111111; --b-bg-deep:#060606;
+  --b-text:#ece4d8; --b-text-muted:#9e9487; --b-text-dim:#655e54;
+  --b-border:rgba(255,255,255,0.08); --b-hairline:rgba(255,255,255,0.05);
+}
+html,body{background:var(--b-bg);color:var(--b-text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;min-height:100vh}
+.wrap{max-width:1320px;margin:0 auto;padding:64px 24px}
+
+.back-link{display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-muted);text-decoration:none;margin-bottom:32px}
+.back-link:hover{color:var(--gold-2)}
+
+header{text-align:center;margin-bottom:48px;padding-bottom:36px;border-bottom:1px solid var(--b-hairline)}
+.eyebrow{font-size:11px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold-3);margin-bottom:18px}
+h1{font-family:'Old Standard TT',serif;font-weight:400;font-size:clamp(34px,5vw,56px);line-height:1.1;color:var(--b-text);margin-bottom:18px;letter-spacing:-0.01em}
+h1 em{color:var(--gold-2);font-style:italic}
+.lead{font-size:15px;color:var(--b-text-muted);max-width:720px;margin:0 auto;line-height:1.85}
+
+.intro{background:rgba(201,169,97,0.04);border:1px solid var(--b-border);border-radius:6px;padding:24px 28px;margin-bottom:48px;font-size:14px;line-height:1.85;color:var(--b-text-muted)}
+.intro strong{color:var(--gold-2);font-weight:500}
+
+.tier{margin-bottom:64px}
+.tier-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.tier-num{
+  font-family:'Old Standard TT',serif;font-style:italic;font-size:14px;
+  color:var(--gold-3);letter-spacing:0.06em;
+}
+.tier-name{font-family:'Old Standard TT',serif;font-weight:400;font-size:26px;color:var(--b-text);letter-spacing:-0.005em}
+.tier-name em{color:var(--gold-2);font-style:italic}
+.tier-sub{font-size:13px;color:var(--b-text-muted);margin-bottom:24px}
+
+.surfaces{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px}
+.surface{
+  background:var(--b-bg-elev);
+  border:1px solid var(--b-border);
+  border-radius:8px;
+  padding:0;
+  overflow:hidden;
+  transition:all 0.3s ease;
+  text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;
+  cursor:pointer;
+}
+.surface:hover{border-color:rgba(201,169,97,0.4);background:rgba(201,169,97,0.03);transform:translateY(-2px)}
+
+.surface-banner{
+  height:120px;background:radial-gradient(circle at 30% 50%,rgba(201,169,97,0.18),transparent 60%);
+  display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--b-hairline);position:relative;overflow:hidden;
+}
+.surface-banner::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold-4),transparent)}
+.surface-name{font-family:'Old Standard TT',serif;font-weight:400;font-size:28px;color:var(--b-text);letter-spacing:-0.01em;line-height:1}
+.surface-name em{color:var(--gold-2);font-style:italic}
+.surface-status{
+  font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;
+  letter-spacing:0.22em;text-transform:uppercase;
+  padding:5px 10px;border-radius:99px;
+  background:rgba(255,255,255,0.05);color:var(--b-text-muted);
+}
+.surface-status.new{background:rgba(232,199,155,0.10);color:var(--gold-2)}
+.surface-status.replace{background:rgba(168,138,74,0.10);color:var(--gold-3)}
+.surface-status.classic{background:rgba(255,255,255,0.04);color:var(--b-text-dim)}
+.surface-status.mode{background:rgba(168,138,74,0.10);color:var(--gold-3)}
+
+.surface-body{padding:18px 22px 20px;flex:1;display:flex;flex-direction:column}
+.surface-concept{
+  font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;
+  letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-3);margin-bottom:10px;
+}
+.surface-question{
+  font-family:'Old Standard TT',serif;font-size:16px;color:var(--b-text);
+  font-style:italic;margin-bottom:14px;line-height:1.5;
+}
+.surface-question em{color:var(--gold-2)}
+.surface-desc{
+  font-size:12.5px;color:var(--b-text-muted);line-height:1.65;flex:1;margin-bottom:14px;
+}
+.surface-meta{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding-top:12px;border-top:1px solid var(--b-hairline);
+  font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--b-text-dim);
+}
+.surface-meta .demo-link{color:var(--gold-2);font-weight:500}
+
+/* Tier accents */
+.tier-1 .surface-banner{background:radial-gradient(circle at 30% 50%,rgba(201,169,97,0.25),transparent 60%)}
+.tier-1 .surface-name em{color:var(--gold-1)}
+.tier-2 .surface-banner{background:radial-gradient(circle at 30% 50%,rgba(201,169,97,0.16),transparent 60%)}
+.tier-3 .surface-banner{background:radial-gradient(circle at 30% 50%,rgba(201,169,97,0.10),transparent 60%)}
+.tier-classic .surface-banner{background:radial-gradient(circle at 30% 50%,rgba(255,255,255,0.04),transparent 60%)}
+
+/* Question rule */
+.rules{margin-top:64px;padding:36px;background:var(--b-bg-elev);border:1px solid var(--b-border);border-radius:8px}
+.rules h3{font-family:'Old Standard TT',serif;font-weight:400;font-size:22px;color:var(--b-text);margin-bottom:18px}
+.rules h3 em{color:var(--gold-2);font-style:italic}
+.rules ol{padding-left:20px;font-size:13.5px;line-height:1.85;color:var(--b-text-muted)}
+.rules ol li{margin-bottom:8px}
+.rules ol li strong{color:var(--gold-2);font-weight:500}
+
+footer{text-align:center;margin-top:64px;padding-top:36px;border-top:1px solid var(--b-hairline);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--b-text-dim)}
+footer strong{color:var(--gold-3);font-weight:500}
+
+@media (max-width:760px){
+  .surfaces{grid-template-columns:1fr}
+  .surface-name{font-size:24px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <a href="/brilliance-mockups/00-index.html" class="back-link">&larr; All Mockups</a>
+
+  <header>
+    <p class="eyebrow">Brilliance OS Surface System</p>
+    <h1>One platform, <em>many surfaces</em></h1>
+    <p class="lead">Each chat-concept becomes a different surface tuned to a specific posture. The platform's grammar is "the right surface for the right thinking" - not one chat bolted into every view. Click any surface to see its concept demo.</p>
+  </header>
+
+  <div class="intro">
+    <strong>How to read this map.</strong> Each card below is a surface in the Brilliance OS, with the chat-concept that defines its visual treatment, the question it answers, and a status badge: <strong>NEW</strong> (new view), <strong>REPLACE</strong> (existing view, new chrome), <strong>CLASSIC</strong> (current chrome unchanged), <strong>MODE</strong> (universal modifier). Click into any card to view its concept demo with Desktop / Mobile tabs. Read the full architecture at <code style="font-family:'DM Sans',monospace;font-size:13px;color:var(--gold-2)">docs/brilliance/12-surface-system.md</code>.
+  </div>
+
+  <!-- TIER 1 -->
+  <section class="tier tier-1">
+    <div class="tier-head">
+      <span class="tier-num">Tier i.</span>
+      <h2 class="tier-name">Ship in <em>v33.0</em></h2>
+    </div>
+    <p class="tier-sub">Highest impact. Lowest refactor cost. The Welcome Release surfaces.</p>
+    <div class="surfaces">
+
+      <a class="surface" href="/brilliance-mockups/11-concept-demo.html?id=c1">
+        <div class="surface-banner">
+          <span class="surface-name">Chat</span>
+          <span class="surface-status replace">Replace</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-concept">Concept: Concierge Desk</p>
+          <p class="surface-question">"Help me with what's <em>relevant today</em>."</p>
+          <p class="surface-desc">Brilliance greets you with what's active across Pulse, Bloom, Studio runs, and today's calendar. You make a request; the platform handles it directly or routes to the right specialist agent. Replaces the current centered-blob landing.</p>
+          <div class="surface-meta"><span>Internal: agent view</span><span class="demo-link">View demo &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="surface" href="/brilliance-mockups/11-concept-demo.html?id=b3">
+        <div class="surface-banner">
+          <span class="surface-name">History</span>
+          <span class="surface-status replace">Replace</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-concept">Concept: Time Ribbon</p>
+          <p class="surface-question">"What did I ask, <em>and when</em>?"</p>
+          <p class="surface-desc">Horizontal scrubbing timeline. Each conversation moment is a chapter mark. Drag to revisit. Edit any past message to branch a new conversation from that point. Search filters markers by topic. Replaces the current History list view.</p>
+          <div class="surface-meta"><span>Internal: tuning view</span><span class="demo-link">View demo &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="surface" href="/brilliance-mockups/11-concept-demo.html?id=e1">
+        <div class="surface-banner">
+          <span class="surface-name">Focus <em>Mode</em></span>
+          <span class="surface-status mode">Mode</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-concept">Concept: Negative Space</p>
+          <p class="surface-question">"<em>Quiet</em> everything else."</p>
+          <p class="surface-desc">Universal modifier triggered by Cmd+Shift+F. Strips any active surface to: one message, Brilli, an input. Past collapses to a tiny gold dot. Sidebar collapses. Auto-trigger on 30s of idle. Esc to exit.</p>
+          <div class="surface-meta"><span>Modifier on any view</span><span class="demo-link">View demo &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- TIER 2 -->
+  <section class="tier tier-2">
+    <div class="tier-head">
+      <span class="tier-num">Tier ii.</span>
+      <h2 class="tier-name">Ship in <em>v33.x</em> (post-launch)</h2>
+    </div>
+    <p class="tier-sub">Moderate refactor. Existing surfaces gain new chrome. Classic mode toggle preserved for 90 days.</p>
+    <div class="surfaces">
+
+      <a class="surface" href="/brilliance-mockups/11-concept-demo.html?id=d1">
+        <div class="surface-banner">
+          <span class="surface-name">Studio</span>
+          <span class="surface-status replace">Replace</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-concept">Concept: Split-Pane Workspace</p>
+          <p class="surface-question">"<em>Make this thing</em> while I watch."</p>
+          <p class="surface-desc">Left pane: conversation. Right pane: live artifact streaming as Brilliance creates it. Brilli sits in the gutter showing where attention flows. Drag the divider to focus on chat or output.</p>
+          <div class="surface-meta"><span>Internal: studio view</span><span class="demo-link">View demo &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="surface" href="/brilliance-mockups/11-concept-demo.html?id=c2">
+        <div class="surface-banner">
+          <span class="surface-name">Folio</span>
+          <span class="surface-status replace">Replace</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-concept">Concept: Studio at Work</p>
+          <p class="surface-question">"Help me <em>create the artifact itself</em>."</p>
+          <p class="surface-desc">Easel center with the artifact prominent. Tools on a left rail (operations, automations, library items). Conversation on the right contextualized to this artifact. The artifact is the work; everything orbits it.</p>
+          <div class="surface-meta"><span>Internal: folio view</span><span class="demo-link">View demo &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="surface" href="/brilliance-mockups/11-concept-demo.html?id=a2">
+        <div class="surface-banner">
+          <span class="surface-name">Notebook</span>
+          <span class="surface-status replace">Replace + rename</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-concept">Concept: Letter Series</p>
+          <p class="surface-question">"I want to <em>write something carefully</em>."</p>
+          <p class="surface-desc">Long-form writing surface. Cream-paper theme option, gold initial caps, marginalia from Brilliance in the right gutter. Wax-seal animation on completion. Renames Scribe to Notebook (Scribe was an internal codename).</p>
+          <div class="surface-meta"><span>Internal: scribe view (renamed)</span><span class="demo-link">View demo &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- TIER 3 -->
+  <section class="tier tier-3">
+    <div class="tier-head">
+      <span class="tier-num">Tier iii.</span>
+      <h2 class="tier-name">Ship in <em>v34</em></h2>
+    </div>
+    <p class="tier-sub">New view. Larger investment. Worth the wait.</p>
+    <div class="surfaces">
+
+      <a class="surface" href="/brilliance-mockups/11-concept-demo.html?id=b2">
+        <div class="surface-banner">
+          <span class="surface-name">Thought <em>Board</em></span>
+          <span class="surface-status new">New view</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-concept">Concept: Branching Pinboard / Spatial Constellation</p>
+          <p class="surface-question">"I want to <em>explore an idea</em> from many angles."</p>
+          <p class="surface-desc">A new free-form surface for research and multi-thread exploration. Two view modes (toggle): Pinboard for active manipulation (drag/pin/branch), Constellation for navigation (zoom to see the whole conversation as a shape). Cards link manually or via Brilliance suggestions.</p>
+          <div class="surface-meta"><span>Internal: NEW data-view="board"</span><span class="demo-link">View demo &rarr;</span></div>
+        </div>
+      </a>
+
+      <a class="surface" href="/brilliance-mockups/11-concept-demo.html?id=b1">
+        <div class="surface-banner">
+          <span class="surface-name">Thought Board <em>(constellation)</em></span>
+          <span class="surface-status new">View mode</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-concept">Concept: Spatial Constellation</p>
+          <p class="surface-question">"<em>Show me</em> the shape of my thinking."</p>
+          <p class="surface-desc">Same Thought Board, alternate lens. 2D zoomable canvas. Messages cluster by topic via embeddings. Long conversations become navigable artifacts. Toggle from Pinboard via the top-right control.</p>
+          <div class="surface-meta"><span>Same data, different view</span><span class="demo-link">View demo &rarr;</span></div>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- CLASSIC SURFACES -->
+  <section class="tier tier-classic">
+    <div class="tier-head">
+      <span class="tier-num">Tier 0.</span>
+      <h2 class="tier-name">Classic <em>surfaces</em> (chrome unchanged)</h2>
+    </div>
+    <p class="tier-sub">Existing surfaces that keep their current chrome. Brilli embeds where appropriate but the layout is right as-is.</p>
+    <div class="surfaces">
+
+      <div class="surface" style="cursor:default">
+        <div class="surface-banner">
+          <span class="surface-name">Pulse</span>
+          <span class="surface-status classic">Classic</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-question">"What does my <em>day, week, portfolio</em> look like?"</p>
+          <p class="surface-desc">Already excellent. Goals, calendar, today, stats in one frame. Brilli appears as an inline status dot in the sidebar; Brilli pulses on automation completion.</p>
+        </div>
+      </div>
+
+      <div class="surface" style="cursor:default">
+        <div class="surface-banner">
+          <span class="surface-name">Identity</span>
+          <span class="surface-status classic">Classic</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-question">"Configure <em>who I am</em> to the platform."</p>
+          <p class="surface-desc">Brand and life identity configuration. Stays as it is; the new presence (Brilli) reads from these fields. No chrome change needed.</p>
+        </div>
+      </div>
+
+      <div class="surface" style="cursor:default">
+        <div class="surface-banner">
+          <span class="surface-name">Library</span>
+          <span class="surface-status classic">Classic</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-question">"Where is my <em>work archived</em>?"</p>
+          <p class="surface-desc">Finder-style archive. Empty states get a small Brilli per the entity spec. Otherwise unchanged.</p>
+        </div>
+      </div>
+
+      <div class="surface" style="cursor:default">
+        <div class="surface-banner">
+          <span class="surface-name">Bloom</span>
+          <span class="surface-status classic">Classic</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-question">"<em>Generate</em> brand content at scale."</p>
+          <p class="surface-desc">Continuously generated brand feed. The launch popup gets Brilli. Otherwise unchanged.</p>
+        </div>
+      </div>
+
+      <div class="surface" style="cursor:default">
+        <div class="surface-banner">
+          <span class="surface-name">Automations</span>
+          <span class="surface-status classic">Classic</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-question">"<em>Schedule and orchestrate</em> work."</p>
+          <p class="surface-desc">Multi-step pipelines, scheduled tasks, workflow presets. Visual unchanged; Brilli pulses on automation completion via sidebar status.</p>
+        </div>
+      </div>
+
+      <div class="surface" style="cursor:default">
+        <div class="surface-banner">
+          <span class="surface-name">Mail</span>
+          <span class="surface-status classic">Classic</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-question">"<em>Compose and send</em>."</p>
+          <p class="surface-desc">Outbox, Sent, Compose, Inbox tabs. Email templates rebrand to Brilliance per the surface rebrand pass. Chrome unchanged.</p>
+        </div>
+      </div>
+
+      <div class="surface" style="cursor:default">
+        <div class="surface-banner">
+          <span class="surface-name">Settings</span>
+          <span class="surface-status classic">Classic</span>
+        </div>
+        <div class="surface-body">
+          <p class="surface-question">"<em>Configure</em> the platform."</p>
+          <p class="surface-desc">Standard settings panel. Gains "Brilliance presence" picker (7 forms incl. Classic BLAKE), "Animate Brilli" toggle, surface mode toggles for power users.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="rules">
+    <h3>Coherence <em>rules</em></h3>
+    <ol>
+      <li><strong>Brilli is the same in every surface.</strong> One presence, many surfaces. Whether you're at the Concierge Desk or the Thought Board, Brilli looks identical and behaves identically.</li>
+      <li><strong>Old Standard TT for headlines, DM Sans for body.</strong> No font drift across surfaces.</li>
+      <li><strong>Gold palette is universal.</strong> Per-brand accent colors override gold ONLY in brand-mode surfaces (Studio, Folio, Bloom, Pulse). Gold is the platform color.</li>
+      <li><strong>Each surface answers ONE question.</strong> If you're asking two questions on one surface, you're in the wrong surface - Brilliance suggests moving you.</li>
+      <li><strong>Cross-surface deep links.</strong> Pinning a Chat message on Thought Board keeps the link live. History scrubbing jumps to any past surface. The platform is unified by content, not by chat.</li>
+      <li><strong>Brilliance always knows where you are.</strong> The system prompt for Brilli always includes the active surface, so suggestions are surface-appropriate.</li>
+      <li><strong>Classic mode for 90 days.</strong> Existing power users can toggle back to v32.x chrome on Studio, Folio, Notebook for transition comfort.</li>
+    </ol>
+  </div>
+
+  <footer>
+    <p>Brilliance &middot; <strong>by RoweOS</strong> &middot; Surface System &middot; v33.0 architecture</p>
+  </footer>
+</div>
+
+</body>
+</html>
