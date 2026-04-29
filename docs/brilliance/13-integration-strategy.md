@@ -218,13 +218,46 @@ This path keeps you shipping every week. The ten paying clients see weekly impro
 
 All of those happen inside the existing repo. They DON'T require throwing the existing code away.
 
-## Open questions for Jordan
+## Locked decisions (2026-04-29)
 
-1. **Confirm: no rewrite from scratch?** Worth being explicit before someone (you, me, or a future contractor) suggests it again under deadline pressure.
-2. **Build pipeline timing:** add esbuild in v34 (Q4 2026) or earlier? Earlier means a small refactor to migrate src/build.sh.
-3. **TypeScript adoption strategy:** per-file with `// @ts-check` JSDoc, or rename src/js to src/ts and add proper types? Recommend the former for gradual adoption.
-4. **Test suite priority:** add tests now (small, gradual), or wait until v34? Recommend now for highest-risk modules: sync, agents, Stripe webhook.
-5. **Public-facing "Brilliance is built fresh"** marketing claim — would be misleading. Recommend marketing leans on "Brilliance is the platform you've built into" instead, which is true and stronger.
+These were the open questions. Jordan's answers locked them in.
+
+### 1. No rewrite from scratch — CONFIRMED
+We do not start fresh. We transform in place. But the work is intentional: every feature's current code is mapped, the planned architectural treatment is documented, and the refactor follows a per-feature playbook (see `15-architecture-playbook.md`).
+
+### 2. Build pipeline timing — START NOW
+Esbuild added immediately, parallel to v33.0 brand work. Replaces `src/build.sh` concatenation with proper bundling. New code (Evolve, services) ships through esbuild from day 1. Existing modules continue to be concatenated until their refactor turn.
+
+This also unblocks **Evolve** — a new feature being added: skill-building and educational repository for life and brand. See `14-evolve.md`. Built fresh as TypeScript modules under the new pipeline.
+
+### 3. TypeScript strategy — HYBRID, the right way
+- **NEW modules** (Evolve, services as they extract) → `.ts` files from day 1
+- **EXISTING high-risk modules** (sync, agents, Stripe webhook) → add `// @ts-check` + JSDoc types now, convert to `.ts` when refactored
+- **EXISTING low-risk modules** (UI panels, view chrome) → leave as plain `.js`, convert opportunistically
+
+No flag day. Gradual but disciplined. The build pipeline (esbuild) handles both `.js` and `.ts` natively.
+
+### 4. Test suite priority — START NOW for high-risk modules
+Three critical-path test files added in the first refactor sprint:
+- `src/__tests__/sync.test.ts` - covers `mergeByTimestamp`, `safeSyncWrite`, `_normalizeTs`, conflict resolution edge cases
+- `src/__tests__/agents.test.ts` - model routing, system prompt assembly, multi-agent orchestration
+- `src/__tests__/stripe-webhook.test.ts` - signature verification, both purchase types (api_key_purchase vs subscription)
+
+Stack: **Vitest** (fastest, works with esbuild seamlessly). For E2E: **Playwright** for the welcome modal, chat send, and automation execution flows. Firebase emulator for sync integration tests.
+
+Target: 30-50 tests covering the past 6 months of production bugs. Each fixed bug gets a regression test added.
+
+### 5. Marketing language — flexible, lean on continuity
+Direction: **"Brilliance has always been inside of RoweOS."** Or **"Brilliance is the platform you've built into."** Both are true and stronger than any "ground-up rewrite" claim. We do not need to signify how the platform was built; we need to signify what it is now.
+
+## What this means in practice
+
+- `src/build.sh` gets a proper esbuild step in v33.0 prep work
+- `package.json` adds: vitest, esbuild, @types/node, typescript (devDeps only)
+- `tsconfig.json` configured for strict TypeScript on new files, lenient on JSDoc'd legacy
+- A `services/` folder begins to exist alongside `src/js/core/` for the extracted typed services
+- **Evolve** is the first feature built entirely under the new architecture (and serves as the reference for how everything else gets refactored)
+- Each feature getting refactored follows `15-architecture-playbook.md` with a per-feature design block before code is written
 
 ## The bottom line
 
