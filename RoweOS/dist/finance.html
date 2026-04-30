@@ -476,30 +476,28 @@ td.num { text-align: right; }
 /* ── Print / Save-as-PDF ──────────────────────────────────── */
 
 @media print {
-  @page { size: A4 portrait; margin: 14mm 14mm 18mm 14mm; }
+  @page { size: A4 portrait; margin: 14mm 14mm 18mm 14mm; background: #0a0a0a; }
 
-  html, body {
-    background: #ffffff !important;
-    color: #1a1a1a !important;
-  }
-
-  /* Force a light palette regardless of dark/light toggle */
+  /* Force dark palette in print regardless of screen theme */
   html, html.light-mode {
-    --bg: #ffffff;
-    --bg-elevated: #ffffff;
-    --bg-card: #ffffff;
-    --bg-card-hover: #ffffff;
-    --text: #1a1a1a;
-    --text-secondary: #444;
-    --text-muted: #777;
-    --border: rgba(0, 0, 0, 0.12);
-    --border-strong: rgba(0, 0, 0, 0.20);
-    --border-gold: rgba(168, 152, 120, 0.55);
-    --gold-subtle: rgba(168, 152, 120, 0.08);
-    --gold-glow: rgba(168, 152, 120, 0.10);
+    --bg: #0a0a0a;
+    --bg-elevated: #141414;
+    --bg-card: #161616;
+    --bg-card-hover: #161616;
+    --text: #ececec;
+    --text-secondary: #a3a3a3;
+    --text-muted: #6b6b6b;
+    --border: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --border-gold: rgba(168, 152, 120, 0.45);
+    --gold-subtle: rgba(168, 152, 120, 0.10);
+    --gold-glow: rgba(168, 152, 120, 0.18);
+    background: #0a0a0a !important;
   }
+  html, body { background: #0a0a0a !important; color: #ececec !important; }
 
-  * {
+  /* Preserve all colors and gradients in print output */
+  *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
@@ -518,96 +516,107 @@ td.num { text-align: right; }
   }
 
   /* Re-flow page */
-  .finance-page { max-width: 100% !important; padding: 0 !important; }
-  section { padding: 18px 0 !important; page-break-inside: avoid; break-inside: avoid; border-top: 1px solid rgba(0,0,0,0.10) !important; }
+  .finance-page { max-width: 100% !important; padding: 0 !important; background: #0a0a0a !important; }
+  section { padding: 16px 0 !important; page-break-inside: avoid; break-inside: avoid; border-top: 1px solid rgba(255,255,255,0.08) !important; }
   section:first-of-type { border-top: none !important; }
 
-  .hero { padding-top: 0 !important; padding-bottom: 14px !important; text-align: left !important; }
+  .hero { padding-top: 12px !important; padding-bottom: 14px !important; text-align: left !important; }
   .hero-eyebrow { margin-bottom: 10px !important; }
-  .hero h1 { font-size: 36px !important; line-height: 1.08 !important; margin-bottom: 12px !important; }
-  .hero .subline { margin: 0 0 18px !important; max-width: 100% !important; font-size: 13px !important; }
+  .hero h1 { font-size: 36px !important; line-height: 1.08 !important; margin-bottom: 12px !important; color: #ececec !important; }
+  .hero h1 em { color: #a89878 !important; }
+  .hero .subline { margin: 0 0 18px !important; max-width: 100% !important; font-size: 13px !important; color: #b5b5b5 !important; }
 
-  /* Stat strip stays compact */
-  .stat-strip { margin-top: 14px !important; border-color: rgba(0,0,0,0.12) !important; }
-  .stat { padding: 14px 12px !important; border-color: rgba(0,0,0,0.10) !important; }
-  .stat-value { font-size: 28px !important; }
-  .stat-label { font-size: 9px !important; }
+  /* Stat strip */
+  .stat-strip { margin-top: 14px !important; border-color: rgba(255,255,255,0.10) !important; }
+  .stat { padding: 14px 12px !important; border-color: rgba(255,255,255,0.10) !important; }
+  .stat-value { font-size: 28px !important; color: #a89878 !important; }
+  .stat-label { font-size: 9px !important; color: #888 !important; }
 
   /* Section type */
-  .section-eyebrow { margin-bottom: 8px !important; font-size: 9.5px !important; }
-  .section-heading { font-size: 22px !important; margin-bottom: 8px !important; }
-  .section-sub { font-size: 12px !important; margin-bottom: 18px !important; }
+  .section-eyebrow { margin-bottom: 8px !important; font-size: 9.5px !important; color: #a89878 !important; }
+  .section-heading { font-size: 22px !important; margin-bottom: 8px !important; color: #ececec !important; }
+  .section-sub { font-size: 12px !important; margin-bottom: 18px !important; color: #b5b5b5 !important; }
 
   /* Cards */
   .card {
-    border: 1px solid rgba(0,0,0,0.12) !important;
-    background: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    background: #161616 !important;
     padding: 14px 16px !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
-  .card-eyebrow { font-size: 9px !important; margin-bottom: 6px !important; }
-  .card-title { font-size: 16px !important; }
-  .card-num { font-size: 28px !important; }
-  .card-body { font-size: 11.5px !important; line-height: 1.5 !important; }
+  .card-eyebrow { font-size: 9px !important; margin-bottom: 6px !important; color: #a89878 !important; }
+  .card-title { font-size: 16px !important; color: #ececec !important; }
+  .card-num { font-size: 28px !important; color: #a89878 !important; }
+  .card-body { font-size: 11.5px !important; line-height: 1.5 !important; color: #b5b5b5 !important; }
   .traction-grid { gap: 10px !important; }
-  .traction-grid .card.span-7 { grid-column: span 12 !important; }
-  .traction-grid .card.span-5,
-  .traction-grid .card.span-4,
-  .traction-grid .card.span-6 { grid-column: span 6 !important; }
 
-  /* Curve renders as image */
+  /* Curve */
   .curve-svg { height: 140px !important; }
   .curve-line { stroke: #a89878 !important; }
   .curve-area { fill: rgba(168, 152, 120, 0.18) !important; }
   .curve-dot { fill: #a89878 !important; }
-  .curve-axis-text { fill: #777 !important; }
+  .curve-axis-text { fill: #888 !important; }
+  .curve-grid { stroke: rgba(255,255,255,0.10) !important; }
 
   /* Calculator */
-  .proj-meta { background: #fbf9f4 !important; border-color: rgba(168, 152, 120, 0.55) !important; padding: 10px 14px !important; font-size: 10.5px !important; }
-  .proj-table-wrap { border-color: rgba(0,0,0,0.12) !important; }
+  .proj-meta { background: rgba(168, 152, 120, 0.06) !important; border-color: rgba(168, 152, 120, 0.45) !important; padding: 10px 14px !important; font-size: 10.5px !important; color: #b5b5b5 !important; }
+  .proj-meta strong { color: #a89878 !important; }
+  .proj-table-wrap { border-color: rgba(255,255,255,0.10) !important; }
   .proj-table { min-width: 0 !important; }
-  .proj-table thead th { background: #f3f0ea !important; color: #444 !important; padding: 8px 10px !important; font-size: 9.5px !important; }
-  .proj-table tbody td { padding: 10px !important; font-size: 11.5px !important; border-color: rgba(0,0,0,0.08) !important; }
-  .proj-name { font-size: 14px !important; }
-  .proj-sub { font-size: 10px !important; }
-  .proj-input { background: #ffffff !important; color: #1a1a1a !important; border: 1px solid rgba(0,0,0,0.18) !important; }
-  .proj-out { font-size: 14px !important; }
+  .proj-table thead th { background: #141414 !important; color: #a3a3a3 !important; padding: 8px 10px !important; font-size: 9.5px !important; border-color: rgba(255,255,255,0.10) !important; }
+  .proj-table tbody td { padding: 10px !important; font-size: 11.5px !important; border-color: rgba(255,255,255,0.08) !important; color: #ececec !important; }
+  .proj-name { font-size: 14px !important; color: #ececec !important; }
+  .proj-sub { font-size: 10px !important; color: #888 !important; }
+  .proj-out { font-size: 14px !important; color: #a89878 !important; }
   .proj-row.target { background: rgba(168, 152, 120, 0.10) !important; }
+  .proj-row.target .proj-name { color: #c9b890 !important; }
   .proj-notes { gap: 14px !important; margin-top: 16px !important; }
-  .proj-note p { font-size: 10.5px !important; }
+  .proj-note h4 { color: #a89878 !important; }
+  .proj-note p { font-size: 10.5px !important; color: #b5b5b5 !important; }
 
   /* Use of funds */
   .fund-summary { gap: 8px !important; margin-bottom: 16px !important; }
-  .fund-stat { padding: 12px !important; }
-  .fund-stat .v { font-size: 22px !important; }
-  .fund-stat .l { font-size: 9px !important; }
+  .fund-stat { padding: 12px !important; background: #161616 !important; }
+  .fund-stat .v { font-size: 22px !important; color: #a89878 !important; }
+  .fund-stat .l { font-size: 9px !important; color: #888 !important; }
   .fund-bars { gap: 8px !important; }
   .fund-bar { grid-template-columns: 220px 1fr 80px !important; }
-  .fund-bar .lab { font-size: 11.5px !important; }
-  .fund-bar .lab small { font-size: 9.5px !important; }
-  .fund-bar .pct { font-size: 14px !important; }
-  .fund-bar .track { background: #f0ede6 !important; height: 8px !important; }
-  .fund-bar .fill { background: #a89878 !important; }
+  .fund-bar .lab { font-size: 11.5px !important; color: #ececec !important; }
+  .fund-bar .lab small { font-size: 9.5px !important; color: #888 !important; }
+  .fund-bar .pct { font-size: 14px !important; color: #a89878 !important; }
+  .fund-bar .pct small { color: #888 !important; }
+  .fund-bar .track { background: #141414 !important; height: 8px !important; border-color: rgba(255,255,255,0.10) !important; }
+  .fund-bar .fill { background: linear-gradient(90deg, rgba(168,152,120,0.5), #a89878) !important; }
 
   /* Why grid + risks */
   .why-grid { gap: 16px !important; }
-  .why-list li { padding: 8px 0 8px 22px !important; font-size: 11.5px !important; border-color: rgba(0,0,0,0.10) !important; }
-  .bio-card { padding: 16px !important; border-color: rgba(0,0,0,0.12) !important; }
-  .bio-name { font-size: 17px !important; }
-  .bio-body { font-size: 11.5px !important; }
+  .why-grid h3 { color: #ececec !important; }
+  .why-list li { padding: 8px 0 8px 22px !important; font-size: 11.5px !important; border-color: rgba(255,255,255,0.08) !important; color: #b5b5b5 !important; }
+  .why-list li strong { color: #ececec !important; }
+  .why-list li::before { background: #a89878 !important; }
+  .bio-card { padding: 16px !important; border-color: rgba(255,255,255,0.10) !important; background: #161616 !important; }
+  .bio-name { font-size: 17px !important; color: #ececec !important; }
+  .bio-role { color: #a89878 !important; }
+  .bio-body { font-size: 11.5px !important; color: #b5b5b5 !important; }
+  .bio-body em { background: rgba(168, 152, 120, 0.12) !important; color: #ccc !important; }
   .risks-grid { gap: 10px !important; }
-  .risk h4 { font-size: 14px !important; }
-  .risk p, .risk .mit { font-size: 11px !important; }
+  .risk h4 { font-size: 14px !important; color: #ececec !important; }
+  .risk p { font-size: 11px !important; color: #b5b5b5 !important; }
+  .risk .mit { font-size: 11px !important; border-color: rgba(255,255,255,0.10) !important; color: #999 !important; }
+  .risk .mit strong { color: #a89878 !important; }
+  .logo-chip { background: #141414 !important; color: #b5b5b5 !important; border-color: rgba(255,255,255,0.10) !important; }
+  .gfs-badge { background: rgba(168, 152, 120, 0.10) !important; color: #a89878 !important; border-color: rgba(168, 152, 120, 0.45) !important; }
+  .tag-soft { background: #141414 !important; color: #888 !important; border-color: rgba(255,255,255,0.10) !important; }
 
   /* Section page-breaks */
   section.section-break-before { page-break-before: always !important; }
 
   /* Footer */
-  .finance-footer { padding: 12px 0 !important; border-color: rgba(0,0,0,0.12) !important; margin-top: 16px !important; }
-  .footer-brand { font-size: 14px !important; }
-  .footer-tagline { font-size: 10px !important; }
-  .footer-link { font-size: 10.5px !important; }
+  .finance-footer { padding: 14px 0 !important; border-color: rgba(255,255,255,0.10) !important; margin-top: 16px !important; }
+  .footer-brand { font-size: 14px !important; color: #a89878 !important; }
+  .footer-tagline { font-size: 10px !important; color: #888 !important; }
+  .footer-link { font-size: 10.5px !important; color: #a3a3a3 !important; }
 
   /* Avoid splitting elements awkwardly */
   h1, h2, h3, h4, .card, .risk, .fund-bar, .proj-row { page-break-inside: avoid !important; break-inside: avoid !important; }
@@ -826,7 +835,7 @@ td.num { text-align: right; }
     <h1>Operating intelligence<br>for <em>brand &amp; life.</em></h1>
     <p class="subline">A multi-surface AI platform. 120+ signups and a growing paying base. Exponential trajectory in the last several weeks. Built solo, with profitable margins on every paid seat.</p>
     <div class="hero-ctas">
-      <button class="btn btn-primary" id="downloadPdfBtn" type="button" title="Opens print dialog. Choose 'Save as PDF' as the destination.">
+      <button class="btn btn-primary" id="downloadPdfBtn" type="button" title="Opens print dialog. Destination: Save as PDF. In Chrome/Safari, enable 'Background graphics' to keep dark theme.">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Save as PDF
       </button>
