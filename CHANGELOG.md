@@ -1,4 +1,47 @@
-# RoweOS Changelog
+# Brilliance / RoweOS Changelog
+
+## v33.0 — Welcome to Brilliance (2026-04-29)
+
+The "Welcome to Brilliance" Release. RoweOS becomes Brilliance at every user-facing surface; the engine is unchanged. Three pillars:
+
+### Brand swap (Phase D, complete)
+- Browser tab `<title>`: Brilliance — Intelligence OS
+- PWA install name: Brilliance
+- Splash screen: "Welcome to Brilliance" with the new Celestial Orb (Brilli, primary direction)
+- Onboarding flow: every screen reads Brilliance ("Install Brilliance as an App", "How will you use Brilliance?", "Start Using Brilliance")
+- Settings: "Brilliance AI" smart routing section, "Delete Brilliance Account"
+- Helper agent renamed: "Brilliance Helper" with updated system prompt
+- Email templates (server + client): Welcome, Founder, Plans, Feedback all Brilliance-branded
+- PDF/DOC/XLSX/PPT/HTML exports: filename + watermark "Brilliance"
+- Push notifications: "Brilliance Reminder" / "Brilliance" titles
+- Marketing pages (info, purchase, newsletter, social, portfolio, terms, privacy): Brilliance throughout
+- Legal preamble: "Brilliance (formerly RoweOS), a product of The Rowe Collection, LLC"
+
+### Welcome experience (Phase E)
+- One-time welcome modal fires on first launch after v33.0 deploy
+- Variant B copy (confident-terse): "Same platform. Same memory. Same work. New name."
+- Celestial Orb at hero scale, gold gradient wordmark, single Continue CTA
+- Persists flag to localStorage `brilliance_welcomed_v33` AND Firestore `profile/welcomed_v33`
+- ESC + click-outside dismiss
+- Existing users only — new users (account created after v33.0) skip welcome
+
+### Cleanup (Phase B)
+- Focus/Signal feature retirement: `~5,800 lines` of dead code removed (HTML view, JS module, label maps, sidebar refs, dead branches). `showView('signal') → pulse` redirect preserved for back-compat URL bookmarks.
+- `autoTrimDataForSync()` deleted (-121 lines, dead since v22.32)
+- 9 orphaned HTML pages removed (login.html, social2/3, executive-summary, overview, demos, blake-studio, export-blake-bg) + dead `api/session.js`
+- 38 unused images deleted (~14 MB; 9 desktop, 29 mobile)
+- 53 shipped specs+plans archived to `docs/superpowers/{specs,plans}/archive/`
+- Backup files + corrupted ZIP fragments + obsolete verify.sh removed (~34 MB)
+
+### Internal preserved
+Code-internal stays RoweOS by design (per Option A confirmed 2026-04-29): all `roweos_*` localStorage keys, Firebase project paths, JS function names (resolveRoweOSAI, openRoweOSLibraryPicker, toggleRoweOSMode, etc.), CSS class names, repo name, build paths. Engine is RoweOS; product is Brilliance. By RoweOS.
+
+### Known follow-ups (v33.x / v34)
+- Phase C-full: Canvas 2D Brilli module replacing chat blob landing + thinking indicator + sidebar status dot (per `docs/brilliance/05-brilli-animation.md`)
+- Phase B CSS sweep: 78KB of `.focus-2-*` selectors targeting removed DOM elements (inert, deferred to v34 with proper postcss tooling — initial regex sweep ate critical .hidden rules and was rolled back)
+- Selectable Brilli forms in Settings (Aura/Field as v33.x option)
+- Sync v5 migration (per `docs/brilliance/16-sync-v5.md`)
+- Evolve feature ship (per `docs/brilliance/14-evolve.md`)
 
 ## v31.20 (2026-04-26)
 - **Root-cause fix for the 2/9 chat resurrection bug.** Admin Purge wrote `{ data: '[]' }` to `conversations/current` but the pull reads `convCurrent.messages`, not `convCurrent.data`. The old `messages` array was never overwritten, so the next cloud pull resurrected the old chats. Now writes `{ messages: [] }` and clears in-memory `currentConversation` immediately. Pull also honors empty cloud arrays.

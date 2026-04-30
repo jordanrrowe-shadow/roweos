@@ -2,7 +2,7 @@
 // DATA INITIALIZATION & MIGRATION - v4.8.0
 // ═══════════════════════════════════════════════════════════════
 
-var ROWEOS_VERSION = 'v32.1'; // v32.1: convergent sync — auto-purge removed (had false-positive bug), self-healing tombstones, 30s convergence loop auto-reconciles drift, no more Push/Pull required
+var ROWEOS_VERSION = 'v33.0'; // v33.0: Welcome to Brilliance Release — brand layer, Celestial Orb, welcome modal, Phase B cleanup (had false-positive bug), self-healing tombstones, 30s convergence loop auto-reconciles drift, no more Push/Pull required
 var ROWEOS_DATA_VERSION_KEY = 'roweos_data_version';
 var ROWEOS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/YOUR-REPO/roweos-updates/main/latest-version.json';
 var ROWEOS_LAST_UPDATE_CHECK = 'roweos_last_update_check';

@@ -355,6 +355,47 @@
     </div>
   </div>
 
+  <!-- v33.0: Welcome to Brilliance modal (fires once per user on first launch after v33.0 deploy) -->
+  <div id="brillianceWelcomeModal" class="modal-overlay" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);backdrop-filter:blur(28px);z-index:99999;" onclick="if(event.target===this){dismissBrillianceWelcome();}" role="dialog" aria-modal="true" aria-labelledby="brillianceWelcomeHeading">
+    <div style="width:min(620px,92vw);padding:64px 56px 48px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(201,169,97,0.10),#0a0a0a 65%);border:1px solid rgba(255,255,255,0.06);border-radius:6px;position:relative;isolation:isolate;">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% -20%,rgba(201,169,97,0.18),transparent 55%);pointer-events:none;border-radius:6px;z-index:-1;"></div>
+
+      <!-- Celestial Orb (matches splash) -->
+      <div style="width:180px;height:180px;margin:0 auto 36px;position:relative;isolation:isolate;" aria-hidden="true">
+        <div style="position:absolute;inset:-40px;background:radial-gradient(circle,rgba(201,169,97,0.30),rgba(201,169,97,0.10) 35%,transparent 70%);border-radius:50%;z-index:-1;animation:welcomeOrbBloom 6s ease-in-out infinite;"></div>
+        <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 45%,rgba(245,230,200,0.18) 0%,rgba(201,169,97,0.18) 50%,rgba(168,138,74,0.32) 80%,rgba(107,90,61,0.55) 100%);border:1px solid rgba(232,199,155,0.45);box-shadow:0 0 60px rgba(201,169,97,0.30),inset 0 0 28px rgba(0,0,0,0.4);animation:welcomeOrbBreathe 5s ease-in-out infinite;"></div>
+        <div style="position:absolute;top:50%;left:50%;width:38%;height:38%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#fff8e8 0%,#f5e6c8 35%,rgba(201,169,97,0.25) 75%,transparent 100%);animation:welcomeOrbCore 5s ease-in-out infinite;"></div>
+        <span style="position:absolute;top:32%;left:42%;width:3px;height:3px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:welcomeOrbTwinkle 4s ease-in-out infinite;animation-delay:0s;"></span>
+        <span style="position:absolute;top:48%;left:62%;width:3px;height:3px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:welcomeOrbTwinkle 4s ease-in-out infinite;animation-delay:0.6s;"></span>
+        <span style="position:absolute;top:62%;left:38%;width:3px;height:3px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:welcomeOrbTwinkle 4s ease-in-out infinite;animation-delay:1.2s;"></span>
+        <span style="position:absolute;top:42%;left:30%;width:2px;height:2px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:welcomeOrbTwinkle 4s ease-in-out infinite;animation-delay:1.8s;"></span>
+        <span style="position:absolute;top:58%;left:58%;width:2px;height:2px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:welcomeOrbTwinkle 4s ease-in-out infinite;animation-delay:2.4s;"></span>
+      </div>
+
+      <h1 id="brillianceWelcomeHeading" style="font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:54px;color:#f5e6c8;letter-spacing:-0.01em;line-height:1;margin-bottom:6px;background:linear-gradient(135deg,#f5e6c8,#e2c79b 50%,#c9a961);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Brilliance</h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;color:#c9a961;margin-bottom:6px;">Intelligence OS</p>
+      <p style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:400;letter-spacing:0.25em;text-transform:uppercase;color:#655e54;margin-bottom:24px;">by <strong style="color:#c9a961;font-weight:500;">RoweOS</strong></p>
+      <div style="width:140px;height:1px;background:linear-gradient(90deg,transparent,#a88a4a,transparent);margin:0 auto 32px;"></div>
+
+      <div style="font-family:Georgia,serif;font-size:21px;line-height:1.65;color:#ece4d8;max-width:480px;margin:0 auto 36px;text-align:left;">
+        <p style="margin-bottom:18px;">Welcome to <em style="color:#e2c79b;font-style:italic;">Brilliance</em>.</p>
+        <p style="margin-bottom:18px;">Same platform. Same memory. Same work. New name.</p>
+        <p>Meet Brilli, the <em style="color:#e2c79b;font-style:italic;">intelligence</em> behind the platform. Everything is where you left it.</p>
+      </div>
+
+      <button type="button" onclick="dismissBrillianceWelcome()" style="display:inline-flex;align-items:center;gap:10px;padding:16px 44px;background:linear-gradient(135deg,#e2c79b,#c9a961 60%,#a88a4a);color:#000;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.25em;text-transform:uppercase;cursor:pointer;transition:all 0.35s ease;animation:welcomeBtnGlow 2s ease-in-out 4s infinite;">Continue</button>
+
+      <p style="margin-top:28px;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#655e54;">Brilliance &middot; by RoweOS &middot; The Rowe Collection</p>
+    </div>
+    <style>
+      @keyframes welcomeOrbBloom{0%,100%{opacity:0.85;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+      @keyframes welcomeOrbBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+      @keyframes welcomeOrbCore{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.06)}}
+      @keyframes welcomeOrbTwinkle{0%,100%{opacity:0.4;transform:scale(0.85)}50%{opacity:1;transform:scale(1.2)}}
+      @keyframes welcomeBtnGlow{0%,100%{box-shadow:0 0 0 rgba(201,169,97,0)}50%{box-shadow:0 0 30px rgba(201,169,97,0.35)}}
+    </style>
+  </div>
+
   <!-- v20.19: Feedback Modal -->
   <!-- v21.12: Feedback screenshot lightbox -->
   <div id="feedbackLightbox" onclick="this.style.display='none'"><img id="feedbackLightboxImg" src="" alt="Screenshot"></div>

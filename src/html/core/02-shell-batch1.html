@@ -57,7 +57,25 @@
         Back
       </div>
 
-      <img src="/icons/roweos-emblem.png" alt="Brilliance" style="width:200px;height:200px;object-fit:contain;margin-bottom:20px;margin-top:0;position:relative;filter:brightness(1.1);" onerror="this.style.display='none'">
+      <!-- v33.0: Celestial Orb (Brilli, primary direction). CSS-only, no canvas dependency on splash. -->
+      <div class="splash-orb" style="width:160px;height:160px;margin:0 auto 24px;position:relative;isolation:isolate;" aria-hidden="true">
+        <div style="content:'';position:absolute;inset:-40px;background:radial-gradient(circle,rgba(201,169,97,0.28),rgba(201,169,97,0.10) 35%,transparent 70%);border-radius:50%;z-index:-1;animation:splashOrbBloom 6s ease-in-out infinite;"></div>
+        <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 45%,rgba(245,230,200,0.18) 0%,rgba(201,169,97,0.18) 50%,rgba(168,138,74,0.32) 80%,rgba(107,90,61,0.55) 100%);border:1px solid rgba(232,199,155,0.45);box-shadow:0 0 60px rgba(201,169,97,0.25),inset 0 0 28px rgba(0,0,0,0.4);animation:splashOrbBreathe 5s ease-in-out infinite;"></div>
+        <div style="position:absolute;top:50%;left:50%;width:38%;height:38%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#fff8e8 0%,#f5e6c8 35%,rgba(201,169,97,0.25) 75%,transparent 100%);animation:splashOrbCore 5s ease-in-out infinite;"></div>
+        <span style="position:absolute;top:32%;left:42%;width:3px;height:3px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:splashOrbTwinkle 4s ease-in-out infinite;animation-delay:0s;"></span>
+        <span style="position:absolute;top:48%;left:62%;width:3px;height:3px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:splashOrbTwinkle 4s ease-in-out infinite;animation-delay:0.6s;"></span>
+        <span style="position:absolute;top:62%;left:38%;width:3px;height:3px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:splashOrbTwinkle 4s ease-in-out infinite;animation-delay:1.2s;"></span>
+        <span style="position:absolute;top:42%;left:30%;width:2px;height:2px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:splashOrbTwinkle 4s ease-in-out infinite;animation-delay:1.8s;"></span>
+        <span style="position:absolute;top:58%;left:58%;width:2px;height:2px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:splashOrbTwinkle 4s ease-in-out infinite;animation-delay:2.4s;"></span>
+        <span style="position:absolute;top:35%;left:55%;width:2px;height:2px;border-radius:50%;background:#fff8e8;box-shadow:0 0 4px #f5e6c8,0 0 8px #e2c79b;animation:splashOrbTwinkle 4s ease-in-out infinite;animation-delay:3s;"></span>
+      </div>
+      <style>
+        @keyframes splashOrbBloom{0%,100%{opacity:0.85;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+        @keyframes splashOrbBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+        @keyframes splashOrbCore{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.06)}}
+        @keyframes splashOrbTwinkle{0%,100%{opacity:0.4;transform:scale(0.85)}50%{opacity:1;transform:scale(1.2)}}
+        @media (prefers-reduced-motion:reduce){.splash-orb *{animation:none !important}}
+      </style>
       <div class="auth-title" style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;color:#fff;margin-bottom:6px;position:relative;">Create your account or Sign in</div>
       <div class="auth-subtitle" style="font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:32px;position:relative;">Choose your sign-in method</div>
 

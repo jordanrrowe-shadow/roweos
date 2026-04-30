@@ -4434,7 +4434,62 @@ function hideAuthGate() {
     gate.style.opacity = '0';
     setTimeout(function() { gate.style.display = 'none'; }, 400);
   }
+  // v33.0: Welcome to Brilliance modal — fires once per user on first launch after v33.0
+  setTimeout(function() {
+    try { if (typeof maybeShowBrillianceWelcome === 'function') maybeShowBrillianceWelcome(); } catch(e) { console.warn('[Welcome] error:', e); }
+  }, 800);
 }
+
+// v33.0: Welcome modal trigger logic. Fires once per user when:
+//   1. localStorage 'brilliance_welcomed_v33' is unset
+//   2. firebaseUser is resolved
+//   3. User account was created BEFORE the v33.0 deploy timestamp (existing users only)
+function maybeShowBrillianceWelcome() {
+  try {
+    if (localStorage.getItem('brilliance_welcomed_v33') === 'true') return;
+    if (typeof firebaseUser === 'undefined' || !firebaseUser) return;
+    // Existing user check — accountCreationMs < V33_DEPLOY_MS
+    var V33_DEPLOY_MS = 1746000000000; // ~ April 30 2026 - threshold; users created after this skip welcome
+    var creationTime = firebaseUser.metadata && firebaseUser.metadata.creationTime;
+    if (creationTime) {
+      var createdMs = Date.parse(creationTime);
+      if (!isNaN(createdMs) && createdMs > V33_DEPLOY_MS) {
+        // New user — they never knew RoweOS-the-name. Skip welcome, set flag.
+        localStorage.setItem('brilliance_welcomed_v33', 'true');
+        return;
+      }
+    }
+    var modal = document.getElementById('brillianceWelcomeModal');
+    if (!modal) { console.warn('[Welcome] modal element missing'); return; }
+    modal.style.display = 'flex';
+    // ESC key dismiss
+    var escHandler = function(e) {
+      if (e.key === 'Escape') { dismissBrillianceWelcome(); document.removeEventListener('keydown', escHandler); }
+    };
+    document.addEventListener('keydown', escHandler);
+  } catch(e) {
+    console.warn('[Welcome] failed to show:', e);
+    try { localStorage.setItem('brilliance_welcomed_v33', 'true'); } catch(_) {} // fail-safe: skip welcome on error
+  }
+}
+window.maybeShowBrillianceWelcome = maybeShowBrillianceWelcome;
+
+function dismissBrillianceWelcome() {
+  try {
+    var modal = document.getElementById('brillianceWelcomeModal');
+    if (modal) {
+      modal.style.transition = 'opacity 400ms ease-out';
+      modal.style.opacity = '0';
+      setTimeout(function() { modal.style.display = 'none'; modal.style.opacity = '1'; }, 400);
+    }
+    localStorage.setItem('brilliance_welcomed_v33', 'true');
+    // Cloud sync the flag (write-through)
+    if (typeof writeDB === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
+      try { writeDB('profile/welcomed_v33', { value: true, _modifiedAt: Date.now() }); } catch(e) {}
+    }
+  } catch(e) { console.warn('[Welcome] dismiss error:', e); }
+}
+window.dismissBrillianceWelcome = dismissBrillianceWelcome;
 
 // v31.5: Dev/admin bypass for the tier gate. Used in preview environments and by
 // admin to validate the actual app surface (chat/blob/accessibility settings) without
