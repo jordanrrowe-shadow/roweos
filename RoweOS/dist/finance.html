@@ -1567,10 +1567,10 @@ td.num { text-align: right; }
     y += 36;
 
     pdf.setFont('times', 'normal');
-    pdf.setFontSize(orientation === 'landscape' ? 56 : 64);
+    pdf.setFontSize(orientation === 'landscape' ? 76 : 64);
     setColor(C.text);
     pdf.text('2026', W / 2, y, { align: 'center' });
-    y += 44;
+    y += orientation === 'landscape' ? 52 : 44;
 
     drawCenteredText('The Rowe Collection LLC  ·  Austin, Texas', 11, C.sec);
     y += 22;
@@ -1587,12 +1587,12 @@ td.num { text-align: right; }
     newPage();
     drawSectionEyebrow('Financial Brief · 2026');
     pdf.setFont('times', 'normal');
-    pdf.setFontSize(orientation === 'landscape' ? 30 : 36);
+    pdf.setFontSize(orientation === 'landscape' ? 44 : 36);
     setColor(C.text);
-    pdf.text('Operating intelligence', M, y); y += orientation === 'landscape' ? 34 : 40;
+    pdf.text('Operating intelligence', M, y); y += orientation === 'landscape' ? 50 : 40;
     pdf.setFont('times', 'italic');
     setColor(C.gold);
-    pdf.text('for brand & life.', M, y); y += orientation === 'landscape' ? 22 : 26;
+    pdf.text('for brand & life.', M, y); y += orientation === 'landscape' ? 32 : 26;
 
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(11);
@@ -1606,12 +1606,12 @@ td.num { text-align: right; }
 
     // Stat strip (4 stats)
     var stats = [
-      { v: '120+',     l: 'TOTAL SIGNUPS' },
-      { v: 'GROWING',  l: 'PAYING CLIENTS' },
-      { v: 'MRR ↑', l: 'MONTHLY · PROJECTED UP' },
-      { v: '9',        l: 'NEW SURFACES · 60 DAYS' }
+      { v: '120+',    l: 'TOTAL SIGNUPS' },
+      { v: 'GROWING', l: 'PAYING CLIENTS' },
+      { v: 'RISING',  l: 'MRR · MONTHLY' },
+      { v: '9',       l: 'NEW SURFACES · 60 DAYS' }
     ];
-    var stripH = 86;
+    var stripH = orientation === 'landscape' ? 100 : 86;
     var sw = CW / 4;
     setDraw(C.border); pdf.setLineWidth(0.5);
     pdf.line(M, y, M + CW, y);
@@ -1620,15 +1620,27 @@ td.num { text-align: right; }
       var sx = M + s * sw;
       if (s > 0) { setDraw(C.border); pdf.line(sx, y, sx, y + stripH); }
       pdf.setFont('times', 'normal');
-      pdf.setFontSize(stats[s].v.length > 5 ? 22 : 30);
+      var sFs = stats[s].v.length > 5 ? (orientation === 'landscape' ? 26 : 22) : (orientation === 'landscape' ? 36 : 30);
+      pdf.setFontSize(sFs);
       setColor(C.gold);
-      pdf.text(stats[s].v, sx + sw / 2, y + 38, { align: 'center' });
+      pdf.text(stats[s].v, sx + sw / 2, y + (orientation === 'landscape' ? 50 : 42), { align: 'center' });
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(8);
+      pdf.setFontSize(8.5);
       setColor(C.muted);
-      pdf.text(stats[s].l, sx + sw / 2, y + 64, { align: 'center' });
+      pdf.text(stats[s].l, sx + sw / 2, y + (orientation === 'landscape' ? 76 : 66), { align: 'center' });
     }
-    y += stripH + 28;
+    y += stripH + 32;
+
+    // ── At a glance · summary bullets ──
+    drawSectionEyebrow('At a glance');
+    drawList([
+      '120+ signups across 12 months. Curve steepening over the last several weeks.',
+      '10%+ free-to-paid conversion (2x the prosumer benchmark). 100% retention to date.',
+      'Subscription deposits compounding into the multi-thousand-dollar range across recent cycles. MRR is moving up faster than a static brief can hold.',
+      'Path to $1M ARR achievable with Target inputs (5,000 signups, 12% conv, $70 ARPU). See projection table.',
+      '$500K SAFE @ $5M post-money cap. 18-month runway. People-first allocation: marketing hire (M+1), engineering hire (M+9).',
+      'Multi-surface platform shipped end-to-end by a single founder. Nine new surfaces live in the last 60 days. Velocity does not slow with funding.'
+    ]);
 
     drawFooter('Brilliance · Financial Brief · roweos.com/finance', '1');
 
