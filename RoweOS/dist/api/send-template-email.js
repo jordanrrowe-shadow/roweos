@@ -123,8 +123,8 @@ function wrapEmail(subtitle, bodyHtml, recipientId, templateKey) {
     '<table width="560" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:12px;border:1px solid #2a2a2a;">',
     // Header
     '<tr><td style="padding:32px 32px 16px;border-bottom:1px solid #2a2a2a;background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);text-align:center;border-radius:12px 12px 0 0;">',
-    '<img src="https://roweos.com/logo.png" alt="RoweOS" style="width:64px;height:64px;border-radius:12px;margin-bottom:12px;">',
-    '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>',
+    '<img src="https://roweos.com/logo.png" alt="Brilliance" style="width:64px;height:64px;border-radius:12px;margin-bottom:12px;">',
+    '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">Brilliance</h1>',
     '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1.5px;text-transform:uppercase;">' + escapeHtml(tagline) + '</p>'
   ];
 
@@ -181,9 +181,9 @@ function buildOnboardingSurvey(userId, userName, recipientId) {
   parts.push(optionButton(buildResponseUrl(userId, 'api_key_need', 'unsure', 'onboarding_survey'), 'Not sure what this means'));
   parts.push('</div>');
 
-  // Question 3: How did you hear about RoweOS
+  // Question 3: How did you hear about Brilliance
   parts.push('<div style="margin:0 0 24px;">');
-  parts.push('<p style="margin:0 0 10px;font-size:14px;color:#e0e0e0;font-weight:500;">How did you hear about RoweOS?</p>');
+  parts.push('<p style="margin:0 0 10px;font-size:14px;color:#e0e0e0;font-weight:500;">How did you hear about Brilliance?</p>');
   var sources = ['Twitter/X', 'Google Search', 'Friend/Referral', 'LinkedIn', 'Product Hunt', 'Other'];
   for (var i = 0; i < sources.length; i++) {
     parts.push(optionButton(buildResponseUrl(userId, 'referral_source', sources[i].toLowerCase().replace(/[^a-z0-9]/g, '_'), 'onboarding_survey'), sources[i]));
@@ -207,7 +207,7 @@ function buildOnboardingSurvey(userId, userName, recipientId) {
   parts.push('<p style="margin:16px 0 0;font-size:13px;color:#888;line-height:1.5;">Have more to share? Just reply to this email.</p>');
 
   return {
-    subject: 'Quick questions about your RoweOS experience',
+    subject: 'Quick questions about your Brilliance experience',
     html: wrapEmail('Onboarding Survey', parts.join('\n'), recipientId, 'onboarding_survey')
   };
 }
@@ -235,7 +235,7 @@ function buildReengagement(userId, userName, recipientId) {
   }
 
   parts.push('<div style="text-align:center;margin:28px 0 0;">');
-  parts.push(ctaButton(trackedUrl('reengagement_open', '/', recipientId), 'Open RoweOS'));
+  parts.push(ctaButton(trackedUrl('reengagement_open', '/', recipientId), 'Open Brilliance'));
   parts.push('</div>');
 
   return {
@@ -267,7 +267,7 @@ function buildFeatureAnnouncement(metadata, recipientId) {
   parts.push('</div>');
 
   return {
-    subject: 'New in RoweOS: ' + featureName,
+    subject: 'New in Brilliance: ' + featureName,
     html: wrapEmail('Feature Update', parts.join('\n'), recipientId, 'feature_announcement')
   };
 }
@@ -279,7 +279,7 @@ function buildAccessKeyDelivery(metadata, userName, recipientId) {
   var parts = [];
 
   parts.push('<p style="margin:0 0 16px;font-size:15px;color:#e0e0e0;line-height:1.6;">' + greeting + '</p>');
-  parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.6;">Your RoweOS access key is ready. Here it is:</p>');
+  parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.6;">Your Brilliance access key is ready. Here it is:</p>');
 
   // Tier badge
   parts.push('<div style="margin:0 0 16px;">');
@@ -310,7 +310,7 @@ function buildAccessKeyDelivery(metadata, userName, recipientId) {
   parts.push('</div>');
 
   return {
-    subject: 'Your RoweOS Access Key',
+    subject: 'Your Brilliance Access Key',
     html: wrapEmail('Access Key Delivery', parts.join('\n'), recipientId, 'access_key_delivery')
   };
 }
@@ -320,7 +320,7 @@ function buildCheckin(userId, userName, recipientId) {
   var parts = [];
 
   parts.push('<p style="margin:0 0 16px;font-size:15px;color:#e0e0e0;line-height:1.6;">' + greeting + '</p>');
-  parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.6;">We want to make sure RoweOS is working well for you. How would you rate your experience?</p>');
+  parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.6;">We want to make sure Brilliance is working well for you. How would you rate your experience?</p>');
 
   // Rating options
   parts.push('<div style="margin:0 0 24px;text-align:center;">');
@@ -336,12 +336,12 @@ function buildCheckin(userId, userName, recipientId) {
   parts.push('</div>');
 
   parts.push('<div style="background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:20px;margin:0 0 16px;">');
-  parts.push('<p style="margin:0 0 8px;font-size:14px;color:#e0e0e0;font-weight:500;">What would make RoweOS better?</p>');
+  parts.push('<p style="margin:0 0 8px;font-size:14px;color:#e0e0e0;font-weight:500;">What would make Brilliance better?</p>');
   parts.push('<p style="margin:0;font-size:13px;color:#888;line-height:1.5;">We read every reply. Just hit reply and share your thoughts, feature requests, or anything on your mind.</p>');
   parts.push('</div>');
 
   return {
-    subject: 'How\'s RoweOS working for you?',
+    subject: 'How\'s Brilliance working for you?',
     html: wrapEmail('Check-in', parts.join('\n'), recipientId, 'checkin')
   };
 }
@@ -352,7 +352,7 @@ function buildSubscriptionInfo(userName, recipientId) {
   var parts = [];
 
   parts.push('<p style="margin:0 0 16px;font-size:15px;color:#e0e0e0;line-height:1.6;">' + greeting + '</p>');
-  parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.6;">Here is everything you need to know about RoweOS plans, AI API keys, and smart model routing.</p>');
+  parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.6;">Here is everything you need to know about Brilliance plans, AI API keys, and smart model routing.</p>');
 
   // --- Section 1: Choose Your Plan ---
   parts.push('<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">Choose Your Plan</h2>');
@@ -412,7 +412,7 @@ function buildSubscriptionInfo(userName, recipientId) {
 
   // --- Section 2: AI API Keys ---
   parts.push('<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">AI API Keys - Pay As You Go</h2>');
-  parts.push('<p style="margin:0 0 20px;font-size:14px;color:#ccc;line-height:1.6;">RoweOS works with your own API keys from three providers:</p>');
+  parts.push('<p style="margin:0 0 20px;font-size:14px;color:#ccc;line-height:1.6;">Brilliance works with your own API keys from three providers:</p>');
 
   // Provider cards
   var providers = [
@@ -437,13 +437,13 @@ function buildSubscriptionInfo(userName, recipientId) {
   // Divider
   parts.push('<div style="border-top:1px solid #2a2a2a;margin:0 0 24px;"></div>');
 
-  // --- Section 3: RoweOS AI - Smart Routing ---
-  parts.push('<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">RoweOS AI - Unlock Smart Routing</h2>');
-  parts.push('<p style="margin:0 0 16px;font-size:14px;color:#ccc;line-height:1.7;">When you have all three AI providers configured, RoweOS AI automatically selects the best model for each task. Strategy questions route to Claude. Creative content routes to GPT. Research and analysis routes to Gemini.</p>');
+  // --- Section 3: Brilliance AI - Smart Routing ---
+  parts.push('<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">Brilliance AI - Unlock Smart Routing</h2>');
+  parts.push('<p style="margin:0 0 16px;font-size:14px;color:#ccc;line-height:1.7;">When you have all three AI providers configured, Brilliance AI automatically selects the best model for each task. Strategy questions route to Claude. Creative content routes to GPT. Research and analysis routes to Gemini.</p>');
   parts.push('<p style="margin:0;font-size:14px;color:#ccc;line-height:1.7;">One prompt, the right model, every time.</p>');
 
   return {
-    subject: 'RoweOS Plans, API Keys, and AI Routing',
+    subject: 'Brilliance Plans, API Keys, and AI Routing',
     html: wrapEmail('Subscription', parts.join('\n'), recipientId, 'subscription_info')
   };
 }
@@ -452,7 +452,7 @@ function buildSubscriptionInfo(userName, recipientId) {
 // No em dashes, no sentence dashes - per Jordan's preference.
 // v31.3: Welcome email — sent to new signups (manual or auto). Mirrors the client-side
 // generateBetaWelcomeEmail/Founder welcome layout: dark card, getting-started steps, what-you-get.
-// v31.4: Wrap Open RoweOS + footer URLs through /api/track-click for per-recipient attribution.
+// v31.4: Wrap Open Brilliance + footer URLs through /api/track-click for per-recipient attribution.
 function buildWelcome(userName, recipientId) {
   var firstName = userName ? String(userName).split(' ')[0] : '';
   var greeting = firstName ? ('Hi ' + escapeHtml(firstName) + ',') : 'Hi there,';
@@ -460,7 +460,7 @@ function buildWelcome(userName, recipientId) {
   var signinUrl = trackedUrl('welcome_signin', '/', recipientId);
 
   parts.push('<p style="margin:0 0 16px;font-size:15px;color:#e0e0e0;line-height:1.6;">' + greeting + '</p>');
-  parts.push('<h2 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;font-weight:400;color:#f5ecd9;">Welcome to RoweOS Founder.</h2>');
+  parts.push('<h2 style="margin:0 0 8px;font-family:Georgia,serif;font-size:24px;font-weight:400;color:#f5ecd9;">Welcome to Brilliance Founder.</h2>');
   parts.push('<p style="margin:0 0 24px;font-size:14px;color:#ccc;line-height:1.7;">Your 14 day free trial is now active. Here is everything you need to get started.</p>');
 
   // Getting Started
@@ -498,14 +498,14 @@ function buildWelcome(userName, recipientId) {
   parts.push('</div>');
 
   parts.push('<div style="text-align:center;margin:0 0 18px;">');
-  parts.push(ctaButton(trackedUrl('welcome_open', '/', recipientId), 'Open RoweOS'));
+  parts.push(ctaButton(trackedUrl('welcome_open', '/', recipientId), 'Open Brilliance'));
   parts.push('</div>');
 
   parts.push('<p style="margin:18px 0 0;font-size:12.5px;color:#888;line-height:1.6;">Reply to this email if you want a 1:1 walkthrough or have any questions.</p>');
   parts.push('<p style="margin:8px 0 0;font-size:12.5px;color:#888;line-height:1.6;">Jordan, founder of The Rowe Collection</p>');
 
   return {
-    subject: 'Welcome to RoweOS. Your trial is active.',
+    subject: 'Welcome to Brilliance. Your trial is active.',
     html: wrapEmail('New Signup · Welcome', parts.join('\n'), recipientId, 'welcome')
   };
 }
@@ -533,7 +533,7 @@ function buildFounderLifetimeOffer(userName, recipientId) {
   parts.push('<p style="color:#d4b896;font-size:11px;letter-spacing:2.4px;text-transform:uppercase;margin:0 0 8px;text-align:center;">Founder · Reserved Access</p>');
   parts.push('<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 18px;text-align:center;">' + greeting + '</p>');
   parts.push('<h2 style="margin:0 0 12px;font-family:Georgia,serif;font-size:26px;font-weight:400;color:#f5ecd9;text-align:center;line-height:1.25;">Your Founder seat is ready.</h2>');
-  parts.push('<p style="color:#a89878;font-size:14px;line-height:1.7;margin:0 0 28px;text-align:center;">You\'re one of the first 100 chosen for early Founder access to RoweOS. As a thank you, your trial unlocks at <span style="color:#d4b896;font-weight:500;">half price for life</span>.</p>');
+  parts.push('<p style="color:#a89878;font-size:14px;line-height:1.7;margin:0 0 28px;text-align:center;">You\'re one of the first 100 chosen for early Founder access to Brilliance. As a thank you, your trial unlocks at <span style="color:#d4b896;font-weight:500;">half price for life</span>.</p>');
 
   // Coupon code card
   parts.push('<div style="background:linear-gradient(180deg,#1a1a1a,#0e0e0e);border:1px solid rgba(212,184,150,0.4);border-radius:14px;padding:24px;margin:0 0 24px;text-align:center;">');
@@ -552,8 +552,8 @@ function buildFounderLifetimeOffer(userName, recipientId) {
 
   // Vision
   parts.push('<div style="border-top:1px solid #2a2a2a;padding:28px 0 0;margin:0 0 24px;">');
-  parts.push('<h3 style="margin:0 0 12px;font-family:Georgia,serif;font-size:20px;font-weight:400;color:#f5ecd9;">What you can build with RoweOS.</h3>');
-  parts.push('<p style="color:#ccc;font-size:14px;line-height:1.75;margin:0 0 14px;">RoweOS is an operating system for the way you actually work. One workspace where your brand intelligence and your personal life sit side by side. Run five brands at once. Have an AI Strategy agent draft your quarter, a Marketing agent ship your social calendar, an Operations agent file your weekly review.</p>');
+  parts.push('<h3 style="margin:0 0 12px;font-family:Georgia,serif;font-size:20px;font-weight:400;color:#f5ecd9;">What you can build with Brilliance.</h3>');
+  parts.push('<p style="color:#ccc;font-size:14px;line-height:1.75;margin:0 0 14px;">Brilliance is an operating system for the way you actually work. One workspace where your brand intelligence and your personal life sit side by side. Run five brands at once. Have an AI Strategy agent draft your quarter, a Marketing agent ship your social calendar, an Operations agent file your weekly review.</p>');
   parts.push('<p style="color:#ccc;font-size:14px;line-height:1.75;margin:0;">Then flip to LifeAI and have a Wellness Coach calendar your week, a Tax Copilot reconcile receipts, a Personal AI remember the names of your clients\' kids. One brain, two halves, no context switching.</p>');
   parts.push('</div>');
 
@@ -572,7 +572,7 @@ function buildFounderLifetimeOffer(userName, recipientId) {
   parts.push('<div style="background:linear-gradient(180deg,rgba(168,152,120,0.07),rgba(168,152,120,0.02));border:1px solid rgba(168,152,120,0.22);border-radius:14px;padding:22px 24px;margin:0 0 24px;">');
   parts.push('<p style="color:#a89878;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">Optional Add-on</p>');
   parts.push('<h3 style="margin:0 0 8px;font-family:Georgia,serif;font-size:18px;font-weight:400;color:#f5ecd9;">Skip the API key setup.</h3>');
-  parts.push('<p style="color:#ccc;font-size:13.5px;line-height:1.65;margin:0 0 14px;">RoweOS routes to OpenAI, Anthropic, and Google. You can bring your own API keys, or buy a Rowe managed key pack with a single charge so you can start running operations the moment your trial activates. No monthly billing, no provider accounts to set up.</p>');
+  parts.push('<p style="color:#ccc;font-size:13.5px;line-height:1.65;margin:0 0 14px;">Brilliance routes to OpenAI, Anthropic, and Google. You can bring your own API keys, or buy a Rowe managed key pack with a single charge so you can start running operations the moment your trial activates. No monthly billing, no provider accounts to set up.</p>');
   parts.push('<a href="https://roweos.com/api/track-click?c=founder_apikey' + trackParam + '&to=%2Fpurchase" style="display:inline-block;padding:11px 22px;background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.45);border-radius:9px;color:#d4b896;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:0.3px;">Browse API Key Packs &rarr;</a>');
   parts.push('</div>');
 
@@ -580,7 +580,7 @@ function buildFounderLifetimeOffer(userName, recipientId) {
   parts.push('<div style="text-align:center;padding:18px 16px;background:#0e0e0e;border:1px solid #1e1e1e;border-radius:12px;margin:0 0 24px;">');
   parts.push('<p style="color:#666;font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;margin:0 0 8px;">Backed by</p>');
   parts.push('<p style="font-family:Georgia,serif;font-size:17px;color:#d4b896;margin:0;">Google for Startups</p>');
-  parts.push('<p style="color:#888;font-size:11.5px;margin:6px 0 0;line-height:1.5;max-width:380px;margin-left:auto;margin-right:auto;">RoweOS is part of the Google for Startups Cloud Program. Supported infrastructure, vetted product, real builders.</p>');
+  parts.push('<p style="color:#888;font-size:11.5px;margin:6px 0 0;line-height:1.5;max-width:380px;margin-left:auto;margin-right:auto;">Brilliance is part of the Google for Startups Cloud Program. Supported infrastructure, vetted product, real builders.</p>');
   parts.push('</div>');
 
   // Closing
@@ -588,7 +588,7 @@ function buildFounderLifetimeOffer(userName, recipientId) {
   parts.push('<p style="color:#888;font-size:13px;line-height:1.7;margin:0;">Jordan, founder of The Rowe Collection</p>');
 
   return {
-    subject: 'Your Founder Lifetime Discount. RoweOS is ready.',
+    subject: 'Your Founder Lifetime Discount. Brilliance is ready.',
     html: wrapEmail('Founder · Lifetime Offer', parts.join('\n'), recipientId, 'founder_lifetime_offer')
   };
 }
@@ -740,7 +740,7 @@ module.exports = async function handler(req, res) {
         // of every campaign send for validation. Cannot BCC roweos@therowecollection.com
         // because that's the FROM address and Resend silently drops same-address BCCs.
         var _payload = {
-          from: 'RoweOS <roweos@therowecollection.com>',
+          from: 'Brilliance <roweos@therowecollection.com>',
           reply_to: 'jordan@therowecollection.com',
           to: [userEmail],
           bcc: ['jordan@therowecollection.com'],

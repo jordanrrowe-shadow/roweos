@@ -61,7 +61,7 @@ function buildWelcomeEmail(greeting) {
 
   return '<!DOCTYPE html>'
     + '<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">'
-    + '<title>Welcome to RoweOS</title></head>'
+    + '<title>Welcome to Brilliance</title></head>'
     + '<body style="margin:0;padding:0;background-color:' + bg + ';font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:' + bg + ';">'
     + '<tr><td align="center" style="padding:40px 16px 0;">'
@@ -77,17 +77,17 @@ function buildWelcomeEmail(greeting) {
     // Hero
     + '<tr><td style="padding:0 0 40px;text-align:center;">'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,\'Times New Roman\',serif;font-size:32px;font-weight:normal;color:' + textColor + ';line-height:1.3;">' + greeting + '</h1>'
-    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'re now on the list for early access to RoweOS, a private AI platform for managing your brands and your life from a single, elegant interface.</p>'
+    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'re now on the list for early access to Brilliance, a private AI platform for managing your brands and your life from a single, elegant interface.</p>'
     + '</td></tr>'
 
     // Divider
     + '<tr><td style="padding:0 0 40px;"><div style="height:1px;background:linear-gradient(to right,' + bg + ',' + borderColor + ',' + bg + ');"></div></td></tr>'
 
-    // What is RoweOS
+    // What is Brilliance
     + '<tr><td style="padding:0 0 32px;">'
-    + '<p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">What is RoweOS</p>'
+    + '<p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">What is Brilliance</p>'
     + '<h2 style="margin:0 0 16px;font-family:Georgia,serif;font-size:22px;font-weight:normal;color:' + textColor + ';">Operating Intelligence, Built for Brands</h2>'
-    + '<p style="margin:0;font-size:15px;line-height:1.7;color:' + dimText + ';">RoweOS is not a chatbot. It\'s a unified intelligence platform that thinks in terms of brands, coaches, workflows, and outcomes. Every AI agent embodies your brand\'s identity, voice, and strategy, responding as an on-brand concierge that deeply understands who you are.</p>'
+    + '<p style="margin:0;font-size:15px;line-height:1.7;color:' + dimText + ';">Brilliance is not a chatbot. It\'s a unified intelligence platform that thinks in terms of brands, coaches, workflows, and outcomes. Every AI agent embodies your brand\'s identity, voice, and strategy, responding as an on-brand concierge that deeply understands who you are.</p>'
     + '</td></tr>'
 
     // Two Mode Cards
@@ -133,7 +133,7 @@ function buildWelcomeEmail(greeting) {
 
     // CTA
     + '<tr><td align="center" style="padding:0 0 40px;">'
-    + '<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:' + dimText + ';">We\'ll be in touch as we roll out access. In the meantime, explore what RoweOS can do.</p>'
+    + '<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:' + dimText + ';">We\'ll be in touch as we roll out access. In the meantime, explore what Brilliance can do.</p>'
     + '<a href="https://roweos.com/info" style="display:inline-block;padding:14px 36px;font-size:14px;font-weight:500;letter-spacing:1px;text-transform:uppercase;text-decoration:none;color:' + bg + ';background:linear-gradient(135deg,' + goldLight + ',' + gold + ');border-radius:10px;">Learn More</a>'
     + '</td></tr>'
 
@@ -172,7 +172,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
 
   return '<!DOCTYPE html>'
     + '<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">'
-    + '<title>Welcome to RoweOS</title></head>'
+    + '<title>Welcome to Brilliance</title></head>'
     + '<body style="margin:0;padding:0;background-color:' + bg + ';font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:' + bg + ';">'
     + '<tr><td align="center" style="padding:40px 16px 0;">'
@@ -186,7 +186,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     // Hero
     + '<tr><td style="padding:0 0 32px;text-align:center;">'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,\'Times New Roman\',serif;font-size:32px;font-weight:normal;color:' + textColor + ';line-height:1.3;">' + greeting + '</h1>'
-    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">Your 14-day free trial of RoweOS Founder is now active. Your personal AI operating system for managing brands and life from a single, elegant interface.</p>'
+    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">Your 14-day free trial of Brilliance Founder is now active. Your personal AI operating system for managing brands and life from a single, elegant interface.</p>'
     + '</td></tr>'
 
     // Divider
@@ -231,7 +231,7 @@ function buildIndividualWelcomeEmail(firstName, accessKey) {
     + '<tr><td style="padding:0 0 32px;">'
     + '<div style="background:' + cardBg + ';border:1px solid ' + borderColor + ';border-radius:12px;padding:20px;">'
     + '<p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:' + gold + ';">AI Model Access</p>'
-    + '<p style="margin:8px 0 0;font-size:13px;line-height:1.6;color:' + dimText + ';">RoweOS works with Claude, GPT, and Google AI. Add your own API keys in <strong style="color:' + textColor + ';">Settings</strong>, or purchase pre-loaded keys directly inside the app.</p>'
+    + '<p style="margin:8px 0 0;font-size:13px;line-height:1.6;color:' + dimText + ';">Brilliance works with Claude, GPT, and Google AI. Add your own API keys in <strong style="color:' + textColor + ';">Settings</strong>, or purchase pre-loaded keys directly inside the app.</p>'
     + '</div>'
     + '</td></tr>'
 
@@ -265,7 +265,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
 
   return '<!DOCTYPE html>'
     + '<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">'
-    + '<title>Welcome to RoweOS: ' + coName + '</title></head>'
+    + '<title>Welcome to Brilliance: ' + coName + '</title></head>'
     + '<body style="margin:0;padding:0;background-color:' + bg + ';font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:' + bg + ';">'
     + '<tr><td align="center" style="padding:40px 16px 0;">'
@@ -286,7 +286,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
     // Hero
     + '<tr><td style="padding:0 0 32px;text-align:center;">'
     + '<h1 style="margin:0 0 16px;font-family:Georgia,\'Times New Roman\',serif;font-size:32px;font-weight:normal;color:' + textColor + ';line-height:1.3;">' + greeting + '</h1>'
-    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted Founder access to RoweOS for <strong style="color:' + textColor + ';">' + coName + '</strong> , a private AI operating system for managing your brands, team, and operations from a single platform.</p>'
+    + '<p style="margin:0;font-size:16px;line-height:1.7;color:' + dimText + ';max-width:440px;display:inline-block;">You\'ve been granted Founder access to Brilliance for <strong style="color:' + textColor + ';">' + coName + '</strong> , a private AI operating system for managing your brands, team, and operations from a single platform.</p>'
     + '</td></tr>'
 
     // Divider
@@ -319,7 +319,7 @@ function buildCompanyWelcomeEmail(firstName, accessKey, companyName) {
     + '<tr><td style="padding:0 0 32px;">'
     + '<div style="background:rgba(168,152,120,0.06);border:1px solid rgba(168,152,120,0.15);border-radius:12px;padding:20px;">'
     + '<p style="margin:0 0 8px;font-size:14px;font-weight:500;color:' + textColor + ';">Inviting Team Members</p>'
-    + '<p style="margin:0;font-size:13px;line-height:1.6;color:' + dimText + ';">As a Founder, you can share your brand configuration with team members. Use the <strong style="color:' + textColor + ';">Share Brand</strong> button in Identity to generate a join link. Team members will need their own RoweOS accounts and access keys.</p>'
+    + '<p style="margin:0;font-size:13px;line-height:1.6;color:' + dimText + ';">As a Founder, you can share your brand configuration with team members. Use the <strong style="color:' + textColor + ';">Share Brand</strong> button in Identity to generate a join link. Team members will need their own Brilliance accounts and access keys.</p>'
     + '</div>'
     + '</td></tr>'
 
@@ -492,10 +492,10 @@ export default async function handler(req, res) {
 
         if (signupType === 'company') {
           emailHtml = buildCompanyWelcomeEmail(firstName, accessKeyString, companyName);
-          emailSubject = 'Welcome to RoweOS Founder: ' + companyName + ' Access Key';
+          emailSubject = 'Welcome to Brilliance Founder: ' + companyName + ' Access Key';
         } else {
           emailHtml = buildIndividualWelcomeEmail(firstName, accessKeyString);
-          emailSubject = 'Welcome to RoweOS Founder: Your Access Key';
+          emailSubject = 'Welcome to Brilliance Founder: Your Access Key';
         }
 
         var emailResp = await fetch('https://api.resend.com/emails', {
@@ -505,7 +505,7 @@ export default async function handler(req, res) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'RoweOS <roweos@therowecollection.com>',
+            from: 'Brilliance <roweos@therowecollection.com>',
             to: [email],
             subject: emailSubject,
             html: emailHtml

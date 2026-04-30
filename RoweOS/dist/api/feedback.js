@@ -65,7 +65,7 @@ function buildFeedbackEmail(feedback) {
 
   return '<!DOCTYPE html>'
     + '<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">'
-    + '<title>RoweOS Feedback</title></head>'
+    + '<title>Brilliance Feedback</title></head>'
     + '<body style="margin:0;padding:0;background-color:' + bg + ';font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:' + bg + ';">'
     + '<tr><td align="center" style="padding:40px 16px;">'
@@ -115,7 +115,7 @@ function buildFeedbackEmail(feedback) {
 
     // Footer
     + '<tr><td style="padding:24px 0 0;text-align:center;border-top:1px solid ' + borderColor + ';">'
-    + '<p style="margin:0;font-size:11px;color:rgba(138,133,127,0.5);">RoweOS Feedback System</p>'
+    + '<p style="margin:0;font-size:11px;color:rgba(138,133,127,0.5);">Brilliance Feedback System</p>'
     + '</td></tr>'
 
     + '</table></td></tr></table></body></html>';
@@ -159,9 +159,9 @@ export default async function handler(req, res) {
               method: 'POST',
               headers: { 'Authorization': 'Bearer ' + resendKey, 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                from: 'RoweOS <roweos@therowecollection.com>',
+                from: 'Brilliance <roweos@therowecollection.com>',
                 to: ['jordan@therowecollection.com'],
-                subject: 'RoweOS Feedback: ' + (categoryLabels[category] || category) + ' — ' + description.substring(0, 60),
+                subject: 'Brilliance Feedback: ' + (categoryLabels[category] || category) + ' — ' + description.substring(0, 60),
                 html: emailHtml
               })
             }, 5000);

@@ -154,7 +154,7 @@ function renderThankYouPage(answer) {
     '<head>' +
     '<meta charset="UTF-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-    '<title>RoweOS - Response Received</title>' +
+    '<title>Brilliance - Response Received</title>' +
     '<style>' +
     '* { margin: 0; padding: 0; box-sizing: border-box; }' +
     'body {' +
@@ -231,8 +231,8 @@ function renderThankYouPage(answer) {
     '</div>' +
     '<h1>Thank you</h1>' +
     '<p>Your response has been recorded. We appreciate your feedback and will use it to improve your experience.</p>' +
-    '<a href="https://roweos.com" style="display:inline-block;margin-top:20px;padding:14px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;letter-spacing:0.5px;">Log in to RoweOS</a>' +
-    '<div class="brand" style="margin-top:16px;">RoweOS</div>' +
+    '<a href="https://roweos.com" style="display:inline-block;margin-top:20px;padding:14px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;letter-spacing:0.5px;">Log in to Brilliance</a>' +
+    '<div class="brand" style="margin-top:16px;">Brilliance</div>' +
     '</div>' +
     '</body>' +
     '</html>';

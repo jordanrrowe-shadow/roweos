@@ -10,7 +10,7 @@
 
   // Skip if already defined (Electron preload)
   if (window.roweosAPI && window.roweosAPI.isElectron) {
-    console.log('RoweOS: Electron API detected, skipping browser bridge');
+    console.log('Brilliance: Electron API detected, skipping browser bridge');
     return;
   }
 
@@ -40,7 +40,7 @@
 
   // Helper: emit debug log
   function debugLog(message, data) {
-    console.log('[RoweOS API]', message, data || '');
+    console.log('[Brilliance API]', message, data || '');
     streamCallbacks.onDebugLog.forEach(function(cb) { cb(message, data); });
   }
 
@@ -397,7 +397,7 @@
     }
   };
 
-  console.log('RoweOS API Bridge v6.0 initialized (Browser Mode)');
+  console.log('Brilliance API Bridge v6.0 initialized (Browser Mode)');
 
 })();
 
@@ -5930,7 +5930,7 @@ function renderMailComposeFrom() {
   // v22.33: Only show admin built-in addresses for admin users
   if (typeof isAdmin === 'function' && isAdmin()) {
     if (hiddenBuiltIn.indexOf('roweos@therowecollection.com') === -1) {
-      html += '<option value="roweos@therowecollection.com"' + (defaultAddr === 'roweos@therowecollection.com' ? ' selected' : '') + '>RoweOS (roweos@therowecollection.com)</option>';
+      html += '<option value="roweos@therowecollection.com"' + (defaultAddr === 'roweos@therowecollection.com' ? ' selected' : '') + '>Brilliance (roweos@therowecollection.com)</option>';
     }
     if (hiddenBuiltIn.indexOf('jordan@therowecollection.com') === -1) {
       html += '<option value="jordan@therowecollection.com"' + (defaultAddr === 'jordan@therowecollection.com' ? ' selected' : '') + '>Jordan Rowe (jordan@therowecollection.com)</option>';
@@ -6226,13 +6226,13 @@ function mailAttachPDFData(pdfResult) {
   var reader = new FileReader();
   reader.onload = function(e) {
     window._mailAttachments.push({
-      name: pdfResult.filename || 'RoweOS-Export.pdf',
+      name: pdfResult.filename || 'Brilliance-Export.pdf',
       type: 'application/pdf',
       size: pdfResult.blob.size,
       base64: e.target.result.split(',')[1]
     });
     mailRenderAttachmentChips();
-    showToast('PDF attached: ' + (pdfResult.filename || 'RoweOS-Export.pdf'), 'success');
+    showToast('PDF attached: ' + (pdfResult.filename || 'Brilliance-Export.pdf'), 'success');
   };
   reader.readAsDataURL(pdfResult.blob);
 }
@@ -6244,7 +6244,7 @@ function mailAttachCurrentPDF() {
   }
   var run = window.currentRun;
   var docTitle = run.contextTitle || run.brand || 'Document';
-  var brandName = run.brand || 'RoweOS';
+  var brandName = run.brand || 'Brilliance';
   var result = roweosPDF(run.deliv, {
     title: docTitle,
     brandName: brandName,
@@ -6623,11 +6623,11 @@ function mailOnTemplateChange() {
     var tier = tierMap[val] || 'founder';
     var tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
     var subEl = document.getElementById('mailComposeSubject');
-    if (subEl) subEl.value = 'Welcome to RoweOS ' + tierLabel + ' - Your Access Key';
+    if (subEl) subEl.value = 'Welcome to Brilliance ' + tierLabel + ' - Your Access Key';
     var body = document.getElementById('mailComposeBody');
     if (body) {
-      body.innerHTML = '<h2>Welcome to RoweOS ' + tierLabel + '</h2>'
-        + '<p>You\'ve been granted early access to RoweOS - an AI operating system built for brands and life. Your access key is below.</p>'
+      body.innerHTML = '<h2>Welcome to Brilliance ' + tierLabel + '</h2>'
+        + '<p>You\'ve been granted early access to Brilliance - an AI operating system built for brands and life. Your access key is below.</p>'
         + '<div style="background:rgba(168,152,120,0.1);border:1px solid rgba(168,152,120,0.3);border-radius:8px;padding:18px;text-align:center;margin:20px 0;">'
         + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#888;margin-bottom:8px;">Your Access Key</div>'
         + '<div style="font-size:22px;color:#a89878;letter-spacing:3px;font-weight:600;font-family:monospace;">ROWE-XXXX-XXXX</div>'
@@ -6645,10 +6645,10 @@ function mailOnTemplateChange() {
   }
   if (val === 'admin_checkin') {
     var subEl2 = document.getElementById('mailComposeSubject');
-    if (subEl2) subEl2.value = 'Checking in - How\'s RoweOS going?';
+    if (subEl2) subEl2.value = 'Checking in - How\'s Brilliance going?';
     var body2 = document.getElementById('mailComposeBody');
     if (body2) {
-      body2.innerHTML = '<h2>Hope you\'ve been enjoying RoweOS</h2>'
+      body2.innerHTML = '<h2>Hope you\'ve been enjoying Brilliance</h2>'
         + '<p>I wanted to personally check in and see how things are going. Your experience and feedback are incredibly valuable as we continue building.</p>'
         + '<h3>A few quick questions:</h3>'
         + '<ul>'
@@ -6659,12 +6659,12 @@ function mailOnTemplateChange() {
         + '<h3>How to share feedback</h3>'
         + '<ol>'
         + '<li><strong>Reply to this email</strong> with your thoughts</li>'
-        + '<li>Use the <strong>Feedback</strong> button inside RoweOS (bottom-left)</li>'
+        + '<li>Use the <strong>Feedback</strong> button inside Brilliance (bottom-left)</li>'
         + '<li>Or just message me directly at jordan@therowecollection.com</li>'
         + '</ol>'
         + '<p><strong>Quick Tip:</strong> Try asking your BrandAI to create a content calendar, write a client proposal, or brainstorm new service offerings. The more context you give it in your Brand Identity, the better it gets.</p>'
         + '<p>Thanks for being an early adopter. Your input directly shapes what we build next.</p>'
-        + '<p>Best,<br><strong>Jordan Rowe</strong><br>Creator, RoweOS</p>';
+        + '<p>Best,<br><strong>Jordan Rowe</strong><br>Creator, Brilliance</p>';
     }
   }
   // Live preview
@@ -10169,7 +10169,7 @@ function showEmailPublisher(content, op) {
   var fromOptions = '';
   // v22.33: Only show admin addresses for admin
   if (typeof isAdmin === 'function' && isAdmin()) {
-    fromOptions += '<option value="roweos@therowecollection.com"' + (defaultFrom === 'roweos@therowecollection.com' ? ' selected' : '') + '>RoweOS</option>';
+    fromOptions += '<option value="roweos@therowecollection.com"' + (defaultFrom === 'roweos@therowecollection.com' ? ' selected' : '') + '>Brilliance</option>';
     fromOptions += '<option value="jordan@therowecollection.com"' + (defaultFrom === 'jordan@therowecollection.com' ? ' selected' : '') + '>Jordan Rowe</option>';
   }
   // v23.10: Multi-account Gmail (with display name)

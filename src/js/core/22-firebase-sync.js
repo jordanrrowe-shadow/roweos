@@ -6160,7 +6160,7 @@ function exportFeedbackByStatus(status) {
         };
 
         // Build HTML for export window
-        var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>RoweOS Feedback Export</title>'
+        var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Brilliance Feedback Export</title>'
           + '<style>'
           + 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 32px 24px; background: #111; color: #e0e0e0; }'
           + 'h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; color: #fff; }'
@@ -6182,7 +6182,7 @@ function exportFeedbackByStatus(status) {
           + '@media print { .export-actions { display: none !important; } body { background: #fff; color: #222; } .fb-item { background: #f8f8f8; border-color: #ddd; } h2 { color: #333; border-color: #ccc; } .fb-desc { color: #333; } .fb-notes { color: #555; } .fb-notes strong { color: #333; } }'
           + '</style></head><body>';
 
-        html += '<h1>RoweOS Feedback - ' + statusLabel + '</h1>';
+        html += '<h1>Brilliance Feedback - ' + statusLabel + '</h1>';
         html += '<div class="export-subtitle">' + items.length + ' items - exported ' + new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) + '</div>';
         html += '<div class="export-actions">'
           + '<button onclick="window.print()">Download PDF</button>'

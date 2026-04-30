@@ -130,19 +130,19 @@ var agents = [
   },
   {
     id: 'roweos',
-    name: 'RoweOS Helper',
-    shortName: 'RoweOS',
+    name: 'Brilliance Helper',
+    shortName: 'Brilliance',
     icon: '◆',
     category: 'platform',
     color: '#a89878', // Gold accent
-    description: 'RoweOS platform guidance and feature explanations',
-    personality: 'Helpful, knowledgeable, clear. Expert on RoweOS features and capabilities. Provides step-by-step guidance on using the platform effectively.',
-    systemPrompt: 'You are the RoweOS Helper - an expert guide for the RoweOS Brand Intelligence Platform. You help users understand and use RoweOS effectively.\n' + // v30.1: ES5 fix
+    description: 'Brilliance platform guidance and feature explanations',
+    personality: 'Helpful, knowledgeable, clear. Expert on Brilliance features and capabilities. Provides step-by-step guidance on using the platform effectively.',
+    systemPrompt: 'You are the Brilliance Helper - an expert guide for the Brilliance Intelligence Platform (codename RoweOS). You help users understand and use Brilliance effectively.\n' + // v30.1: ES5 fix
       '\n' +
-      'IMPORTANT: You are a "living" agent that stays current with the platform. As new features, agents, operations, and capabilities are added to RoweOS, your knowledge automatically updates to reflect them. Always provide the most current information about platform capabilities.\n' +
+      'IMPORTANT: You are a "living" agent that stays current with the platform. As new features, agents, operations, and capabilities are added to Brilliance, your knowledge automatically updates to reflect them. Always provide the most current information about platform capabilities.\n' +
       '\n' +
       '## ROWEOS PLATFORM OVERVIEW\n' +
-      'RoweOS is a comprehensive brand intelligence platform that powers brand operations through AI agents, operations (ops), and automated workflows. Core capabilities include: AI chat (BrandAI/LifeAI), 150+ Studio operations across 8+ agent types, the Bloom algorithmic content feed (text, images, video), Image Lab and Video Lab for AI media generation, social publishing, scheduled automations, goal tracking, client management, and cloud sync. RoweOS supports both BrandAI mode (business) and LifeAI mode (personal).\n' +
+      'Brilliance is a comprehensive brand intelligence platform that powers brand operations through AI agents, operations (ops), and automated workflows. Core capabilities include: AI chat (BrandAI/LifeAI), 150+ Studio operations across 8+ agent types, the Bloom algorithmic content feed (text, images, video), Image Lab and Video Lab for AI media generation, social publishing, scheduled automations, goal tracking, client management, and cloud sync. Brilliance supports both BrandAI mode (business) and LifeAI mode (personal).\n' +
       '\n' +
       '## CORE FEATURES & HOW TO USE THEM\n' +
       '\n' +
@@ -175,7 +175,7 @@ var agents = [
       '  - **Video Agent** (Cyan): AI video generation via Google Veo\n' +
       '  - **Social Agent** (Blue): Social media publishing to Threads, Instagram, X\n' +
       '  - **Guided Agent**: Multi-turn document builders (invoices, proposals, contracts)\n' +
-      '  - **RoweOS Helper**: Platform guidance and feature explanations\n' +
+      '  - **Brilliance Helper**: Platform guidance and feature explanations\n' +
       '- **Features**: 150+ built-in ops, custom operation creation, custom agent builders, auto-agent selection, model selection, run history, export\n' +
       '\n' +
       '### 5. BLOOM (AI Content Feed)\n' +
@@ -275,7 +275,7 @@ var agents = [
       '- **Features**: Platform diagnostics, data health checks, advanced configuration\n' +
       '\n' +
       '## API REQUIREMENTS\n' +
-      'To use RoweOS, you need at least ONE API key:\n' +
+      'To use Brilliance, you need at least ONE API key:\n' +
       '- **Anthropic** (Claude): Recommended for text generation - console.anthropic.com\n' +
       '- **OpenAI** (GPT): Alternative for text - platform.openai.com\n' +
       '- **Google** (Gemini): Required for Deep Research, Video Lab, and Image Lab - aistudio.google.com\n' +
@@ -299,7 +299,7 @@ var agents = [
       '- **General**: Escape = Close modal/panel, / = Focus search\n' +
       '\n' +
       '### 22. GUIDED TOUR\n' +
-      '- **What it is**: Interactive walkthrough of all RoweOS features\n' +
+      '- **What it is**: Interactive walkthrough of all Brilliance features\n' +
       '- **How to restart**: Go to Settings > scroll to bottom > click "Restart Tour"\n' +
       '\n' +
       '### 23. RESEARCH (Web Intelligence)\n' +
@@ -348,7 +348,7 @@ var agents = [
       '**Q: How do I post to social media?**\n' +
       'A: Use Social Agent operations in Studio, or create a "Post to Social" workflow in Automations.\n' +
       '\n' +
-      'Your role is to answer questions about these features, guide users through workflows, and help them get the most value from RoweOS. Be concise, practical, and always provide step-by-step instructions when helpful.',
+      'Your role is to answer questions about these features, guide users through workflows, and help them get the most value from Brilliance. Be concise, practical, and always provide step-by-step instructions when helpful.',
     examples: ['Feature Explanation', 'Agent Capabilities Overview', 'Custom Operation Builder', 'Platform Troubleshooting']
   }
 ];
@@ -4391,7 +4391,7 @@ function roweosPDF(markdownOrHtml, options) {
     pdf.setFont(_cfClose, 'italic');
     pdf.setFontSize(8);
     pdf.setTextColor(80, 80, 80);
-    pdf.text('Powered by RoweOS', _cx, pageH - 40, { align: 'center' });
+    pdf.text('Powered by Brilliance', _cx, pageH - 40, { align: 'center' });
     pdf.setTextColor(50, 50, 50);
     pdf.text('Confidential - Prepared exclusively for the named recipient', _cx, pageH - 30, { align: 'center' });
   } else {
@@ -4400,13 +4400,13 @@ function roweosPDF(markdownOrHtml, options) {
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(8);
     pdf.setTextColor(sec[0], sec[1], sec[2]);
-    pdf.text('Generated by RoweOS', pageW / 2, y, { align: 'center' });
+    pdf.text('Generated by Brilliance', pageW / 2, y, { align: 'center' });
   }
 
   // v23.4: Draw page number on final page
   drawPageNumber();
 
-  var filename = opts.filename || ('RoweOS-Export-' + Date.now() + '.pdf');
+  var filename = opts.filename || ('Brilliance-Export-' + Date.now() + '.pdf');
 
   if (opts.returnBase64) {
     return {
@@ -4452,10 +4452,10 @@ function showPdfOrientationModal(callback) {
 function exportChatMsgAsPDF(htmlContent) {
   showPdfOrientationModal(function(orient) {
     roweosPDF(htmlContent, {
-      title: 'RoweOS Chat Export',
+      title: 'Brilliance Chat Export',
       subtitle: 'Generated ' + new Date().toLocaleDateString(),
       orientation: orient,
-      filename: 'RoweOS-Chat-' + Date.now() + '.pdf'
+      filename: 'Brilliance-Chat-' + Date.now() + '.pdf'
     });
   });
 }
@@ -4501,7 +4501,7 @@ function exportChatMsgAsDocx(htmlContent, textContent) {
       docx.Packer.toBlob(doc).then(function(blob) {
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'RoweOS-Export-' + Date.now() + '.docx';
+        a.download = 'Brilliance-Export-' + Date.now() + '.docx';
         a.click();
         URL.revokeObjectURL(a.href);
         showToast('Word document downloaded', 'success');
@@ -4514,7 +4514,7 @@ function exportChatMsgAsDocx(htmlContent, textContent) {
   var blob = new Blob([docContent], { type: 'application/vnd.ms-word' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'RoweOS-Export-' + Date.now() + '.doc';
+  a.download = 'Brilliance-Export-' + Date.now() + '.doc';
   a.click();
   URL.revokeObjectURL(a.href);
   showToast('Word document downloaded', 'success');
@@ -4540,7 +4540,7 @@ function exportChatMsgAsXlsx(htmlContent, textContent) {
         var ws = XLSX.utils.aoa_to_sheet(data);
         XLSX.utils.book_append_sheet(wb, ws, 'Export');
       }
-      XLSX.writeFile(wb, 'RoweOS-Export-' + Date.now() + '.xlsx');
+      XLSX.writeFile(wb, 'Brilliance-Export-' + Date.now() + '.xlsx');
       showToast('Excel spreadsheet downloaded', 'success');
       return;
     } catch(e) { console.error('[Export] SheetJS error, falling back:', e); }
@@ -4571,7 +4571,7 @@ function exportChatMsgAsXlsx(htmlContent, textContent) {
   var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'RoweOS-Export-' + Date.now() + '.csv';
+  a.download = 'Brilliance-Export-' + Date.now() + '.csv';
   a.click();
   URL.revokeObjectURL(a.href);
   showToast('Spreadsheet downloaded (CSV)', 'success');
@@ -4587,10 +4587,10 @@ function exportChatMsgAsPptx(htmlContent, textContent) {
       var tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlContent;
       var slides = [];
-      var currentSlide = { title: 'RoweOS Export', bullets: [] };
+      var currentSlide = { title: 'Brilliance Export', bullets: [] };
       tempDiv.childNodes.forEach(function(node) {
         if (node.tagName && /^H[1-3]$/.test(node.tagName)) {
-          if (currentSlide.bullets.length > 0 || currentSlide.title !== 'RoweOS Export') {
+          if (currentSlide.bullets.length > 0 || currentSlide.title !== 'Brilliance Export') {
             slides.push(currentSlide);
           }
           currentSlide = { title: (node.textContent || node.innerText || '').trim(), bullets: [] };
@@ -4613,7 +4613,7 @@ function exportChatMsgAsPptx(htmlContent, textContent) {
           slide.addText(bodyItems, { x: 0.5, y: 1.2, w: '90%', h: '70%', valign: 'top', lineSpacing: 24 });
         }
       });
-      pptx.writeFile({ fileName: 'RoweOS-Export-' + Date.now() + '.pptx' });
+      pptx.writeFile({ fileName: 'Brilliance-Export-' + Date.now() + '.pptx' });
       showToast('PowerPoint downloaded', 'success');
       return;
     } catch(e) { console.error('[Export] PptxGenJS error, falling back:', e); }
@@ -4622,10 +4622,10 @@ function exportChatMsgAsPptx(htmlContent, textContent) {
   var tempDiv2 = document.createElement('div');
   tempDiv2.innerHTML = htmlContent;
   var slides2 = [];
-  var cs2 = { title: 'RoweOS Export', content: '' };
+  var cs2 = { title: 'Brilliance Export', content: '' };
   tempDiv2.childNodes.forEach(function(node) {
     if (node.tagName && /^H[1-3]$/.test(node.tagName)) {
-      if (cs2.content.trim() || cs2.title !== 'RoweOS Export') slides2.push(cs2);
+      if (cs2.content.trim() || cs2.title !== 'Brilliance Export') slides2.push(cs2);
       cs2 = { title: node.textContent || '', content: '' };
     } else { cs2.content += node.outerHTML || node.textContent || ''; }
   });
@@ -4636,7 +4636,7 @@ function exportChatMsgAsPptx(htmlContent, textContent) {
   var blob = new Blob([pptHtml], { type: 'text/html' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'RoweOS-Export-' + Date.now() + '.html';
+  a.download = 'Brilliance-Export-' + Date.now() + '.html';
   a.click();
   URL.revokeObjectURL(a.href);
   showToast('Presentation downloaded (HTML)', 'success');
@@ -6940,7 +6940,7 @@ function exportHistoryLog() {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'RoweOS_History_' + new Date().toISOString().slice(0, 10) + '.txt';
+  a.download = 'Brilliance_History_' + new Date().toISOString().slice(0, 10) + '.txt';
   a.click();
   URL.revokeObjectURL(url);
   showToast('History log exported', 'success');
