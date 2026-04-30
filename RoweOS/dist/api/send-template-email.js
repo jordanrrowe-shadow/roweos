@@ -107,48 +107,57 @@ function trackedUrl(campaign, dest, recipientId) {
 }
 
 function wrapEmail(subtitle, bodyHtml, recipientId, templateKey) {
-  var tagline = subtitle || 'Operating intelligence, built for brands and life';
+  var tagline = subtitle || 'Intelligence, accessible.';
   // v31.4: Per-template footer click attribution. Each template gets its own
   // <template>_plans and <template>_apikeys campaigns so the admin dashboard
   // shows footer engagement broken out by which campaign drove it.
   var tplKey = templateKey || 'generic';
   var plansUrl = trackedUrl(tplKey + '_plans', '/purchase', recipientId);
   var apiKeysUrl = trackedUrl(tplKey + '_apikeys', '/purchase', recipientId);
+  // v34.7: Brilliance branding — the cursive monogram already contains the
+  // wordmark, so the duplicate "Brilliance" h1 is retired. Body bg is now the
+  // deep warm cream-on-black used in the v34.x client preview, header is a
+  // single centered monogram with bloom halo and tagline below.
   var parts = [
     '<!DOCTYPE html>',
     '<html><head><meta charset="utf-8"></head>',
-    '<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">',
+    '<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;color:#f5ecd9;">',
     '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">',
     '<tr><td align="center">',
-    '<table width="560" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:12px;border:1px solid #2a2a2a;">',
+    '<table width="560" cellpadding="0" cellspacing="0" style="background:#14110d;border-radius:14px;border:1px solid rgba(201,169,97,0.18);">',
     // Header
-    '<tr><td style="padding:32px 32px 16px;border-bottom:1px solid #2a2a2a;background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);text-align:center;border-radius:12px 12px 0 0;">',
-    '<img src="https://roweos.com/logo.png" alt="Brilliance" style="width:64px;height:64px;border-radius:12px;margin-bottom:12px;">',
-    '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">Brilliance</h1>',
-    '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1.5px;text-transform:uppercase;">' + escapeHtml(tagline) + '</p>'
+    '<tr><td style="padding:36px 32px 22px;text-align:center;background:linear-gradient(180deg,#1a1610 0%,#14110d 100%);border-radius:14px 14px 0 0;border-bottom:1px solid rgba(201,169,97,0.14);">',
+    // Monogram with subtle bloom halo (built via background gradient on a wrapper td)
+    '<table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>',
+    '<td style="background:radial-gradient(circle, rgba(201,169,97,0.18) 0%, rgba(201,169,97,0) 70%);border-radius:50%;padding:14px;">',
+    '<img src="https://roweos.com/images/brilliance/monogram-circle.png" alt="Brilliance" width="84" height="84" style="display:block;width:84px;height:84px;border-radius:50%;" />',
+    '</td>',
+    '</tr></table>',
+    '<p style="margin:18px 0 0;font-family:\'DM Sans\',sans-serif;font-size:11px;color:rgba(201,169,97,0.85);letter-spacing:0.32em;text-transform:uppercase;font-weight:500;">Brilliance</p>',
+    '<p style="margin:6px 0 0;font-family:Georgia,serif;font-style:italic;font-size:14px;color:rgba(245,236,217,0.6);letter-spacing:0.01em;">' + escapeHtml(tagline) + '</p>'
   ];
 
   parts.push('</td></tr>');
   // Body
-  parts.push('<tr><td style="padding:24px 32px;">');
+  parts.push('<tr><td style="padding:30px 32px 20px;">');
   parts.push(bodyHtml);
   parts.push('</td></tr>');
-  // v30.5: Intelligence, accessible promo section
-  parts.push('<tr><td style="padding:24px 32px 0;text-align:center;border-top:1px solid #2a2a2a;">');
-  parts.push('<p style="font-family:\'DM Sans\',sans-serif;font-size:20px;font-weight:300;color:#a89878;letter-spacing:1px;margin:0 0 4px;">Intelligence, accessible.</p>');
-  parts.push('<p style="font-family:\'DM Sans\',sans-serif;font-size:13px;color:#888;margin:0 0 16px;">Simple plans. No hidden fees.</p>');
+  // Promo section — refined to match the email aesthetic
+  parts.push('<tr><td style="padding:22px 32px 0;text-align:center;border-top:1px solid rgba(201,169,97,0.14);">');
+  parts.push('<p style="font-family:Georgia,serif;font-size:18px;font-weight:400;font-style:italic;color:#e2c79b;margin:0 0 4px;">Intelligence, accessible.</p>');
+  parts.push('<p style="font-family:\'DM Sans\',sans-serif;font-size:12px;color:rgba(245,236,217,0.5);margin:0 0 18px;letter-spacing:0.02em;">Simple plans. No hidden fees.</p>');
   parts.push('<table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>');
-  parts.push('<td style="padding-right:8px;"><a href="' + plansUrl + '" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">View Plans</a></td>');
-  parts.push('<td style="padding-left:8px;"><a href="' + apiKeysUrl + '" style="display:inline-block;padding:10px 24px;border:1px solid #a89878;border-radius:6px;color:#a89878;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;">Get API Keys</a></td>');
+  parts.push('<td style="padding-right:6px;"><a href="' + plansUrl + '" style="display:inline-block;padding:11px 22px;background:linear-gradient(180deg,#d4b87f 0%,#b8975f 100%);border-radius:8px;color:#1a1610;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.01em;">View Plans</a></td>');
+  parts.push('<td style="padding-left:6px;"><a href="' + apiKeysUrl + '" style="display:inline-block;padding:11px 22px;border:1px solid rgba(201,169,97,0.4);border-radius:8px;color:#e2c79b;text-decoration:none;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.01em;">Get API Keys</a></td>');
   parts.push('</tr></table>');
   parts.push('</td></tr>');
   // Footer
   // v31.3: Include https://therowecollection.com in every email so URL domain matches the
   // sending domain (roweos@therowecollection.com). Resolves Resend "URLs match sending domain"
   // spam-filter warning and reinforces brand attribution.
-  parts.push('<tr><td style="padding:16px 32px;border-top:1px solid #2a2a2a;text-align:center;">');
-  parts.push('<p style="margin:0 0 6px;font-size:11px;color:#555;">A product of <a href="https://therowecollection.com" style="color:#a89878;text-decoration:none;">The Rowe Collection, LLC</a> &middot; Austin, TX</p>');
-  parts.push('<p style="margin:0;font-size:11px;color:#555;">Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color:#a89878;text-decoration:none;">jordan@therowecollection.com</a></p>');
+  parts.push('<tr><td style="padding:24px 32px 22px;border-top:1px solid rgba(201,169,97,0.10);text-align:center;margin-top:18px;">');
+  parts.push('<p style="margin:0 0 6px;font-size:11px;color:rgba(245,236,217,0.4);">A product of <a href="https://therowecollection.com" style="color:#c9a961;text-decoration:none;">The Rowe Collection, LLC</a> &middot; Austin, TX</p>');
+  parts.push('<p style="margin:0;font-size:11px;color:rgba(245,236,217,0.4);">Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color:#c9a961;text-decoration:none;">jordan@therowecollection.com</a></p>');
   parts.push('</td></tr>');
   parts.push('</table>');
   parts.push('</td></tr></table>');

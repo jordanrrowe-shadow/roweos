@@ -348,7 +348,7 @@ async function sendEmail(to, subject, htmlBody) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'RoweOS <roweos@therowecollection.com>',
+        from: 'Brilliance <roweos@therowecollection.com>',
         reply_to: 'jordan@therowecollection.com',
         to: [to],
         subject: subject,
@@ -463,7 +463,7 @@ export default async function handler(req, res) {
           '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
           '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
           '  <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #1a1a1a;">',
-          '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+          '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
           '    <p style="color: #e05555; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;">Firebase Not Configured</p>',
           '  </div>',
           '  <p style="color: #ccc; font-size: 14px;">Customer <strong style="color: #fff;">' + (customerEmail || 'unknown') + '</strong> purchased a <strong style="color: #a89878;">' + apiProvider + '</strong> API key but Firebase is not configured. Assign manually.</p>',
@@ -547,7 +547,7 @@ export default async function handler(req, res) {
             var apiKeyHtml = [
               '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
               '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
-              '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+              '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
               '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands &amp; life</p>',
               '  </div>',
               '  <div style="padding: 36px 40px 40px; background: #111;">',
@@ -557,7 +557,7 @@ export default async function handler(req, res) {
             if (existingAccessKey) {
               var tierLabel2 = existingTier ? existingTier.charAt(0).toUpperCase() + existingTier.slice(1) : '';
               apiKeyHtml += [
-                '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Welcome to RoweOS' + (tierLabel2 ? ' ' + tierLabel2 : '') + '</h2>',
+                '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Welcome to Brilliance' + (tierLabel2 ? ' ' + tierLabel2 : '') + '</h2>',
                 '    <p style="color: #999; margin: 0 0 24px; font-size: 14px;">Your account is ready. Here\u2019s everything you need to get started.</p>',
                 '    <div style="margin-bottom: 28px;">',
                 '      <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Your Access Key</p>',
@@ -596,8 +596,8 @@ export default async function handler(req, res) {
             ].join('\n');
 
             var emailSubject = existingAccessKey
-              ? 'Welcome to RoweOS  - Your Access Key & ' + providerLabel + ' API Key'
-              : 'Your ' + providerLabel + ' API Key  - RoweOS';
+              ? 'Welcome to Brilliance  - Your Access Key & ' + providerLabel + ' API Key'
+              : 'Your ' + providerLabel + ' API Key  - Brilliance';
             await sendEmail(customerEmail, emailSubject, apiKeyHtml);
           }
 
@@ -610,7 +610,7 @@ export default async function handler(req, res) {
             '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
             '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
             '  <div style="margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;">',
-            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
             '    <p style="color: #a89878; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6;">API Key Sold</p>',
             '  </div>',
             '  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">',
@@ -643,7 +643,7 @@ export default async function handler(req, res) {
             '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
             '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
             '  <div style="margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;">',
-            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
             '    <p style="color: #e05555; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;">Pool Empty - Action Needed</p>',
             '  </div>',
             '  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">',
@@ -661,7 +661,7 @@ export default async function handler(req, res) {
             '    <tr><td style="padding: 12px 0; font-size: 12px; color: #a89878;">Credit Tier</td><td style="padding: 12px 0; font-size: 14px; color: #fff; text-align: right; font-weight: 600;">' + (creditTier ? '$' + creditTier : 'N/A') + '</td></tr>',
             '  </table>',
             '  <div style="background: #1a1a1a; border-radius: 8px; padding: 16px; margin-top: 24px;">',
-            '    <p style="color: #ccc; font-size: 13px; margin: 0;">Add a <strong style="color: ' + pColorOos + ';">' + (providerCompanyOos[apiProvider] || apiProvider) + '</strong> key to the pool in RoweOS Admin and send it to the customer manually.</p>',
+            '    <p style="color: #ccc; font-size: 13px; margin: 0;">Add a <strong style="color: ' + pColorOos + ';">' + (providerCompanyOos[apiProvider] || apiProvider) + '</strong> key to the pool in Brilliance Admin and send it to the customer manually.</p>',
             '  </div>',
             '</div>',
             '</div>'
@@ -674,7 +674,7 @@ export default async function handler(req, res) {
             var customerOosHtml = [
               '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
               '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
-              '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+              '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
               '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands &amp; life</p>',
               '  </div>',
               '  <div style="padding: 36px 40px 40px; background: #111;">',
@@ -694,7 +694,7 @@ export default async function handler(req, res) {
               '  </div>',
               '</div>'
             ].join('\n');
-            await sendEmail(customerEmail, 'Your ' + providerLabelOos + ' API Key - RoweOS', customerOosHtml);
+            await sendEmail(customerEmail, 'Your ' + providerLabelOos + ' API Key - Brilliance', customerOosHtml);
           }
 
           return res.status(200).json({ received: true, type: 'api_key_purchase', provider: apiProvider, assigned: false, reason: 'pool_empty' });
@@ -843,7 +843,7 @@ export default async function handler(req, res) {
               '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
               '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
               '  <div style="margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;">',
-              '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+              '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
               '    <p style="color: #e05555; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;">Add-On Pool Empty - Action Needed</p>',
               '  </div>',
               '  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">',
@@ -874,7 +874,7 @@ export default async function handler(req, res) {
             '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
             '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
             '  <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #1a1a1a;">',
-            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+            '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
             '    <p style="color: #e05555; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;">Add-On Assignment Error</p>',
             '  </div>',
             '  <p style="color: #ccc; font-size: 14px;">Error assigning add-on API key for <strong style="color: #fff;">' + (customerEmail || 'unknown') + '</strong>:</p>',
@@ -942,11 +942,11 @@ export default async function handler(req, res) {
         var customerHtml = [
           '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
           '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
-          '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+          '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
           '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands &amp; life</p>',
           '  </div>',
           '  <div style="padding: 36px 40px 40px; background: #111;">',
-          '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Welcome to RoweOS ' + tierLabel + '</h2>',
+          '    <h2 style="color: #fff; margin: 0 0 8px; font-size: 22px; font-weight: 500;">Welcome to Brilliance ' + tierLabel + '</h2>',
           '    <p style="color: #999; margin: 0 0 24px; font-size: 14px;">Your account is ready. Here\u2019s everything you need to get started.</p>',
           '    <div style="margin-bottom: 28px;">',
           '      <p style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Your Access Key</p>',
@@ -989,8 +989,8 @@ export default async function handler(req, res) {
         ].join('\n');
 
         var subjectLine = purchasedApiKeys.length > 0
-          ? 'Welcome to RoweOS ' + tierLabel + '  - Your Keys Are Ready'
-          : 'Welcome to RoweOS ' + tierLabel + '  - Your Access Key';
+          ? 'Welcome to Brilliance ' + tierLabel + '  - Your Keys Are Ready'
+          : 'Welcome to Brilliance ' + tierLabel + '  - Your Access Key';
         var custEmailSent = await sendEmail(customerEmail, subjectLine, customerHtml);
         console.log('[Stripe Webhook] Customer email sent:', custEmailSent, 'to:', customerEmail);
       }
@@ -1001,7 +1001,7 @@ export default async function handler(req, res) {
         '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; background: #0a0a0a; color: #fff; padding: 0; margin: 0;">',
         '<div style="max-width: 520px; margin: 0 auto; padding: 40px 32px;">',
         '  <div style="margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid #1a1a1a;">',
-        '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
+        '    <h1 style="color: #a89878; margin: 0; font-size: 22px; font-weight: 300; letter-spacing: 3px;">Brilliance</h1>',
         '    <p style="color: #a89878; margin: 6px 0 0; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6;">New Purchase</p>',
         '  </div>',
         '  <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">',

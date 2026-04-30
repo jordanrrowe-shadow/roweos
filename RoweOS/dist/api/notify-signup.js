@@ -67,10 +67,10 @@ async function handler(req, res) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'RoweOS <roweos@therowecollection.com>',
+            from: 'Brilliance <roweos@therowecollection.com>',
             reply_to: 'jordan@therowecollection.com',
             to: ['jordan@therowecollection.com'],
-            subject: 'New RoweOS Signup: ' + email,
+            subject: 'New Brilliance Signup: ' + email,
             html: emailHtml
           })
         });
@@ -94,35 +94,44 @@ async function handler(req, res) {
           var firstName = displayName ? displayName.split(' ')[0] : '';
           var greeting = firstName ? 'Hi ' + escapeHtml(firstName) + ',' : 'Welcome,';
 
+          // v34.7: Brilliance branding — monogram + italic accents, no duplicate wordmark.
           var welcomeHtml = [
-            '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e0e0e0;">',
-            '  <div style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding: 48px 40px 32px; border-radius: 12px 12px 0 0; text-align: center;">',
-            '    <h1 style="color: #a89878; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 3px;">RoweOS</h1>',
-            '    <p style="color: #666; margin: 8px 0 0; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;">Operating intelligence, built for brands &amp; life</p>',
+            '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #f5ecd9;">',
+            '  <div style="background: linear-gradient(180deg, #1a1610 0%, #14110d 100%); padding: 44px 40px 30px; border-radius: 14px 14px 0 0; text-align: center; border: 1px solid rgba(201,169,97,0.18); border-bottom: 1px solid rgba(201,169,97,0.14);">',
+            '    <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;"><tr>',
+            '      <td style="background:radial-gradient(circle, rgba(201,169,97,0.20) 0%, rgba(201,169,97,0) 70%);border-radius:50%;padding:14px;">',
+            '        <img src="https://roweos.com/images/brilliance/monogram-circle.png" alt="Brilliance" width="84" height="84" style="display:block;width:84px;height:84px;border-radius:50%;" />',
+            '      </td>',
+            '    </tr></table>',
+            '    <p style="margin: 18px 0 0; font-family:\'DM Sans\',sans-serif; font-size: 11px; color: rgba(201,169,97,0.85); letter-spacing: 0.32em; text-transform: uppercase; font-weight: 500;">Brilliance</p>',
+            '    <p style="margin: 6px 0 0; font-family: Georgia, serif; font-style: italic; font-size: 14px; color: rgba(245,236,217,0.6);">Intelligence, accessible.</p>',
             '  </div>',
-            '  <div style="padding: 36px 40px 40px; background: #111;">',
-            '    <p style="color: #ccc; font-size: 15px; margin: 0 0 20px; line-height: 1.6;">' + greeting + '</p>',
-            '    <p style="color: #ccc; font-size: 15px; margin: 0 0 20px; line-height: 1.6;">Thanks for creating your RoweOS account. To unlock the full platform, you\'ll need an access key.</p>',
-            '    <div style="background: #1a1a1a; border: 1px solid #a8987844; border-radius: 10px; padding: 24px; margin: 24px 0;">',
-            '      <p style="color: #fff; font-size: 15px; font-weight: 500; margin: 0 0 12px;">What you get with a plan:</p>',
-            '      <ul style="color: #bbb; font-size: 13px; line-height: 2; margin: 0; padding-left: 20px;">',
-            '        <li><strong style="color: #fff;">BrandAI</strong>  - 4 AI agents for strategy, marketing, operations & documents</li>',
-            '        <li><strong style="color: #fff;">LifeAI</strong>  - Personal life management with coach archetypes</li>',
-            '        <li><strong style="color: #fff;">Cloud Sync</strong>  - Your data synced across all devices</li>',
-            '        <li><strong style="color: #fff;">Studio, Focus, Automations</strong>  - The full toolkit</li>',
+            '  <div style="padding: 36px 40px 40px; background: #14110d; border-left: 1px solid rgba(201,169,97,0.18); border-right: 1px solid rgba(201,169,97,0.18);">',
+            '    <p style="color: #f5ecd9; font-size: 15px; margin: 0 0 20px; line-height: 1.6;">' + greeting + '</p>',
+            '    <p style="color: rgba(245,236,217,0.78); font-size: 15px; margin: 0 0 20px; line-height: 1.65;">Thanks for creating your Brilliance account. To unlock the full platform, you\'ll need an access key.</p>',
+            '    <div style="background: #1a1610; border: 1px solid rgba(201,169,97,0.22); border-radius: 12px; padding: 22px 24px; margin: 24px 0;">',
+            '      <p style="color: #f5ecd9; font-size: 14.5px; font-weight: 500; margin: 0 0 12px;">What you get with a plan:</p>',
+            '      <ul style="color: rgba(245,236,217,0.72); font-size: 13px; line-height: 1.95; margin: 0; padding-left: 18px;">',
+            '        <li><strong style="color: #e2c79b; font-weight:500;">BrandAI</strong>  - 4 AI agents for strategy, marketing, operations & documents</li>',
+            '        <li><strong style="color: #e2c79b; font-weight:500;">LifeAI</strong>  - Personal life management with coach archetypes</li>',
+            '        <li><strong style="color: #e2c79b; font-weight:500;">Cloud Sync</strong>  - Your data synced across all devices</li>',
+            '        <li><strong style="color: #e2c79b; font-weight:500;">Studio, Pulse, Automations</strong>  - The full toolkit</li>',
             '      </ul>',
             '    </div>',
             '    <div style="text-align: center; margin: 32px 0;">',
-            '      <a href="https://roweos.com/info#pricing" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #a89878, #c4a882); color: #0a0a0a; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 8px; letter-spacing: 0.5px;">View Plans & Get Your Access Key</a>',
+            '      <a href="https://roweos.com/info#pricing" style="display: inline-block; padding: 14px 36px; background: linear-gradient(180deg, #d4b87f 0%, #b8975f 100%); color: #1a1610; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 9px; letter-spacing: 0.02em;">View Plans & Get Your Access Key</a>',
             '    </div>',
-            '    <p style="color: #888; font-size: 13px; margin: 0 0 8px; text-align: center;">Solo $9/mo · Founder $59/mo · Premium $79/mo · all start with a free trial</p>',
-            '    <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #222;">',
-            '      <p style="color: #888; font-size: 13px; margin: 0 0 12px;">Already have an access key? Just sign back in at <a href="https://roweos.com" style="color: #a89878; text-decoration: none;">roweos.com</a> and it will activate automatically.</p>',
-            '      <p style="color: #888; font-size: 13px; margin: 0 0 12px;">Want a pre-loaded API key so you don\'t need your own? You can purchase one during checkout or in Settings after signing in.</p>',
+            '    <p style="color: rgba(245,236,217,0.5); font-size: 12.5px; margin: 0 0 8px; text-align: center;">Solo $9/mo · Founder $59/mo · Premium $79/mo · all start with a free trial</p>',
+            '    <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(201,169,97,0.12);">',
+            '      <p style="color: rgba(245,236,217,0.55); font-size: 13px; margin: 0 0 12px; line-height:1.65;">Already have an access key? Just sign back in at <a href="https://roweos.com" style="color: #c9a961; text-decoration: none;">roweos.com</a> and it will activate automatically.</p>',
+            '      <p style="color: rgba(245,236,217,0.55); font-size: 13px; margin: 0 0 12px; line-height:1.65;">Want a pre-loaded API key so you don\'t need your own? You can purchase one during checkout or in Settings after signing in.</p>',
             '    </div>',
-            '    <p style="color: #555; font-size: 12px; margin: 24px 0 0; padding-top: 16px; border-top: 1px solid #222;">',
-            '      Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color: #a89878; text-decoration: none;">jordan@therowecollection.com</a>',
+            '    <p style="color: rgba(245,236,217,0.4); font-size: 12px; margin: 24px 0 0; padding-top: 16px; border-top: 1px solid rgba(201,169,97,0.10);">',
+            '      Questions? Reply to this email or contact <a href="mailto:jordan@therowecollection.com" style="color: #c9a961; text-decoration: none;">jordan@therowecollection.com</a>',
             '    </p>',
+            '  </div>',
+            '  <div style="background: #14110d; border: 1px solid rgba(201,169,97,0.18); border-top: none; border-radius: 0 0 14px 14px; padding: 16px 32px; text-align: center;">',
+            '    <p style="margin: 0; font-size: 11px; color: rgba(245,236,217,0.4);">A product of <a href="https://therowecollection.com" style="color: #c9a961; text-decoration: none;">The Rowe Collection, LLC</a> &middot; Austin, TX</p>',
             '  </div>',
             '</div>'
           ].join('\n');
@@ -134,10 +143,10 @@ async function handler(req, res) {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              from: 'RoweOS <roweos@therowecollection.com>',
+              from: 'Brilliance <roweos@therowecollection.com>',
               reply_to: 'jordan@therowecollection.com',
               to: [email],
-              subject: 'Welcome to RoweOS - Get Your Access Key',
+              subject: 'Welcome to Brilliance — Get Your Access Key',
               html: welcomeHtml
             })
           });
@@ -160,7 +169,7 @@ async function handler(req, res) {
                       userId: { stringValue: uid },
                       userEmail: { stringValue: email },
                       template: { stringValue: 'welcome' },
-                      subject: { stringValue: 'Welcome to RoweOS - Get Your Access Key' },
+                      subject: { stringValue: 'Welcome to Brilliance - Get Your Access Key' },
                       sentAt: { stringValue: new Date().toISOString() },
                       status: { stringValue: 'sent' },
                       error: { stringValue: '' }
@@ -383,7 +392,7 @@ function renderSignupEmail(payload) {
     '<table width="560" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:12px;border:1px solid #2a2a2a;">',
     // Header
     '<tr><td style="padding:32px 32px 16px;border-bottom:1px solid #2a2a2a;">',
-    '<h1 style="margin:0;font-size:20px;font-weight:600;color:#a89878;letter-spacing:0.5px;">RoweOS</h1>',
+    '<h1 style="margin:0;font-size:20px;font-weight:600;color:#a89878;letter-spacing:0.5px;">Brilliance</h1>',
     '<p style="margin:8px 0 0;font-size:13px;color:#888;">New User Signup via ' + escapeHtml(source) + '</p>',
     '</td></tr>',
     // Body
@@ -427,7 +436,7 @@ function renderSignupEmail(payload) {
     '</td></tr>',
     // Footer
     '<tr><td style="padding:16px 32px;border-top:1px solid #2a2a2a;">',
-    '<p style="margin:0;font-size:11px;color:#555;">Sent automatically by RoweOS signup monitoring.</p>',
+    '<p style="margin:0;font-size:11px;color:#555;">Sent automatically by Brilliance signup monitoring.</p>',
     '</td></tr>',
     '</table>',
     '</td></tr></table>',
