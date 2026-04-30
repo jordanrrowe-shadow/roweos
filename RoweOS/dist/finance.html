@@ -96,6 +96,16 @@ html.light-mode .top-nav { background: rgba(245, 243, 238, 0.85); }
   letter-spacing: 0.4px;
 }
 .nav-pill:hover { background: var(--gold-subtle); }
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; padding: 0;
+  background: transparent; color: var(--gold);
+  border: 1px solid var(--border-gold); border-radius: 6px;
+  cursor: pointer; transition: all 0.25s;
+}
+.theme-toggle:hover { background: var(--gold-subtle); transform: translateY(-1px); }
+.theme-toggle svg { width: 16px; height: 16px; transition: transform 0.3s; }
+html.light-mode .theme-toggle svg { transform: rotate(180deg); }
 
 /* ── Hero ──────────────────────────────────────────────────── */
 
@@ -510,6 +520,12 @@ body.pdf-mode { padding: 24px 0; }
       <a href="/portfolio" class="nav-link">Portfolio</a>
       <a href="/purchase" class="nav-link">Pricing</a>
       <a href="#meeting" class="nav-pill">Book a meeting</a>
+      <button class="theme-toggle" type="button" onclick="toggleFinanceTheme()" title="Toggle light / dark" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 3a9 9 0 0 1 0 18" fill="currentColor"></path>
+        </svg>
+      </button>
     </div>
   </div>
 </nav>
