@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v33.51
+Version:  v33.52
 File:     src/ (modular source) → builds to RoweOS/dist/index.html
 Live:     roweos.com
 ```
