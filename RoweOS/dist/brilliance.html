@@ -238,23 +238,10 @@ button{font-family:inherit}
   filter:blur(80px);
 }
 .b-hero-monogram{
-  width:clamp(220px,32vw,420px);
-  margin:0 auto 22px;
+  width:clamp(280px,42vw,520px);
+  margin:0 auto 48px;
   opacity:0;
   animation:b-fadeUp 1.2s var(--b-ease) 0.2s forwards,b-glow 8s ease-in-out 1.4s infinite;
-}
-.b-hero-wordmark{
-  display:block;
-  width:clamp(240px,30vw,420px);
-  height:auto;
-  margin:0 auto 36px;
-  mix-blend-mode:lighten;
-  opacity:0;
-  animation:b-fadeUp 1.1s var(--b-ease) 0.45s forwards;
-}
-@media (max-width:520px){
-  .b-hero-monogram{width:clamp(200px,52vw,320px);margin-bottom:18px}
-  .b-hero-wordmark{width:clamp(200px,62vw,320px);margin-bottom:28px}
 }
 .b-hero-headline{
   font-family:var(--b-serif);
@@ -357,97 +344,64 @@ button{font-family:inherit}
 .b-chapter-intro em{color:var(--gold-2);font-style:italic}
 
 .b-twocol{
-  margin-top:80px;
+  margin-top:72px;
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:18px;
+  gap:0;
   text-align:left;
-  max-width:1020px;
+  max-width:980px;
   margin-left:auto;margin-right:auto;
+  border-top:1px solid var(--b-hairline);
+  border-bottom:1px solid var(--b-hairline);
 }
 .b-twocol-col{
+  padding:48px 44px;
   position:relative;
-  padding:44px 40px 36px;
-  background:linear-gradient(180deg,rgba(255,255,255,0.012),rgba(255,255,255,0.003));
-  border:1px solid var(--b-hairline);
-  border-radius:18px;
-  overflow:hidden;
 }
-.b-twocol-col::before{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;
-  height:1px;
-  background:linear-gradient(90deg,transparent,rgba(201,169,97,0.32),transparent);
+.b-twocol-col + .b-twocol-col{
+  border-left:1px solid var(--b-hairline);
 }
 .b-twocol-tag{
-  display:inline-flex;align-items:center;gap:8px;
   font-family:var(--b-sans);
   font-size:10px;
   font-weight:500;
   letter-spacing:var(--b-track-luxury);
   text-transform:uppercase;
   color:var(--gold-3);
-  margin-bottom:18px;
-  padding:5px 12px;
-  border:1px solid rgba(201,169,97,0.22);
-  border-radius:999px;
-  background:rgba(201,169,97,0.05);
+  margin-bottom:14px;
 }
 .b-twocol-name{
   font-family:var(--b-serif);
   font-weight:400;
-  font-size:34px;
-  line-height:1.05;
+  font-size:30px;
+  line-height:1.1;
   color:var(--b-text);
-  margin-bottom:10px;
-  letter-spacing:-0.01em;
+  margin-bottom:8px;
 }
 .b-twocol-name em{color:var(--gold-2);font-style:italic}
 .b-twocol-tagline{
   font-family:var(--b-sans);
-  font-size:13.5px;
+  font-size:13px;
   color:var(--b-text-muted);
-  margin-bottom:30px;
-  padding-bottom:24px;
+  margin-bottom:28px;
+  padding-bottom:22px;
   border-bottom:1px solid var(--b-hairline);
-  line-height:1.55;
 }
 .b-twocol-list{list-style:none;padding:0;margin:0}
 .b-twocol-list li{
-  position:relative;
-  display:grid;
-  grid-template-columns:1fr;
-  gap:5px;
-  padding:14px 0 14px 22px;
-  border-bottom:1px solid rgba(255,255,255,0.03);
-  transition:padding 0.25s ease,background 0.25s ease;
-}
-.b-twocol-list li::before{
-  content:'';
-  position:absolute;
-  left:0;top:22px;
-  width:6px;height:6px;
-  border-radius:50%;
-  background:var(--gold-2);
-  opacity:0.55;
-  transform:translateY(-50%);
-  transition:opacity 0.25s ease,transform 0.25s ease,box-shadow 0.25s ease;
-}
-.b-twocol-list li:hover{padding-left:26px;background:rgba(201,169,97,0.025)}
-.b-twocol-list li:hover::before{
-  opacity:1;
-  transform:translateY(-50%) scale(1.25);
-  box-shadow:0 0 12px rgba(201,169,97,0.6);
+  display:flex;flex-direction:column;
+  gap:4px;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
 }
 .b-twocol-list li:last-child{border-bottom:none}
 .b-twocol-list .b-feat-name{
   font-family:var(--b-serif);
   font-style:italic;
-  font-weight:500;
-  font-size:17px;
+  font-weight:400;
+  font-size:16px;
   color:var(--gold-2);
-  letter-spacing:0.005em;
+  letter-spacing:0.01em;
 }
 .b-twocol-list .b-feat-desc{
   font-family:var(--b-sans);
@@ -456,10 +410,9 @@ button{font-family:inherit}
   color:var(--b-text-muted);
 }
 @media (max-width:760px){
-  .b-twocol{grid-template-columns:1fr;gap:14px;margin-top:56px}
-  .b-twocol-col{padding:34px 26px 28px;border-radius:14px}
-  .b-twocol-name{font-size:28px}
-  .b-twocol-list .b-feat-name{font-size:16px}
+  .b-twocol{grid-template-columns:1fr;border-left:none;border-right:none}
+  .b-twocol-col{padding:36px 24px}
+  .b-twocol-col + .b-twocol-col{border-left:none;border-top:1px solid var(--b-hairline)}
 }
 
 /* ====================== DIFFERENCE CARDS ====================== */
@@ -873,8 +826,6 @@ button{font-family:inherit}
   <div class="b-hero-glow" aria-hidden="true"></div>
 
   <img src="/images/brilliance/monogram-circle.png" alt="Brilliance by RoweOS" class="b-hero-monogram">
-
-  <img src="/images/logo-full.png" alt="Brilliance" class="b-hero-wordmark">
 
   <h1 class="b-hero-headline">Be <em>Brilliant</em>.</h1>
 
