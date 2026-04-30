@@ -47,6 +47,14 @@ html.light-mode {
   --gold-subtle: rgba(168, 152, 120, 0.08);
   --gold-glow: rgba(168, 152, 120, 0.14);
 }
+html.light-mode .top-nav { background: rgba(245, 243, 238, 0.88); }
+html.light-mode .card { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+html.light-mode .card:hover { box-shadow: 0 4px 18px rgba(168, 152, 120, 0.12); }
+html.light-mode .btn-primary { color: #ffffff; }
+html.light-mode .proj-input { background: #ffffff; }
+html.light-mode .final-cta { background: #ffffff; }
+html.light-mode .fund-bar .track { background: #f0ede6; }
+html.light-mode .fund-stat.card { background: #ffffff; }
 
 html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
 body {
@@ -878,12 +886,25 @@ body.pdf-mode { padding: 24px 0; }
 (function() {
   'use strict';
 
-  // ── Light mode toggle via ?light query ────────────────
-  if (location.search.indexOf('light') !== -1) {
-    document.documentElement.classList.add('light-mode');
+  // ── Theme: persisted toggle + ?light query + system preference ──
+  function applyThemeMeta(isLight) {
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', '#f5f3ee');
+    if (meta) meta.setAttribute('content', isLight ? '#f5f3ee' : '#0a0a0a');
   }
+  (function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem('roweos-finance-theme'); } catch (e) {}
+    var forceLight = location.search.indexOf('light') !== -1;
+    var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    var isLight = forceLight || saved === 'light' || (!saved && prefersLight);
+    if (isLight) document.documentElement.classList.add('light-mode');
+    applyThemeMeta(isLight);
+  })();
+  window.toggleFinanceTheme = function() {
+    var isLight = document.documentElement.classList.toggle('light-mode');
+    try { localStorage.setItem('roweos-finance-theme', isLight ? 'light' : 'dark'); } catch (e) {}
+    applyThemeMeta(isLight);
+  };
 
   // ── Number formatter ─────────────────────────────────
   function fmt(n) {
