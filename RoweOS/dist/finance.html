@@ -1347,18 +1347,803 @@ td.num { text-align: right; }
     window._curveTimer = setTimeout(renderCurve, 160);
   });
 
-  // ── PDF export · native print (vector text, reliable) ─
-  // Browsers route through the system "Save as PDF" dialog which produces
-  // crisp vector PDFs vs. raster screenshots. The @media print stylesheet
-  // forces a print-friendly light layout regardless of current theme.
+  // ── PDF export · programmatic jsPDF (dark vector, no print dialog) ──
+  // Mirrors /portfolio's pattern: orientation modal then jsPDF.
+  var _logoBase64 = '';
+  (function preloadLogo() {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      var c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      c.getContext('2d').drawImage(img, 0, 0);
+      try { _logoBase64 = c.toDataURL('image/png'); } catch(e) {}
+    };
+    img.src = '/images/logo-full.png';
+  })();
+
+  window.showPdfModal = function() {
+    var m = document.getElementById('pdfModal');
+    if (m) m.style.display = 'flex';
+  };
+  window.closePdfModal = function() {
+    var m = document.getElementById('pdfModal');
+    if (m) m.style.display = 'none';
+  };
+  document.addEventListener('click', function(e) {
+    var m = document.getElementById('pdfModal');
+    if (m && m.style.display === 'flex' && e.target === m) window.closePdfModal();
+  });
+
   var pdfBtn = document.getElementById('downloadPdfBtn');
   if (pdfBtn) {
-    pdfBtn.addEventListener('click', function() {
-      var prevTitle = document.title;
-      document.title = 'Brilliance-Finance-Brief-2026';
-      window.print();
-      setTimeout(function() { document.title = prevTitle; }, 1500);
-    });
+    pdfBtn.addEventListener('click', window.showPdfModal);
+  }
+
+  window.generatePDF = function(orientation) {
+    window.closePdfModal();
+    var btn = document.getElementById('downloadPdfBtn');
+    var origLabel = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = 'Generating...'; btn.disabled = true; }
+    setTimeout(function() {
+      try { _buildFinancePDF(orientation); }
+      catch(e) { console.error('PDF Error:', e); alert('PDF generation failed: ' + e.message); }
+      if (btn) { btn.innerHTML = origLabel; btn.disabled = false; }
+    }, 50);
+  };
+
+  function _buildFinancePDF(orientation) {
+    var jsPDF = window.jspdf && window.jspdf.jsPDF;
+    if (!jsPDF) { alert('PDF library failed to load. Hard-refresh and try again.'); return; }
+    var pdf = new jsPDF({ orientation: orientation, unit: 'pt', format: 'letter' });
+    var W = pdf.internal.pageSize.getWidth();
+    var H = pdf.internal.pageSize.getHeight();
+    var M = 56;
+    var CW = W - M * 2;
+    var y = M;
+    var pageNum = 0;
+
+    var C = {
+      bg:       [10, 10, 10],
+      card:     [22, 22, 22],
+      cardElev: [30, 30, 30],
+      gold:     [168, 152, 120],
+      goldDim:  [80, 72, 57],
+      goldBright: [201, 184, 144],
+      text:     [232, 232, 232],
+      sec:      [165, 165, 165],
+      muted:    [110, 110, 110],
+      border:   [42, 42, 42],
+      borderStrong: [60, 60, 60],
+      gridLine: [38, 38, 38]
+    };
+
+    function bg() { pdf.setFillColor(C.bg[0], C.bg[1], C.bg[2]); pdf.rect(0, 0, W, H, 'F'); }
+    function setColor(c) { pdf.setTextColor(c[0], c[1], c[2]); }
+    function setFill(c) { pdf.setFillColor(c[0], c[1], c[2]); }
+    function setDraw(c) { pdf.setDrawColor(c[0], c[1], c[2]); }
+    function newPage() { pdf.addPage(); pageNum++; bg(); y = M; }
+    function checkSpace(needed) { if (y + needed > H - 50) { newPage(); return true; } return false; }
+    function drawFooter(text, num) {
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      setColor(C.muted);
+      pdf.text(text, M, H - 28);
+      if (num) pdf.text(String(num), W - M, H - 28, { align: 'right' });
+    }
+    function drawCenteredText(t, sz, c, style) {
+      pdf.setFont('helvetica', style || 'normal');
+      pdf.setFontSize(sz);
+      setColor(c);
+      pdf.text(t, W / 2, y, { align: 'center' });
+    }
+    function spaceLetters(s) { return s.split('').join('  '); }
+    function drawGoogleColored(fontSize, suffix, suffixColor, centerY) {
+      var letters = [
+        { ch: 'G', c: [66,133,244] }, { ch: 'o', c: [234,67,53] },
+        { ch: 'o', c: [251,188,5] }, { ch: 'g', c: [52,168,83] },
+        { ch: 'l', c: [234,67,53] }, { ch: 'e', c: [66,133,244] }
+      ];
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(fontSize);
+      var totalW = 0;
+      for (var i = 0; i < letters.length; i++) totalW += pdf.getTextWidth(letters[i].ch);
+      var sufW = suffix ? pdf.getTextWidth(suffix) : 0;
+      var startX = W / 2 - (totalW + sufW) / 2;
+      var cx = startX;
+      var ty = centerY || y;
+      for (var j = 0; j < letters.length; j++) {
+        pdf.setTextColor(letters[j].c[0], letters[j].c[1], letters[j].c[2]);
+        pdf.text(letters[j].ch, cx, ty);
+        cx += pdf.getTextWidth(letters[j].ch);
+      }
+      if (suffix) { setColor(suffixColor || C.sec); pdf.text(suffix, cx, ty); }
+    }
+    function drawSectionEyebrow(t) {
+      checkSpace(28);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8.5);
+      setColor(C.gold);
+      pdf.text(t.toUpperCase(), M, y);
+      y += 18;
+    }
+    function drawSectionHeading(t) {
+      checkSpace(38);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(22);
+      setColor(C.text);
+      var lines = pdf.splitTextToSize(t, CW);
+      pdf.text(lines, M, y);
+      y += lines.length * 26 + 6;
+    }
+    function drawSub(t) {
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10.5);
+      setColor(C.sec);
+      var lines = pdf.splitTextToSize(t, Math.min(CW, 480));
+      checkSpace(lines.length * 14 + 14);
+      pdf.text(lines, M, y);
+      y += lines.length * 14 + 16;
+    }
+    function drawLabel(t) {
+      checkSpace(22);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8.5);
+      setColor(C.gold);
+      pdf.text(t.toUpperCase(), M, y);
+      y += 16;
+    }
+    function drawH3(t) {
+      checkSpace(24);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(12);
+      setColor(C.text);
+      pdf.text(t, M, y);
+      y += 18;
+    }
+    function drawPara(t, indent) {
+      var x = M + (indent || 0);
+      var w = CW - (indent || 0);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      setColor(C.sec);
+      var lines = pdf.splitTextToSize(t, w);
+      checkSpace(lines.length * 14 + 8);
+      pdf.text(lines, x, y);
+      y += lines.length * 14 + 10;
+    }
+    function drawList(items) {
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      for (var i = 0; i < items.length; i++) {
+        var lines = pdf.splitTextToSize(items[i], CW - 22);
+        checkSpace(lines.length * 13 + 8);
+        // Dash bullet
+        setDraw(C.gold);
+        pdf.setLineWidth(1);
+        pdf.line(M, y - 3, M + 9, y - 3);
+        setColor(C.sec);
+        pdf.text(lines, M + 16, y);
+        y += lines.length * 13 + 7;
+      }
+      y += 6;
+    }
+    function drawCard(x, cy, w, h, fill) {
+      setFill(fill || C.card);
+      setDraw(C.border);
+      pdf.setLineWidth(0.5);
+      pdf.roundedRect(x, cy, w, h, 6, 6, 'FD');
+    }
+
+    // ────────── COVER ──────────
+    bg();
+    setDraw(C.goldDim);
+    pdf.setLineWidth(0.7);
+    pdf.rect(28, 28, W - 56, H - 56);
+
+    if (_logoBase64) {
+      var natW = 800, natH = 220;
+      try {
+        var probe = document.querySelector('img[src="/images/logo-full.png"]');
+        if (probe && probe.naturalWidth) { natW = probe.naturalWidth; natH = probe.naturalHeight; }
+      } catch(e) {}
+      var lw = orientation === 'landscape' ? 180 : 220;
+      var lh = lw * (natH / natW);
+      y = H * 0.20;
+      pdf.addImage(_logoBase64, 'PNG', W / 2 - lw / 2, y, lw, lh);
+      y += lh + 56;
+    } else {
+      y = H * 0.32;
+    }
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    setColor(C.gold);
+    pdf.text(spaceLetters('FINANCIAL BRIEF'), W / 2, y, { align: 'center' });
+    y += 30;
+    setDraw(C.goldDim);
+    pdf.setLineWidth(0.6);
+    pdf.line(W/2 - 30, y, W/2 + 30, y);
+    y += 36;
+
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(orientation === 'landscape' ? 56 : 64);
+    setColor(C.text);
+    pdf.text('2026', W / 2, y, { align: 'center' });
+    y += 44;
+
+    drawCenteredText('The Rowe Collection LLC  ·  Austin, Texas', 11, C.sec);
+    y += 22;
+    pdf.setFont('helvetica', 'italic');
+    pdf.setFontSize(12);
+    setColor(C.gold);
+    pdf.text('Brilliance · Brand & Life Intelligence Platform · by RoweOS.', W / 2, y, { align: 'center' });
+    y += 36;
+    drawGoogleColored(9, '   for Startups Recipient', C.muted, y);
+    y = H - 56;
+    drawCenteredText('CONFIDENTIAL · THE ROWE COLLECTION LLC', 8, C.muted);
+
+    // ────────── PAGE 2 · HERO + STAT STRIP ──────────
+    newPage();
+    drawSectionEyebrow('Financial Brief · 2026');
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(orientation === 'landscape' ? 30 : 36);
+    setColor(C.text);
+    pdf.text('Operating intelligence', M, y); y += orientation === 'landscape' ? 34 : 40;
+    pdf.setFont('times', 'italic');
+    setColor(C.gold);
+    pdf.text('for brand & life.', M, y); y += orientation === 'landscape' ? 22 : 26;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+    setColor(C.sec);
+    var heroLines = pdf.splitTextToSize(
+      'A multi-surface AI platform. 120+ signups and a growing paying base. Exponential trajectory in the last several weeks. Built solo, with profitable margins on every paid seat.',
+      Math.min(CW, 520)
+    );
+    pdf.text(heroLines, M, y);
+    y += heroLines.length * 15 + 26;
+
+    // Stat strip (4 stats)
+    var stats = [
+      { v: '120+',     l: 'TOTAL SIGNUPS' },
+      { v: 'GROWING',  l: 'PAYING CLIENTS' },
+      { v: 'MRR ↑', l: 'MONTHLY · PROJECTED UP' },
+      { v: '9',        l: 'NEW SURFACES · 60 DAYS' }
+    ];
+    var stripH = 86;
+    var sw = CW / 4;
+    setDraw(C.border); pdf.setLineWidth(0.5);
+    pdf.line(M, y, M + CW, y);
+    pdf.line(M, y + stripH, M + CW, y + stripH);
+    for (var s = 0; s < stats.length; s++) {
+      var sx = M + s * sw;
+      if (s > 0) { setDraw(C.border); pdf.line(sx, y, sx, y + stripH); }
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(stats[s].v.length > 5 ? 22 : 30);
+      setColor(C.gold);
+      pdf.text(stats[s].v, sx + sw / 2, y + 38, { align: 'center' });
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      setColor(C.muted);
+      pdf.text(stats[s].l, sx + sw / 2, y + 64, { align: 'center' });
+    }
+    y += stripH + 28;
+
+    drawFooter('Brilliance · Financial Brief · roweos.com/finance', '1');
+
+    // ────────── PAGE 3 · TRACTION ──────────
+    newPage();
+    drawSectionEyebrow('Section 02 · Traction');
+    drawSectionHeading('Real signal. Not projections.');
+    drawSub('Every number below is from the live platform. Subscriptions through Stripe, signups through Firestore, surfaces shipped through git history.');
+
+    // Signup curve card
+    var curveData = [3, 6, 10, 16, 22, 30, 40, 52, 67, 84, 102, 124];
+    var curveMonths = ['May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'];
+    var curveCardH = orientation === 'landscape' ? 200 : 230;
+    drawCard(M, y, CW, curveCardH);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(8.5);
+    setColor(C.gold);
+    pdf.text('SIGNUPS · LAST 12 MONTHS', M + 16, y + 22);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(15);
+    setColor(C.text);
+    pdf.text('From zero to 120+, accelerating now.', M + 16, y + 44);
+
+    // Plot the curve
+    var plotPadL = 44, plotPadR = 18, plotPadT = 56, plotPadB = 24;
+    var px = M + 16;
+    var py = y + plotPadT;
+    var pw = CW - 32 - plotPadL - plotPadR + plotPadL;
+    var ph = curveCardH - plotPadT - plotPadB;
+    var maxY = Math.max.apply(null, curveData);
+    var stepX = (CW - 32 - plotPadL - plotPadR) / (curveData.length - 1);
+    // Y grid lines
+    setDraw(C.gridLine);
+    pdf.setLineWidth(0.4);
+    var yTicks = [0, Math.round(maxY/2), maxY];
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(7.5);
+    setColor(C.muted);
+    for (var t = 0; t < yTicks.length; t++) {
+      var ty = py + (1 - yTicks[t]/maxY) * ph;
+      pdf.line(M + 16 + plotPadL, ty, M + CW - 16 - plotPadR, ty);
+      pdf.text(String(yTicks[t]), M + 16 + plotPadL - 4, ty + 3, { align: 'right' });
+    }
+    // Curve area fill (approximated with polygon)
+    setFill(C.goldDim);
+    var pts = [];
+    for (var i = 0; i < curveData.length; i++) {
+      var pxi = M + 16 + plotPadL + i * stepX;
+      var pyi = py + (1 - curveData[i]/maxY) * ph;
+      pts.push([pxi, pyi]);
+    }
+    // Line segments
+    setDraw(C.gold);
+    pdf.setLineWidth(1.4);
+    for (var k = 0; k < pts.length - 1; k++) {
+      pdf.line(pts[k][0], pts[k][1], pts[k+1][0], pts[k+1][1]);
+    }
+    // Dots
+    setFill(C.gold);
+    for (var d = 0; d < pts.length; d++) {
+      var r = (d === pts.length - 1) ? 3.2 : 2;
+      pdf.circle(pts[d][0], pts[d][1], r, 'F');
+    }
+    // X labels (every 2 months + last)
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(7.5);
+    setColor(C.muted);
+    for (var m2 = 0; m2 < curveMonths.length; m2++) {
+      if (m2 % 2 !== 0 && m2 !== curveMonths.length - 1) continue;
+      var mx = M + 16 + plotPadL + m2 * stepX;
+      pdf.text(curveMonths[m2], mx, y + curveCardH - 8, { align: 'center' });
+    }
+    y += curveCardH + 14;
+
+    // Two-column row: Conversion + Retention
+    var dualCardH = 110;
+    var halfW = (CW - 14) / 2;
+    drawCard(M, y, halfW, dualCardH);
+    drawCard(M + halfW + 14, y, halfW, dualCardH);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(8.5);
+    setColor(C.gold);
+    pdf.text('FREE → PAID', M + 16, y + 22);
+    pdf.text('RETENTION', M + halfW + 14 + 16, y + 22);
+
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(34);
+    setColor(C.gold);
+    pdf.text('10%+', M + 16, y + 60);
+    pdf.text('100%', M + halfW + 14 + 16, y + 60);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9.5);
+    setColor(C.sec);
+    var convBody = pdf.splitTextToSize('2x prosumer benchmarks. Above the 2-5% industry baseline with no paid funnel. Conversion rises with every new Brilliance surface.', halfW - 32);
+    pdf.text(convBody, M + 16, y + 78);
+    var retBody = pdf.splitTextToSize('Zero churn to date across the Founder cohort. Trial-cycle data lands once month-3 completes.', halfW - 32);
+    pdf.text(retBody, M + halfW + 14 + 16, y + 78);
+    y += dualCardH + 14;
+
+    // Customer mix + Validation row
+    drawCard(M, y, halfW, dualCardH);
+    drawCard(M + halfW + 14, y, halfW, dualCardH);
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(8.5);
+    setColor(C.gold);
+    pdf.text('CUSTOMER MIX', M + 16, y + 22);
+    pdf.text('VALIDATION', M + halfW + 14 + 16, y + 22);
+
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(15);
+    setColor(C.text);
+    pdf.text('Diversified by industry.', M + 16, y + 42);
+    pdf.text('Vetted. Credited. Advised.', M + halfW + 14 + 16, y + 42);
+
+    // Industry chips
+    var chips = ['Service brands', 'Retreat & hospitality', 'Personal-brand consultants'];
+    var cy = y + 60;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8.5);
+    setColor(C.sec);
+    var chipX = M + 16;
+    for (var ch = 0; ch < chips.length; ch++) {
+      var ctw = pdf.getTextWidth(chips[ch]) + 18;
+      if (chipX + ctw > M + halfW - 8) { chipX = M + 16; cy += 18; }
+      setFill(C.cardElev);
+      setDraw(C.border);
+      pdf.setLineWidth(0.4);
+      pdf.roundedRect(chipX, cy - 9, ctw, 14, 7, 7, 'FD');
+      setColor(C.sec);
+      pdf.text(chips[ch], chipX + 9, cy + 1);
+      chipX += ctw + 6;
+    }
+    // GfS line
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8.5);
+    var gx = M + halfW + 14 + 16;
+    var gy = y + 64;
+    pdf.setFontSize(9);
+    var prevY = y; y = gy;
+    drawGoogleColored(9, '  for Startups Cloud Program', C.gold, gy);
+    y = prevY;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8.5);
+    setColor(C.sec);
+    var gfsBody = pdf.splitTextToSize('Accepted with $200K cloud credits + technical advisors. Third-party engineering validation.', halfW - 32);
+    pdf.text(gfsBody, M + halfW + 14 + 16, y + 84);
+    y += dualCardH + 14;
+
+    // Recent revenue signal — full width
+    var rrCardH = 92;
+    drawCard(M, y, CW, rrCardH);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(8.5);
+    setColor(C.gold);
+    pdf.text('RECENT REVENUE SIGNAL', M + 16, y + 22);
+    pdf.setFont('times', 'italic');
+    pdf.setFontSize(15);
+    setColor(C.text);
+    pdf.text('Exponential, not linear.', M + 16, y + 42);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9.5);
+    setColor(C.sec);
+    var rrBody = pdf.splitTextToSize(
+      'The paying base and MRR are both compounding week-over-week, with subscription deposits running into the multi-thousand-dollar range across recent cycles. We intentionally do not pin a static MRR number on this brief because that number is moving up faster than a static page can hold. Funding accelerates this trajectory; it does not create it.',
+      CW - 32
+    );
+    pdf.text(rrBody, M + 16, y + 60);
+    y += rrCardH + 14;
+
+    drawFooter('Brilliance · Financial Brief · roweos.com/finance', '2');
+
+    // ────────── PAGE 4 · THE MODEL ──────────
+    newPage();
+    drawSectionEyebrow('Section 03 · The model');
+    drawSectionHeading('Stress-test the path to $1M ARR.');
+    drawSub('Editable on the live page. The four scenarios below recompute Yr-1/2/3 ARR from signups, conversion, and ARPU. SaaS exit-ARR formula, applied honestly.');
+
+    // Notes box
+    var noteH = 64;
+    setFill([22, 21, 18]);
+    setDraw(C.gold);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(M, y, CW, noteH, 6, 6, 'FD');
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    setColor(C.sec);
+    pdf.setFont('helvetica', 'bold');
+    setColor(C.gold);
+    pdf.text('Formula:', M + 14, y + 18);
+    pdf.setFont('helvetica', 'normal');
+    setColor(C.sec);
+    pdf.text('Yr-1 ARR = signups x conv% x ARPU x 12.', M + 14 + 50, y + 18);
+    pdf.setFont('helvetica', 'bold');
+    setColor(C.gold);
+    pdf.text('Y/Y:', M + 14, y + 36);
+    pdf.setFont('helvetica', 'normal');
+    setColor(C.sec);
+    pdf.text('3x then 2.5x (early-stage SaaS standard, conservative vs. PLG at 5-7x).', M + 14 + 30, y + 36);
+    pdf.setFont('helvetica', 'bold');
+    setColor(C.gold);
+    pdf.text('Margin:', M + 14, y + 54);
+    pdf.setFont('helvetica', 'normal');
+    setColor(C.sec);
+    pdf.text('92%+ per paid seat (BYOK keeps AI cost near zero on the platform).', M + 14 + 46, y + 54);
+    y += noteH + 18;
+
+    // Pull current values from the on-page calculator if available
+    function readScenarios() {
+      var rows = document.querySelectorAll('.proj-row');
+      var out = [];
+      var labels = { floor: 'Floor', realistic: 'Realistic', target: 'Target', stretch: 'Stretch' };
+      var subs = {
+        floor: 'Status quo · zero marketing',
+        realistic: 'Modest content + community',
+        target: 'Brilliance launch traction',
+        stretch: 'Viral product-led upside'
+      };
+      for (var i = 0; i < rows.length; i++) {
+        var key = rows[i].getAttribute('data-scenario');
+        var sg = parseFloat(rows[i].querySelector('[data-input="signups"]').value) || 0;
+        var cv = parseFloat(rows[i].querySelector('[data-input="conv"]').value) || 0;
+        var ap = parseFloat(rows[i].querySelector('[data-input="arpu"]').value) || 0;
+        var yr1 = sg * (cv/100) * ap * 12;
+        out.push({
+          name: labels[key] || key,
+          sub: subs[key] || '',
+          target: key === 'target',
+          signups: sg, conv: cv, arpu: ap,
+          yr1: yr1, yr2: yr1 * 3, yr3: yr1 * 7.5
+        });
+      }
+      return out;
+    }
+    function fmtMoney(n) {
+      n = Math.round(n);
+      if (n >= 1000000) {
+        var m = n / 1000000; var s = m >= 100 ? m.toFixed(0) : m.toFixed(2);
+        return '$' + s.replace(/\.?0+$/, '') + 'M';
+      }
+      if (n >= 1000) return '$' + Math.round(n/1000) + 'K';
+      return '$' + n;
+    }
+    var scenarios = readScenarios();
+
+    // Projection table
+    var tHeaders = ['SCENARIO', 'SIGNUPS YR 1', 'CONV %', 'ARPU $/MO', 'YR-1 ARR', 'YR-2 ARR', 'YR-3 ARR'];
+    var tCols = [CW * 0.20, CW * 0.13, CW * 0.10, CW * 0.12, CW * 0.15, CW * 0.15, CW * 0.15];
+    var headerH = 26;
+    setFill(C.cardElev);
+    pdf.rect(M, y, CW, headerH, 'F');
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(8);
+    setColor(C.sec);
+    var hx = M;
+    for (var hh = 0; hh < tHeaders.length; hh++) {
+      var align = hh === 0 ? 'left' : 'right';
+      var tx = align === 'left' ? hx + 12 : hx + tCols[hh] - 12;
+      pdf.text(tHeaders[hh], tx, y + 17, { align: align });
+      hx += tCols[hh];
+    }
+    y += headerH;
+
+    for (var sIdx = 0; sIdx < scenarios.length; sIdx++) {
+      var sc = scenarios[sIdx];
+      var rowH = 40;
+      if (sc.target) {
+        setFill([28, 26, 21]);
+        pdf.rect(M, y, CW, rowH, 'F');
+      }
+      // Bottom border
+      setDraw(C.border);
+      pdf.setLineWidth(0.4);
+      pdf.line(M, y + rowH, M + CW, y + rowH);
+
+      var cx2 = M;
+      // Name + sub
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(13);
+      setColor(sc.target ? C.goldBright : C.text);
+      pdf.text(sc.name, cx2 + 12, y + 18);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      setColor(C.muted);
+      pdf.text(sc.sub, cx2 + 12, y + 32);
+      cx2 += tCols[0];
+
+      // Signups
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      setColor(C.text);
+      pdf.text(sc.signups.toLocaleString(), cx2 + tCols[1] - 12, y + 24, { align: 'right' });
+      cx2 += tCols[1];
+
+      // Conv
+      pdf.text(sc.conv + '%', cx2 + tCols[2] - 12, y + 24, { align: 'right' });
+      cx2 += tCols[2];
+
+      // ARPU
+      pdf.text('$' + sc.arpu, cx2 + tCols[3] - 12, y + 24, { align: 'right' });
+      cx2 += tCols[3];
+
+      // ARRs
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(13);
+      setColor(C.gold);
+      pdf.text(fmtMoney(sc.yr1), cx2 + tCols[4] - 12, y + 24, { align: 'right' });
+      cx2 += tCols[4];
+      pdf.text(fmtMoney(sc.yr2), cx2 + tCols[5] - 12, y + 24, { align: 'right' });
+      cx2 += tCols[5];
+      pdf.text(fmtMoney(sc.yr3), cx2 + tCols[6] - 12, y + 24, { align: 'right' });
+
+      y += rowH;
+    }
+    y += 22;
+
+    // Footnote labels
+    drawLabel('Cost stack');
+    drawPara('~$6K/yr Vercel + Firebase + AI providers. Brilliance routes paying users to their own keys, so AI cost is near zero on the platform side. True margin per paying seat: 92%+.');
+    drawLabel('ARPU lift');
+    drawPara('Blended ARPU rises with upgrades from Solo ($9) to Founder ($29.50) to Premium ($79), plus one-time managed-API-key packs.');
+
+    drawFooter('Brilliance · Financial Brief · roweos.com/finance', '3');
+
+    // ────────── PAGE 5 · USE OF FUNDS ──────────
+    newPage();
+    drawSectionEyebrow('Section 04 · The asks');
+    drawSectionHeading('$500K. 18 months. People, not infra.');
+    drawSub('Round structured as a SAFE. Allocation favors a marketing+content hire to convert organic momentum into a repeatable channel, with engineering and infra in support.');
+
+    // Three summary stat cards
+    var fsW = (CW - 24) / 3;
+    var fsH = 76;
+    var fsItems = [
+      ['$500K', 'ROUND SIZE · SAFE'],
+      ['$5M',   'POST-MONEY CAP'],
+      ['18 MO', 'RUNWAY TARGET']
+    ];
+    for (var fi = 0; fi < fsItems.length; fi++) {
+      var fx = M + fi * (fsW + 12);
+      drawCard(fx, y, fsW, fsH);
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(26);
+      setColor(C.gold);
+      pdf.text(fsItems[fi][0], fx + fsW/2, y + 36, { align: 'center' });
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      setColor(C.muted);
+      pdf.text(fsItems[fi][1], fx + fsW/2, y + 58, { align: 'center' });
+    }
+    y += fsH + 24;
+
+    // Bars
+    var bars = [
+      { lab: 'Brand-side growth marketer + content lead', sub: 'First hire · M+1 · 120+ -> 5,000 signups in 18 months', pct: 36, amt: '$180K' },
+      { lab: 'Full-time engineer · Sync v5, mobile, multi-user', sub: 'Second hire · M+9 · reduces founder-only-engineer risk', pct: 18, amt: '$90K' },
+      { lab: 'Paid acquisition + content production', sub: 'Run by the marketing hire only — no founder-run paid', pct: 16, amt: '$80K' },
+      { lab: 'Infrastructure scaling + GfS extended credits', sub: 'Firestore, Vercel functions, Veo 3.1, observability', pct: 12, amt: '$60K' },
+      { lab: 'Legal + accounting + corporate setup', sub: 'Delaware C-corp conversion, contracts, compliance', pct: 10, amt: '$50K' },
+      { lab: 'Founder salary @ $40K/yr', sub: 'Lean by design · majority of value remains in equity', pct: 8, amt: '$40K' }
+    ];
+    var labW = orientation === 'landscape' ? 280 : 240;
+    var pctW = 80;
+    var trackW = CW - labW - pctW - 16;
+    for (var b = 0; b < bars.length; b++) {
+      checkSpace(48);
+      var br = bars[b];
+      // Label
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10.5);
+      setColor(C.text);
+      pdf.text(br.lab, M, y);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8.5);
+      setColor(C.muted);
+      var subLines = pdf.splitTextToSize(br.sub, labW - 8);
+      pdf.text(subLines, M, y + 14);
+      // Track
+      var tx = M + labW;
+      var ty = y - 2;
+      setFill(C.cardElev);
+      setDraw(C.border);
+      pdf.setLineWidth(0.4);
+      pdf.roundedRect(tx, ty, trackW, 8, 4, 4, 'FD');
+      // Fill
+      setFill(C.gold);
+      pdf.roundedRect(tx, ty, trackW * (br.pct / 100), 8, 4, 4, 'F');
+      // Percent + amount
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(14);
+      setColor(C.gold);
+      pdf.text(br.pct + '%', M + CW, y, { align: 'right' });
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8.5);
+      setColor(C.muted);
+      pdf.text(br.amt, M + CW, y + 14, { align: 'right' });
+      y += 32;
+    }
+
+    drawFooter('Brilliance · Financial Brief · roweos.com/finance', '4');
+
+    // ────────── PAGE 6 · WHY THIS TEAM / WHY NOW ──────────
+    newPage();
+    drawSectionEyebrow('Section 05 · Why & who');
+    drawSectionHeading('Why this build. Why now. Why this founder.');
+
+    // Bio card
+    var bioH = 110;
+    drawCard(M, y, CW, bioH);
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(18);
+    setColor(C.text);
+    pdf.text('Jordan Rowe', M + 18, y + 30);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(8.5);
+    setColor(C.gold);
+    pdf.text('FOUNDER · CEO · BUILDER', M + 18, y + 48);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    setColor(C.sec);
+    var bioBody = pdf.splitTextToSize(
+      'Builder of Brilliance, solo, over 18 months. Single-handed end-to-end: product, engineering, design, brand, support. Previously [experience to fill]. Based in Austin, TX. Operates The Rowe Collection (five real brands: Solo Training, Retreats, Reserve, & Co.) which both fund Brilliance and serve as live test environments for every feature.',
+      CW - 36
+    );
+    pdf.text(bioBody, M + 18, y + 66);
+    y += bioH + 18;
+
+    drawLabel('Why this build');
+    drawList([
+      'The multi-surface system (Tier 1/2/3) is the differentiator. Most AI products are one chat. Brilliance is nine surfaces (Chat, Studio, Folio, Pulse, Rhythm, Library, Bloom, Notebook, Thought Board) each tuned to a specific intellectual posture.',
+      'Identity is the moat AI cannot sell. It is user-supplied, user-owned. Brilliance learns brand voice and personal context, then injects that identity before the model sees the prompt.',
+      'Sovereign-by-design. Bring-your-own-key economics let Brilliance run profitably from day one. No VC needed to subsidize unit margins.'
+    ]);
+
+    drawLabel('Why now');
+    drawList([
+      'Consumer AI hit utility threshold in 2025. The pull is real, not speculative.',
+      'Most "AI workspaces" target enterprise. The prosumer + small-brand operator segment is wide open.',
+      'BYOK economics mean Brilliance runs profitably from a single founder\'s earnings. We are raising to compress an 18-month curve into a 9-month curve.',
+      'Privacy backlash is forming. Sovereign AI is positioned for the moment when "AI vendors will train on my data" becomes a category-defining fear.'
+    ]);
+
+    drawFooter('Brilliance · Financial Brief · roweos.com/finance', '5');
+
+    // ────────── PAGE 7 · RISKS ──────────
+    newPage();
+    drawSectionEyebrow('Risks · the honest version');
+    drawSectionHeading('What could go wrong.');
+    drawSub('A page with only good news reads like a pitch. Here is what we would push back on if we were on the other side of the table.');
+
+    var risks = [
+      { t: 'Solo-founder concentration', b: 'Bus factor is 1. Single point of decision and execution. Real risk for an investor underwriting durability.', m: 'The marketing+engineering hire plan is the explicit answer. First hire (M+1) reduces channel risk; second hire (M+9) reduces engineering risk. Co-founder slot deliberately open for the right person.' },
+      { t: 'AI provider lock-in', b: 'If OpenAI or Anthropic vertically integrates an "identity layer," Brilliance\'s wedge narrows.', m: 'User-owned keys route across three providers (Anthropic, OpenAI, Google) at the user\'s discretion. Identity data is portable. The platform stays neutral as model commodity intensifies.' },
+      { t: 'Distribution · iOS / Android', b: 'Brilliance is a PWA today, not a native iOS/macOS app. App Store distribution gates a portion of the prosumer market.', m: 'v36 plan is a React Native shell. PWA installs already work on iOS Safari with sync intact. Distribution is a 2027 problem, not a 2026 problem.' },
+      { t: 'Pricing power · enterprise gap', b: '$9-$79/mo positions Brilliance as prosumer. Multi-user / org-tier pricing ($500+/mo) is on the roadmap but not built.', m: 'The architecture (per-brand profiles, share codes, multi-tenant data shapes) is already in place. Enterprise tier is a packaging+permissions exercise, not a rebuild.' }
+    ];
+    var rW = (CW - 16) / 2;
+    for (var ri = 0; ri < risks.length; ri++) {
+      var rr = risks[ri];
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      var bodyLines = pdf.splitTextToSize(rr.b, rW - 32);
+      var mitLines = pdf.splitTextToSize('Mitigation: ' + rr.m, rW - 32);
+      var rH = 30 + bodyLines.length * 12 + 14 + mitLines.length * 12 + 18;
+
+      var col = ri % 2;
+      var row = Math.floor(ri / 2);
+      var rx = col === 0 ? M : M + rW + 16;
+      if (col === 0) {
+        // Calc paired card height for row alignment
+        if (ri + 1 < risks.length) {
+          var pair = risks[ri + 1];
+          var pBodyLines = pdf.splitTextToSize(pair.b, rW - 32);
+          var pMitLines = pdf.splitTextToSize('Mitigation: ' + pair.m, rW - 32);
+          var pH = 30 + pBodyLines.length * 12 + 14 + pMitLines.length * 12 + 18;
+          rH = Math.max(rH, pH);
+        }
+        checkSpace(rH + 12);
+        if (col === 0) window._rowY = y;
+      }
+      var ry = window._rowY || y;
+
+      drawCard(rx, ry, rW, rH);
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(13);
+      setColor(C.text);
+      pdf.text(rr.t, rx + 16, ry + 24);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      setColor(C.sec);
+      pdf.text(bodyLines, rx + 16, ry + 42);
+      // Divider
+      setDraw(C.border);
+      pdf.setLineWidth(0.4);
+      var divY = ry + 42 + bodyLines.length * 12 + 6;
+      pdf.line(rx + 16, divY, rx + rW - 16, divY);
+      // Mitigation
+      pdf.setFont('helvetica', 'italic');
+      pdf.setFontSize(8.5);
+      setColor(C.muted);
+      pdf.text(mitLines, rx + 16, divY + 14);
+
+      if (col === 1) {
+        y = (window._rowY || y) + rH + 14;
+      } else if (ri === risks.length - 1) {
+        y = ry + rH + 14;
+      }
+    }
+
+    drawFooter('Brilliance · Financial Brief · roweos.com/finance', '6');
+
+    // ────────── SAVE ──────────
+    pdf.save('Brilliance-Financial-Brief-2026.pdf');
   }
 
 })();
