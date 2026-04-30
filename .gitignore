@@ -12,3 +12,7 @@ scripts/inspect-cloud.js
 scripts/categorize-pulse.js
 node_modules/
 scripts/cleanup-cloud-v321-comprehensive.js
+RoweOS/dist/_scaffold-bundle.js
+RoweOS/dist/_scaffold-bundle.js.map
+coverage/
+.vitest/
