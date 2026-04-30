@@ -112,6 +112,13 @@ section + section {
   text-align: center;
 }
 
+.hero-wordmark {
+  display: block;
+  width: clamp(220px, 28vw, 360px);
+  height: auto;
+  margin: 0 auto 32px;
+}
+
 .hero h1 {
   font-family: 'Cormorant Garamond', serif;
   font-size: 52px;
@@ -665,6 +672,11 @@ section + section {
     font-size: 38px;
   }
 
+  .hero-wordmark {
+    width: clamp(190px, 50vw, 260px);
+    margin-bottom: 24px;
+  }
+
   section {
     padding: 56px 0;
   }
@@ -714,8 +726,9 @@ section + section {
 
 <div class="purchase-page">
 
-  <!-- Hero — v33.84: refreshed copy for the RoweOS → Brilliance transition -->
+  <!-- Hero -->
   <section class="hero">
+    <img src="/images/logo-full.png" alt="Brilliance" class="hero-wordmark">
     <h1>Intelligence, <em>accessible.</em></h1>
     <p class="subline">Brilliance &middot; the operating intelligence for brand &amp; life.</p>
     <p class="note">Same platform. Same memory. Same work. New name and new surfaces. All plans include a free trial. Early adopters lock in their price for life.</p>
