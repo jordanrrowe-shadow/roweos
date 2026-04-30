@@ -18,7 +18,6 @@
     "api/info-signup.js": { "maxDuration": 10 }
   },
   "routes": [
-    { "src": "/overview", "dest": "/overview.html" },
     { "src": "/newsletter", "dest": "/newsletter.html" },
     { "src": "/info", "dest": "/info.html" },
     { "src": "/info/", "dest": "/info.html" },
@@ -30,14 +29,10 @@
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/privacy", "dest": "/privacy.html" },
     { "src": "/terms", "dest": "/terms.html" },
-    { "src": "/social3", "dest": "/social3.html" },
-    { "src": "/social2", "dest": "/social2.html" },
     { "src": "/social", "dest": "/social.html" },
-    { "src": "/demos", "dest": "/demos.html" },
     { "src": "/images/(.*)", "dest": "/images/$1" },
     { "src": "/social-callback", "dest": "/social-callback.html" },
     { "src": "/social-callback.html", "dest": "/social-callback.html" },
-    { "src": "/login.html", "dest": "/login.html" },
     { "src": "/favicon.ico", "dest": "/favicon.ico" },
     { "src": "/apple-touch-icon.png", "dest": "/apple-touch-icon.png" },
     { "src": "/manifest.json", "dest": "/manifest.json" },
@@ -45,9 +40,7 @@
     { "src": "/icons/(.*)", "dest": "/icons/$1" },
     { "src": "/logo.png", "dest": "/logo.png" },
     { "src": "/portfolio", "dest": "/portfolio.html" },
-    { "src": "/executive-summary", "dest": "/executive-summary.html" },
     { "src": "/blake", "dest": "/blake.html" },
-    { "src": "/blake-studio", "dest": "/blake-studio.html" },
     { "src": "/purchase", "dest": "/purchase.html" },
     { "src": "/tinymce/(.*)", "dest": "/tinymce/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
