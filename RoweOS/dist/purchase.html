@@ -513,6 +513,87 @@ section + section {
   line-height: 1.6;
 }
 
+/* ── Now in Brilliance · surface highlights ── */
+
+.surfaces-section { text-align: center; }
+.surfaces-eyebrow {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: var(--gold-subtle);
+  border: 1px solid var(--border-gold);
+  border-radius: 999px;
+  padding: 6px 14px;
+  margin-bottom: 18px;
+}
+.surfaces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(248px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+  text-align: left;
+}
+.surface-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px 22px 22px;
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+}
+.surface-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168, 152, 120, 0.45), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.surface-card:hover {
+  border-color: var(--border-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(168, 152, 120, 0.10);
+}
+.surface-card:hover::before { opacity: 1; }
+.surface-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: inline-block;
+  margin-bottom: 14px;
+  box-shadow: 0 0 0 4px var(--gold-subtle);
+}
+.surface-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 21px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.2px;
+}
+.surface-name em { color: var(--gold); font-style: italic; font-weight: 400; }
+.surface-name .surface-sub {
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.surface-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
 /* ── Brilliance AI ── */
 
 .ai-section {
@@ -735,20 +816,67 @@ section + section {
     </div>
   </section>
 
-  <!-- v33.84: Now in Brilliance — surface highlights for the transition release -->
-  <section class="how-section" style="padding-top:0;">
-    <h2 class="section-heading">Now in Brilliance</h2>
-    <p class="section-sub">RoweOS is now Brilliance. Same platform — and a long list of new surfaces shipped this release.</p>
-    <div class="how-steps" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
-      <div class="how-step"><h3>Brilli, the entity</h3><p>A gold orb on chat with attending / thinking / pleased states. Five forms — Celestial, Aura/Field, Firefly, Light Signature, plus the original Classic BLAKE.</p></div>
-      <div class="how-step"><h3>Concierge Desk</h3><p>What's active today, in one pill row above your chat input. Pulse goals, calendar, automations, Bloom, Evolve.</p></div>
-      <div class="how-step"><h3>Focus Mode</h3><p>⌘⇧F strips ambient chrome on any surface. One message, Brilli, input. Esc exits.</p></div>
-      <div class="how-step"><h3>History · Time Ribbon</h3><p>A scrubbing timeline of past conversations. Each marker is a moment — Resume or Branch from here.</p></div>
-      <div class="how-step"><h3>Studio · Split-Pane</h3><p>Run an operation with input on the left, live output streaming on the right.</p></div>
-      <div class="how-step"><h3>Folio · Studio at Work</h3><p>Treats the active artifact as the centerpiece — chat moves to a narrow right gutter.</p></div>
-      <div class="how-step"><h3>Notebook · Letter Series</h3><p>Cream paper, narrow column, gold drop caps. Reversible — your data stays the same.</p></div>
-      <div class="how-step"><h3>Thought Board</h3><p>A new surface. Pin moments from Chat, Notebook, or Studio. Pinboard grid + Constellation 2D map.</p></div>
-      <div class="how-step"><h3>Evolve preview</h3><p>Educational Intelligence: Today / Practice / Translator / Verify / Skills. Multi-model quiz pipeline activates in v34.</p></div>
+  <!-- Now in Brilliance · surface highlights -->
+  <section class="surfaces-section" style="padding-top:0;">
+    <span class="surfaces-eyebrow">Now Shipping</span>
+    <h2 class="section-heading">Now in <em style="font-style:italic;color:var(--gold);">Brilliance</em></h2>
+    <p class="section-sub">RoweOS is now Brilliance. Same platform. New name, new namesake, and a long list of new surfaces shipped this release.</p>
+    <div class="surfaces-grid">
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">Brilli, <em>the entity</em></h3>
+        <p class="surface-desc">A gold orb on chat with attending, thinking, and pleased states. Five forms: Celestial, Aura, Firefly, Light Signature, and the original Classic BLAKE.</p>
+      </div>
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">Concierge <em>Desk</em></h3>
+        <p class="surface-desc">What is active today, in one pill row above your chat input. Pulse goals, calendar, automations, Bloom, Evolve.</p>
+      </div>
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">Focus <em>Mode</em></h3>
+        <p class="surface-desc">&#8984;&#8679;F strips ambient chrome on any surface. One message, Brilli, input. Esc exits.</p>
+      </div>
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">History<span class="surface-sub">Time Ribbon</span></h3>
+        <p class="surface-desc">A scrubbing timeline of past conversations. Each marker is a moment. Resume or Branch from here.</p>
+      </div>
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">Studio<span class="surface-sub">Split-Pane</span></h3>
+        <p class="surface-desc">Run an operation with input on the left, live output streaming on the right.</p>
+      </div>
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">Folio<span class="surface-sub">Studio at Work</span></h3>
+        <p class="surface-desc">Treats the active artifact as the centerpiece. Chat moves to a narrow right gutter.</p>
+      </div>
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">Notebook<span class="surface-sub">Letter Series</span></h3>
+        <p class="surface-desc">Cream paper, narrow column, gold drop caps. Reversible. Your data stays the same.</p>
+      </div>
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">Thought <em>Board</em></h3>
+        <p class="surface-desc">A new surface. Pin moments from Chat, Notebook, or Studio. Pinboard grid plus Constellation 2D map.</p>
+      </div>
+
+      <div class="surface-card">
+        <span class="surface-dot"></span>
+        <h3 class="surface-name">Evolve <em>preview</em></h3>
+        <p class="surface-desc">Educational Intelligence: Today, Practice, Translator, Verify, Skills. Multi-model quiz pipeline activates in v34.</p>
+      </div>
+
     </div>
   </section>
 
