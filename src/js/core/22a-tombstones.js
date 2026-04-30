@@ -958,42 +958,9 @@ function initTombstoneRegistry_v32() {
 }
 window.initTombstoneRegistry_v32 = initTombstoneRegistry_v32;
 
-// v32.0-B: Focus residue detection. v28.8 (~mid-January 2026) retired Focus.
-// Goals/todos with the legacy titles below or createdAt before the cutoff are
-// candidates for the one-shot purge.
-
-var FOCUS_RETIRE_DATE = Date.parse('2026-01-15T00:00:00Z');
-var FOCUS_LEGACY_TITLES = [
-  'Governance', 'Staff Meeting', 'Mobile', 'Theft', 'Onboarding',
-  'Settings & Sync', 'Library', 'Identity', 'Studio & Pulse', 'Rhythm',
-  'Taxes 2025', 'Infiniti', 'Focus', 'Home', 'BrandAI', 'LifeAI',
-  'Inventory', 'Priority', 'Due by Today', 'Proposal',
-  'Leadership Academy', 'Rowe Org', 'LAA Strategy',
-  'Craig One on One', 'Unassigned'
-];
-
-function _matchesLegacyFocus(title) {
-  if (!title) return false;
-  for (var i = 0; i < FOCUS_LEGACY_TITLES.length; i++) {
-    var t = FOCUS_LEGACY_TITLES[i];
-    if (title === t) return true;
-    if (title.indexOf(t + ' (week of') === 0) return true;
-  }
-  return false;
-}
-
-// v32.1: Auto-purge heuristics removed. The v32.0 title-prefix matcher had a
-// critical false-positive bug — titles like "Priority", "Governance", "Rowe Org",
-// "Leadership Academy" are still actively used as Pulse Goals every week, so
-// matching on "Priority (week of" prefix tombstoned the user's CURRENT data.
-// All purges now go through explicit user UI buttons (Pulse "Clear All",
-// per-goal Delete, Sync Inventory ×). No background heuristic ever runs.
-//
-// FOCUS_RETIRE_DATE / FOCUS_LEGACY_TITLES / _matchesLegacyFocus / _focusGoalPredicate /
-// _focusTodoPredicate kept above as inert references in case a future admin
-// wants to reuse them, but no registry entry has legacyHeuristic populated.
-function _focusGoalPredicate() { return false; }
-function _focusTodoPredicate() { return false; }
+// v33.0: Focus residue heuristics removed. v28.8 retired Focus, and v32.1
+// neutralized the title-prefix matcher (false-positives on still-active goals
+// like "Priority", "Governance"). All purges go through explicit user UI now.
 
 // v32.0-B: Pre-flight backup. Writes a snapshot of every category's localStorage
 // to TWO local keys (one stable, one ephemeral) AND a Firestore doc so cross-

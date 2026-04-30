@@ -407,7 +407,6 @@ var AGENT_COLORS = {
 // v26.3: Sidebar icon lookup (viewId -> icon markup)
 var SIDEBAR_ICONS = {
   agent: '<span class="nav-item-icon">\u2726</span>',
-  signal: '<span class="nav-item-icon">\u25C9</span>',
   pulse: '<span class="nav-item-icon">\u2756</span>',
   studio: '<span class="nav-item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>',
   folio: '<span class="nav-item-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg></span>',
@@ -430,7 +429,7 @@ var SIDEBAR_ICONS = {
 
 // v26.3: Sidebar label lookup (viewId -> display name)
 var SIDEBAR_LABELS = {
-  agent: 'BrandAI', signal: 'Focus', pulse: 'Pulse', studio: 'Studio',
+  agent: 'BrandAI', pulse: 'Pulse', studio: 'Studio',
   folio: 'Folio', rhythm: 'Rhythm', library: 'Library', automations: 'Automations',
   mail: 'Mail', memory: 'Identity', tuning: 'History', guardrails: 'Guardrails',
   clients: 'People', commerce: 'Analytics', inventory: 'Inventory', sync: 'Sync',
@@ -1156,7 +1155,6 @@ var _sectionGroups = {
     tagline: 'Your brand at a glance',
     description: 'Monitor brand health, track daily focus items, and manage your schedule.',
     features: [
-      { id: 'signal', label: 'Focus', desc: 'Daily intelligence dashboard', icon: 'focus' },
       { id: 'pulse', label: 'Pulse', desc: 'Brand health metrics', icon: 'pulse' },
       { id: 'rhythm', label: 'Rhythm', desc: 'Calendar and event management', icon: 'rhythm' }
     ],
@@ -1309,7 +1307,7 @@ var _sidebarMode = localStorage.getItem('roweos_sidebar_mode') || 'expanded';
 var DEFAULT_CUSTOM_SIDEBAR = {
   standalone: ['agent'],
   groups: [
-    { id: 'core', label: 'Core', items: ['signal', 'pulse', 'rhythm'] },
+    { id: 'core', label: 'Core', items: ['pulse', 'rhythm'] },
     { id: 'create', label: 'Create', items: ['studio', 'social', 'automations', 'bloom'] },
     { id: 'orchestration', label: 'Orchestration', items: ['folio', 'library', 'mail'] },
     { id: 'intelligence', label: 'Intelligence', items: ['memory', 'tuning', 'guardrails'] },
@@ -1435,7 +1433,7 @@ function renderCustomSidebarItem(viewId, isStandalone) {
 // v26.3: Check if a view requires premium access
 function hasFeatureAccessForView(viewId) {
   var featureMap = {
-    automations: 'automations', social: 'social', signal: 'focus',
+    automations: 'automations', social: 'social',
     commerce: 'analytics', memory: 'identity', sync: 'sync'
   };
   var feature = featureMap[viewId];
@@ -1875,7 +1873,7 @@ function renderAvailablePool() {
 
   var data = getCustomSidebar();
   // All possible viewIds
-  var allViews = ['agent','signal','pulse','studio','folio','research','rhythm','library','automations','mail','memory','tuning','guardrails','clients','commerce','inventory','sync','settings','bloom','social'];
+  var allViews = ['agent','pulse','studio','folio','research','rhythm','library','automations','mail','memory','tuning','guardrails','clients','commerce','inventory','sync','settings','bloom','social'];
   // Find which are in use
   var usedViews = (data.standalone || []).slice();
   for (var g = 0; g < data.groups.length; g++) {
@@ -1972,7 +1970,7 @@ function isFavorite(viewId) {
 
 // v26.1: View labels for favorite star button
 var _viewLabels = {
-  agent: 'Chat', signal: 'Focus', pulse: 'Pulse', studio: 'Studio',
+  agent: 'Chat', pulse: 'Pulse', studio: 'Studio',
   rhythm: 'Rhythm', library: 'Library', memory: 'Identity', tuning: 'History',
   settings: 'Settings', inventory: 'Inventory', clients: 'People',
   commerce: 'Analytics', admin: 'Admin', mail: 'Mail', folio: 'Folio',
@@ -2648,7 +2646,7 @@ function showView(view) {
   }
 
   // Hide all views
-  var allViews = ['agent', 'studio', 'identity', 'signal', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'clients', 'commerce', 'journal', 'sync', 'automations', 'admin', 'bloom', 'mail', 'folio', 'research', 'social', 'sectionLanding', 'scribe']; // v29.0: Added scribe
+  var allViews = ['agent', 'studio', 'identity', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'clients', 'commerce', 'journal', 'sync', 'automations', 'admin', 'bloom', 'mail', 'folio', 'research', 'social', 'sectionLanding', 'scribe']; // v29.0: Added scribe
   allViews.forEach(function(v) {
     var el = document.getElementById(v + 'View');
     if (el) el.classList.add('hidden');
@@ -2858,12 +2856,6 @@ function showView(view) {
   if (view === 'signal') { view = 'pulse'; }
   // v28.9: Media Lab merged into Studio - redirect
   if (view === 'social') { view = 'studio'; }
-  if (view === 'signal') {
-    renderSignalView();
-    if (typeof initFocus2 === 'function') initFocus2(); // v10.5.25: Init Focus 2.0
-    if (typeof syncMobileBrandV2 === 'function') syncMobileBrandV2(); // v10.5.25: Sync mobile brand for mode
-    if (typeof restoreFocusCardStates === 'function') restoreFocusCardStates(); // v25.0: Restore collapsed/expanded states
-  }
   if (view === 'identity') showSettings();
   if (view === 'tuning') {
     showTuning();
@@ -3341,11 +3333,6 @@ function onBrandChange() {
   
   // v15.23: Dead code removed - Identity view uses currentView === 'memory', handled below
   
-  // v28.3: Wrap Focus render in try/catch - crashes here must not break brand switch chain
-  try {
-    if (typeof renderFocusView === 'function') renderFocusView();
-  } catch(e) { console.warn('[onBrandChange] renderFocusView error:', e.message); }
-
   // v15.30: Re-render Library view when brand changes so filter follows
   if (currentView === 'library' && typeof renderLibraryView === 'function') {
     renderLibraryView();
@@ -6521,11 +6508,6 @@ function selectSidebarBrand(idx) {
   // Trigger the full brand change
   onBrandChange();
 
-  // v9.1.14: Always update Focus view when brand changes
-  if (typeof renderFocusView === 'function') {
-    renderFocusView();
-  }
-
   // v28.2: Force Identity view refresh if currently visible - belt-and-suspenders
   if (currentView === 'memory' && typeof renderBrandIdentityView === 'function') {
     currentKnowledgeBrand = 'brand_' + idx;
@@ -6596,11 +6578,6 @@ function selectBrandFromDropdown(idxOrId) {
 
   // Trigger full brand change
   onBrandChange();
-
-  // v9.1.14: Always update Focus view when brand changes
-  if (typeof renderFocusView === 'function') {
-    renderFocusView();
-  }
 }
 
 // Close brand dropdowns when clicking outside

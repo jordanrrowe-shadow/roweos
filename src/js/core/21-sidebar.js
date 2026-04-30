@@ -180,7 +180,7 @@ function initLiquidNavScroll() {
   document.addEventListener('scroll', handleLiquidNavScroll, { passive: true, capture: true });
   
   // Also add to specific known scrollable containers
-  var panels = document.querySelectorAll('.panel-view, #agentView, #studioView, #identityView, #rhythmView, #pulseView, #brandIntelView, #tuningView, #settingsView, .panel'); // v28.8: removed #signalView
+  var panels = document.querySelectorAll('.panel-view, #agentView, #studioView, #identityView, #rhythmView, #pulseView, #brandIntelView, #tuningView, #settingsView, .panel');
   
   panels.forEach(function(panel) {
     panel.addEventListener('scroll', handleLiquidNavScroll, { passive: true });
@@ -197,7 +197,7 @@ function handleLiquidNavScroll(e) {
     scrollTop = target.scrollTop;
   } else {
     // Try to find the currently visible panel's scroll position
-    var visiblePanel = document.querySelector('#agentView:not([style*="display: none"]), #studioView:not([style*="display: none"]), #rhythmView:not([style*="display: none"]), #pulseView:not([style*="display: none"]), #identityView:not([style*="display: none"]), #settingsView:not([style*="display: none"])'); // v28.8: removed #signalView
+    var visiblePanel = document.querySelector('#agentView:not([style*="display: none"]), #studioView:not([style*="display: none"]), #rhythmView:not([style*="display: none"]), #pulseView:not([style*="display: none"]), #identityView:not([style*="display: none"]), #settingsView:not([style*="display: none"])');
     if (visiblePanel) {
       scrollTop = visiblePanel.scrollTop || 0;
     }
@@ -463,10 +463,6 @@ function onMobileBrandChangeV2(value) {
   // Trigger full brand change for conversation context
   onBrandChange();
   
-  // v9.1.14: Always update Focus view when brand changes
-  if (typeof renderFocusView === 'function') {
-    renderFocusView();
-  }
 }
 
 // v16.0: Mobile header brand dropdown change handler - delegates to onMobileBrandChangeV2 for shared paths

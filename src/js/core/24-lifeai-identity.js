@@ -5299,11 +5299,6 @@ function renderRhythm() {
   renderCalendar();
 }
 
-// Signal View (Focus wrapper)
-function renderSignalView() {
-  renderFocusView();
-}
-
 // Tuning View
 function showTuning() {
   console.log('[Tuning] showTuning called');

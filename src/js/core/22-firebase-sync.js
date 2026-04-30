@@ -2183,9 +2183,6 @@ function reloadAllData() {
     // v23.16: Reload commerce data after sync
     if (typeof loadCommerceData === 'function') loadCommerceData();
     
-    // v9.1.14: Render Focus view to show synced To-Do items
-    if (typeof renderFocusView === 'function') renderFocusView();
-    
     // v10.5.25: Reload library from localStorage after Firebase sync
     if (typeof initLibrary === 'function') initLibrary();
     if (typeof renderLibrary === 'function') renderLibrary();
@@ -2530,7 +2527,6 @@ function setupRealtimeSync() {
       safeSyncWrite('roweosTodos', todosArr);
       console.log('[Firebase V3] Todos update from cloud -', todosArr.length, 'items');
       if (typeof initTodos === 'function') initTodos();
-      if (typeof renderFocusView === 'function') renderFocusView();
     }, function() { /* silent */ });
     firebaseUnsubscribers.push(unsubTodos);
 

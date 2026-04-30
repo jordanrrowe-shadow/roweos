@@ -239,48 +239,11 @@
     }
     html.life-mode.light-mode .chat-send-btn-v2.sending .send-text {
       color: var(--life-accent) !important;
-    }
-    
-    
-    /* FOCUS ASSISTANT SEND BUTTON - Same glow treatment */
-    html.life-mode .focus-2-ai-send {
-      background: rgba(30, 30, 30, 0.9) !important;
-      border: 1px solid var(--life-accent-30) !important;
-      box-shadow: 0 0 15px var(--life-accent-20) !important;
-    }
-    html.life-mode .focus-2-ai-send svg {
-      stroke: #ffffff !important;
-      fill: none !important;
-    }
-    html.life-mode .focus-2-ai-send:hover {
-      background: rgba(40, 40, 40, 0.95) !important;
-      box-shadow: 0 0 20px var(--life-accent-30) !important;
-    }
-    
-    /* ═══════════════════════════════════════════════════════════════
-       COMPREHENSIVE GOLD → ACCENT COLOR OVERRIDES
-       Replace ALL gold elements with life accent color
-       ═══════════════════════════════════════════════════════════════ */
-    
-    /* FOCUS VIEW - Calendar today circle */
-    html.life-mode .focus-2-calendar .calendar-day.today,
-    html.life-mode .calendar-day.today,
-    html.life-mode .focus-2-today-indicator {
+    }    
+    html.life-mode .calendar-day.today {
       background: var(--life-accent) !important;
       color: #1a1a1a !important;
-    }
-    
-    /* FOCUS VIEW - All gold borders */
-    html.life-mode .focus-2-widget,
-    html.life-mode .focus-2-card,
-    html.life-mode .focus-2-panel {
-      border-color: var(--border-color) !important;
-    }
-    html.life-mode .focus-2-widget:hover,
-    html.life-mode .focus-2-card:hover {
-      border-color: var(--life-accent-30) !important;
-    }
-    
+    }    
     /* RHYTHM VIEW - Gold accents */
     html.life-mode .rhythm-today-marker,
     html.life-mode .rhythm-calendar .today {
@@ -454,14 +417,7 @@
     html.life-mode .chat-input-v2:focus-within {
       border-color: var(--life-accent) !important;
       box-shadow: 0 0 0 2px var(--life-accent-20), 0 4px 20px var(--life-accent-15) !important;
-    }
-    
-    /* FOCUS ASSISTANT INPUT - border glow */
-    html.life-mode .focus-2-ai-input:focus {
-      border-color: var(--life-accent) !important;
-      box-shadow: 0 0 0 2px var(--life-accent-20) !important;
-    }
-    
+    }    
     /* IDENTITY/PROFILE HEADERS */
     html.life-mode .life-identity-name,
     html.life-mode .life-identity-hero h1,
@@ -482,13 +438,7 @@
     html.life-mode .mobile-menu-item.active .mobile-menu-item-icon,
     html.life-mode .mobile-menu-item.active .mobile-menu-item-label {
       color: var(--life-accent) !important;
-    }
-    
-    /* FOCUS VIEW STATS */
-    html.life-mode .focus-2-stat-value {
-      color: var(--life-accent) !important;
-    }
-    
+    }    
     /* INVENTORY STAT */
     html.life-mode #statTotalItems {
       color: var(--life-accent) !important;
@@ -500,47 +450,14 @@
     }
     html.life-mode .calendar-day-dot {
       background: var(--life-accent) !important;
-    }
-    
-    /* v10.5.25: Focus mini calendar today circle */
-    html.life-mode .focus-2-mini-dot.is-today {
-      background: var(--life-accent) !important;
-      border-color: var(--life-accent) !important;
-      color: var(--life-accent-text) !important;
-    }
-    html.life-mode .focus-2-mini-dot.has-tasks::after {
-      background: var(--life-accent) !important;
-    }
-    html.life-mode .focus-2-mini-dot:hover {
-      border-color: var(--life-accent) !important;
-    }
-    html.life-mode .focus-2-mini-dot.is-selected {
-      border-color: var(--life-accent) !important;
-      background: var(--life-accent-15) !important;
-    }
-    
+    }    
     /* ALL GOLD BORDERS - change to accent */
     html.life-mode .card-border-gold,
     html.life-mode .panel-gold-border,
     html.life-mode [style*="border-color: #a89878"],
     html.life-mode [style*="border-color: var(--accent)"] {
       border-color: var(--life-accent) !important;
-    }
-    
-    /* WIDGET BORDERS in Focus view */
-    html.life-mode .focus-2-widget {
-      border-color: var(--border-color) !important;
-    }
-    html.life-mode .focus-2-widget:hover {
-      border-color: var(--life-accent-30) !important;
-    }
-    
-    /* FILTER BUTTONS */
-    html.life-mode .focus-2-mode-filter-btn.active {
-      background: var(--life-accent) !important;
-      color: #1a1a1a !important;
-    }
-    
+    }    
     /* CHAT AVATAR - accent background with dynamic contrast diamond */
     html.life-mode .conversation-avatar .avatar-icon,
     html.life-mode .life-ai-avatar .avatar-icon,
@@ -561,13 +478,7 @@
     /* LifeAI sidebar icon - smaller diamond to match BrandAI */
     html.life-mode .nav-item[data-view="agent"] .nav-item-icon {
       font-size: var(--text-base) !important;
-    }
-    
-    /* FOCUS ASSISTANT HEADER */
-    html.life-mode .focus-2-assistant-icon {
-      color: var(--life-accent) !important;
-    }
-    
+    }    
     /* LANDING/WELCOME ICON */
     html.life-mode .agent-welcome-icon,
     html.life-mode .landing-logo svg,
@@ -3378,13 +3289,7 @@
       box-sizing: border-box;
       overflow: hidden;
       border-radius: 0;
-    }
-    /* v28.8: #signalView desktop styles removed — Focus retired */
-    /* v26.1: Focus Pill Layout */
-    #focusPersistentHeader {
-      margin-bottom: var(--space-4);
-    }
-    #focusPersistentHeader .focus-greeting-row {
+    }    #focusPersistentHeader .focus-greeting-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -3820,30 +3725,30 @@
     
     /* v11.5.4: Dynamic left positioning when sidebar is collapsed */
     html.sidebar-pinned-collapsed #studioView,
-    html.sidebar-pinned-collapsed #memoryView, /* v28.8: removed #signalView */
-    html.sidebar-pinned-collapsed #tuningView,
-    html.sidebar-pinned-collapsed #settingsView,
-    html.sidebar-pinned-collapsed #exportView,
-    html.sidebar-pinned-collapsed #guardrailsView,
-    html.sidebar-pinned-collapsed #libraryView,
-    html.sidebar-pinned-collapsed #inventoryView,
-    html.sidebar-pinned-collapsed #clientsView,
-    html.sidebar-pinned-collapsed #rhythmView,
-    html.sidebar-pinned-collapsed #pulseView,
-    html.sidebar-pinned-collapsed #brandIntelView,
-    html.sidebar-pinned-collapsed #identityView,
-    html.sidebar-pinned-collapsed #scheduleView,
-    html.sidebar-pinned-collapsed #automationsView,
-    html.sidebar-pinned-collapsed #syncView,
-    html.sidebar-pinned-collapsed #commerceView,
-    html.sidebar-pinned-collapsed #adminView,
-    html.sidebar-pinned-collapsed #bloomView,
-    html.sidebar-pinned-collapsed #mailView,
-    html.sidebar-pinned-collapsed #folioView,
-    html.sidebar-pinned-collapsed #socialView,
-    html.sidebar-pinned-collapsed #researchView,
-    html.sidebar-pinned-collapsed #sectionLandingView,
-    html.sidebar-pinned-collapsed #scribeView, /* v29.0 */
+html.sidebar-pinned-collapsed #memoryView,
+html.sidebar-pinned-collapsed #settingsView,
+html.sidebar-pinned-collapsed #exportView,
+html.sidebar-pinned-collapsed #guardrailsView,
+html.sidebar-pinned-collapsed #libraryView,
+html.sidebar-pinned-collapsed #inventoryView,
+html.sidebar-pinned-collapsed #clientsView,
+html.sidebar-pinned-collapsed #rhythmView,
+html.sidebar-pinned-collapsed #pulseView,
+html.sidebar-pinned-collapsed #brandIntelView,
+html.sidebar-pinned-collapsed #identityView,
+html.sidebar-pinned-collapsed #scheduleView,
+html.sidebar-pinned-collapsed #automationsView,
+html.sidebar-pinned-collapsed #syncView,
+html.sidebar-pinned-collapsed #commerceView,
+html.sidebar-pinned-collapsed #adminView,
+html.sidebar-pinned-collapsed #bloomView,
+html.sidebar-pinned-collapsed #mailView,
+html.sidebar-pinned-collapsed #folioView,
+html.sidebar-pinned-collapsed #socialView,
+html.sidebar-pinned-collapsed #researchView,
+html.sidebar-pinned-collapsed #sectionLandingView,
+html.sidebar-pinned-collapsed #scribeView,
+/* v29.0 */
     html.sidebar-pinned-collapsed #sidebarNavCustom {
       left: var(--sidebar-collapsed-width);
       transition: left var(--sidebar-transition);
@@ -3851,30 +3756,30 @@
     
     /* v11.5.4: Push panels right when sidebar is pinned open (Always Open) */
     html.sidebar-pinned #studioView,
-    html.sidebar-pinned #memoryView, /* v28.8: removed #signalView */
-    html.sidebar-pinned #tuningView,
-    html.sidebar-pinned #settingsView,
-    html.sidebar-pinned #exportView,
-    html.sidebar-pinned #guardrailsView,
-    html.sidebar-pinned #libraryView,
-    html.sidebar-pinned #inventoryView,
-    html.sidebar-pinned #clientsView,
-    html.sidebar-pinned #rhythmView,
-    html.sidebar-pinned #pulseView,
-    html.sidebar-pinned #brandIntelView,
-    html.sidebar-pinned #identityView,
-    html.sidebar-pinned #scheduleView,
-    html.sidebar-pinned #automationsView,
-    html.sidebar-pinned #syncView,
-    html.sidebar-pinned #commerceView,
-    html.sidebar-pinned #adminView,
-    html.sidebar-pinned #bloomView,
-    html.sidebar-pinned #mailView,
-    html.sidebar-pinned #folioView,
-    html.sidebar-pinned #socialView,
-    html.sidebar-pinned #researchView,
-    html.sidebar-pinned #sectionLandingView,
-    html.sidebar-pinned #scribeView, /* v29.0 */
+html.sidebar-pinned #memoryView,
+html.sidebar-pinned #settingsView,
+html.sidebar-pinned #exportView,
+html.sidebar-pinned #guardrailsView,
+html.sidebar-pinned #libraryView,
+html.sidebar-pinned #inventoryView,
+html.sidebar-pinned #clientsView,
+html.sidebar-pinned #rhythmView,
+html.sidebar-pinned #pulseView,
+html.sidebar-pinned #brandIntelView,
+html.sidebar-pinned #identityView,
+html.sidebar-pinned #scheduleView,
+html.sidebar-pinned #automationsView,
+html.sidebar-pinned #syncView,
+html.sidebar-pinned #commerceView,
+html.sidebar-pinned #adminView,
+html.sidebar-pinned #bloomView,
+html.sidebar-pinned #mailView,
+html.sidebar-pinned #folioView,
+html.sidebar-pinned #socialView,
+html.sidebar-pinned #researchView,
+html.sidebar-pinned #sectionLandingView,
+html.sidebar-pinned #scribeView,
+/* v29.0 */
     html.sidebar-pinned #sidebarNavCustom {
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
@@ -3882,30 +3787,30 @@
     
     /* v11.5.4: Push panels right when sidebar hover-expands (Auto mode) */
     html.sidebar-hover-expanded #studioView,
-    html.sidebar-hover-expanded #memoryView, /* v28.8: removed #signalView */
-    html.sidebar-hover-expanded #tuningView,
-    html.sidebar-hover-expanded #settingsView,
-    html.sidebar-hover-expanded #exportView,
-    html.sidebar-hover-expanded #guardrailsView,
-    html.sidebar-hover-expanded #libraryView,
-    html.sidebar-hover-expanded #inventoryView,
-    html.sidebar-hover-expanded #clientsView,
-    html.sidebar-hover-expanded #rhythmView,
-    html.sidebar-hover-expanded #pulseView,
-    html.sidebar-hover-expanded #brandIntelView,
-    html.sidebar-hover-expanded #identityView,
-    html.sidebar-hover-expanded #scheduleView,
-    html.sidebar-hover-expanded #automationsView,
-    html.sidebar-hover-expanded #syncView,
-    html.sidebar-hover-expanded #commerceView,
-    html.sidebar-hover-expanded #adminView,
-    html.sidebar-hover-expanded #bloomView,
-    html.sidebar-hover-expanded #mailView,
-    html.sidebar-hover-expanded #folioView,
-    html.sidebar-hover-expanded #socialView,
-    html.sidebar-hover-expanded #researchView,
-    html.sidebar-hover-expanded #sectionLandingView,
-    html.sidebar-hover-expanded #scribeView, /* v29.0 */
+html.sidebar-hover-expanded #memoryView,
+html.sidebar-hover-expanded #settingsView,
+html.sidebar-hover-expanded #exportView,
+html.sidebar-hover-expanded #guardrailsView,
+html.sidebar-hover-expanded #libraryView,
+html.sidebar-hover-expanded #inventoryView,
+html.sidebar-hover-expanded #clientsView,
+html.sidebar-hover-expanded #rhythmView,
+html.sidebar-hover-expanded #pulseView,
+html.sidebar-hover-expanded #brandIntelView,
+html.sidebar-hover-expanded #identityView,
+html.sidebar-hover-expanded #scheduleView,
+html.sidebar-hover-expanded #automationsView,
+html.sidebar-hover-expanded #syncView,
+html.sidebar-hover-expanded #commerceView,
+html.sidebar-hover-expanded #adminView,
+html.sidebar-hover-expanded #bloomView,
+html.sidebar-hover-expanded #mailView,
+html.sidebar-hover-expanded #folioView,
+html.sidebar-hover-expanded #socialView,
+html.sidebar-hover-expanded #researchView,
+html.sidebar-hover-expanded #sectionLandingView,
+html.sidebar-hover-expanded #scribeView,
+/* v29.0 */
     html.sidebar-hover-expanded #sidebarNavCustom {
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
@@ -15469,62 +15374,8 @@
     }
     .calendar-main {
       flex: 1;
-    }
-    
-    /* ═══════════════════════════════════════════════════════════════
-       FOCUS VIEW STYLES
-       ═══════════════════════════════════════════════════════════════ */
-    
-    /* v10.5.25: Focus 2.0 - Fixed Column Grid with independent widget sizing */
-    .focus-2-unified-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-4);
-      align-items: stretch;
-      align-content: start;
-      padding-bottom: 32px;
-    }
-    
-    /* Widget Cards - v13.9: Only draggable in customize mode */
-    .focus-2-widget-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: var(--space-5);
-      position: relative;
-      cursor: default;
-      transition: all 0.2s ease;
-      overflow: visible;
-      grid-column: span 1;
-      display: flex;
-      flex-direction: column;
-    }
-    body.focus2-customize-mode .focus-2-widget-card {
-      cursor: grab;
-    }
-    
-    .focus-2-widget-card:active {
-      cursor: grabbing;
-    }
-    
-    .focus-2-widget-card:hover {
-      border-color: rgba(212, 175, 55, 0.3);
-    }
-    
-    .focus-2-widget-card.dragging {
-      opacity: 0.6;
-      transform: scale(1.02);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-      z-index: 100;
-    }
-    
-    .focus-2-widget-card.drag-over {
-      border-color: var(--accent);
-      background: rgba(212, 175, 55, 0.05);
-    }
-    
-    /* v10.5.25: Widget controls - resize only, shows on top-right hover */
-    .focus-2-widget-controls {
+    }    
+    /* v10.5.25: Widget controls - resize only {
       position: absolute;
       top: 6px;
       right: 6px;
@@ -15539,9 +15390,7 @@
       pointer-events: none;
     }
     
-    /* v10.5.25: When Customize mode is ON, show controls - subtle glass effect */
-    body.focus2-resize-mode .focus-2-widget-controls,
-    body.focus2-customize-mode .focus-2-widget-controls {
+    /* v10.5.25: When Customize mode is ON {
       opacity: 1 !important;
       pointer-events: auto !important;
       display: flex !important;
@@ -15551,1095 +15400,19 @@
       padding: 3px !important;
       border-radius: 5px !important;
       backdrop-filter: blur(8px) !important;
-    }
-    
-    body.focus2-resize-mode .focus-2-widget-resize-btn,
-    body.focus2-customize-mode .focus-2-widget-resize-btn {
-      background: transparent !important;
-      color: var(--accent) !important;
-      border: none !important;
-      padding: 3px !important;
-    }
-    
-    body.focus2-resize-mode .focus-2-widget-resize-btn:hover,
-    body.focus2-customize-mode .focus-2-widget-resize-btn:hover {
-      background: rgba(212, 175, 55, 0.2) !important;
-      border-radius: 3px !important;
-    }
-    
-    body.focus2-resize-mode .focus-2-widget-resize-btn svg,
-    body.focus2-customize-mode .focus-2-widget-resize-btn svg {
-      width: 11px !important;
-      height: 11px !important;
-    }
-    
-    /* Hover zone in top-right corner of widget */
-    .focus-2-widget-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 80px;
-      height: 60px;
-      z-index: 9;
-    }
-    
-    /* Show controls when hovering top-right area */
-    .focus-2-widget-card:has(::before:hover) .focus-2-widget-controls,
-    .focus-2-widget-controls:hover {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    
+    }    
     /* Fallback for browsers without :has() - show on controls hover */
-    @supports not selector(:has(*)) {
-      .focus-2-widget-card:hover .focus-2-widget-controls {
-        opacity: 1;
-        pointer-events: auto;
-      }
-    }
-    
-    .focus-2-widget-resize-btn {
-      padding: var(--space-1);
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 3px;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s ease;
-    }
-    
-    .focus-2-widget-resize-btn svg {
-      width: 12px;
-      height: 12px;
-    }
-    
-    .focus-2-widget-resize-btn:hover {
-      background: var(--bg-primary);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    
-    /* v10.5.25: Hide drag handles completely on desktop */
-    .focus-2-widget-drag-handle {
-      display: none !important;
-    }
-    
-    .focus-2-widget-drag-handle svg {
-      width: 12px;
-      height: 12px;
-    }
-    
-    /* v10.5.25: Widget Sizes - 2 column grid (half = span 1, full = span 2) */
-    .focus-2-widget-wide {
+    @supports not selector(:has(*)) {    }    
+    /* v10.5.25: Widget Sizes - 2 column grid (half = span 1 {
       grid-column: span 1 !important;
-    }
-    
-    .focus-2-widget-full {
-      grid-column: span 2 !important;
-    }
-    
+    }    
     /* Remove compact - no longer used */
     
     /* Categories rendered directly in unified grid via display: contents */
     #focus2CategoriesGrid {
       display: contents;
-    }
-    
-    /* v10.5.25: Merged Today + Calendar */
-    .focus-2-today-calendar-merged {
-      display: flex;
-      gap: var(--space-6);
-      align-items: center;
-    }
-    
-    /* v10.5.25: Vertical orientation for calendar widget - stacked date display */
-    .focus-2-widget-card[data-orientation="vertical"] .focus-2-today-calendar-merged {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    
-    .focus-2-widget-card[data-orientation="vertical"] .focus-2-today-section {
-      border-right: none;
-      border-bottom: 1px solid var(--border-color);
-      padding: var(--space-5);
-      text-align: center;
-      display: block;
-    }
-    
-    .focus-2-widget-card[data-orientation="vertical"] .focus-2-day-number {
-      font-size: 64px;
-      margin-bottom: var(--space-2);
-    }
-    
-    .focus-2-widget-card[data-orientation="vertical"] .focus-2-month {
-      display: block;
-      font-size: var(--text-lg);
-      letter-spacing: 0.2em;
-      margin-bottom: var(--space-1);
-    }
-    
-    .focus-2-widget-card[data-orientation="vertical"] .focus-2-weekday {
-      display: block;
-      font-size: var(--text-base);
-      margin-bottom: var(--space-1);
-    }
-    
-    .focus-2-widget-card[data-orientation="vertical"] .focus-2-year {
-      display: block;
-      font-size: var(--text-2xl);
-      margin-top: 6px;
-    }
-    
-    .focus-2-widget-card[data-orientation="vertical"] .focus-2-calendar-section {
-      padding-top: var(--space-3);
-    }
-    
-    .focus-2-today-section {
-      text-align: center;
-      padding: 10px 20px;
-      border-right: 1px solid var(--border-color);
-      min-width: 120px;
-    }
-    
-    .focus-2-calendar-section {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .focus-2-day-number {
-      font-size: 56px;
-      font-weight: 800;
-      color: var(--text-primary);
-      line-height: 1;
-      margin-bottom: var(--space-1);
-    }
-    
-    .focus-2-month {
-      font-size: var(--text-base);
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      color: var(--accent);
-      margin-bottom: 2px;
-    }
-    
-    .focus-2-weekday {
-      font-size: var(--text-base);
-      color: var(--text-secondary);
-    }
-    
-    .focus-2-year {
-      font-size: var(--text-xl);
-      font-weight: 300;
-      color: var(--text-muted);
-      margin-top: var(--space-1);
-    }
-    
-    /* v10.5.25: Compact Tasks Controls */
-    .focus-2-tasks-controls {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      margin-bottom: var(--space-2);
-    }
-    
-    .focus-2-tasks-left {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-tasks-left svg {
-      color: var(--accent);
-    }
-    
-    .focus-2-tasks-right {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-    }
-    
-    .focus-2-eye-toggle {
-      width: 32px;
-      height: 32px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-secondary);
-      transition: all 0.2s;
-    }
-    
-    .focus-2-eye-toggle:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    
-    .focus-2-eye-toggle.hidden svg {
-      opacity: 0.4;
-    }
-    
-    .focus-2-new-dropdown {
-      position: relative;
-    }
-    
-    .focus-2-new-btn {
-      padding: 8px 16px;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-md);
-      color: #000;
-      font-size: var(--text-base);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .focus-2-new-btn:hover {
-      filter: brightness(1.1);
-    }
-    
-    .focus-2-new-menu {
-      position: absolute;
-      top: calc(100% + 4px);
-      right: 0;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 6px;
-      min-width: 160px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      z-index: 100;
-    }
-    
-    .focus-2-new-menu button {
-      width: 100%;
-      padding: 10px 12px;
-      background: none;
-      border: none;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: var(--text-base);
-      color: var(--text-primary);
-      cursor: pointer;
-      text-align: left;
-    }
-    
-    .focus-2-new-menu button:hover {
-      background: var(--bg-tertiary);
-    }
-    
-    .focus-2-new-menu button svg {
-      color: var(--text-muted);
-    }
-    
-    /* v10.5.25: New Task Modal */
-    .focus-2-new-task-modal {
-      grid-column: 1 / -1;
-      background: var(--bg-secondary);
-      border: 1px solid var(--accent);
-      border-radius: var(--radius-xl);
-      padding: var(--space-5);
-      margin-bottom: var(--space-2);
-    }
-    
-    .focus-2-new-task-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-4);
-    }
-    
-    .focus-2-new-task-header h3 {
-      font-size: var(--text-lg);
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
-    
-    .focus-2-new-task-close {
-      width: 28px;
-      height: 28px;
-      background: none;
-      border: none;
-      font-size: var(--text-2xl);
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-    
-    .focus-2-new-task-field {
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-new-task-field label {
-      display: block;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 6px;
-    }
-    
-    .focus-2-new-task-field input,
-    .focus-2-new-task-field select,
-    .focus-2-new-task-field textarea {
-      width: 100%;
-      padding: 10px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-    
-    .focus-2-new-task-field textarea {
-      min-height: 60px;
-      resize: vertical;
-    }
-    
-    .focus-2-new-task-row {
-      display: flex;
-      gap: var(--space-3);
-    }
-    
-    .focus-2-new-task-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--space-2);
-      margin-top: var(--space-4);
-    }
-    
-    /* v10.5.25: Task Detail Modal (centered popup) */
-    .focus-2-task-detail-backdrop {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 10000;
-    }
-
-    .focus-2-task-detail-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: min(520px, 90vw);
-      max-height: 85vh;
-      overflow-y: auto;
-      background: var(--bg-primary);
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      z-index: 10001;
-    }
-    
-    
-    .focus-2-task-detail-content {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .focus-2-task-detail-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-5);
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .focus-2-task-detail-check {
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .focus-2-task-detail-check.completed {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
-    
-    .focus-2-task-detail-title {
-      flex: 1;
-      background: none;
-      border: none;
-      font-size: var(--text-xl);
-      font-weight: 600;
-      color: var(--text-primary);
-      padding: 4px 0;
-    }
-    
-    .focus-2-task-detail-title:focus {
-      outline: none;
-      border-bottom: 1px solid var(--accent);
-    }
-    
-    .focus-2-task-detail-close {
-      width: 32px;
-      height: 32px;
-      background: none;
-      border: none;
-      font-size: var(--text-3xl);
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-    
-    .focus-2-task-detail-body {
-      flex: 1;
-      padding: var(--space-5);
-      overflow-y: auto;
-    }
-    
-    .focus-2-task-detail-row {
-      margin-bottom: var(--space-5);
-    }
-    
-    .focus-2-task-detail-row label {
-      display: block;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: var(--space-2);
-    }
-    
-    .focus-2-task-detail-row input,
-    .focus-2-task-detail-row select,
-    .focus-2-task-detail-row textarea {
-      width: 100%;
-      padding: var(--space-3);
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-    
-    .focus-2-task-detail-row textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    
-    .focus-2-task-detail-footer {
-      padding: var(--space-5);
-      border-top: 1px solid var(--border-color);
-    }
-    
-    .focus-2-btn-danger {
-      background: #ef4444 !important;
-      color: #fff !important;
-    }
-    
-    /* Mini Calendar - v10.5.25: Responsive sizing */
-    .focus-2-mini-calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      padding: 10px 0;
-      width: 100%;
-    }
-    
-    .focus-2-mini-calendar-header {
-      text-align: center;
-      font-size: var(--text-xs);
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      padding: 4px 0;
-    }
-    
-    .focus-2-mini-dot {
-      position: relative;
-      aspect-ratio: 1;
-      width: 100%;
-      max-width: 42px;
-      max-height: 42px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      background: var(--bg-tertiary);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    
-    .focus-2-mini-dot:hover {
-      background: var(--bg-primary);
-      border-color: var(--accent);
-      transform: scale(1.05);
-    }
-    
-    .focus-2-mini-dot.is-today {
-      background: var(--accent);
-      color: #000;
-      font-weight: 700;
-      border-color: var(--accent);
-    }
-    
-    .focus-2-mini-dot.is-selected {
-      border: 2px solid var(--accent);
-      background: rgba(212, 175, 55, 0.15);
-      font-weight: 600;
-    }
-    
-    /* v10.5.25: Has-tasks shows a small dot indicator instead of gold border */
-    .focus-2-mini-dot.has-tasks::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-    
-    .focus-2-mini-dot.has-tasks.light::after {
-      opacity: 0.5;
-    }
-    
-    .focus-2-mini-cal-header {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      margin-bottom: var(--space-3);
-      width: 100%;
-    }
-    
-    .focus-2-mini-cal-day-name {
-      text-align: center;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    /* v10.5.25: Larger calendar when widget is wide/full */
-    .focus-2-widget-wide .focus-2-mini-calendar-header,
-    .focus-2-widget-full .focus-2-mini-calendar-header {
-      font-size: var(--text-base);
-      font-weight: 700;
-      padding: 10px 0;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-widget-wide .focus-2-mini-dot,
-    .focus-2-widget-full .focus-2-mini-dot {
-      font-size: var(--text-base);
-    }
-    
-    .focus-2-mini-cal-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      width: 100%;
-    }
-    
-    .focus-2-mini-cal-day {
-      aspect-ratio: 1;
-      max-width: 42px;
-      max-height: 42px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: var(--text-sm);
-      color: var(--text-secondary);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    
-    .focus-2-mini-cal-day:hover {
-      background: var(--bg-tertiary);
-    }
-    
-    .focus-2-mini-cal-day.today {
-      background: var(--accent);
-      color: #000;
-      font-weight: 700;
-    }
-    
-    .focus-2-mini-cal-day.has-tasks::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      width: 4px;
-      height: 4px;
-      background: var(--accent);
-      border-radius: 50%;
-    }
-    
-    /* Stats Grid */
-    .focus-2-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-3);
-    }
-    
-    .focus-2-stat {
-      text-align: center;
-      padding: 12px 8px;
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-md);
-    }
-    
-    .focus-2-stat-number {
-      font-size: var(--text-3xl);
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-stat-label {
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-    
-    /* Widget Header */
-    .focus-2-widget-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-widget-title {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-widget-title svg {
-      color: var(--accent);
-    }
-    
-    .focus-2-widget-action {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      background: none !important;
-      background-color: transparent !important;
-      border: none !important;
-      cursor: pointer;
-      text-decoration: underline;
-      padding: 4px 8px;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-    
-    html.light-mode .focus-2-widget-action {
-      background: none !important;
-      background-color: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-    
-    /* Notes Input */
-    .focus-2-notes-input {
-      width: 100%;
-      min-height: 80px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: var(--space-3);
-      font-size: var(--text-base);
-      color: var(--text-primary);
-      resize: vertical;
-      font-family: inherit;
-    }
-    
-    .focus-2-notes-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    
-    /* Tasks Header */
-    .focus-2-tasks-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: var(--space-3);
-    }
-    
-    .focus-2-tasks-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: var(--text-xl);
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-tasks-title svg {
-      color: var(--accent);
-    }
-    
-    .focus-2-tasks-actions {
-      display: flex;
-      gap: var(--space-2);
-      flex-wrap: wrap;
-    }
-    
-    /* Day Detail */
-    .focus-2-day-detail-header {
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-day-detail-title {
-      font-size: var(--text-lg);
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-day-detail-date {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-    }
-    
-    .focus-2-mode-filter {
-      display: flex;
-      gap: 6px;
-      margin-top: var(--space-3);
-    }
-    
-    .focus-2-mode-filter-btn {
-      flex: 1;
-      padding: 6px 10px;
-      font-size: var(--text-sm);
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      cursor: pointer;
-    }
-    
-    .focus-2-mode-filter-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #000;
-    }
-    
-    /* AI Assistant */
-    .focus-2-ai-assistant-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-ai-assistant-avatar {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, var(--accent), rgba(212, 175, 55, 0.5));
-      border-radius: var(--radius-lg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #000;
-    }
-    
-    .focus-2-ai-assistant-name {
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-ai-assistant-status {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-    }
-    
-    .focus-2-ai-message {
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-md);
-      padding: var(--space-3);
-      font-size: var(--text-base);
-      color: var(--text-primary);
-      line-height: 1.5;
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-ai-assistant-input {
-      display: flex;
-      gap: var(--space-2);
-    }
-    
-    .focus-2-ai-input {
-      flex: 1;
-      padding: 10px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-    
-    .focus-2-ai-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    
-    .focus-2-ai-send {
-      width: 40px;
-      height: 40px;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-md);
-      color: #000;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* Category Cards */
-    .focus-2-category-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: var(--space-5);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-      /* v13.9: Allow text selection by default - only disable in customize mode */
-      -webkit-user-select: text;
-      user-select: text;
-      -webkit-user-drag: none;
-    }
-
-    /* v13.9: Only show grab cursor in customize mode */
-    body.focus2-customize-mode .focus-2-category-card {
-      cursor: grab;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-user-drag: element;
-    }
-
-    body.focus2-customize-mode .focus-2-category-card:active {
-      cursor: grabbing;
-    }
-
-    .focus-2-category-card.dragging {
-      opacity: 0.6;
-      transform: scale(1.02);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-      z-index: 100;
-    }
-    
-    .focus-2-category-card.drag-over {
-      border-color: var(--accent);
-      background: rgba(212, 175, 55, 0.05);
-    }
-    }
-    
-    .focus-2-stat {
-      text-align: center;
-      padding: var(--space-3);
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-lg);
-    }
-    
-    .focus-2-stat-number {
-      font-size: var(--text-4xl);
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1;
-    }
-    
-    .focus-2-stat-label {
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-top: var(--space-1);
-    }
-    
-    /* AI Recommendation Card */
-    .focus-2-ai-card {
-      background: linear-gradient(145deg, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.02) 100%);
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      border-radius: var(--radius-xl);
-      padding: var(--space-5);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .focus-2-ai-card::before {
-      content: '✦';
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      font-size: var(--text-2xl);
-      color: var(--accent);
-      opacity: 0.5;
-    }
-    
-    .focus-2-ai-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-ai-badge {
-      font-size: var(--text-xs);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--accent);
-      background: rgba(212, 175, 55, 0.15);
-      padding: 4px 10px;
-      border-radius: var(--radius-md);
-    }
-    
-    .focus-2-ai-suggestion {
-      font-size: var(--text-base);
-      color: var(--text-primary);
-      line-height: 1.5;
-      margin-bottom: var(--space-4);
-    }
-    
-    .focus-2-ai-action {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 16px;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: var(--text-base);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    
-    .focus-2-ai-action:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-    }
-    
-    .focus-2-ai-dismiss {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: var(--text-sm);
-      cursor: pointer;
-      margin-left: var(--space-3);
-    }
-    
-    /* Main Content Area */
-    .focus-2-main {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-6);
-    }
-    
-    /* Timeline Section */
-    .focus-2-timeline {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-2xl);
-      padding: var(--space-6);
-    }
-    
-    .focus-2-section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-5);
-    }
-    
-    .focus-2-section-title {
-      font-size: var(--text-lg);
-      font-weight: 700;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .focus-2-section-title svg {
-      color: var(--accent);
-    }
-    
-    .focus-2-section-actions {
-      display: flex;
-      gap: var(--space-2);
-    }
-    
-    .focus-2-btn {
-      padding: 8px 14px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      font-size: var(--text-sm);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    
-    .focus-2-btn:hover {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-    
-    .focus-2-btn-primary {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #000;
-      font-weight: 600;
-    }
-    
-    .focus-2-btn-primary:hover {
-      opacity: 0.9;
-    }
-    
-    /* Timeline Items */
-    .focus-2-timeline-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-    }
-    
-    /* v24.26: Remove one-sided border, use full border + lift */
-    .focus-2-timeline-item {
+    }    }    
+    /* v24.26: Remove one-sided border {
       display: flex;
       gap: var(--space-4);
       padding: var(--space-4);
@@ -16648,632 +15421,10 @@
       border: 1px solid rgba(168,152,120,0.15);
       transition: all 0.15s ease;
       cursor: pointer;
-    }
-
-    .focus-2-timeline-item:hover {
-      transform: translateY(-2px);
-      background: var(--bg-primary);
-      box-shadow: var(--gold-glow-sm);
-    }
-
-    .focus-2-timeline-item.completed {
-      opacity: 0.5;
-      border-color: var(--border-color);
-    }
-    
-    .focus-2-timeline-item.completed .focus-2-timeline-title {
-      text-decoration: line-through;
-    }
-    
-    .focus-2-timeline-time {
-      width: 60px;
-      text-align: right;
-      flex-shrink: 0;
-    }
-    
-    .focus-2-timeline-time-value {
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-timeline-time-label {
-      font-size: var(--text-xs);
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-    
-    .focus-2-timeline-content {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .focus-2-timeline-title {
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: var(--space-1);
-    }
-    
-    .focus-2-timeline-meta {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-    }
-    
-    .focus-2-timeline-badge {
-      font-size: var(--text-xs);
-      padding: 2px 8px;
-      background: rgba(212, 175, 55, 0.1);
-      border-radius: var(--radius-sm);
-      color: var(--accent);
-    }
-    
-    .focus-2-timeline-checkbox {
-      width: 22px;
-      height: 22px;
-      border: 2px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      flex-shrink: 0;
-    }
-    
-    .focus-2-timeline-checkbox:hover {
-      border-color: var(--accent);
-    }
-    
-    .focus-2-timeline-checkbox.checked {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #000;
-    }
-    
-    /* v10.5.25: Full-width Draggable Task Cards Grid */
-    .focus-2-categories-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--space-4);
-      align-content: flex-start;
-    }
-    
-    .focus-2-category-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: var(--space-5);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-      animation: fadeSlideIn 0.3s ease;
-      /* v13.9: Text-selectable by default */
-      -webkit-user-select: text;
-      user-select: text;
-    }
-    
-    /* v10.5.25: Position drag handles at top-right of category cards */
-    .focus-2-category-card .focus-2-widget-drag-handle {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      z-index: 5;
-      /* v13.1: Prevent text selection on drag handles */
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    
-    .focus-2-category-card:active {
-      cursor: grabbing;
-    }
-    
-    .focus-2-category-card.dragging {
-      opacity: 0.6;
-      transform: scale(1.02);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-      z-index: 100;
-    }
-    
-    .focus-2-category-card.drag-over {
-      border-color: var(--accent);
-      background: rgba(212, 175, 55, 0.05);
-    }
-    
-    
-    .focus-2-category-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: var(--cat-color, var(--accent));
-      border-radius: var(--radius-xs) 0 0 4px;
-    }
-    
-    .focus-2-category-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      border-color: var(--cat-color, var(--accent));
-    }
-    
-    /* v10.5.25: Expanded category stays in place, grows vertically */
-    .focus-2-category-card.expanded {
+    }    
+    /* v10.5.25: Expanded category stays in place {
       /* No longer spans horizontally - stays in its grid cell and grows taller */
-    }
-    
-    .focus-2-category-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 6px;
-    }
-    
-    /* v10.5.25: Category edit/delete action buttons */
-    .focus-2-category-actions {
-      display: flex;
-      gap: var(--space-1);
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
-    .focus-2-category-card:hover .focus-2-category-actions,
-    .focus-2-category-card.expanded .focus-2-category-actions {
-      opacity: 1;
-    }
-    .focus-2-category-action-btn {
-      width: 24px;
-      height: 24px;
-      border: none;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius-xs);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-secondary);
-      transition: all 0.15s ease;
-    }
-    .focus-2-category-action-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      color: var(--text-primary);
-    }
-    .focus-2-category-action-btn.delete:hover {
-      background: rgba(220, 38, 38, 0.2);
-      color: #dc2626;
-    }
-    html.light-mode .focus-2-category-action-btn {
-      background: rgba(0, 0, 0, 0.05);
-    }
-    html.light-mode .focus-2-category-action-btn:hover {
-      background: rgba(0, 0, 0, 0.1);
-    }
-    html.light-mode .focus-2-category-action-btn.delete:hover {
-      background: rgba(220, 38, 38, 0.1);
-    }
-
-    /* v13.2: Multi-select toolbar */
-    .focus-2-multiselect-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-3) var(--space-4);
-      background: rgba(30, 30, 30, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      margin-bottom: var(--space-4);
-    }
-    html.light-mode .focus-2-multiselect-toolbar {
-      background: rgba(255, 255, 255, 0.85);
-    }
-    .focus-2-multiselect-count {
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--accent);
-      min-width: 80px;
-    }
-    .focus-2-multiselect-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      font-size: var(--text-sm);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .focus-2-multiselect-btn:hover {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-    }
-    .focus-2-multiselect-btn-danger:hover {
-      background: #dc2626;
-      color: #fff;
-      border-color: #dc2626;
-    }
-    .focus-2-multiselect-btn-cancel {
-      background: transparent;
-      border-color: transparent;
-      color: var(--text-muted);
-    }
-    .focus-2-multiselect-btn-cancel:hover {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      border-color: var(--border-color);
-    }
-    .focus-2-multiselect-check {
-      width: 20px;
-      height: 20px;
-      border-radius: var(--radius-sm);
-      border: 2px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.15s ease;
-    }
-    .focus-2-multiselect-check.checked {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #000;
-    }
-    .focus-2-category-task-item.multi-selected {
-      background: rgba(212, 175, 55, 0.08);
-      border-color: rgba(212, 175, 55, 0.3);
-    }
-    @media (max-width: 768px) {
-      .focus-2-multiselect-toolbar {
-        flex-wrap: wrap;
-        gap: var(--space-2);
-      }
-      .focus-2-multiselect-btn {
-        font-size: var(--text-xs);
-        padding: 4px 8px;
-      }
-    }
-
-    .focus-2-category-title {
-      font-size: var(--text-xl);
-      font-weight: 700;
-      color: var(--text-primary);
-      display: flex;
-      align-items: baseline;
-      gap: var(--space-2);
-    }
-    
-    .focus-2-category-count {
-      font-size: var(--text-lg);
-      font-weight: 400;
-      background: linear-gradient(135deg, var(--cat-color, var(--accent)), rgba(212, 175, 55, 0.5));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .focus-2-category-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-md);
-      background: rgba(212, 175, 55, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--cat-color, var(--accent));
-      margin-bottom: var(--space-2);
-    }
-    /* v24.27: Constrain icon SVGs inside category cards */
-    .focus-2-category-icon svg {
-      width: 14px;
-      height: 14px;
-    }
-    
-    .focus-2-category-desc {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      line-height: 1.4;
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-category-tasks {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-2);
-    }
-    
-    /* v10.5.25: Hide preview pills when expanded (tasks shown in full list instead) */
-    .focus-2-category-card.expanded .focus-2-category-tasks {
-      display: none;
-    }
-    
-    .focus-2-task-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      font-size: var(--text-base);
-      color: var(--text-primary);
-      transition: all 0.15s ease;
-      cursor: pointer;
-    }
-    
-    .focus-2-task-pill:hover {
-      background: var(--bg-primary);
-      border-color: var(--cat-color, var(--accent));
-    }
-    
-    .focus-2-task-pill.completed {
-      opacity: 0.4;
-      text-decoration: line-through;
-    }
-    
-    .focus-2-task-pill-icon {
-      width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--cat-color, var(--accent));
-    }
-    
-    .focus-2-task-more {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-1);
-      padding: 8px 14px;
-      background: rgba(212, 175, 55, 0.1);
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      border-radius: var(--radius-md);
-      font-size: var(--text-base);
-      font-weight: 500;
-      color: var(--accent);
-      cursor: pointer;
-    }
-    
-    /* v10.5.25: New Category Modal */
-    .focus-2-new-category-modal {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: var(--space-6);
-      margin-bottom: var(--space-5);
-      animation: slideDown 0.2s ease;
-    }
-    
-    .focus-2-new-category-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-5);
-    }
-    
-    .focus-2-new-category-header h3 {
-      font-size: var(--text-xl);
-      font-weight: 700;
-      color: var(--text-primary);
-      margin: 0;
-    }
-    
-    .focus-2-new-category-close {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: var(--text-3xl);
-      cursor: pointer;
-      padding: var(--space-1);
-    }
-    
-    .focus-2-new-category-field {
-      margin-bottom: var(--space-4);
-    }
-    
-    .focus-2-new-category-field label {
-      display: block;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-2);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .focus-2-new-category-field input {
-      width: 100%;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 12px 16px;
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-    
-    .focus-2-new-category-field input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    
-    .focus-2-color-picker {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    
-    .focus-2-color-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-md);
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    
-    .focus-2-color-btn:hover {
-      transform: scale(1.1);
-    }
-    
-    .focus-2-color-btn.selected {
-      border-color: var(--text-primary);
-      box-shadow: 0 0 0 2px var(--bg-primary);
-    }
-
-    /* v12.2.4: Color Wheel Picker */
-    .focus-2-color-wheel-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 12px;
-      padding-top: 8px;
-        background: transparent;
-      border-top: 1px solid var(--border-color);
-    }
-
-    .focus-2-color-wheel-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-secondary);
-      font-size: var(--text-sm);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-color-wheel-btn:hover {
-      background: var(--bg-secondary);
-      border-color: var(--accent);
-      color: var(--text-primary);
-    }
-
-    .focus-2-color-wheel-btn.active {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .focus-2-color-wheel-wrapper {
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      padding: 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      margin-top: 10px;
-    }
-
-    .focus-2-color-wheel-wrapper.visible {
-      display: flex;
-    }
-
-    .focus-2-color-wheel-canvas-container {
-      position: relative;
-      width: 200px;
-      height: 200px;
-      margin: 0 auto;
-    }
-
-    .focus-2-color-wheel-canvas {
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      cursor: crosshair;
-    }
-
-    .focus-2-color-wheel-pointer {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      border: 2px solid white;
-      border-radius: 50%;
-      box-shadow: 0 0 4px rgba(0,0,0,0.5);
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-    }
-
-    .focus-2-brightness-slider {
-      width: 100%;
-      height: 24px;
-      border-radius: var(--radius-md);
-      -webkit-appearance: none;
-      appearance: none;
-      background: linear-gradient(to right, #000, #fff);
-      cursor: pointer;
-    }
-
-    .focus-2-brightness-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: white;
-      border: 2px solid var(--border-color);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      cursor: pointer;
-    }
-
-    .focus-2-color-wheel-preview {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .focus-2-color-wheel-swatch {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius-md);
-      border: 2px solid var(--border-color);
-    }
-
-    .focus-2-color-wheel-hex {
-      flex: 1;
-      padding: 8px 12px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      font-family: monospace;
-      font-size: var(--text-sm);
-    }
-
-    .focus-2-color-wheel-hex:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .focus-2-color-wheel-apply {
-      padding: 8px 16px;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-md);
-      color: #000;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-color-wheel-apply:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    /* v10.5.25: LifeAI Accent Color Picker - Compact */
+    }    @media (max-width: 768px) {    }    /* v10.5.25: LifeAI Accent Color Picker - Compact */
     /* v10.5.25: LifeAI Accent Color Picker - Matches BrandAI box size */
     .life-accent-picker {
       display: flex;
@@ -17721,504 +15872,7 @@
     html.light-mode .settings-row input[type="range"]::-moz-range-track,
     html.light-mode .settings-section input[type="range"]::-moz-range-track {
       background: rgba(0,0,0,0.12);
-    }
-
-    /* v10.5.25: Icon Picker for Categories */
-    .focus-2-icon-picker {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: var(--space-2);
-      max-height: 200px;
-      overflow-y: auto;
-      padding: var(--space-2);
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-md);
-      margin-top: var(--space-2);
-    }
-    
-    .focus-2-icon-btn {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--radius-md);
-      border: 2px solid transparent;
-      background: var(--bg-secondary);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      color: var(--text-secondary);
-    }
-    
-    .focus-2-icon-btn:hover {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      transform: scale(1.08);
-    }
-    
-    .focus-2-icon-btn.selected {
-      border-color: var(--accent);
-      background: rgba(212, 175, 55, 0.15);
-      color: var(--accent);
-    }
-    
-    .focus-2-icon-btn svg {
-      width: 18px;
-      height: 18px;
-    }
-    
-    .focus-2-icon-preview {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: 10px;
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-md);
-      margin-bottom: 10px;
-    }
-    
-    .focus-2-icon-preview-icon {
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-md);
-      color: var(--accent);
-    }
-    
-    .focus-2-icon-preview-text {
-      font-size: var(--text-base);
-      color: var(--text-muted);
-    }
-    
-    .focus-2-new-category-actions {
-      display: flex;
-      gap: var(--space-3);
-      justify-content: flex-end;
-      margin-top: var(--space-5);
-      padding-top: var(--space-4);
-      border-top: 1px solid var(--border-color);
-    }
-    
-    /* Category Expanded State */
-    .focus-2-category-expanded {
-      display: none;
-      margin-top: var(--space-5);
-      padding-top: var(--space-5);
-      border-top: 1px solid var(--border-color);
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    
-    .focus-2-category-card.expanded .focus-2-category-expanded {
-      display: block;
-      animation: slideDown 0.3s ease;
-    }
-    
-    .focus-2-category-add {
-      display: flex;
-      gap: 10px;
-      margin-bottom: var(--space-4);
-    }
-    
-    .focus-2-category-add-input {
-      flex: 1;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 12px 16px;
-      font-size: var(--text-base);
-      color: var(--text-primary);
-      font-family: inherit;
-      resize: none;
-      overflow: hidden;
-      min-height: 40px;
-      max-height: 120px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      line-height: 1.4;
-    }
-
-    .focus-2-category-add-input:focus {
-      outline: none;
-      border-color: var(--cat-color, var(--accent));
-    }
-
-    /* v13.9: Focus categories fade-in animation */
-    .focus-2-categories-animating {
-      animation: focus2CatFadeIn 0.25s ease forwards;
-    }
-    
-    .focus-2-category-add-btn {
-      padding: 12px 20px;
-      background: var(--cat-color, var(--accent));
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: #000;
-      cursor: pointer;
-    }
-    
-    .focus-2-category-task-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-    }
-    
-    .focus-2-category-task-item {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: 14px 16px;
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-lg);
-      transition: all 0.15s ease;
-    }
-    
-    .focus-2-category-task-item:hover {
-      background: var(--bg-primary);
-    }
-    
-    .focus-2-category-task-item.completed {
-      opacity: 0.5;
-    }
-    
-    .focus-2-category-task-item.completed .focus-2-category-task-text {
-      text-decoration: line-through;
-    }
-    
-    .focus-2-category-task-check {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      flex-shrink: 0;
-    }
-    
-    .focus-2-category-task-check:hover {
-      border-color: var(--cat-color, var(--accent));
-    }
-    
-    .focus-2-category-task-check.checked {
-      background: var(--cat-color, var(--accent));
-      border-color: var(--cat-color, var(--accent));
-      color: #000;
-    }
-    
-    .focus-2-category-task-text {
-      flex: 1;
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-    
-    .focus-2-category-task-date {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-    }
-    
-    /* Completed Tasks Toggle */
-    .focus-2-completed-toggle {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: 12px 0;
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      cursor: pointer;
-      border-top: 1px solid var(--border-color);
-      margin-top: var(--space-4);
-    }
-    
-    .focus-2-completed-toggle:hover {
-      color: var(--text-primary);
-    }
-    
-    .focus-2-completed-toggle svg {
-      transition: transform 0.2s ease;
-    }
-    
-    .focus-2-completed-toggle.open svg {
-      transform: rotate(180deg);
-    }
-    
-    .focus-2-completed-list {
-      display: none;
-      padding-top: var(--space-3);
-    }
-    
-    .focus-2-completed-toggle.open + .focus-2-completed-list {
-      display: block;
-      animation: slideDown 0.2s ease;
-    }
-
-    /* v15.18: Task drag handle - visible on hover */
-    .focus-2-task-drag-handle {
-      opacity: 0;
-      transition: opacity 0.15s ease;
-      cursor: grab;
-      flex-shrink: 0;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-    }
-    .focus-2-category-task-item:hover .focus-2-task-drag-handle {
-      opacity: 0.4;
-    }
-    .focus-2-task-drag-handle:hover {
-      opacity: 0.7 !important;
-    }
-
-    /* v15.18: Task dragging state */
-    .focus-2-category-task-item.task-dragging {
-      opacity: 0.3;
-    }
-
-    /* v15.18: Drop target highlight on category card */
-    .focus-2-category-card.task-drop-target {
-      outline: 2px dashed var(--accent, #a89878);
-      outline-offset: -2px;
-      background: var(--brand-accent-10, rgba(168,152,120,0.08));
-    }
-
-    /* v12.2.4: Priority Tasks */
-    .focus-2-category-task-item.priority {
-      border-left: 3px solid var(--accent);
-      background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
-    }
-
-    .focus-2-category-task-item.priority .focus-2-category-task-text {
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .focus-2-task-priority-btn {
-      background: none;
-      border: none;
-      padding: 4px;
-      cursor: pointer;
-      opacity: 0.4;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-task-priority-btn:hover {
-      opacity: 0.8;
-    }
-
-    .focus-2-task-priority-btn.active {
-      opacity: 1;
-      color: var(--accent);
-    }
-
-    .focus-2-task-priority-btn svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    /* v12.2.4: Recurring Task Indicator */
-    .focus-2-task-recurrence-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 6px;
-      background: rgba(106, 184, 148, 0.15);
-      border-radius: var(--radius-sm);
-      font-size: 10px;
-      color: #6ab894;
-      margin-left: 8px;
-    }
-
-    .focus-2-task-recurrence-badge svg {
-      width: 10px;
-      height: 10px;
-    }
-
-    /* v12.2.4: Recurrence Picker in Task Detail */
-    .focus-2-recurrence-picker {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-    }
-
-    .focus-2-recurrence-type {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .focus-2-recurrence-btn {
-      padding: 6px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-secondary);
-      font-size: var(--text-sm);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-recurrence-btn:hover {
-      border-color: var(--accent);
-    }
-
-    .focus-2-recurrence-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #000;
-    }
-
-    .focus-2-recurrence-options {
-      display: none;
-      padding: var(--space-3);
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-md);
-      margin-top: var(--space-2);
-    }
-
-    .focus-2-recurrence-options.visible {
-      display: block;
-    }
-
-    .focus-2-recurrence-days {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: var(--space-2);
-    }
-
-    .focus-2-recurrence-day {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 50%;
-      font-size: var(--text-xs);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-recurrence-day:hover {
-      border-color: var(--accent);
-    }
-
-    .focus-2-recurrence-day.selected {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #000;
-    }
-
-    /* v12.2.4: Category Sort Controls */
-    .focus-2-categories-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-4);
-      padding: 0 var(--space-2);
-    }
-
-    .focus-2-sort-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-secondary);
-      font-size: var(--text-sm);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-sort-btn:hover {
-      border-color: var(--accent);
-      color: var(--text-primary);
-    }
-
-    .focus-2-sort-btn.active {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* v12.2.4: Inline Automation Creator */
-    .focus-2-automation-inline {
-      padding: var(--space-4);
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-lg);
-      margin-top: var(--space-3);
-      border: 1px solid var(--border-color);
-    }
-
-    .focus-2-automation-inline-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-3);
-    }
-
-    .focus-2-automation-inline-title {
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .focus-2-automation-field {
-      margin-bottom: var(--space-3);
-    }
-
-    .focus-2-automation-field label {
-      display: block;
-      font-size: var(--text-xs);
-      color: var(--text-secondary);
-      margin-bottom: var(--space-1);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .focus-2-automation-field select,
-    .focus-2-automation-field input {
-      width: 100%;
-      padding: 8px 12px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-primary);
-      font-size: var(--text-sm);
-    }
-
-    .focus-2-create-automation-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      width: 100%;
-      padding: 10px;
-      background: transparent;
-      border: 1px dashed var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-muted);
-      font-size: var(--text-sm);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      margin-top: var(--space-3);
-    }
-
-    .focus-2-create-automation-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* v12.2.4: Journal Book UI */
+    }    /* v12.2.4: Journal Book UI */
     .journal-container {
       padding: var(--space-6);
       max-width: 900px;
@@ -18357,43 +16011,7 @@
       font-size: 48px;
       opacity: 0.3;
       margin-bottom: var(--space-4);
-    }
-
-    /* v12.2.4: Save to Journal Button */
-    .focus-2-save-journal-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-secondary);
-      font-size: var(--text-sm);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-save-journal-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .focus-2-journal-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: var(--accent);
-      font-size: var(--text-sm);
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .focus-2-journal-link:hover {
-      text-decoration: underline;
-    }
-
-    /* v12.2.4: Journal Mobile */
+    }    /* v12.2.4: Journal Mobile */
     @media (max-width: 768px) {
       .journal-book {
         border-radius: 0;
@@ -18412,853 +16030,40 @@
       .journal-entry {
         padding: var(--space-3);
       }
-    }
-
-    /* v12.2.4: Inline Category Edit */
-    .focus-2-category-card.editing .focus-2-category-expanded {
-      display: none;
-    }
-
-    .focus-2-inline-edit {
-      display: none;
-      padding: var(--space-4);
-      margin-top: var(--space-4);
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border-color);
-    }
-
-    .focus-2-category-card.editing .focus-2-inline-edit {
-      display: block;
-      animation: slideDown 0.2s ease;
-    }
-
-    .focus-2-inline-edit-field {
-      margin-bottom: var(--space-3);
-    }
-
-    .focus-2-inline-edit-field label {
-      display: block;
-      font-size: var(--text-xs);
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-1);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .focus-2-inline-edit-field input[type="text"] {
-      width: 100%;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 10px 14px;
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-
-    .focus-2-inline-edit-field input[type="text"]:focus {
-      outline: none;
-      border-color: var(--cat-color, var(--accent));
-    }
-
-    .focus-2-inline-color-picker {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .focus-2-inline-color-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-sm);
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-inline-color-btn:hover {
-      transform: scale(1.1);
-    }
-
-    .focus-2-inline-color-btn.selected {
-      border-color: var(--text-primary);
-      box-shadow: 0 0 0 2px var(--bg-primary);
-    }
-
-    .focus-2-inline-custom-color-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      color: var(--text-secondary);
-      font-size: var(--text-xs);
-      cursor: pointer;
-    }
-
-    .focus-2-inline-custom-color-btn:hover {
-      border-color: var(--accent);
-      color: var(--text-primary);
-    }
-
-    .focus-2-inline-custom-color-btn.active {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .focus-2-inline-color-wheel {
-      display: none;
-      margin-top: var(--space-3);
-      padding: var(--space-3);
-      background: var(--bg-secondary);
-      border-radius: var(--radius-md);
-    }
-
-    .focus-2-inline-color-wheel.visible {
-      display: block;
-    }
-
-    .focus-2-inline-color-wheel-canvas {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      cursor: crosshair;
-      margin: 0 auto;
-      display: block;
-    }
-
-    .focus-2-inline-color-wheel-container {
-      position: relative;
-      width: 140px;
-      height: 140px;
-      margin: 0 auto;
-    }
-
-    .focus-2-inline-color-wheel-pointer {
-      position: absolute;
-      width: 12px;
-      height: 12px;
-      border: 2px solid white;
-      border-radius: 50%;
-      box-shadow: 0 0 4px rgba(0,0,0,0.5);
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-    }
-
-    .focus-2-inline-color-preview {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: var(--space-2);
-    }
-
-    .focus-2-inline-color-swatch {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-sm);
-      border: 2px solid var(--border-color);
-    }
-
-    .focus-2-inline-color-hex {
-      flex: 1;
-      padding: 6px 10px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      font-family: monospace;
-      font-size: var(--text-sm);
-    }
-
-    .focus-2-inline-edit-actions {
-      display: flex;
-      gap: var(--space-2);
-      margin-top: var(--space-4);
-      padding-top: var(--space-3);
-      border-top: 1px solid var(--border-color);
-    }
-
-    .focus-2-inline-edit-actions button {
-      flex: 1;
-      padding: 10px 16px;
-      border-radius: var(--radius-md);
-      font-size: var(--text-sm);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .focus-2-inline-edit-cancel {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      color: var(--text-secondary);
-    }
-
-    .focus-2-inline-edit-cancel:hover {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-
-    .focus-2-inline-edit-save {
-      background: var(--cat-color, var(--accent));
-      border: none;
-      color: #000;
-    }
-
-    .focus-2-inline-edit-save:hover {
-      opacity: 0.9;
-    }
-
-    /* v13.9: Uncategorized Card - same width as other cards, never span full width */
-    .focus-2-category-card.uncategorized {
+    }    /* v13.9: Uncategorized Card - same width as other cards {
       grid-column: span 1 !important;
       background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-    }
-    
-    /* Category Color Presets */
-    .focus-2-category-card[data-color="gold"] { --cat-color: #a89878; }
-    .focus-2-category-card[data-color="blue"] { --cat-color: #3b82f6; }
-    .focus-2-category-card[data-color="green"] { --cat-color: #22c55e; }
-    .focus-2-category-card[data-color="purple"] { --cat-color: #a855f7; }
-    .focus-2-category-card[data-color="red"] { --cat-color: #ef4444; }
-    .focus-2-category-card[data-color="orange"] { --cat-color: #f97316; }
-    .focus-2-category-card[data-color="pink"] { --cat-color: #ec4899; }
-    .focus-2-category-card[data-color="cyan"] { --cat-color: #06b6d4; }
-    
-    /* Quick Notes Card */
-    .focus-2-notes {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-2xl);
-      padding: var(--space-6);
-    }
-    
-    .focus-2-notes-input {
-      width: 100%;
-      min-height: 100px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: var(--space-4);
-      font-size: var(--text-base);
-      color: var(--text-primary);
-      resize: vertical;
-      font-family: inherit;
-      line-height: 1.6;
-    }
-    
-    .focus-2-notes-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    
-    .focus-2-notes-input::placeholder {
-      color: var(--text-muted);
-    }
-    
-    .focus-2-notes-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: var(--space-3);
-    }
-    
-    .focus-2-notes-hint {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-    }
-    
-    /* Automations Preview */
-    .focus-2-automations {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-2xl);
-      padding: var(--space-6);
-    }
-    
-    .focus-2-automation-item {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: 14px;
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-lg);
-      margin-bottom: 10px;
-    }
-    
-    .focus-2-automation-item:last-child {
-      margin-bottom: 0;
-    }
-    
-    .focus-2-automation-icon {
-      width: 22px;
-      height: 22px;
-      background: rgba(212, 175, 55, 0.1);
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent);
-    }
-    
-    .focus-2-automation-info {
-      flex: 1;
-    }
-    
-    .focus-2-automation-name {
-      font-size: var(--text-base);
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-automation-time {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-    }
-    /* v13.2: Recurrence badge */
-    .focus-2-automation-recur {
-      display: inline-block;
-      padding: 1px 6px;
-      background: rgba(212, 175, 55, 0.15);
-      color: var(--accent);
-      border-radius: var(--radius-sm);
-      font-size: var(--text-xs);
-      font-weight: 600;
-      margin-left: 6px;
-      vertical-align: middle;
-    }
-
-    .focus-2-automation-run {
-      padding: 6px 12px;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: var(--text-sm);
-      font-weight: 600;
-      cursor: pointer;
-    }
-    
-    /* Empty state */
-    .focus-2-empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--text-muted);
-    }
-    
-    .focus-2-empty-icon {
-      font-size: var(--text-4xl);
-      margin-bottom: var(--space-3);
-      opacity: 0.5;
-    }
-    
-    .focus-2-empty-text {
-      font-size: var(--text-base);
-    }
-    
-    /* v10.5.25: Day Detail Card (appears when clicking mini calendar) */
-    .focus-2-day-detail {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: var(--space-5);
-      margin-top: var(--space-4);
-      animation: slideDown 0.2s ease;
-    }
-    
-    .focus-2-day-detail-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-4);
-      padding-bottom: var(--space-3);
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .focus-2-day-detail-title {
-      font-size: var(--text-lg);
-      font-weight: 700;
-      color: var(--accent);
-    }
-    
-    .focus-2-day-detail-date {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-    }
-    
-    .focus-2-day-detail-close {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: var(--text-xl);
-      padding: var(--space-1);
-      line-height: 1;
-    }
-    
-    .focus-2-day-detail-close:hover {
-      color: var(--text-primary);
-    }
-    
-    .focus-2-day-detail-section {
-      margin-bottom: var(--space-4);
-    }
-    
-    .focus-2-day-detail-section:last-child {
-      margin-bottom: 0;
-    }
-    
-    .focus-2-day-detail-section-title {
-      font-size: var(--text-sm);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .focus-2-day-detail-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--space-2);
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-    
-    /* v10.5.25: Completed task styling */
-    .focus-2-day-detail-item.completed {
-      opacity: 0.6;
-    }
-    .focus-2-day-detail-item.completed .focus-2-day-detail-item-name {
-      text-decoration: line-through;
-    }
-    
-    .focus-2-day-detail-item:last-child {
-      margin-bottom: 0;
-    }
-    
-    /* v10.5.25: Clickable checkbox for tasks */
-    .focus-2-day-detail-item-check {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      cursor: pointer;
-      background: var(--bg-secondary);
-      border: 2px solid var(--border-color);
-      color: var(--text-muted);
-      transition: all 0.2s ease;
-    }
-    .focus-2-day-detail-item-check:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .focus-2-day-detail-item-check.checked {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: white;
-    }
-    
-    .focus-2-day-detail-item-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    
-    .focus-2-day-detail-item-icon.task {
-      background: rgba(212, 175, 55, 0.15);
-      color: var(--accent);
-    }
-    
-    .focus-2-day-detail-item-icon.event {
-      background: rgba(59, 130, 246, 0.15);
-      color: #3b82f6;
-    }
-    
-    .focus-2-day-detail-item-icon.auto {
-      background: rgba(168, 85, 247, 0.15);
-      color: #a855f7;
-    }
-    
-    .focus-2-day-detail-item-text {
-      flex: 1;
-      min-width: 0;
-    }
-    
-    .focus-2-day-detail-item-name {
-      font-weight: 500;
-      /* v13.1: Allow text wrapping instead of truncating */
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      white-space: normal;
-    }
-
-    /* v13.1: Scrollable content area for Upcoming tasks */
+    }    /* v13.1: Scrollable content area for Upcoming tasks */
     #focus2DayDetailContent {
       max-height: 400px;
       overflow-y: auto;
-    }
-    
-    .focus-2-day-detail-item-meta {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-    }
-    
-    .focus-2-day-detail-empty {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      text-align: center;
-      padding: var(--space-3);
-    }
-    
-    .focus-2-mode-filter {
-      display: flex;
-      gap: var(--space-2);
-      margin-top: var(--space-3);
-    }
-    
-    .focus-2-mode-filter-btn {
-      flex: 1;
-      padding: 8px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      font-size: var(--text-sm);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    
-    .focus-2-mode-filter-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #1a1a1a; /* Dark text on gold */
-      font-weight: 600;
-    }
-    
-    /* Light mode: All button uses dark bg, needs white text */
-    html.light-mode .focus-2-mode-filter-btn#focus2FilterAll.active {
+    }    
+    /* Light mode: All button uses dark bg {
       background: #2c3e50 !important;
       border-color: #2c3e50 !important;
       color: #ffffff !important;
-    }
-    
-    /* v10.5.25: AI Assistant Card - Fixed Height */
-    .focus-2-ai-assistant {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-xl);
-      padding: var(--space-4);
-      display: flex;
-      flex-direction: column;
-      max-height: 350px;
-      flex-shrink: 0;
-    }
-    
-    .focus-2-ai-assistant-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding-bottom: var(--space-4);
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: var(--space-4);
-    }
-    
-    .focus-2-ai-assistant-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, var(--accent), rgba(212, 175, 55, 0.6));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #000;
-    }
-    
-    .focus-2-ai-assistant-info {
-      flex: 1;
-    }
-    
-    .focus-2-ai-assistant-name {
-      font-size: var(--text-base);
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    
-    .focus-2-ai-assistant-status {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-    }
-    
-    .focus-2-ai-assistant-messages {
-      flex: 1;
-      overflow-y: auto;
-      margin-bottom: var(--space-4);
-    }
-    
-    .focus-2-ai-message {
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-lg);
-      padding: 14px;
-      font-size: var(--text-base);
-      color: var(--text-primary);
-      line-height: 1.5;
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-ai-message.user {
-      background: rgba(212, 175, 55, 0.1);
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      margin-left: 20px;
-    }
-    
-    .focus-2-ai-assistant-input {
-      display: flex;
-      gap: var(--space-2);
-    }
-    
-    .focus-2-ai-input {
-      flex: 1;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 12px 14px;
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-    
-    .focus-2-ai-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    
-    .focus-2-ai-input::placeholder {
-      color: var(--text-muted);
-    }
-    
-    .focus-2-ai-send {
-      width: 44px;
-      height: 44px;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-md);
-      color: #000;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s ease;
-    }
-    
-    .focus-2-ai-send:hover {
-      transform: scale(1.05);
-    }
-    
-    /* v10.5.25: Enhanced Todo List in Focus 2.0 */
-    .focus-2-todo-category-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: 12px 0 8px;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-    
-    .focus-2-todo-category-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    
-    .focus-2-add-task-inline {
-      display: flex;
-      gap: var(--space-2);
-      padding: var(--space-3);
-      background: var(--bg-tertiary);
-      border-radius: var(--radius-lg);
-      margin-bottom: var(--space-3);
-    }
-    
-    .focus-2-add-task-input {
-      flex: 1;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 10px 14px;
-      font-size: var(--text-base);
-      color: var(--text-primary);
-    }
-    
-    .focus-2-add-task-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    
-    .focus-2-add-task-select {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      font-size: var(--text-sm);
-      color: var(--text-primary);
-      min-width: 100px;
-    }
-    
-    .focus-2-add-task-btn {
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius-md);
-      padding: 10px 16px;
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: #000;
-      cursor: pointer;
-    }
-    
-    /* LifeAI specific styles */
-    html.life-mode .focus-2-ai-card {
-      background: linear-gradient(145deg, rgba(74, 222, 128, 0.08) 0%, rgba(74, 222, 128, 0.02) 100%);
-      border-color: rgba(74, 222, 128, 0.2);
-    }
-    
-    html.life-mode .focus-2-ai-card::before {
-      color: #4ade80;
-    }
-    
-    html.life-mode .focus-2-ai-badge {
-      color: #4ade80;
-      background: rgba(74, 222, 128, 0.15);
-    }
-    
-    html.life-mode .focus-2-today-hero::before {
-      background: linear-gradient(90deg, #4ade80, rgba(74, 222, 128, 0.3));
-    }
-    
+    }    
     /* v10.5.25: Desktop narrow - keep 2 columns with smaller gap */
-    @media (max-width: 1200px) {
-      .focus-2-unified-grid {
-        gap: var(--space-3);
-      }
-    }
+    @media (max-width: 1200px) {    }
     
     /* v10.5.25: Mobile - single column stack */
-    @media (max-width: 600px) {
-      .focus-2-unified-grid {
-        grid-template-columns: 1fr !important;
-        gap: var(--space-3) !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        overflow-x: hidden !important;
-      }
-      
-      /* v11.0.5: Today calendar merged - stack vertically on mobile */
-      .focus-2-today-calendar-merged {
-        flex-direction: column !important;
-        gap: var(--space-4) !important;
-      }
-      
-      .focus-2-today-section {
-        min-width: unset !important;
-        border-right: none !important;
-        border-bottom: 1px solid var(--border-color) !important;
-        padding-bottom: var(--space-4) !important;
-      }
-      
-      .focus-2-calendar-section {
-        width: 100% !important;
-        min-width: 0 !important;
-      }
-      
-      .focus-2-mini-calendar {
+    @media (max-width: 600px) {      
+      /* v10.5.25: When a category card is expanded on mobile {
         width: 100% !important;
       }
       
-      /* v10.5.25: All widget cards full width on mobile */
-      .focus-2-widget-card,
-      .focus-2-widget-wide,
-      .focus-2-widget-full,
-      .focus-2-widget-compact,
-      .focus-2-category-card {
-        grid-column: span 1 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      
-      /* v10.5.25: When a category card is expanded on mobile, make it full width */
-      .focus-2-category-card.expanded {
-        width: 100% !important;
-      }
-      
-      /* v10.5.25: Categories grid should be single column on mobile */
-      .focus-2-categories-container,
       #focus2CategoriesGrid {
         display: flex !important;
         flex-direction: column !important;
         gap: var(--space-3) !important;
         width: 100% !important;
-      }
-      
-      .focus-2-widget-wide,
-      .focus-2-widget-full {
-        width: 100% !important;
-      }
-      
-      /* v13.9: Mobile resize controls HEIGHT (expand down / compact up) */
-      /* Compact mode (wide) - allow scrolling instead of truncation */
-      .focus-2-widget-card.focus-2-widget-wide {
+      }      
+      /* Expanded mode (full) - taller {
         max-height: none !important;
         overflow: visible !important;
-        height: auto !important;
-      }
-      /* v13.9: Category cards must NEVER be height-limited on mobile */
-      .focus-2-category-card {
-        max-height: none !important;
-        overflow: visible !important;
-        height: auto !important;
-      }
-      .focus-2-category-card.expanded {
-        max-height: none !important;
-        overflow: visible !important;
-        height: auto !important;
-      }
-      
-      /* Expanded mode (full) - taller, auto height */
-      .focus-2-widget-card.focus-2-widget-full {
-        max-height: none !important;
-        overflow: visible !important;
-      }
-      
-      /* Exception: Today+Calendar card should not be height-limited */
-      .focus-2-widget-card[data-widget="today-calendar"] {
-        max-height: none !important;
-        overflow: visible !important;
-      }
-      
-      /* v10.5.25: Mobile widget controls - small, side by side, top-right */
-      .focus-2-widget-controls {
+      }      
+      /* v10.5.25: Mobile widget controls - small,
+side by side {
         position: absolute !important;
         top: 8px !important;
         right: 8px !important;
@@ -19271,81 +16076,8 @@
         padding: 0 !important;
         border: none !important;
         box-shadow: none !important;
-      }
-      
-      /* v11.0.5: Stats grid - constrain to fit mobile */
-      .focus-2-stats-grid {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: var(--space-2) !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      
-      .focus-2-stat {
-        padding: 12px 8px !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      
-      /* v11.0.5: Day detail - constrain width */
-      .focus-2-day-detail,
-      .focus-2-day-detail-section,
-      .focus-2-day-detail-task {
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        overflow-x: hidden !important;
-      }
-      
-      .focus-2-day-detail-task-title {
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        max-width: calc(100% - 40px) !important;
-      }
-      
-      /* v10.5.25: Show controls when customize mode is ON */
-      body.focus2-customize-mode .focus-2-widget-controls {
-        display: flex !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-      }
-      
-      /* v10.5.25: Drag handle - small square with dots */
-      .focus-2-widget-drag-handle {
-        position: relative !important;
-        top: auto !important;
-        right: auto !important;
-        width: 28px !important;
-        height: 28px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        background: var(--bg-tertiary) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: var(--radius-sm) !important;
-        cursor: grab !important;
-        touch-action: none !important;
-      }
-      
-      /* v10.5.25: Category card drag handles - MUST be top-right absolute */
-      .focus-2-category-card .focus-2-widget-drag-handle {
-        position: absolute !important;
-        top: 8px !important;
-        right: 8px !important;
-        z-index: 5 !important;
-      }
-      
-      .focus-2-widget-drag-handle svg {
-        width: 12px !important;
-        height: 12px !important;
-        opacity: 0.6 !important;
-      }
-      
-      /* v10.5.25: Resize button - small, same size as drag handle */
-      .focus-2-widget-resize-btn {
+      }      
+      /* v10.5.25: Resize button - small {
         width: 28px !important;
         height: 28px !important;
         min-width: 28px !important;
@@ -19356,114 +16088,14 @@
         background: var(--bg-tertiary) !important;
         border: 1px solid var(--border-color) !important;
         border-radius: var(--radius-sm) !important;
-      }
-      
-      .focus-2-widget-resize-btn svg {
-        width: 12px !important;
-        height: 12px !important;
-      }
-      
-      /* v10.5.25: Hide calendar orientation toggle on mobile, show only resize */
-      .focus-2-widget-controls .focus-2-calendar-toggle {
+      }      
+      /* v10.5.25: Hide calendar orientation toggle on mobile {
         display: none !important;
-      }
-      
-      /* v10.5.25: Category card drag handles - hidden by default */
-      .focus-2-category-card .focus-2-widget-drag-handle {
-        display: none !important;
-      }
-      
-      /* v10.5.25: Show category drag handles when customize mode is ON */
-      body.focus2-customize-mode .focus-2-category-card .focus-2-widget-drag-handle {
-        display: flex !important;
-      }
-      
-      /* v10.5.25: Highlight category cards in customize mode */
-      body.focus2-customize-mode .focus-2-category-card {
-        border-color: rgba(212, 175, 55, 0.4) !important;
-      }
-      
-      /* But hide them by default until JS toggle */
-      .focus-2-widget-controls:not([style*="flex"]) {
-        display: none;
-      }
-      
-      .focus-2-day-number {
-        font-size: var(--text-5xl);
-      }
-      
-      .focus-2-tasks-header {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .focus-2-tasks-actions {
-        justify-content: center;
-      }
-      
-      /* Mobile task detail modal - centered popup, slightly wider on mobile */
-      .focus-2-task-detail-modal {
+      }      
+      /* Mobile task detail modal - centered popup {
         width: min(520px, 94vw) !important;
         max-height: 80vh !important;
-      }
-
-      .focus-2-task-detail-content {
-        height: 100% !important;
-        overflow-y: auto !important;
-        padding-bottom: 40px !important;
-      }
-
-      .focus-2-task-detail-header {
-        padding: 20px 16px 16px 16px !important;
-        position: sticky !important;
-        top: 0 !important;
-        background: var(--bg-primary) !important;
-        z-index: 10 !important;
-      }
-      
-      .focus-2-task-detail-close {
-        width: 44px !important;
-        height: 44px !important;
-        font-size: var(--text-4xl) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-      }
-      
-      /* v11.0.5: Mobile task detail check - larger touch target */
-      .focus-2-task-detail-check {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        border-radius: var(--radius-md) !important;
-        cursor: pointer !important;
-        -webkit-tap-highlight-color: rgba(0,0,0,0.1) !important;
-      }
-      
-      .focus-2-task-detail-check svg {
-        width: 18px !important;
-        height: 18px !important;
-      }
-      
-      .focus-2-task-detail-body {
-        padding: 16px !important;
-        padding-bottom: 100px !important;
-      }
-      
-      /* v10.5.25: Larger touch target for task checkbox */
-      .focus-2-category-task-check {
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        min-height: 32px !important;
-      }
-      
-      .focus-2-category-task-item {
-        padding: 12px 14px !important;
-        gap: 14px !important;
-      }
-    }
+      }    }
     
     /* v25.2: Reminder Notification Popups */
     .reminder-popup-container { position:fixed;bottom:20px;right:20px;z-index:9990;display:flex;flex-direction:column-reverse;gap:8px;max-height:80vh;pointer-events:none; }
@@ -21057,25 +17689,7 @@
     }
     
     /* Mobile responsive for Focus 2.0 and Pulse 2.0 */
-    @media (max-width: 900px) {
-      .focus-2-container {
-        grid-template-columns: 1fr;
-      }
-      
-      .focus-2-sidebar {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-4);
-      }
-      
-      .focus-2-today-hero {
-        grid-column: 1 / -1;
-      }
-      
-      .focus-2-day-number {
-        font-size: var(--text-5xl);
-      }
-      
+    @media (max-width: 900px) {      
       .pulse-2-container {
         grid-template-columns: 1fr;
       }
@@ -21087,24 +17701,7 @@
       }
     }
     
-    @media (max-width: 600px) {
-      .focus-2-sidebar {
-        grid-template-columns: 1fr;
-      }
-      
-      .focus-2-timeline-item {
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-      
-      .focus-2-timeline-time {
-        width: auto;
-        text-align: left;
-        display: flex;
-        gap: var(--space-2);
-        align-items: center;
-      }
-    }
+    @media (max-width: 600px) {    }
     
     /* Preserve old focus styles for backwards compatibility */
     .focus-header {
@@ -21219,26 +17816,11 @@
       margin-bottom: var(--space-4);
       padding-bottom: var(--space-3);
       border-bottom: 1px solid var(--border-subtle);
-    }
-    .focus-card-collapsible .focus-card-header {
-      cursor: pointer;
-      user-select: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
-    }
-    .focus-card-collapsible .focus-card-header:hover {
-      color: var(--accent);
-    }
-    .focus-card-toggle {
+    }    .focus-card-toggle {
       color: var(--text-muted);
       font-size: var(--text-sm);
       transition: transform 0.2s ease;
-    }
-    .focus-card-collapsible.collapsed .focus-card-toggle {
-      transform: rotate(-90deg);
-    }
-    
+    }    
     /* v9.1.14: Drag handle for Focus cards */
     .focus-drag-handle {
       cursor: grab;
@@ -21295,11 +17877,7 @@
       margin-top: var(--space-4);
       padding-top: var(--space-3);
       border-top: 1px solid var(--border-subtle);
-    }
-    .focus-card-collapsible.collapsed .focus-card-body {
-      display: none;
-    }
-    .focus-card-title {
+    }    .focus-card-title {
       font-size: var(--text-lg);
       font-weight: 600;
       color: var(--text-primary);
@@ -36422,17 +33000,17 @@
         background: #f8f8f8;
       }
       html.light-mode .panel-view,
-      html.light-mode #agentView, /* v28.8: removed #signalView */
-      html.light-mode #studioView,
-      html.light-mode #scribeView, /* v29.2 */
+html.light-mode #agentView,
+html.light-mode #scribeView,
+/* v29.2 */
       html.light-mode #identityView,
-      html.light-mode #rhythmView,
-      html.light-mode #pulseView,
-      html.light-mode #settingsView,
-      html.light-mode #libraryView,
-      html.light-mode #adminView,
-      html.light-mode #mailView,
-      html.light-mode #researchView {
+html.light-mode #rhythmView,
+html.light-mode #pulseView,
+html.light-mode #settingsView,
+html.light-mode #libraryView,
+html.light-mode #adminView,
+html.light-mode #mailView,
+html.light-mode #researchView {
         background: #f8f8f8;
       }
     }
@@ -41101,18 +37679,17 @@
         height: 28px !important;
       }
       
-      /* v11.0: Fix view padding - ensure bottom content accessible above floating nav - v14.0: Added syncView, commerceView */
+      /* v11.0: Fix view padding - ensure bottom content accessible above floating nav - v14.0: Added syncView,
+commerceView */
       #studioView,
-      #settingsView,
-      #identityView,
-      /* v28.8: removed #signalView */
-      #rhythmView,
-      #pulseView,
-      #memoryView,
-      #libraryView,
-      #syncView,
-      #clientsView,
-      #commerceView {
+#settingsView,
+#identityView,
+#pulseView,
+#memoryView,
+#libraryView,
+#syncView,
+#clientsView,
+#commerceView {
         padding-bottom: calc(72px + var(--mobile-safe-bottom)) !important; /* v15.43: Above smaller nav */
       }
       
@@ -42859,23 +39436,21 @@
        Ensures .hidden ALWAYS wins regardless of other specificity rules
        ═══════════════════════════════════════════════════════════════════════════ */
     .panel-view.hidden,
-    #agentView.hidden,
-    #agentView.landing-view.hidden,
-    #studioView.hidden,
-    #identityView.hidden,
-    /* v28.8: removed #signalView.hidden */
-    #rhythmView.hidden,
-    #pulseView.hidden,
-    #brandIntelView.hidden,
-    #tuningView.hidden,
-    #settingsView.hidden,
-    #memoryView.hidden,
-    #exportView.hidden,
-    #libraryView.hidden,
-    #analyticsView.hidden,
-    #scheduleView.hidden,
-    #inventoryView.hidden,
-    #mailView.hidden {
+#agentView.hidden,
+#agentView.landing-view.hidden,
+#studioView.hidden,
+#identityView.hidden,
+#pulseView.hidden,
+#brandIntelView.hidden,
+#tuningView.hidden,
+#settingsView.hidden,
+#memoryView.hidden,
+#exportView.hidden,
+#libraryView.hidden,
+#analyticsView.hidden,
+#scheduleView.hidden,
+#inventoryView.hidden,
+#mailView.hidden {
       display: none !important;
       visibility: hidden !important;
       opacity: 0 !important;
@@ -46832,11 +43407,9 @@
         min-width: 0 !important;
       }
       #studioView .panel-header span,
-      #studioView .studio-ops-list,
-      #studioView .studio-workspace-content,
-      #focusView .focus-card,
-      #focusView .focus-2-section,
-      #focusView .focus-2-category-card {
+#studioView .studio-ops-list,
+#studioView .studio-workspace-content,
+#focusView .focus-card {
         word-break: break-word !important;
         overflow-wrap: break-word !important;
       }
@@ -46847,25 +43420,13 @@
       #focusView {
         overflow-x: hidden !important;
         max-width: 100vw !important;
-      }
-      #focusView .focus-2-automation-name {
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-        white-space: normal !important;
-      }
-      /* Prevent any fixed-width children from overflowing */
-      .studio-ops-item,
-      .focus-2-field,
-      .focus-2-automation-field {
+      }      /* Prevent any fixed-width children from overflowing */
+      .studio-ops-item {
         max-width: 100% !important;
         min-width: 0 !important;
       }
       .studio-ops-item input,
-      .studio-ops-item textarea,
-      .focus-2-field input,
-      .focus-2-field textarea,
-      .focus-2-automation-field input,
-      .focus-2-automation-field textarea {
+.studio-ops-item textarea {
         max-width: 100% !important;
         box-sizing: border-box !important;
       }
@@ -47025,22 +43586,7 @@
       .cal-event-time {
         min-width: 44px;
         font-size: 10px;
-      }
-
-      /* --- 6. Focus Reminders widget --- */
-      /* Ensure reminders card is always visible (not collapsed) on mobile */
-      .focus-2-widget-card[data-widget="reminders"] {
-        display: block;
-      }
-      /* Show resize/controls only in customize mode on mobile */
-      .focus-2-widget-card[data-widget="reminders"] .focus-2-widget-controls {
-        display: none;
-      }
-      body.focus2-customize-mode .focus-2-widget-card[data-widget="reminders"] .focus-2-widget-controls {
-        display: flex;
-      }
-
-    }
+      }    }
 
     /* v25.3: Analytics responsive */
     @media (max-width: 768px) {

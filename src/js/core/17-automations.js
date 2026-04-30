@@ -4919,7 +4919,7 @@ function renderPipelineStepConfig(step, index) {
     html += '<div class="auto-lab-form-field"><label>Navigate To</label>';
     html += '<select id="pipelineStepReminderView_' + index + '">';
     html += '<option value=""' + (!actionView ? ' selected' : '') + '>None (dismiss only)</option>';
-    [['agent','Chat'],['signal','Focus'],['pulse','Pulse'],['studio','Studio'],['rhythm','Automations'],['library','Library'],['memory','Identity'],['tuning','Memory'],['settings','Settings'],['inventory','Inventory'],['clients','Clients'],['commerce','Analytics'],['mail','Mail']].forEach(function(v) {
+    [['agent','Chat'],['pulse','Pulse'],['studio','Studio'],['rhythm','Automations'],['library','Library'],['memory','Identity'],['tuning','Memory'],['settings','Settings'],['inventory','Inventory'],['clients','Clients'],['commerce','Analytics'],['mail','Mail']].forEach(function(v) {
       html += '<option value="' + v[0] + '"' + (actionView === v[0] ? ' selected' : '') + '>' + v[1] + '</option>';
     });
     html += '</select></div>';

@@ -103,7 +103,6 @@ function updateLaunchModeUI() {
   var description = document.getElementById('launchDescription');
   var chatTitle = document.getElementById('launchOptionChatTitle');
   var chatDesc = document.getElementById('launchOptionChatDesc');
-  var focusDesc = document.getElementById('launchOptionFocusDesc');
   var studioDesc = document.getElementById('launchOptionStudioDesc');
   
   if (!launchScreen) return;
@@ -119,8 +118,6 @@ function updateLaunchModeUI() {
     if (description) description.textContent = 'RoweOS connects your personal life with leading AI providers to power intelligent task management, life organization, and personal productivity.';
     if (chatTitle) chatTitle.textContent = 'LifeAI';
     if (chatDesc) chatDesc.textContent = 'Talk with your personal life assistant';
-    // v10.5.25: Keep sparkle icon for both modes
-    if (focusDesc) focusDesc.textContent = 'Explore your personal intelligence dashboard';
     if (studioDesc) studioDesc.textContent = 'Generate content using specialized life operations';
     
   } else {
@@ -134,8 +131,6 @@ function updateLaunchModeUI() {
     if (description) description.textContent = 'RoweOS connects your brands with leading AI providers to power intelligent content generation, brand strategy, and operational excellence.';
     if (chatTitle) chatTitle.textContent = 'BrandAI';
     if (chatDesc) chatDesc.textContent = 'Talk with your brand agent';
-    // v10.5.25: Keep sparkle icon for both modes
-    if (focusDesc) focusDesc.textContent = 'Explore your brand intelligence dashboard';
     if (studioDesc) studioDesc.textContent = 'Generate content using specialized agent operations';
   }
 }

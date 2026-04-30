@@ -3071,40 +3071,6 @@ function renderFocusRecentActivity() {
   container.innerHTML = html;
 }
 
-function toggleFocusCard(header) {
-  var card = header.closest('.focus-card-collapsible');
-  if (card) {
-    card.classList.toggle('collapsed');
-    // v25.0: Save collapsed/expanded state
-    var titleEl = card.querySelector('.focus-card-title');
-    var cardId = (card.dataset && card.dataset.widget) || (titleEl ? titleEl.textContent.trim() : '');
-    if (cardId) {
-      try {
-        var states = JSON.parse(localStorage.getItem('roweos_focus_card_states') || '{}');
-        states[cardId] = card.classList.contains('collapsed');
-        localStorage.setItem('roweos_focus_card_states', JSON.stringify(states));
-      } catch(e) {}
-    }
-  }
-}
-
-// v25.0: Restore Focus card collapsed/expanded states from localStorage
-function restoreFocusCardStates() {
-  try {
-    var states = JSON.parse(localStorage.getItem('roweos_focus_card_states') || '{}');
-    var cards = document.querySelectorAll('#signalView .focus-card-collapsible');
-    cards.forEach(function(card) {
-      var titleEl = card.querySelector('.focus-card-title');
-      var cardId = (card.dataset && card.dataset.widget) || (titleEl ? titleEl.textContent.trim() : '');
-      if (cardId && states[cardId] === true) {
-        card.classList.add('collapsed');
-      } else {
-        card.classList.remove('collapsed');
-      }
-    });
-  } catch(e) {}
-}
-
 // =====================================================
 // v9.1.14: FOCUS CARD DRAG AND DROP
 // =====================================================
