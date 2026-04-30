@@ -3682,8 +3682,8 @@ function updateModeUI(mode) {
   
   // Update page title
   var subtitle = isLife ? 'Life Intelligence Platform' : 'Brand Intelligence Platform';
-  // v15.3: Updated title - just "RoweOS - Intelligence Platform"
-  document.title = 'RoweOS - Intelligence Platform';
+  // v33.0: Brilliance brand
+  document.title = 'Brilliance - Intelligence OS';
   
   // v10.5.25: Update desktop platform title (uppercase for display)
   var desktopTitle = document.getElementById('desktopPlatformTitle');

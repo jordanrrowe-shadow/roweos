@@ -6,7 +6,7 @@
     <!-- v28.0: Migration overlay -->
     <div id="migrationOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;z-index:100000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
       <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;width:90%;max-width:480px;">
-        <div style="font-size:28px;font-weight:600;margin-bottom:8px;">Upgrading RoweOS to v4.0</div>
+        <div style="font-size:28px;font-weight:600;margin-bottom:8px;">Upgrading Brilliance to v4.0</div>
         <div style="font-size:14px;color:#888;margin-bottom:32px;">Your data is safe. Do not close this tab.</div>
         <div style="width:100%;height:4px;background:#1a1a1a;border-radius:2px;overflow:hidden;margin-bottom:24px;">
           <div id="migrationProgressBar" style="width:0%;height:100%;background:#a89878;border-radius:2px;transition:width 0.3s;"></div>
@@ -33,7 +33,7 @@
 
       <div style="text-align:center;position:relative;z-index:1;">
         <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:rgba(201,181,122,0.45);margin-bottom:20px;opacity:0;animation:splashFadeUp 0.8s ease forwards 0.3s;">Welcome, to</div>
-        <img src="/icons/roweos-wordmark.png" alt="RoweOS" style="max-width:480px;width:80vw;height:auto;margin-bottom:8px;opacity:0;animation:splashFadeUp 0.9s ease forwards 0.5s;" onerror="this.outerHTML='<div style=&quot;font-family:Cormorant Garamond,Georgia,serif;font-size:82px;font-weight:300;letter-spacing:3px;background:linear-gradient(135deg,#e0cc8a,#c9b57a,#d4b978);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;&quot;>RoweOS</div>'">
+        <img src="/icons/roweos-wordmark.png" alt="Brilliance" style="max-width:480px;width:80vw;height:auto;margin-bottom:8px;opacity:0;animation:splashFadeUp 0.9s ease forwards 0.5s;" onerror="this.outerHTML='<div style=&quot;font-family:Cormorant Garamond,Georgia,serif;font-size:82px;font-weight:300;letter-spacing:3px;background:linear-gradient(135deg,#e0cc8a,#c9b57a,#d4b978);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;&quot;>Brilliance</div>'">
         <div style="width:48px;height:1px;background:rgba(201,181,122,0.35);margin:0 auto 20px;opacity:0;animation:splashFadeUp 0.6s ease forwards 0.7s;"></div>
         <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-style:italic;color:rgba(255,255,255,0.3);letter-spacing:0.5px;margin-bottom:48px;opacity:0;animation:splashFadeUp 0.7s ease forwards 0.9s;">Brand &amp; Life Intelligence</div>
         <a onclick="triggerGoldTransition()" style="display:inline-block;padding:16px 40px;border:1px solid rgba(201,181,122,0.4);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#c9b57a;cursor:pointer;transition:all 0.4s ease;text-decoration:none;opacity:0;animation:splashFadeUp 0.7s ease forwards 1.2s;" onmouseover="this.style.background='rgba(201,181,122,0.08)';this.style.borderColor='rgba(201,181,122,0.6)';this.style.boxShadow='0 0 40px rgba(201,181,122,0.06)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(201,181,122,0.4)';this.style.boxShadow='none'">Begin Experience</a>
@@ -57,7 +57,7 @@
         Back
       </div>
 
-      <img src="/icons/roweos-emblem.png" alt="RoweOS" style="width:200px;height:200px;object-fit:contain;margin-bottom:20px;margin-top:0;position:relative;filter:brightness(1.1);" onerror="this.style.display='none'">
+      <img src="/icons/roweos-emblem.png" alt="Brilliance" style="width:200px;height:200px;object-fit:contain;margin-bottom:20px;margin-top:0;position:relative;filter:brightness(1.1);" onerror="this.style.display='none'">
       <div class="auth-title" style="font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;color:#fff;margin-bottom:6px;position:relative;">Create your account or Sign in</div>
       <div class="auth-subtitle" style="font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:32px;position:relative;">Choose your sign-in method</div>
 
@@ -117,9 +117,9 @@
           <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#c9b57a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:12px;"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="22,5 12,13 2,5"/></svg>
           <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:600;color:#fff;margin-bottom:8px;">Check Your Email</div>
           <div id="accessKeyEmailHint" style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:4px;">We've sent your access key</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:16px;">Enter it below to activate RoweOS</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:16px;">Enter it below to activate Brilliance</div>
         </div>
-        <div class="auth-muted" id="accessKeyDefaultPrompt" style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:16px;">Enter your access key to activate RoweOS</div>
+        <div class="auth-muted" id="accessKeyDefaultPrompt" style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:16px;">Enter your access key to activate Brilliance</div>
         <input type="text" id="accessKeyInput" placeholder="ROWE-XXXX-XXXX" maxlength="14" style="width:100%;padding:14px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:#fff;font-size:18px;font-weight:600;text-align:center;letter-spacing:3px;text-transform:uppercase;font-family:'SF Mono',Monaco,monospace;outline:none;" oninput="this.value=this.value.toUpperCase()">
         <button onclick="handleAccessKeySubmit()" style="width:100%;padding:14px;background:linear-gradient(135deg,#c9b57a,#d4b978);color:#0a0a0a;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Activate</button>
         <div id="accessKeyResend" style="display:none;margin-top:12px;">
@@ -130,7 +130,7 @@
 
       <!-- v27.1: Learn More link -->
       <div style="margin-top:28px;text-align:center;">
-        <a href="/info" style="font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(201,181,122,0.55);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s;" onmouseover="this.style.color='rgba(201,181,122,0.85)'" onmouseout="this.style.color='rgba(201,181,122,0.55)'">Learn more about RoweOS</a>
+        <a href="/info" style="font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(201,181,122,0.55);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s;" onmouseover="this.style.color='rgba(201,181,122,0.85)'" onmouseout="this.style.color='rgba(201,181,122,0.55)'">Learn more about Brilliance</a>
       </div>
 
       <!-- Footer -->
@@ -213,7 +213,7 @@
       <!-- v31.2: Welcome intro with Google for Startups, fades into tier picker -->
       <div id="tierIntro">
         <div style="font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:#a89878;margin-bottom:18px;font-weight:500;animation:tierIntroBadgePulse 3.6s ease-in-out infinite;">A new kind of operating system</div>
-        <h1 style="font-family:Georgia,serif;font-size:52px;font-weight:400;line-height:1.05;margin:0 0 20px;color:#f5ecd9;letter-spacing:-0.5px;">Welcome to RoweOS.</h1>
+        <h1 style="font-family:Georgia,serif;font-size:52px;font-weight:400;line-height:1.05;margin:0 0 20px;color:#f5ecd9;letter-spacing:-0.5px;">Welcome to Brilliance.</h1>
         <p style="font-size:16px;color:#a89878;line-height:1.65;margin:0 auto 44px;max-width:540px;">One operating system for your brand and life.</p>
 
         <!-- Google for Startups card (matches /info layout - colored wordmark only, no separate icon) -->
@@ -223,7 +223,7 @@
             <span style="font-weight:500;color:#4285F4;">G</span><span style="font-weight:500;color:#EA4335;">o</span><span style="font-weight:500;color:#FBBC05;">o</span><span style="font-weight:500;color:#4285F4;">g</span><span style="font-weight:500;color:#34A853;">l</span><span style="font-weight:500;color:#EA4335;">e</span>
             <span style="color:#a89878;font-size:0.7em;font-style:italic;font-weight:300;margin-left:6px;">for Startups</span>
           </div>
-          <p style="font-size:12.5px;color:#888;line-height:1.6;margin:0;max-width:420px;margin-left:auto;margin-right:auto;">RoweOS is a member of the Google for Startups Cloud Program. Vetted infrastructure, real builders.</p>
+          <p style="font-size:12.5px;color:#888;line-height:1.6;margin:0;max-width:420px;margin-left:auto;margin-right:auto;">Brilliance is backed by Google for Startups. Vetted infrastructure, real builders.</p>
         </div>
 
         <button onclick="dismissTierIntro()" style="margin-top:36px;padding:11px 28px;background:transparent;border:1px solid rgba(168,152,120,0.4);border-radius:999px;color:#d4b896;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;letter-spacing:0.4px;font-weight:500;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,152,120,0.08)';this.style.borderColor='rgba(168,152,120,0.7)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(168,152,120,0.4)'">Choose Your Plan &rarr;</button>
@@ -239,7 +239,7 @@
       <!-- Header -->
       <div style="text-align:center;margin-bottom:32px;">
         <div class="tier-eyebrow" style="margin-bottom:14px;animation:tierShimmer 2.6s ease-in-out infinite;">Step Two of Two · Choose Your Plan</div>
-        <h1 style="font-family:Georgia,serif;font-size:38px;font-weight:400;line-height:1.15;margin:0 0 14px;color:#f5ecd9;">Welcome to RoweOS.</h1>
+        <h1 style="font-family:Georgia,serif;font-size:38px;font-weight:400;line-height:1.15;margin:0 0 14px;color:#f5ecd9;">Welcome to Brilliance.</h1>
         <p style="font-size:15px;color:#a89878;line-height:1.6;margin:0 auto;max-width:520px;">One operating system for your brand and life. Pick the plan that fits.</p>
       </div>
 
@@ -319,7 +319,7 @@
         <div style="flex:1;min-width:280px;">
           <div class="tier-eyebrow">Need AI capacity? · Optional add on</div>
           <div style="font-family:Georgia,serif;font-size:20px;color:#f5ecd9;margin-bottom:6px;">Bring your own keys, or buy a Rowe provided pack.</div>
-          <div style="font-size:13px;color:#a89878;line-height:1.6;">RoweOS routes to OpenAI, Anthropic, and Google. Use your own API keys for direct provider billing, or purchase a managed key pack from us with a single charge. No monthly billing, ideal for trying things out.</div>
+          <div style="font-size:13px;color:#a89878;line-height:1.6;">Brilliance routes to OpenAI, Anthropic, and Google. Use your own API keys for direct provider billing, or purchase a managed key pack from us with a single charge. No monthly billing, ideal for trying things out.</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
           <button onclick="window.location.href='/purchase'" style="padding:12px 22px;background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.45);border-radius:10px;color:#d4b896;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:-apple-system,BlinkMacSystemFont,sans-serif;" onmouseover="this.style.background='rgba(168,152,120,0.25)'" onmouseout="this.style.background='rgba(168,152,120,0.15)'">Purchase API Key Pack →</button>
