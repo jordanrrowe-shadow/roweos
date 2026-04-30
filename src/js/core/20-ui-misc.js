@@ -753,7 +753,7 @@ function populateCalendarSelectors() {
     if (!sel) return;
     // Remember current value
     var curVal = sel.value || 'roweos';
-    sel.innerHTML = '<option value="roweos">RoweOS (Local)</option>';
+    sel.innerHTML = '<option value="roweos">Brilliance (Local)</option>';
 
     // Google calendars
     if (typeof _gcalConnected !== 'undefined' && _gcalConnected && typeof _gcalCalendars !== 'undefined') {
@@ -798,7 +798,7 @@ function populateCalendarSelectors() {
 function populateEventCalendarPicker() {
   var sel = document.getElementById('eventPushTo');
   if (!sel) return;
-  var html = '<option value="local">RoweOS (local)</option>';
+  var html = '<option value="local">Brilliance (local)</option>';
   if (_gcalConnected && _gcalCalendars) {
     for (var i = 0; i < _gcalCalendars.length; i++) {
       html += '<option value="google_' + i + '">Google: ' + escapeHtml(_gcalCalendars[i].summary || 'Calendar') + '</option>';
@@ -848,7 +848,7 @@ function fireEventReminder(event) {
   // Browser notification if permitted
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
-      new Notification('RoweOS Reminder', {
+      new Notification('Brilliance Reminder', {
         body: event.title + timeStr,
         icon: '/favicon.ico'
       });
@@ -6023,7 +6023,7 @@ function showImageProviderPickerOnce(callback, opts) {
   opts = opts || {};
   if (localStorage.getItem('roweos_image_provider_pref')) { callback(_resolveImageProvider()); return; }
   var headerText = opts.headerText || 'Pick your image generator';
-  var subText = opts.subText || 'RoweOS detected an image request. Which generator should we use? You can change this later in System.';
+  var subText = opts.subText || 'Brilliance detected an image request. Which generator should we use? You can change this later in System.';
   var modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200000;display:flex;align-items:center;justify-content:center;padding:20px;';
   var box = document.createElement('div');
@@ -8701,12 +8701,12 @@ function confirmExport() {
   
   // Generate filename with date
   var date = new Date().toISOString().slice(0, 10);
-  a.download = 'RoweOS_v58_' + date + '.html';
+  a.download = 'Brilliance_v58_' + date + '.html';
   
   a.click();
   URL.revokeObjectURL(url);
   closeExportModal();
-  showToast('RoweOS exported successfully', 'success');
+  showToast('Brilliance exported successfully', 'success');
 }
 
 // ═══════════════════════════════════════════════════════════════

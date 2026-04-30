@@ -5384,7 +5384,7 @@ function init() {
   versionEls.forEach(function(el) {
     if (el) {
       if (el.id === 'mobileVersionDisplay') {
-        el.textContent = 'RoweOS ' + ROWEOS_VERSION;
+        el.textContent = 'Brilliance ' + ROWEOS_VERSION;
       } else {
         el.textContent = ROWEOS_VERSION;
       }
@@ -5454,7 +5454,7 @@ function init() {
       var subTierLabel = subTier ? subTier.charAt(0).toUpperCase() + subTier.slice(1) : '';
       setTimeout(function() {
         if (typeof showToast === 'function') {
-          showToast('Welcome to RoweOS' + (subTierLabel ? ' ' + subTierLabel : '') + '! Check your email for your access key.', 'success', 8000);
+          showToast('Welcome to Brilliance' + (subTierLabel ? ' ' + subTierLabel : '') + '! Check your email for your access key.', 'success', 8000);
         }
       }, 2000);
     }
@@ -7350,7 +7350,7 @@ function getOperationPreviewSnippet(op) {
     'operations': 'Streamlined processes for peak efficiency...',
     'documents': 'Professional documentation tailored to your brand...',
     'research': 'Deep market intelligence at your fingertips...',
-    'platform': 'Master RoweOS and unlock its full potential...',
+    'platform': 'Master Brilliance and unlock its full potential...',
     'brand-specific': 'Custom solutions built for your unique brand...'
   };
   return snippets[op.category] || 'AI-powered output customized for your brand...';
@@ -8583,7 +8583,7 @@ function exportLibraryFileToDrive() {
   }
   if (!file || !file.content) { showToast('No file content to export', 'error'); return; }
 
-  var fileName = file.name || 'RoweOS Export';
+  var fileName = file.name || 'Brilliance Export';
   var content = file.content;
   var mimeType = 'text/plain';
   var isBase64 = content.indexOf('data:') === 0;

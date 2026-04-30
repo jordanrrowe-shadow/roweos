@@ -208,7 +208,7 @@ export default async function handler(req, res) {
 
     // --- Send ---
     if (action === 'send' || action === 'test') {
-      var title = action === 'test' ? 'RoweOS' : (body.title || 'RoweOS');
+      var title = action === 'test' ? 'Brilliance' : (body.title || 'Brilliance');
       var message = action === 'test' ? 'Push notifications are working' : (body.message || '');
       var payload = JSON.stringify({
         title: title,

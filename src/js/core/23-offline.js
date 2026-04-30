@@ -906,7 +906,7 @@ function renderModelConfigList() {
 
     // Get model display name and split it
     var fullModelName = getModelDisplayName(settings.provider, settings.model);
-    var modelParts = isRoweOS ? { provider: 'ROWEOS AI', model: 'Smart Routing' } : splitModelName(fullModelName);
+    var modelParts = isRoweOS ? { provider: 'BRILLIANCE AI', model: 'Smart Routing' } : splitModelName(fullModelName);
 
     // v24.4: RoweOS AI gets gold connected badge
     var statusClass = connected ? (isRoweOS ? 'connected-gold' : 'connected') : 'disconnected';
@@ -930,7 +930,7 @@ function renderModelConfigList() {
     // Controls
     html += '  <div class="model-config-controls">';
     html += '    <select id="providerSelect-' + i + '" class="model-config-select" onchange="updateBrandProvider(' + i + ', this.value)">';
-    html += '      <option value="roweos"' + (settings.provider === 'roweos' ? ' selected' : '') + '>RoweOS AI</option>';
+    html += '      <option value="roweos"' + (settings.provider === 'roweos' ? ' selected' : '') + '>Brilliance AI</option>';
     html += '      <option value="anthropic"' + (settings.provider === 'anthropic' ? ' selected' : '') + '>Anthropic, Claude</option>';
     html += '      <option value="openai"' + (settings.provider === 'openai' ? ' selected' : '') + '>OpenAI, ChatGPT</option>';
     html += '      <option value="google"' + (settings.provider === 'google' ? ' selected' : '') + '>Google</option>';
@@ -2520,35 +2520,35 @@ function populateDockInstructions() {
 
   var html = '';
   if (isIOS) {
-    if (title) title.textContent = 'Add RoweOS to your Home Screen';
+    if (title) title.textContent = 'Add Brilliance to your Home Screen';
     html = '<div style="text-align:left;color:var(--text-secondary);font-size:var(--text-sm);line-height:1.8;">'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">1</div><span>Tap the <strong style="color:var(--text-primary);">Share</strong> button <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> in Safari</span></div>'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">2</div><span>Scroll down and tap <strong style="color:var(--text-primary);">Add to Home Screen</strong></span></div>'
       + '<div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">3</div><span>Tap <strong style="color:var(--text-primary);">Add</strong> to confirm</span></div>'
       + '</div>';
   } else if (isAndroid) {
-    if (title) title.textContent = 'Install RoweOS';
+    if (title) title.textContent = 'Install Brilliance';
     html = '<div style="text-align:left;color:var(--text-secondary);font-size:var(--text-sm);line-height:1.8;">'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">1</div><span>Tap the <strong style="color:var(--text-primary);">&#8942;</strong> menu in Chrome</span></div>'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">2</div><span>Tap <strong style="color:var(--text-primary);">Install app</strong> or <strong style="color:var(--text-primary);">Add to Home screen</strong></span></div>'
       + '<div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">3</div><span>Tap <strong style="color:var(--text-primary);">Install</strong> to confirm</span></div>'
       + '</div>';
   } else if (isMac) {
-    if (title) title.textContent = 'Add RoweOS to your Dock';
+    if (title) title.textContent = 'Add Brilliance to your Dock';
     html = '<div style="text-align:left;color:var(--text-secondary);font-size:var(--text-sm);line-height:1.8;">'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">1</div><span>In Safari or Chrome, look for the <strong style="color:var(--text-primary);">install</strong> icon in the address bar</span></div>'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">2</div><span>Or drag the site icon from the address bar to your <strong style="color:var(--text-primary);">Dock</strong></span></div>'
-      + '<div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">3</div><span>RoweOS will open as its own window</span></div>'
+      + '<div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">3</div><span>Brilliance will open as its own window</span></div>'
       + '</div>';
   } else if (isWindows) {
-    if (title) title.textContent = 'Add RoweOS to your Desktop';
+    if (title) title.textContent = 'Add Brilliance to your Desktop';
     html = '<div style="text-align:left;color:var(--text-secondary);font-size:var(--text-sm);line-height:1.8;">'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">1</div><span>Click the <strong style="color:var(--text-primary);">&#8942;</strong> menu in Chrome or Edge</span></div>'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">2</div><span>Click <strong style="color:var(--text-primary);">More tools > Create shortcut</strong></span></div>'
       + '<div style="display:flex;align-items:center;gap:10px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--text-primary);">3</div><span>Check <strong style="color:var(--text-primary);">"Open as window"</strong> and click Create</span></div>'
       + '</div>';
   } else {
-    if (title) title.textContent = 'Add RoweOS to your Home';
+    if (title) title.textContent = 'Add Brilliance to your Home';
     html = '<p style="color:var(--text-secondary);font-size:var(--text-sm);">Check your browser menu for an option to install or add to home screen.</p>';
   }
   container.innerHTML = html;
@@ -2623,7 +2623,7 @@ function populateCrossDeviceContent() {
     html += '</div>';
     // Text content
     html += '<div style="flex:1;">';
-    html += '<p style="color:var(--text-primary);font-weight:600;font-size:17px;margin:0 0 8px;">RoweOS works on your phone too</p>';
+    html += '<p style="color:var(--text-primary);font-weight:600;font-size:17px;margin:0 0 8px;">Brilliance works on your phone too</p>';
     html += '<p style="color:var(--text-secondary);font-size:14px;margin:0 0 16px;line-height:1.6;">Add it to your home screen for instant access. Visit <strong>roweos.com</strong> on your phone\'s browser.</p>';
     if (hasSync) {
       html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(168,152,120,0.08);border:1px solid rgba(168,152,120,0.15);border-radius:8px;margin-bottom:12px;">';

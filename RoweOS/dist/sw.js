@@ -4,7 +4,7 @@
 self.addEventListener('push', function(event) {
   var data = {};
   try { data = event.data.json(); } catch(e) {
-    data = { title: 'RoweOS', body: event.data ? event.data.text() : 'New notification' };
+    data = { title: 'Brilliance', body: event.data ? event.data.text() : 'New notification' };
   }
 
   var options = {
@@ -17,7 +17,7 @@ self.addEventListener('push', function(event) {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'RoweOS', options)
+    self.registration.showNotification(data.title || 'Brilliance', options)
   );
 });
 

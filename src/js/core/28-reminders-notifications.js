@@ -287,7 +287,7 @@ function checkDueReminders() {
     showReminderPopup(r);
     // Browser notification
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      try { new Notification('RoweOS Reminder', { body: r.title, icon: '/icons/icon-192.png', tag: 'rem-' + r.id }); } catch(e) {}
+      try { new Notification('Brilliance Reminder', { body: r.title, icon: '/icons/icon-192.png', tag: 'rem-' + r.id }); } catch(e) {}
     }
   }
   if (changed) saveReminders(reminders);
@@ -321,7 +321,7 @@ function showReminderPopup(reminder) {
   popup.className = 'reminder-popup';
   popup.id = 'reminderPopup_' + reminder.id;
   popup.innerHTML = '<div class="reminder-popup-header">'
-    + '<span class="reminder-popup-label">RoweOS Reminder</span>'
+    + '<span class="reminder-popup-label">Brilliance Reminder</span>'
     + '<button class="reminder-popup-close" id="remClose_' + reminder.id + '" onclick="dismissReminderPopup(\'' + reminder.id + '\')" title="Complete an action first">'
     + '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>'
     + '</div>'
@@ -1093,7 +1093,7 @@ function sendPushNotification(title, message, opts) {
     body: JSON.stringify({
       action: 'send',
       uid: uid,
-      title: title || 'RoweOS',
+      title: title || 'Brilliance',
       message: message || '',
       tag: (opts && opts.tag) || '',
       url: (opts && opts.url) || '/',

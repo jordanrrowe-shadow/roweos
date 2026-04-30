@@ -602,7 +602,7 @@ function handleNativeModelSelect(sel) {
   var parts = sel.value.split('|');
   if (parts.length === 2) {
     var displayNames = {
-      'auto': 'RoweOS AI', 'claude-sonnet-4-6': 'Sonnet 4.6', 'claude-haiku-4-20250514': 'Haiku 4.5',
+      'auto': 'Brilliance AI', 'claude-sonnet-4-6': 'Sonnet 4.6', 'claude-haiku-4-20250514': 'Haiku 4.5',
       // v31.0: gpt-5.5 family display labels
       'claude-opus-4-7': 'Opus 4.7', 'gpt-5.5': 'GPT-5.5', 'gpt-5.5-pro': 'GPT-5.5 Pro',
       'gpt-5.5-thinking': 'GPT-5.5 Thinking', 'gemini-3.1-pro-preview': '3.1 Pro',
@@ -696,8 +696,8 @@ function showStudioModelActionSheet() {
   popup.innerHTML =
     '<div style="padding:10px 16px 4px;font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;">Text Models</div>' +
     '<div class="studio-mobile-model-section">' +
-      '<div class="studio-mobile-model-label">RoweOS AI</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'auto' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'roweos\', \'auto\', \'RoweOS AI\')">Auto (Smart Routing)</div>' +
+      '<div class="studio-mobile-model-label">Brilliance AI</div>' +
+      '<div class="studio-mobile-model-item' + (currentModel === 'auto' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'roweos\', \'auto\', \'Brilliance AI\')">Auto (Smart Routing)</div>' +
     '</div>' +
     '<div class="studio-mobile-model-section">' +
       '<div class="studio-mobile-model-label">Anthropic</div>' +

@@ -115,7 +115,7 @@ function updateLaunchModeUI() {
     
     // Update text content
     if (subtitle) subtitle.textContent = 'LIFE INTELLIGENCE PLATFORM';
-    if (description) description.textContent = 'RoweOS connects your personal life with leading AI providers to power intelligent task management, life organization, and personal productivity.';
+    if (description) description.textContent = 'Brilliance connects your personal life with leading AI providers to power intelligent task management, life organization, and personal productivity.';
     if (chatTitle) chatTitle.textContent = 'LifeAI';
     if (chatDesc) chatDesc.textContent = 'Talk with your personal life assistant';
     if (studioDesc) studioDesc.textContent = 'Generate content using specialized life operations';
@@ -128,7 +128,7 @@ function updateLaunchModeUI() {
     
     // Update text content
     if (subtitle) subtitle.textContent = 'BRAND INTELLIGENCE PLATFORM';
-    if (description) description.textContent = 'RoweOS connects your brands with leading AI providers to power intelligent content generation, brand strategy, and operational excellence.';
+    if (description) description.textContent = 'Brilliance connects your brands with leading AI providers to power intelligent content generation, brand strategy, and operational excellence.';
     if (chatTitle) chatTitle.textContent = 'BrandAI';
     if (chatDesc) chatDesc.textContent = 'Talk with your brand agent';
     if (studioDesc) studioDesc.textContent = 'Generate content using specialized agent operations';
@@ -211,7 +211,7 @@ function exploreRoweOS() {
   if (launchMode === 'life') {
     showToast('Welcome to LifeAI! Your personal life assistant is ready.', 'info');
   } else {
-    showToast('Welcome to RoweOS! Configure your brand in Settings to unlock full potential.', 'info');
+    showToast('Welcome to Brilliance! Configure your brand in Settings to unlock full potential.', 'info');
   }
 }
 
@@ -2153,7 +2153,7 @@ function exportAllBrands() {
   // Download
   var a = document.createElement('a');
   a.href = url;
-  a.download = 'RoweOS_All_Brands_' + new Date().toISOString().split('T')[0] + '.json';
+  a.download = 'Brilliance_All_Brands_' + new Date().toISOString().split('T')[0] + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -2211,7 +2211,7 @@ function executeExportBrand() {
   } else {
     // Rich Text export
     var brandsToExport = scope === 'all' ? brands : [brands[selectedBrand]];
-    var text = 'RoweOS Brand Export\n' + '='.repeat(40) + '\n';
+    var text = 'Brilliance Brand Export\n' + '='.repeat(40) + '\n';
     text += 'Exported: ' + new Date().toLocaleString() + '\n\n';
     brandsToExport.forEach(function(brand, i) {
       if (scope === 'all') text += '\n' + '-'.repeat(40) + '\n';
@@ -2236,7 +2236,7 @@ function executeExportBrand() {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = (scope === 'all' ? 'RoweOS_All_Brands' : (brands[selectedBrand].name || 'Brand').replace(/\s+/g, '_')) + '_export.txt';
+    a.download = (scope === 'all' ? 'Brilliance_All_Brands' : (brands[selectedBrand].name || 'Brand').replace(/\s+/g, '_')) + '_export.txt';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -2361,7 +2361,7 @@ function showRecentSearches() {
   if (!container) return;
   var recent = getRecentSearches();
   if (recent.length === 0) {
-    container.innerHTML = '<div class="search-empty">Type to search across all of RoweOS</div>';
+    container.innerHTML = '<div class="search-empty">Type to search across all of Brilliance</div>';
     return;
   }
   var html = '<div class="search-result-group">Recent</div>';
@@ -2702,7 +2702,7 @@ function searchWithAI(query, callback) {
   var brandName = scope.brands[0] ? (scope.brands[0].shortName || scope.brands[0].name) : 'RoweOS';
 
   // Build context summary for AI
-  var context = 'You are a search assistant for RoweOS, a brand intelligence platform. ';
+  var context = 'You are a search assistant for Brilliance, a brand intelligence platform. ';
   context += 'Current brand: ' + brandName + '. ';
 
   // Add data summaries
@@ -2817,7 +2817,7 @@ function onSidePanelSearch(value) {
   _sidePanelDebounce = setTimeout(function() {
     if (!value || value.trim().length === 0) {
       var container = document.getElementById('sidePanelResults');
-      if (container) container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-tertiary);font-size:13px;">Search across all of RoweOS</div>';
+      if (container) container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-tertiary);font-size:13px;">Search across all of Brilliance</div>';
       return;
     }
     // Try AI first, fall back to navigate
