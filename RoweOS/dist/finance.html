@@ -1595,14 +1595,14 @@ td.num { text-align: right; }
     pdf.text('for brand & life.', M, y); y += orientation === 'landscape' ? 32 : 26;
 
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
+    pdf.setFontSize(orientation === 'landscape' ? 13 : 11);
     setColor(C.sec);
     var heroLines = pdf.splitTextToSize(
       'A multi-surface AI platform. 120+ signups and a growing paying base. Exponential trajectory in the last several weeks. Built solo, with profitable margins on every paid seat.',
-      Math.min(CW, 520)
+      Math.min(CW, orientation === 'landscape' ? 720 : 520)
     );
     pdf.text(heroLines, M, y);
-    y += heroLines.length * 15 + 26;
+    y += heroLines.length * (orientation === 'landscape' ? 17 : 15) + 30;
 
     // Stat strip (4 stats)
     var stats = [
