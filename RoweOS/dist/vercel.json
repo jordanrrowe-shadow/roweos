@@ -42,6 +42,8 @@
     { "src": "/portfolio", "dest": "/portfolio.html" },
     { "src": "/blake", "dest": "/blake.html" },
     { "src": "/purchase", "dest": "/purchase.html" },
+    { "src": "/finance", "dest": "/finance.html" },
+    { "src": "/finance/", "dest": "/finance.html" },
     { "src": "/tinymce/(.*)", "dest": "/tinymce/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]

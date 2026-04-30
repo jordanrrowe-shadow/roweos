@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brilliance · Financial Projections</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="description" content="Brilliance · operating intelligence for brand & life. Traction, financial baseline, and Series-A path. By RoweOS.">
+<meta name="theme-color" content="#0a0a0a">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0a;
+  --bg-elevated: #141414;
+  --bg-card: #161616;
+  --bg-card-hover: #1c1c1c;
+  --gold: #a89878;
+  --gold-bright: #c9b890;
+  --gold-dim: rgba(168, 152, 120, 0.30);
+  --gold-subtle: rgba(168, 152, 120, 0.08);
+  --gold-glow: rgba(168, 152, 120, 0.18);
+  --text: #ececec;
+  --text-secondary: #a3a3a3;
+  --text-muted: #6b6b6b;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --border-gold: rgba(168, 152, 120, 0.32);
+  --good: #6ec48a;
+  --warn: #d9a55b;
+}
+
+html.light-mode {
+  --bg: #f5f3ee;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fafaf7;
+  --text: #1a1a1a;
+  --text-secondary: #555;
+  --text-muted: #8a8a8a;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --border-gold: rgba(168, 152, 120, 0.30);
+  --gold-subtle: rgba(168, 152, 120, 0.08);
+  --gold-glow: rgba(168, 152, 120, 0.14);
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: inherit; }
+
+/* ── Layout ────────────────────────────────────────────────── */
+
+.finance-page { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+section { padding: 80px 0; }
+section + section { border-top: 1px solid var(--border); }
+
+/* ── Top nav ───────────────────────────────────────────────── */
+
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10, 10, 10, 0.78);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+html.light-mode .top-nav { background: rgba(245, 243, 238, 0.85); }
+
+.top-nav-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 32px;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; font-weight: 500; color: var(--gold);
+  text-decoration: none; letter-spacing: 1.2px;
+}
+.nav-right { display: flex; gap: 18px; align-items: center; }
+.nav-link {
+  font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s;
+}
+.nav-link:hover { color: var(--gold); }
+.nav-pill {
+  font-size: 12px; padding: 7px 14px; border-radius: 999px;
+  border: 1px solid var(--border-gold); color: var(--gold); text-decoration: none; transition: all 0.2s;
+  letter-spacing: 0.4px;
+}
+.nav-pill:hover { background: var(--gold-subtle); }
+
+/* ── Hero ──────────────────────────────────────────────────── */
+
+.hero { padding-top: 160px; padding-bottom: 56px; text-align: center; }
+.hero-eyebrow {
+  font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 22px;
+}
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 60px; font-weight: 300; line-height: 1.1;
+  letter-spacing: -0.5px; margin-bottom: 22px; color: var(--text);
+}
+.hero h1 em { font-style: italic; color: var(--gold); }
+.hero .subline {
+  font-size: 18px; color: var(--text-secondary); font-weight: 300;
+  max-width: 640px; margin: 0 auto 44px; line-height: 1.55;
+}
+.hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.3px;
+  padding: 13px 26px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border-gold); background: transparent; color: var(--gold);
+}
+.btn:hover { background: var(--gold-subtle); }
+.btn-primary {
+  background: var(--gold); color: var(--bg); border-color: var(--gold);
+}
+.btn-primary:hover { background: var(--gold-bright); border-color: var(--gold-bright); }
+.btn:disabled { opacity: 0.5; cursor: wait; }
+
+/* ── Stat strip ────────────────────────────────────────────── */
+
+.stat-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0; margin: 64px auto 0;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.stat {
+  padding: 32px 20px; text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat:last-child { border-right: none; }
+.stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px; font-weight: 400; color: var(--gold); letter-spacing: -0.5px; line-height: 1;
+}
+.stat-label {
+  font-size: 11px; color: var(--text-muted);
+  letter-spacing: 1.4px; text-transform: uppercase; margin-top: 10px;
+}
+
+/* ── Section heading ──────────────────────────────────────── */
+
+.section-eyebrow {
+  font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px; font-weight: 500;
+}
+.section-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px; font-weight: 400; color: var(--text);
+  margin-bottom: 14px; letter-spacing: -0.3px; line-height: 1.15;
+}
+.section-sub {
+  font-size: 16px; color: var(--text-secondary);
+  max-width: 640px; line-height: 1.6; margin-bottom: 48px;
+}
+.section-head-center { text-align: center; }
+.section-head-center .section-sub { margin-left: auto; margin-right: auto; }
+
+/* ── Card primitive ────────────────────────────────────────── */
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  transition: border-color 0.25s, background 0.25s;
+}
+.card:hover { border-color: var(--border-gold); background: var(--bg-card-hover); }
+
+.card-eyebrow {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold); font-weight: 500; margin-bottom: 12px;
+}
+.card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 400; color: var(--text); margin-bottom: 6px;
+}
+.card-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 38px; font-weight: 400; color: var(--gold); letter-spacing: -0.5px;
+  line-height: 1; margin-bottom: 8px;
+}
+.card-num small { font-size: 16px; color: var(--text-muted); margin-left: 4px; }
+.card-body {
+  font-size: 13.5px; color: var(--text-secondary); line-height: 1.55;
+}
+
+/* ── Traction grid ─────────────────────────────────────────── */
+
+.traction-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 22px;
+}
+.traction-grid .card.span-7 { grid-column: span 7; }
+.traction-grid .card.span-5 { grid-column: span 5; }
+.traction-grid .card.span-4 { grid-column: span 4; }
+.traction-grid .card.span-6 { grid-column: span 6; }
+.traction-grid .card.span-12 { grid-column: span 12; }
+
+/* Signup curve */
+.curve-wrap { position: relative; padding-top: 14px; }
+.curve-svg { display: block; width: 100%; height: 200px; }
+.curve-axis-text { fill: var(--text-muted); font-size: 11px; font-family: 'DM Sans', sans-serif; }
+.curve-line { fill: none; stroke: var(--gold); stroke-width: 2; }
+.curve-area { fill: var(--gold-glow); }
+.curve-dot { fill: var(--gold); }
+.curve-dot.last { fill: var(--gold-bright); }
+.curve-grid { stroke: var(--border); stroke-width: 1; }
+
+/* Logo wall */
+.logo-wall {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;
+}
+.logo-chip {
+  font-size: 12px; padding: 8px 14px; border-radius: 999px;
+  border: 1px solid var(--border); color: var(--text-secondary);
+  background: var(--bg-elevated); letter-spacing: 0.2px;
+}
+
+/* GfS badge */
+.gfs-badge {
+  display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px;
+  background: var(--gold-subtle); border: 1px solid var(--border-gold);
+  border-radius: 999px; font-size: 12px; color: var(--gold); margin-bottom: 14px;
+  letter-spacing: 0.3px; font-weight: 500;
+}
+.gfs-badge svg { width: 14px; height: 14px; }
+
+/* Tag */
+.tag { font-size: 11px; padding: 4px 10px; border-radius: 4px;
+  background: var(--gold-subtle); color: var(--gold); letter-spacing: 0.5px;
+  text-transform: uppercase; font-weight: 500; display: inline-block;
+}
+.tag-soft { background: var(--bg-elevated); color: var(--text-muted);
+  border: 1px solid var(--border); }
+
+/* ── Calculator / projection table ─────────────────────────── */
+
+.proj-wrap { margin-top: 12px; }
+.proj-meta {
+  display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+  font-size: 12px; color: var(--text-muted); margin-bottom: 22px;
+  padding: 14px 18px; background: var(--bg-card); border: 1px dashed var(--border-gold);
+  border-radius: 10px;
+}
+.proj-meta strong { color: var(--gold); font-weight: 600; }
+
+.proj-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; border: 1px solid var(--border); }
+
+.proj-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+.proj-table thead th {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 11px; font-weight: 500; letter-spacing: 1.2px; text-transform: uppercase;
+  padding: 14px 16px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.proj-table thead th.num { text-align: right; }
+.proj-table tbody tr { transition: background 0.2s; }
+.proj-table tbody tr:hover { background: var(--bg-elevated); }
+.proj-table tbody td {
+  padding: 18px 16px; border-bottom: 1px solid var(--border);
+  font-size: 14px; color: var(--text);
+}
+.proj-table tbody tr:last-child td { border-bottom: none; }
+
+.proj-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; color: var(--text); }
+.proj-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.proj-input {
+  width: 88px; padding: 8px 10px; border-radius: 6px;
+  border: 1px solid var(--border-strong); background: var(--bg);
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px;
+  text-align: right; transition: border-color 0.2s;
+}
+.proj-input:focus { outline: none; border-color: var(--gold); }
+.proj-input.wide { width: 110px; }
+
+.proj-out {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; font-weight: 500; color: var(--gold); text-align: right;
+  letter-spacing: -0.2px; min-width: 90px; display: inline-block;
+}
+td.num { text-align: right; }
+.proj-row.target { background: var(--gold-subtle); }
+.proj-row.target:hover { background: var(--gold-glow); }
+.proj-row.target .proj-name { color: var(--gold-bright); }
+
+.proj-notes { margin-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.proj-note h4 {
+  font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 8px; font-weight: 500;
+}
+.proj-note p { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+
+/* ── Use of funds ─────────────────────────────────────────── */
+
+.fund-summary {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 36px;
+}
+.fund-stat { text-align: center; padding: 20px; }
+.fund-stat .v {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px; font-weight: 400; color: var(--gold); letter-spacing: -0.4px; line-height: 1;
+}
+.fund-stat .l { font-size: 11px; color: var(--text-muted); letter-spacing: 1.4px;
+  text-transform: uppercase; margin-top: 8px; }
+
+.fund-bars { display: flex; flex-direction: column; gap: 14px; }
+.fund-bar { display: grid; grid-template-columns: 240px 1fr 90px; gap: 16px; align-items: center; }
+.fund-bar .lab {
+  font-size: 14px; color: var(--text);
+}
+.fund-bar .lab small { display: block; font-size: 11px; color: var(--text-muted);
+  margin-top: 3px; letter-spacing: 0.3px; }
+.fund-bar .track {
+  height: 12px; background: var(--bg-elevated); border-radius: 6px;
+  overflow: hidden; border: 1px solid var(--border);
+}
+.fund-bar .fill {
+  height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+  border-radius: 6px; transition: width 0.6s ease-out;
+}
+.fund-bar .pct {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; color: var(--gold); text-align: right; font-weight: 500;
+}
+.fund-bar .pct small { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;
+  font-family: 'DM Sans', sans-serif; letter-spacing: 0.3px; }
+
+/* ── Why now / why this team ──────────────────────────────── */
+
+.why-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+}
+.why-grid .col h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px; font-weight: 400; color: var(--text);
+  margin-bottom: 12px; letter-spacing: -0.2px;
+}
+.why-list {
+  list-style: none; padding: 0; margin: 0;
+}
+.why-list li {
+  position: relative;
+  padding: 12px 0 12px 28px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px; color: var(--text-secondary); line-height: 1.55;
+}
+.why-list li:last-child { border-bottom: none; }
+.why-list li::before {
+  content: ''; position: absolute; left: 0; top: 19px; width: 14px; height: 1px;
+  background: var(--gold);
+}
+.why-list li strong { color: var(--text); font-weight: 500; }
+
+.bio-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 28px; border-radius: 14px;
+}
+.bio-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 500; color: var(--text); margin-bottom: 4px;
+}
+.bio-role {
+  font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+}
+.bio-body { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+.bio-body em { color: var(--text-muted); font-style: normal;
+  background: var(--gold-subtle); padding: 2px 6px; border-radius: 3px;
+}
+
+/* ── Risks ─────────────────────────────────────────────────── */
+
+.risks-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px;
+}
+.risk { padding: 22px 24px; }
+.risk h4 {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500;
+  color: var(--text); margin-bottom: 8px;
+}
+.risk p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.55; }
+.risk .mit {
+  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-muted);
+}
+.risk .mit strong { color: var(--gold); font-weight: 500; }
+
+/* ── Final CTA ─────────────────────────────────────────────── */
+
+.final-cta {
+  text-align: center; background: var(--bg-card);
+  border: 1px solid var(--border-gold); border-radius: 18px;
+  padding: 56px 40px;
+}
+.final-cta h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px; font-weight: 400; color: var(--text); margin-bottom: 14px;
+  letter-spacing: -0.3px;
+}
+.final-cta p {
+  font-size: 15px; color: var(--text-secondary); max-width: 520px; margin: 0 auto 28px;
+  line-height: 1.6;
+}
+.meeting-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 36px auto 32px;
+  max-width: 720px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.meeting-step {
+  padding: 18px 12px; text-align: center; border-right: 1px solid var(--border);
+}
+.meeting-step:last-child { border-right: none; }
+.meeting-step .min {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--gold);
+}
+.meeting-step .lab { font-size: 11px; color: var(--text-muted);
+  letter-spacing: 1.2px; text-transform: uppercase; margin-top: 6px; }
+
+/* ── Footer ────────────────────────────────────────────────── */
+
+.finance-footer {
+  padding: 56px 0 40px;
+  text-align: center; border-top: 1px solid var(--border);
+  margin-top: 32px;
+}
+.footer-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; font-weight: 400; color: var(--gold); margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.footer-tagline {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 18px; letter-spacing: 0.4px;
+}
+.footer-links { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+.footer-link {
+  font-size: 12.5px; color: var(--text-secondary); text-decoration: none;
+  transition: color 0.2s; letter-spacing: 0.3px;
+}
+.footer-link:hover { color: var(--gold); }
+
+/* ── PDF mode ──────────────────────────────────────────────── */
+
+body.pdf-mode .top-nav,
+body.pdf-mode .hero-ctas,
+body.pdf-mode .final-cta,
+body.pdf-mode .nav-pill { display: none !important; }
+body.pdf-mode { padding: 24px 0; }
+
+/* ── Responsive ────────────────────────────────────────────── */
+
+@media (max-width: 980px) {
+  .traction-grid .card.span-7,
+  .traction-grid .card.span-5,
+  .traction-grid .card.span-4,
+  .traction-grid .card.span-6 { grid-column: span 12; }
+
+  .why-grid { grid-template-columns: 1fr; }
+  .risks-grid { grid-template-columns: 1fr; }
+  .proj-notes { grid-template-columns: 1fr; }
+  .stat-strip { grid-template-columns: repeat(2, 1fr); }
+  .stat:nth-child(2) { border-right: none; }
+  .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+  .fund-summary { grid-template-columns: 1fr; }
+  .meeting-grid { grid-template-columns: repeat(2, 1fr); }
+  .meeting-step:nth-child(2) { border-right: none; }
+  .meeting-step:nth-child(1), .meeting-step:nth-child(2) { border-bottom: 1px solid var(--border); }
+  .fund-bar { grid-template-columns: 1fr 80px; grid-template-rows: auto auto; }
+  .fund-bar .lab { grid-column: 1 / 3; }
+  .fund-bar .track { grid-column: 1; }
+  .fund-bar .pct { grid-column: 2; }
+}
+
+@media (max-width: 720px) {
+  .finance-page { padding: 0 22px; }
+  .top-nav-inner { padding: 0 22px; }
+  .hero { padding-top: 130px; }
+  .hero h1 { font-size: 40px; }
+  .hero .subline { font-size: 16px; }
+  .section-heading { font-size: 30px; }
+  section { padding: 64px 0; }
+  .stat-value { font-size: 34px; }
+  .card-num { font-size: 32px; }
+  .final-cta { padding: 40px 22px; }
+  .final-cta h2 { font-size: 28px; }
+  .nav-right .nav-link { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <a href="/" class="nav-logo">Brilliance</a>
+    <div class="nav-right">
+      <a href="/portfolio" class="nav-link">Portfolio</a>
+      <a href="/purchase" class="nav-link">Pricing</a>
+      <a href="#meeting" class="nav-pill">Book a meeting</a>
+    </div>
+  </div>
+</nav>
+
+<div class="finance-page" id="financePage">
+
+  <!-- ── Section 1 — Hero + stat strip ──────────────────── -->
+  <section class="hero">
+    <div class="hero-eyebrow">Financial Brief · 2026</div>
+    <h1>Operating intelligence<br>for <em>brand &amp; life.</em></h1>
+    <p class="subline">A multi-surface AI platform. 118 signups, accelerating. 10 paying clients. Built solo. Profitable margins on every paid seat.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-primary" id="downloadPdfBtn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        View the deck (PDF)
+      </button>
+      <a class="btn" href="#meeting">Book a meeting</a>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat"><div class="stat-value">118</div><div class="stat-label">Total signups</div></div>
+      <div class="stat"><div class="stat-value">10</div><div class="stat-label">Paying clients</div></div>
+      <div class="stat"><div class="stat-value">$500</div><div class="stat-label">MRR · monthly</div></div>
+      <div class="stat"><div class="stat-value">9</div><div class="stat-label">New surfaces · 60 days</div></div>
+    </div>
+  </section>
+
+  <!-- ── Section 2 — Traction proof ────────────────────── -->
+  <section>
+    <div class="section-eyebrow">Section 02 · Traction</div>
+    <h2 class="section-heading">Real signal. Not projections.</h2>
+    <p class="section-sub">Every number below is from the live platform. Subscriptions through Stripe, signups through Firestore, surfaces shipped through git history.</p>
+
+    <div class="traction-grid">
+
+      <!-- Signup curve, large -->
+      <div class="card span-7">
+        <div class="card-eyebrow">Signups · last 12 months</div>
+        <div class="card-title">From zero to 118, accelerating now.</div>
+        <p class="card-body">Word of mouth and a single founder posting in public. No paid acquisition, no SEO, no content team. The curve steepens in the last several weeks as the Brilliance brand transition lands and Founder-tier referrals compound. Funding is for compressing this curve, not creating it.</p>
+        <div class="curve-wrap" id="signupCurve"></div>
+      </div>
+
+      <!-- Conversion -->
+      <div class="card span-5">
+        <div class="card-eyebrow">Free → Paid</div>
+        <div class="card-num">8.5<small>%</small></div>
+        <div class="card-title">Above prosumer benchmarks.</div>
+        <p class="card-body">10 paying / 118 signups. Industry benchmarks for prosumer SaaS sit at 2&ndash;5%. Brilliance is converting at ~2&times; the benchmark with no paid funnel. Every paying client is here on intent, not on a coupon.</p>
+      </div>
+
+      <!-- Retention -->
+      <div class="card span-4">
+        <div class="card-eyebrow">Retention</div>
+        <div class="card-num">100<small>%</small></div>
+        <div class="card-title">Zero churn to date.</div>
+        <p class="card-body">Every paying client from the Founder cohort is still active. Trial-cycle data lands once the first cohort completes month 3.</p>
+        <span class="tag-soft tag" style="margin-top: 14px;">Stripe · live</span>
+      </div>
+
+      <!-- Logo wall -->
+      <div class="card span-4">
+        <div class="card-eyebrow">Customer mix · 10 clients</div>
+        <div class="card-title">Diversified by industry.</div>
+        <div class="logo-wall">
+          <span class="logo-chip">5 · service brands</span>
+          <span class="logo-chip">3 · retreat &amp; hospitality</span>
+          <span class="logo-chip">2 · personal-brand consultants</span>
+        </div>
+        <p class="card-body" style="margin-top: 14px;">Names withheld pending NDA review. Concentration risk is low: no single client is &gt;15% of MRR.</p>
+      </div>
+
+      <!-- Google for Startups -->
+      <div class="card span-4">
+        <div class="card-eyebrow">Validation</div>
+        <div class="gfs-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          Google for Startups Cloud Program
+        </div>
+        <div class="card-title">Vetted. Credited. Advised.</div>
+        <p class="card-body">Accepted into the Cloud Program with $200K of cloud credits and access to technical advisors. Validation that the platform meets a third-party engineering bar.</p>
+      </div>
+
+      <!-- Engagement (placeholder, instrument before live) -->
+      <div class="card span-12">
+        <div class="card-eyebrow">Engagement · sessions per paying client per week</div>
+        <div class="card-title">Daily-driver behavior, not weekend tinkering.</div>
+        <p class="card-body">Founder-cohort users open Brilliance multiple times per day for chat, Studio runs, calendar, and Pulse goals. Median session count and length will be wired in once <code style="color: var(--gold); background: var(--gold-subtle); padding: 2px 6px; border-radius: 3px;">roweos_session_log</code> is instrumented in the next deploy. Until then, this card stays honest: "in flight, not faked."</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Section 3 — Live calculator ──────────────────── -->
+  <section>
+    <div class="section-eyebrow">Section 03 · The model</div>
+    <h2 class="section-heading">Stress-test the path to $1M ARR.</h2>
+    <p class="section-sub">Editable inputs. The cells on the right recompute in real time. Drag the numbers around. See what's defensible. The math is the same SaaS exit-ARR formula every Series-A deck uses, applied honestly.</p>
+
+    <div class="proj-wrap">
+      <div class="proj-meta">
+        <span><strong>Formula:</strong> Yr-1 ARR = signups &times; conv% &times; ARPU &times; 12.</span>
+        <span><strong>Y/Y:</strong> 3&times; then 2.5&times; (standard early-stage SaaS, conservative vs. true PLG at 5&ndash;7&times;).</span>
+        <span><strong>Margin:</strong> 92%+ per paid seat (BYOK keeps AI cost near zero on the platform).</span>
+      </div>
+
+      <div class="proj-table-wrap">
+        <table class="proj-table" id="projTable">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th class="num">Signups · yr 1</th>
+              <th class="num">Conv %</th>
+              <th class="num">ARPU $/mo</th>
+              <th class="num">Yr-1 ARR</th>
+              <th class="num">Yr-2 ARR</th>
+              <th class="num">Yr-3 ARR</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="proj-row" data-scenario="floor">
+              <td>
+                <div class="proj-name">Floor</div>
+                <div class="proj-sub">Status quo · zero marketing</div>
+              </td>
+              <td class="num"><input type="number" class="proj-input" data-input="signups" value="500" min="0" step="50"></td>
+              <td class="num"><input type="number" class="proj-input" data-input="conv" value="8" min="0" max="100" step="0.5"></td>
+              <td class="num"><input type="number" class="proj-input" data-input="arpu" value="50" min="0" step="5"></td>
+              <td class="num"><span class="proj-out" data-out="yr1">$24K</span></td>
+              <td class="num"><span class="proj-out" data-out="yr2">$72K</span></td>
+              <td class="num"><span class="proj-out" data-out="yr3">$180K</span></td>
+            </tr>
+            <tr class="proj-row" data-scenario="realistic">
+              <td>
+                <div class="proj-name">Realistic</div>
+                <div class="proj-sub">Modest content + community</div>
+              </td>
+              <td class="num"><input type="number" class="proj-input" data-input="signups" value="2000" min="0" step="100"></td>
+              <td class="num"><input type="number" class="proj-input" data-input="conv" value="10" min="0" max="100" step="0.5"></td>
+              <td class="num"><input type="number" class="proj-input" data-input="arpu" value="60" min="0" step="5"></td>
+              <td class="num"><span class="proj-out" data-out="yr1">—</span></td>
+              <td class="num"><span class="proj-out" data-out="yr2">—</span></td>
+              <td class="num"><span class="proj-out" data-out="yr3">—</span></td>
+            </tr>
+            <tr class="proj-row target" data-scenario="target">
+              <td>
+                <div class="proj-name">Target</div>
+                <div class="proj-sub">Brilliance launch traction · 18 mo plan</div>
+              </td>
+              <td class="num"><input type="number" class="proj-input" data-input="signups" value="5000" min="0" step="500"></td>
+              <td class="num"><input type="number" class="proj-input" data-input="conv" value="12" min="0" max="100" step="0.5"></td>
+              <td class="num"><input type="number" class="proj-input" data-input="arpu" value="70" min="0" step="5"></td>
+              <td class="num"><span class="proj-out" data-out="yr1">—</span></td>
+              <td class="num"><span class="proj-out" data-out="yr2">—</span></td>
+              <td class="num"><span class="proj-out" data-out="yr3">—</span></td>
+            </tr>
+            <tr class="proj-row" data-scenario="stretch">
+              <td>
+                <div class="proj-name">Stretch</div>
+                <div class="proj-sub">Viral product-led · upside case</div>
+              </td>
+              <td class="num"><input type="number" class="proj-input wide" data-input="signups" value="15000" min="0" step="1000"></td>
+              <td class="num"><input type="number" class="proj-input" data-input="conv" value="15" min="0" max="100" step="0.5"></td>
+              <td class="num"><input type="number" class="proj-input" data-input="arpu" value="80" min="0" step="5"></td>
+              <td class="num"><span class="proj-out" data-out="yr1">—</span></td>
+              <td class="num"><span class="proj-out" data-out="yr2">—</span></td>
+              <td class="num"><span class="proj-out" data-out="yr3">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="proj-notes">
+        <div class="proj-note">
+          <h4>Cost stack</h4>
+          <p>~$6K/yr Vercel + Firebase + AI providers. Brilliance routes paying users to their own keys, so AI cost is near zero on the platform side. True margin per paying seat: <strong style="color: var(--gold);">92%+</strong>.</p>
+        </div>
+        <div class="proj-note">
+          <h4>ARPU lift</h4>
+          <p>Blended ARPU rises with upgrades from Solo ($9) to Founder ($29.50) to Premium ($79), plus one-time managed-API-key packs. The $50 baseline is conservative against today's actual mix.</p>
+        </div>
+        <div class="proj-note">
+          <h4>What's not in this model</h4>
+          <p>No team costs (model represents revenue, not P&amp;L). Hiring expense lives in the Use of Funds block below. No enterprise tier ($500+/mo, multi-user). Roadmap, not committed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 4 — Use of funds ──────────────────────── -->
+  <section>
+    <div class="section-eyebrow">Section 04 · The asks</div>
+    <h2 class="section-heading">$500K. 18 months. People, not infra.</h2>
+    <p class="section-sub">Round structured as a SAFE. Allocation favors a marketing+content hire to convert organic momentum into a repeatable channel, with engineering and infra in support.</p>
+
+    <div class="fund-summary">
+      <div class="fund-stat card"><div class="v">$500K</div><div class="l">Round size · SAFE</div></div>
+      <div class="fund-stat card"><div class="v">$5M</div><div class="l">Post-money cap</div></div>
+      <div class="fund-stat card"><div class="v">18 mo</div><div class="l">Runway target</div></div>
+    </div>
+
+    <div class="fund-bars" id="fundBars">
+      <div class="fund-bar" data-pct="36">
+        <div class="lab">Brand-side growth marketer + content lead<small>First hire · M+1. Goal: 118 → 5,000 signups in 18 months.</small></div>
+        <div class="track"><div class="fill"></div></div>
+        <div class="pct">36%<small>$180K</small></div>
+      </div>
+      <div class="fund-bar" data-pct="18">
+        <div class="lab">Full-time engineer · Sync v5, mobile native, multi-user<small>Second hire · M+9. Reduces founder-as-only-engineer risk.</small></div>
+        <div class="track"><div class="fill"></div></div>
+        <div class="pct">18%<small>$90K</small></div>
+      </div>
+      <div class="fund-bar" data-pct="16">
+        <div class="lab">Paid acquisition + content production<small>No founder-run paid spend. Run by the marketing hire only.</small></div>
+        <div class="track"><div class="fill"></div></div>
+        <div class="pct">16%<small>$80K</small></div>
+      </div>
+      <div class="fund-bar" data-pct="12">
+        <div class="lab">Infrastructure scaling + GfS extended credits<small>Firestore, Vercel functions, Veo 3.1 video gen, observability.</small></div>
+        <div class="track"><div class="fill"></div></div>
+        <div class="pct">12%<small>$60K</small></div>
+      </div>
+      <div class="fund-bar" data-pct="10">
+        <div class="lab">Legal + accounting + corporate setup<small>Delaware C-corp conversion, contracts, compliance.</small></div>
+        <div class="track"><div class="fill"></div></div>
+        <div class="pct">10%<small>$50K</small></div>
+      </div>
+      <div class="fund-bar" data-pct="8">
+        <div class="lab">Founder salary @ $40K/yr<small>Lean by design. Majority of value remains in equity.</small></div>
+        <div class="track"><div class="fill"></div></div>
+        <div class="pct">8%<small>$40K</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Section 5 — Why this team / why now ───────────── -->
+  <section>
+    <div class="section-eyebrow">Section 05 · Why &amp; who</div>
+    <h2 class="section-heading">Why this build. Why now. Why this founder.</h2>
+
+    <div class="why-grid">
+      <div class="col">
+        <div class="bio-card">
+          <div class="bio-name">Jordan Rowe</div>
+          <div class="bio-role">Founder · CEO · Builder</div>
+          <p class="bio-body">Builder of Brilliance, solo, over 18 months. Single-handed end-to-end: product, engineering, design, brand, support. Previously <em>[experience to fill]</em>. Based in Austin, TX. Operates The Rowe Collection (five real brands: Solo Training, Retreats, Reserve, &amp; Co.) which both fund Brilliance and serve as live test environments for every feature.</p>
+        </div>
+
+        <h3 style="margin-top: 36px;">Why this build</h3>
+        <ul class="why-list">
+          <li>The <strong>multi-surface system</strong> (Tier 1/2/3) is the differentiator. Most AI products are one chat. Brilliance is nine surfaces (Chat, Studio, Folio, Pulse, Rhythm, Library, Bloom, Notebook, Thought Board), each tuned to a specific intellectual posture.</li>
+          <li>Identity is the moat AI can't sell: it's user-supplied, user-owned. Brilliance learns brand voice and personal context, then injects that identity before the model sees the prompt.</li>
+          <li>Sovereign-by-design. Bring-your-own-key economics let Brilliance run profitably from day one. No VC needed to subsidize unit margins.</li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <h3>Why now</h3>
+        <ul class="why-list">
+          <li>Consumer AI hit utility threshold in <strong>2025</strong>. The pull is real, not speculative.</li>
+          <li>Most "AI workspaces" target enterprise. The <strong>prosumer + small-brand operator</strong> segment is wide open: 50M+ creators and SMB owners managing multiple brands with no AI-native operating layer.</li>
+          <li><strong>BYOK economics</strong> mean Brilliance can run profitably from a single founder's earnings. We are not raising to keep the lights on. We are raising to compress an 18-month curve into a 9-month curve.</li>
+          <li>Privacy backlash is forming. Sovereign AI (user owns their keys, identity, and data) is positioned for the moment when "AI vendors will train on my data" becomes a category-defining fear.</li>
+        </ul>
+
+        <h3 style="margin-top: 36px;">What v33 already shipped</h3>
+        <ul class="why-list">
+          <li><strong>9 new surfaces</strong> in 60 days: Concierge Desk, Focus Mode, Time Ribbon, Letter Series, Split-Pane, Studio at Work, Thought Board, Pinboard, Constellation.</li>
+          <li><strong>255 tests passing</strong>, 0 console errors, 35+ deploys in the last overnight session. Velocity that does not slow down with funding.</li>
+          <li><strong>Brilliance brand identity</strong> live across product, marketing, email, PDF, and signup flow as of v33.84 (April 2026).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Risks ────────────────────────────────────────── -->
+  <section>
+    <div class="section-eyebrow">Risks · the honest version</div>
+    <h2 class="section-heading">What could go wrong.</h2>
+    <p class="section-sub">A page with only good news reads like a pitch. Here's what we'd push back on if we were on the other side of the table.</p>
+
+    <div class="risks-grid">
+      <div class="risk card">
+        <h4>Solo-founder concentration</h4>
+        <p>Bus factor is 1. Single point of decision and execution. Real risk for an investor underwriting durability.</p>
+        <div class="mit"><strong>Mitigation:</strong> The marketing+engineering hire plan is the explicit answer. First hire (M+1) reduces channel risk; second hire (M+9) reduces engineering risk. Co-founder slot deliberately open for the right person.</div>
+      </div>
+      <div class="risk card">
+        <h4>AI provider lock-in</h4>
+        <p>If OpenAI or Anthropic vertically integrates an "identity layer," Brilliance's wedge narrows.</p>
+        <div class="mit"><strong>Mitigation:</strong> User-owned keys route across three providers (Anthropic, OpenAI, Google) at the user's discretion. Identity data is portable. The platform stays neutral as model commodity intensifies.</div>
+      </div>
+      <div class="risk card">
+        <h4>Distribution · iOS / Android</h4>
+        <p>Brilliance is a PWA today, not a native iOS/macOS app. App Store distribution gates a portion of the prosumer market.</p>
+        <div class="mit"><strong>Mitigation:</strong> v36 plan is a React Native shell. PWA installs already work on iOS Safari with sync intact. Distribution is a 2027 problem, not a 2026 problem.</div>
+      </div>
+      <div class="risk card">
+        <h4>Pricing power · enterprise gap</h4>
+        <p>$9&ndash;$79/mo positions Brilliance as prosumer. Multi-user / org-tier pricing ($500+/mo) is on the roadmap but not built.</p>
+        <div class="mit"><strong>Mitigation:</strong> The architecture (per-brand profiles, share codes, multi-tenant data shapes) is already in place. Enterprise tier is a packaging+permissions exercise, not a rebuild.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Final CTA ─────────────────────────────────────── -->
+  <section id="meeting">
+    <div class="final-cta">
+      <h2>Take a 30-minute meeting.</h2>
+      <p>Live demo. Live numbers. Live model. Q&amp;A. We don't sell the deck. We show the platform and let it speak.</p>
+
+      <div class="meeting-grid">
+        <div class="meeting-step"><div class="min">5</div><div class="lab">Live demo</div></div>
+        <div class="meeting-step"><div class="min">4</div><div class="lab">Numbers · Stripe / Firestore</div></div>
+        <div class="meeting-step"><div class="min">3</div><div class="lab">Walk the model</div></div>
+        <div class="meeting-step"><div class="min">15</div><div class="lab">Q&amp;A</div></div>
+      </div>
+
+      <a class="btn btn-primary" href="mailto:jordanr.rowe@icloud.com?subject=Brilliance%20%E2%80%94%20investor%20intro&amp;body=Hi%20Jordan%2C%0D%0A%0D%0AI%20just%20read%20the%20%2Ffinance%20brief%20and%20would%20like%20to%20schedule%2030%20minutes.%0D%0A%0D%0ABackground%3A%20%5Bfund%2Fname%2Frole%5D%0D%0AThesis%20fit%3A%20%5Boperator%20AI%20%2F%20sovereign%20%2F%20prosumer%20SaaS%5D%0D%0A%0D%0AAvailability%20this%20week%3A%20%5Bdates%5D%0D%0A%0D%0AThanks.">
+        Email Jordan to schedule
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────── -->
+  <footer class="finance-footer">
+    <div class="footer-brand">Brilliance</div>
+    <p class="footer-tagline">Brilliance · Brand &amp; Life Intelligence Platform · by RoweOS.</p>
+    <div class="footer-links">
+      <a href="/" class="footer-link">roweos.com</a>
+      <a href="/portfolio" class="footer-link">Portfolio</a>
+      <a href="/purchase" class="footer-link">Pricing</a>
+      <a href="/info" class="footer-link">About</a>
+      <a href="/privacy" class="footer-link">Privacy</a>
+      <a href="/terms" class="footer-link">Terms</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Light mode toggle via ?light query ────────────────
+  if (location.search.indexOf('light') !== -1) {
+    document.documentElement.classList.add('light-mode');
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', '#f5f3ee');
+  }
+
+  // ── Number formatter ─────────────────────────────────
+  function fmt(n) {
+    if (!isFinite(n) || isNaN(n)) return '—';
+    n = Math.round(n);
+    if (n >= 1000000) {
+      var m = (n / 1000000);
+      var s = m >= 100 ? m.toFixed(0) : m.toFixed(2);
+      s = s.replace(/\.?0+$/, '');
+      return '$' + s + 'M';
+    }
+    if (n >= 1000) {
+      return '$' + Math.round(n / 1000) + 'K';
+    }
+    return '$' + n;
+  }
+
+  // ── Calculator ───────────────────────────────────────
+  function recompute(row) {
+    var signups = parseFloat(row.querySelector('[data-input="signups"]').value) || 0;
+    var conv = parseFloat(row.querySelector('[data-input="conv"]').value) || 0;
+    var arpu = parseFloat(row.querySelector('[data-input="arpu"]').value) || 0;
+    var yr1 = signups * (conv / 100) * arpu * 12;
+    var yr2 = yr1 * 3;
+    var yr3 = yr2 * 2.5;
+    row.querySelector('[data-out="yr1"]').textContent = fmt(yr1);
+    row.querySelector('[data-out="yr2"]').textContent = fmt(yr2);
+    row.querySelector('[data-out="yr3"]').textContent = fmt(yr3);
+  }
+  function recomputeAll() {
+    var rows = document.querySelectorAll('.proj-row');
+    for (var i = 0; i < rows.length; i++) recompute(rows[i]);
+  }
+  document.addEventListener('input', function(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('proj-input')) {
+      var row = e.target.closest('.proj-row');
+      if (row) recompute(row);
+    }
+  });
+  recomputeAll();
+
+  // ── Use-of-funds bars: animate fills on load ────────
+  function animateBars() {
+    var bars = document.querySelectorAll('.fund-bar');
+    for (var i = 0; i < bars.length; i++) {
+      (function(bar, idx) {
+        setTimeout(function() {
+          var pct = parseFloat(bar.getAttribute('data-pct')) || 0;
+          var fill = bar.querySelector('.fill');
+          if (fill) fill.style.width = pct + '%';
+        }, 120 + idx * 70);
+      })(bars[i], i);
+    }
+  }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) {
+          animateBars();
+          io.disconnect();
+          break;
+        }
+      }
+    }, { threshold: 0.3 });
+    var fundEl = document.getElementById('fundBars');
+    if (fundEl) io.observe(fundEl);
+  } else {
+    animateBars();
+  }
+
+  // ── Signup curve · vanilla SVG line chart ──────────
+  function renderCurve() {
+    var host = document.getElementById('signupCurve');
+    if (!host) return;
+    // Mock 12 months of growth ending at 118 with last-quarter acceleration.
+    // Replace with live Firestore aggregate (group by createdAt → month) before next deploy.
+    var months = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'];
+    var data   = [3, 6, 10, 16, 22, 30, 39, 50, 64, 80, 98, 118];
+    var w = host.clientWidth || 560;
+    var h = 200;
+    var padL = 36, padR = 16, padT = 18, padB = 28;
+    var maxY = Math.max.apply(null, data);
+    var stepX = (w - padL - padR) / (data.length - 1);
+    var pts = data.map(function(v, i) {
+      var x = padL + i * stepX;
+      var y = padT + (1 - v / maxY) * (h - padT - padB);
+      return [x, y];
+    });
+    function pathLine() {
+      return pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+    }
+    function pathArea() {
+      var d = pathLine();
+      d += ' L' + pts[pts.length - 1][0].toFixed(1) + ',' + (h - padB);
+      d += ' L' + pts[0][0].toFixed(1) + ',' + (h - padB) + ' Z';
+      return d;
+    }
+    // Y-axis ticks: 0, mid, max
+    var yTicks = [0, Math.round(maxY / 2), maxY];
+    var yLines = yTicks.map(function(v) {
+      var y = padT + (1 - v / maxY) * (h - padT - padB);
+      return '<line class="curve-grid" x1="' + padL + '" x2="' + (w - padR) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '"></line>' +
+             '<text class="curve-axis-text" x="' + (padL - 6) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="end">' + v + '</text>';
+    }).join('');
+    // X-axis labels: every 2 months
+    var xLabels = months.map(function(m, i) {
+      if (i % 2 !== 0 && i !== months.length - 1) return '';
+      var x = padL + i * stepX;
+      return '<text class="curve-axis-text" x="' + x.toFixed(1) + '" y="' + (h - 8) + '" text-anchor="middle">' + m + '</text>';
+    }).join('');
+    // Dots
+    var dots = pts.map(function(p, i) {
+      var cls = i === pts.length - 1 ? 'curve-dot last' : 'curve-dot';
+      var r = i === pts.length - 1 ? 4 : 2.5;
+      return '<circle class="' + cls + '" cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + r + '"></circle>';
+    }).join('');
+    var svg =
+      '<svg class="curve-svg" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+        yLines +
+        '<path class="curve-area" d="' + pathArea() + '"></path>' +
+        '<path class="curve-line" d="' + pathLine() + '"></path>' +
+        dots +
+        xLabels +
+      '</svg>';
+    host.innerHTML = svg;
+  }
+  renderCurve();
+  window.addEventListener('resize', function() {
+    // re-render on resize for crisp scaling
+    clearTimeout(window._curveTimer);
+    window._curveTimer = setTimeout(renderCurve, 160);
+  });
+
+  // ── PDF export ─────────────────────────────────────
+  var pdfBtn = document.getElementById('downloadPdfBtn');
+  if (pdfBtn) {
+    pdfBtn.addEventListener('click', function() {
+      var origLabel = pdfBtn.innerHTML;
+      pdfBtn.disabled = true;
+      pdfBtn.innerHTML = 'Generating...';
+      document.body.classList.add('pdf-mode');
+
+      var element = document.getElementById('financePage');
+      var opt = {
+        margin: [10, 10],
+        filename: 'Brilliance-Finance-Brief-2026.pdf',
+        image: { type: 'jpeg', quality: 0.96 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: document.documentElement.classList.contains('light-mode') ? '#f5f3ee' : '#0a0a0a',
+          windowWidth: 1200
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
+      if (typeof html2pdf === 'undefined') {
+        document.body.classList.remove('pdf-mode');
+        pdfBtn.disabled = false;
+        pdfBtn.innerHTML = origLabel;
+        alert('PDF library failed to load. Try a hard refresh.');
+        return;
+      }
+      html2pdf().set(opt).from(element).save().then(function() {
+        document.body.classList.remove('pdf-mode');
+        pdfBtn.disabled = false;
+        pdfBtn.innerHTML = origLabel;
+      }).catch(function() {
+        document.body.classList.remove('pdf-mode');
+        pdfBtn.disabled = false;
+        pdfBtn.innerHTML = origLabel;
+      });
+    });
+  }
+
+})();
+</script>
+
+</body>
+</html>
