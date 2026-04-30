@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RoweOS - Connecting...</title>
+<title>Brilliance - Connecting...</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#09090b;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center}
@@ -43,14 +43,14 @@ h2{font-size:18px;font-weight:600;margin-bottom:8px}
     if (window.opener) {
       setTimeout(function() { window.close(); }, success ? 1000 : 3000);
     } else {
-      // v24.1: Mobile — show "Return to RoweOS" with roweos.com domain
+      // v24.1: Mobile — show "Return to Brilliance" with roweos.com domain
       var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       if (isMobile && success) {
         spinnerEl.style.display = 'none';
         var returnUrl = 'https://roweos.com' + (_detectedPlatform ? '?social_callback=' + _detectedPlatform : '');
         statusEl.innerHTML = '<span style="color:#22c55e;font-weight:600;">Connected!</span><br><br>' +
-          '<a href="' + returnUrl + '" style="display:inline-block;background:#a89878;color:#fff;padding:12px 32px;font-size:15px;font-weight:600;border-radius:10px;text-decoration:none;margin-bottom:12px;">Return to RoweOS</a><br>' +
-          '<span style="font-size:13px;color:rgba(255,255,255,0.4);">Or switch to RoweOS on your Home Screen</span>';
+          '<a href="' + returnUrl + '" style="display:inline-block;background:#a89878;color:#fff;padding:12px 32px;font-size:15px;font-weight:600;border-radius:10px;text-decoration:none;margin-bottom:12px;">Return to Brilliance</a><br>' +
+          '<span style="font-size:13px;color:rgba(255,255,255,0.4);">Or switch to Brilliance on your Home Screen</span>';
         return;
       }
       // Desktop fallback: redirect with query param
