@@ -9,6 +9,7 @@
 <meta name="description" content="Brilliance · operating intelligence for brand & life. Traction, financial baseline, and Series-A path. By RoweOS.">
 <meta name="theme-color" content="#0a0a0a">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -795,6 +796,25 @@ td.num { text-align: right; }
 </style>
 </head>
 <body>
+
+<!-- ── PDF Orientation Modal ────────────────────────────── -->
+<div id="pdfModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
+  <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);padding:40px;max-width:420px;width:90%;text-align:center;border-radius:14px;">
+    <h3 style="color:#e8e8e8;margin-bottom:8px;font-weight:500;font-size:18px;font-family:'DM Sans',sans-serif;">Download PDF</h3>
+    <p style="color:#999;font-size:13px;margin-bottom:28px;font-family:'DM Sans',sans-serif;">Choose your preferred orientation.</p>
+    <div style="display:flex;gap:16px;justify-content:center;margin-bottom:20px;">
+      <button onclick="generatePDF('portrait')" style="flex:1;background:transparent;border:1px solid rgba(255,255,255,0.15);color:#e8e8e8;padding:16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.2s;border-radius:8px;" onmouseover="this.style.borderColor='#a89878';this.style.color='#a89878'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='#e8e8e8'">
+        <svg width="24" height="32" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;"><rect x="1" y="1" width="22" height="30" rx="2"/></svg>
+        Portrait
+      </button>
+      <button onclick="generatePDF('landscape')" style="flex:1;background:transparent;border:1px solid rgba(255,255,255,0.15);color:#e8e8e8;padding:16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.2s;border-radius:8px;" onmouseover="this.style.borderColor='#a89878';this.style.color='#a89878'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='#e8e8e8'">
+        <svg width="32" height="24" viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;"><rect x="1" y="1" width="30" height="22" rx="2"/></svg>
+        Landscape
+      </button>
+    </div>
+    <button onclick="closePdfModal()" style="background:none;border:none;color:#666;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;padding:8px;">Cancel</button>
+  </div>
+</div>
 
 <!-- ── Navigation ─────────────────────────────────────────── -->
 <nav class="top-nav">
