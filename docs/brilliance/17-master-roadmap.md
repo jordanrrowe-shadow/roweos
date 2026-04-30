@@ -198,26 +198,29 @@ Per `15-architecture-playbook.md` Sprint 1.
 - Test signature verification + both purchase types (api_key_purchase, subscription)
 - Run against Stripe's webhook tester in CI
 
-### Sprint 4 — Evolve Phase 1 (3 weeks)
-Per `14-evolve.md` Phase 1.
+### Sprint 4 — Evolve Foundation + Sprint A (Pulse Dashboard, 2 weeks)
+Per `14-evolve.md` v0.2 Sprint A.
 
-- Build `services/evolve/skills` (Skills CRUD + Constellation map view)
-- Build `services/evolve/sources` (Sources CRUD + Living Document view)
-- Cross-link Skills ↔ Sources
-- AI summarize source via `services/agents`
-- Tests
-- Wire into sidebar nav as new view "Evolve"
+- `services/evolve/state.ts` — Zustand store + `EvolveProfile` type
+- `services/evolve/prompt-injector.ts` — `generateEvolveSystemPrompt(profile)` (the Translator pattern)
+- `EvolveDashboard.tsx` — countdown + Pomodoro 25/5 + XP bar + tutor-pose Brilli
+- Wire into Pulse view (new "Today's Evolve load" card)
+- Sidebar nav adds "Evolve" view
+- Tests for prompt injection + state mutations
 
-**Deliverable:** Evolve view live with Skills + Sources tabs. First feature built entirely under the architecture playbook. Reference implementation for all future modules.
+**Deliverable:** Pulse Dashboard (Pillar I) live; user can set targetGoal + cognitiveProfile; daily countdown visible.
 
 ### v33.5 success criteria
 1. `npm run build` produces a deployable bundle from a clean checkout in <30s
 2. `npm test` runs 50+ tests in <10s, all passing
 3. Build pipeline used by `deploy.sh`
 4. `services/sync`, `services/agents`, `services/stripe` all typed and tested
-5. Evolve Phase 1 deployed; existing users see new "Evolve" tab
+5. Evolve Sprints A + B deployed (Pulse Dashboard + Liquid Rhythm Planner); existing users see new "Evolve" tab with countdown + 3 daily micro-tasks + Recalibrate button
 6. CLAUDE.md updated with development workflow + module organization
 7. Memory updated; `project_brilliance_v33.md` extended with v33.5 status
+
+### Why two Evolve sprints land in v33.5 (not all in v34)
+Sprints A + B (Pulse Dashboard + Liquid Rhythm) ship in v33.5 because they prove the architecture playbook works. The user has a working Evolve experience earlier — a target goal, a daily load, a recalibrate button — even before the Quiz Engine + Translator + Verifier ship in v34. This phased approach lets users start using Evolve as a study planner immediately, then upgrade to the full multi-model pipeline as v34 unfolds.
 
 ---
 
@@ -237,12 +240,17 @@ Per `16-sync-v5.md`.
 - Weeks 14-17: 30-day stability period; v4 retirement
 - Week 17: decommission v4 implementation files
 
-### Track 2 — Evolve Phase 2 + 3 (5 weeks)
-Per `14-evolve.md` Phases 2, 3.
+### Track 2 — Evolve Sprints B-G (12 weeks)
+Per `14-evolve.md` v0.2 build plan.
 
-- Phase 2 (2 weeks): Reflections via Notebook integration, Spaced Repetition, Pulse integration
-- Phase 3 (2 weeks): Brand SOPs, Pinboard view, agent prompt injection
-- Phase 4 (1 week): cross-surface polish (History timeline markers, Identity skill focus, Brilli tutor pose)
+- **Sprint B** (2 wks): Liquid Rhythm Planner — `recalibrateMomentum()` algorithm + UI + framer-motion micro-interactions. Anti-ADHD discipline. (Pillar II)
+- **Sprint C** (3 wks): Infinite Assessment Engine — nightly Gemini Deep Research → GPT-5.5 Thinking → JSON questions → QuizCard with Why/Why Not Matrix. (Pillar III, the heart of Evolve)
+- **Sprint D** (1.5 wks): Context Translator — Claude 4.7 Opus two-pane mini-app. (Pillar IV)
+- **Sprint E** (1.5 wks): Deep Verification Studio — Gemini + GPT-5.5 Pro peer-review with VERIFIED/CORRECTED badge + citations. (Pillar V)
+- **Sprint F** (2 wks): Storage Layer — Skills/Sources/Reflections/SOPs Collections via sync v5; Constellation + Library + Notebook integration.
+- **Sprint G** (2 wks): Veo 3.1 Bonus — auto-detect 3+ failures on spatial concepts → trigger Veo → save video to Library. Cross-surface polish (History markers, Identity feed).
+
+**Total Evolve scope: ~14 weeks across v33.5 + v34** (was ~8 weeks in v0.1; the PDF added Liquid Rhythm, Multi-model Quiz Engine, Translator, Verifier, Veo as first-class capabilities).
 
 ### Track 3 — Tier 2 surfaces (8 weeks)
 Per `12-surface-system.md` Tier 2.
