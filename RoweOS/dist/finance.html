@@ -469,6 +469,10 @@ td.num { text-align: right; }
 }
 .footer-link:hover { color: var(--gold); }
 
+/* ── PDF cover (print only) ───────────────────────────────── */
+
+.print-cover { display: none; }
+
 /* ── Print / Save-as-PDF ──────────────────────────────────── */
 
 @media print {
@@ -608,6 +612,112 @@ td.num { text-align: right; }
   /* Avoid splitting elements awkwardly */
   h1, h2, h3, h4, .card, .risk, .fund-bar, .proj-row { page-break-inside: avoid !important; break-inside: avoid !important; }
   h1, h2, h3 { page-break-after: avoid !important; }
+
+  /* Cards inside CSS Grid don't honor page-break-inside.
+     Convert grids to block flow so each card flows independently. */
+  .traction-grid {
+    display: block !important;
+  }
+  .traction-grid > .card {
+    display: block !important;
+    width: 100% !important;
+    grid-column: auto !important;
+    margin: 0 0 10px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .proj-notes { display: block !important; }
+  .proj-notes > .proj-note { margin-bottom: 12px !important; }
+  .why-grid { display: block !important; }
+  .why-grid > .col { margin-bottom: 18px !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+  .risks-grid { display: block !important; }
+  .risks-grid > .risk { margin: 0 0 10px !important; width: 100% !important; }
+  .fund-bars > .fund-bar { page-break-inside: avoid !important; break-inside: avoid !important; }
+
+  /* ── Cover page (print-only) ────────────────────── */
+  .print-cover {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    text-align: center;
+    background: #0a0a0a !important;
+    color: #e8e8e8 !important;
+    padding: 60px 40px;
+    margin: 0 !important;
+    position: relative;
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border: none !important;
+  }
+  .print-cover .cover-frame {
+    position: absolute;
+    inset: 28px;
+    border: 1px solid rgba(168, 152, 120, 0.42) !important;
+    pointer-events: none;
+  }
+  .print-cover .cover-logo {
+    width: 220px;
+    height: auto;
+    mix-blend-mode: lighten;
+    margin-bottom: 56px;
+  }
+  .print-cover .cover-eyebrow {
+    font-size: 13px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #a89878 !important;
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+  .print-cover .cover-year {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 64px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: #e8e8e8 !important;
+    margin-bottom: 24px;
+    line-height: 1;
+  }
+  .print-cover .cover-divider {
+    width: 60px;
+    height: 1px;
+    background: rgba(168, 152, 120, 0.55) !important;
+    margin: 0 auto 24px;
+  }
+  .print-cover .cover-meta {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: #aaa !important;
+    margin-bottom: 8px;
+  }
+  .print-cover .cover-tagline {
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    color: #a89878 !important;
+    margin-bottom: 36px;
+  }
+  .print-cover .cover-recipient {
+    font-size: 10.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #888 !important;
+  }
+  .print-cover .cover-confidential {
+    position: absolute;
+    bottom: 56px;
+    left: 0;
+    right: 0;
+    font-size: 9.5px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #666 !important;
+  }
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
@@ -671,6 +781,19 @@ td.num { text-align: right; }
 </nav>
 
 <div class="finance-page" id="financePage">
+
+  <!-- ── Cover page (print only) ──────────────────────── -->
+  <section class="print-cover" aria-hidden="true">
+    <div class="cover-frame"></div>
+    <img src="/images/logo-full.png" alt="Brilliance" class="cover-logo">
+    <div class="cover-eyebrow">Financial Brief</div>
+    <div class="cover-year">2026</div>
+    <div class="cover-divider"></div>
+    <div class="cover-meta">The Rowe Collection LLC &middot; Austin, Texas</div>
+    <div class="cover-tagline">Brilliance &middot; Brand &amp; Life Intelligence Platform &middot; by RoweOS</div>
+    <div class="cover-recipient">Google for Startups Recipient</div>
+    <div class="cover-confidential">Confidential &middot; The Rowe Collection LLC</div>
+  </section>
 
   <!-- ── Section 1 — Hero + stat strip ──────────────────── -->
   <section class="hero">
