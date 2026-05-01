@@ -685,7 +685,7 @@ function buildBrillianceTransition(userName, recipientId) {
   parts.push('<p style="color:#888;font-size:12px;line-height:1.7;margin:8px 0 0;text-align:center;">Part of the Google for Startups Cloud Program. Built by The Rowe Collection in Austin, TX.</p>');
 
   return {
-    subject: 'RoweOS is now Brilliance — what changed (and how to keep building)',
+    subject: 'Welcome to Brilliance. What changed, and how we keep building.',
     html: wrapEmail('Transition Announcement', parts.join('\n'), recipientId, 'brilliance_transition')
   };
 }
