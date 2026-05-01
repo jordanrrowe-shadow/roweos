@@ -768,7 +768,11 @@ module.exports = async function handler(req, res) {
     }
 
     // Validate template
-    var validTemplates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info', 'founder_lifetime_offer', 'welcome'];
+    // v34.29: Added `brilliance_transition` to the whitelist. v34.8 added the
+    // server `case` + `buildBrillianceTransition()` builder but missed updating
+    // this validation list, so admin sends were rejected with 400 "Invalid
+    // template" before they ever reached the builder.
+    var validTemplates = ['onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info', 'founder_lifetime_offer', 'welcome', 'brilliance_transition'];
     if (validTemplates.indexOf(template) === -1) {
       return res.status(400).json({ error: 'Invalid template. Must be one of: ' + validTemplates.join(', ') });
     }
