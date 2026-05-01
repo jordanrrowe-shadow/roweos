@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing Brilliance - The Operating System For Brilliant Work</title>
+<meta name="description" content="A cinematic introduction to Brilliance, the Intelligence OS by RoweOS. Where AI meets actual brilliance.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:title" content="Introducing Brilliance">
+<meta property="og:description" content="The operating system for brilliant work.">
+<meta property="og:image" content="https://roweos.com/images/brilliance/monogram-circle.png">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="/images/brilliance/monogram.png">
+<link rel="preload" as="image" href="/images/brilliance/monogram-circle.png">
+<link rel="preload" as="image" href="/images/brilliance/wordmark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   INTRODUCING BRILLIANCE - CINEMATIC RELEASE FILM
+   Apple-keynote style intro experience
+   Brand layer: .b-* / --b-*
+   ============================================================ */
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+:root{
+  --b-bg:#000000;
+  --b-bg-soft:#070707;
+  --b-bg-elev:#0e0e0e;
+  --b-surface:rgba(255,255,255,0.025);
+  --b-border:rgba(255,255,255,0.08);
+  --b-hairline:rgba(255,255,255,0.04);
+
+  --gold-0:#fff5dd;
+  --gold-1:#f5e6c8;
+  --gold-2:#e2c79b;
+  --gold-3:#c9a961;
+  --gold-4:#a88a4a;
+  --gold-5:#6b5a3d;
+  --gold-glow:rgba(201,169,97,0.32);
+  --gold-glow-soft:rgba(201,169,97,0.14);
+
+  --b-text:#ece4d8;
+  --b-text-muted:#9e9487;
+  --b-text-dim:#5a5249;
+  --b-text-faint:#34302c;
+
+  --b-serif:'Old Standard TT',Georgia,serif;
+  --b-sans:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --b-track:0.18em;
+  --b-track-luxury:0.32em;
+  --b-track-cinema:0.48em;
+
+  --b-ease:cubic-bezier(0.22,1,0.36,1);
+  --b-ease-cinema:cubic-bezier(0.65,0,0.35,1);
+  --b-ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important}
+}
+
+html{scroll-behavior:smooth;background:#000;color-scheme:dark}
+body{
+  font-family:var(--b-sans);
+  background:var(--b-bg);
+  color:var(--b-text);
+  line-height:1.65;
+  font-weight:300;
+  letter-spacing:0.005em;
+  overflow-x:hidden;
+  min-height:100vh;
+  -webkit-tap-highlight-color:transparent;
+}
+img{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer}
+
+/* ====================== SCROLL PROGRESS RAIL ====================== */
+.b-rail{
+  position:fixed;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold-1),var(--gold-3),var(--gold-2));
+  transform:scaleX(0);transform-origin:left center;
+  z-index:200;
+  transition:transform 0.08s linear;
+  box-shadow:0 0 18px rgba(201,169,97,0.55);
+}
+
+/* ====================== TOP CHROME ====================== */
+.b-chrome{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:18px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  pointer-events:none;
+  opacity:0;animation:b-chrome-in 1.6s var(--b-ease) 4.5s forwards;
+}
+.b-chrome > *{pointer-events:auto}
+@keyframes b-chrome-in{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+
+.b-chrome-mark{
+  display:flex;align-items:center;gap:11px;
+  font-family:var(--b-serif);
+  color:var(--gold-2);
+  font-size:15px;
+  letter-spacing:0.04em;
+}
+.b-chrome-mark img{width:26px;height:26px;border-radius:50%;filter:drop-shadow(0 0 12px var(--gold-glow))}
+.b-chrome-mark span{font-style:italic}
+
+.b-chrome-meta{
+  font-family:var(--b-sans);
+  font-size:10px;
+  letter-spacing:var(--b-track-cinema);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+  display:flex;align-items:center;gap:14px;
+}
+.b-chrome-meta .b-pulse{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gold-3);
+  box-shadow:0 0 12px var(--gold-3);
+  animation:b-pulse 2.4s ease-in-out infinite;
+}
+@keyframes b-pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.4;transform:scale(0.7)}
+}
+
+@media (max-width:720px){
+  .b-chrome{padding:14px 18px}
+  .b-chrome-meta{font-size:9px;letter-spacing:0.3em;gap:8px}
+}
+
+/* ====================== COLD OPEN / PRELOADER ====================== */
+.b-cold{
+  position:fixed;inset:0;z-index:300;
+  background:#000;
+  display:flex;align-items:center;justify-content:center;
+  animation:b-cold-out 1.2s var(--b-ease-cinema) 3.6s forwards;
+  pointer-events:none;
+}
+@keyframes b-cold-out{
+  to{opacity:0;visibility:hidden}
+}
+.b-cold-orb{
+  width:14px;height:14px;border-radius:50%;
+  background:radial-gradient(circle,var(--gold-0),var(--gold-3) 60%,transparent 100%);
+  box-shadow:0 0 60px 8px var(--gold-glow);
+  animation:b-cold-orb 3.6s var(--b-ease-cinema) forwards;
+}
+@keyframes b-cold-orb{
+  0%{transform:scale(0);opacity:0}
+  20%{transform:scale(1);opacity:1}
+  60%{transform:scale(1);opacity:1;box-shadow:0 0 60px 8px var(--gold-glow)}
+  85%{transform:scale(40);opacity:0.6;box-shadow:0 0 200px 80px var(--gold-glow)}
+  100%{transform:scale(80);opacity:0}
+}
+
+/* ====================== SCENE FRAMEWORK ====================== */
+.b-scene{
+  position:relative;
+  min-height:100vh;
+  width:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:120px 32px;
+  overflow:hidden;
+  isolation:isolate;
+}
+.b-scene-inner{
+  position:relative;
+  max-width:1180px;
+  width:100%;
+  text-align:center;
+  z-index:2;
+}
+
+/* Reveal-on-scroll base */
+.b-reveal{opacity:0;transform:translateY(28px);transition:opacity 1.2s var(--b-ease),transform 1.2s var(--b-ease)}
+.b-reveal.b-in{opacity:1;transform:translateY(0)}
+.b-reveal-late{transition-delay:0.2s}
+.b-reveal-late-2{transition-delay:0.45s}
+.b-reveal-late-3{transition-delay:0.7s}
+.b-reveal-late-4{transition-delay:0.95s}
+
+/* ====================== AMBIENT BACKGROUND LAYERS ====================== */
+.b-bg-layer{position:absolute;inset:0;z-index:0;pointer-events:none}
+.b-bg-grain{
+  background:
+    radial-gradient(circle at 20% 30%,rgba(201,169,97,0.06),transparent 55%),
+    radial-gradient(circle at 80% 70%,rgba(201,169,97,0.04),transparent 50%);
+  mix-blend-mode:screen;
+}
+.b-bg-vignette{
+  background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.85) 100%);
+}
+
+/* Floating orbs */
+.b-orbs{position:absolute;inset:0;overflow:hidden}
+.b-orb{
+  position:absolute;
+  width:480px;height:480px;
+  border-radius:50%;
+  filter:blur(80px);
+  opacity:0.6;
+  will-change:transform;
+}
+.b-orb-1{
+  top:-10%;left:-10%;
+  background:radial-gradient(circle,rgba(201,169,97,0.35),transparent 70%);
+  animation:b-orb-float-1 22s ease-in-out infinite;
+}
+.b-orb-2{
+  bottom:-15%;right:-10%;
+  background:radial-gradient(circle,rgba(245,230,200,0.25),transparent 70%);
+  animation:b-orb-float-2 28s ease-in-out infinite;
+}
+.b-orb-3{
+  top:40%;right:30%;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(168,138,74,0.20),transparent 70%);
+  animation:b-orb-float-3 18s ease-in-out infinite;
+}
+@keyframes b-orb-float-1{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(60px,40px) scale(1.08)}
+  66%{transform:translate(-30px,80px) scale(0.94)}
+}
+@keyframes b-orb-float-2{
+  0%,100%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(-80px,-50px) scale(1.12)}
+}
+@keyframes b-orb-float-3{
+  0%,100%{transform:translate(0,0)}
+  50%{transform:translate(-100px,40px)}
+}
+
+/* Particle field */
+.b-stars{position:absolute;inset:0;overflow:hidden;opacity:0.6}
+.b-star{
+  position:absolute;
+  width:2px;height:2px;
+  border-radius:50%;
+  background:var(--gold-1);
+  box-shadow:0 0 6px var(--gold-2);
+  animation:b-twinkle 4s ease-in-out infinite;
+}
+@keyframes b-twinkle{
+  0%,100%{opacity:0.2;transform:scale(0.6)}
+  50%{opacity:1;transform:scale(1)}
+}
+
+/* ====================== TYPOGRAPHY KIT ====================== */
+.b-kicker{
+  font-family:var(--b-sans);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:var(--b-track-cinema);
+  text-transform:uppercase;
+  color:var(--gold-3);
+  margin-bottom:28px;
+  display:inline-flex;align-items:center;gap:14px;
+}
+.b-kicker::before,.b-kicker::after{
+  content:'';display:inline-block;
+  width:32px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-4),transparent);
+}
+.b-kicker.b-left{padding-left:0}
+.b-kicker.b-left::before{display:none}
+
+.b-eyebrow{
+  font-family:var(--b-sans);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+  margin-bottom:18px;
+}
+
+.b-title-cinema{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:clamp(56px,11vw,156px);
+  line-height:0.96;
+  letter-spacing:-0.02em;
+  color:var(--gold-1);
+  background:linear-gradient(180deg,var(--gold-0) 0%,var(--gold-2) 50%,var(--gold-4) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 30px rgba(201,169,97,0.3));
+  margin-bottom:20px;
+}
+
+.b-title{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:clamp(40px,7.5vw,96px);
+  line-height:1.02;
+  letter-spacing:-0.015em;
+  color:var(--b-text);
+  margin-bottom:24px;
+}
+.b-title em{
+  font-style:italic;
+  color:var(--gold-2);
+}
+
+.b-subtitle{
+  font-family:var(--b-sans);
+  font-size:clamp(15px,1.4vw,18px);
+  font-weight:300;
+  line-height:1.65;
+  color:var(--b-text-muted);
+  max-width:620px;
+  margin:0 auto 36px;
+}
+
+.b-italic{
+  font-family:var(--b-serif);
+  font-style:italic;
+  color:var(--gold-2);
+}
+
+/* ====================== WORD-BY-WORD REVEAL ====================== */
+.b-words{display:inline}
+.b-word{
+  display:inline-block;
+  opacity:0;
+  transform:translateY(60%) rotateX(45deg);
+  transform-origin:bottom center;
+  filter:blur(8px);
+  transition:opacity 1.1s var(--b-ease),transform 1.1s var(--b-ease),filter 1.1s var(--b-ease);
+  margin-right:0.18em;
+}
+.b-words.b-in .b-word{opacity:1;transform:translateY(0) rotateX(0deg);filter:blur(0)}
+
+/* Letter reveal */
+.b-letters{display:inline-block}
+.b-letter{
+  display:inline-block;
+  opacity:0;
+  transform:translateY(0.5em);
+  transition:opacity 0.7s var(--b-ease),transform 0.7s var(--b-ease);
+}
+.b-letters.b-in .b-letter{opacity:1;transform:translateY(0)}
+
+/* ====================== SCENE 01 - INTRODUCING ====================== */
+.b-scene-intro{
+  background:
+    radial-gradient(ellipse at center,rgba(201,169,97,0.08),transparent 60%),
+    #000;
+  min-height:120vh;
+  padding-top:18vh;
+}
+.b-intro-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:36px;
+}
+.b-intro-eyebrow{
+  font-family:var(--b-sans);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:var(--b-track-cinema);
+  text-transform:uppercase;
+  color:var(--b-text-muted);
+  opacity:0;animation:b-fadeUp 1.4s var(--b-ease) 4.2s forwards;
+}
+.b-introducing{
+  font-family:var(--b-sans);
+  font-size:clamp(14px,1.3vw,17px);
+  font-weight:300;
+  letter-spacing:var(--b-track-cinema);
+  text-transform:uppercase;
+  color:var(--gold-3);
+  opacity:0;animation:b-fadeUp 1.4s var(--b-ease) 4.6s forwards;
+}
+.b-mark-hero{
+  width:clamp(90px,12vw,140px);
+  height:clamp(90px,12vw,140px);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle,rgba(201,169,97,0.18),transparent 70%);
+  position:relative;
+  opacity:0;
+  animation:b-fadeUp 1.6s var(--b-ease) 5.0s forwards,b-breathe 6s ease-in-out 5s infinite;
+}
+.b-mark-hero img{width:100%;height:100%;border-radius:50%;filter:drop-shadow(0 0 36px rgba(201,169,97,0.55))}
+.b-mark-hero::before,.b-mark-hero::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:1px solid var(--gold-4);
+  opacity:0.3;
+}
+.b-mark-hero::before{animation:b-ring 4s ease-out 5s infinite}
+.b-mark-hero::after{animation:b-ring 4s ease-out 6s infinite}
+@keyframes b-ring{
+  0%{transform:scale(1);opacity:0.4}
+  100%{transform:scale(1.8);opacity:0}
+}
+@keyframes b-breathe{
+  0%,100%{filter:drop-shadow(0 0 30px rgba(201,169,97,0.4))}
+  50%{filter:drop-shadow(0 0 60px rgba(201,169,97,0.7))}
+}
+
+.b-wordmark-cinema{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(72px,14vw,200px);
+  line-height:0.92;
+  letter-spacing:-0.02em;
+  background:linear-gradient(180deg,#ffffff 0%,var(--gold-1) 30%,var(--gold-3) 65%,var(--gold-5) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 40px rgba(201,169,97,0.35));
+  display:inline-block;
+  position:relative;
+}
+.b-wordmark-cinema .b-letter{
+  transition-duration:1.1s;
+}
+
+.b-wordmark-shimmer{
+  position:relative;
+  display:inline-block;
+}
+.b-wordmark-shimmer::after{
+  content:'';position:absolute;
+  top:0;left:-100%;
+  width:50%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,245,221,0.4),transparent);
+  animation:b-shimmer 6s ease-in-out 7s infinite;
+  pointer-events:none;
+}
+@keyframes b-shimmer{
+  0%{left:-100%}
+  60%,100%{left:200%}
+}
+
+.b-tagline-static{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-size:clamp(20px,2.4vw,30px);
+  font-weight:400;
+  line-height:1.5;
+  color:var(--b-text-muted);
+  margin-top:20px;
+  opacity:0;animation:b-fadeUp 1.4s var(--b-ease) 6.2s forwards;
+}
+.b-tagline-static span{color:var(--gold-2)}
+
+.b-scroll-cue{
+  position:absolute;
+  bottom:48px;left:50%;
+  transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  font-family:var(--b-sans);
+  font-size:9px;
+  letter-spacing:var(--b-track-cinema);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+  opacity:0;
+  animation:b-fadeIn 1s var(--b-ease) 7.5s forwards;
+}
+.b-scroll-cue-line{
+  width:1px;height:48px;
+  background:linear-gradient(180deg,var(--gold-4),transparent);
+  position:relative;overflow:hidden;
+}
+.b-scroll-cue-line::after{
+  content:'';position:absolute;top:0;left:0;
+  width:1px;height:14px;
+  background:var(--gold-1);
+  animation:b-scroll-cue 2.4s ease-in-out infinite;
+}
+@keyframes b-scroll-cue{
+  0%{transform:translateY(-14px);opacity:0}
+  30%{opacity:1}
+  100%{transform:translateY(48px);opacity:0}
+}
+
+@keyframes b-fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes b-fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ====================== SCENE 02 - MANIFESTO BEATS ====================== */
+.b-scene-beats{
+  background:linear-gradient(180deg,#000,#050505,#000);
+  min-height:140vh;
+  flex-direction:column;
+}
+.b-beats-stack{
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  width:100%;
+}
+.b-beat{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:clamp(64px,12vw,180px);
+  line-height:1;
+  letter-spacing:-0.025em;
+  color:var(--b-text);
+  margin:24px 0;
+  text-align:center;
+  position:relative;
+}
+.b-beat-1{color:var(--gold-1)}
+.b-beat-2{color:var(--b-text);font-style:italic}
+.b-beat-3{
+  background:linear-gradient(120deg,var(--gold-2),var(--gold-4));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.b-beat-4{color:var(--b-text-muted);font-style:italic}
+
+.b-beat-divider{
+  width:1px;height:80px;
+  background:linear-gradient(180deg,transparent,var(--gold-4),transparent);
+  margin:24px 0;
+  opacity:0;
+  transition:opacity 0.8s var(--b-ease) 0.4s;
+}
+.b-beat-divider.b-in{opacity:1}
+
+/* ====================== SCENE 03 - TAGLINE CYCLE ====================== */
+.b-scene-cycle{
+  background:#000;
+  min-height:100vh;
+}
+.b-cycle-eyebrow{
+  margin-bottom:60px;
+}
+.b-cycle-stage{
+  position:relative;
+  height:clamp(180px,22vw,280px);
+  display:flex;align-items:center;justify-content:center;
+}
+.b-cycle-line{
+  position:absolute;
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(40px,7vw,88px);
+  line-height:1.1;
+  letter-spacing:-0.015em;
+  color:var(--b-text);
+  opacity:0;
+  transform:translateY(24px) scale(0.96);
+  transition:opacity 1.1s var(--b-ease-cinema),transform 1.1s var(--b-ease-cinema);
+  text-align:center;
+  width:90%;
+  max-width:980px;
+}
+.b-cycle-line.b-active{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+.b-cycle-line.b-leaving{
+  opacity:0;
+  transform:translateY(-24px) scale(1.04);
+}
+.b-cycle-line span{
+  color:var(--gold-2);
+  font-style:normal;
+  font-family:var(--b-sans);
+  font-weight:300;
+}
+
+.b-cycle-dots{
+  display:flex;justify-content:center;gap:10px;
+  margin-top:60px;
+}
+.b-cycle-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--b-text-faint);
+  transition:all 0.4s var(--b-ease);
+  cursor:pointer;border:none;padding:0;
+}
+.b-cycle-dot.b-active{
+  width:24px;border-radius:3px;
+  background:var(--gold-3);
+  box-shadow:0 0 12px var(--gold-glow);
+}
+
+/* ====================== SCENE 04 - WITHOUT THE NOISE ====================== */
+.b-scene-noise{
+  background:#000;
+  min-height:120vh;
+  flex-direction:column;
+}
+.b-noise-stage{
+  position:relative;width:100%;
+  display:flex;flex-direction:column;align-items:center;
+}
+.b-noise-grid{
+  position:absolute;inset:0;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+  gap:10px;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 1.4s var(--b-ease);
+}
+.b-noise-grid.b-in{opacity:1;animation:b-noise-out 4s var(--b-ease) 0.6s forwards}
+.b-noise-grid span{
+  display:block;
+  font-family:var(--b-sans);
+  font-size:11px;
+  color:var(--b-text-faint);
+  font-weight:300;
+  letter-spacing:0.04em;
+  opacity:0.5;
+  animation:b-noise-flicker 0.4s ease-in-out infinite alternate;
+}
+@keyframes b-noise-flicker{
+  from{opacity:0.2}to{opacity:0.6}
+}
+@keyframes b-noise-out{
+  0%{opacity:1;filter:blur(0)}
+  100%{opacity:0;filter:blur(20px)}
+}
+
+.b-noise-headline{
+  position:relative;z-index:2;
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(48px,9vw,128px);
+  line-height:1;
+  letter-spacing:-0.02em;
+  color:var(--gold-1);
+  text-align:center;
+  margin-top:20px;
+}
+.b-noise-headline em{
+  font-style:normal;
+  color:var(--b-text);
+  font-family:var(--b-sans);
+  font-weight:200;
+  letter-spacing:0.01em;
+}
+
+.b-noise-sub{
+  margin-top:40px;
+  font-family:var(--b-sans);
+  font-size:clamp(15px,1.5vw,18px);
+  color:var(--b-text-muted);
+  font-weight:300;
+  max-width:580px;
+  text-align:center;
+}
+
+/* ====================== SCENE 05 - FEATURES ORBIT ====================== */
+.b-scene-features{
+  background:linear-gradient(180deg,#000,#080808 50%,#000);
+  min-height:100vh;
+  padding-top:140px;padding-bottom:140px;
+}
+.b-features-head{margin-bottom:80px}
+.b-features-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1px;
+  background:var(--b-border);
+  border:1px solid var(--b-border);
+  border-radius:2px;
+  overflow:hidden;
+}
+.b-feature{
+  background:#000;
+  padding:48px 36px;
+  text-align:left;
+  transition:background 0.5s var(--b-ease);
+  position:relative;
+  overflow:hidden;
+  cursor:default;
+}
+.b-feature::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-3),transparent);
+  transform:translateX(-100%);
+  transition:transform 0.8s var(--b-ease);
+}
+.b-feature:hover{background:#0a0a0a}
+.b-feature:hover::before{transform:translateX(0)}
+.b-feature-num{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-size:14px;
+  color:var(--b-text-dim);
+  margin-bottom:24px;
+  letter-spacing:0.04em;
+}
+.b-feature-icon{
+  width:36px;height:36px;
+  margin-bottom:24px;
+  color:var(--gold-3);
+  transition:transform 0.6s var(--b-ease),color 0.4s var(--b-ease);
+}
+.b-feature:hover .b-feature-icon{
+  transform:scale(1.12) rotate(-5deg);
+  color:var(--gold-2);
+  filter:drop-shadow(0 0 12px var(--gold-glow));
+}
+.b-feature-icon svg{width:100%;height:100%;stroke-width:1.2}
+.b-feature-name{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-size:clamp(22px,2.2vw,30px);
+  font-weight:400;
+  color:var(--b-text);
+  margin-bottom:12px;
+  line-height:1.2;
+}
+.b-feature-desc{
+  font-family:var(--b-sans);
+  font-size:13px;
+  font-weight:300;
+  line-height:1.65;
+  color:var(--b-text-muted);
+}
+
+@media (max-width:900px){
+  .b-features-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:580px){
+  .b-features-grid{grid-template-columns:1fr}
+  .b-feature{padding:36px 28px}
+}
+
+/* ====================== SCENE 06 - VS COMPETITORS ====================== */
+.b-scene-vs{
+  background:#000;
+  min-height:100vh;
+  padding-top:140px;padding-bottom:140px;
+}
+.b-vs-head{margin-bottom:80px;text-align:center}
+.b-vs-title{
+  font-family:var(--b-serif);
+  font-weight:400;
+  font-size:clamp(44px,8vw,108px);
+  line-height:1;
+  letter-spacing:-0.02em;
+  color:var(--b-text);
+  margin-bottom:24px;
+}
+.b-vs-title strong{
+  font-weight:400;
+  color:var(--gold-2);
+  font-style:italic;
+}
+
+.b-vs-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  align-items:stretch;
+}
+.b-vs-col{
+  border:1px solid var(--b-border);
+  border-radius:2px;
+  padding:48px 40px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.015),transparent);
+  position:relative;
+}
+.b-vs-col-them{opacity:0.85}
+.b-vs-col-us{
+  border-color:var(--gold-4);
+  background:linear-gradient(180deg,rgba(201,169,97,0.06),rgba(201,169,97,0.01));
+  box-shadow:0 0 60px rgba(201,169,97,0.08) inset;
+}
+.b-vs-label{
+  font-family:var(--b-sans);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+  margin-bottom:12px;
+}
+.b-vs-col-us .b-vs-label{color:var(--gold-3)}
+.b-vs-name{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-size:clamp(28px,3.5vw,42px);
+  font-weight:400;
+  color:var(--b-text);
+  margin-bottom:36px;
+  line-height:1.1;
+}
+.b-vs-col-us .b-vs-name{color:var(--gold-1)}
+
+.b-vs-list{
+  list-style:none;
+  display:flex;flex-direction:column;gap:18px;
+}
+.b-vs-item{
+  font-family:var(--b-sans);
+  font-size:14px;
+  font-weight:300;
+  line-height:1.55;
+  color:var(--b-text-muted);
+  padding-left:28px;
+  position:relative;
+}
+.b-vs-item::before{
+  content:'';position:absolute;
+  left:0;top:9px;
+  width:14px;height:1px;
+  background:var(--b-text-faint);
+}
+.b-vs-col-us .b-vs-item{color:var(--b-text)}
+.b-vs-col-us .b-vs-item::before{
+  background:var(--gold-3);
+  box-shadow:0 0 8px var(--gold-glow);
+}
+
+@media (max-width:760px){
+  .b-vs-grid{grid-template-columns:1fr}
+  .b-vs-col{padding:36px 28px}
+}
+
+/* ====================== SCENE 07 - LIVING TAGLINE WALL ====================== */
+.b-scene-wall{
+  background:linear-gradient(180deg,#000,#070707,#000);
+  min-height:120vh;
+  padding:160px 32px;
+}
+.b-wall-eyebrow{margin-bottom:60px}
+.b-wall{
+  display:flex;flex-direction:column;gap:0;
+  border-top:1px solid var(--b-hairline);
+}
+.b-wall-row{
+  display:grid;
+  grid-template-columns:80px 1fr auto;
+  gap:36px;align-items:center;
+  padding:32px 0;
+  border-bottom:1px solid var(--b-hairline);
+  transition:background 0.5s var(--b-ease),padding 0.5s var(--b-ease);
+  cursor:default;
+}
+.b-wall-row:hover{
+  background:linear-gradient(90deg,transparent,rgba(201,169,97,0.04),transparent);
+  padding-left:18px;padding-right:18px;
+}
+.b-wall-num{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-size:14px;
+  color:var(--b-text-dim);
+  letter-spacing:0.06em;
+}
+.b-wall-line{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(22px,3vw,38px);
+  line-height:1.25;
+  color:var(--b-text);
+  letter-spacing:-0.005em;
+  text-align:left;
+  transition:color 0.5s var(--b-ease),transform 0.5s var(--b-ease);
+}
+.b-wall-row:hover .b-wall-line{
+  color:var(--gold-1);
+  transform:translateX(8px);
+}
+.b-wall-tag{
+  font-family:var(--b-sans);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+  white-space:nowrap;
+}
+.b-wall-row:hover .b-wall-tag{color:var(--gold-3)}
+
+@media (max-width:720px){
+  .b-wall-row{grid-template-columns:48px 1fr;gap:18px;padding:22px 0}
+  .b-wall-tag{display:none}
+}
+
+/* ====================== SCENE 08 - LIVES HERE ====================== */
+.b-scene-lives{
+  background:radial-gradient(ellipse at center,rgba(201,169,97,0.12),#000 60%);
+  min-height:120vh;
+  flex-direction:column;
+}
+.b-lives-stage{
+  display:flex;flex-direction:column;align-items:center;gap:48px;
+  position:relative;
+}
+.b-lives-orb{
+  width:clamp(180px,24vw,320px);
+  height:clamp(180px,24vw,320px);
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,var(--gold-0) 0%,var(--gold-2) 25%,var(--gold-3) 55%,var(--gold-5) 90%);
+  box-shadow:
+    0 0 100px 20px rgba(201,169,97,0.5),
+    0 0 200px 40px rgba(201,169,97,0.25),
+    inset -20px -30px 80px rgba(0,0,0,0.4),
+    inset 20px 30px 60px rgba(255,245,221,0.3);
+  animation:b-orb-pulse 8s ease-in-out infinite;
+  position:relative;
+}
+.b-lives-orb::before,.b-lives-orb::after{
+  content:'';position:absolute;border-radius:50%;
+  border:1px solid rgba(201,169,97,0.3);
+  pointer-events:none;
+}
+.b-lives-orb::before{
+  inset:-30px;
+  animation:b-ring-out 6s ease-out infinite;
+}
+.b-lives-orb::after{
+  inset:-60px;
+  animation:b-ring-out 6s ease-out 2s infinite;
+}
+@keyframes b-orb-pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.04)}
+}
+@keyframes b-ring-out{
+  0%{transform:scale(1);opacity:0.6}
+  100%{transform:scale(1.5);opacity:0}
+}
+
+.b-lives-headline{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(56px,11vw,156px);
+  line-height:0.96;
+  letter-spacing:-0.02em;
+  background:linear-gradient(180deg,var(--gold-0),var(--gold-2) 60%,var(--gold-4));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-align:center;
+}
+.b-lives-sub{
+  font-family:var(--b-sans);
+  font-size:clamp(15px,1.5vw,18px);
+  font-weight:300;
+  color:var(--b-text-muted);
+  max-width:560px;
+  text-align:center;
+  line-height:1.65;
+}
+
+/* ====================== SCENE 09 - FINAL CTA ====================== */
+.b-scene-final{
+  background:#000;
+  min-height:100vh;
+  padding:160px 32px 100px;
+  flex-direction:column;
+}
+.b-final-stage{
+  display:flex;flex-direction:column;align-items:center;gap:36px;
+  text-align:center;
+}
+.b-final-eyebrow{
+  font-family:var(--b-sans);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:var(--b-track-cinema);
+  text-transform:uppercase;
+  color:var(--gold-3);
+}
+.b-final-title{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-weight:400;
+  font-size:clamp(64px,14vw,200px);
+  line-height:0.94;
+  letter-spacing:-0.025em;
+  background:linear-gradient(180deg,#fff,var(--gold-1) 30%,var(--gold-3) 70%,var(--gold-5));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 40px rgba(201,169,97,0.4));
+}
+.b-final-sub{
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-size:clamp(20px,2.4vw,28px);
+  font-weight:400;
+  color:var(--b-text-muted);
+  margin-top:-8px;
+}
+.b-final-actions{
+  display:flex;gap:16px;flex-wrap:wrap;justify-content:center;
+  margin-top:20px;
+}
+.b-cta-primary{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:18px 42px;
+  background:linear-gradient(135deg,var(--gold-1),var(--gold-3) 60%,var(--gold-4));
+  color:#000;
+  border:none;
+  border-radius:2px;
+  font-family:var(--b-sans);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all 0.4s var(--b-ease);
+  position:relative;overflow:hidden;
+  text-decoration:none;
+}
+.b-cta-primary span{position:relative;z-index:2}
+.b-cta-primary::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--gold-0),var(--gold-1) 60%,var(--gold-2));
+  opacity:0;transition:opacity 0.4s var(--b-ease);
+}
+.b-cta-primary::after{
+  content:'';position:absolute;
+  top:0;left:-150%;
+  width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);
+  transition:left 0.6s var(--b-ease);
+  pointer-events:none;
+}
+.b-cta-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 50px rgba(201,169,97,0.45);
+}
+.b-cta-primary:hover::before{opacity:1}
+.b-cta-primary:hover::after{left:200%}
+
+.b-cta-secondary{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:18px 36px;
+  background:transparent;
+  color:var(--gold-2);
+  border:1px solid var(--gold-5);
+  border-radius:2px;
+  font-family:var(--b-sans);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all 0.4s var(--b-ease);
+  text-decoration:none;
+}
+.b-cta-secondary:hover{
+  border-color:var(--gold-3);
+  color:var(--gold-1);
+  transform:translateY(-2px);
+  box-shadow:0 0 24px rgba(201,169,97,0.18);
+}
+
+/* ====================== FOOTER ====================== */
+.b-foot{
+  border-top:1px solid var(--b-hairline);
+  padding:48px 32px;
+  text-align:center;
+  font-family:var(--b-sans);
+  font-size:11px;
+  letter-spacing:var(--b-track-luxury);
+  text-transform:uppercase;
+  color:var(--b-text-dim);
+}
+.b-foot-mark{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-bottom:16px;
+  font-family:var(--b-serif);
+  font-style:italic;
+  font-size:14px;
+  letter-spacing:0.04em;
+  color:var(--gold-3);
+  text-transform:none;
+}
+.b-foot-mark img{width:22px;height:22px;border-radius:50%}
+.b-foot-links{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:6px}
+.b-foot-links a{color:var(--b-text-dim);text-decoration:none;transition:color 0.25s var(--b-ease)}
+.b-foot-links a:hover{color:var(--gold-2)}
+
+/* ====================== UTILITIES ====================== */
+.b-divider-cinema{
+  width:60px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-4),transparent);
+  margin:32px auto;
+}
+.b-mono{
+  font-family:'SF Mono',Menlo,monospace;
+  font-size:11px;
+  letter-spacing:0.06em;
+  color:var(--b-text-dim);
+}
+
+/* Subtle parallax helper */
+.b-parallax{will-change:transform;transition:transform 0.1s linear}
+</style>
+</head>
+<body>
+
+<!-- Cold open / preloader -->
+<div class="b-cold" aria-hidden="true">
+  <div class="b-cold-orb"></div>
+</div>
+
+<!-- Scroll progress rail -->
+<div class="b-rail" id="bRail"></div>
+
+<!-- Top chrome -->
+<div class="b-chrome">
+  <div class="b-chrome-mark">
+    <img src="/images/brilliance/monogram-circle.png" alt="">
+    <span>Brilliance</span>
+  </div>
+  <div class="b-chrome-meta">
+    <span class="b-pulse"></span>
+    <span>Release Film - 2026</span>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCENE 01 - COLD OPEN / INTRODUCING
+     ============================================================ -->
+<section class="b-scene b-scene-intro">
+  <div class="b-bg-layer b-bg-grain"></div>
+  <div class="b-orbs">
+    <div class="b-orb b-orb-1 b-parallax" data-parallax="0.15"></div>
+    <div class="b-orb b-orb-2 b-parallax" data-parallax="0.25"></div>
+    <div class="b-orb b-orb-3 b-parallax" data-parallax="0.10"></div>
+  </div>
+  <div class="b-stars" id="bStars"></div>
+  <div class="b-bg-layer b-bg-vignette"></div>
+
+  <div class="b-scene-inner">
+    <div class="b-intro-wrap">
+      <div class="b-intro-eyebrow">A film by RoweOS</div>
+
+      <div class="b-mark-hero">
+        <img src="/images/brilliance/monogram-circle.png" alt="Brilliance monogram">
+      </div>
+
+      <div class="b-introducing">Introducing</div>
+
+      <div class="b-wordmark-shimmer">
+        <h1 class="b-wordmark-cinema b-letters" data-letters="Brilliance">Brilliance</h1>
+      </div>
+
+      <p class="b-tagline-static">Intelligence OS, by <span>RoweOS</span>.</p>
+    </div>
+  </div>
+
+  <div class="b-scroll-cue">
+    <span>Scroll</span>
+    <div class="b-scroll-cue-line"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 02 - FOUR-BEAT MANIFESTO
+     ============================================================ -->
+<section class="b-scene b-scene-beats">
+  <div class="b-bg-layer b-bg-grain"></div>
+  <div class="b-orbs">
+    <div class="b-orb b-orb-1 b-parallax" data-parallax="0.12" style="top:20%;left:10%"></div>
+    <div class="b-orb b-orb-2 b-parallax" data-parallax="0.20" style="bottom:10%;right:5%"></div>
+  </div>
+
+  <div class="b-scene-inner">
+    <div class="b-eyebrow b-reveal">Manifesto - movement one</div>
+
+    <div class="b-beats-stack">
+      <h2 class="b-beat b-beat-1 b-reveal"><span class="b-words" data-words="Be Brilliant.">Be Brilliant.</span></h2>
+      <div class="b-beat-divider b-reveal"></div>
+
+      <h2 class="b-beat b-beat-2 b-reveal"><span class="b-words" data-words="Run Brilliant.">Run Brilliant.</span></h2>
+      <div class="b-beat-divider b-reveal"></div>
+
+      <h2 class="b-beat b-beat-3 b-reveal"><span class="b-words" data-words="Think Brilliant.">Think Brilliant.</span></h2>
+      <div class="b-beat-divider b-reveal"></div>
+
+      <h2 class="b-beat b-beat-4 b-reveal"><span class="b-words" data-words="Built Brilliant.">Built Brilliant.</span></h2>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 03 - WITHOUT THE NOISE
+     ============================================================ -->
+<section class="b-scene b-scene-noise">
+  <div class="b-bg-layer b-bg-grain"></div>
+
+  <div class="b-scene-inner">
+    <div class="b-noise-stage">
+      <div class="b-eyebrow b-reveal">Movement two - the clearing</div>
+
+      <div class="b-noise-grid b-reveal" id="bNoiseGrid"></div>
+
+      <h2 class="b-noise-headline b-reveal b-reveal-late">
+        Brilliance, <em>without the noise.</em>
+      </h2>
+
+      <p class="b-noise-sub b-reveal b-reveal-late-2">
+        We removed every dashboard, panel, and alert that was not actually
+        helping you do brilliant work. What is left is the operating system
+        underneath the operating system.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 04 - TAGLINE CYCLE (auto-rotating)
+     ============================================================ -->
+<section class="b-scene b-scene-cycle">
+  <div class="b-orbs">
+    <div class="b-orb b-orb-3 b-parallax" data-parallax="0.18" style="top:30%;left:50%;width:560px;height:560px"></div>
+  </div>
+
+  <div class="b-scene-inner">
+    <div class="b-eyebrow b-cycle-eyebrow b-reveal">Movement three - the lines we live by</div>
+
+    <div class="b-cycle-stage" id="bCycleStage">
+      <div class="b-cycle-line b-active">Brilliant <span>by design.</span></div>
+      <div class="b-cycle-line">Brilliance, <span>delivered.</span></div>
+      <div class="b-cycle-line">Made for <span>brilliant minds.</span></div>
+      <div class="b-cycle-line">One platform. <span>Total brilliance.</span></div>
+      <div class="b-cycle-line">Born brilliant. <span>Built to prove it.</span></div>
+      <div class="b-cycle-line">Intelligence at its <span>most brilliant.</span></div>
+      <div class="b-cycle-line">Where AI meets <span>actual brilliance.</span></div>
+      <div class="b-cycle-line">The brilliant layer <span>beneath your brand.</span></div>
+      <div class="b-cycle-line">AI that runs <span>on brilliance.</span></div>
+      <div class="b-cycle-line">Brilliance, <span>not just intelligence.</span></div>
+    </div>
+
+    <div class="b-cycle-dots" id="bCycleDots"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 05 - WHAT BRILLIANCE DOES (FEATURES)
+     ============================================================ -->
+<section class="b-scene b-scene-features">
+  <div class="b-scene-inner">
+    <div class="b-features-head">
+      <div class="b-eyebrow b-reveal">Movement four - the engine</div>
+      <h2 class="b-title b-reveal b-reveal-late">
+        One platform. <em>Total brilliance.</em>
+      </h2>
+      <p class="b-subtitle b-reveal b-reveal-late-2">
+        Everything you need to run a brand, build a life, and ship brilliant
+        work, on a single intelligence layer that already knows your voice,
+        your standards, and your shape.
+      </p>
+    </div>
+
+    <div class="b-features-grid">
+
+      <div class="b-feature b-reveal">
+        <div class="b-feature-num">01</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg>
+        </div>
+        <h3 class="b-feature-name">Brand Intelligence</h3>
+        <p class="b-feature-desc">
+          Five specialized agents - Strategy, Marketing, Operations,
+          Documents, Intelligence - trained on the brand you actually run,
+          not a generic prompt template.
+        </p>
+      </div>
+
+      <div class="b-feature b-reveal b-reveal-late">
+        <div class="b-feature-num">02</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3 class="b-feature-name">Life Intelligence</h3>
+        <p class="b-feature-desc">
+          A separate operating mode for everything outside the brand.
+          Coaches, calendars, finances, journaling, with the same
+          memory and the same standards.
+        </p>
+      </div>
+
+      <div class="b-feature b-reveal b-reveal-late-2">
+        <div class="b-feature-num">03</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3 class="b-feature-name">Studio</h3>
+        <p class="b-feature-desc">
+          Image, video, document, and post generation in one room.
+          Every output passes through your brand voice and visual
+          standards before you ever see it.
+        </p>
+      </div>
+
+      <div class="b-feature b-reveal">
+        <div class="b-feature-num">04</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3 class="b-feature-name">Automations Lab</h3>
+        <p class="b-feature-desc">
+          Schedule any operation, chain them into pipelines, and let
+          Brilliance run them on its own clock. Cloud-side execution
+          even when the tab is closed.
+        </p>
+      </div>
+
+      <div class="b-feature b-reveal b-reveal-late">
+        <div class="b-feature-num">05</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3 class="b-feature-name">Library &amp; Memory</h3>
+        <p class="b-feature-desc">
+          Every conversation, file, asset, and decision becomes context.
+          Brilliance does not start from zero each time you open it.
+        </p>
+      </div>
+
+      <div class="b-feature b-reveal b-reveal-late-2">
+        <div class="b-feature-num">06</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3 class="b-feature-name">Pulse &amp; Rhythm</h3>
+        <p class="b-feature-desc">
+          A unified command center for goals, focus, and execution.
+          Brilliance keeps the rhythm so you can stay in the work.
+        </p>
+      </div>
+
+      <div class="b-feature b-reveal">
+        <div class="b-feature-num">07</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3 class="b-feature-name">Social, Mail &amp; Bloom</h3>
+        <p class="b-feature-desc">
+          Multi-platform publishing, brand-aware mail, and an AI feed
+          that drafts content in your voice every morning. All native,
+          all approved by you.
+        </p>
+      </div>
+
+      <div class="b-feature b-reveal b-reveal-late">
+        <div class="b-feature-num">08</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <h3 class="b-feature-name">Multi-Brand Mode</h3>
+        <p class="b-feature-desc">
+          Run an entire portfolio without losing the thread. Switch
+          brands and the whole platform - voice, agents, files, KPIs -
+          shifts with you.
+        </p>
+      </div>
+
+      <div class="b-feature b-reveal b-reveal-late-2">
+        <div class="b-feature-num">09</div>
+        <div class="b-feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h3 class="b-feature-name">Yours, End-to-End</h3>
+        <p class="b-feature-desc">
+          Bring your own keys, your own data, your own brand voice.
+          Brilliance is the layer beneath - not another silo your
+          information lives inside.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 06 - VS COMPETITORS
+     ============================================================ -->
+<section class="b-scene b-scene-vs">
+  <div class="b-bg-layer b-bg-grain"></div>
+
+  <div class="b-scene-inner">
+    <div class="b-vs-head b-reveal">
+      <div class="b-eyebrow">Movement five - the difference</div>
+      <h2 class="b-vs-title">Where AI meets <strong>actual brilliance.</strong></h2>
+      <p class="b-subtitle">
+        Most platforms wrap a chat box around a model. Brilliance is the
+        operating system the model is supposed to live inside.
+      </p>
+    </div>
+
+    <div class="b-vs-grid">
+
+      <div class="b-vs-col b-vs-col-them b-reveal">
+        <div class="b-vs-label">The category</div>
+        <h3 class="b-vs-name">Generic AI tools.</h3>
+        <ul class="b-vs-list">
+          <li class="b-vs-item">A chat window with no memory of your brand.</li>
+          <li class="b-vs-item">Pricing tied to seats and usage caps.</li>
+          <li class="b-vs-item">A different app for posts, mail, files, and ops.</li>
+          <li class="b-vs-item">One generic voice that sounds like everyone else.</li>
+          <li class="b-vs-item">Integrations stitched together with brittle webhooks.</li>
+          <li class="b-vs-item">Your data scattered across vendors you do not own.</li>
+        </ul>
+      </div>
+
+      <div class="b-vs-col b-vs-col-us b-reveal b-reveal-late">
+        <div class="b-vs-label">The new layer</div>
+        <h3 class="b-vs-name">Brilliance.</h3>
+        <ul class="b-vs-list">
+          <li class="b-vs-item">An intelligence layer that knows your brand by name.</li>
+          <li class="b-vs-item">One platform - studio, automations, mail, social, library.</li>
+          <li class="b-vs-item">Your voice, your visual standards, on every output.</li>
+          <li class="b-vs-item">Multi-brand and life modes on the same surface.</li>
+          <li class="b-vs-item">Cloud-side automations that run when the tab is closed.</li>
+          <li class="b-vs-item">Bring your own keys. Bring your own data. Bring your own voice.</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="b-divider-cinema"></div>
+    <p class="b-subtitle b-reveal" style="margin-top:36px">
+      <span class="b-italic">Brilliance is not another tool in the stack.</span><br>
+      It is the layer the stack should have been built on.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 07 - LIVING TAGLINE WALL
+     ============================================================ -->
+<section class="b-scene b-scene-wall">
+  <div class="b-scene-inner">
+    <div class="b-wall-eyebrow b-reveal">
+      <div class="b-eyebrow">Movement six - the lines</div>
+      <h2 class="b-title">
+        Operate. Build. Think. <em>Run.</em>
+      </h2>
+      <p class="b-subtitle">
+        Every line below is a different angle on the same instrument.
+        Hover any line to feel it.
+      </p>
+    </div>
+
+    <div class="b-wall">
+
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">i</div>
+        <div class="b-wall-line">The operating system for brilliant work.</div>
+        <div class="b-wall-tag">Positioning</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">ii</div>
+        <div class="b-wall-line">Intelligence, by design.</div>
+        <div class="b-wall-tag">Manifesto</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">iii</div>
+        <div class="b-wall-line">Your brand. Running at full brilliance.</div>
+        <div class="b-wall-tag">Brand</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">iv</div>
+        <div class="b-wall-line">Built to run. Built to think. Built to be brilliant.</div>
+        <div class="b-wall-tag">Engineering</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">v</div>
+        <div class="b-wall-line">Your brand at its most brilliant.</div>
+        <div class="b-wall-tag">Brand</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">vi</div>
+        <div class="b-wall-line">Your work. Your voice. Your brilliance.</div>
+        <div class="b-wall-tag">Ownership</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">vii</div>
+        <div class="b-wall-line">Brilliance that belongs to you.</div>
+        <div class="b-wall-tag">Ownership</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">viii</div>
+        <div class="b-wall-line">Finally, a platform as brilliant as your brand.</div>
+        <div class="b-wall-tag">Promise</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">ix</div>
+        <div class="b-wall-line">Operate with brilliance.</div>
+        <div class="b-wall-tag">Verb</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">x</div>
+        <div class="b-wall-line">Build from brilliance.</div>
+        <div class="b-wall-tag">Verb</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">xi</div>
+        <div class="b-wall-line">Think in brilliance.</div>
+        <div class="b-wall-tag">Verb</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">xii</div>
+        <div class="b-wall-line">Run on brilliance.</div>
+        <div class="b-wall-tag">Verb</div>
+      </div>
+      <div class="b-wall-row b-reveal">
+        <div class="b-wall-num">xiii</div>
+        <div class="b-wall-line">Work at the level of brilliance.</div>
+        <div class="b-wall-tag">Aspirational</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 08 - BRILLIANCE LIVES HERE
+     ============================================================ -->
+<section class="b-scene b-scene-lives">
+  <div class="b-bg-layer b-bg-grain"></div>
+
+  <div class="b-scene-inner">
+    <div class="b-lives-stage">
+      <div class="b-lives-orb b-parallax" data-parallax="-0.10"></div>
+
+      <h2 class="b-lives-headline b-reveal">
+        <span class="b-words" data-words="Brilliance lives here.">Brilliance lives here.</span>
+      </h2>
+
+      <p class="b-lives-sub b-reveal b-reveal-late">
+        One layer. One source of voice. One system that already knows
+        what brilliant looks like for you.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SCENE 09 - FINAL CALL
+     ============================================================ -->
+<section class="b-scene b-scene-final">
+  <div class="b-orbs">
+    <div class="b-orb b-orb-1 b-parallax" data-parallax="0.10"></div>
+    <div class="b-orb b-orb-2 b-parallax" data-parallax="0.18"></div>
+  </div>
+
+  <div class="b-scene-inner">
+    <div class="b-final-stage">
+      <div class="b-final-eyebrow b-reveal">The release</div>
+
+      <h2 class="b-final-title b-reveal b-reveal-late">
+        <span class="b-words" data-words="Be Brilliant.">Be Brilliant.</span>
+      </h2>
+
+      <p class="b-final-sub b-reveal b-reveal-late-2">
+        The Intelligence OS is open.
+      </p>
+
+      <div class="b-final-actions b-reveal b-reveal-late-3">
+        <a class="b-cta-primary" href="https://roweos.com">
+          <span>Enter Brilliance</span>
+        </a>
+        <a class="b-cta-secondary" href="/brilliance">
+          <span>Read the manifesto</span>
+        </a>
+      </div>
+
+      <p class="b-mono b-reveal b-reveal-late-4" style="margin-top:48px">
+        Available now at roweos.com - Built by The Rowe Collection.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="b-foot">
+  <div class="b-foot-mark">
+    <img src="/images/brilliance/monogram-circle.png" alt="">
+    <span>Brilliance</span>
+  </div>
+  <div>Intelligence OS by RoweOS - The Rowe Collection LLC, Austin TX</div>
+  <div class="b-foot-links">
+    <a href="/">RoweOS</a>
+    <a href="/brilliance">Brilliance</a>
+    <a href="/info">About</a>
+    <a href="/portfolio">Portfolio</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // ====================== STAR FIELD ======================
+  function buildStars(){
+    var stars = document.getElementById('bStars');
+    if (!stars) return;
+    var count = window.innerWidth < 720 ? 28 : 56;
+    var html = '';
+    for (var i = 0; i < count; i++){
+      var top = (Math.random() * 100).toFixed(2);
+      var left = (Math.random() * 100).toFixed(2);
+      var delay = (Math.random() * 4).toFixed(2);
+      var dur = (3 + Math.random() * 4).toFixed(2);
+      html += '<span class="b-star" style="top:' + top + '%;left:' + left + '%;animation-delay:' + delay + 's;animation-duration:' + dur + 's"></span>';
+    }
+    stars.innerHTML = html;
+  }
+  buildStars();
+
+  // ====================== NOISE GRID ======================
+  function buildNoiseGrid(){
+    var grid = document.getElementById('bNoiseGrid');
+    if (!grid) return;
+    var fragments = [
+      'notif','alert','panel','widget','toast','badge','popup','banner','modal',
+      'metric','dashboard','sidebar','header','footer','overlay','tray','feed',
+      'noise','noise','prompt','tab','window','signal','signal','signal',
+      'ping','beacon','message','status','update','sync','queue'
+    ];
+    var w = window.innerWidth;
+    var count = w < 600 ? 60 : w < 1000 ? 120 : 180;
+    var html = '';
+    for (var i = 0; i < count; i++){
+      var word = fragments[Math.floor(Math.random() * fragments.length)];
+      html += '<span style="animation-delay:' + (Math.random() * 0.4).toFixed(2) + 's">' + word + '</span>';
+    }
+    grid.innerHTML = html;
+  }
+  buildNoiseGrid();
+
+  // ====================== LETTER REVEAL (IntersectionObserver) ======================
+  function prepareLetters(){
+    var nodes = document.querySelectorAll('[data-letters]');
+    nodes.forEach(function(node){
+      var text = node.getAttribute('data-letters');
+      var html = '';
+      for (var i = 0; i < text.length; i++){
+        var ch = text.charAt(i);
+        var safe = ch === ' ' ? '&nbsp;' : ch;
+        var delay = (i * 0.085).toFixed(3);
+        html += '<span class="b-letter" style="transition-delay:' + delay + 's">' + safe + '</span>';
+      }
+      node.innerHTML = html;
+    });
+  }
+  prepareLetters();
+
+  // ====================== WORD REVEAL ======================
+  function prepareWords(){
+    var nodes = document.querySelectorAll('[data-words]');
+    nodes.forEach(function(node){
+      var text = node.getAttribute('data-words');
+      var parts = text.split(' ');
+      var html = '';
+      for (var i = 0; i < parts.length; i++){
+        var delay = (i * 0.14).toFixed(3);
+        html += '<span class="b-word" style="transition-delay:' + delay + 's">' + parts[i] + '</span>';
+      }
+      node.innerHTML = html;
+    });
+  }
+  prepareWords();
+
+  // ====================== FIRE LETTER REVEAL FOR HERO ======================
+  setTimeout(function(){
+    var heroLetters = document.querySelectorAll('.b-scene-intro .b-letters');
+    heroLetters.forEach(function(n){ n.classList.add('b-in'); });
+  }, 5400);
+
+  // ====================== INTERSECTION OBSERVER (reveals + word animations) ======================
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting){
+        entry.target.classList.add('b-in');
+        // Cascade child .b-words and .b-letters within reveal blocks
+        var inner = entry.target.querySelectorAll('.b-words, .b-letters');
+        inner.forEach(function(n){
+          // Stagger slightly so the word animation feels triggered by the reveal
+          setTimeout(function(){ n.classList.add('b-in'); }, 80);
+        });
+        // For wall rows, no need to unobserve - keep cheap
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+
+  document.querySelectorAll('.b-reveal').forEach(function(el){ io.observe(el); });
+
+  // Standalone word/letter spans not nested under a .b-reveal
+  document.querySelectorAll('.b-words, .b-letters').forEach(function(el){
+    if (!el.closest('.b-reveal') && !el.closest('.b-scene-intro')){
+      io.observe(el);
+      el.classList.add('b-reveal');
+    }
+  });
+
+  // ====================== SCROLL PROGRESS RAIL ======================
+  var rail = document.getElementById('bRail');
+  function updateRail(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    var pct = max > 0 ? (h.scrollTop || window.scrollY) / max : 0;
+    rail.style.transform = 'scaleX(' + pct + ')';
+  }
+  updateRail();
+
+  // ====================== PARALLAX ======================
+  var parallaxNodes = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
+  function updateParallax(){
+    var sy = window.scrollY || window.pageYOffset;
+    parallaxNodes.forEach(function(node){
+      var rect = node.getBoundingClientRect();
+      // Only animate when in/near viewport
+      if (rect.bottom < -200 || rect.top > window.innerHeight + 200) return;
+      var speed = parseFloat(node.getAttribute('data-parallax')) || 0;
+      var center = rect.top + rect.height / 2;
+      var offset = (center - window.innerHeight / 2) * speed;
+      node.style.transform = 'translate3d(0,' + (-offset).toFixed(1) + 'px,0)';
+    });
+  }
+
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if (!ticking){
+      requestAnimationFrame(function(){
+        updateRail();
+        updateParallax();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', function(){
+    updateRail();
+    updateParallax();
+  });
+
+  // ====================== TAGLINE CYCLE (auto-rotate + dots) ======================
+  var stage = document.getElementById('bCycleStage');
+  var dotsHost = document.getElementById('bCycleDots');
+  if (stage && dotsHost){
+    var lines = stage.querySelectorAll('.b-cycle-line');
+    var current = 0;
+    var timer = null;
+    var manualUntil = 0;
+
+    // Build dots
+    var dotsHtml = '';
+    for (var i = 0; i < lines.length; i++){
+      dotsHtml += '<button class="b-cycle-dot' + (i === 0 ? ' b-active' : '') + '" data-i="' + i + '" aria-label="Tagline ' + (i + 1) + '"></button>';
+    }
+    dotsHost.innerHTML = dotsHtml;
+
+    var dots = dotsHost.querySelectorAll('.b-cycle-dot');
+
+    function setActive(idx){
+      lines.forEach(function(l, i){
+        l.classList.remove('b-active');
+        l.classList.remove('b-leaving');
+      });
+      lines.forEach(function(l, i){
+        if (i === current) l.classList.add('b-leaving');
+      });
+      current = idx;
+      // After exit animation, swap
+      setTimeout(function(){
+        lines.forEach(function(l){ l.classList.remove('b-leaving'); l.classList.remove('b-active'); });
+        lines[idx].classList.add('b-active');
+      }, 350);
+
+      dots.forEach(function(d, i){
+        d.classList.toggle('b-active', i === idx);
+      });
+    }
+
+    function tick(){
+      var nextIdx = (current + 1) % lines.length;
+      setActive(nextIdx);
+    }
+
+    function start(){
+      stop();
+      timer = setInterval(function(){
+        if (Date.now() < manualUntil) return;
+        tick();
+      }, 4000);
+    }
+    function stop(){ if (timer) clearInterval(timer); timer = null; }
+
+    dots.forEach(function(d){
+      d.addEventListener('click', function(){
+        var idx = parseInt(d.getAttribute('data-i'), 10) || 0;
+        setActive(idx);
+        manualUntil = Date.now() + 8000;
+      });
+    });
+
+    // Only run when scene is visible (battery + perf)
+    var cycleIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) start();
+        else stop();
+      });
+    }, { threshold: 0.2 });
+    cycleIO.observe(stage);
+  }
+
+  // ====================== KEYBOARD SHORTCUT - JUMP TO START ======================
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Home'){ window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    if (e.key === 'End'){ window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }); }
+  });
+
+  // ====================== ACCESSIBLE PRELOAD - REMOVE COLD AFTER ANIMATION ======================
+  setTimeout(function(){
+    var cold = document.querySelector('.b-cold');
+    if (cold && cold.parentNode) cold.parentNode.removeChild(cold);
+  }, 5200);
+})();
+</script>
+
+</body>
+</html>
