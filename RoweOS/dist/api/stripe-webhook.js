@@ -356,6 +356,22 @@ async function sendEmail(to, subject, htmlBody) {
       })
     });
 
+    // v34.66: Log every Stripe-driven send (purchase confirmation, API key delivery,
+    // access key delivery) so the admin Campaigns dashboard sees revenue-tied mail.
+    try {
+      var emailLog = require('./_email-log-helper');
+      var stripeBody = null;
+      try { stripeBody = await resp.clone().json(); } catch (eR) {}
+      await emailLog.write({
+        userEmail: to,
+        template: 'stripe_webhook',
+        subject: subject,
+        status: resp.ok ? 'sent' : 'failed',
+        resendId: (stripeBody && stripeBody.id) || '',
+        sentBy: 'stripe-webhook'
+      });
+    } catch (eL) { console.warn('[Stripe Webhook] email_log helper missing:', eL.message); }
+
     if (!resp.ok) {
       var errText = await resp.text();
       _lastEmailError = 'Resend ' + resp.status + ': ' + errText;

@@ -517,6 +517,20 @@ export default async function handler(req, res) {
           var emailErr = await emailResp.text().catch(function() { return ''; });
           console.warn('[Newsletter] Resend failed:', emailResp.status, emailErr.substring(0, 200));
         }
+        // v34.66: Log every Newsletter welcome send.
+        try {
+          var emailLog = require('./_email-log-helper');
+          var resendBody = null;
+          try { resendBody = await emailResp.clone().json(); } catch (eR) {}
+          await emailLog.write({
+            userEmail: email,
+            template: signupType === 'company' ? 'newsletter_welcome_company' : 'newsletter_welcome_individual',
+            subject: emailSubject,
+            status: emailResp.ok ? 'sent' : 'failed',
+            resendId: (resendBody && resendBody.id) || '',
+            sentBy: 'newsletter'
+          });
+        } catch (eL) { console.warn('[Newsletter] email_log helper missing:', eL.message); }
       } catch(emailErr) {
         console.warn('[Newsletter] Email send error (non-fatal):', emailErr.message);
       }

@@ -1054,7 +1054,22 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
           body: JSON.stringify(resendPayload)
         });
         var resendData = await resendResp.json();
-        if (resendData.statusCode && resendData.statusCode >= 400) {
+        var schedulerSendOk = !(resendData.statusCode && resendData.statusCode >= 400);
+        // v34.66: Log every scheduled email send so the admin Campaigns dashboard
+        // sees automation/pipeline-driven sends, not just admin composer ones.
+        try {
+          var emailLog = require('./_email-log-helper');
+          await emailLog.write({
+            userEmail: emailTo,
+            template: 'scheduler_pipeline',
+            subject: emailSubject,
+            status: schedulerSendOk ? 'sent' : 'failed',
+            resendId: (resendData && resendData.id) || '',
+            error: schedulerSendOk ? '' : JSON.stringify(resendData),
+            sentBy: 'scheduler'
+          });
+        } catch (eL) { console.warn('[Scheduler] email_log helper missing:', eL.message); }
+        if (!schedulerSendOk) {
           throw new Error('Email failed: ' + JSON.stringify(resendData));
         }
         stepResult = 'Email sent to ' + emailTo + ' (Subject: ' + emailSubject + ')';

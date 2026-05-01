@@ -155,16 +155,31 @@ export default async function handler(req, res) {
               email: email, tier: tier, brand: brand,
               mode: mode, deviceInfo: deviceInfo, screenshots: screenshots
             });
+            var feedbackSubject = 'Brilliance Feedback: ' + (categoryLabels[category] || category) + ' - ' + description.substring(0, 60);
             var emailResp = await fetchWithTimeout('https://api.resend.com/emails', {
               method: 'POST',
               headers: { 'Authorization': 'Bearer ' + resendKey, 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 from: 'Brilliance <roweos@therowecollection.com>',
                 to: ['jordan@therowecollection.com'],
-                subject: 'Brilliance Feedback: ' + (categoryLabels[category] || category) + ' - ' + description.substring(0, 60),
+                subject: feedbackSubject,
                 html: emailHtml
               })
             }, 5000);
+            // v34.66: Log to email_log so the admin Campaigns dashboard sees feedback admin sends.
+            try {
+              var emailLog = require('./_email-log-helper');
+              var resendData = null;
+              try { resendData = await emailResp.clone().json(); } catch (eR) {}
+              await emailLog.write({
+                userEmail: 'jordan@therowecollection.com',
+                template: 'feedback_admin',
+                subject: feedbackSubject,
+                status: emailResp.ok ? 'sent' : 'failed',
+                resendId: (resendData && resendData.id) || '',
+                sentBy: 'feedback'
+              });
+            } catch (eL) { console.warn('[Feedback] email_log helper missing:', eL.message); }
             if (emailResp.ok) { console.log('[Feedback] Admin email sent'); }
             else { console.warn('[Feedback] Resend failed:', emailResp.status); }
           } catch(e) { console.warn('[Feedback] Email error:', e.message); }

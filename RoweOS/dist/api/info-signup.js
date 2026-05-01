@@ -74,6 +74,7 @@ export default async function handler(req, res) {
         uid: '(prospect)',
         createdAt: createdAt
       });
+      var infoSubject = 'New Brilliance Lead (Info Page): ' + email;
       var resendResp = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -81,10 +82,10 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'RoweOS <roweos@therowecollection.com>',
+          from: 'Brilliance <roweos@therowecollection.com>',
           reply_to: 'jordan@therowecollection.com',
           to: ['jordan@therowecollection.com'],
-          subject: 'New RoweOS Lead (Info Page): ' + email,
+          subject: infoSubject,
           html: html
         })
       });
@@ -94,6 +95,20 @@ export default async function handler(req, res) {
       } else {
         console.log('[info-signup] Admin email sent for:', email);
       }
+      // v34.66: Log to email_log so admin Campaigns dashboard sees Info-page leads.
+      try {
+        var emailLog = require('./_email-log-helper');
+        var resendBody = null;
+        try { resendBody = await resendResp.clone().json(); } catch (eR) {}
+        await emailLog.write({
+          userEmail: 'jordan@therowecollection.com',
+          template: 'info_signup_admin',
+          subject: infoSubject,
+          status: resendResp.ok ? 'sent' : 'failed',
+          resendId: (resendBody && resendBody.id) || '',
+          sentBy: 'info-signup'
+        });
+      } catch (eL) { console.warn('[info-signup] email_log helper missing:', eL.message); }
     } catch (e) {
       console.error('[info-signup] Resend send failed:', e && e.message);
     }
