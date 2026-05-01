@@ -418,6 +418,9 @@ button{font-family:inherit;cursor:pointer}
 }
 .b-wordmark-cinema .b-letter{
   transition-duration:1.1s;
+  background:linear-gradient(180deg,#ffffff 0%,var(--gold-1) 30%,var(--gold-3) 65%,var(--gold-5) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
 
 .b-wordmark-shimmer{
@@ -505,7 +508,7 @@ button{font-family:inherit;cursor:pointer}
 }
 .b-beat-1{color:var(--gold-1)}
 .b-beat-2{color:var(--b-text);font-style:italic}
-.b-beat-3{
+.b-beat-3,.b-beat-3 .b-word{
   background:linear-gradient(120deg,var(--gold-2),var(--gold-4));
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
@@ -939,6 +942,11 @@ button{font-family:inherit;cursor:pointer}
   -webkit-text-fill-color:transparent;
   text-align:center;
 }
+.b-lives-headline .b-word{
+  background:linear-gradient(180deg,var(--gold-0),var(--gold-2) 60%,var(--gold-4));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
 .b-lives-sub{
   font-family:var(--b-sans);
   font-size:clamp(15px,1.5vw,18px);
@@ -979,6 +987,11 @@ button{font-family:inherit;cursor:pointer}
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
   filter:drop-shadow(0 0 40px rgba(201,169,97,0.4));
+}
+.b-final-title .b-word{
+  background:linear-gradient(180deg,#fff,var(--gold-1) 30%,var(--gold-3) 70%,var(--gold-5));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
 .b-final-sub{
   font-family:var(--b-serif);
