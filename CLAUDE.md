@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v34.66
+Version:  v34.67
 File:     src/ (modular source) → builds to RoweOS/dist/index.html
 Live:     roweos.com
 ```
@@ -162,21 +162,52 @@ const items = data.filter(d => d.active);
 
 ## KEY FEATURES (v25.2)
 
-### Sync Architecture (V3.1 Cloud-Authoritative, v28.3 fixes)
-- Write-through: every save hits localStorage + Firestore simultaneously
-- Cloud always wins on pull (no "local wins" guards)
-- `mergeByTimestamp()` resolves per-item conflicts using `_modifiedAt`
-- `_normalizeTs()` converts `_modifiedAt` to numeric ms (handles ISO strings from Firestore and numeric from localStorage)
-- `safeSyncWrite()` applies cloud data unconditionally (empty = deleted)
-- `manualSyncNow()` pushes brands first (3s wait for ghost cleanup), then pulls. Was pull-only before v28.3.
-- Pre-pull backup stored in `roweos_pre_pull_backup` as safety net
-- All data items should have `id` and `_modifiedAt` fields
-- v27.3: Brands use stable ID doc paths (`brand_name_*`), NOT array indices
-- v28.3: `saveBrands()` fetches existing docs FIRST, then batch writes + deletes ghosts atomically (no window for onSnapshot resurrection)
-- v28.3: `deleteBrand()` deletes Firestore doc IMMEDIATELY via direct `.delete()` call, BEFORE saveBrands runs
-- v28.3: `_all` doc saves ALL brand fields (deep copy minus large base64). Individual docs ALWAYS preferred over `_all` on pull.
-- v28.3: Theme is device-local. Cloud theme only seeds on first load (no `roweos-theme` in localStorage). Never overwritten by cloud pull or onSnapshot.
-- v28.3: `checkApiConnection()` runs after auth resolves AND after every cloud key sync path completes
+### Sync Architecture — Migration in Progress (v34.66+)
+
+**Two layers in parallel.** Spec: `docs/brilliance/16-sync-v5.md`. Active migration plan: `memory/project_sync_v5_migration.md`. Read those two files first when touching sync.
+
+**v4 (still source-of-truth, will retire after 30d observation):**
+- Write-through: every save hits localStorage + Firestore simultaneously.
+- Cloud always wins on pull (no "local wins" guards).
+- `mergeByTimestamp()` resolves per-item conflicts using `_modifiedAt`.
+- `_normalizeTs()` converts `_modifiedAt` to numeric ms.
+- `safeSyncWrite()` applies cloud data unconditionally (empty = deleted).
+- `manualSyncNow()` pushes brands first (3s wait), then pulls.
+- Brands use stable ID doc paths (`brand_name_*`).
+- `saveBrands()` fetches existing docs FIRST, then batch writes + deletes ghosts atomically.
+- `deleteBrand()` deletes Firestore doc IMMEDIATELY before saveBrands runs.
+- `_all` doc saves ALL brand fields (NEVER a subset). Individual docs preferred over `_all` on pull.
+- Theme is device-local; cloud only seeds on first load.
+
+**v5 (Sync v5, scaffolded + dual-writing in v34.66, behind four flags):**
+- Universal envelope: `{ id, data, _modifiedAt, _createdAt, _deletedAt, _clientId, _schemaVersion }`. See `docs/brilliance/16-sync-v5.md` §1.
+- Per-collection `Collection<T>` instances registered at module init in `35-sync-v5.js` `V5_REGISTRY`. 26 collections covering every v4-shadowed namespace plus profile/* sub-docs.
+- Last-write-wins by `_modifiedAt`, ties broken by `_clientId` lexicographic. Implemented in `resolveConflict()`.
+- Continuous `onSnapshot` per collection (read-shadow today; cloud-write when `roweos_sync_v5_writes` is on).
+- Tombstones via `_deletedAt`. `runTombstoneGC` Cloud Function GCs envelopes older than 30d.
+- Bootstrap migration runs once per device (gated by `roweos_sync_v5_bootstrap_done`) — seeds v5 caches from `roweos_*` localStorage so the discrepancy clock has historical data.
+- `mirrorV4Write(collection, id, data)` is called from every v4 write path (writeDB, writeDBDoc, deleteDBDoc, saveBrands batch loop). No-op when `roweos_sync_v5_dual_write` flag is OFF.
+- `runSyncV5Audit` Cloud Function compares v4 vs v5 daily; writes drift to `sync_v5_audit/{uid}/discrepancies`. Admin dashboard at Settings → Sync v5 → "View audit".
+
+**Four flags (gate progression):**
+1. `roweos_sync_v5` — read-shadow on (listens, never writes). Default OFF.
+2. `roweos_sync_v5_writes` — v5-native cloud writes (evolve_* + every shadowed collection in `V5_NATIVE_COLLECTIONS`). Default OFF.
+3. `roweos_sync_v5_dual_write` — v4 writes mirror into v5 envelopes. Default OFF.
+4. `roweos_sync_v5_reads` — reads come from v5 collections (writes still hit both). Default OFF.
+
+**Read facade** (Phase C #9, v34.67): `SyncV5.readArray(name, v4Reader)` and `SyncV5.readDoc(name, id, v4Reader)`. When `readsEnabled()` is OFF, the v4 reader runs unchanged. When ON, the v5 cache is consulted and envelopes are unwrapped to v4 shape so callers don't need to know. Already wired into `getReminders`, `loadScribeNotebooks`, `loadBrands`, `getMergedAutomations`, `pulseGoals` initializer.
+
+**Migration phases (current state):**
+- **Phase A (build dual-write)** — DONE in v34.66/v34.67. Per-collection registration, native allowlist, save-path hooks, bootstrap migration.
+- **Phase B (reconciliation)** — `runSyncV5Audit` Function shipped; spec bar = 14 consecutive zero-discrepancy days. Currently waiting on production traffic to surface drift.
+- **Phase C (read switch)** — facade + 5 highest-traffic readers routed in v34.67. Flag (`roweos_sync_v5_reads`) defaults OFF. Rollout: Jordan 7d → 10% 7d → 100%. Currently OFF for everyone.
+- **Phase D (retire v4)** — STAGED for v35.x. Cannot run until 30 days at 100% v5 reads. Tracked in `memory/project_sync_v5_migration.md`. Items #11-#20.
+
+**When changing sync code today:**
+- Touch v4 paths normally — they remain source-of-truth.
+- ALSO ensure v5 mirror happens. `writeDB` and `writeDBDoc` already do this; direct `db.batch()` calls (like `saveBrands`) need an inline `SyncV5.mirrorV4Write(coll, id, data)` after the batch.set.
+- New collections need a row in `V5_REGISTRY` and matching entry in the `_v5Map` / `_subMap` in 09-state.js.
+- Read sites: prefer `SyncV5.readArray('X_v5', () => v4Read())` over direct localStorage reads — gives us a binary cutover gate.
 - **CRITICAL: `_all` doc must NEVER save a subset of fields.** Previously caused silent data loss when `loadFromFirebaseV2` preferred `_all` over individual docs and the subset won the timestamp merge.
 
 ### Universal Search (Hybrid)
