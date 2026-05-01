@@ -146,7 +146,7 @@ async function handler(req, res) {
               from: 'Brilliance <roweos@therowecollection.com>',
               reply_to: 'jordan@therowecollection.com',
               to: [email],
-              subject: 'Welcome to Brilliance — Get Your Access Key',
+              subject: 'Welcome to Brilliance. Get Your Access Key',
               html: welcomeHtml
             })
           });

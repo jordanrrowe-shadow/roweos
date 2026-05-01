@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## QUICK REFERENCE
 
 ```
-Version:  v34.62
+Version:  v34.63
 File:     src/ (modular source) → builds to RoweOS/dist/index.html
 Live:     roweos.com
 ```
@@ -23,6 +23,25 @@ serena start-mcp-server --language-backend JetBrains
 bash src/build.sh && ./deploy.sh
 ```
 Handles: version sync to CLAUDE.md, git commit+push, Vercel deploy. Manual fallback: `cd RoweOS/dist && npx vercel --prod` (needs `.vercel/project.json` or it prompts).
+
+### Pre-deploy audit (MANDATORY before any production deploy)
+v34.63: Visual regressions like stark-white slabs in light mode (Image #65/#66)
+must be caught BEFORE shipping, not after. The audit ritual is:
+
+1. **Spawn two parallel audit agents** (general-purpose):
+   - **Visual-regression sweep**: scan CSS + HTML for theme-mismatch bugs
+     (hardcoded `#fff` / `#ffffff` / `var(--bg-elevated)` on wrapper containers
+     in light mode that paint stark slabs over the cream workspace).
+   - **Em-dash sweep**: scan all user-facing HTML + JS string literals + email
+     templates for `—` and replace with ` - ` (Jordan strongly dislikes em-dashes).
+2. **Run mechanical checks**: `bash scripts/pre-deploy-audit.sh`
+   Verifies version-string consistency across the 8 locations, build succeeds,
+   257-test suite passes, no ES5 violations / base64-via-innerHTML / forbidden
+   patterns. Exits 1 if anything fails.
+3. **Act on every HIGH-severity finding** the agents return before invoking
+   deploy.sh. MED / LOW findings can be deferred but not silently ignored.
+4. Only after the script passes AND both agent reports are clean (or
+   deferred-with-reason) should deploy.sh be run.
 
 ### Critical Rules
 1. **Brand names:** Always `brands[idx].shortName || brands[idx].name`

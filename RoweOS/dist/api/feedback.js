@@ -161,7 +161,7 @@ export default async function handler(req, res) {
               body: JSON.stringify({
                 from: 'Brilliance <roweos@therowecollection.com>',
                 to: ['jordan@therowecollection.com'],
-                subject: 'Brilliance Feedback: ' + (categoryLabels[category] || category) + ' — ' + description.substring(0, 60),
+                subject: 'Brilliance Feedback: ' + (categoryLabels[category] || category) + ' - ' + description.substring(0, 60),
                 html: emailHtml
               })
             }, 5000);
