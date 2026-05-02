@@ -325,10 +325,11 @@ function renderCard(tag, fmt, mode) {
 // Standard portrait (4:5) and square (1:1) layout
 function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark) {
   var isSquare = fmt === 'square';
-  var headlineSize = tag.text.length > 36 ? (isSquare ? 78 : 92) : (tag.text.length > 22 ? (isSquare ? 96 : 116) : (isSquare ? 124 : 148));
+  var headlineSize = tag.text.length > 36 ? (isSquare ? 72 : 86) : (tag.text.length > 22 ? (isSquare ? 92 : 110) : (isSquare ? 120 : 144));
   var headlineLineHeight = 1.05;
-  var paddingY = isSquare ? 80 : 110;
-  var monogramSize = isSquare ? 64 : 76;
+  var paddingY = isSquare ? 90 : 120;
+  var monogramSize = isSquare ? 130 : 160;
+  var gfsHeight = isSquare ? 64 : 76;
 
   var glowSize = isSquare ? 1100 : 1200;
   var glow = '<div style="position:absolute;top:50%;left:50%;width:'+glowSize+'px;height:'+glowSize+'px;'
@@ -336,12 +337,10 @@ function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, go
 
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,184,150,0.04),transparent 55%),radial-gradient(ellipse at bottom,rgba(0,0,0,0.4),transparent 60%);pointer-events:none;"></div>' : '';
 
-  var cornerOrn = '<div style="position:absolute;top:'+(paddingY-30)+'px;left:50%;transform:translateX(-50%);width:1px;height:24px;background:linear-gradient(to bottom,transparent,'+goldSoft+',transparent);opacity:0.5;"></div>';
-
   var topBlock = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:18px;">'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;">'
       + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:'+monogramSize+'px;height:'+monogramSize+'px;display:block;" />'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+tag.kicker+'</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.42em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+tag.kicker+'</div>'
     + '</div>';
 
   var headline = ''
@@ -350,25 +349,23 @@ function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, go
         + 'font-size:'+headlineSize+'px;line-height:'+headlineLineHeight+';letter-spacing:-0.015em;color:'+text+';">'
         + tag.text
       + '</div>'
+      + '<div style="width:60px;height:1px;background:'+goldSoft+';opacity:0.55;margin:36px auto 0;"></div>'
     + '</div>';
 
-  var divider = '<div style="width:60px;height:1px;background:'+goldSoft+';opacity:0.55;"></div>';
-
   var bottomBlock = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:18px;">'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
-      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:'+(isSquare?22:26)+'px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.92:0.85)+';" />'
-      + '<div style="width:1px;height:18px;background:'+border+';"></div>'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:22px;">'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.36em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
+      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:'+gfsHeight+'px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.95:0.88)+';" />'
+      + '<div style="width:1px;height:20px;background:'+border+';margin-top:6px;"></div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.34em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
     + '</div>';
 
   var inner = ''
-    + glow + grain + cornerOrn
+    + glow + grain
     + '<div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;'
       + 'padding:'+paddingY+'px 80px;z-index:2;">'
       + topBlock
       + headline
-      + divider
       + bottomBlock
     + '</div>';
 
@@ -385,26 +382,26 @@ function renderXCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, bord
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at left,rgba(212,184,150,0.04),transparent 55%);pointer-events:none;"></div>' : '';
 
   var leftPanel = ''
-    + '<div style="flex:0 0 360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;border-right:1px solid '+border+';padding:48px 32px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:96px;height:96px;display:block;" />'
-      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:42px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.36em;text-transform:uppercase;color:'+dim+';font-weight:500;text-align:center;">Intelligence OS</div>'
+    + '<div style="flex:0 0 380px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:56px 36px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:160px;height:160px;display:block;" />'
+      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:50px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:'+dim+';font-weight:500;text-align:center;">Intelligence OS</div>'
     + '</div>';
 
   var rightPanel = ''
-    + '<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:60px 64px 48px;">'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+tag.kicker+'</div>'
+    + '<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:56px 64px 44px;">'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.42em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+tag.kicker+'</div>'
       + '<div>'
         + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;'
           + 'font-size:'+headlineSize+'px;line-height:1.08;letter-spacing:-0.015em;color:'+text+';">'
           + tag.text
         + '</div>'
-        + '<div style="width:50px;height:1px;background:'+goldSoft+';opacity:0.55;margin-top:24px;"></div>'
+        + '<div style="width:50px;height:1px;background:'+goldSoft+';opacity:0.55;margin-top:22px;"></div>'
       + '</div>'
       + '<div style="display:flex;align-items:center;justify-content:space-between;gap:24px;">'
-        + '<div style="display:flex;align-items:center;gap:14px;">'
-          + '<div style="font-family:\'DM Sans\',sans-serif;font-size:9.5px;letter-spacing:0.3em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
-          + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:20px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.9:0.85)+';" />'
+        + '<div style="display:flex;align-items:center;gap:18px;">'
+          + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.34em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
+          + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:46px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.95:0.88)+';" />'
         + '</div>'
         + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
       + '</div>'
@@ -429,10 +426,10 @@ function renderStoryCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, 
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,184,150,0.05),transparent 55%),radial-gradient(ellipse at bottom,rgba(0,0,0,0.5),transparent 55%);pointer-events:none;"></div>' : '';
 
   var topSection = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:96px;height:96px;display:block;" />'
-      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:48px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:'+dim+';font-weight:500;">'+tag.kicker+'</div>'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:28px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:180px;height:180px;display:block;" />'
+      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:56px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.42em;text-transform:uppercase;color:'+dim+';font-weight:500;">'+tag.kicker+'</div>'
     + '</div>';
 
   var middleSection = ''
@@ -445,10 +442,10 @@ function renderStoryCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, 
     + '</div>';
 
   var bottomSection = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;">'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.36em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
-      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:30px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.92:0.85)+';" />'
-      + '<div style="width:1px;height:22px;background:'+border+';"></div>'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:28px;">'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.4em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
+      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:88px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.95:0.88)+';" />'
+      + '<div style="width:1px;height:22px;background:'+border+';margin-top:6px;"></div>'
       + '<div style="font-family:\'DM Sans\',sans-serif;font-size:13px;letter-spacing:0.34em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
     + '</div>';
 
