@@ -350,10 +350,10 @@ function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, go
 
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,184,150,0.04),transparent 55%),radial-gradient(ellipse at bottom,rgba(0,0,0,0.4),transparent 60%);pointer-events:none;"></div>' : '';
 
-  var wordmarkW = isSquare ? 360 : 440;
+  var wordmarkW = isSquare ? 300 : 360;
   var topBlock = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:14px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:'+monogramSize+'px;height:'+monogramSize+'px;display:block;" />'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:0px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:'+monogramSize+'px;height:'+monogramSize+'px;display:block;margin-bottom:-26px;" />'
       + '<img src="'+WORDMARK_URL+'" crossorigin="anonymous" style="width:'+wordmarkW+'px;height:auto;display:block;" />'
     + '</div>';
 
@@ -397,9 +397,9 @@ function renderXCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, bord
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at left,rgba(212,184,150,0.04),transparent 55%);pointer-events:none;"></div>' : '';
 
   var leftPanel = ''
-    + '<div style="flex:0 0 420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:48px 36px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:200px;height:200px;display:block;" />'
-      + '<img src="'+WORDMARK_URL+'" crossorigin="anonymous" style="width:340px;height:auto;display:block;" />'
+    + '<div style="flex:0 0 420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:48px 36px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:200px;height:200px;display:block;margin-bottom:-24px;" />'
+      + '<img src="'+WORDMARK_URL+'" crossorigin="anonymous" style="width:280px;height:auto;display:block;" />'
     + '</div>';
 
   var rightPanel = ''
@@ -441,9 +441,9 @@ function renderStoryCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, 
   var gfsFilter = isDark ? 'filter:invert(1) hue-rotate(180deg);' : 'filter:brightness(0.4);';
 
   var topSection = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:18px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:260px;height:260px;display:block;" />'
-      + '<img src="'+WORDMARK_URL+'" crossorigin="anonymous" style="width:520px;height:auto;display:block;" />'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:0;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:260px;height:260px;display:block;margin-bottom:-32px;" />'
+      + '<img src="'+WORDMARK_URL+'" crossorigin="anonymous" style="width:430px;height:auto;display:block;" />'
     + '</div>';
 
   var middleSection = ''
