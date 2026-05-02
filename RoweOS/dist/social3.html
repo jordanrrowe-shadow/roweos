@@ -224,47 +224,49 @@ var CATEGORIES = [
   { id: 'action',      label: 'Action Lines' }
 ];
 
+var BRAND_SUBTITLE = 'Intelligence OS';
+
 var TAGLINES = [
-  // Manifesto - punchy command-form lines
-  { cat: 'manifesto',   text: 'Be Brilliant.',                                kicker: 'Brilliance' },
-  { cat: 'manifesto',   text: 'Run Brilliant.',                               kicker: 'Brilliance' },
-  { cat: 'manifesto',   text: 'Think Brilliant.',                             kicker: 'Brilliance' },
-  { cat: 'manifesto',   text: 'Built Brilliant.',                             kicker: 'Brilliance' },
-  { cat: 'manifesto',   text: 'Brilliance, without the noise.',               kicker: 'Brilliance' },
+  // Manifesto
+  { cat: 'manifesto',   text: 'Be Brilliant.' },
+  { cat: 'manifesto',   text: 'Run Brilliant.' },
+  { cat: 'manifesto',   text: 'Think Brilliant.' },
+  { cat: 'manifesto',   text: 'Built Brilliant.' },
+  { cat: 'manifesto',   text: 'Brilliance, without the noise.' },
 
   // Brand Promise
-  { cat: 'promise',     text: 'Brilliant by design.',                         kicker: 'Brand Promise' },
-  { cat: 'promise',     text: 'Brilliance, delivered.',                       kicker: 'Brand Promise' },
-  { cat: 'promise',     text: 'Made for brilliant minds.',                    kicker: 'Brand Promise' },
-  { cat: 'promise',     text: 'One platform. Total brilliance.',              kicker: 'Brand Promise' },
-  { cat: 'promise',     text: 'Brilliance lives here.',                       kicker: 'Brand Promise' },
-  { cat: 'promise',     text: 'Born brilliant. Built to prove it.',           kicker: 'Brand Promise' },
+  { cat: 'promise',     text: 'Brilliant by design.' },
+  { cat: 'promise',     text: 'Brilliance, delivered.' },
+  { cat: 'promise',     text: 'Made for brilliant minds.' },
+  { cat: 'promise',     text: 'One platform. Total brilliance.' },
+  { cat: 'promise',     text: 'Brilliance lives here.' },
+  { cat: 'promise',     text: 'Born brilliant. Built to prove it.' },
 
   // Intelligence Positioning
-  { cat: 'intelligence',text: 'Intelligence at its most brilliant.',          kicker: 'Intelligence' },
-  { cat: 'intelligence',text: 'Where AI meets actual brilliance.',            kicker: 'Intelligence' },
-  { cat: 'intelligence',text: 'The brilliant layer beneath your brand.',      kicker: 'Intelligence' },
-  { cat: 'intelligence',text: 'AI that runs on brilliance.',                  kicker: 'Intelligence' },
-  { cat: 'intelligence',text: 'Brilliance, not just intelligence.',           kicker: 'Intelligence' },
+  { cat: 'intelligence',text: 'Intelligence at its most brilliant.' },
+  { cat: 'intelligence',text: 'Where AI meets actual brilliance.' },
+  { cat: 'intelligence',text: 'The brilliant layer beneath your brand.' },
+  { cat: 'intelligence',text: 'AI that runs on brilliance.' },
+  { cat: 'intelligence',text: 'Brilliance, not just intelligence.' },
 
   // Platform Definition
-  { cat: 'platform',    text: 'The operating system for brilliant work.',     kicker: 'Intelligence OS' },
-  { cat: 'platform',    text: 'Intelligence, by design.',                     kicker: 'Intelligence OS' },
-  { cat: 'platform',    text: 'Your brand. Running at full brilliance.',      kicker: 'Intelligence OS' },
-  { cat: 'platform',    text: 'Built to run. Built to think. Built to be brilliant.', kicker: 'Intelligence OS' },
+  { cat: 'platform',    text: 'The operating system for brilliant work.' },
+  { cat: 'platform',    text: 'Intelligence, by design.' },
+  { cat: 'platform',    text: 'Your brand. Running at full brilliance.' },
+  { cat: 'platform',    text: 'Built to run. Built to think. Built to be brilliant.' },
 
   // Brand Empowerment
-  { cat: 'empower',     text: 'Your brand at its most brilliant.',            kicker: 'For Your Brand' },
-  { cat: 'empower',     text: 'Your work. Your voice. Your brilliance.',      kicker: 'For Your Brand' },
-  { cat: 'empower',     text: 'Brilliance that belongs to you.',              kicker: 'For Your Brand' },
-  { cat: 'empower',     text: 'Finally, a platform as brilliant as your brand.', kicker: 'For Your Brand' },
+  { cat: 'empower',     text: 'Your brand at its most brilliant.' },
+  { cat: 'empower',     text: 'Your work. Your voice. Your brilliance.' },
+  { cat: 'empower',     text: 'Brilliance that belongs to you.' },
+  { cat: 'empower',     text: 'Finally, a platform as brilliant as your brand.' },
 
   // Action lines
-  { cat: 'action',      text: 'Operate with brilliance.',                     kicker: 'Daily Practice' },
-  { cat: 'action',      text: 'Build from brilliance.',                       kicker: 'Daily Practice' },
-  { cat: 'action',      text: 'Think in brilliance.',                         kicker: 'Daily Practice' },
-  { cat: 'action',      text: 'Run on brilliance.',                           kicker: 'Daily Practice' },
-  { cat: 'action',      text: 'Work at the level of brilliance.',             kicker: 'Daily Practice' }
+  { cat: 'action',      text: 'Operate with brilliance.' },
+  { cat: 'action',      text: 'Build from brilliance.' },
+  { cat: 'action',      text: 'Think in brilliance.' },
+  { cat: 'action',      text: 'Run on brilliance.' },
+  { cat: 'action',      text: 'Work at the level of brilliance.' }
 ];
 
 // ─── STATE ───
@@ -302,6 +304,13 @@ function buildTemplates() {
 }
 
 // ─── RENDER ───
+// Auto-split a tagline into one sentence per line (so "One platform. Total brilliance." breaks).
+function formatTagline(text) {
+  var parts = text.match(/[^.!?]+[.!?]/g);
+  if (!parts || parts.length < 2) return text;
+  return parts.map(function(s) { return s.trim(); }).join('<br>');
+}
+
 function renderCard(tag, fmt, mode) {
   var isDark = mode === 'dark';
   var bg = isDark ? '#0a0a0a' : '#fafaf7';
@@ -326,10 +335,13 @@ function renderCard(tag, fmt, mode) {
 function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark) {
   var isSquare = fmt === 'square';
   var headlineSize = tag.text.length > 36 ? (isSquare ? 72 : 86) : (tag.text.length > 22 ? (isSquare ? 92 : 110) : (isSquare ? 120 : 144));
-  var headlineLineHeight = 1.05;
+  var headlineLineHeight = 1.08;
   var paddingY = isSquare ? 90 : 120;
-  var monogramSize = isSquare ? 130 : 160;
-  var gfsHeight = isSquare ? 64 : 76;
+  var monogramSize = isSquare ? 160 : 200;
+  var gfsHeight = isSquare ? 32 : 38;
+  // Dark-mode trick: invert + 180deg hue rotation lightens the dark gray
+  // "for Startups" wordmark while preserving the colorful Google logo.
+  var gfsFilter = isDark ? 'filter:invert(1) hue-rotate(180deg);' : 'filter:brightness(0.4);';
 
   var glowSize = isSquare ? 1100 : 1200;
   var glow = '<div style="position:absolute;top:50%;left:50%;width:'+glowSize+'px;height:'+glowSize+'px;'
@@ -338,25 +350,25 @@ function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, go
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,184,150,0.04),transparent 55%),radial-gradient(ellipse at bottom,rgba(0,0,0,0.4),transparent 60%);pointer-events:none;"></div>' : '';
 
   var topBlock = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;">'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:22px;">'
       + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:'+monogramSize+'px;height:'+monogramSize+'px;display:block;" />'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.42em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+tag.kicker+'</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.42em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+BRAND_SUBTITLE+'</div>'
     + '</div>';
 
   var headline = ''
     + '<div style="text-align:center;max-width:'+(w-160)+'px;">'
       + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;'
         + 'font-size:'+headlineSize+'px;line-height:'+headlineLineHeight+';letter-spacing:-0.015em;color:'+text+';">'
-        + tag.text
+        + formatTagline(tag.text)
       + '</div>'
       + '<div style="width:60px;height:1px;background:'+goldSoft+';opacity:0.55;margin:36px auto 0;"></div>'
     + '</div>';
 
   var bottomBlock = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:22px;">'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:18px;">'
       + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.36em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
-      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:'+gfsHeight+'px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.95:0.88)+';" />'
-      + '<div style="width:1px;height:20px;background:'+border+';margin-top:6px;"></div>'
+      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:'+gfsHeight+'px;width:auto;display:block;'+gfsFilter+'opacity:0.92;" />'
+      + '<div style="width:1px;height:18px;background:'+border+';margin-top:4px;"></div>'
       + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.34em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
     + '</div>';
 
@@ -375,6 +387,7 @@ function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, go
 // X / Twitter 16:9 layout - horizontal split
 function renderXCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark) {
   var headlineSize = tag.text.length > 36 ? 56 : (tag.text.length > 22 ? 72 : 92);
+  var gfsFilter = isDark ? 'filter:invert(1) hue-rotate(180deg);' : 'filter:brightness(0.4);';
 
   var glow = '<div style="position:absolute;top:50%;left:0;width:900px;height:900px;'
     + 'transform:translateY(-50%);background:radial-gradient(circle,'+glowColor+' 0%,transparent 60%);pointer-events:none;"></div>';
@@ -382,26 +395,26 @@ function renderXCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, bord
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at left,rgba(212,184,150,0.04),transparent 55%);pointer-events:none;"></div>' : '';
 
   var leftPanel = ''
-    + '<div style="flex:0 0 380px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:56px 36px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:160px;height:160px;display:block;" />'
+    + '<div style="flex:0 0 380px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:56px 36px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:200px;height:200px;display:block;" />'
       + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:50px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:'+dim+';font-weight:500;text-align:center;">Intelligence OS</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.42em;text-transform:uppercase;color:'+dim+';font-weight:500;text-align:center;">Intelligence OS</div>'
     + '</div>';
 
   var rightPanel = ''
     + '<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:56px 64px 44px;">'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.42em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+tag.kicker+'</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.42em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+BRAND_SUBTITLE+'</div>'
       + '<div>'
         + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;'
-          + 'font-size:'+headlineSize+'px;line-height:1.08;letter-spacing:-0.015em;color:'+text+';">'
-          + tag.text
+          + 'font-size:'+headlineSize+'px;line-height:1.12;letter-spacing:-0.015em;color:'+text+';">'
+          + formatTagline(tag.text)
         + '</div>'
         + '<div style="width:50px;height:1px;background:'+goldSoft+';opacity:0.55;margin-top:22px;"></div>'
       + '</div>'
       + '<div style="display:flex;align-items:center;justify-content:space-between;gap:24px;">'
-        + '<div style="display:flex;align-items:center;gap:18px;">'
+        + '<div style="display:flex;align-items:center;gap:14px;">'
           + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.34em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
-          + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:46px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.95:0.88)+';" />'
+          + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:24px;width:auto;display:block;'+gfsFilter+'opacity:0.92;" />'
         + '</div>'
         + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
       + '</div>'
@@ -425,27 +438,29 @@ function renderStoryCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, 
 
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,184,150,0.05),transparent 55%),radial-gradient(ellipse at bottom,rgba(0,0,0,0.5),transparent 55%);pointer-events:none;"></div>' : '';
 
+  var gfsFilter = isDark ? 'filter:invert(1) hue-rotate(180deg);' : 'filter:brightness(0.4);';
+
   var topSection = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:28px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:180px;height:180px;display:block;" />'
-      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:56px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
-      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.42em;text-transform:uppercase;color:'+dim+';font-weight:500;">'+tag.kicker+'</div>'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:240px;height:240px;display:block;" />'
+      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:62px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:13px;letter-spacing:0.42em;text-transform:uppercase;color:'+dim+';font-weight:500;">'+BRAND_SUBTITLE+'</div>'
     + '</div>';
 
   var middleSection = ''
     + '<div style="text-align:center;max-width:'+(w-140)+'px;">'
       + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;'
-        + 'font-size:'+headlineSize+'px;line-height:1.05;letter-spacing:-0.015em;color:'+text+';">'
-        + tag.text
+        + 'font-size:'+headlineSize+'px;line-height:1.08;letter-spacing:-0.015em;color:'+text+';">'
+        + formatTagline(tag.text)
       + '</div>'
       + '<div style="width:64px;height:1px;background:'+goldSoft+';opacity:0.55;margin:48px auto 0;"></div>'
     + '</div>';
 
   var bottomSection = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:28px;">'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:22px;">'
       + '<div style="font-family:\'DM Sans\',sans-serif;font-size:12px;letter-spacing:0.4em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
-      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:88px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.95:0.88)+';" />'
-      + '<div style="width:1px;height:22px;background:'+border+';margin-top:6px;"></div>'
+      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:48px;width:auto;display:block;'+gfsFilter+'opacity:0.92;" />'
+      + '<div style="width:1px;height:22px;background:'+border+';margin-top:4px;"></div>'
       + '<div style="font-family:\'DM Sans\',sans-serif;font-size:13px;letter-spacing:0.34em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
     + '</div>';
 
