@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brilliance - Social Campaign</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="/images/brilliance/monogram.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+--bg:#0a0a0a;--surface:rgba(255,255,255,0.03);--surface-2:#111;--border:rgba(255,255,255,0.08);--border-strong:rgba(255,255,255,0.14);
+--text:#ece4d8;--text-muted:#9e9487;--text-dim:#655e54;
+--gold-1:#f2dfc5;--gold-2:#c4a882;--gold-3:#b2997b;--gold-4:#8b7b67;--gold-5:#6b5d4d;
+--serif:'Cormorant Garamond',Georgia,serif;--sans:'DM Sans',-apple-system,sans-serif;
+}
+html{scroll-behavior:smooth;background:var(--bg);color-scheme:dark}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;min-height:100vh;font-weight:300}
+
+.top-bar{padding:14px 0;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.top-bar-inner{display:flex;align-items:center;justify-content:space-between;max-width:1400px;margin:0 auto;padding:0 24px}
+.top-bar-left{display:flex;align-items:center;gap:14px}
+.top-bar-logo{height:24px;width:auto;opacity:0.9}
+.top-bar-divider{width:1px;height:18px;background:var(--border-strong)}
+.top-bar-title{font-family:var(--sans);font-size:12px;color:var(--text-muted);letter-spacing:0.2em;text-transform:uppercase;font-weight:400}
+.top-bar-eyebrow{font-family:var(--sans);font-size:10px;color:var(--gold-3);letter-spacing:0.24em;text-transform:uppercase;font-weight:500;padding:4px 10px;border:1px solid rgba(178,153,123,0.25);border-radius:20px}
+
+.studio-layout{display:flex;max-width:1400px;margin:0 auto;min-height:calc(100vh - 57px)}
+.sidebar{width:260px;border-right:1px solid var(--border);padding:24px 20px;flex-shrink:0;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto}
+.sidebar-section{margin-bottom:28px}
+.sidebar-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;font-weight:500}
+.sidebar-btn{display:block;width:100%;text-align:left;padding:8px 12px;border:1px solid transparent;background:transparent;color:var(--text-muted);border-radius:6px;font-family:var(--sans);font-size:12px;cursor:pointer;transition:all 0.2s;margin-bottom:2px}
+.sidebar-btn:hover{background:var(--surface);color:var(--text)}
+.sidebar-btn.active{background:rgba(178,153,123,0.1);border-color:rgba(178,153,123,0.2);color:var(--gold-2)}
+.sidebar-count{float:right;font-size:10px;color:var(--text-dim);background:var(--surface);padding:1px 7px;border-radius:8px}
+.sidebar-divider{height:1px;background:var(--border);margin:20px 0}
+.toggle-row{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:16px}
+.toggle-btn{flex:1;padding:7px 0;text-align:center;font-size:11px;font-family:var(--sans);border:none;background:transparent;color:var(--text-dim);cursor:pointer;transition:all 0.2s;letter-spacing:0.04em}
+.toggle-btn.active{background:rgba(178,153,123,0.12);color:var(--gold-2)}
+.download-all-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:linear-gradient(135deg,var(--gold-3),var(--gold-5));color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:0.06em;cursor:pointer;transition:all 0.3s}
+.download-all-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(178,153,123,0.3)}
+.download-all-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+.download-all-btn svg{width:14px;height:14px}
+
+.grid-area{flex:1;padding:24px;overflow-y:auto}
+.grid-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.grid-title{font-family:var(--serif);font-size:24px;font-weight:400;color:var(--text);letter-spacing:-0.01em}
+.grid-sub{font-size:12px;color:var(--text-dim);margin-top:4px}
+.post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.post-card{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:all 0.3s;background:var(--surface-2)}
+.post-card.size-square{aspect-ratio:1/1}
+.post-card.size-portrait{aspect-ratio:4/5}
+.post-card.size-story{aspect-ratio:9/16}
+.post-card.size-x{aspect-ratio:16/9}
+.post-card:hover{border-color:var(--gold-4);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+.post-card-inner{transform-origin:top left;pointer-events:none}
+.post-card-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px 12px;background:linear-gradient(transparent,rgba(0,0,0,0.85));display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.post-card-label{font-size:11px;color:#fff;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post-card-meta{font-size:9px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.1em;flex-shrink:0}
+.post-card-dl{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity 0.2s;z-index:2}
+.post-card:hover .post-card-dl{opacity:1}
+
+.preview-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);justify-content:center;align-items:center;padding:24px}
+.preview-modal.open{display:flex}
+.preview-content{position:relative;max-width:540px;width:100%;max-height:90vh;display:flex;flex-direction:column;align-items:center}
+.preview-card-wrap{width:100%;overflow:hidden;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
+.preview-card-wrap.preview-square{aspect-ratio:1/1}
+.preview-card-wrap.preview-portrait{aspect-ratio:4/5}
+.preview-card-wrap.preview-story{aspect-ratio:9/16;max-width:340px}
+.preview-card-wrap.preview-x{aspect-ratio:16/9}
+.preview-card-inner{transform-origin:top left}
+.preview-actions{display:flex;gap:10px;margin-top:16px;justify-content:center;flex-wrap:wrap}
+.preview-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:8px;font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:0.06em;cursor:pointer;transition:all 0.3s;border:none}
+.preview-btn.primary{background:linear-gradient(135deg,var(--gold-3),var(--gold-5));color:#fff}
+.preview-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(178,153,123,0.3)}
+.preview-btn.secondary{background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid var(--border)}
+.preview-btn.secondary:hover{border-color:var(--gold-4);color:var(--gold-2)}
+.preview-close{position:absolute;top:-40px;right:0;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:all 0.2s}
+.preview-close:hover{background:rgba(255,255,255,0.1)}
+
+#renderContainer{position:fixed;top:-9999px;left:-9999px;overflow:hidden;z-index:-1}
+
+.progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-3),var(--gold-1));z-index:300;transition:width 0.3s;display:none}
+.progress-bar.active{display:block}
+
+.intro-banner{max-width:1400px;margin:0 auto;padding:24px 24px 0}
+.intro-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border:1px solid rgba(178,153,123,0.18);background:rgba(178,153,123,0.04);border-radius:10px;flex-wrap:wrap}
+.intro-banner-text{font-size:12px;color:var(--text-muted);letter-spacing:0.02em;line-height:1.55}
+.intro-banner-text strong{color:var(--gold-1);font-weight:500;letter-spacing:0.04em}
+
+@media(max-width:900px){
+.sidebar{display:none}
+.grid-area{padding:16px}
+.post-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.intro-banner{padding:16px 16px 0}
+}
+@media(max-width:500px){
+.post-grid{grid-template-columns:1fr 1fr;gap:8px}
+.top-bar-eyebrow{display:none}
+}
+
+.mobile-controls{display:none;padding:12px 16px;border-bottom:1px solid var(--border);overflow-x:auto;white-space:nowrap;gap:6px;-webkit-overflow-scrolling:touch}
+.mobile-controls::-webkit-scrollbar{display:none}
+@media(max-width:900px){.mobile-controls{display:flex}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+<div class="top-bar-inner">
+<div class="top-bar-left">
+<img class="top-bar-logo" src="/images/brilliance/wordmark.png" alt="Brilliance">
+<div class="top-bar-divider"></div>
+<span class="top-bar-title">Social Campaign</span>
+</div>
+<div class="top-bar-eyebrow">Backed by Google for Startups</div>
+</div>
+</div>
+
+<div class="intro-banner">
+<div class="intro-banner-inner">
+<div class="intro-banner-text"><strong>Brilliance launch campaign</strong> - every card includes the Brilliance wordmark and the Google for Startups credibility badge. Pick a tagline, choose a format, export PNG. Ready to post on X, Instagram, LinkedIn, and Threads.</div>
+</div>
+</div>
+
+<div class="mobile-controls" id="mobileControls"></div>
+
+<div class="studio-layout">
+<div class="sidebar">
+
+<div class="sidebar-section">
+<div class="sidebar-label">Format</div>
+<div class="toggle-row" id="formatToggle">
+<button class="toggle-btn active" data-format="all">All</button>
+<button class="toggle-btn" data-format="portrait">4:5</button>
+<button class="toggle-btn" data-format="square">1:1</button>
+<button class="toggle-btn" data-format="story">9:16</button>
+<button class="toggle-btn" data-format="x">16:9</button>
+</div>
+</div>
+
+<div class="sidebar-section">
+<div class="sidebar-label">Mode</div>
+<div class="toggle-row" id="modeToggle">
+<button class="toggle-btn active" data-mode="all">All</button>
+<button class="toggle-btn" data-mode="dark">Dark</button>
+<button class="toggle-btn" data-mode="light">Light</button>
+</div>
+</div>
+
+<div class="sidebar-section">
+<div class="sidebar-label">Category</div>
+<div id="categoryList"></div>
+</div>
+
+<div class="sidebar-divider"></div>
+
+<div class="sidebar-section">
+<button class="download-all-btn" id="downloadAllBtn" onclick="downloadAll()">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+Download All (.zip)
+</button>
+<div style="font-size:10px;color:var(--text-dim);text-align:center;margin-top:8px" id="downloadStatus"></div>
+</div>
+</div>
+
+<div class="grid-area">
+<div class="grid-header">
+<div>
+<div class="grid-title" id="gridTitle">All Templates</div>
+<div class="grid-sub" id="gridSub"></div>
+</div>
+</div>
+<div class="post-grid" id="postGrid"></div>
+</div>
+</div>
+
+<div class="preview-modal" id="previewModal" onclick="if(event.target===this)closePreview()">
+<div class="preview-content">
+<button class="preview-close" onclick="closePreview()">&times;</button>
+<div class="preview-card-wrap" id="previewWrap">
+<div class="preview-card-inner" id="previewInner"></div>
+</div>
+<div class="preview-actions">
+<button class="preview-btn primary" onclick="downloadCurrent()">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+Download PNG
+</button>
+<button class="preview-btn secondary" onclick="closePreview()">Close</button>
+</div>
+</div>
+</div>
+
+<div id="renderContainer"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<script>
+/* ============================================
+   BRILLIANCE - SOCIAL CAMPAIGN BUILDER
+   Backed by Google for Startups
+   ============================================ */
+
+var WORDMARK_URL = '/images/brilliance/wordmark.png';
+var MONOGRAM_URL = '/images/brilliance/monogram-circle.png';
+var GFS_URL = '/images/promo/google-for-startups.png';
+
+var FORMATS = {
+  portrait:  { w: 1080, h: 1350, label: 'Instagram 4:5',  short: '4:5' },
+  square:    { w: 1080, h: 1080, label: 'Instagram 1:1',  short: '1:1' },
+  story:     { w: 1080, h: 1920, label: 'Story 9:16',     short: '9:16' },
+  x:         { w: 1200, h: 675,  label: 'X / Twitter 16:9', short: '16:9' }
+};
+
+var CATEGORIES = [
+  { id: 'all',         label: 'All Taglines' },
+  { id: 'manifesto',   label: 'Manifesto' },
+  { id: 'promise',     label: 'Brand Promise' },
+  { id: 'intelligence',label: 'Intelligence Positioning' },
+  { id: 'platform',    label: 'Platform Definition' },
+  { id: 'empower',     label: 'Brand Empowerment' },
+  { id: 'action',      label: 'Action Lines' }
+];
+
+var TAGLINES = [
+  // Manifesto - punchy command-form lines
+  { cat: 'manifesto',   text: 'Be Brilliant.',                                kicker: 'Brilliance' },
+  { cat: 'manifesto',   text: 'Run Brilliant.',                               kicker: 'Brilliance' },
+  { cat: 'manifesto',   text: 'Think Brilliant.',                             kicker: 'Brilliance' },
+  { cat: 'manifesto',   text: 'Built Brilliant.',                             kicker: 'Brilliance' },
+  { cat: 'manifesto',   text: 'Brilliance, without the noise.',               kicker: 'Brilliance' },
+
+  // Brand Promise
+  { cat: 'promise',     text: 'Brilliant by design.',                         kicker: 'Brand Promise' },
+  { cat: 'promise',     text: 'Brilliance, delivered.',                       kicker: 'Brand Promise' },
+  { cat: 'promise',     text: 'Made for brilliant minds.',                    kicker: 'Brand Promise' },
+  { cat: 'promise',     text: 'One platform. Total brilliance.',              kicker: 'Brand Promise' },
+  { cat: 'promise',     text: 'Brilliance lives here.',                       kicker: 'Brand Promise' },
+  { cat: 'promise',     text: 'Born brilliant. Built to prove it.',           kicker: 'Brand Promise' },
+
+  // Intelligence Positioning
+  { cat: 'intelligence',text: 'Intelligence at its most brilliant.',          kicker: 'Intelligence' },
+  { cat: 'intelligence',text: 'Where AI meets actual brilliance.',            kicker: 'Intelligence' },
+  { cat: 'intelligence',text: 'The brilliant layer beneath your brand.',      kicker: 'Intelligence' },
+  { cat: 'intelligence',text: 'AI that runs on brilliance.',                  kicker: 'Intelligence' },
+  { cat: 'intelligence',text: 'Brilliance, not just intelligence.',           kicker: 'Intelligence' },
+
+  // Platform Definition
+  { cat: 'platform',    text: 'The operating system for brilliant work.',     kicker: 'Intelligence OS' },
+  { cat: 'platform',    text: 'Intelligence, by design.',                     kicker: 'Intelligence OS' },
+  { cat: 'platform',    text: 'Your brand. Running at full brilliance.',      kicker: 'Intelligence OS' },
+  { cat: 'platform',    text: 'Built to run. Built to think. Built to be brilliant.', kicker: 'Intelligence OS' },
+
+  // Brand Empowerment
+  { cat: 'empower',     text: 'Your brand at its most brilliant.',            kicker: 'For Your Brand' },
+  { cat: 'empower',     text: 'Your work. Your voice. Your brilliance.',      kicker: 'For Your Brand' },
+  { cat: 'empower',     text: 'Brilliance that belongs to you.',              kicker: 'For Your Brand' },
+  { cat: 'empower',     text: 'Finally, a platform as brilliant as your brand.', kicker: 'For Your Brand' },
+
+  // Action lines
+  { cat: 'action',      text: 'Operate with brilliance.',                     kicker: 'Daily Practice' },
+  { cat: 'action',      text: 'Build from brilliance.',                       kicker: 'Daily Practice' },
+  { cat: 'action',      text: 'Think in brilliance.',                         kicker: 'Daily Practice' },
+  { cat: 'action',      text: 'Run on brilliance.',                           kicker: 'Daily Practice' },
+  { cat: 'action',      text: 'Work at the level of brilliance.',             kicker: 'Daily Practice' }
+];
+
+// ─── STATE ───
+var currentFormat = 'all';
+var currentMode = 'all';
+var currentFilter = 'all';
+var previewIdx = -1;
+var templates = [];
+
+// ─── BUILD TEMPLATE LIST ───
+// Each tagline gets one template per (format × mode) combination = 4 formats × 2 modes = 8 per tagline.
+function buildTemplates() {
+  var list = [];
+  var formats = ['portrait', 'square', 'story', 'x'];
+  var modes = ['dark', 'light'];
+
+  TAGLINES.forEach(function(tag, ti) {
+    formats.forEach(function(fmt) {
+      modes.forEach(function(mode) {
+        list.push({
+          id: 'bril_' + ti + '_' + fmt + '_' + mode,
+          tag: tag,
+          format: fmt,
+          mode: mode,
+          w: FORMATS[fmt].w,
+          h: FORMATS[fmt].h,
+          label: tag.text,
+          render: function() { return renderCard(tag, fmt, mode); }
+        });
+      });
+    });
+  });
+
+  return list;
+}
+
+// ─── RENDER ───
+function renderCard(tag, fmt, mode) {
+  var isDark = mode === 'dark';
+  var bg = isDark ? '#0a0a0a' : '#fafaf7';
+  var text = isDark ? '#ece4d8' : '#1a1a1a';
+  var muted = isDark ? '#9e9487' : '#5a5550';
+  var dim = isDark ? '#655e54' : '#8a857e';
+  var border = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  var goldBright = isDark ? '#d4b896' : '#8b7b67';
+  var goldSoft = isDark ? '#b2997b' : '#a89878';
+  var glowColor = isDark ? 'rgba(212,184,150,0.10)' : 'rgba(178,153,123,0.07)';
+
+  var w = FORMATS[fmt].w;
+  var h = FORMATS[fmt].h;
+
+  // Layout switches per format
+  if (fmt === 'x') return renderXCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark);
+  if (fmt === 'story') return renderStoryCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark);
+  return renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark);
+}
+
+// Standard portrait (4:5) and square (1:1) layout
+function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark) {
+  var isSquare = fmt === 'square';
+  var headlineSize = tag.text.length > 36 ? (isSquare ? 78 : 92) : (tag.text.length > 22 ? (isSquare ? 96 : 116) : (isSquare ? 124 : 148));
+  var headlineLineHeight = 1.05;
+  var paddingY = isSquare ? 80 : 110;
+  var monogramSize = isSquare ? 64 : 76;
+
+  var glowSize = isSquare ? 1100 : 1200;
+  var glow = '<div style="position:absolute;top:50%;left:50%;width:'+glowSize+'px;height:'+glowSize+'px;'
+    + 'transform:translate(-50%,-50%);background:radial-gradient(circle,'+glowColor+' 0%,transparent 60%);pointer-events:none;"></div>';
+
+  var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,184,150,0.04),transparent 55%),radial-gradient(ellipse at bottom,rgba(0,0,0,0.4),transparent 60%);pointer-events:none;"></div>' : '';
+
+  var cornerOrn = '<div style="position:absolute;top:'+(paddingY-30)+'px;left:50%;transform:translateX(-50%);width:1px;height:24px;background:linear-gradient(to bottom,transparent,'+goldSoft+',transparent);opacity:0.5;"></div>';
+
+  var topBlock = ''
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:18px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:'+monogramSize+'px;height:'+monogramSize+'px;display:block;" />'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+tag.kicker+'</div>'
+    + '</div>';
+
+  var headline = ''
+    + '<div style="text-align:center;max-width:'+(w-160)+'px;">'
+      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;'
+        + 'font-size:'+headlineSize+'px;line-height:'+headlineLineHeight+';letter-spacing:-0.015em;color:'+text+';">'
+        + tag.text
+      + '</div>'
+    + '</div>';
+
+  var divider = '<div style="width:60px;height:1px;background:'+goldSoft+';opacity:0.55;"></div>';
+
+  var bottomBlock = ''
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:18px;">'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
+      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:'+(isSquare?22:26)+'px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.92:0.85)+';" />'
+      + '<div style="width:1px;height:18px;background:'+border+';"></div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
+    + '</div>';
+
+  var inner = ''
+    + glow + grain + cornerOrn
+    + '<div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;'
+      + 'padding:'+paddingY+'px 80px;z-index:2;">'
+      + topBlock
+      + headline
+      + divider
+      + bottomBlock
+    + '</div>';
+
+  return wrap(w, h, bg, text, inner);
+}
+
+// X / Twitter 16:9 layout - horizontal split
+function renderXCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark) {
+  var headlineSize = tag.text.length > 36 ? 56 : (tag.text.length > 22 ? 72 : 92);
+
+  var glow = '<div style="position:absolute;top:50%;left:0;width:900px;height:900px;'
+    + 'transform:translateY(-50%);background:radial-gradient(circle,'+glowColor+' 0%,transparent 60%);pointer-events:none;"></div>';
+
+  var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at left,rgba(212,184,150,0.04),transparent 55%);pointer-events:none;"></div>' : '';
+
+  var leftPanel = ''
+    + '<div style="flex:0 0 360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;border-right:1px solid '+border+';padding:48px 32px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:96px;height:96px;display:block;" />'
+      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:42px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:10px;letter-spacing:0.36em;text-transform:uppercase;color:'+dim+';font-weight:500;text-align:center;">Intelligence OS</div>'
+    + '</div>';
+
+  var rightPanel = ''
+    + '<div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:60px 64px 48px;">'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:'+goldBright+';font-weight:500;">'+tag.kicker+'</div>'
+      + '<div>'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;'
+          + 'font-size:'+headlineSize+'px;line-height:1.08;letter-spacing:-0.015em;color:'+text+';">'
+          + tag.text
+        + '</div>'
+        + '<div style="width:50px;height:1px;background:'+goldSoft+';opacity:0.55;margin-top:24px;"></div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:24px;">'
+        + '<div style="display:flex;align-items:center;gap:14px;">'
+          + '<div style="font-family:\'DM Sans\',sans-serif;font-size:9.5px;letter-spacing:0.3em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
+          + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:20px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.9:0.85)+';" />'
+        + '</div>'
+        + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
+      + '</div>'
+    + '</div>';
+
+  var inner = ''
+    + glow + grain
+    + '<div style="position:relative;width:100%;height:100%;display:flex;z-index:2;">'
+      + leftPanel + rightPanel
+    + '</div>';
+
+  return wrap(w, h, bg, text, inner);
+}
+
+// Story 9:16 layout - vertical with breathing room
+function renderStoryCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, border, glowColor, isDark) {
+  var headlineSize = tag.text.length > 36 ? 100 : (tag.text.length > 22 ? 124 : 152);
+
+  var glow = '<div style="position:absolute;top:35%;left:50%;width:1300px;height:1300px;'
+    + 'transform:translate(-50%,-50%);background:radial-gradient(circle,'+glowColor+' 0%,transparent 60%);pointer-events:none;"></div>';
+
+  var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at top,rgba(212,184,150,0.05),transparent 55%),radial-gradient(ellipse at bottom,rgba(0,0,0,0.5),transparent 55%);pointer-events:none;"></div>' : '';
+
+  var topSection = ''
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:96px;height:96px;display:block;" />'
+      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;font-size:48px;color:'+goldBright+';letter-spacing:0.02em;">Brilliance</div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.4em;text-transform:uppercase;color:'+dim+';font-weight:500;">'+tag.kicker+'</div>'
+    + '</div>';
+
+  var middleSection = ''
+    + '<div style="text-align:center;max-width:'+(w-140)+'px;">'
+      + '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:300;'
+        + 'font-size:'+headlineSize+'px;line-height:1.05;letter-spacing:-0.015em;color:'+text+';">'
+        + tag.text
+      + '</div>'
+      + '<div style="width:64px;height:1px;background:'+goldSoft+';opacity:0.55;margin:48px auto 0;"></div>'
+    + '</div>';
+
+  var bottomSection = ''
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:24px;">'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:11px;letter-spacing:0.36em;text-transform:uppercase;color:'+dim+';font-weight:500;">Backed by</div>'
+      + '<img src="'+GFS_URL+'" crossorigin="anonymous" style="height:30px;width:auto;display:block;'+(isDark?'':'filter:brightness(0.4);')+'opacity:'+(isDark?0.92:0.85)+';" />'
+      + '<div style="width:1px;height:22px;background:'+border+';"></div>'
+      + '<div style="font-family:\'DM Sans\',sans-serif;font-size:13px;letter-spacing:0.34em;text-transform:uppercase;color:'+muted+';font-weight:400;">brilliance.run</div>'
+    + '</div>';
+
+  var inner = ''
+    + glow + grain
+    + '<div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;'
+      + 'padding:140px 70px;z-index:2;">'
+      + topSection + middleSection + bottomSection
+    + '</div>';
+
+  return wrap(w, h, bg, text, inner);
+}
+
+function wrap(w, h, bg, text, inner) {
+  return '<div style="width:'+w+'px;height:'+h+'px;background:'+bg+';color:'+text+';font-family:\'DM Sans\',sans-serif;position:relative;overflow:hidden;">'
+    + inner + '</div>';
+}
+
+// ─── GRID / SIDEBAR ───
+function getVisibleTemplates() {
+  return templates.filter(function(t) {
+    if (currentFilter !== 'all' && t.tag.cat !== currentFilter) return false;
+    if (currentMode !== 'all' && t.mode !== currentMode) return false;
+    if (currentFormat !== 'all' && t.format !== currentFormat) return false;
+    return true;
+  });
+}
+
+function renderGrid() {
+  var grid = document.getElementById('postGrid');
+  var visible = getVisibleTemplates();
+
+  var cat = CATEGORIES.find(function(c) { return c.id === currentFilter; });
+  var fmtLabel = currentFormat === 'all' ? 'All Formats' : FORMATS[currentFormat].label;
+  var modeLabel = currentMode === 'all' ? 'All Modes' : (currentMode.charAt(0).toUpperCase() + currentMode.slice(1) + ' Mode');
+
+  document.getElementById('gridTitle').textContent = cat ? cat.label : 'All Taglines';
+  document.getElementById('gridSub').textContent = visible.length + ' templates · ' + fmtLabel + ' · ' + modeLabel;
+
+  grid.innerHTML = '';
+
+  visible.forEach(function(t) {
+    var card = document.createElement('div');
+    card.className = 'post-card size-' + t.format;
+    card.onclick = function(e) {
+      if (e.target.closest('.post-card-dl')) return;
+      openPreview(templates.indexOf(t));
+    };
+
+    var inner = document.createElement('div');
+    inner.className = 'post-card-inner';
+    inner.style.width = t.w + 'px';
+    inner.style.height = t.h + 'px';
+    inner.innerHTML = t.render();
+    card.appendChild(inner);
+
+    var overlay = document.createElement('div');
+    overlay.className = 'post-card-overlay';
+    overlay.innerHTML = '<span class="post-card-label">' + escapeText(t.tag.text) + '</span>'
+      + '<span class="post-card-meta">' + FORMATS[t.format].short + ' · ' + t.mode + '</span>';
+    card.appendChild(overlay);
+
+    var dlBtn = document.createElement('div');
+    dlBtn.className = 'post-card-dl';
+    dlBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+    dlBtn.onclick = function(e) { e.stopPropagation(); downloadTemplate(templates.indexOf(t)); };
+    card.appendChild(dlBtn);
+
+    grid.appendChild(card);
+
+    (function(el, inn, tw, th) {
+      requestAnimationFrame(function() {
+        var cw = el.offsetWidth;
+        var ch = el.offsetHeight;
+        var scale = Math.min(cw / tw, ch / th);
+        inn.style.transform = 'scale(' + scale + ')';
+      });
+    })(card, inner, t.w, t.h);
+  });
+}
+
+function escapeText(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderSidebar() {
+  var list = document.getElementById('categoryList');
+  var mobileCtrl = document.getElementById('mobileControls');
+  list.innerHTML = '';
+  mobileCtrl.innerHTML = '';
+
+  CATEGORIES.forEach(function(cat) {
+    var count = templates.filter(function(t) {
+      var modeOk = currentMode === 'all' || t.mode === currentMode;
+      var fmtOk = currentFormat === 'all' || t.format === currentFormat;
+      var catOk = cat.id === 'all' || t.tag.cat === cat.id;
+      return modeOk && fmtOk && catOk;
+    }).length;
+
+    var btn = document.createElement('button');
+    btn.className = 'sidebar-btn' + (currentFilter === cat.id ? ' active' : '');
+    btn.innerHTML = cat.label + '<span class="sidebar-count">' + count + '</span>';
+    btn.onclick = function() { setFilter(cat.id); };
+    list.appendChild(btn);
+
+    var mbtn = document.createElement('button');
+    mbtn.className = 'sidebar-btn' + (currentFilter === cat.id ? ' active' : '');
+    mbtn.style.cssText = 'flex-shrink:0;padding:6px 14px;font-size:11px;border:1px solid var(--border);border-radius:20px;';
+    if (currentFilter === cat.id) mbtn.style.cssText += 'background:rgba(178,153,123,0.12);border-color:rgba(178,153,123,0.3);color:var(--gold-2);';
+    mbtn.textContent = cat.label;
+    mbtn.onclick = function() { setFilter(cat.id); };
+    mobileCtrl.appendChild(mbtn);
+  });
+}
+
+function setFilter(catId) { currentFilter = catId; renderSidebar(); renderGrid(); }
+function setFormatFilter(f) {
+  currentFormat = f;
+  document.querySelectorAll('#formatToggle .toggle-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-format') === f);
+  });
+  renderSidebar(); renderGrid();
+}
+function setModeFilter(m) {
+  currentMode = m;
+  document.querySelectorAll('#modeToggle .toggle-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-mode') === m);
+  });
+  renderSidebar(); renderGrid();
+}
+
+// ─── PREVIEW ───
+function openPreview(idx) {
+  previewIdx = idx;
+  var t = templates[idx];
+  var wrap = document.getElementById('previewWrap');
+  var container = document.getElementById('previewInner');
+
+  wrap.className = 'preview-card-wrap preview-' + t.format;
+  container.innerHTML = t.render();
+  container.style.width = t.w + 'px';
+  container.style.height = t.h + 'px';
+
+  requestAnimationFrame(function() {
+    var ww = wrap.offsetWidth;
+    var wh = wrap.offsetHeight;
+    var scale = Math.min(ww / t.w, wh / t.h);
+    container.style.transform = 'scale(' + scale + ')';
+  });
+
+  document.getElementById('previewModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePreview() {
+  document.getElementById('previewModal').classList.remove('open');
+  document.body.style.overflow = '';
+  previewIdx = -1;
+}
+
+// ─── DOWNLOAD ───
+function rasterizeSvgs(container) {
+  return new Promise(function(resolve) {
+    var svgs = container.querySelectorAll('svg');
+    if (svgs.length === 0) { resolve(); return; }
+    var remaining = svgs.length;
+    function done() { remaining--; if (remaining <= 0) resolve(); }
+    for (var i = 0; i < svgs.length; i++) {
+      (function(svg) {
+        try {
+          var w = parseInt(svg.getAttribute('width')) || 24;
+          var h = parseInt(svg.getAttribute('height')) || 24;
+          var xml = new XMLSerializer().serializeToString(svg);
+          if (xml.indexOf('xmlns') === -1) xml = xml.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+          var blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+          var url = URL.createObjectURL(blob);
+          var img = new Image();
+          img.onload = function() {
+            try {
+              var c = document.createElement('canvas');
+              c.width = w * 4; c.height = h * 4;
+              c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+              var pngUrl = c.toDataURL('image/png');
+              URL.revokeObjectURL(url);
+              var rep = document.createElement('img');
+              rep.src = pngUrl;
+              rep.setAttribute('width', w);
+              rep.setAttribute('height', h);
+              if (svg.getAttribute('style')) rep.setAttribute('style', svg.getAttribute('style'));
+              svg.parentNode.replaceChild(rep, svg);
+            } catch(e) {}
+            done();
+          };
+          img.onerror = function() { URL.revokeObjectURL(url); done(); };
+          img.src = url;
+        } catch(e) { done(); }
+      })(svgs[i]);
+    }
+  });
+}
+
+function renderToCanvas(idx) {
+  return new Promise(function(resolve, reject) {
+    var t = templates[idx];
+    if (!t) { reject(new Error('Template not found: ' + idx)); return; }
+    var container = document.getElementById('renderContainer');
+    var timedOut = false;
+
+    var timeout = setTimeout(function() {
+      timedOut = true;
+      container.innerHTML = '';
+      reject(new Error('Render timeout'));
+    }, 15000);
+
+    container.style.width = t.w + 'px';
+    container.style.height = t.h + 'px';
+
+    try {
+      container.innerHTML = t.render();
+    } catch(e) { clearTimeout(timeout); container.innerHTML = ''; reject(e); return; }
+
+    var imgs = container.querySelectorAll('img');
+    var loaded = 0;
+    var total = imgs.length;
+
+    function onReady() {
+      if (timedOut) return;
+      rasterizeSvgs(container).then(function() {
+        if (timedOut) return;
+        html2canvas(container.firstChild, {
+          width: t.w,
+          height: t.h,
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          logging: false
+        }).then(function(canvas) {
+          if (timedOut) return;
+          clearTimeout(timeout);
+          container.innerHTML = '';
+          resolve(canvas);
+        }).catch(function(e) {
+          clearTimeout(timeout); container.innerHTML = ''; reject(e);
+        });
+      }).catch(function(e) { clearTimeout(timeout); container.innerHTML = ''; reject(e); });
+    }
+
+    if (total === 0) {
+      setTimeout(onReady, 50);
+    } else {
+      imgs.forEach(function(img) {
+        if (img.complete && img.naturalWidth > 0) {
+          loaded++;
+          if (loaded >= total) setTimeout(onReady, 50);
+        } else {
+          img.onload = img.onerror = function() {
+            loaded++;
+            if (loaded >= total) setTimeout(onReady, 50);
+          };
+        }
+      });
+    }
+  });
+}
+
+function fileSafeName(t, idx) {
+  var slug = t.tag.text.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  var num = (idx + 1).toString();
+  if (num.length < 2) num = '0' + num;
+  return num + '_Brilliance_' + slug + '_' + FORMATS[t.format].short.replace(':', 'x') + '_' + t.mode + '.png';
+}
+
+function downloadTemplate(idx) {
+  var t = templates[idx];
+  renderToCanvas(idx).then(function(canvas) {
+    canvas.toBlob(function(blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Brilliance_' + t.tag.text.replace(/[^a-zA-Z0-9]+/g, '_') + '_' + FORMATS[t.format].short.replace(':', 'x') + '_' + t.mode + '.png';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, 'image/png');
+  }).catch(function(e) {
+    console.error('[social3] Download failed:', e.message);
+    alert('Download failed. Try again.');
+  });
+}
+
+function downloadCurrent() {
+  if (previewIdx >= 0) downloadTemplate(previewIdx);
+}
+
+function downloadAll() {
+  var visible = getVisibleTemplates();
+  if (visible.length === 0) return;
+
+  var btn = document.getElementById('downloadAllBtn');
+  var status = document.getElementById('downloadStatus');
+  var bar = document.getElementById('progressBar');
+  btn.disabled = true;
+  bar.classList.add('active');
+  bar.style.width = '0%';
+
+  var zip = new JSZip();
+
+  function processNext(i) {
+    if (i >= visible.length) {
+      status.textContent = 'Creating ZIP…';
+      bar.style.width = '95%';
+      zip.generateAsync({ type: 'blob' }).then(function(content) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = 'Brilliance_Social_Campaign.zip';
+        a.click();
+        URL.revokeObjectURL(a.href);
+        btn.disabled = false;
+        status.textContent = '';
+        bar.classList.remove('active');
+      });
+      return;
+    }
+
+    var t = visible[i];
+    var globalIdx = templates.indexOf(t);
+    status.textContent = 'Rendering ' + (i + 1) + ' of ' + visible.length + '…';
+    bar.style.width = ((i / visible.length) * 90) + '%';
+
+    renderToCanvas(globalIdx).then(function(canvas) {
+      canvas.toBlob(function(blob) {
+        zip.file(fileSafeName(t, i), blob);
+        processNext(i + 1);
+      }, 'image/png');
+    }).catch(function(e) {
+      console.error('[social3] Skipping template ' + globalIdx + ':', e.message);
+      processNext(i + 1);
+    });
+  }
+
+  processNext(0);
+}
+
+// ─── INIT ───
+function init() {
+  templates = buildTemplates();
+
+  document.querySelectorAll('#formatToggle .toggle-btn').forEach(function(b) {
+    b.onclick = function() { setFormatFilter(b.getAttribute('data-format')); };
+  });
+  document.querySelectorAll('#modeToggle .toggle-btn').forEach(function(b) {
+    b.onclick = function() { setModeFilter(b.getAttribute('data-mode')); };
+  });
+
+  // Default to portrait + dark for the cleanest first view of the campaign
+  setFormatFilter('portrait');
+  setModeFilter('dark');
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
