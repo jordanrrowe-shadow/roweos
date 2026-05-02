@@ -72,7 +72,7 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
 
 <div class="hero">
   <h1>Privacy <span class="accent">Policy</span></h1>
-  <p class="subtitle">Last updated: April 1, 2026</p>
+  <p class="subtitle">Last updated: May 2, 2026</p>
 </div>
 
 <div class="content">
@@ -96,27 +96,62 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
 
     <div class="card">
       <h3>Application Data</h3>
-      <p>Data you create within Brilliance (brands, conversations, documents, goals, inventory, calendar events, and other content) is stored locally in your browser and optionally synced to Firebase Cloud Firestore if you enable cloud sync.</p>
+      <p>Data you create within Brilliance is stored locally in your browser and optionally synced to Firebase Cloud Firestore if you enable cloud sync. This covers every surface in the platform: brands and life profiles, conversations, Notebooks (long-form writing), Pulse goals and items, Rhythm calendar events and routines, Studio operations and generated content, Folio visual artifacts, Bloom saved seeds, Library files, Mail (outbox, sent, drafts, settings), People / Clients, Inventory, Thought Board pins, Evolve profile and skill data, Identity (brand mission, voice, life context), Memory (conversation history), and Settings.</p>
     </div>
 
     <div class="card">
       <h3>API Keys</h3>
-      <p>AI provider API keys you enter (Anthropic, OpenAI, Google) are stored exclusively in your browser's local storage. They are never transmitted to our servers or stored in our databases.</p>
+      <p>AI provider API keys you enter (Anthropic, OpenAI, Google) are stored exclusively in your browser's local storage. They are never transmitted to or stored on our servers, with one exception: pre-loaded keys you purchase through Brilliance are delivered server-side via Stripe and stored in your Firebase account so they can be auto-provisioned to your devices.</p>
     </div>
 
     <div class="card">
       <h3>Social Media Connections</h3>
-      <p>If you connect social media accounts (X/Twitter, Threads, Instagram), we receive OAuth access tokens from those platforms. These tokens are stored in your Firebase account and are used only to post content on your behalf when you explicitly request it. We do not read, scrape, or analyze your social media feeds.</p>
+      <p>If you connect social media accounts (X / Twitter, Threads, Instagram, LinkedIn, Facebook, TikTok), we receive OAuth access tokens from those platforms. Tokens are stored in your Firebase account (Firestore <code>social_tokens</code> subcollection) so the mobile PWA can post even when localStorage is partitioned by the OS. Tokens are used only to post content on your behalf when you explicitly request it or when an automation you configured runs. We do not read, scrape, or analyze your social media feeds.</p>
+    </div>
+
+    <div class="card">
+      <h3>Calendar &amp; Mail Integrations</h3>
+      <p>When you connect Google Calendar, Outlook Calendar (Microsoft Graph), or iCloud Calendar (CalDAV), Brilliance receives OAuth tokens or CalDAV credentials. The same applies to Mail integrations: Gmail, Outlook, and iCloud Mail. These credentials are stored in your Firebase account and used solely for the actions you initiate (read calendar events, create events, send mail from your account). We do not analyze the content of your calendar events or mail beyond what is needed to render them in your view.</p>
     </div>
 
     <div class="card">
       <h3>Automations &amp; Pipelines</h3>
-      <p>If you create scheduled workflows or multi-step pipelines, Brilliance stores their configuration (name, schedule, action type, steps, and associated brand) in your browser's local storage and optionally in Firebase if cloud sync is enabled. Execution history and results are stored locally. Automations that involve social posting or AI calls use your own connected accounts and API keys — we do not execute actions on external services without a configuration you created.</p>
+      <p>If you create scheduled workflows or multi-step pipelines, Brilliance stores their configuration (name, schedule, action type, steps, and associated brand or life profile) in your browser's local storage and optionally in Firebase if cloud sync is enabled. Execution history and results are stored locally. Automations that involve social posting, mail, or AI calls use your own connected accounts and API keys — we do not execute actions on external services without a configuration you created. Automations may run server-side via Cloud Functions when the app is closed; the Cloud Function reads only the automations you've saved and uses only the credentials you've connected.</p>
+    </div>
+
+    <div class="card">
+      <h3>Evolve (Adaptive Learning)</h3>
+      <p>Evolve stores your learning goal, deadline, known mental models / context, XP, streak, and answered quiz history. The Quiz Engine generates questions by sending your goal and known context to your configured AI providers (Gemini for outlines, Claude or GPT for question generation). The Verifier Engine sends claims you submit through a two-pass review across two different providers. All AI calls go through your own API keys; we do not log the prompts or responses on our servers.</p>
+    </div>
+
+    <div class="card">
+      <h3>Brilliance Knowledge Engine</h3>
+      <p>To answer "what does Brilliance know about my data" questions, the Universal Search and chat agents can attach a JSON snapshot of your current localStorage state (counts, names, status across the surfaces above). This snapshot is built locally in your browser and sent only to your configured AI provider with the prompt. It never touches our servers and never includes API keys, OAuth tokens, or access keys.</p>
+    </div>
+
+    <div class="card">
+      <h3>Push Notifications</h3>
+      <p>If you enable push notifications, we store a Web Push subscription (endpoint URL and encryption keys) in your Firebase account so reminders, automation completions, and other alerts can fire even when Brilliance is closed. The subscription is tied to your browser/device and can be revoked at any time from Settings.</p>
+    </div>
+
+    <div class="card">
+      <h3>Payments &amp; Billing</h3>
+      <p>Subscription and one-time payments are processed by Stripe. Brilliance does not see or store your full card details. We receive only Stripe customer IDs, subscription status, and event metadata necessary to grant or revoke access to paid tiers.</p>
+    </div>
+
+    <div class="card">
+      <h3>Transactional Email</h3>
+      <p>We send transactional emails (welcome, access key delivery, feedback receipts, billing receipts, optional reminders) via Resend. We log a minimal record of each send (recipient address, template, status, timestamp) in Firestore so the in-app Campaigns dashboard can show delivery state. Email content is not retained beyond what's needed for retry / debugging.</p>
     </div>
 
     <div class="card">
       <h3>Usage Analytics</h3>
       <p>We track basic API usage metrics (provider, model, token count, estimated cost) locally in your browser to power the Analytics dashboard. This data is not sent to our servers unless you enable cloud sync.</p>
+    </div>
+
+    <div class="card">
+      <h3>Feedback</h3>
+      <p>When you submit feedback through the in-app Send Feedback form, we receive your description, selected category and area tags, optional screenshots, device / OS metadata, and your account email. This is used to triage bugs and prioritize features. Screenshots may be stored in Firestore for review.</p>
     </div>
   </div>
 
@@ -147,15 +182,21 @@ td{padding:10px 16px;color:rgba(255,255,255,0.5);border-bottom:1px solid rgba(25
           <tr><th>Service</th><th>Purpose</th><th>Data Shared</th></tr>
         </thead>
         <tbody>
-          <tr><td>Google Firebase</td><td>Authentication & cloud sync</td><td>Account info, application data (if sync enabled)</td></tr>
-          <tr><td>Anthropic (Claude)</td><td>AI conversations</td><td>Your prompts (sent directly from browser using your key)</td></tr>
-          <tr><td>OpenAI (GPT)</td><td>AI conversations</td><td>Your prompts (sent directly from browser using your key)</td></tr>
-          <tr><td>Google (Gemini)</td><td>AI conversations & image generation</td><td>Your prompts (sent directly from browser using your key)</td></tr>
-          <tr><td>X/Twitter API</td><td>Social media posting</td><td>Post content & images you choose to publish</td></tr>
-          <tr><td>Meta (Threads/Instagram)</td><td>Social media posting</td><td>Post content & images you choose to publish</td></tr>
-          <tr><td>Google Calendar API</td><td>Calendar integration</td><td>Calendar events (read/write via your Google account)</td></tr>
-          <tr><td>Google Drive API</td><td>File import</td><td>File metadata and content (read-only, only files you select)</td></tr>
-          <tr><td>Vercel</td><td>Hosting & serverless functions</td><td>OAuth token exchange (server-side only)</td></tr>
+          <tr><td>Google Firebase</td><td>Authentication, Firestore cloud sync, Cloud Functions</td><td>Account info, application data (if sync enabled), automation execution metadata</td></tr>
+          <tr><td>Anthropic (Claude)</td><td>Chat, Studio, Quiz Engine, Verifier Engine</td><td>Your prompts (sent directly from browser using your key)</td></tr>
+          <tr><td>OpenAI (GPT)</td><td>Chat, Studio, Verifier Engine</td><td>Your prompts (sent directly from browser using your key)</td></tr>
+          <tr><td>Google (Gemini)</td><td>Chat, Studio, Quiz Engine outlines, image / video generation (Nano Banana, Veo)</td><td>Your prompts (sent directly from browser using your key)</td></tr>
+          <tr><td>X / Twitter API</td><td>Social Hub posting</td><td>Post content &amp; images you choose to publish</td></tr>
+          <tr><td>Meta (Threads / Instagram / Facebook)</td><td>Social Hub posting</td><td>Post content &amp; images you choose to publish</td></tr>
+          <tr><td>LinkedIn / TikTok</td><td>Social Hub posting</td><td>Post content &amp; images you choose to publish</td></tr>
+          <tr><td>Google Calendar API</td><td>Rhythm calendar integration</td><td>Calendar events (read / write via your Google account)</td></tr>
+          <tr><td>Microsoft Graph (Outlook)</td><td>Rhythm calendar + Mail integration</td><td>Calendar events, mail messages (read / write via your Microsoft account)</td></tr>
+          <tr><td>Apple iCloud (CalDAV)</td><td>Rhythm calendar integration</td><td>Calendar events (read / write via app-specific password)</td></tr>
+          <tr><td>Gmail API</td><td>Mail integration</td><td>Mail messages (read / send via your Google account)</td></tr>
+          <tr><td>Google Drive API</td><td>Library file import</td><td>File metadata and content (read-only, only files you select)</td></tr>
+          <tr><td>Stripe</td><td>Subscription + API key purchases</td><td>Customer ID, subscription status, payment metadata</td></tr>
+          <tr><td>Resend</td><td>Transactional email (welcome, receipts, alerts)</td><td>Recipient email, template name, delivery status</td></tr>
+          <tr><td>Vercel</td><td>Hosting, serverless functions, OAuth proxies</td><td>OAuth token exchange, social posting proxies (server-side only, not logged)</td></tr>
         </tbody>
       </table>
     </div>
