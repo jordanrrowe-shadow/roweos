@@ -204,7 +204,7 @@ Download PNG
    ============================================ */
 
 var WORDMARK_URL = '/images/brilliance/wordmark-intelligence-os.png';
-var MONOGRAM_URL = '/images/brilliance/b-logo-gold.png';
+var MONOGRAM_URL = '/images/brilliance/b-app-icon.png';
 var GFS_URL = '/images/promo/google-for-startups.png';
 // Wordmark PNG is 1536x1024 (1.5:1). Use width-based sizing so the lockup feels right per format.
 
@@ -352,8 +352,8 @@ function renderStandardCard(tag, fmt, w, h, bg, text, muted, dim, goldBright, go
 
   var wordmarkW = isSquare ? 300 : 360;
   var topBlock = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:0px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:'+monogramSize+'px;height:'+monogramSize+'px;display:block;margin-bottom:-26px;" />'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:'+monogramSize+'px;height:'+monogramSize+'px;display:block;border-radius:32px;" />'
       + '<img src="'+WORDMARK_URL+'" crossorigin="anonymous" style="width:'+wordmarkW+'px;height:auto;display:block;" />'
     + '</div>';
 
@@ -397,8 +397,8 @@ function renderXCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, bord
   var grain = isDark ? '<div style="position:absolute;inset:0;background:radial-gradient(ellipse at left,rgba(212,184,150,0.04),transparent 55%);pointer-events:none;"></div>' : '';
 
   var leftPanel = ''
-    + '<div style="flex:0 0 420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:48px 36px;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:200px;height:200px;display:block;margin-bottom:-24px;" />'
+    + '<div style="flex:0 0 420px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:48px 36px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:200px;height:200px;display:block;border-radius:36px;" />'
       + '<img src="'+WORDMARK_URL+'" crossorigin="anonymous" style="width:280px;height:auto;display:block;" />'
     + '</div>';
 
@@ -441,8 +441,8 @@ function renderStoryCard(tag, w, h, bg, text, muted, dim, goldBright, goldSoft, 
   var gfsFilter = isDark ? 'filter:invert(1) hue-rotate(180deg);' : 'filter:brightness(0.4);';
 
   var topSection = ''
-    + '<div style="display:flex;flex-direction:column;align-items:center;gap:0;">'
-      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:260px;height:260px;display:block;margin-bottom:-32px;" />'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;">'
+      + '<img src="'+MONOGRAM_URL+'" crossorigin="anonymous" style="width:260px;height:260px;display:block;border-radius:48px;" />'
       + '<img src="'+WORDMARK_URL+'" crossorigin="anonymous" style="width:430px;height:auto;display:block;" />'
     + '</div>';
 
