@@ -1023,7 +1023,7 @@ async function executePipeline(task, brand, brandSettingsObj, apiKeys, profileDa
         emailTo = _resolveVars(emailTo);
         emailSubject = _resolveVars(emailSubject);
         emailBody = _resolveVars(emailBody);
-        var emailFrom = (step.config && step.config.emailFrom) || 'roweos@therowecollection.com';
+        var emailFrom = (step.config && step.config.emailFrom) || 'jordan@therowecollection.com';
         // Strip gmail:/outlook: prefix
         if (emailFrom.indexOf('gmail:') === 0) emailFrom = emailFrom.substring(6);
         if (emailFrom.indexOf('outlook:') === 0) emailFrom = emailFrom.substring(8);

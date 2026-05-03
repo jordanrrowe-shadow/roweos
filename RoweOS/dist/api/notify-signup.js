@@ -67,7 +67,7 @@ async function handler(req, res) {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: 'Brilliance <roweos@therowecollection.com>',
+            from: 'Brilliance <jordan@therowecollection.com>',
             reply_to: 'jordan@therowecollection.com',
             to: ['jordan@therowecollection.com'],
             subject: 'New Brilliance Signup: ' + email,
@@ -143,7 +143,7 @@ async function handler(req, res) {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              from: 'Brilliance <roweos@therowecollection.com>',
+              from: 'Brilliance <jordan@therowecollection.com>',
               reply_to: 'jordan@therowecollection.com',
               to: [email],
               subject: 'Welcome to Brilliance. Get Your Access Key',

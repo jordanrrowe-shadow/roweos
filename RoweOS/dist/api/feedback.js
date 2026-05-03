@@ -160,7 +160,7 @@ export default async function handler(req, res) {
               method: 'POST',
               headers: { 'Authorization': 'Bearer ' + resendKey, 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                from: 'Brilliance <roweos@therowecollection.com>',
+                from: 'Brilliance <jordan@therowecollection.com>',
                 to: ['jordan@therowecollection.com'],
                 subject: feedbackSubject,
                 html: emailHtml

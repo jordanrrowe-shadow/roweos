@@ -82,7 +82,7 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: 'Brilliance <roweos@therowecollection.com>',
+          from: 'Brilliance <jordan@therowecollection.com>',
           reply_to: 'jordan@therowecollection.com',
           to: ['jordan@therowecollection.com'],
           subject: infoSubject,

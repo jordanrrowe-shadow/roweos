@@ -810,14 +810,14 @@ module.exports = async function handler(req, res) {
       console.error('[send-template-email]', sendError);
     } else {
       try {
-        // v31.3: Always BCC jordan@therowecollection.com so Jordan receives a copy
-        // of every campaign send for validation. Cannot BCC roweos@therowecollection.com
-        // because that's the FROM address and Resend silently drops same-address BCCs.
+        // v34.102: Admin platform sends now use jordan@therowecollection.com
+        // as both From and reply-to so recipients see Jordan's address.
+        // BCC moved to roweos@ for archival (was the inverse before).
         var _payload = {
-          from: 'Brilliance <roweos@therowecollection.com>',
+          from: 'Brilliance <jordan@therowecollection.com>',
           reply_to: 'jordan@therowecollection.com',
           to: [userEmail],
-          bcc: ['jordan@therowecollection.com'],
+          bcc: ['roweos@therowecollection.com'],
           subject: emailData.subject,
           html: emailData.html
         };

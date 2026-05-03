@@ -348,7 +348,7 @@ async function sendEmail(to, subject, htmlBody) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'Brilliance <roweos@therowecollection.com>',
+        from: 'Brilliance <jordan@therowecollection.com>',
         reply_to: 'jordan@therowecollection.com',
         to: [to],
         subject: subject,
