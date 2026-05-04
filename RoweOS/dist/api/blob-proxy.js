@@ -5,8 +5,20 @@
 export default async function handler(req, res) {
   var blobUrl = req.query.url || '';
 
-  // Security: only allow Vercel Blob URLs for roweos-social images
-  if (!blobUrl || blobUrl.indexOf('blob.vercel-storage.com') === -1 || blobUrl.indexOf('roweos-social-') === -1) {
+  // v34.107: parse the URL with new URL() and validate hostname + pathname prefix
+  // separately. The previous substring-match check was bypassable - a value like
+  // 'https://attacker.com/?x=blob.vercel-storage.com/roweos-social-x' contained both
+  // required substrings without the actual hostname matching.
+  if (!blobUrl) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  var parsedBlobUrl;
+  try { parsedBlobUrl = new URL(blobUrl); } catch (eParse) {
+    return res.status(403).json({ error: 'Forbidden: invalid URL' });
+  }
+  if (parsedBlobUrl.protocol !== 'https:'
+      || parsedBlobUrl.hostname !== 'blob.vercel-storage.com'
+      || parsedBlobUrl.pathname.indexOf('/roweos-social-') !== 0) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 

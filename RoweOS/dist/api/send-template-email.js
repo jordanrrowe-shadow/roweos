@@ -58,6 +58,49 @@ async function getGoogleAccessToken(serviceAccount) {
   return data.access_token;
 }
 
+// v34.107: Verify a Firebase ID token. Returns the verified user record (with localId)
+// or null on any failure. Uses Identity Toolkit accounts:lookup with a service-account
+// access token for the cloud-platform scope.
+async function getIdtkAccessToken(serviceAccount) {
+  var crypto2 = require('crypto');
+  var now = Math.floor(Date.now() / 1000);
+  var header = { alg: 'RS256', typ: 'JWT' };
+  var payload = {
+    iss: serviceAccount.client_email,
+    scope: 'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/firebase',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600
+  };
+  var jwt = await signJwt(header, payload, serviceAccount.private_key);
+  var resp = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=' + jwt
+  });
+  if (!resp.ok) throw new Error('IDTK token exchange failed: ' + resp.status);
+  var data = await resp.json();
+  return data.access_token;
+}
+
+async function verifyFirebaseIdToken(idtkToken, idToken) {
+  if (!idToken) return null;
+  try {
+    var resp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + idtkToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken: idToken })
+    });
+    if (!resp.ok) return null;
+    var data = await resp.json();
+    if (!data.users || !data.users[0] || !data.users[0].localId) return null;
+    return data.users[0];
+  } catch (e) {
+    console.error('[send-template-email] verifyFirebaseIdToken error:', e && e.message);
+    return null;
+  }
+}
+
 // --- HMAC link signing ---
 
 function generateHmac(userId, question, answer) {
@@ -760,11 +803,38 @@ module.exports = async function handler(req, res) {
     var userId = body.userId || '';
     var userEmail = body.userEmail || '';
     var userName = body.userName || '';
-    var callerUid = body.callerUid || '';
     var metadata = body.metadata || {};
 
-    // Admin check
-    if (callerUid !== ADMIN_UID) {
+    // v34.107: Server-side admin verification via Firebase ID token. Previous
+    // body.callerUid check was bypassable by anyone who learned ADMIN_UID -
+    // the constant is leaked across 6 server files. Now requires a valid
+    // Authorization: Bearer <idToken> from the actual admin user.
+    var authHeader = req.headers.authorization || req.headers.Authorization || '';
+    var idToken = '';
+    if (authHeader.indexOf('Bearer ') === 0) idToken = authHeader.substring(7).trim();
+    if (!idToken) {
+      return res.status(401).json({ error: 'Missing Authorization header (Firebase ID token)' });
+    }
+
+    // Verify token before any side effects (including before validating template
+    // shape) so failed admin checks never leak whether a template name is valid.
+    var serviceAccountRawAuth = process.env.FIREBASE_SERVICE_ACCOUNT;
+    if (!serviceAccountRawAuth) {
+      return res.status(500).json({ error: 'Server not configured (missing FIREBASE_SERVICE_ACCOUNT)' });
+    }
+    var saAuth;
+    try { saAuth = JSON.parse(serviceAccountRawAuth); } catch (eSA) {
+      return res.status(500).json({ error: 'Server config error' });
+    }
+    var idtkAccessToken;
+    try { idtkAccessToken = await getIdtkAccessToken(saAuth); } catch (eTok) {
+      return res.status(500).json({ error: 'Auth service unavailable' });
+    }
+    var verifiedUser = await verifyFirebaseIdToken(idtkAccessToken, idToken);
+    if (!verifiedUser) {
+      return res.status(401).json({ error: 'Invalid or expired Firebase ID token' });
+    }
+    if (verifiedUser.localId !== ADMIN_UID) {
       return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
     }
 

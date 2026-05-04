@@ -48,6 +48,32 @@ async function getGoogleAccessToken(serviceAccount, scope) {
 
 // --- Identity Toolkit (Auth admin) ---
 
+// v34.107: Verify a Firebase ID token via Identity Toolkit and return the localId
+// (the Firebase user's UID). Returns null on any failure - callers must check.
+// We hit accounts:lookup with the service-account-issued Google access token PLUS
+// the user's idToken in the body. The response contains a verified user record
+// only if the idToken signature, issuer, audience, and expiration all check out.
+async function verifyIdToken(idtkToken, idToken) {
+  if (!idToken) return null;
+  try {
+    var resp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + idtkToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken: idToken })
+    });
+    if (!resp.ok) return null;
+    var data = await resp.json();
+    if (!data.users || !data.users[0]) return null;
+    var user = data.users[0];
+    // Sanity: localId must be present and the lookup must agree with the token.
+    if (!user.localId) return null;
+    return user;
+  } catch (e) {
+    console.error('[admin-delete-user] verifyIdToken error:', e && e.message);
+    return null;
+  }
+}
+
 async function lookupAuthUserByEmail(idtkToken, projectId, email) {
   var resp = await fetch('https://identitytoolkit.googleapis.com/v1/projects/' + projectId + '/accounts:lookup', {
     method: 'POST',
@@ -172,13 +198,20 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   var body = req.body || {};
-  var callerUid = body.callerUid || '';
   var email = (body.email || '').toLowerCase().trim();
   var uid = body.uid || '';
 
-  if (callerUid !== ADMIN_UID) {
-    return res.status(403).json({ error: 'Admin only' });
+  // v34.107: Server-side admin verification via Firebase ID token. The previous
+  // body.callerUid check was bypassable - anyone who learned ADMIN_UID could pass
+  // the gate. Now we require Authorization: Bearer <idToken>, verify it via
+  // Identity Toolkit, and only proceed if the verified UID matches ADMIN_UID.
+  var authHeader = req.headers.authorization || req.headers.Authorization || '';
+  var idToken = '';
+  if (authHeader.indexOf('Bearer ') === 0) idToken = authHeader.substring(7).trim();
+  if (!idToken) {
+    return res.status(401).json({ error: 'Missing Authorization header (Firebase ID token)' });
   }
+
   if (!email && !uid) {
     return res.status(400).json({ error: 'email or uid required' });
   }
@@ -194,6 +227,16 @@ module.exports = async function handler(req, res) {
     // Two scopes: Firestore + Identity Toolkit (Auth)
     var fsToken = await getGoogleAccessToken(serviceAccount, 'https://www.googleapis.com/auth/datastore');
     var idtkToken = await getGoogleAccessToken(serviceAccount, 'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/firebase');
+
+    // v34.107: verify the ID token and confirm the caller is the admin BEFORE
+    // any destructive operation. Failures here return 401/403 - never proceed.
+    var verifiedUser = await verifyIdToken(idtkToken, idToken);
+    if (!verifiedUser) {
+      return res.status(401).json({ error: 'Invalid or expired Firebase ID token' });
+    }
+    if (verifiedUser.localId !== ADMIN_UID) {
+      return res.status(403).json({ error: 'Admin only' });
+    }
 
     var report = { authDeleted: false, firestoreDeleted: 0, errors: [] };
 

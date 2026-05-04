@@ -122,9 +122,20 @@ function buildFeedbackEmail(feedback) {
 }
 
 export default async function handler(req, res) {
-  // v21.9: Permissive CORS — echo back origin (feedback endpoint has no security concern)
+  // v34.107: Tightened CORS - the previous "echo back origin" was permissive enough
+  // that any third-party site could cross-origin POST to this endpoint and trigger
+  // admin email + push notifications with arbitrary content. Now allowlisted to
+  // RoweOS / Brilliance origins only; all others get the production origin so legitimate
+  // app traffic still works while drive-by spam from foreign sites is blocked.
   var origin = (req.headers.origin || '').trim();
-  res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  var ALLOWED_ORIGINS = [
+    'https://roweos.com',
+    'https://www.roweos.com',
+    'https://roweos.vercel.app'
+  ];
+  var allowedOrigin = ALLOWED_ORIGINS.indexOf(origin) !== -1 ? origin : 'https://roweos.com';
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Access-Control-Max-Age', '86400');

@@ -36,15 +36,18 @@ async function getGoogleAccessToken(serviceAccount) {
 }
 
 // v22.4: Generate access key string (same format as client-side)
+// v34.107: Switched from Math.random() to crypto.randomInt() so generated access
+// keys are cryptographically random - matches stripe-webhook.js behavior. Math.random
+// is predictable after observing a few outputs and is unsuitable for credentials.
 function generateAccessKeyString() {
   var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I, O, 0, 1
   var key = 'ROWE-';
   for (var i = 0; i < 4; i++) {
-    key += chars.charAt(Math.floor(Math.random() * chars.length));
+    key += chars.charAt(crypto.randomInt(0, chars.length));
   }
   key += '-';
   for (var j = 0; j < 4; j++) {
-    key += chars.charAt(Math.floor(Math.random() * chars.length));
+    key += chars.charAt(crypto.randomInt(0, chars.length));
   }
   return key;
 }

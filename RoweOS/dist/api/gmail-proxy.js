@@ -39,12 +39,24 @@ async function getGoogleAccessToken(serviceAccount) {
 
 // Store Gmail tokens in Firestore for cross-device access
 async function storeGmailTokens(uid, tokenData) {
+  return _storeMailTokens(uid, tokenData, 'gmail_mail');
+}
+
+// v34.107: Outlook variant - same Firestore path layout under social_tokens/outlook_mail
+// so cross-device pickup works identically to Gmail. Previously the outlook_exchange
+// action returned tokens to the client without persisting; users lost their Outlook
+// connection when switching devices or clearing localStorage.
+async function storeOutlookTokens(uid, tokenData) {
+  return _storeMailTokens(uid, tokenData, 'outlook_mail');
+}
+
+async function _storeMailTokens(uid, tokenData, docKey) {
   if (!process.env.FIREBASE_SERVICE_ACCOUNT || !process.env.FIREBASE_PROJECT_ID) return;
   try {
     var sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     var googleToken = await getGoogleAccessToken(sa);
     var projectId = process.env.FIREBASE_PROJECT_ID;
-    var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/social_tokens/gmail_mail';
+    var docPath = 'projects/' + projectId + '/databases/(default)/documents/roweos_users/' + uid + '/social_tokens/' + docKey;
     var fields = {
       accessToken: { stringValue: tokenData.accessToken || '' },
       refreshToken: { stringValue: tokenData.refreshToken || '' },
@@ -57,7 +69,7 @@ async function storeGmailTokens(uid, tokenData) {
       headers: { 'Authorization': 'Bearer ' + googleToken, 'Content-Type': 'application/json' },
       body: JSON.stringify({ fields: fields })
     });
-    console.log('[gmail-proxy] Stored tokens in Firestore for uid:', uid);
+    console.log('[gmail-proxy] Stored tokens in Firestore for uid:', uid, 'key:', docKey);
   } catch(e) {
     console.error('[gmail-proxy] Firestore store error:', e.message);
   }
@@ -564,6 +576,15 @@ export default async function handler(req, res) {
         expiresAt: expiresAt,
         email: email
       };
+
+      // v34.107: persist to Firestore so the Outlook connection survives device
+      // switches + localStorage clears. Mirrors the Gmail exchange path. If uid
+      // isn't supplied (older client builds), the write is skipped silently.
+      if (uid) {
+        try { await storeOutlookTokens(uid, result); } catch (eStore) {
+          console.warn('[gmail-proxy] storeOutlookTokens failed for uid', uid, ':', eStore && eStore.message);
+        }
+      }
 
       console.log('[gmail-proxy] Outlook token exchange success for:', email, 'uid:', uid);
       return res.status(200).json(result);

@@ -171,8 +171,14 @@ module.exports = async function handler(req, res) {
   var campaign = (req.query.c || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 64);
   var to = req.query.to || '/';
   var u = (req.query.u || '').slice(0, 256); // recipient identifier (email or uid)
-  // Only allow same-origin redirects
-  if (to.indexOf('http') === 0 || to.indexOf('//') === 0) to = '/';
+  // v34.107: harden open-redirect guard. Previous check only blocked absolute
+  // URLs starting with 'http' or '//'; a relative path like '/admin' or one with
+  // '..' segments still went through. Now require the path to start with '/' and
+  // contain no scheme markers, no protocol-relative slashes, and no '..' traversal.
+  if (typeof to !== 'string' || to.indexOf('http') === 0 || to.indexOf('//') === 0
+      || to.indexOf('..') !== -1 || to.charAt(0) !== '/') {
+    to = '/';
+  }
   if (!campaign) {
     return res.status(400).json({ error: 'Missing campaign id (c=)' });
   }
