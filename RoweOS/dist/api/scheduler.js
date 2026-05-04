@@ -719,9 +719,13 @@ async function executeSocialPost(task, profileData, reqHost, projectId, googleAc
     }
 
     // v20.12: Try 2 — Firestore social_tokens subcollection (written by social-auth endpoint)
+    // v34.105: tokens are stored at 'roweos_users/{uid}/social_tokens/' across the rest of the
+    // codebase (gmail-proxy.js:47, social-auth.js:48). The previous 'users/{uid}' path was a
+    // stale prefix that always returned 404, so this fallback never recovered a token and
+    // pipeline social posts silently failed when the in-profile token was missing.
     if ((!tokenData || !tokenData.accessToken) && projectId && googleAccessToken && uid) {
       try {
-        var tokenDoc = await firestoreGet(projectId, googleAccessToken, 'users/' + uid + '/social_tokens/' + scKey);
+        var tokenDoc = await firestoreGet(projectId, googleAccessToken, 'roweos_users/' + uid + '/social_tokens/' + scKey);
         if (tokenDoc && tokenDoc.fields) {
           tokenData = parseFirestoreDoc(tokenDoc.fields);
         }
