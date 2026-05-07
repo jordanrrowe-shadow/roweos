@@ -1,6 +1,98 @@
 // v18.9: Fetch website metadata for Digital Presence import
 // Extracts title, description, OG tags, favicon, and social media links from a URL
 
+// v34.111: SSRF defenses. Reject IPv4 in private + reserved ranges (RFC 1918,
+// loopback, link-local, broadcast, multicast, cloud metadata 169.254.169.254),
+// IPv6 loopback ::1, IPv6 link-local fe80::/10, IPv6 unique-local fc00::/7,
+// and known cloud metadata hostnames (metadata.google.internal etc).
+function isPublicHostname(hostnameRaw) {
+  if (!hostnameRaw) return false;
+  // strip IPv6 brackets
+  var h = String(hostnameRaw).toLowerCase().replace(/^\[/, '').replace(/\]$/, '');
+  // hostname-based blocks
+  if (h === 'localhost' || h === 'metadata.google.internal' || h === 'metadata') return false;
+  if (h.indexOf('.localhost') === h.length - '.localhost'.length && h.length > '.localhost'.length) return false;
+  // IPv6 - any colon means IPv6 literal here
+  if (h.indexOf(':') !== -1) {
+    if (h === '::' || h === '::1' || h === '0:0:0:0:0:0:0:0' || h === '0:0:0:0:0:0:0:1') return false;
+    // link-local fe80::/10
+    if (/^fe[89ab][0-9a-f]?:/.test(h)) return false;
+    // unique-local fc00::/7
+    if (/^f[cd][0-9a-f]{0,2}:/.test(h)) return false;
+    // IPv4-mapped IPv6 ::ffff:a.b.c.d - extract and re-check
+    var mapped = h.match(/^::ffff:([0-9.]+)$/);
+    if (mapped && !isPublicIPv4(mapped[1])) return false;
+    return true;
+  }
+  // pure IPv4 dotted quad
+  if (/^[0-9.]+$/.test(h)) {
+    return isPublicIPv4(h);
+  }
+  // hostname (DNS name) - allowed. The actual address resolution happens in
+  // node fetch; the safe-redirect layer re-validates each redirect hop, but
+  // a malicious DNS could still resolve to a private IP. For full coverage
+  // we'd need a DNS lookup + revalidation here; the redirect re-check covers
+  // the common attack vector (open redirect to metadata host).
+  return true;
+}
+
+function isPublicIPv4(ip) {
+  var parts = String(ip).split('.');
+  if (parts.length !== 4) return false;
+  var a = parseInt(parts[0], 10);
+  var b = parseInt(parts[1], 10);
+  var c = parseInt(parts[2], 10);
+  var d = parseInt(parts[3], 10);
+  if ([a, b, c, d].some(function(n) { return isNaN(n) || n < 0 || n > 255; })) return false;
+  if (a === 0) return false;                                  // 0.0.0.0/8
+  if (a === 10) return false;                                 // 10.0.0.0/8 RFC1918
+  if (a === 127) return false;                                // 127.0.0.0/8 loopback
+  if (a === 169 && b === 254) return false;                   // 169.254.0.0/16 link-local + cloud metadata
+  if (a === 172 && b >= 16 && b <= 31) return false;          // 172.16.0.0/12 RFC1918
+  if (a === 192 && b === 0 && c === 0) return false;          // 192.0.0.0/24 IETF
+  if (a === 192 && b === 0 && c === 2) return false;          // 192.0.2.0/24 TEST-NET-1
+  if (a === 192 && b === 168) return false;                   // 192.168.0.0/16 RFC1918
+  if (a === 198 && (b === 18 || b === 19)) return false;      // 198.18.0.0/15 benchmark
+  if (a === 198 && b === 51 && c === 100) return false;       // TEST-NET-2
+  if (a === 203 && b === 0 && c === 113) return false;        // TEST-NET-3
+  if (a >= 224 && a <= 239) return false;                     // multicast
+  if (a >= 240) return false;                                 // reserved + broadcast 255.255.255.255
+  return true;
+}
+
+// Manual redirect follower. Re-validates the hostname on every hop so a public
+// allowed URL can't 302 you into the cloud metadata endpoint or a private host.
+async function fetchWithSafeRedirects(initialUrl, options, maxHops) {
+  var current = initialUrl;
+  var hops = 0;
+  var opts = Object.assign({}, options || {}, { redirect: 'manual' });
+  while (true) {
+    var resp = await fetch(current, opts);
+    if (resp.status >= 300 && resp.status < 400 && resp.headers.get('location')) {
+      hops++;
+      if (hops > (maxHops || 5)) {
+        throw new Error('Too many redirects');
+      }
+      var loc;
+      try { loc = new URL(resp.headers.get('location'), current); } catch (e) {
+        throw new Error('Bad redirect target');
+      }
+      if (loc.protocol !== 'http:' && loc.protocol !== 'https:') {
+        throw new Error('Redirect to non-http(s) blocked');
+      }
+      if (loc.port && loc.port !== '' && loc.port !== '80' && loc.port !== '443') {
+        throw new Error('Redirect to custom port blocked');
+      }
+      if (!isPublicHostname(loc.hostname)) {
+        throw new Error('Redirect to private/local host blocked');
+      }
+      current = loc.href;
+      continue;
+    }
+    return resp;
+  }
+}
+
 export default async function handler(req, res) {
   var origin = req.headers.origin || '';
   if (origin === 'https://roweos.vercel.app' || origin === 'https://roweos.com' || origin === 'https://www.roweos.com') {
@@ -38,24 +130,34 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid URL' });
     }
 
-    // Block internal/private IPs
-    var hostname = parsed.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.')) {
-      return res.status(400).json({ error: 'Private URLs not allowed' });
+    // v34.111: Hardened SSRF block. Previous version missed IPv6 loopback,
+    // link-local 169.254.x.x (cloud metadata at 169.254.169.254 returns IAM
+    // creds on AWS/GCP/Azure), 0.0.0.0, the proper 172.16-31 private range,
+    // and the bare-prefix `172.` rule was both incorrect (172.0.x and
+    // 172.32-255.x are NOT private) and incomplete. Also adds an IPv4-octet
+    // allow check + protocol allowlist + port restriction. Redirects are
+    // now manually re-validated per hop instead of `redirect: 'follow'`.
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return res.status(400).json({ error: 'Only http(s) URLs allowed' });
+    }
+    if (parsed.port && parsed.port !== '' && parsed.port !== '80' && parsed.port !== '443') {
+      return res.status(400).json({ error: 'Custom ports not allowed' });
+    }
+    if (!isPublicHostname(parsed.hostname)) {
+      return res.status(400).json({ error: 'Private or local URLs not allowed' });
     }
 
-    // Fetch with timeout
+    // Fetch with timeout. Manual redirect handling so each hop is re-validated
+    // - prevents an allowed public host from redirecting into 169.254.169.254.
     var controller = new AbortController();
     var timeout = setTimeout(function() { controller.abort(); }, 8000);
-
-    var response = await fetch(url, {
+    var response = await fetchWithSafeRedirects(url, {
       signal: controller.signal,
       headers: {
         'User-Agent': 'RoweOS-MetaFetcher/1.0',
         'Accept': 'text/html,application/xhtml+xml'
-      },
-      redirect: 'follow'
-    });
+      }
+    }, 5);
     clearTimeout(timeout);
 
     if (!response.ok) {
