@@ -604,7 +604,7 @@ function handleNativeModelSelect(sel) {
     var displayNames = {
       'auto': 'Brilliance AI', 'claude-sonnet-4-6': 'Sonnet 4.6', 'claude-haiku-4-20250514': 'Haiku 4.5',
       // v31.0: gpt-5.5 family display labels
-      'claude-opus-4-7': 'Opus 4.7', 'gpt-5.5': 'GPT-5.5', 'gpt-5.5-pro': 'GPT-5.5 Pro',
+      'claude-opus-4-8': 'Opus 4.8', 'gpt-5.5': 'GPT-5.5', 'gpt-5.5-pro': 'GPT-5.5 Pro',
       'gpt-5.5-thinking': 'GPT-5.5 Thinking', 'gemini-3.1-pro-preview': '3.1 Pro',
       'gemini-3-flash-preview': '3.0 Flash', 'gemini-3-pro-image-preview': 'Nano Banana Pro 3',
       'gemini-2.5-flash-image': 'Nano Banana 3.0', 'gemini-2.0-flash-exp-image-generation': 'Flash Image',
@@ -703,7 +703,7 @@ function showStudioModelActionSheet() {
       '<div class="studio-mobile-model-label">Anthropic</div>' +
       '<div class="studio-mobile-model-item' + (currentModel === 'claude-sonnet-4-6' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'anthropic\', \'claude-sonnet-4-6\', \'Sonnet 4.6\')">Sonnet 4.6</div>' +
       '<div class="studio-mobile-model-item' + (currentModel === 'claude-haiku-4-20250514' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'anthropic\', \'claude-haiku-4-20250514\', \'Haiku 4.5\')">Haiku 4.5</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'claude-opus-4-7' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'anthropic\', \'claude-opus-4-7\', \'Opus 4.7\')">Opus 4.7</div>' +
+      '<div class="studio-mobile-model-item' + (currentModel === 'claude-opus-4-8' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'anthropic\', \'claude-opus-4-8\', \'Opus 4.8\')">Opus 4.8</div>' +
     '</div>' +
     '<div class="studio-mobile-model-section">' +
       '<div class="studio-mobile-model-label">OpenAI</div>' +

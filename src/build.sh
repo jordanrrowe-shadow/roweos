@@ -135,5 +135,26 @@ concat_sorted() {
 LINE_COUNT=$(wc -l < "$OUT" | tr -d ' ')
 SIZE_KB=$(( $(wc -c < "$OUT" | tr -d ' ') / 1024 ))
 echo "Built: $OUT"
-echo "Lines: $LINE_COUNT | Size: ${SIZE_KB}KB"
+echo "Lines: $LINE_COUNT | Size: ${SIZE_KB}KB (pre-minify)"
+
+# v35.0: post-build minification. Inline <script> blocks are passed through
+# esbuild --minify --target=es2015, inline <style> blocks through esbuild's CSS
+# minifier. The unminified copy is preserved at RoweOS/dist/index.unminified.html
+# so we can diff against it when investigating regressions.
+# Skip with NO_MINIFY=1 bash src/build.sh for local debug builds.
+if [ "${NO_MINIFY:-0}" = "1" ]; then
+  echo "NO_MINIFY=1 set; skipping minification"
+  node "$PROJECT_DIR/scripts/minify-bundle.mjs" --no-minify || echo "[warn] unminified copy step failed"
+else
+  if [ -f "$PROJECT_DIR/scripts/minify-bundle.mjs" ]; then
+    echo "Minifying..."
+    node "$PROJECT_DIR/scripts/minify-bundle.mjs" || {
+      echo "[warn] minify failed; reverting to unminified source"
+      cp "$PROJECT_DIR/RoweOS/dist/index.unminified.html" "$OUT"
+    }
+    POST_SIZE_KB=$(( $(wc -c < "$OUT" | tr -d ' ') / 1024 ))
+    echo "Post-minify size: ${POST_SIZE_KB}KB"
+  fi
+fi
+
 echo "=== Build Complete ==="

@@ -18,7 +18,7 @@
   var PROVIDERS = {
     anthropic: {
       baseUrl: 'https://api.anthropic.com/v1/messages',
-      models: ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001']
+      models: ['claude-sonnet-4-6', 'claude-opus-4-8', 'claude-opus-4-7', 'claude-haiku-4-5-20251001']
     },
     openai: {
       baseUrl: 'https://api.openai.com/v1/responses',

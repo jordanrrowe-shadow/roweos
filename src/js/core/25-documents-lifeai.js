@@ -3298,7 +3298,7 @@ async function extractFromIdentityWebsite() {
     if (activeProvider === 'anthropic') {
       // v22.49: Validate model name - fall back to known-good model if stored value is invalid
       var claudeModel = localStorage.getItem('claudeModel') || 'claude-sonnet-4-6';
-      var validModels = ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001', 'claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022'];
+      var validModels = ['claude-sonnet-4-6', 'claude-opus-4-8', 'claude-opus-4-7', 'claude-haiku-4-5-20251001', 'claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022'];
       if (validModels.indexOf(claudeModel) === -1 && claudeModel.indexOf('claude') === -1) {
         claudeModel = 'claude-sonnet-4-6';
       }
@@ -9178,12 +9178,18 @@ function openNewGoalModal() {
     var input = document.getElementById('goalChatInput');
     if (input) {
       input.focus();
-      input.addEventListener('keydown', function(e) {
+      // v35.0: remove prior listener before binding fresh one so repeated modal
+      // opens don't stack handlers on the same persistent input element.
+      if (window._goalChatKeydownHandler) {
+        try { input.removeEventListener('keydown', window._goalChatKeydownHandler); } catch(e) {}
+      }
+      window._goalChatKeydownHandler = function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           sendGoalChatMessage();
         }
-      });
+      };
+      input.addEventListener('keydown', window._goalChatKeydownHandler);
     }
   }, 100);
 }

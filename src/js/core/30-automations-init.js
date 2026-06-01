@@ -944,7 +944,7 @@ var MODEL_TIERS = {
     label: 'Pro Only',
     desc: 'Highest-tier models only',
     models: {
-      anthropic: ['claude-opus-4-7', 'claude-sonnet-4-6'],
+      anthropic: ['claude-opus-4-8', 'claude-sonnet-4-6'],
       openai: ['gpt-5.5-pro', 'gpt-5.5', 'gpt-5.5-thinking'],
       google: ['gemini-3.1-pro-preview']
     }
@@ -953,7 +953,7 @@ var MODEL_TIERS = {
     label: 'Balanced',
     desc: 'Pro for complex, standard for simple',
     models: {
-      anthropic: ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001'],
+      anthropic: ['claude-sonnet-4-6', 'claude-opus-4-8', 'claude-haiku-4-5-20251001'],
       openai: ['gpt-5.5', 'gpt-5.5-pro', 'gpt-5.5-thinking'],
       google: ['gemini-3.1-pro-preview', 'gemini-3-flash-preview']
     }

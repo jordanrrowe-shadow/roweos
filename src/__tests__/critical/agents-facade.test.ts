@@ -20,7 +20,7 @@ describe('services/agents — defensive', () => {
   it('callAnthropic throws when global missing', async () => {
     await expect(
       agents.callAnthropic({
-        model: 'claude-opus-4-7',
+        model: 'claude-opus-4-8',
         systemPrompt: 'sys',
         messages: [{ role: 'user', content: 'hi' }],
         apiKey: 'k',
@@ -60,7 +60,7 @@ describe('services/agents — delegation', () => {
     };
     const ctrl = new AbortController();
     await agents.callAnthropic({
-      model: 'claude-opus-4-7',
+      model: 'claude-opus-4-8',
       apiKey: 'sk_test',
       systemPrompt: 'sysprompt',
       messages: [{ role: 'user', content: 'hello' }],
@@ -71,7 +71,7 @@ describe('services/agents — delegation', () => {
         abortSignal: ctrl.signal,
       },
     });
-    expect(capturedArgs.model).toBe('claude-opus-4-7');
+    expect(capturedArgs.model).toBe('claude-opus-4-8');
     expect(capturedArgs.key).toBe('sk_test');
     expect(capturedArgs.sys).toBe('sysprompt');
     expect(capturedArgs.msgs).toEqual([{ role: 'user', content: 'hello' }]);

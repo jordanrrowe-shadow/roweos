@@ -1,5 +1,71 @@
 # Brilliance / RoweOS Changelog
 
+## v35.0 - Performance overhaul + Opus 4.8
+
+The first major-version bump in the v34.x line. A perf-focused release
+addressing three concrete user-felt problems plus the Anthropic Opus 4.7 -> 4.8
+migration. Driven by four parallel Explore agents that audited the codebase
+along distinct axes (notebook latency, boot/memory, listener/blob leaks,
+build bloat). Spec at `docs/superpowers/specs/2026-06-01-v35-performance-overhaul-design.md`.
+
+**Bundle minification (the single largest win).**
+`scripts/minify-bundle.mjs` pipes the post-concat bundle through esbuild,
+minifying each inline `<script>` block (JS, target=es2015, no identifier
+mangling for globals) and each inline `<style>` block (CSS) independently.
+Wire-size dropped from 10.4 MB to 6.9 MB (-32.8%). The unminified copy is
+preserved at `RoweOS/dist/index.unminified.html` for incident debugging.
+Skip with `NO_MINIFY=1 bash src/build.sh`. The minifier is run from `build.sh`
+after concat; a failed minify reverts to the unminified source rather than
+breaking the deploy.
+
+**On-demand CDN libs deferred.**
+`src/html/core/01-cdn-and-boot.html`: added `defer` to jsPDF, xlsx (SheetJS),
+ical.js, Chart.js, html2canvas, docx, pptxgenjs, Three.js, and TinyMCE -
+9 libs that are only invoked by user actions (export, chart render, Scribe
+editor, etc.). HTML parser no longer blocks on these network downloads
+during boot. Firebase, PDF.js, and marked.js stay synchronous because their
+globals are accessed during inline script execution.
+
+**Scribe (Notebook) typing-lag fixes.**
+- `initScribeResizeHandle()` was stacking 6 listeners
+  (mousedown/mousemove/mouseup/touchstart/touchmove/touchend) on every Scribe
+  view entry, never removing them. Now caches handler refs and detaches the
+  previous set before binding a fresh one.
+- `scheduleScribeAutoSave()` now wraps the `saveActiveScribeNotebook()` call in
+  `requestAnimationFrame` so the editor.getContent() walk + Firestore write
+  never lands on the same frame as a keystroke.
+- `saveActiveScribeNotebook()` sidebar list-item DOM mutation deferred to
+  `requestAnimationFrame`.
+- `updateScribeWordCount()` defers the editor.getContent({format:'text'}) DOM
+  walk to `requestAnimationFrame` inside the existing 300ms debounce window.
+
+**Memory leak fixes.**
+- Object URLs from 3 chat-export paths (chat-selection, chat-sections,
+  chat-clip in `20-ui-misc.js`) now call `URL.revokeObjectURL()` immediately
+  after the synthetic `<a>.click()` resolves.
+- `openGoalChatModal` keydown listener on the persistent `goalChatInput` is
+  now cached on `window._goalChatKeydownHandler` and removed before each
+  re-bind, so repeated modal opens don't stack handlers.
+
+**Anthropic Opus 4.7 -> 4.8 migration.**
+- New model ID `claude-opus-4-8` (announced 2026-05-28; same pricing as 4.7;
+  4x lower flaw-pass rate; better agentic coding).
+- Replaced `claude-opus-4-7` -> `claude-opus-4-8` across all dropdowns,
+  registries, default-model selectors, streaming call sites, and the
+  `agents-facade.test.ts` fixture. Touches 12 source files.
+- Historical pricing + display name entries for `claude-opus-4-7` were
+  preserved in `29-analytics-commerce.js` (both pricing and getModelDisplayName
+  maps), `27-launch-brandai.js`, the `25-documents-lifeai.js` validModels
+  whitelist, and the `00-api-bridge.js` model list - so old conversations and
+  cost reports referencing 4.7 still render correctly.
+- User-facing copy updated (analytics dashboard provider tile, About modal
+  "Latest" caption, system About blurb).
+
+**Deferred to follow-up:** CSS split (`01-base.css` is 1.57 MB), unused
+@keyframes prune (~20 candidates), utility-function consolidation, list
+virtualization for calendar/clients/automations, lazy `onSnapshot` listener
+attach. These are tracked in the v35.0 spec.
+
 ## v34.121 - Fresh-restore boot hang (Bloom thumbnail fetch storm)
 
 After v34.120, a user re-added the PWA (which wipes local storage/IndexedDB).

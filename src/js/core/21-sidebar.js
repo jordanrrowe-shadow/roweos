@@ -1293,7 +1293,7 @@ var PROVIDER_CONFIG = {
     docsLabel: 'console.anthropic.com',
     icon: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#e8956a" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>',
     models: [
-      { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', desc: 'Most capable, complex tasks' },
+      { id: 'claude-opus-4-8', name: 'Claude Opus 4.8', desc: 'Most capable, complex tasks' },
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', desc: 'Balanced speed and quality' },
       { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', desc: 'Fast and efficient' }
     ],
@@ -1754,7 +1754,7 @@ function showModelPickerInModal(provider) {
 
   var models = {
     anthropic: [
-      { id: 'claude-opus-4-7', name: 'Claude Opus 4.7', desc: 'Most capable, complex reasoning and analysis', color: '#a89878', recommended: true },
+      { id: 'claude-opus-4-8', name: 'Claude Opus 4.8', desc: 'Most capable, complex reasoning and analysis', color: '#a89878', recommended: true },
       { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6', desc: 'Fast, intelligent, great for most tasks', color: '#f97316', recommended: false },
       { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', desc: 'Fastest responses, cost-effective', color: '#22c55e', recommended: false }
     ],

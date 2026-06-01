@@ -14,5 +14,7 @@ node_modules/
 scripts/cleanup-cloud-v321-comprehensive.js
 RoweOS/dist/_scaffold-bundle.js
 RoweOS/dist/_scaffold-bundle.js.map
+# v35.0: minifier writes an unminified debug copy alongside the shipped bundle
+RoweOS/dist/index.unminified.html
 coverage/
 .vitest/

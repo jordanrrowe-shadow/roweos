@@ -7099,7 +7099,7 @@ function updateAutoLabAgentModels(preselect) {
   var modelsByProvider = {
     gemini: ['gemini-3-flash-preview', 'gemini-3.1-pro-preview'],
     nanobanana: ['gemini-2.5-flash-image', 'gemini-3-pro-image-preview', 'gemini-2.0-flash-exp-image-generation'],
-    anthropic: ['claude-sonnet-4-6', 'claude-haiku-4-20250514', 'claude-opus-4-7'],
+    anthropic: ['claude-sonnet-4-6', 'claude-haiku-4-20250514', 'claude-opus-4-8'],
     openai: ['gpt-5.5', 'gpt-5.5-pro', 'gpt-5.5-thinking']
   };
   var models = modelsByProvider[provider] || modelsByProvider.gemini;

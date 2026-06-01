@@ -6828,7 +6828,7 @@ var ROWEOS_AI_ROUTING = {
     { provider: 'openai', model: 'gpt-5.5' }
   ],
   strategic: [
-    { provider: 'anthropic', model: 'claude-opus-4-7' },
+    { provider: 'anthropic', model: 'claude-opus-4-8' },
     { provider: 'google', model: 'gemini-3.1-pro-preview' },
     { provider: 'anthropic', model: 'claude-sonnet-4-6' },
     { provider: 'openai', model: 'gpt-5.5' }

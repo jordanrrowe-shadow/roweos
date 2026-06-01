@@ -937,7 +937,11 @@ function onScribeContentChange() { // v29.0:
 function scheduleScribeAutoSave() { // v29.0:
   if (_scribeAutoSaveTimer) clearTimeout(_scribeAutoSaveTimer);
   _scribeAutoSaveTimer = setTimeout(function() {
-    saveActiveScribeNotebook();
+    // v35.0: defer the heavy work (editor.getContent + Firestore write + DOM
+    // mutation) to the next animation frame so we never block a paint for an
+    // input event that happens to land near the 1000ms debounce boundary.
+    var raf = window.requestAnimationFrame || function(fn) { return setTimeout(fn, 16); };
+    raf(function() { saveActiveScribeNotebook(); });
   }, 1000);
 }
 
@@ -973,8 +977,13 @@ function saveActiveScribeNotebook() { // v29.0:
 
   saveScribeNotebooks();
   // v29.0: Update list item without full re-render to avoid losing scroll position
-  var listItem = document.querySelector('.scribe-nb-item[data-nb-id="' + _scribeActiveId + '"] .scribe-nb-item-title');
-  if (listItem) listItem.textContent = nb.title || 'Untitled';
+  // v35.0: defer the DOM mutation a frame so it never piggy-backs the typing
+  // event's critical render path.
+  var raf = window.requestAnimationFrame || function(fn) { return setTimeout(fn, 16); };
+  raf(function() {
+    var listItem = document.querySelector('.scribe-nb-item[data-nb-id="' + _scribeActiveId + '"] .scribe-nb-item-title');
+    if (listItem) listItem.textContent = nb.title || 'Untitled';
+  });
 }
 
 // === AI WRITING === // v29.3:
@@ -1527,11 +1536,30 @@ function unlinkScribeLibraryItem(idx) { // v29.0:
 
 // === RESIZE HANDLE === // v29.3:
 
+// v35.0: cached handler refs so we can remove old listeners before re-binding.
+// Each Scribe view entry called initScribeResizeHandle() and stacked another
+// 6 listeners (mousedown/mousemove/mouseup/touchstart/touchmove/touchend) that
+// were never cleaned up - measurable lag after enough view re-entries in a
+// single session.
+var _scribeResizeHandlers = null;
+
 function initScribeResizeHandle() {
   var handle = document.getElementById('scribeResizeHandle');
   if (!handle) return;
   var panel = document.getElementById('scribeKnowledgePanel');
   if (!panel) return;
+
+  // v35.0: detach previous listeners before binding fresh ones.
+  if (_scribeResizeHandlers) {
+    var prev = _scribeResizeHandlers;
+    try { if (prev.handle) prev.handle.removeEventListener('mousedown', prev.onStart); } catch(e) {}
+    try { if (prev.handle) prev.handle.removeEventListener('touchstart', prev.onStart); } catch(e) {}
+    try { document.removeEventListener('mousemove', prev.onMove); } catch(e) {}
+    try { document.removeEventListener('mouseup', prev.onEnd); } catch(e) {}
+    try { document.removeEventListener('touchmove', prev.onMove); } catch(e) {}
+    try { document.removeEventListener('touchend', prev.onEnd); } catch(e) {}
+    _scribeResizeHandlers = null;
+  }
 
   var startY = 0;
   var startHeight = 0;
@@ -1571,6 +1599,8 @@ function initScribeResizeHandle() {
   handle.addEventListener('touchstart', onStart, { passive: false });
   document.addEventListener('touchmove', onMove, { passive: false });
   document.addEventListener('touchend', onEnd);
+
+  _scribeResizeHandlers = { handle: handle, onStart: onStart, onMove: onMove, onEnd: onEnd };
 }
 
 // === WORD COUNT === // v29.3:
@@ -1585,14 +1615,21 @@ function updateScribeWordCount() {
   if (_scribeWordCountTimer) clearTimeout(_scribeWordCountTimer);
   _scribeWordCountTimer = setTimeout(function() {
     _scribeWordCountTimer = null;
-    var el = document.getElementById('scribeWordCount');
-    if (!el) return;
-    var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
-    if (!editor) { el.textContent = '0 words'; return; }
-    var text = editor.getContent({ format: 'text' }) || '';
-    var words = text.split(/\s+/).filter(function(s) { return s.length > 0; }).length;
-    var chars = text.length;
-    el.textContent = words + ' word' + (words !== 1 ? 's' : '') + '  |  ' + chars + ' characters';
+    // v35.0: defer the editor.getContent() DOM walk to next animation frame.
+    // Even with the 300ms debounce, the walk itself can take 50-200ms on long
+    // notebooks - that work was landing on the same frame as the user's next
+    // keystroke. rAF moves it after the paint.
+    var raf = window.requestAnimationFrame || function(fn) { return setTimeout(fn, 16); };
+    raf(function() {
+      var el = document.getElementById('scribeWordCount');
+      if (!el) return;
+      var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+      if (!editor) { el.textContent = '0 words'; return; }
+      var text = editor.getContent({ format: 'text' }) || '';
+      var words = text.split(/\s+/).filter(function(s) { return s.length > 0; }).length;
+      var chars = text.length;
+      el.textContent = words + ' word' + (words !== 1 ? 's' : '') + '  |  ' + chars + ' characters';
+    });
   }, 300);
 }
 

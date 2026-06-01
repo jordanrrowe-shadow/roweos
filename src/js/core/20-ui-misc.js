@@ -9249,9 +9249,13 @@ function toggleModeFromGrid() {
       } else {
         var blob = new Blob(['<html><body>' + html + '</body></html>'], { type: 'application/msword' });
         var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
+        var blobUrl = URL.createObjectURL(blob);
+        a.href = blobUrl;
         a.download = 'chat-selection.doc';
         a.click();
+        // v35.0: revoke the Blob URL so it doesn't sit in memory for the rest
+        // of the session. Defer one tick so the synthetic click can resolve.
+        setTimeout(function() { try { URL.revokeObjectURL(blobUrl); } catch(e) {} }, 0);
         showToast('Downloaded as Word doc', 'success');
       }
     } else if (action === 'email') {
@@ -9337,9 +9341,12 @@ function exportCheckedSections(btn) {
   if (!html) return;
   var blob = new Blob(['<html><body>' + html + '</body></html>'], { type: 'application/msword' });
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  var blobUrl = URL.createObjectURL(blob);
+  a.href = blobUrl;
   a.download = 'chat-sections.doc';
   a.click();
+  // v35.0: revoke after click resolves to free the Blob from memory.
+  setTimeout(function() { try { URL.revokeObjectURL(blobUrl); } catch(e) {} }, 0);
   showToast('Exported ' + checked.length + ' section(s)', 'success');
 }
 
@@ -9441,9 +9448,12 @@ function exportClipContent(btn) {
 
   var blob = new Blob(['<html><body>' + html + '</body></html>'], { type: 'application/msword' });
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  var blobUrl = URL.createObjectURL(blob);
+  a.href = blobUrl;
   a.download = 'chat-clip.doc';
   a.click();
+  // v35.0: revoke after click resolves to free the Blob from memory.
+  setTimeout(function() { try { URL.revokeObjectURL(blobUrl); } catch(e) {} }, 0);
   showToast('Clip exported', 'success');
 }
 

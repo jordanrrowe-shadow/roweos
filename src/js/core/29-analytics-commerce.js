@@ -503,6 +503,7 @@ function calculateCost(provider, model, inputTokens, outputTokens, webSearchEnab
   if (provider === 'google') provider = 'gemini';
   var pricing = {
     'claude': {
+      'claude-opus-4-8': { input: 5.00, output: 25.00 },
       'claude-opus-4-7': { input: 5.00, output: 25.00 },
       'claude-sonnet-4-6': { input: 3.00, output: 15.00 },
       'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00 },
@@ -4461,7 +4462,7 @@ function renderApiProviderStatus() {
   try { apiKeys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}'); } catch(e) { console.warn('[API] Corrupted API keys data:', e.message); }
 
   var providers = [
-    { key: 'anthropic', name: 'Anthropic', models: 'Claude Opus 4.7, Sonnet 4.6, Haiku 4.5', color: '#d4a574', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>' },
+    { key: 'anthropic', name: 'Anthropic', models: 'Claude Opus 4.8, Sonnet 4.6, Haiku 4.5', color: '#d4a574', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>' },
     { key: 'openai', name: 'OpenAI', models: 'GPT-5.5, GPT-5.5 Pro, Thinking', color: '#10b981', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>' },
     { key: 'google', name: 'Google', models: 'Gemini 3.1 Pro, 3 Flash, 2.5 Pro', color: '#3b82f6', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>' },
     { key: 'nanobanana', name: 'Nano Banana', models: 'Image Gen, Deep Research', color: '#f59e0b', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>' }
@@ -4836,6 +4837,7 @@ function formatTokenCount(tokens) {
 // v15.4: Friendly model display names
 function getModelDisplayName(modelId) {
   var names = {
+    'claude-opus-4-8': 'Claude Opus 4.8',
     'claude-opus-4-7': 'Claude Opus 4.7',
     'claude-sonnet-4-6': 'Claude Sonnet 4.6',
     'claude-3-5-sonnet-20241022': 'Claude Sonnet 3.5',

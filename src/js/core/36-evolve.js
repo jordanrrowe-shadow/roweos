@@ -1113,7 +1113,7 @@ var Evolve = (function(){
 
     try {
       if (anthropicKey && typeof callAnthropicStreaming === 'function') {
-        callAnthropicStreaming('claude-opus-4-7', anthropicKey, msgs, sys, onChunk, onComplete, onError);
+        callAnthropicStreaming('claude-opus-4-8', anthropicKey, msgs, sys, onChunk, onComplete, onError);
       } else if (openaiKey && typeof callOpenAIStreaming === 'function') {
         if (modelEl) modelEl.textContent = 'Streaming · GPT-5';
         callOpenAIStreaming('gpt-5', openaiKey, msgs, sys, onChunk, onComplete, onError);
@@ -1253,7 +1253,7 @@ var Evolve = (function(){
     }
     try {
       if (anthropicKey && typeof callAnthropicStreaming === 'function') {
-        callAnthropicStreaming('claude-opus-4-7', anthropicKey, msgs, sys, onChunk, onComplete, onError);
+        callAnthropicStreaming('claude-opus-4-8', anthropicKey, msgs, sys, onChunk, onComplete, onError);
       } else if (openaiKey && typeof callOpenAIStreaming === 'function') {
         callOpenAIStreaming('gpt-5', openaiKey, msgs, sys, onChunk, onComplete, onError);
       }
