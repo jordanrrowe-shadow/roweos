@@ -30,11 +30,15 @@ fi
 echo "Building from source..."
 bash "$PROJECT_DIR/src/build.sh"
 
-# 1. Extract current version from ROWEOS_VERSION constant in index.html
-if [ -f "RoweOS/dist/index.html" ]; then
-    CURRENT_VERSION=$(grep -o "var ROWEOS_VERSION = 'v[^']*'" RoweOS/dist/index.html | tail -1 | sed "s/var ROWEOS_VERSION = '//" | sed "s/'//")
-else
-    CURRENT_VERSION=$(unzip -p RoweOS.zip "RoweOS/dist/index.html" | grep -o "var ROWEOS_VERSION = 'v[^']*'" | tail -1 | sed "s/var ROWEOS_VERSION = '//" | sed "s/'//")
+# 1. Extract current version from ROWEOS_VERSION constant.
+# v35.0: read from src/js/core/09-state.js instead of the built dist file,
+# because the v35.0 minifier rewrites `= 'v35.0'` to `="v35.0"` (double
+# quotes, no spaces) and the old single-quote-only regex would miss it.
+# Source is canonical and never minified.
+CURRENT_VERSION=$(grep -oE "ROWEOS_VERSION[ =]+'v[0-9]+\.[0-9]+'" src/js/core/09-state.js | head -1 | sed -E "s/.*'(v[0-9]+\.[0-9]+)'/\\1/")
+if [ -z "$CURRENT_VERSION" ] && [ -f "RoweOS/dist/index.html" ]; then
+    # Fallback: search the built file allowing either quote style.
+    CURRENT_VERSION=$(grep -oE "ROWEOS_VERSION[ =]*[\"']v[0-9]+\.[0-9]+[\"']" RoweOS/dist/index.html | tail -1 | sed -E "s/.*[\"'](v[0-9]+\.[0-9]+)[\"']/\\1/")
 fi
 
 if [ -z "$CURRENT_VERSION" ]; then
