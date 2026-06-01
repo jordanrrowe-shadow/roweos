@@ -68,6 +68,14 @@
                         <div class="scribe-voice-item" onclick="scribeVoiceAction('brand_voice')">Brand Voice</div>
                       </div>
                     </div>
+                    <!-- v33.71: Letter Series toggle (Tier 2 surface from docs/brilliance/12-surface-system.md). -->
+                    <button onclick="window.LetterSeries&&window.LetterSeries.toggle()" class="scribe-action-btn scribe-letter-toggle" id="scribeLetterToggle" title="Letter Series: cream paper · gold drop caps · narrow column">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h6"/></svg>
+                    </button>
+                    <!-- v33.74: Pin notebook to Thought Board (cross-surface deep link). -->
+                    <button onclick="pinScribeToThoughtBoard()" class="scribe-action-btn" title="Pin this notebook to the Thought Board">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5"/><path d="M9 10.76V6h1V2h4v4h1v4.76l3 3.04V17H6v-2.2z"/></svg>
+                    </button>
                     <button onclick="saveActiveScribeNotebook(); if(typeof showToast==='function') showToast('Notebook saved','success');" class="scribe-action-btn scribe-save-btn" title="Save">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     </button>

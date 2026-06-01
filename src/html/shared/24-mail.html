@@ -290,7 +290,7 @@
         <button onclick="mailVoiceAction('concise')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Make Concise</button>
         <button onclick="mailVoiceAction('expand')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Expand</button>
         <button onclick="mailVoiceAction('grammar')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Fix Grammar</button>
-        <button onclick="mailVoiceAction('brand_voice')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Brand Voice</button>
+        <button onclick="mailVoiceAction('brand_voice')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> <span id="mailVoiceBrandLabel">Brand Voice</span></button>
       </div>
 
       <!-- v22.25: Write with AI Modal -->
@@ -587,6 +587,14 @@
             <button id="mailSigSaveBtn" onclick="mailSaveSignatureUI()" style="padding:8px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;">Save Signature</button>
           </div>
         </div>
+        </div>
+
+        <!-- v34.103: Email rendering FAQ - documents iCloud Mail signature behavior -->
+        <div class="mail-settings-section">
+          <h3 style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px;">Why does my email have an extra logo at the bottom?</h3>
+          <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px;">If you're sending through Gmail or Outlook and a second logo (yours, or an iCloud-styled one) appears at the very bottom of the message in the recipient's inbox, it almost always comes from the recipient's mail client appending its own signature: <strong>iCloud Mail</strong> in particular auto-attaches a signature image when an account opens HTML mail. That happens after we hand the message off and is outside our control.</p>
+          <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px;">Brilliance templates only render <em>one</em> logo, in the header (left, center, or right based on the per-step setting). The footer is text only ("Designed &amp; Sent from Brilliance" on the Newsletter template, blank on the others). If you see a logo at the bottom in the recipient's view but not in the Compose preview, the recipient's mail client added it.</p>
+          <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin:0;">To verify: send a test to a Gmail web inbox and an iCloud Mail account from the same pipeline. The Gmail copy will not show a bottom logo. The iCloud copy will, because iCloud appends its own.</p>
         </div>
       </div>
     </div>

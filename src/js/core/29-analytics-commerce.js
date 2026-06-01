@@ -2484,6 +2484,34 @@ function showSnapshotListModal() {
 // v25.2: Sync Now pulls from cloud (cloud-authoritative)
 // Write-through handles all pushes on every save action.
 // enablePersistence handles offline queue flushing.
+// v34.110: Define the convergence helpers that renderSyncInventory calls. These
+// were referenced via `typeof === 'function'` checks but never defined anywhere
+// in the codebase, so the "Aligning..." status never resolved on its own. Now
+// they delegate to loadFromFirebaseV2 (the real cloud-authoritative pull) and
+// re-render inventory afterward. Debounced so 20 "Aligning..." rows on the same
+// render don't fire 20 separate pulls.
+var _v321DriftDebounce = null;
+window._v321ResolveDrift = function(cat) {
+  return new Promise(function(resolve) {
+    if (_v321DriftDebounce) clearTimeout(_v321DriftDebounce);
+    _v321DriftDebounce = setTimeout(function() {
+      _v321DriftDebounce = null;
+      if (typeof loadFromFirebaseV2 !== 'function' || typeof firebaseUser === 'undefined' || !firebaseUser) {
+        resolve();
+        return;
+      }
+      loadFromFirebaseV2(true).then(function() {
+        if (typeof renderSyncInventory === 'function') return renderSyncInventory();
+      }).then(resolve, resolve);
+    }, 600);
+  });
+};
+window.forceAlignFromCloud_v321 = function() {
+  // Redundant with manualSyncNow's own loadFromFirebaseV2 call, but the inventory
+  // render expects this symbol; resolve immediately so the chain continues.
+  return Promise.resolve();
+};
+
 function manualSyncNow() {
   if (typeof loadFromFirebaseV2 !== 'function' || typeof firebaseUser === 'undefined' || !firebaseUser) {
     showToast('Firebase not connected', 'error');
@@ -2601,13 +2629,22 @@ function manualSyncNow() {
     // v28.5: Firebase client terminated (common on iOS when app is backgrounded)
     // Re-initialize Firestore and retry once
     var errMsg = String(e.message || e);
-    if (errMsg.indexOf('terminated') !== -1 && !manualSyncNow._retried) {
+    // v34.110: Also auto-recover from "FIRESTORE (X.Y.Z) INTERNAL ASSERTION
+    // FAILED: Unexpected state" - a known Firebase v10 SDK bug where the IDB
+    // transaction queue gets into an inconsistent state. Same recipe as the
+    // 'terminated' branch: clear persistence, retry once. Previously this
+    // class of error fell through to a raw "Sync failed: FIRESTORE..." toast
+    // that was alarming and unactionable.
+    var _isAssertion = (errMsg.indexOf('INTERNAL ASSERTION') !== -1)
+                       || (errMsg.indexOf('Unexpected state') !== -1)
+                       || (errMsg.indexOf('FIRESTORE') !== -1 && errMsg.indexOf('FAILED') !== -1);
+    if ((errMsg.indexOf('terminated') !== -1 || _isAssertion) && !manualSyncNow._retried) {
       manualSyncNow._retried = true;
-      console.log('[manualSyncNow] Firestore terminated, re-initializing...');
+      console.log('[manualSyncNow] Firestore needs reset (' + (_isAssertion ? 'assertion' : 'terminated') + '), re-initializing...');
       try {
         firebase.firestore().clearPersistence().catch(function() {});
       } catch(ignore) {}
-      showToast('Reconnecting...', 'info');
+      showToast(_isAssertion ? 'Sync hit a transient SDK issue, auto-recovering. Your data is safe.' : 'Reconnecting...', 'info');
       setTimeout(function() {
         manualSyncNow._retried = false;
         manualSyncNow();
@@ -2615,7 +2652,11 @@ function manualSyncNow() {
       return;
     }
     manualSyncNow._retried = false;
-    showToast('Sync failed: ' + errMsg, 'error');
+    // v34.110: friendlier message for the assertion class (after retry exhausted)
+    var _userMsg = _isAssertion
+      ? 'Sync paused. Try again in a moment, or refresh the page. Your local data is safe.'
+      : 'Sync failed: ' + errMsg;
+    showToast(_userMsg, 'error');
   });
 }
 
@@ -4179,7 +4220,11 @@ function updateCommerceStats() {
     .forEach(function(inv) { outstanding += (inv.total || 0); });
 
   // v15.4: Total clients - read from dedicated storage
-  var totalClients = getClients().length;
+  // v34.74: Use getClientsForBrand() so the Dashboard count matches the Pipeline
+  // view. Previously getClients() returned every person across every brand which
+  // caused the "Dashboard: 9 / Pipeline: 0" mismatch when the active brand had
+  // no clients but other brands did. Honors the "Show all brands" toggle.
+  var totalClients = (typeof getClientsForBrand === 'function' ? getClientsForBrand() : getClients()).length;
   
   // Active products
   var activeProducts = (inventory.items || []).filter(function(i) { return i.isActive !== false; }).length;
@@ -4816,7 +4861,7 @@ function getModelDisplayName(modelId) {
     'gemini-3-pro-image-preview': 'Nano Banana 3.0 Pro',
     'gemini-2.5-flash-image': 'Nano Banana Flash',
     'gemini-2.0-flash-exp-image-generation': 'Nano Banana Legacy',
-    'auto': 'RoweOS AI'
+    'auto': 'Brilliance AI'
   };
   return names[modelId] || modelId;
 }
@@ -5408,7 +5453,16 @@ function scheduleCheckInReminders() {
 
   if (changed) {
     localStorage.setItem('roweos_reminders', JSON.stringify(reminders));
-    if (typeof writeDB === 'function') writeDB('profile/reminders', { data: reminders });
+    // v33.35 (Sprint 1): services/sync facade.
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+        window.BrillianceServices.sync.writeDB('profile/reminders', { data: reminders });
+      } else if (typeof writeDB === 'function') {
+        writeDB('profile/reminders', { data: reminders });
+      }
+    } catch(eR) {
+      if (typeof writeDB === 'function') writeDB('profile/reminders', { data: reminders });
+    }
   }
 }
 
@@ -8436,6 +8490,15 @@ function deleteDirectReport(personId) {
 }
 
 function renderClientsView() {
+  // v34.72 Life parity gap #6: branch on app_mode. Life mode renders the
+  // People-in-My-Life pipeline (acquaintance / friend / close / family) using
+  // roweos_life_people storage. Brand mode is unchanged.
+  try {
+    if (localStorage.getItem('roweos_app_mode') === 'life' && typeof renderLifePeopleView === 'function') {
+      return renderLifePeopleView();
+    }
+  } catch(e){}
+
   migrateClientsData();
   var container = document.getElementById('clientsCardsContainer');
   var detailPanel = document.getElementById('clientDetailPanel');
@@ -8483,7 +8546,7 @@ function renderClientsView() {
       hint.id = 'clientsBrandMismatchHint';
       hint.style.cssText = 'margin:12px 0;padding:12px 14px;background:rgba(168,139,250,0.08);border:1px solid rgba(168,139,250,0.25);border-radius:10px;font-size:12px;color:var(--text-secondary);';
       hint.innerHTML = '<strong style="color:#a78bfa;">' + allPeople.length + ' client' + (allPeople.length !== 1 ? 's' : '') + ' exist in other brands.</strong> The Pipeline view is filtered to your current brand. ' +
-        '<button onclick="clientsShowAllBrands=true;var cb=document.getElementById(\'clientsShowAllBrands\');if(cb)cb.checked=true;localStorage.setItem(\'roweos_clients_show_all_brands\',\'true\');renderClientsView();" style="margin-left:6px;padding:4px 10px;background:rgba(168,139,250,0.18);border:1px solid rgba(168,139,250,0.4);border-radius:6px;color:#a78bfa;cursor:pointer;font-size:11px;">Show all brands</button>';
+        '<button onclick="clientsShowAllBrands=true;var cb=document.getElementById(\'clientsShowAllBrands\');if(cb)cb.checked=true;localStorage.setItem(\'roweos_clients_brand_filter\',\'true\');renderClientsView();" style="margin-left:6px;padding:4px 10px;background:rgba(168,139,250,0.18);border:1px solid rgba(168,139,250,0.4);border-radius:6px;color:#a78bfa;cursor:pointer;font-size:11px;">Show all brands</button>';
       // Insert above the cards
       var prev = document.getElementById('clientsBrandMismatchHint');
       if (prev) prev.parentNode.removeChild(prev);
@@ -10279,7 +10342,7 @@ function showPdfSettingsModal(callback, pdfOpts) {
   var brandIdx = _getPdfBrandIdx();
   var brandName = '';
   try { brandName = brands[brandIdx].shortName || brands[brandIdx].name || ''; } catch(e) {}
-  var defaultCoverHeader = opts.coverHeader !== undefined ? opts.coverHeader : (brandName || 'RoweOS');
+  var defaultCoverHeader = opts.coverHeader !== undefined ? opts.coverHeader : (brandName || 'Brilliance');
   // Get current brand logo
   var brandLogo = '';
   try {
@@ -10576,7 +10639,7 @@ function showPdfPreviewModal(pdfResult, onDownload, onAdjust) {
       // Direct download
       var a = document.createElement('a');
       a.href = pdfResult.base64;
-      a.download = pdfResult.filename || 'RoweOS-Export.pdf';
+      a.download = pdfResult.filename || 'Brilliance-Export.pdf';
       a.click();
       showToast('PDF downloaded', 'success');
     }
@@ -10623,7 +10686,7 @@ function universalPDFExport(content, exportOpts) {
   var brandIdx = _getPdfBrandIdx();
   var brandName = eo.brandName || '';
   if (!brandName) {
-    try { brandName = brands[brandIdx].shortName || brands[brandIdx].name; } catch(e) { brandName = 'RoweOS'; }
+    try { brandName = brands[brandIdx].shortName || brands[brandIdx].name; } catch(e) { brandName = 'Brilliance'; }
   }
   var brandLogo = eo.brandLogo || '';
   if (!brandLogo) {

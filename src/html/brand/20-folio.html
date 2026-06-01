@@ -18,6 +18,8 @@
             <div id="folioTabBar" style="display:flex;gap:2px;margin-bottom:var(--space-4);background:var(--bg-secondary);border-radius:10px;padding:3px;width:fit-content;">
             <button class="folio-tab active" onclick="switchFolioTab('gallery')" data-folio-tab="gallery" style="padding:7px 20px;border-radius:8px;border:none;background:var(--bg-elevated);color:var(--text-primary);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;">Gallery</button>
             <button class="folio-tab" onclick="switchFolioTab('chat')" data-folio-tab="chat" style="padding:7px 20px;border-radius:8px;border:none;background:transparent;color:var(--text-muted);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;">Chat</button>
+            <!-- v33.76: Studio at Work toggle (Tier 2 surface from docs/brilliance/12-surface-system.md). Treats the active artifact as the centerpiece, with chat in the right gutter. -->
+            <button class="folio-tab folio-easel-toggle" id="folioEaselToggle" onclick="window.FolioEasel&&window.FolioEasel.toggle()" title="Studio at Work: easel layout with artifact in center, chat in right gutter" style="margin-left:auto;padding:7px 14px;border-radius:8px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;">Studio at Work</button>
           </div>
           </div><!-- end #folioHeaderBlock -->
 

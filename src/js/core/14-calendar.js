@@ -683,7 +683,7 @@ async function runVideoOperation() {
   // Get operation params
   var selectedOp = window.currentStudioOp || {};
   var context = (document.getElementById('studioContext') || {}).value || '';
-  var brandName = 'RoweOS';
+  var brandName = 'Brilliance';
   var brandIdx = typeof studioSelectedBrand !== 'undefined' ? studioSelectedBrand : 0;
   if (typeof brands !== 'undefined' && brands[brandIdx]) {
     brandName = brands[brandIdx].shortName || brands[brandIdx].name;
@@ -1772,7 +1772,7 @@ function downloadGeneratedImage() {
     return;
   }
   
-  var filename = (img.brand || 'RoweOS').replace(/\s+/g, '_') + '_' + (img.operation || 'image').replace(/\s+/g, '_') + '_' + Date.now() + '.png';
+  var filename = (img.brand || 'Brilliance').replace(/\s+/g, '_') + '_' + (img.operation || 'image').replace(/\s+/g, '_') + '_' + Date.now() + '.png';
   link.download = filename;
   document.body.appendChild(link);
   link.click();
@@ -1801,7 +1801,7 @@ function saveGeneratedImageToLibrary() {
   }
   
   // Generate filename
-  var filename = (img.brand || 'RoweOS').replace(/\s+/g, '_') + '_' + (img.operation || 'image').replace(/\s+/g, '_') + '_' + Date.now();
+  var filename = (img.brand || 'Brilliance').replace(/\s+/g, '_') + '_' + (img.operation || 'image').replace(/\s+/g, '_') + '_' + Date.now();
   
   // Create library file entry
   var libraryFile = {
@@ -4138,8 +4138,15 @@ function saveChatMsgAsGoal(btn) {
   var goals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
   goals.push(goal);
   localStorage.setItem('roweos_pulse_goals', JSON.stringify(goals));
-  if (typeof writeDB === 'function') {
-    writeDB('pulse/main', { goals: JSON.stringify(goals) }, { category: 'goals' });
+  // v33.34 (Sprint 1): services/sync facade with safe fallback.
+  try {
+    if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+      window.BrillianceServices.sync.writeDB('pulse/main', { goals: JSON.stringify(goals) }, { category: 'goals' });
+    } else if (typeof writeDB === 'function') {
+      writeDB('pulse/main', { goals: JSON.stringify(goals) }, { category: 'goals' });
+    }
+  } catch(eC) {
+    if (typeof writeDB === 'function') writeDB('pulse/main', { goals: JSON.stringify(goals) }, { category: 'goals' });
   }
   if (typeof pulseGoals !== 'undefined') {
     pulseGoals = goals;
@@ -4506,7 +4513,16 @@ function renderCalendar() {
       // Count total items for this day
       // v16.12: Use merged calendar (native + external)
       var dayEvents = getCalendarEventsForDate(dateStr);
-      var dayTodos = todos.filter(function(t) { return t.date === dateStr; });
+      // v33.63: `todos` global was removed in the v28.8 Focus retirement but this caller
+      // was missed — caused renderCalendar to ReferenceError on every month-view render.
+      // Read directly from localStorage now (matching writeDBTodos's pattern).
+      var _allTodos = [];
+      try {
+        var _todosKey = (typeof getTodosKey === 'function') ? getTodosKey() : 'roweosTodos';
+        _allTodos = JSON.parse(localStorage.getItem(_todosKey) || '[]') || [];
+        if (!Array.isArray(_allTodos)) _allTodos = [];
+      } catch(e) { _allTodos = []; }
+      var dayTodos = _allTodos.filter(function(t) { return t && t.date === dateStr; });
       var scheduledTasks = getScheduledTasks();
       var dayAutos = scheduledTasks.filter(function(a) { return a.scheduledDate && a.scheduledDate.slice(0, 10) === dateStr; });
       dayTotalItems = dayEvents.length + dayTodos.length + dayAutos.length;
@@ -4659,44 +4675,48 @@ function setCalendarColor(calId, color) {
   renderCalendar();
 }
 
+// v34.81: Calendars panel reflowed to a grid of compact tiles per provider.
 function renderCalendarsPanel() {
   var container = document.getElementById('calendarsPanel');
   if (!container) return;
   var html = '';
 
-  // RoweOS
-  html += '<div class="cal-provider-section"><div class="cal-provider-label">RoweOS</div>';
-  html += renderCalendarRow('roweos_local', 'RoweOS (local)', 'roweos', true);
-  html += '</div>';
+  function provider(label, color, items) {
+    return '<div class="cal-provider-section">' +
+             '<div class="cal-provider-label" style="color:' + color + ';">' + label + '</div>' +
+             '<div class="cal-tile-grid">' + items + '</div>' +
+           '</div>';
+  }
+
+  // Brilliance (native calendar provider)
+  html += provider('Brilliance', 'var(--accent)', renderCalendarRow('roweos_local', 'Brilliance (local)', 'roweos', true));
 
   // Google
   if (_gcalConnected && _gcalCalendars && _gcalCalendars.length > 0) {
-    html += '<div class="cal-provider-section"><div class="cal-provider-label">Google Calendar</div>';
+    var gItems = '';
     for (var gi = 0; gi < _gcalCalendars.length; gi++) {
       var gc = _gcalCalendars[gi];
-      html += renderCalendarRow('google_' + (gc.id || gi), gc.summary || gc.name || 'Calendar', 'google', true);
+      gItems += renderCalendarRow('google_' + (gc.id || gi), gc.summary || gc.name || 'Calendar', 'google', true);
     }
-    html += '</div>';
+    html += provider('Google Calendar', '#4285f4', gItems);
   }
 
   // iCloud
   if (_icloudConnected) {
-    html += '<div class="cal-provider-section"><div class="cal-provider-label">iCloud</div>';
+    var iItems = '';
     if (_icloudCalendars && _icloudCalendars.length > 0) {
       for (var ii = 0; ii < _icloudCalendars.length; ii++) {
-        html += renderCalendarRow('icloud_' + ii, _icloudCalendars[ii].name || 'Calendar', 'icloud', true);
+        iItems += renderCalendarRow('icloud_' + ii, _icloudCalendars[ii].name || 'Calendar', 'icloud', true);
       }
     } else {
-      html += renderCalendarRow('icloud_all', 'iCloud', 'icloud', true);
+      iItems = renderCalendarRow('icloud_all', 'iCloud', 'icloud', true);
     }
-    html += '</div>';
+    html += provider('iCloud', '#007aff', iItems);
   }
 
   // Outlook
   if (_outlookCalConnected) {
-    html += '<div class="cal-provider-section"><div class="cal-provider-label">Outlook</div>';
-    html += renderCalendarRow('outlook_default', 'Outlook Calendar', 'outlook', true);
-    html += '</div>';
+    html += provider('Outlook', '#0078d4', renderCalendarRow('outlook_default', 'Outlook Calendar', 'outlook', true));
   }
 
   container.innerHTML = html;
@@ -4705,11 +4725,11 @@ function renderCalendarsPanel() {
 function renderCalendarRow(calId, name, source, checked) {
   var color = getCalendarColor(calId, source);
   var vis = _calendarVisibility[calId] !== false;
-  return '<div class="cal-calendar-row">'
+  return '<label class="cal-tile' + (vis ? ' on' : '') + '" onclick="event.stopPropagation();">'
     + '<input type="checkbox" ' + (vis ? 'checked' : '') + ' onchange="toggleCalendarVisibility(\'' + calId + '\',this.checked)">'
-    + '<div class="cal-color-swatch" style="background:' + color + ';" onclick="openCalColorPicker(event,\'' + calId + '\',\'' + source + '\')"></div>'
-    + '<span class="cal-name">' + escapeHtml(name) + '</span>'
-    + '</div>';
+    + '<span class="cal-tile-swatch" style="background:' + color + ';" onclick="event.preventDefault();event.stopPropagation();openCalColorPicker(event,\'' + calId + '\',\'' + source + '\')"></span>'
+    + '<span class="cal-tile-name">' + escapeHtml(name) + '</span>'
+    + '</label>';
 }
 
 function toggleCalendarVisibility(calId, visible) {
@@ -5060,9 +5080,11 @@ function deleteGoogleCalendarEvent(eventId) {
 // v25.2: Outlook Calendar Write-Back (Microsoft Graph API)
 // ═══════════════════════════════════════════════════════════════
 
-function pushEventToOutlookCalendar(event) {
-  var token = localStorage.getItem('roweos_outlook_cal_token');
-  if (!token) { showToast('Outlook not connected', 'error'); return Promise.reject('Not connected'); }
+// v34.106: Outlook write-back now refresh-and-retries on 401, matching the pattern
+// already used by syncOutlookCalendarEvents. Previously expired tokens caused permanent
+// failure (push showed an error toast then bailed; update silently treated the 401
+// JSON body as success and toasted "Outlook event updated"; delete bailed silently).
+function _doPushOutlook(event, token, isRetry) {
   var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Chicago';
   var body = {
     subject: event.title || 'Untitled',
@@ -5071,19 +5093,30 @@ function pushEventToOutlookCalendar(event) {
     body: { contentType: 'text', content: event.description || '' },
     isAllDay: event.allDay || false
   };
-  showToast('Saving to Outlook...', 'info');
   return fetch('https://graph.microsoft.com/v1.0/me/events', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   }).then(function(r) {
-    if (r.status === 401) {
-      showToast('Outlook token expired. Please reconnect.', 'error');
-      return Promise.reject('Token expired');
+    if (r.status === 401 && !isRetry) {
+      return new Promise(function(resolve, reject) {
+        refreshOutlookCalToken(function(newToken) {
+          if (newToken) resolve(_doPushOutlook(event, newToken, true));
+          else { showToast('Outlook token expired. Please reconnect.', 'error'); reject('Token expired'); }
+        });
+      });
     }
+    if (r.status === 401) { showToast('Outlook token expired. Please reconnect.', 'error'); return Promise.reject('Token expired after refresh'); }
     return r.json();
-  }).then(function(data) {
-    if (data.id) {
+  });
+}
+
+function pushEventToOutlookCalendar(event) {
+  var token = localStorage.getItem('roweos_outlook_cal_token');
+  if (!token) { showToast('Outlook not connected', 'error'); return Promise.reject('Not connected'); }
+  showToast('Saving to Outlook...', 'info');
+  return _doPushOutlook(event, token, false).then(function(data) {
+    if (data && data.id) {
       showToast('Event saved to Outlook', 'success');
       syncOutlookCalendarEvents();
     }
@@ -5093,9 +5126,7 @@ function pushEventToOutlookCalendar(event) {
   });
 }
 
-function updateOutlookCalendarEvent(event) {
-  var token = localStorage.getItem('roweos_outlook_cal_token');
-  if (!token || !event.externalId) return Promise.reject('Missing token or event ID');
+function _doUpdateOutlook(event, token, isRetry) {
   var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Chicago';
   var body = {
     subject: event.title,
@@ -5103,12 +5134,31 @@ function updateOutlookCalendarEvent(event) {
     end: { dateTime: event.date + 'T' + (event.endTime || event.time || '01:00') + ':00', timeZone: tz },
     body: { contentType: 'text', content: event.description || '' }
   };
-  showToast('Updating Outlook event...', 'info');
   return fetch('https://graph.microsoft.com/v1.0/me/events/' + event.externalId, {
     method: 'PATCH',
     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  }).then(function(r) {
+    if (r.status === 401 && !isRetry) {
+      return new Promise(function(resolve, reject) {
+        refreshOutlookCalToken(function(newToken) {
+          if (newToken) resolve(_doUpdateOutlook(event, newToken, true));
+          else { showToast('Outlook token expired. Please reconnect.', 'error'); reject('Token expired'); }
+        });
+      });
+    }
+    // v34.106: must check r.ok BEFORE parsing JSON - the previous version unconditionally
+    // toasted "Outlook event updated" even on a 4xx error body.
+    if (!r.ok) { return Promise.reject('Update failed (' + r.status + ')'); }
+    return r.json();
+  });
+}
+
+function updateOutlookCalendarEvent(event) {
+  var token = localStorage.getItem('roweos_outlook_cal_token');
+  if (!token || !event.externalId) return Promise.reject('Missing token or event ID');
+  showToast('Updating Outlook event...', 'info');
+  return _doUpdateOutlook(event, token, false).then(function(data) {
     showToast('Outlook event updated', 'success');
     syncOutlookCalendarEvents();
     return data;
@@ -5117,16 +5167,31 @@ function updateOutlookCalendarEvent(event) {
   });
 }
 
-function deleteOutlookCalendarEvent(eventId) {
-  var token = localStorage.getItem('roweos_outlook_cal_token');
-  if (!token || !eventId) return Promise.reject('Missing token or event ID');
-  showToast('Deleting from Outlook...', 'info');
+function _doDeleteOutlook(eventId, token, isRetry) {
   return fetch('https://graph.microsoft.com/v1.0/me/events/' + eventId, {
     method: 'DELETE',
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function(r) {
-    if (r.ok) { showToast('Deleted from Outlook', 'success'); syncOutlookCalendarEvents(); }
-    else showToast('Delete failed', 'error');
+    if (r.status === 401 && !isRetry) {
+      return new Promise(function(resolve, reject) {
+        refreshOutlookCalToken(function(newToken) {
+          if (newToken) resolve(_doDeleteOutlook(eventId, newToken, true));
+          else { showToast('Outlook token expired. Please reconnect.', 'error'); reject('Token expired'); }
+        });
+      });
+    }
+    if (!r.ok) return Promise.reject('Delete failed (' + r.status + ')');
+    return true;
+  });
+}
+
+function deleteOutlookCalendarEvent(eventId) {
+  var token = localStorage.getItem('roweos_outlook_cal_token');
+  if (!token || !eventId) return Promise.reject('Missing token or event ID');
+  showToast('Deleting from Outlook...', 'info');
+  return _doDeleteOutlook(eventId, token, false).then(function() {
+    showToast('Deleted from Outlook', 'success');
+    syncOutlookCalendarEvents();
   }).catch(function(err) {
     showToast('Delete failed: ' + (err.message || err), 'error');
   });
@@ -5950,13 +6015,14 @@ function renderCalendarListUI() {
   }
 
   // v24.24: Helper for collapsible group card
+  // v34.81: items now wrap in a responsive grid for the prettier square-tile look.
   function groupCard(id, title, color, count, itemsHtml) {
-    return '<div class="cal-list-group" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:8px;overflow:hidden;">' +
-      '<div class="cal-list-group-title" style="color:' + color + ';display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;margin:0;" onclick="var b=document.getElementById(\'' + id + '\');var o=b.style.display!==\'none\';b.style.display=o?\'none\':\'block\';this.querySelector(\'svg\').style.transform=o?\'rotate(-90deg)\':\'\';">' +
+    return '<div class="cal-list-group" style="margin-bottom:14px;">' +
+      '<div class="cal-list-group-title" style="color:' + color + ';display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="var b=document.getElementById(\'' + id + '\');var o=b.style.display!==\'none\';b.style.display=o?\'none\':\'grid\';this.querySelector(\'svg\').style.transform=o?\'rotate(-90deg)\':\'\';">' +
       '<span style="display:flex;align-items:center;gap:6px;">' + title + '<span style="font-size:10px;color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;">' + count + '</span></span>' +
       chevronSvg +
       '</div>' +
-      '<div id="' + id + '" style="padding:0 8px 8px;">' + itemsHtml + '</div>' +
+      '<div class="cal-list-grid" id="' + id + '">' + itemsHtml + '</div>' +
       '</div>';
   }
 
@@ -5995,7 +6061,7 @@ function renderCalendarListUI() {
   var nativeVis = isCalendarVisible(nativeKey);
   var nativeDef = _defaultCalendarId === nativeKey || !_defaultCalendarId;
   var nativeItems = calItem('native', 'var(--accent)', nativeVis, 'Local Events', nativeDef, '');
-  html += groupCard('calGroupNative', 'RoweOS', 'var(--accent)', '1', nativeItems);
+  html += groupCard('calGroupNative', 'Brilliance', 'var(--accent)', '1', nativeItems);
 
   container.innerHTML = html;
 }

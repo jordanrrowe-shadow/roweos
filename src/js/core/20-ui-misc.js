@@ -2183,7 +2183,13 @@ function renderAIChatSection(type, id, messages) {
     html += '<div class="day-ai-chat-empty">Ask a question about this ' + type + '</div>';
   } else {
     messages.forEach(function(msg) {
-      html += '<div class="day-ai-message ' + msg.role + '">' + msg.content + '</div>';
+      // v34.106: escape AI/user content - msg.content is persisted in localStorage
+      // and replayed; an adversarial AI response containing <script> would otherwise
+      // execute in the page context every render.
+      var _msgContent = '';
+      if (typeof msg.content === 'string') _msgContent = msg.content;
+      else if (msg.displayContent) _msgContent = String(msg.displayContent);
+      html += '<div class="day-ai-message ' + escapeHtml(msg.role || '') + '">' + escapeHtml(_msgContent) + '</div>';
     });
   }
   html += '</div>';
@@ -3082,8 +3088,18 @@ function toggleWebSearch(provider, enabled) {
   }
 
   // v25.1: Write-through to Firestore (replaces deprecated syncToFirebase)
-  if (typeof writeDB === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
-    writeDB('profile/main', { 'settings.webSearchPrefs': webSearchPrefs, 'settings.claudeWebSearch': localStorage.getItem('roweos_claude_web_search') === 'true', 'settings.geminiWebSearch': localStorage.getItem('roweos_gemini_web_search') === 'true' });
+  // v33.33 (Sprint 1): services/sync facade, safe fallback.
+  if (typeof firebaseUser !== 'undefined' && firebaseUser) {
+    var _wsPayload = { 'settings.webSearchPrefs': webSearchPrefs, 'settings.claudeWebSearch': localStorage.getItem('roweos_claude_web_search') === 'true', 'settings.geminiWebSearch': localStorage.getItem('roweos_gemini_web_search') === 'true' };
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+        window.BrillianceServices.sync.writeDB('profile/main', _wsPayload);
+      } else if (typeof writeDB === 'function') {
+        writeDB('profile/main', _wsPayload);
+      }
+    } catch(eW) {
+      if (typeof writeDB === 'function') writeDB('profile/main', _wsPayload);
+    }
   }
 
   var message = enabled ?
@@ -3098,10 +3114,19 @@ function toggleFeature(featureName, enabled) {
   localStorage.setItem(key, enabled ? 'true' : 'false');
 
   // v25.1: Write-through to Firestore (replaces deprecated syncToFirebase)
-  if (typeof writeDB === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
+  // v33.33 (Sprint 1): services/sync facade, safe fallback.
+  if (typeof firebaseUser !== 'undefined' && firebaseUser) {
     var settingsUpdate = {};
     settingsUpdate['settings.' + featureName] = enabled;
-    writeDB('profile/main', settingsUpdate);
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+        window.BrillianceServices.sync.writeDB('profile/main', settingsUpdate);
+      } else if (typeof writeDB === 'function') {
+        writeDB('profile/main', settingsUpdate);
+      }
+    } catch(eF) {
+      if (typeof writeDB === 'function') writeDB('profile/main', settingsUpdate);
+    }
   }
 
   var displayName = featureName === 'autoPilot' ? 'Auto-Pilot Mode' :
@@ -4832,7 +4857,9 @@ function renderConversation() {
     
     // Create proper bubble structure with avatar for assistant messages
     // v16.4: Add export action bar to assistant messages
-    var msgActionsHtml = '<div class="chat-msg-actions"><button onclick="exportChatMsg(this,\'copy\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy</button><button onclick="exportChatMsg(this,\'docx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Word</button><button onclick="exportChatMsg(this,\'xlsx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg> Excel</button><button onclick="exportChatMsg(this,\'pptx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Slides</button><button onclick="exportChatMsg(this,\'pdf\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13h4M10 17h4M8 9h1"/></svg> PDF</button><button onclick="openChatSaveMenu(this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg> Save</button></div>';
+    // v33.74: Pin to Thought Board button — extracts the message body + sends it
+    // to the new Tier 3 surface so cross-surface deep links work end-to-end.
+    var msgActionsHtml = '<div class="chat-msg-actions"><button onclick="exportChatMsg(this,\'copy\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy</button><button onclick="exportChatMsg(this,\'docx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Word</button><button onclick="exportChatMsg(this,\'xlsx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg> Excel</button><button onclick="exportChatMsg(this,\'pptx\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Slides</button><button onclick="exportChatMsg(this,\'pdf\')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13h4M10 17h4M8 9h1"/></svg> PDF</button><button onclick="pinChatMsgToThoughtBoard(this)" title="Pin this thought to the Thought Board"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17v5"/><path d="M9 10.76V6h1V2h4v4h1v4.76l3 3.04V17H6v-2.2z"/></svg> Pin</button><button onclick="openChatSaveMenu(this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg> Save</button></div>';
 
     if (msg.role === 'user') {
       // v12.0.3: Include file cards if present
@@ -5998,6 +6025,10 @@ window.IMAGE_EDIT_INTENT_RE = IMAGE_EDIT_INTENT_RE;
 function _detectImageGenIntent(text) {
   if (!text || typeof text !== 'string') return null;
   if (text.length > 4000) return null; // long pasted text — probably not an image request
+  // v34.108: bail out when the user is clearly asking for a written deliverable
+  // (email, draft, paragraph, summary, etc.). Prevents the "write an email about
+  // this resume" → image-gen misroute.
+  if (/\b(write|draft|compose|email|reply|paragraph|summary|summarize|outline|note|memo|letter|message|caption|copy(?:write)?|article|post|tweet)\b/i.test(text)) return null;
   if (!IMAGE_INTENT_RE.test(text)) return null;
   return text.trim();
 }
@@ -6031,9 +6062,9 @@ function showImageProviderPickerOnce(callback, opts) {
   box.innerHTML = '<div style="font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">' + (typeof escapeHtml === 'function' ? escapeHtml(headerText) : headerText) + '</div>' +
     '<div style="font-size:12px;color:var(--text-muted);margin-bottom:18px;">' + (typeof escapeHtml === 'function' ? escapeHtml(subText) : subText) + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px;">' +
-    '<button data-pref="nano-banana-3-pro" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">Nano Banana 3.0 Pro <span style="color:var(--text-muted);font-size:11px;">— Google, multimodal, refs</span></button>' +
-    '<button data-pref="imagen3" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">Imagen 4 <span style="color:var(--text-muted);font-size:11px;">— Google, photorealistic</span></button>' +
-    '<button data-pref="gpt-image-2" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">GPT Image 2 <span style="color:var(--text-muted);font-size:11px;">— OpenAI, edits</span></button>' +
+    '<button data-pref="nano-banana-3-pro" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">Nano Banana 3.0 Pro <span style="color:var(--text-muted);font-size:11px;">Google · multimodal · refs</span></button>' +
+    '<button data-pref="imagen3" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">Imagen 4 <span style="color:var(--text-muted);font-size:11px;">Google · photorealistic</span></button>' +
+    '<button data-pref="gpt-image-2" class="image-pref-btn" style="padding:10px 12px;text-align:left;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);cursor:pointer;">GPT Image 2 <span style="color:var(--text-muted);font-size:11px;">OpenAI · edits</span></button>' +
     '</div>';
   modal.appendChild(box);
   document.body.appendChild(modal);
@@ -6253,6 +6284,86 @@ function _maybeHandleChatImageGen(userText, callback) {
 window._maybeHandleChatImageGen = _maybeHandleChatImageGen;
 
 function runAgent() {
+  // v34.45: Slash-command shortcuts. If the chat input starts with a slash
+  // command (`/goal X`, `/note X`, `/remind X`, `/brief`, `/help`), route to
+  // the matching capture surface instead of sending to AI. Saves users a step
+  // for capture-only flows.
+  try {
+    var _slashEl = document.getElementById('agentCommand');
+    var _slashText = _slashEl ? (_slashEl.value || '').trim() : '';
+    if (_slashText.charAt(0) === '/') {
+      var _slashMatch = _slashText.match(/^\/(goal|task|note|remind|reminder|brief|today|yesterday|recap|help|shortcuts|sync|theme|focus|brilli|random|pulse|library|scribe|notebooks|automations|mail|bloom|studio)(\s+(.+))?$/i);
+      if (_slashMatch) {
+        var _slashCmd = _slashMatch[1].toLowerCase();
+        var _slashArg = (_slashMatch[3] || '').trim();
+        if (_slashCmd === 'goal' || _slashCmd === 'task') {
+          if (_slashArg && typeof addItemToPulseGoal === 'function') {
+            addItemToPulseGoal(null, { text: _slashArg });
+            if (typeof showToast === 'function') showToast('Added to Pulse · Unassigned', 'success');
+            try { if (typeof updateSidebarBadges === 'function') updateSidebarBadges(); } catch(e){}
+            try { if (typeof _renderConciergeRow === 'function') _renderConciergeRow(); } catch(e){}
+          } else if (typeof window.openQuickAddGoal === 'function') {
+            window.openQuickAddGoal(_slashArg);
+          }
+        } else if (_slashCmd === 'note') {
+          if (typeof window.openQuickAddNote === 'function') window.openQuickAddNote(_slashArg);
+        } else if (_slashCmd === 'remind' || _slashCmd === 'reminder') {
+          if (typeof window.openQuickAddReminder === 'function') window.openQuickAddReminder(_slashArg);
+        } else if (_slashCmd === 'brief' || _slashCmd === 'today') {
+          if (typeof window.openDailyBrief === 'function') window.openDailyBrief();
+        } else if (_slashCmd === 'yesterday' || _slashCmd === 'recap') {
+          // v34.58: /yesterday opens the recap of yesterday's wins.
+          if (typeof window.openYesterdayRecap === 'function') window.openYesterdayRecap();
+        } else if (_slashCmd === 'help' || _slashCmd === 'shortcuts') {
+          if (typeof window.showShortcutsOverlay === 'function') window.showShortcutsOverlay();
+        } else if (_slashCmd === 'sync') {
+          // v34.54: /sync triggers manual cloud sync inline.
+          if (typeof manualSyncNow === 'function') {
+            if (typeof showToast === 'function') showToast('Syncing…', 'info');
+            manualSyncNow();
+          }
+        } else if (_slashCmd === 'theme') {
+          // v34.54: /theme toggles light/dark.
+          if (typeof toggleTheme === 'function') toggleTheme();
+        } else if (_slashCmd === 'focus') {
+          // v34.54: /focus toggles Focus Mode.
+          if (typeof toggleFocusMode === 'function') toggleFocusMode();
+          else document.body.classList.toggle('focus-mode');
+        } else if (_slashCmd === 'brilli') {
+          // v34.54: /brilli <form> sets a specific Brilli form, or opens picker if no arg.
+          if (_slashArg) {
+            var _slashFormMap = { celestial:'celestial', aura:'aura', field:'aura', firefly:'firefly', signature:'signature', light:'signature', classic:'classic', blake:'classic' };
+            var _slashFormKey = (_slashArg.toLowerCase().split(/\s+/)[0] || '');
+            var _slashTargetForm = _slashFormMap[_slashFormKey];
+            if (_slashTargetForm && typeof Brilli !== 'undefined') {
+              Brilli.setActiveForm(_slashTargetForm);
+            } else if (typeof openBrilliFormPicker === 'function') {
+              openBrilliFormPicker();
+            }
+          } else if (typeof openBrilliFormPicker === 'function') {
+            openBrilliFormPicker();
+          }
+        } else if (_slashCmd === 'random') {
+          // v34.57: /random picks a random Brilli form (excludes the current one
+          // so it actually changes). Light delight command.
+          if (typeof Brilli !== 'undefined') {
+            var _slashAllForms = ['celestial','aura','firefly','signature','classic'];
+            var _slashCur = Brilli.getActiveForm();
+            var _slashCandidates = _slashAllForms.filter(function(f){ return f !== _slashCur; });
+            var _slashPick = _slashCandidates[Math.floor(Math.random() * _slashCandidates.length)];
+            Brilli.setActiveForm(_slashPick);
+          }
+        } else if (_slashCmd === 'pulse' || _slashCmd === 'library' || _slashCmd === 'scribe' || _slashCmd === 'notebooks' || _slashCmd === 'automations' || _slashCmd === 'mail' || _slashCmd === 'bloom' || _slashCmd === 'studio') {
+          // v34.57: View-jump slash commands. `/scribe` and `/notebooks` both
+          // open the Notebooks view (scribe is the underlying view id).
+          var _slashView = _slashCmd === 'notebooks' ? 'scribe' : _slashCmd;
+          if (typeof showView === 'function') showView(_slashView);
+        }
+        if (_slashEl) _slashEl.value = '';
+        return; // Don't run AI.
+      }
+    }
+  } catch(eS){}
   // v32.0-D: Intercept image-edit intent (image attached + edit verb) BEFORE
   // image generation. Edit takes precedence over generation when an
   // attachment is present.
@@ -7002,8 +7113,15 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     }
 
     // v30.1: Fix streaming arg order (model, apiKey, messages, systemPrompt, ...) and pass abort signal
+    // v33.37 (Sprint 2): use BrillianceServices.agents.dispatch when available; fallback to direct calls.
     try {
-      if (_vProvider === 'anthropic') {
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.agents && window.BrillianceServices.agents.dispatch) {
+        var _vKey = (_vProvider === 'nanobanana' && typeof getNanobananaKey === 'function') ? getNanobananaKey() : _vApiKey;
+        window.BrillianceServices.agents.dispatch(_vProvider, {
+          model: _vModel, apiKey: _vKey, messages: _vMessages, systemPrompt: _vPrompt,
+          callbacks: { onChunk: _vOnChunk, onComplete: _vOnComplete, onError: _vOnError, abortSignal: _vSignal }
+        }).catch(_vOnError);
+      } else if (_vProvider === 'anthropic') {
         callAnthropicStreaming(_vModel, _vApiKey, _vMessages, _vPrompt, _vOnChunk, _vOnComplete, _vOnError, _vSignal);
       } else if (_vProvider === 'openai') {
         callOpenAIStreaming(_vModel, _vApiKey, _vMessages, _vPrompt, _vOnChunk, _vOnComplete, _vOnError, _vSignal);
@@ -7294,6 +7412,19 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     // v24.25: Add inline visual capability
     prompt += VISUAL_CAPABILITY_HINT;
 
+    // v34.78: Brilliance Knowledge Engine — capability manifest always,
+    // full snapshot when the message looks like a knowledge query.
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceKnowledge) {
+        var _bkLife = window.BrillianceKnowledge;
+        prompt += '\n\n' + _bkLife.capabilities();
+        if (_bkLife.shouldAttach && _bkLife.shouldAttach(userMessage)) {
+          var _snapLife = _bkLife.build({ includeContent: false, maxBytes: 50000 });
+          prompt += '\n\n── KNOWLEDGE SNAPSHOT (' + _snapLife.snapshot.generated_at + ') ──\n' + _snapLife.json + '\n── END SNAPSHOT ──';
+        }
+      }
+    } catch (_bkLifeErr) { console.warn('[Knowledge/Life] inject failed:', _bkLifeErr); }
+
     // v16.4: Set up abort controller and stop button
     _streamAbortController = new AbortController();
     setSendButtonStopping('followupBtn');
@@ -7525,6 +7656,18 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     }
     // v24.25: Add inline visual capability
     prompt += VISUAL_CAPABILITY_HINT;
+
+    // v34.78: Brilliance Knowledge Engine — third dispatch path (standard provider).
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceKnowledge) {
+        var _bkStd = window.BrillianceKnowledge;
+        prompt += '\n\n' + _bkStd.capabilities();
+        if (_bkStd.shouldAttach && _bkStd.shouldAttach(userMessage)) {
+          var _snapStd = _bkStd.build({ includeContent: false, maxBytes: 50000 });
+          prompt += '\n\n── KNOWLEDGE SNAPSHOT (' + _snapStd.snapshot.generated_at + ') ──\n' + _snapStd.json + '\n── END SNAPSHOT ──';
+        }
+      }
+    } catch (_bkStdErr) { console.warn('[Knowledge/Std] inject failed:', _bkStdErr); }
 
     // v16.4: Set up abort controller and stop button
     _streamAbortController = new AbortController();
@@ -7976,6 +8119,21 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     // v24.25: Add inline visual capability
     prompt += VISUAL_CAPABILITY_HINT;
 
+    // v34.78: Brilliance Knowledge Engine — always inject the capability
+    // manifest so Brilliance knows what it can do on every call.
+    // When the user message looks like a knowledge query, attach the full
+    // localStorage snapshot too (counts, names, status across every surface).
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceKnowledge) {
+        var _bk = window.BrillianceKnowledge;
+        prompt += '\n\n' + _bk.capabilities();
+        if (_bk.shouldAttach && _bk.shouldAttach(userMessage)) {
+          var _snap = _bk.build({ includeContent: false, maxBytes: 50000 });
+          prompt += '\n\n── KNOWLEDGE SNAPSHOT (' + _snap.snapshot.generated_at + ') ──\n' + _snap.json + '\n── END SNAPSHOT ──';
+        }
+      }
+    } catch (_bkErr) { console.warn('[Knowledge] inject failed:', _bkErr); }
+
     // v31.14: Inject admin context snapshot when admin opts in (toggle stored in
     // localStorage 'roweos_admin_ai_awareness'). Async resolution before stream call.
     var _adminAwarenessOn = (typeof isAdmin === 'function' && isAdmin())
@@ -7987,6 +8145,14 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
     var _brandSignal = _streamAbortController.signal;
 
     var _proceedStream = function(finalPrompt) {
+      // v33.38 (Sprint 2): use BrillianceServices.agents.dispatch when available, fallback to direct globals.
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.agents && window.BrillianceServices.agents.dispatch) {
+        window.BrillianceServices.agents.dispatch(provider, {
+          model: model, apiKey: apiKey, messages: messages, systemPrompt: finalPrompt,
+          callbacks: { onChunk: onChunk, onComplete: onComplete, onError: onError, abortSignal: _brandSignal }
+        }).catch(onError);
+        return;
+      }
       if (provider === 'anthropic') {
         callAnthropicStreaming(model, apiKey, messages, finalPrompt, onChunk, onComplete, onError, _brandSignal);
       } else if (provider === 'openai') {

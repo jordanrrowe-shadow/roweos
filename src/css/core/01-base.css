@@ -1,15 +1,23 @@
     
-    /* Light Mode - Liquid Glass Style */
+    /* Light Mode - Liquid Glass Style
+       v33.60: Deepened tones — was pure white (#fff) → warm cream (#f5f3ee) so cards
+       have more separation and the gold accent reads as part of a coherent palette
+       rather than floating on stark white. Borders darkened proportionally. */
     html.light-mode {
-      --bg-primary: #ffffff;
+      --bg-primary: #f5f3ee;
       --accent-text: #1a1a1a; /* v11.5.4: Always dark text on gold buttons */
-      --bg-secondary: #f8f9fa;
-      --bg-tertiary: #ffffff;
-      --bg-elevated: #ffffff;
-      --bg-hover: #f1f3f4;
-      --border-color: #e0e0e0;
-      --border-light: #ebebeb;
-      --border-subtle: #f0f0f0;
+      --bg-secondary: #ebe9e2;
+      /* v34.77: was --bg-tertiary: #ffffff; --bg-elevated: #ffffff;
+         Both painted hard white slabs over the cream workspace at every
+         elevated surface (cards, modals, side panels). Cream-tinted
+         alternatives keep the v33.60 deepening promise across the whole
+         elevated stack instead of stopping at --bg-primary. */
+      --bg-tertiary: #fbf9f3;
+      --bg-elevated: #faf7f0;
+      --bg-hover: #e3e0d6;
+      --border-color: #d6d2c8;
+      --border-light: #ddd9cf;
+      --border-subtle: #e8e4d8;
       --text-primary: #1a1a1a;
       --text-secondary: #4a4a4a;
       --text-muted: #6b6b6b;
@@ -20,6 +28,18 @@
       --accent-glow: rgba(122, 106, 82, 0.1);
       --accent-gold: #a89878;
       --gold: #7a6a52;
+      /* v34.72 gap #348: canonical Brilliance gold scale. Use these tokens
+         instead of hand-rolled hex literals. The gradient is the canonical
+         CTA gold (matches every v34.x gold pill across modals, onboarding,
+         brand voice). */
+      --brilliance-gold-1: #e2c79b; /* lightest, gradient start */
+      --brilliance-gold-2: #d4b87f; /* light tier */
+      --brilliance-gold-3: #c9a961; /* mid — the "primary" gold */
+      --brilliance-gold-4: #b8975f; /* darker mid */
+      --brilliance-gold-5: #a88a4a; /* gradient end */
+      --brilliance-gold-6: #7a6741; /* deep, light-mode text */
+      --brilliance-gold-gradient: linear-gradient(135deg, #e2c79b, #c9a961, #a88a4a);
+      --brilliance-gold-gradient-soft: linear-gradient(135deg, rgba(226,199,155,0.20), rgba(201,169,97,0.20), rgba(168,138,74,0.20));
       --success: #16a34a;
       --error: #dc2626;
       --warning: #d97706;
@@ -872,12 +892,22 @@
       box-shadow: none !important;
     }
     
+    /* v34.63: Modals + cards stay crisp white (popovers feel intentional that way),
+       but `.panel` is the entire page surface — a stark #fff slab on the warm
+       cream workspace (#f5f3ee) was the "large white rectangle" the user flagged
+       on Identity / Settings / etc. Soften to a warm white so the page surface
+       sits ON the workspace, not over it. */
     html.light-mode .modal,
-    html.light-mode .card,
-    html.light-mode .panel {
+    html.light-mode .card {
       background: #ffffff;
       border: 1px solid rgba(0, 0, 0, 0.06);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 20px rgba(0, 0, 0, 0.03), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+      border-radius: var(--radius-xl);
+    }
+    html.light-mode .panel {
+      background: #fbfaf5;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), 0 4px 20px rgba(0, 0, 0, 0.025);
       border-radius: var(--radius-xl);
     }
     
@@ -974,7 +1004,7 @@
       stroke: var(--life-accent-text, #ffffff) !important;
     }
     
-    /* v10.5.25: Light mode + Life mode — Generate Personalized Tasks button */
+    /* v10.5.25: Light mode + Life mode — AI Generate button (formerly "Generate Personalized Tasks", renamed v33.9 for parity with BrandAI) */
     html.light-mode.life-mode .studio-v2-generate-btn {
       background: linear-gradient(135deg, var(--life-accent), var(--life-accent-dark)) !important;
       color: var(--life-accent-text, #ffffff) !important;
@@ -1169,6 +1199,29 @@
     html.light-mode .settings-row-desc {
       color: var(--text-primary) !important;
     }
+    /* v33.82: Light mode — cream-on-cream rows were unreadable. Add a darker
+       border and crisper text so the row blocks read distinctly against the
+       new #f5f3ee bg. The rule below is scoped to light mode only. */
+    html.light-mode .settings-row {
+      background: rgba(0,0,0,0.04) !important;
+      border: 1px solid rgba(122,103,65,0.22) !important;
+    }
+    html.light-mode .settings-row:hover {
+      background: rgba(168,140,86,0.1) !important;
+      border-color: rgba(122,103,65,0.4) !important;
+    }
+    html.light-mode .settings-row-desc {
+      color: rgba(0,0,0,0.6) !important;
+    }
+    html.light-mode .settings-row-icon {
+      color: #7a6741 !important;
+    }
+    html.light-mode .settings-row-action {
+      color: rgba(0,0,0,0.55) !important;
+    }
+    html.light-mode .settings-section-title {
+      color: rgba(0,0,0,0.5);
+    }
     /* v11.5.4: Light mode — collapsed visual richness */
     html.light-mode .sidebar:not(.expanded):not(.pinned) .nav-item.active::after {
       background: #7a6a52;
@@ -1307,9 +1360,12 @@
       background: #ffffff;
       border-color: #e0e0e0;
     }
+    /* v34.63: Hover background was #121212 (near-black) — copy-paste from
+       dark-mode rule. Fixed to light-mode hover tone so the dropdown feels
+       cohesive when the user mouses over an item. */
     html.light-mode .tool-dropdown-item:hover {
-      background: #121212;
-      border-color: #b8986a;
+      background: rgba(0, 0, 0, 0.04);
+      border-color: var(--accent);
     }
     html.light-mode .tool-dropdown-item-name {
       color: #333333;
@@ -1456,7 +1512,9 @@
     
     /* v24.25: Light mode onboarding — theme-aware, premium gold accents */
     html.light-mode .api-key-modal { background: rgba(0, 0, 0, 0.6); }
-    html.light-mode .onboarding-btn-primary { background: linear-gradient(135deg, var(--accent, #a89878), #d4b896) !important; color: #0a0a0a !important; -webkit-text-fill-color: #0a0a0a !important; }
+    /* v34.64: Light mode keeps the same gold pill gradient as dark — the gold
+       reads warm in either palette. (Was a separate light variant that diverged.) */
+    html.light-mode .onboarding-btn-primary { background: linear-gradient(135deg, #e2c79b, #c9a961, #a88a4a) !important; color: #0a0a0a !important; -webkit-text-fill-color: #0a0a0a !important; }
     html.light-mode .onboarding-form-input, html.light-mode .onboarding-form-textarea {
       background: var(--bg-secondary) !important;
       border-color: var(--border-color) !important;
@@ -1566,6 +1624,105 @@
     html.promo-fonts .landing-subtitle { font-family: 'DM Sans', sans-serif; }
     html.promo-fonts .sidebar-brand-name { font-family: 'DM Sans', sans-serif; }
     html.promo-fonts .journal-title { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; }
+
+    /* v34: brilliance-serif utility — apply to any inline element that needs a
+       Georgia/Cormorant heading font. Auto-switches to Cormorant Garamond when
+       Settings → Font Style is set to Promo. Falls back to Georgia by default. */
+    .brilliance-serif { font-family: 'Georgia', serif; }
+    html.promo-fonts .brilliance-serif {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 400;
+    }
+
+    /* v34.72b: nuke-from-orbit override. The v34.69 selector list missed many
+       deeper rules (evolve-stats-value .num, evolve-stats-goal, evolve-empty-*,
+       evolve-translate-*, evolve-quiz-*, evolve-context-*, board-empty-*,
+       board-card-* etc.) that all hardcoded Georgia. Rather than chase each
+       one, apply a high-specificity blanket: anything inside #evolveView or
+       #boardView inherits the system font and drops italic, unless the user
+       has explicitly enabled promo-fonts mode (Settings → Appearance). */
+    #evolveView, #evolveView *,
+    #boardView,  #boardView * {
+      font-family: inherit;
+      font-style: normal;
+    }
+    /* promo-fonts opt-in still flips headings to Cormorant for users who want
+       the editorial treatment on these two surfaces. */
+    html.promo-fonts #evolveView h1, html.promo-fonts #evolveView h2, html.promo-fonts #evolveView h3,
+    html.promo-fonts #evolveView .panel-header,
+    html.promo-fonts #evolveView .evolve-stats-value .num,
+    html.promo-fonts #boardView h1, html.promo-fonts #boardView h2, html.promo-fonts #boardView h3,
+    html.promo-fonts #boardView .panel-header,
+    html.promo-fonts #boardView .board-card-title,
+    html.promo-fonts #boardView .board-empty-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 400;
+    }
+
+    /* v34.69: Evolve + Thought Board now use the system default font like every
+       other view in the app. Per-Jordan: serif Georgia made these surfaces feel
+       disconnected from Pulse / Studio / Library. promo-fonts mode still flips
+       headings to Cormorant for users who explicitly turn that on in Settings. */
+    .evolve-v2,
+    .board-v2,
+    .evolve-stats-goal,
+    .evolve-stats-value .num,
+    .evolve-context-row .ctx,
+    .today-h,
+    .evolve-empty-title,
+    .evolve-translate-input,
+    .evolve-translate-known .item,
+    .evolve-translate-empty,
+    .evolve-quiz-q,
+    .board-card-title,
+    .board-empty-title,
+    .board-star .lbl {
+      font-family: inherit;
+      font-style: normal;
+    }
+    html.promo-fonts .evolve-stats-goal,
+    html.promo-fonts .evolve-stats-value .num,
+    html.promo-fonts .today-h,
+    html.promo-fonts .evolve-empty-title,
+    html.promo-fonts .evolve-quiz-q,
+    html.promo-fonts .board-card-title,
+    html.promo-fonts .board-empty-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 400;
+    }
+    html.promo-fonts .evolve-context-row .ctx,
+    html.promo-fonts .evolve-translate-input,
+    html.promo-fonts .evolve-translate-known .item,
+    html.promo-fonts .evolve-translate-empty,
+    html.promo-fonts .board-star .lbl {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+    /* When promo-fonts is OFF, still inherit DM Sans / system body font for
+       non-italic text instead of locking to 'DM Sans, sans-serif' explicitly. */
+    .evolve-stats-label,
+    .evolve-stats-row,
+    .evolve-pill,
+    .evolve-context-row .lab,
+    .today-section-tag,
+    .evolve-translate-tag,
+    .evolve-translate-known .lab,
+    .evolve-translate-streaming,
+    .evolve-verify-badge,
+    .evolve-quiz-meta .topic,
+    .evolve-quiz-options,
+    .evolve-skill-grid,
+    .evolve-skill-pillar,
+    .evolve-quiz-btn,
+    .board-mode-pill,
+    .board-add-pin,
+    .board-context-row .lab,
+    .board-card-head,
+    .board-card-source,
+    .board-card-body {
+      font-family: inherit;
+    }
 
     /* v24.27 GUARDRAILS:
        - Do NOT add margin:0 to * — breaks mobile body layout
@@ -2575,6 +2732,1794 @@
     }
     #blobContainer canvas {
       display: block;
+    }
+    /* v33.1/v33.9: Brilli hero swap. Default celestial; aura/firefly/signature use Brilli canvas; classic falls back to blob. */
+    html[data-brilli-form="celestial"] #blobContainer,
+    html[data-brilli-form="aura"]      #blobContainer,
+    html[data-brilli-form="firefly"]   #blobContainer,
+    html[data-brilli-form="signature"] #blobContainer { display: none !important; }
+    html[data-brilli-form="classic"]   #brilliHero    { display: none !important; }
+    /* v33.84: Brilli-flip button only shows when classic BLAKE is the active form. */
+    #blobBrilliSwitchBtn { display: none !important; }
+    html[data-brilli-form="classic"] #blobBrilliSwitchBtn { display: flex !important; }
+    /* v33.3: No square frame around orb. Force transparent + circular clip so the bloom
+       halo can never appear bounded by a rectangle (the helix backdrop made the canvas
+       bounding-box visible in the prior build). */
+    #brilliHero {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      clip-path: circle(50%);
+      -webkit-clip-path: circle(50%);
+      contain: paint;
+    }
+    #brilliHero canvas {
+      display: block;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    /* v33.28: Keyboard focus ring for the clickable hero. */
+    #brilliHero:focus-visible {
+      box-shadow: 0 0 0 3px rgba(201,181,122,0.4) !important;
+      border-radius: 50%;
+    }
+    /* v33.2: Evolve nav flag-gate. */
+    html[data-evolve="on"] .evolve-nav-item { display: flex !important; }
+
+    /* v33.50: Evolve flat layout — matches Studio's structure. No shell box, no nested
+       dark container. Stats strip + horizontal pill nav + context row + flat content area.
+       v33.59: Added padding to fill the position-fixed #evolveView parent (matches
+       studio-v2). Without this, content was flush with the panel edge OR squashed into
+       a sub-region. */
+    .evolve-v2 {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 32px 0;
+      min-height: 100%;
+    }
+
+    /* Stats strip (countdown + goal + XP/streak), full-width row above the pill nav */
+    .evolve-stats-strip {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: var(--space-4);
+      align-items: center;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      margin-bottom: var(--space-3);
+    }
+    .evolve-stats-item-right { text-align: right; }
+    .evolve-stats-label {
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(201,169,97,0.85); font-weight: 500; margin-bottom: 4px;
+    }
+    .evolve-stats-value { display: flex; align-items: baseline; gap: 6px; }
+    .evolve-stats-value .num {
+      font-family: Georgia, serif; font-style: italic; font-size: 28px;
+      color: #f5e6c8; line-height: 1;
+    }
+    .evolve-stats-value .lab {
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+    }
+    .evolve-stats-goal {
+      font-family: Georgia, serif; font-style: italic;
+      font-size: 16px; color: #e2c79b; line-height: 1.4;
+    }
+    .evolve-stats-goal a {
+      color: #c9a961; text-decoration: none;
+      border-bottom: 1px dotted rgba(201,169,97,0.3);
+    }
+    .evolve-stats-row {
+      display: flex; gap: 14px; justify-content: flex-end;
+      font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 6px;
+    }
+    .evolve-stats-row .stat { letter-spacing: 0.06em; }
+    .evolve-stats-row .stat strong {
+      color: #e2c79b; font-family: 'JetBrains Mono', monospace;
+      margin-right: 4px; font-weight: 500;
+    }
+    .evolve-progress-bar {
+      height: 3px; width: 160px; background: rgba(255,255,255,0.06);
+      border-radius: 2px; overflow: hidden; margin-left: auto;
+    }
+    .evolve-progress-bar .fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c9a961, #f5e6c8);
+      transition: width 0.4s ease;
+    }
+
+    /* Horizontal pill tab nav — matches Studio pill aesthetic. */
+    .evolve-pill-nav {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-bottom: var(--space-3);
+      padding: 4px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 99px;
+      align-self: flex-start;
+      width: fit-content;
+    }
+    .evolve-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      border-radius: 99px;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer; text-decoration: none;
+      font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+      transition: all 0.2s;
+    }
+    .evolve-pill:hover { color: #ece4d8; background: rgba(255,255,255,0.04); }
+    .evolve-pill.active {
+      background: rgba(201,169,97,0.12); color: #e2c79b;
+      box-shadow: inset 0 0 0 1px rgba(201,169,97,0.25);
+    }
+    .evolve-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .evolve-pill .badge {
+      font-size: 9px; color: #c9a961;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Translator context — small inline chip below pill nav. */
+    .evolve-context-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px;
+      background: rgba(201,169,97,0.04);
+      border: 1px solid rgba(201,169,97,0.12);
+      border-radius: 8px;
+      margin-bottom: var(--space-4);
+      font-size: 12px;
+    }
+    .evolve-context-row .lab {
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #c9a961; font-weight: 500; flex-shrink: 0;
+    }
+    .evolve-context-row .ctx {
+      color: rgba(255,255,255,0.65);
+      font-family: Georgia, serif; font-style: italic;
+      flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    /* v33.53: tasteful inline link inside the context row. */
+    .evolve-context-row a {
+      color: #c9a961; text-decoration: none;
+      border-bottom: 1px dotted rgba(201,169,97,0.3);
+    }
+    .evolve-context-row a:hover {
+      color: #e2c79b;
+      border-bottom-color: rgba(226,199,155,0.55);
+    }
+
+    /* Flat content area — full width, no border, no background. */
+    .evolve-content-area { width: 100%; }
+    .evolve-tab-pane.hidden { display: none !important; }
+    .evolve-tab-pane.active { display: block; }
+    .evolve-pane-inner { padding: 36px 40px; max-width: 920px; }
+    .today-section-tag {
+      font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 500;
+      letter-spacing: 0.28em; text-transform: uppercase;
+      color: #c9a961; margin-bottom: 14px;
+    }
+    .today-h {
+      font-family: Georgia, serif; font-weight: 400; font-size: 28px;
+      color: #ece4d8; margin-bottom: 18px; letter-spacing: -0.01em;
+    }
+    .today-h em { color: #e2c79b; font-style: italic; }
+    .evolve-empty-card {
+      padding: 24px; border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 10px; background: rgba(255,255,255,0.02);
+    }
+    .evolve-empty-title {
+      font-family: Georgia, serif; font-style: italic;
+      font-size: 18px; color: #e2c79b; margin-bottom: 8px;
+    }
+    .evolve-empty-desc {
+      font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6;
+    }
+    .evolve-translate-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: rgba(255,255,255,0.05);
+    }
+    .evolve-translate-pane { background: #0a0a0a; padding: 36px 40px; }
+    .evolve-translate-output { background: #060606; }
+    .evolve-translate-desc {
+      font-size: 13px; color: rgba(255,255,255,0.55);
+      line-height: 1.7; margin-bottom: 18px;
+    }
+    .evolve-translate-input {
+      width: 100%; padding: 12px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,181,122,0.2);
+      border-radius: 8px; color: #ece4d8;
+      font-size: 14px; font-family: Georgia, serif;
+      font-style: italic;
+      box-sizing: border-box;
+    }
+    .evolve-translate-input:focus { outline: none; border-color: rgba(201,181,122,0.5); }
+    .evolve-translate-tags {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px;
+    }
+    .evolve-translate-tag {
+      font-size: 11px; padding: 4px 10px;
+      background: rgba(201,169,97,0.06);
+      border: 1px solid rgba(201,169,97,0.2);
+      border-radius: 99px; color: #c9a961;
+      cursor: pointer;
+    }
+    .evolve-translate-known { margin-top: 24px; }
+    .evolve-translate-known .lab {
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #c9a961; margin-bottom: 8px; font-weight: 500;
+    }
+    .evolve-translate-known .item {
+      font-size: 13px; color: rgba(255,255,255,0.7);
+      padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-family: Georgia, serif; font-style: italic;
+    }
+    .evolve-translate-empty {
+      padding: 32px; border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 10px; background: rgba(255,255,255,0.02);
+      font-size: 13px; color: rgba(255,255,255,0.5);
+      text-align: center; line-height: 1.7;
+      font-family: Georgia, serif; font-style: italic;
+    }
+    .evolve-translate-streaming {
+      font-size: 12px; color: rgba(255,255,255,0.55);
+      letter-spacing: 0.18em; text-transform: uppercase;
+      margin-top: 14px;
+    }
+    .evolve-translate-cursor {
+      display: inline-block; width: 2px; height: 12px;
+      background: #c9a961; margin-left: 4px;
+      animation: blinkCursor 1s infinite;
+      vertical-align: text-bottom;
+    }
+    .evolve-translate-result {
+      font-size: 14px; color: rgba(255,255,255,0.85);
+      line-height: 1.7; margin-top: 14px;
+    }
+    .evolve-verify-badge {
+      display: inline-block;
+      padding: 5px 14px; border-radius: 99px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .evolve-verify-badge.verified {
+      background: rgba(74,222,128,0.12);
+      color: #4ade80; border: 1px solid rgba(74,222,128,0.4);
+    }
+    .evolve-verify-badge.corrected {
+      background: rgba(245,176,66,0.14);
+      color: #f5b042; border: 1px solid rgba(245,176,66,0.45);
+    }
+    .evolve-verify-badge.insufficient {
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15);
+    }
+    .evolve-verify-output, .evolve-verify-streaming {
+      padding: 18px; background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      font-size: 14px; color: rgba(255,255,255,0.85);
+      line-height: 1.7;
+    }
+    .evolve-verify-label {
+      display: block; font-size: 11px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: #c9a961; margin-bottom: 8px; font-weight: 500;
+    }
+    .evolve-verify-input {
+      width: 100%; min-height: 120px; padding: 14px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: #ece4d8;
+      font-size: 13px; font-family: Georgia, serif;
+      line-height: 1.6; box-sizing: border-box;
+    }
+    .evolve-verify-submit {
+      margin-top: 14px; padding: 11px 22px;
+      background: rgba(201,181,122,0.10);
+      border: 1px solid rgba(201,181,122,0.3);
+      border-radius: 99px; color: rgba(201,169,97,0.6);
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: not-allowed;
+    }
+    .evolve-skill-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .evolve-skill-card {
+      padding: 18px; background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+    }
+    .evolve-skill-pillar {
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #c9a961; margin-bottom: 6px; font-weight: 500;
+    }
+    .evolve-skill-name {
+      font-family: Georgia, serif; font-size: 16px;
+      color: #ece4d8; margin-bottom: 12px;
+    }
+    .evolve-skill-bar {
+      height: 4px; background: rgba(255,255,255,0.05);
+      border-radius: 2px; overflow: hidden; margin-bottom: 8px;
+    }
+    .evolve-skill-bar span {
+      display: block; height: 100%;
+      background: linear-gradient(90deg, #c9a961, #f5e6c8);
+    }
+    .evolve-skill-meta {
+      font-size: 11px; color: rgba(255,255,255,0.45);
+    }
+    /* v33.5: Quiz card per docs/brilliance/13-evolve-preview.html. */
+    .evolve-quiz-card {
+      padding: 28px;
+      background: linear-gradient(180deg, rgba(201,181,122,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+    }
+    .evolve-quiz-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .evolve-quiz-meta .topic {
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #c9a961; font-weight: 500;
+    }
+    .evolve-quiz-meta .diff { display: flex; gap: 4px; }
+    .diff-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+    }
+    .diff-dot.on { background: #c9a961; }
+    .evolve-quiz-q {
+      font-family: Georgia, serif; font-size: 18px;
+      color: #ece4d8; line-height: 1.5; margin-bottom: 22px;
+    }
+    .evolve-quiz-options {
+      display: flex; flex-direction: column; gap: 8px;
+      margin-bottom: 18px;
+    }
+    .evolve-quiz-opt {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px; border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .evolve-quiz-opt:hover {
+      background: rgba(201,181,122,0.04);
+      border-color: rgba(201,181,122,0.25);
+    }
+    .evolve-quiz-opt.selected {
+      background: rgba(201,181,122,0.08);
+      border-color: rgba(201,181,122,0.45);
+    }
+    .evolve-quiz-opt.right {
+      background: rgba(74,222,128,0.08);
+      border-color: rgba(74,222,128,0.45);
+    }
+    .evolve-quiz-opt.wrong {
+      background: rgba(239,83,80,0.08);
+      border-color: rgba(239,83,80,0.4);
+    }
+    .evolve-quiz-opt .letter {
+      flex-shrink: 0; width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; background: rgba(201,181,122,0.10);
+      color: #c9a961; font-weight: 600; font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .evolve-quiz-opt.right .letter { background: rgba(74,222,128,0.18); color: #4ade80; }
+    .evolve-quiz-opt.wrong .letter { background: rgba(239,83,80,0.18); color: #ef5350; }
+    .evolve-quiz-opt .body {
+      font-size: 14px; color: #ece4d8; line-height: 1.6;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .evolve-quiz-matrix {
+      margin-top: 18px; padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .evolve-quiz-citation {
+      font-size: 11px; color: rgba(201,169,97,0.7);
+      letter-spacing: 0.04em; margin-bottom: 14px;
+    }
+    .evolve-quiz-matrix-row {
+      display: flex; gap: 12px; padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .evolve-quiz-matrix-row:last-child { border-bottom: none; }
+    .evolve-quiz-matrix-row .lett {
+      flex-shrink: 0; width: 22px; font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .evolve-quiz-matrix-row.correct .lett { color: #4ade80; }
+    .evolve-quiz-matrix-row.wrong .lett { color: #ef5350; }
+    .evolve-quiz-matrix-row .body {
+      font-size: 13px; color: rgba(255,255,255,0.65);
+      line-height: 1.6;
+    }
+    .evolve-quiz-matrix-row .body strong {
+      color: #ece4d8;
+    }
+    .evolve-quiz-matrix-row.correct .body strong { color: #4ade80; }
+    .evolve-quiz-matrix-row.wrong .body strong { color: #ef5350; }
+    .evolve-quiz-actions {
+      display: flex; justify-content: flex-end; margin-top: 18px;
+    }
+    .evolve-quiz-btn {
+      padding: 11px 24px; border-radius: 99px;
+      background: rgba(201,181,122,0.10);
+      border: 1px solid rgba(201,181,122,0.4);
+      color: #c9a961; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .evolve-quiz-btn:disabled {
+      opacity: 0.4; cursor: not-allowed;
+    }
+    .evolve-quiz-btn.primary {
+      background: linear-gradient(135deg, #e2c79b, #c9a961, #a88a4a);
+      color: #0a0a0a; border-color: transparent;
+    }
+    .evolve-quiz-btn.primary:hover {
+      box-shadow: 0 8px 28px rgba(201,169,97,0.3);
+    }
+    /* v33.51: Mobile parity for Evolve flat layout. Stats strip stacks; pill nav becomes
+       horizontally scrollable; tab panes get tighter padding. */
+    @media (max-width: 768px) {
+      .evolve-stats-strip {
+        grid-template-columns: 1fr;
+        gap: 10px; padding: 12px 14px;
+      }
+      .evolve-stats-item-right { text-align: left; }
+      .evolve-stats-row { justify-content: flex-start; }
+      .evolve-progress-bar { margin-left: 0; width: 100%; max-width: 220px; }
+      .evolve-stats-value .num { font-size: 22px; }
+      .evolve-stats-goal { font-size: 14px; }
+
+      .evolve-pill-nav {
+        flex-wrap: nowrap; overflow-x: auto;
+        align-self: stretch; width: 100%;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .evolve-pill-nav::-webkit-scrollbar { display: none; }
+      .evolve-pill { flex-shrink: 0; padding: 7px 12px; font-size: 11px; }
+      .evolve-pill svg { width: 13px; height: 13px; }
+
+      .evolve-context-row { padding: 7px 12px; font-size: 11px; }
+      .evolve-context-row .lab { font-size: 8px; }
+      .evolve-context-row .ctx { font-size: 12px; }
+
+      .evolve-pane-inner { padding: 18px 14px; }
+      .evolve-translate-grid { grid-template-columns: 1fr; }
+      .evolve-translate-pane { padding: 18px 14px; }
+      .evolve-translate-input { font-size: 13px; padding: 10px 14px; }
+      .evolve-verify-input { min-height: 100px; font-size: 12px; }
+
+      .evolve-quiz-card { padding: 18px; }
+      .evolve-quiz-q { font-size: 16px; }
+      .evolve-quiz-opt { padding: 12px 14px; gap: 10px; }
+      .evolve-quiz-opt .body { font-size: 13px; }
+      .evolve-quiz-opt .letter { width: 24px; height: 24px; font-size: 12px; }
+      .evolve-quiz-matrix-row { padding: 8px 0; }
+      .evolve-quiz-matrix-row .body { font-size: 12px; }
+      .today-h { font-size: 22px; }
+      .evolve-skill-grid { grid-template-columns: 1fr; }
+      .evolve-skill-card { padding: 14px; }
+    }
+    /* v33.51: 375px narrow viewport tighter spacing. */
+    @media (max-width: 380px) {
+      .evolve-stats-strip { padding: 10px 12px; }
+      .evolve-stats-value .num { font-size: 20px; }
+      .evolve-stats-goal { font-size: 13px; }
+      .evolve-pill { font-size: 10px; padding: 6px 10px; }
+      .evolve-pill svg { width: 12px; height: 12px; }
+      .evolve-pane-inner { padding: 14px 12px; }
+      .evolve-quiz-card { padding: 14px; }
+      .evolve-quiz-q { font-size: 15px; }
+      .evolve-quiz-opt { padding: 10px 12px; gap: 8px; }
+      .evolve-quiz-opt .body { font-size: 12px; line-height: 1.5; }
+      .evolve-quiz-opt .letter { width: 22px; height: 22px; }
+      .evolve-skill-card { padding: 12px; }
+      .today-h { font-size: 20px; }
+    }
+
+    /* v33.59: Light-mode color overrides for Evolve flat layout. The dark-theme
+       defaults (#f5e6c8 / #e2c79b / rgba(255,255,255,0.65) / #ece4d8) are invisible
+       on light backgrounds. These overrides keep the gold-accent identity but use
+       darker, higher-contrast tones so the goal, countdown, pill nav, context chip,
+       and tab content are all readable on a #f8f8f8 background. */
+    html.light-mode .evolve-stats-strip {
+      background: rgba(0,0,0,0.03);
+      border-color: rgba(0,0,0,0.08);
+    }
+    html.light-mode .evolve-stats-label { color: #7a6741; }
+    html.light-mode .evolve-stats-value .num { color: #2a2a2a; }
+    html.light-mode .evolve-stats-value .lab { color: rgba(0,0,0,0.45); }
+    html.light-mode .evolve-stats-goal { color: #5a4d2e; }
+    html.light-mode .evolve-stats-goal a {
+      color: #7a6741;
+      border-bottom-color: rgba(122,103,65,0.4);
+    }
+    html.light-mode .evolve-stats-row { color: rgba(0,0,0,0.55); }
+    html.light-mode .evolve-stats-row .stat strong { color: #5a4d2e; }
+    html.light-mode .evolve-progress-bar { background: rgba(0,0,0,0.08); }
+    html.light-mode .evolve-progress-bar .fill {
+      background: linear-gradient(90deg, #8a7d65, #b29c75);
+    }
+
+    html.light-mode .evolve-pill-nav {
+      background: rgba(0,0,0,0.03);
+      border-color: rgba(0,0,0,0.08);
+    }
+    html.light-mode .evolve-pill { color: rgba(0,0,0,0.55); }
+    html.light-mode .evolve-pill:hover {
+      color: #1a1a1a; background: rgba(0,0,0,0.04);
+    }
+    html.light-mode .evolve-pill.active {
+      background: rgba(168,140,86,0.16);
+      color: #5a4d2e;
+      box-shadow: inset 0 0 0 1px rgba(168,140,86,0.4);
+    }
+    html.light-mode .evolve-pill .badge { color: #7a6741; }
+
+    html.light-mode .evolve-context-row {
+      background: rgba(168,140,86,0.07);
+      border-color: rgba(168,140,86,0.22);
+    }
+    html.light-mode .evolve-context-row .lab { color: #7a6741; }
+    html.light-mode .evolve-context-row .ctx { color: rgba(0,0,0,0.65); }
+    html.light-mode .evolve-context-row a {
+      color: #7a6741;
+      border-bottom-color: rgba(122,103,65,0.4);
+    }
+    html.light-mode .evolve-context-row a:hover {
+      color: #5a4d2e;
+      border-bottom-color: rgba(90,77,46,0.6);
+    }
+
+    html.light-mode .today-h { color: #1a1a1a; }
+    html.light-mode .today-h em { color: #5a4d2e; }
+    html.light-mode .today-section-tag { color: #7a6741; }
+    html.light-mode .evolve-empty-card {
+      background: rgba(0,0,0,0.02);
+      border-color: rgba(0,0,0,0.12);
+    }
+    html.light-mode .evolve-empty-title { color: #5a4d2e; }
+    html.light-mode .evolve-empty-desc { color: rgba(0,0,0,0.6); }
+
+    /* v34.76: was stark #ffffff which painted a hard white slab over the
+       cream workspace — see Image #65/#66 family. Cream-tinted variants
+       integrate with the rest of the v33.60 light-mode palette. */
+    html.light-mode .evolve-translate-pane { background: #faf7f0; }
+    html.light-mode .evolve-translate-output { background: #f0ece2; }
+    html.light-mode .evolve-translate-grid { background: rgba(0,0,0,0.06); }
+    html.light-mode .evolve-translate-desc { color: rgba(0,0,0,0.6); }
+    html.light-mode .evolve-translate-input {
+      background: rgba(0,0,0,0.03);
+      border-color: rgba(168,140,86,0.4);
+      color: #1a1a1a;
+    }
+    html.light-mode .evolve-translate-input:focus {
+      border-color: rgba(168,140,86,0.7);
+    }
+    html.light-mode .evolve-translate-tag {
+      background: rgba(168,140,86,0.08);
+      border-color: rgba(168,140,86,0.3);
+      color: #7a6741;
+    }
+    html.light-mode .evolve-translate-known .lab { color: #7a6741; }
+    html.light-mode .evolve-translate-known .item {
+      color: rgba(0,0,0,0.7);
+      border-bottom-color: rgba(0,0,0,0.06);
+    }
+    html.light-mode .evolve-translate-empty {
+      background: rgba(0,0,0,0.02);
+      border-color: rgba(0,0,0,0.12);
+      color: rgba(0,0,0,0.5);
+    }
+    html.light-mode .evolve-translate-streaming { color: rgba(0,0,0,0.55); }
+    html.light-mode .evolve-translate-cursor { background: #7a6741; }
+    html.light-mode .evolve-translate-result { color: rgba(0,0,0,0.85); }
+
+    html.light-mode .evolve-verify-output,
+    html.light-mode .evolve-verify-streaming {
+      background: rgba(0,0,0,0.02);
+      border-color: rgba(0,0,0,0.1);
+      color: rgba(0,0,0,0.85);
+    }
+
+    html.light-mode .evolve-quiz-card {
+      background: linear-gradient(180deg, rgba(168,140,86,0.06), rgba(0,0,0,0.02));
+      border-color: rgba(0,0,0,0.1);
+    }
+    html.light-mode .evolve-quiz-meta .topic { color: #7a6741; }
+    html.light-mode .diff-dot { background: rgba(0,0,0,0.15); }
+    html.light-mode .diff-dot.on { background: #7a6741; }
+    html.light-mode .evolve-quiz-q { color: #1a1a1a; }
+
+    /* v33.61: Skill cards + quiz options + why-matrix light-mode tones. */
+    html.light-mode .evolve-skill-card {
+      background: rgba(0,0,0,0.02);
+      border-color: rgba(0,0,0,0.1);
+    }
+    html.light-mode .evolve-skill-pillar { color: #7a6741; }
+    html.light-mode .evolve-skill-name { color: #1a1a1a; }
+    html.light-mode .evolve-skill-bar { background: rgba(0,0,0,0.08); }
+    html.light-mode .evolve-skill-bar span {
+      background: linear-gradient(90deg, #8a7d65, #b29c75);
+    }
+    html.light-mode .evolve-skill-meta { color: rgba(0,0,0,0.55); }
+
+    html.light-mode .evolve-quiz-opt {
+      background: rgba(0,0,0,0.02);
+      border-color: rgba(0,0,0,0.1);
+    }
+    html.light-mode .evolve-quiz-opt:hover {
+      background: rgba(168,140,86,0.07);
+      border-color: rgba(168,140,86,0.4);
+    }
+    html.light-mode .evolve-quiz-opt.selected {
+      background: rgba(168,140,86,0.12);
+      border-color: rgba(168,140,86,0.55);
+    }
+    html.light-mode .evolve-quiz-opt.right {
+      background: rgba(74,222,128,0.1);
+      border-color: rgba(74,222,128,0.5);
+    }
+    html.light-mode .evolve-quiz-opt.wrong {
+      background: rgba(239,83,80,0.1);
+      border-color: rgba(239,83,80,0.5);
+    }
+    html.light-mode .evolve-quiz-opt .letter {
+      background: rgba(168,140,86,0.14);
+      color: #7a6741;
+    }
+    html.light-mode .evolve-quiz-opt.right .letter {
+      background: rgba(74,222,128,0.22);
+      color: #15803d;
+    }
+    html.light-mode .evolve-quiz-opt.wrong .letter {
+      background: rgba(239,83,80,0.22);
+      color: #b91c1c;
+    }
+    html.light-mode .evolve-quiz-opt .body { color: #1a1a1a; }
+
+    html.light-mode .evolve-quiz-matrix {
+      border-top-color: rgba(0,0,0,0.1);
+    }
+    html.light-mode .evolve-quiz-citation { color: rgba(122,103,65,0.85); }
+    html.light-mode .evolve-quiz-matrix-row {
+      border-bottom-color: rgba(0,0,0,0.06);
+    }
+    html.light-mode .evolve-quiz-matrix-row .lett { color: rgba(0,0,0,0.4); }
+    html.light-mode .evolve-quiz-matrix-row.correct .lett { color: #15803d; }
+    html.light-mode .evolve-quiz-matrix-row.wrong .lett { color: #b91c1c; }
+    html.light-mode .evolve-quiz-matrix-row .body { color: rgba(0,0,0,0.7); }
+    html.light-mode .evolve-quiz-matrix-row .body strong { color: #1a1a1a; }
+    html.light-mode .evolve-quiz-matrix-row.correct .body strong { color: #15803d; }
+    html.light-mode .evolve-quiz-matrix-row.wrong .body strong { color: #b91c1c; }
+
+    html.light-mode .evolve-quiz-btn {
+      background: rgba(168,140,86,0.1);
+      border-color: rgba(168,140,86,0.45);
+      color: #7a6741;
+    }
+
+    html.light-mode .evolve-verify-input {
+      background: rgba(0,0,0,0.03);
+      border-color: rgba(0,0,0,0.12);
+      color: #1a1a1a;
+    }
+    html.light-mode .evolve-verify-submit {
+      background: rgba(168,140,86,0.1);
+      border-color: rgba(168,140,86,0.4);
+      color: rgba(122,103,65,0.7);
+    }
+
+    /* v33.4: Launch-screen Brilliance lockup per docs/brilliance/03-launch-screen mockup. */
+    .brilliance-launch-logo {
+      display: flex; flex-direction: column; align-items: center;
+      max-width: 600px; margin: 0 auto 16px;
+    }
+    .brilliance-launch-orb {
+      position: relative; width: 200px; height: 200px;
+      isolation: isolate; margin-bottom: 24px;
+      clip-path: circle(50%); -webkit-clip-path: circle(50%);
+    }
+    .brilliance-launch-orb-bloom {
+      position: absolute; inset: -30px;
+      background: radial-gradient(circle, rgba(201,169,97,0.32), rgba(201,169,97,0.10) 35%, transparent 70%);
+      border-radius: 50%; z-index: -1;
+      animation: brillianceLaunchBloom 6s ease-in-out infinite;
+    }
+    .brilliance-launch-orb-shell {
+      position: absolute; inset: 0; border-radius: 50%;
+      background: radial-gradient(circle at 50% 45%, rgba(245,230,200,0.20) 0%, rgba(201,169,97,0.20) 50%, rgba(168,138,74,0.34) 80%, rgba(107,90,61,0.55) 100%);
+      border: 1px solid rgba(232,199,155,0.50);
+      box-shadow: 0 0 60px rgba(201,169,97,0.30), inset 0 0 28px rgba(0,0,0,0.4);
+      animation: brillianceLaunchBreathe 5s ease-in-out infinite;
+    }
+    .brilliance-launch-orb-core {
+      position: absolute; top: 50%; left: 50%;
+      width: 38%; height: 38%; transform: translate(-50%,-50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff8e8 0%, #f5e6c8 35%, rgba(201,169,97,0.30) 75%, transparent 100%);
+      animation: brillianceLaunchCore 5s ease-in-out infinite;
+    }
+    .brilliance-launch-spark {
+      position: absolute; border-radius: 50%; background: #fff8e8;
+      box-shadow: 0 0 4px #f5e6c8, 0 0 8px #e2c79b;
+      animation: brillianceLaunchTwinkle 4s ease-in-out infinite;
+    }
+    @keyframes brillianceLaunchBloom { 0%,100%{opacity:0.85;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
+    @keyframes brillianceLaunchBreathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
+    @keyframes brillianceLaunchCore { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.06)} }
+    @keyframes brillianceLaunchTwinkle { 0%,100%{opacity:0.4;transform:scale(0.85)} 50%{opacity:1;transform:scale(1.2)} }
+    @media (prefers-reduced-motion: reduce) {
+      .brilliance-launch-orb * { animation: none !important; }
+    }
+    .brilliance-launch-wordmark {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(56px, 8vw, 84px); font-weight: 300;
+      letter-spacing: -0.01em; line-height: 1; margin: 0 0 6px;
+      background: linear-gradient(135deg, #f5e6c8, #e2c79b 50%, #c9a961);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .brilliance-launch-rule {
+      width: 48px; height: 1px; background: rgba(201,181,122,0.35);
+      margin: 12px auto;
+    }
+    .brilliance-launch-os {
+      font-family: 'DM Sans', sans-serif; font-size: 11px;
+      font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase;
+      color: rgba(201,169,97,0.7); margin-bottom: 6px;
+    }
+    .brilliance-launch-by {
+      font-family: 'DM Sans', sans-serif; font-size: 10px;
+      font-weight: 400; letter-spacing: 0.28em; text-transform: uppercase;
+      color: rgba(255,255,255,0.30);
+    }
+    .brilliance-launch-by strong {
+      color: rgba(201,169,97,0.7); font-weight: 500;
+    }
+
+    /* v34.1: Combo landing — "Be Brilliant." hero tagline + meta line + CTA pair
+       + Google for Startups footer. Mockup at docs/brilliance/03-launch-screen
+       and Image #38 from the v34.0 conversation. */
+    .launch-content-v34 {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0; padding: 24px 16px;
+    }
+    .launch-tagline {
+      margin-top: 28px;
+      font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(38px, 6.5vw, 72px);
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: #f0e6d3;
+      text-align: center;
+    }
+    .launch-tagline-roman { font-style: normal; font-weight: 500; color: #f5ecd9; }
+    .launch-tagline-italic { font-style: italic; font-weight: 400; color: #e2c79b; }
+    html.light-mode .launch-tagline-roman { color: #2b2418; }
+    html.light-mode .launch-tagline-italic { color: #7a5e1f; }
+
+    .launch-meta-line {
+      margin-top: 18px;
+      font-family: 'DM Sans', sans-serif; font-size: 10px;
+      letter-spacing: 0.36em; text-transform: uppercase;
+      color: rgba(232,219,196,0.55);
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+    }
+    .launch-meta-emph { color: rgba(201,169,97,0.85); }
+    .launch-meta-dot { color: rgba(201,169,97,0.45); }
+    html.light-mode .launch-meta-line { color: rgba(60,48,24,0.55); }
+    html.light-mode .launch-meta-emph { color: #7a5e1f; }
+    html.light-mode .launch-meta-dot { color: rgba(60,48,24,0.35); }
+
+    .launch-actions-v34 {
+      margin-top: 36px;
+      display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+    }
+    .launch-cta-primary {
+      padding: 14px 38px;
+      background: linear-gradient(135deg, #e2c79b 0%, #c9a961 50%, #a88a4a 100%);
+      color: #14110a;
+      border: none; border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset, 0 8px 24px -8px rgba(201,169,97,0.45);
+    }
+    .launch-cta-primary:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,0.22) inset, 0 12px 30px -8px rgba(201,169,97,0.6); }
+    .launch-cta-secondary {
+      padding: 14px 30px;
+      background: transparent;
+      color: rgba(232,219,196,0.85);
+      border: 1px solid rgba(201,169,97,0.45);
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .launch-cta-secondary:hover {
+      border-color: rgba(201,169,97,0.75);
+      color: #f5ecd9;
+      background: rgba(201,169,97,0.06);
+    }
+    html.light-mode .launch-cta-secondary {
+      color: rgba(60,48,24,0.85);
+      border-color: rgba(168,140,86,0.5);
+    }
+    html.light-mode .launch-cta-secondary:hover {
+      color: #2b2418;
+      border-color: rgba(168,140,86,0.85);
+      background: rgba(168,140,86,0.08);
+    }
+
+    .launch-footer {
+      margin-top: 48px;
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 10px;
+      color: rgba(232,219,196,0.45);
+      letter-spacing: 0.24em; text-transform: uppercase;
+    }
+    .launch-footer-label { color: rgba(232,219,196,0.55); }
+    .launch-footer-dot { color: rgba(201,169,97,0.4); }
+    .launch-footer-logo { height: 14px; width: auto; opacity: 0.7; }
+    .launch-footer-text { color: rgba(232,219,196,0.7); }
+    html.light-mode .launch-footer-label,
+    html.light-mode .launch-footer-text { color: rgba(60,48,24,0.7); }
+    html.light-mode .launch-footer-dot { color: rgba(168,140,86,0.5); }
+
+    @media (max-width: 540px) {
+      .launch-tagline { margin-top: 22px; }
+      .launch-meta-line { font-size: 9px; letter-spacing: 0.28em; gap: 6px; }
+      .launch-actions-v34 { flex-direction: column; width: 100%; max-width: 320px; }
+      .launch-cta-primary, .launch-cta-secondary { width: 100%; padding: 14px 20px; text-align: center; }
+      .launch-footer { margin-top: 32px; flex-wrap: wrap; justify-content: center; }
+    }
+
+    /* v33.67: Focus Mode (Negative Space) — universal surface modifier per
+       docs/brilliance/12-surface-system.md. Strips ambient chrome so the user
+       sees only the active message + Brilli + input. Triggered by Cmd+Shift+F.
+       Implemented in src/js/core/40-focus-mode.js. */
+    body.focus-mode .sidebar,
+    body.focus-mode .liquid-nav,
+    body.focus-mode .mobile-header,
+    body.focus-mode .nav-section,
+    body.focus-mode .concierge-row,
+    body.focus-mode .breadcrumb,
+    body.focus-mode #notificationBell,
+    body.focus-mode .section-help-btn,
+    body.focus-mode .panel-header > *:not(span),
+    body.focus-mode .studio-action-bar,
+    body.focus-mode .evolve-stats-strip,
+    body.focus-mode .evolve-pill-nav,
+    body.focus-mode .evolve-context-row {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transition: opacity 0.35s ease;
+    }
+    body.focus-mode .panel-view {
+      left: 0 !important;
+      transition: left 0.35s ease, padding 0.35s ease;
+    }
+    body.focus-mode #appContainer {
+      background: var(--bg-primary);
+      transition: background 0.35s ease;
+    }
+    body.focus-mode .panel-header {
+      opacity: 0.4;
+      transition: opacity 0.35s ease;
+    }
+    /* Subtle focus-mode hint dot in the corner so the user can find their way back. */
+    body.focus-mode::after {
+      content: '';
+      position: fixed; top: 14px; right: 16px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(201,169,97,0.55);
+      box-shadow: 0 0 12px rgba(201,169,97,0.4);
+      animation: focusPulse 2.4s ease-in-out infinite;
+      z-index: 99999;
+      pointer-events: none;
+    }
+    @keyframes focusPulse {
+      0%,100% { opacity: 0.45; transform: scale(0.9); }
+      50%     { opacity: 0.95; transform: scale(1.15); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      body.focus-mode::after { animation: none; }
+    }
+
+    /* v33.76: Folio → Studio at Work — Tier 2 surface from
+       docs/brilliance/12-surface-system.md. Toggleable via the Studio at Work
+       button in the Folio tab bar (or window.FolioEasel.toggle()). When ON,
+       the Folio Chat tab gets the easel treatment: artifact centered, chat
+       in a narrower right gutter. */
+    body.folio-easel #folioView .folio-chat {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+      gap: 16px;
+      align-items: stretch;
+    }
+    body.folio-easel #folioView .folio-chat .auto-agent-messages,
+    body.folio-easel #folioView .folio-chat .folio-chat-messages {
+      grid-column: 2 / 3;
+      max-height: calc(100vh - 240px);
+      overflow-y: auto;
+      border-left: 1px solid rgba(201,169,97,0.2);
+      padding-left: 16px;
+    }
+    body.folio-easel #folioView .folio-chat .folio-easel-stage,
+    body.folio-easel #folioView .folio-chat #folioEaselStage,
+    body.folio-easel #folioView .folio-active-artifact {
+      grid-column: 1 / 2;
+      /* v34.69: artifact fills the entire easel column instead of being a
+         centered ~720px island. Inner content (e.g. the dark Q2-Results card)
+         scales to width:100% so charts and tiles use the available space. */
+      width: 100%;
+      min-height: calc(100vh - 240px);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    body.folio-easel #folioView .folio-chat .folio-easel-stage > *,
+    body.folio-easel #folioView .folio-chat #folioEaselStage > *,
+    body.folio-easel #folioView .folio-active-artifact > * {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 1;
+    }
+    /* When no artifact is active yet, show an easel placeholder that occupies
+       the left column so the layout still reads as "studio at work". */
+    body.folio-easel #folioView .folio-chat::before {
+      content: 'Easel — pick an artifact from Gallery, or generate a new one in Chat. The output streams into this column.';
+      grid-column: 1 / 2;
+      align-self: center;
+      max-width: 520px;
+      padding: 36px 28px;
+      border: 1px dashed rgba(201,169,97,0.3);
+      border-radius: 14px;
+      background: rgba(201,169,97,0.04);
+      color: rgba(201,169,97,0.7);
+      font-family: Georgia, serif; font-style: italic; font-size: 14px;
+      line-height: 1.6;
+    }
+    html.light-mode body.folio-easel #folioView .folio-chat::before {
+      border-color: rgba(168,140,86,0.4);
+      background: rgba(168,140,86,0.06);
+      color: #7a6741;
+    }
+    /* When an artifact IS in the left column, hide the placeholder so it
+       doesn't double up. The presence of .folio-active-artifact or
+       #folioEaselStage suppresses the empty-state via this rule. */
+    body.folio-easel #folioView .folio-chat:has(.folio-active-artifact)::before,
+    body.folio-easel #folioView .folio-chat:has(#folioEaselStage)::before {
+      display: none;
+    }
+    @media (max-width: 1100px) {
+      body.folio-easel #folioView .folio-chat { grid-template-columns: 1fr; }
+      body.folio-easel #folioView .folio-chat .auto-agent-messages,
+      body.folio-easel #folioView .folio-chat .folio-chat-messages {
+        grid-column: 1; border-left: none; padding-left: 0; max-height: none;
+      }
+      body.folio-easel #folioView .folio-chat::before { display: none; }
+    }
+    .folio-easel-toggle.active {
+      background: rgba(201,169,97,0.18) !important;
+      border-color: rgba(201,169,97,0.55) !important;
+      color: #c9a961 !important;
+    }
+    html.light-mode .folio-easel-toggle.active {
+      background: rgba(168,140,86,0.18) !important;
+      border-color: rgba(168,140,86,0.6) !important;
+      color: #5a4d2e !important;
+    }
+
+    /* v33.75 / v33.94: Studio → Split-Pane Workspace — Tier 2 surface from
+       docs/brilliance/12-surface-system.md. Toggleable via the Split Pane button
+       in the Studio action bar (or window.SplitPane.toggle()). The body class
+       `studio-split-pane` is the gate; only #studioView is restyled.
+
+       Layout (v33.94): `.studio-v2` becomes a 2-column grid. Header chrome
+       (breadcrumb / panel-header / description / pill nav / action bar /
+       expander panel) spans full width. The LEFT column holds `.studio-v2-content`
+       (cards + config panel + Run History + Post History — internal ordering
+       restored to single-column block flow). The RIGHT column is reserved for
+       `#studioResultsPanel` (Output), pinned sticky so it stays visible while
+       the user scrolls the left column.
+
+       Why: previous layout put the auto-flow grid on `.studio-v2-content`,
+       which let Run History land in the right column and pushed Output to
+       the bottom — and squeezed `#studioConfigPanel` so the task title could
+       break by character on narrow widths. The new layout always keeps Output
+       on the right and history sections under the cards on the left. */
+    body.studio-split-pane #studioView .studio-v2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(420px, 0.85fr);
+      column-gap: 18px;
+      align-items: start;
+      grid-auto-flow: dense; /* let cards + Output share row 6 even if Output is later in DOM */
+    }
+    /* Header chrome spans full width */
+    body.studio-split-pane #studioView .studio-v2 > .breadcrumb,
+    body.studio-split-pane #studioView .studio-v2 > .panel-header,
+    body.studio-split-pane #studioView .studio-v2 > p,
+    body.studio-split-pane #studioView .studio-v2 > #studioPillNav,
+    body.studio-split-pane #studioView .studio-v2 > #studioActionBar,
+    body.studio-split-pane #studioView .studio-v2 > #studioExpanderPanel {
+      grid-column: 1 / -1;
+    }
+    /* Left column: cards + config + history. Block flow so children stack
+       vertically (cards row, config panel when active, Run History, Post
+       History). */
+    body.studio-split-pane #studioView .studio-v2 > .studio-v2-content {
+      grid-column: 1;
+      display: block;
+      min-width: 0;
+    }
+    /* Right column: Output panel. Sticky so it remains visible while the
+       left column scrolls. `grid-auto-flow: dense` on the parent + `grid-column: 2`
+       here lets the panel land in the same row as studio-v2-content. */
+    body.studio-split-pane #studioView .studio-v2 > #studioResultsPanel {
+      grid-column: 2;
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      max-height: calc(100vh - 120px);
+      overflow: auto;
+      min-width: 0;
+      display: block !important;
+    }
+    /* Empty placeholder so the right column never appears blank. */
+    body.studio-split-pane #studioView #studioResultsPanel:empty::before {
+      content: 'Select a task above and run an agent to generate content.';
+      display: block;
+      padding: 32px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      border: 1px dashed var(--border-subtle, var(--border-color));
+      border-radius: 12px;
+    }
+    /* Below 1100px collapse to single column for readability. */
+    @media (max-width: 1100px) {
+      body.studio-split-pane #studioView .studio-v2 {
+        grid-template-columns: 1fr;
+        grid-auto-flow: row;
+      }
+      body.studio-split-pane #studioView .studio-v2 > #studioResultsPanel {
+        grid-column: 1;
+        position: static;
+        max-height: none;
+      }
+    }
+    /* Defensive: ensure config-panel title never break per character even
+       in narrow columns (was the v33.75–v33.93 vertical-text bug). */
+    body.studio-split-pane #studioView #configTaskName,
+    body.studio-split-pane #studioView .studio-v2-config-title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+    .studio-split-toggle.active {
+      background: rgba(201,169,97,0.18);
+      border-color: rgba(201,169,97,0.55);
+      color: #c9a961;
+    }
+    html.light-mode .studio-split-toggle.active {
+      background: rgba(168,140,86,0.18);
+      border-color: rgba(168,140,86,0.6);
+      color: #5a4d2e;
+    }
+
+    /* v33.79: Thought Board pin-count badge in the sidebar nav. Hidden when 0;
+       small gold-tinted pill when there are pins. */
+    .board-pin-count {
+      display: none;
+      margin-left: 6px;
+      padding: 1px 6px;
+      border-radius: 99px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      background: rgba(201,169,97,0.18);
+      color: #c9a961;
+      border: 1px solid rgba(201,169,97,0.35);
+      vertical-align: 1px;
+      line-height: 1.4;
+    }
+    .board-pin-count.on { display: inline-block; }
+    html.light-mode .board-pin-count {
+      background: rgba(168,140,86,0.18);
+      color: #5a4d2e;
+      border-color: rgba(168,140,86,0.45);
+    }
+
+    /* v33.73: Thought Board — Tier 3 surface scaffold per
+       docs/brilliance/12-surface-system.md "Thought Board" section. Two modes:
+       Pinboard grid + Constellation 2D map. Implemented in 43-thought-board.js. */
+    .board-v2 {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      display: flex; flex-direction: column;
+      padding: 24px 32px 0;
+      min-height: 100%;
+    }
+    .board-mode-nav {
+      display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+      margin-bottom: var(--space-3);
+      padding: 4px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 99px;
+      align-self: flex-start;
+      width: fit-content;
+    }
+    .board-mode-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      border-radius: 99px;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer; text-decoration: none;
+      font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+      transition: all 0.2s;
+    }
+    .board-mode-pill:hover { color: #ece4d8; background: rgba(255,255,255,0.04); }
+    .board-mode-pill.active {
+      background: rgba(201,169,97,0.12); color: #e2c79b;
+      box-shadow: inset 0 0 0 1px rgba(201,169,97,0.25);
+    }
+    .board-mode-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .board-add-pin {
+      margin-left: 4px;
+      padding: 6px 14px; border-radius: 99px;
+      background: rgba(201,169,97,0.10);
+      border: 1px solid rgba(201,169,97,0.4);
+      color: #c9a961;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .board-add-pin:hover {
+      background: rgba(201,169,97,0.18);
+      border-color: rgba(201,169,97,0.6);
+    }
+    .board-context-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px;
+      background: rgba(201,169,97,0.04);
+      border: 1px solid rgba(201,169,97,0.12);
+      border-radius: 8px;
+      margin-bottom: var(--space-4);
+      font-size: 12px;
+    }
+    .board-context-row .lab {
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #c9a961; font-weight: 500; flex-shrink: 0;
+    }
+    .board-context-row .ctx {
+      color: rgba(255,255,255,0.65);
+      font-family: Georgia, serif; font-style: italic;
+      flex: 1; min-width: 0;
+    }
+    .board-content-area { width: 100%; flex: 1; }
+    .board-pane.hidden { display: none !important; }
+    .board-pane.active { display: block; }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .board-card {
+      padding: 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .board-card:hover {
+      border-color: rgba(201,169,97,0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    }
+    .board-card-head {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px;
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(201,169,97,0.85);
+      font-weight: 500;
+    }
+    .board-card-icon { display: inline-flex; }
+    .board-card-icon svg { width: 14px; height: 14px; }
+    .board-card-source { flex: 1; }
+    .board-card-close {
+      width: 22px; height: 22px; min-width: 22px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.55);
+      font-size: 14px; line-height: 1;
+      cursor: pointer; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .board-card-close:hover {
+      border-color: rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.9);
+    }
+    .board-card-title {
+      font-family: Georgia, serif; font-style: italic;
+      font-size: 16px; font-weight: 400;
+      color: #f5e6c8; margin: 0 0 8px;
+      line-height: 1.3;
+    }
+    .board-card-body {
+      font-size: 13px; color: rgba(255,255,255,0.7);
+      line-height: 1.6; margin: 0;
+    }
+
+    .board-empty {
+      padding: 36px 24px;
+      border: 1px dashed rgba(255,255,255,0.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      text-align: left;
+    }
+    .board-empty-center {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 420px;
+      text-align: center;
+    }
+    .board-empty-title {
+      font-family: Georgia, serif; font-style: italic;
+      font-size: 18px; color: #e2c79b; margin-bottom: 8px;
+    }
+    .board-empty-desc {
+      font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6;
+    }
+
+    .board-constellation-stage {
+      position: relative;
+      width: 100%; min-height: 480px; height: 60vh;
+      border: 1px solid rgba(201,169,97,0.18);
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(201,169,97,0.06), transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(168,140,86,0.04), transparent 50%),
+        rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+    .board-star {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: transparent; border: none; padding: 4px;
+      cursor: pointer;
+      color: #c9a961;
+      display: inline-flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .board-star .dot {
+      display: block;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 12px rgba(201,169,97,0.5);
+      transition: transform 0.2s ease;
+    }
+    .board-star:hover .dot { transform: scale(1.5); }
+    .board-star .lbl {
+      font-family: Georgia, serif; font-style: italic;
+      font-size: 11px; color: rgba(255,255,255,0.7);
+      max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* Light-mode tones */
+    html.light-mode .board-mode-nav {
+      background: rgba(0,0,0,0.03);
+      border-color: rgba(0,0,0,0.08);
+    }
+    html.light-mode .board-mode-pill { color: rgba(0,0,0,0.55); }
+    html.light-mode .board-mode-pill:hover { color: #1a1a1a; background: rgba(0,0,0,0.04); }
+    html.light-mode .board-mode-pill.active {
+      background: rgba(168,140,86,0.16); color: #5a4d2e;
+      box-shadow: inset 0 0 0 1px rgba(168,140,86,0.4);
+    }
+    html.light-mode .board-add-pin {
+      background: rgba(168,140,86,0.1);
+      border-color: rgba(168,140,86,0.45);
+      color: #7a6741;
+    }
+    html.light-mode .board-context-row {
+      background: rgba(168,140,86,0.07);
+      border-color: rgba(168,140,86,0.22);
+    }
+    html.light-mode .board-context-row .lab { color: #7a6741; }
+    html.light-mode .board-context-row .ctx { color: rgba(0,0,0,0.65); }
+    html.light-mode .board-card {
+      background: rgba(0,0,0,0.025);
+      border-color: rgba(0,0,0,0.08);
+    }
+    html.light-mode .board-card:hover {
+      border-color: rgba(168,140,86,0.45);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    html.light-mode .board-card-head { color: #7a6741; }
+    html.light-mode .board-card-close {
+      border-color: rgba(0,0,0,0.15);
+      color: rgba(0,0,0,0.55);
+    }
+    html.light-mode .board-card-close:hover {
+      border-color: rgba(0,0,0,0.35);
+      color: rgba(0,0,0,0.85);
+    }
+    html.light-mode .board-card-title { color: #1a1a1a; }
+    html.light-mode .board-card-body { color: rgba(0,0,0,0.7); }
+    html.light-mode .board-empty {
+      background: rgba(0,0,0,0.02);
+      border-color: rgba(0,0,0,0.12);
+    }
+    html.light-mode .board-empty-title { color: #5a4d2e; }
+    html.light-mode .board-empty-desc { color: rgba(0,0,0,0.6); }
+    html.light-mode .board-constellation-stage {
+      border-color: rgba(168,140,86,0.25);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(168,140,86,0.06), transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(168,140,86,0.04), transparent 50%),
+        rgba(0,0,0,0.02);
+    }
+    html.light-mode .board-star { color: #7a6741; }
+    html.light-mode .board-star .lbl { color: rgba(0,0,0,0.7); }
+
+    @media (max-width: 768px) {
+      .board-v2 { padding: 18px 16px 0; }
+      .board-mode-nav { gap: 4px; }
+      .board-mode-pill { padding: 7px 12px; font-size: 11px; }
+      .board-add-pin { font-size: 10px; padding: 5px 10px; }
+      .board-grid { grid-template-columns: 1fr; gap: 10px; }
+      .board-card { padding: 14px; }
+      .board-card-title { font-size: 14px; }
+    }
+
+    /* v33.71: Notebook → Letter Series — Tier 2 surface from
+       docs/brilliance/12-surface-system.md "Notebook — Letter Series" section.
+       Toggle via scribeLetterToggle button (top-right of editor) or window.LetterSeries.toggle().
+       The body class `letter-series` is the gate; only Scribe (#scribeView) is restyled. */
+    body.letter-series #scribeView .panel {
+      background: #f4ecd8;
+      color: #2a2218;
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+    body.letter-series #scribeView .scribe-active-editor {
+      background: transparent;
+    }
+    body.letter-series #scribeView .scribe-title-input {
+      /* v34.81: full-width title aligned with the rest of the editor surfaces. */
+      max-width: 100%;
+      margin: 0;
+      font-family: 'Cormorant Garamond', 'Old Standard TT', Georgia, serif;
+      font-size: 36px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: #2a2218;
+      background: transparent;
+    }
+    body.letter-series #scribeView .scribe-tinymce-wrap,
+    body.letter-series #scribeView .tox-edit-area__iframe {
+      background: #faf2dc !important;
+    }
+    /* v34.81: was max-width:760px which made the editor and chat panel feel
+       offset / right-shifted on wide screens. Let the wrap fill the parent;
+       the cream paper + serif content_style still gives the Letter Series feel
+       without squeezing the column off-center. The title input keeps its
+       narrower column for typographic rhythm. */
+    body.letter-series #scribeView .scribe-tinymce-wrap {
+      max-width: 100%;
+      margin: 0;
+      border-color: rgba(122,103,65,0.25);
+      box-shadow: 0 8px 28px rgba(122,103,65,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    /* Knowledge panel + tags row also span the full editor width so the chat
+       input aligns with the toolbar above instead of floating in the middle. */
+    body.letter-series #scribeView .scribe-knowledge-panel,
+    body.letter-series #scribeView .scribe-tags-row {
+      max-width: 100%;
+      margin: 12px 0;
+    }
+    body.letter-series #scribeView .scribe-letter-toggle.active {
+      background: rgba(168,140,86,0.18);
+      border-color: rgba(168,140,86,0.55);
+      color: #5a4d2e;
+    }
+
+    /* Drop cap support — applied to first <p> of any element with the
+       letter-drop class. Editors using TinyMCE can render this by adding the
+       class manually; for now the wrapper styling alone gives the column the
+       letter-paper feel. */
+    body.letter-series #scribeView .letter-drop > p:first-of-type::first-letter,
+    body.letter-series #scribeView .scribe-knowledge-thread > .scribe-msg-assistant:first-of-type p:first-of-type::first-letter {
+      font-family: 'Cormorant Garamond', 'Old Standard TT', Georgia, serif;
+      font-size: 3.4em;
+      float: left;
+      line-height: 0.9;
+      padding: 4px 8px 0 0;
+      color: #7a6741;
+    }
+
+    /* Marginalia hook: an element with class `letter-margin` floats to the
+       outer column as a small italic note. */
+    body.letter-series #scribeView .letter-margin {
+      float: right;
+      clear: right;
+      width: 180px;
+      margin: 4px -200px 8px 16px;
+      font-family: Georgia, serif;
+      font-style: italic;
+      font-size: 12px;
+      color: #7a6741;
+      line-height: 1.5;
+      border-left: 1px solid rgba(122,103,65,0.3);
+      padding-left: 10px;
+    }
+    @media (max-width: 1100px) {
+      body.letter-series #scribeView .letter-margin {
+        float: none; margin: 8px 0;
+        border-left: none; border-top: 1px solid rgba(122,103,65,0.3);
+        padding: 8px 0 0; width: auto;
+      }
+    }
+
+    /* When the toggle button is active in dark mode, the active state still
+       reads as a gentle gold tint. */
+    .scribe-letter-toggle.active {
+      background: rgba(201,169,97,0.18);
+      border-color: rgba(201,169,97,0.5);
+      color: #c9a961;
+    }
+
+    /* v33.70: Time Ribbon — Tier 1 surface modifier per docs/brilliance/12-surface-system.md.
+       Renders at the top of the History view. Markers are conversation moments; clicking
+       a marker shows its summary and offers Resume / Branch from here. */
+    .time-ribbon {
+      margin: 0 0 28px;
+      padding: 18px 20px 14px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+    }
+    html.light-mode .time-ribbon {
+      background: rgba(0,0,0,0.025);
+      border-color: rgba(0,0,0,0.08);
+    }
+    .time-ribbon-head {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .time-ribbon-eyebrow {
+      font-size: 9px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase;
+      color: #c9a961;
+    }
+    html.light-mode .time-ribbon-eyebrow { color: #7a6741; }
+    .time-ribbon-summary {
+      flex: 1; min-width: 0;
+      font-size: 12px; color: rgba(255,255,255,0.6);
+      font-family: Georgia, serif; font-style: italic;
+    }
+    html.light-mode .time-ribbon-summary { color: rgba(0,0,0,0.65); }
+    .time-ribbon-summarize {
+      padding: 6px 12px; border-radius: 99px;
+      background: rgba(201,169,97,0.1);
+      border: 1px solid rgba(201,169,97,0.35);
+      color: #c9a961;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .time-ribbon-summarize:hover:not(:disabled) {
+      background: rgba(201,169,97,0.18);
+      border-color: rgba(201,169,97,0.55);
+    }
+    .time-ribbon-summarize:disabled { opacity: 0.4; cursor: not-allowed; }
+    html.light-mode .time-ribbon-summarize {
+      background: rgba(168,140,86,0.1);
+      border-color: rgba(168,140,86,0.45);
+      color: #7a6741;
+    }
+
+    .time-ribbon-track {
+      position: relative;
+      height: 32px;
+      margin: 0 4px 6px;
+    }
+    .time-ribbon-axis {
+      position: absolute; top: 50%; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, rgba(201,169,97,0) 0%, rgba(201,169,97,0.35) 15%, rgba(201,169,97,0.35) 85%, rgba(201,169,97,0) 100%);
+    }
+    html.light-mode .time-ribbon-axis {
+      background: linear-gradient(90deg, rgba(168,140,86,0) 0%, rgba(168,140,86,0.45) 15%, rgba(168,140,86,0.45) 85%, rgba(168,140,86,0) 100%);
+    }
+    .time-ribbon-markers { position: absolute; inset: 0; }
+    .time-ribbon-marker {
+      position: absolute; top: 50%;
+      transform: translate(-50%, -50%);
+      background: transparent; border: none; padding: 6px;
+      cursor: pointer;
+      --marker-color: #c9a961;
+    }
+    .time-ribbon-marker .dot {
+      display: block;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--marker-color);
+      box-shadow: 0 0 0 0 var(--marker-color);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .time-ribbon-marker:hover .dot {
+      transform: scale(1.4);
+      box-shadow: 0 0 12px 2px rgba(201,169,97,0.45);
+    }
+    .time-ribbon-cursor {
+      position: absolute; top: 0; bottom: 0;
+      width: 2px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(201,169,97,0.0), #c9a961, rgba(201,169,97,0.0));
+      pointer-events: none;
+    }
+    html.light-mode .time-ribbon-cursor {
+      background: linear-gradient(180deg, rgba(168,140,86,0.0), #7a6741, rgba(168,140,86,0.0));
+    }
+    .time-ribbon-axis-labels {
+      position: relative; height: 14px;
+      font-size: 10px; letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.4);
+    }
+    html.light-mode .time-ribbon-axis-labels { color: rgba(0,0,0,0.5); }
+    .time-ribbon-axis-label {
+      position: absolute;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .time-ribbon-axis-label:first-child { transform: translateX(0); }
+    .time-ribbon-axis-label:last-child { transform: translateX(-100%); }
+
+    .time-ribbon-detail {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: rgba(201,169,97,0.05);
+      border: 1px solid rgba(201,169,97,0.22);
+      border-radius: 10px;
+    }
+    html.light-mode .time-ribbon-detail {
+      background: rgba(168,140,86,0.07);
+      border-color: rgba(168,140,86,0.3);
+    }
+    .time-ribbon-detail-title {
+      font-family: Georgia, serif; font-style: italic;
+      font-size: 14px; color: #ece4d8;
+      margin-bottom: 4px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    html.light-mode .time-ribbon-detail-title { color: #1a1a1a; }
+    .time-ribbon-detail-meta {
+      font-size: 11px; color: rgba(255,255,255,0.5);
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+    }
+    html.light-mode .time-ribbon-detail-meta { color: rgba(0,0,0,0.6); }
+    .time-ribbon-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .time-ribbon-action {
+      padding: 6px 14px; border-radius: 99px;
+      background: transparent;
+      border: 1px solid rgba(201,169,97,0.4);
+      color: #c9a961;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .time-ribbon-action:hover {
+      background: rgba(201,169,97,0.12);
+      border-color: rgba(201,169,97,0.6);
+    }
+    html.light-mode .time-ribbon-action {
+      border-color: rgba(168,140,86,0.5);
+      color: #7a6741;
+    }
+    html.light-mode .time-ribbon-action:hover {
+      background: rgba(168,140,86,0.12);
+      border-color: rgba(168,140,86,0.7);
+    }
+
+    @media (max-width: 768px) {
+      .time-ribbon { padding: 14px 14px 12px; margin-bottom: 22px; }
+      .time-ribbon-head { gap: 8px; }
+      .time-ribbon-summary { font-size: 11px; }
+      .time-ribbon-summarize { font-size: 9px; padding: 5px 10px; }
+      .time-ribbon-axis-label { font-size: 9px; }
+    }
+
+    /* v33.4: Concierge Desk pill row per docs/brilliance/12-surface-map.
+       v34.38: Static 32px top margin for breathing room from the "BRAND
+       INTELLIGENCE PLATFORM" title. Was too close, made the title and pills
+       feel like one mass. Static px (no rem/em) so it never tightens up
+       under font-size scaling. */
+    .concierge-row {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; align-items: center;
+      margin: 32px 0 24px;
+      max-width: 720px;
+      padding: 0 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .concierge-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px; border-radius: 99px;
+      background: rgba(201,181,122,0.05);
+      border: 1px solid rgba(201,181,122,0.18);
+      color: rgba(201,169,97,0.85);
+      font-family: 'DM Sans', sans-serif; font-size: 11px;
+      letter-spacing: 0.04em; cursor: pointer;
+      transition: all 0.2s; text-decoration: none;
+      white-space: nowrap;
+    }
+    .concierge-pill:hover {
+      background: rgba(201,181,122,0.12);
+      border-color: rgba(201,181,122,0.4);
+      transform: translateY(-1px);
+    }
+    .concierge-pill .lab {
+      font-size: 9px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: rgba(201,169,97,0.55);
+      font-weight: 500;
+    }
+    .concierge-pill .val {
+      font-weight: 500; color: #f5e6c8;
+    }
+    .concierge-pill svg { width: 12px; height: 12px; opacity: 0.7; }
+    .concierge-row:empty { display: none; }
+    .concierge-dismiss {
+      width: 22px; height: 22px;
+      min-width: 22px; max-width: 22px;
+      min-height: 22px; max-height: 22px;
+      flex: 0 0 22px;
+      box-sizing: border-box;
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.4);
+      font-size: 14px; line-height: 1; padding: 0;
+      cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; justify-content: center;
+      align-self: center;
+    }
+    .concierge-dismiss:hover {
+      border-color: rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+    }
+    /* v33.62: Light-mode concierge — value text + dismiss × invisible without overrides. */
+    html.light-mode .concierge-pill {
+      background: rgba(168,140,86,0.07);
+      border-color: rgba(168,140,86,0.3);
+      color: #5a4d2e;
+    }
+    html.light-mode .concierge-pill:hover {
+      background: rgba(168,140,86,0.14);
+      border-color: rgba(168,140,86,0.5);
+    }
+    html.light-mode .concierge-pill .lab { color: #7a6741; }
+    html.light-mode .concierge-pill .val { color: #1a1a1a; }
+    html.light-mode .concierge-dismiss {
+      border-color: rgba(0,0,0,0.12);
+      color: rgba(0,0,0,0.5);
+    }
+    html.light-mode .concierge-dismiss:hover {
+      border-color: rgba(0,0,0,0.3);
+      color: rgba(0,0,0,0.8);
+    }
+    @media (max-width: 768px) {
+      /* v34.22: With v34.16 / v34.20 there can now be up to 9 pills (Pulse,
+         Automations, Bloom, Today, Evolve, Reminders, Outbox, Notebooks,
+         Resume). Wrapping into 3+ rows on mobile pushed the chat input way
+         down. Switch to single-row horizontal scroll, hide the WebKit
+         scrollbar, snap to the start so the most-relevant pill is always
+         visible first. */
+      .concierge-row {
+        gap: 6px;
+        padding: 0 12px;
+        margin: 24px 0 18px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        scroll-snap-type: x proximity;
+        justify-content: flex-start;
+      }
+      .concierge-row::-webkit-scrollbar { display: none; }
+      .concierge-pill {
+        padding: 5px 10px;
+        font-size: 10px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+      }
+      .concierge-pill .lab { font-size: 8px; }
+    }
+
+    /* v33.4: Brilliance lockup per docs/brilliance/04-sidebar-rebrand mockup. */
+    .brilliance-lockup {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px 12px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      margin: 8px 4px 0;
+    }
+    .brilliance-lockup-dot {
+      flex-shrink: 0;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #f5e6c8, #c9a961);
+      box-shadow: 0 0 6px rgba(201,169,97,0.55);
+      animation: brillianceLockupPulse 3s ease-in-out infinite;
+    }
+    .brilliance-lockup-text {
+      display: flex; flex-direction: column;
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-muted, rgba(255,255,255,0.45));
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .brilliance-lockup-text strong {
+      color: var(--gold-2, #c9a961);
+      font-weight: 500;
+    }
+    .brilliance-lockup-by {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      opacity: 0.75;
+      margin-top: 1px;
+    }
+    @keyframes brillianceLockupPulse {
+      0%, 100% { opacity: 0.6; transform: scale(0.95); }
+      50%      { opacity: 1;   transform: scale(1.08); }
+    }
+    /* Hide lockup text when sidebar is collapsed; keep dot visible. */
+    html.sidebar-pinned-collapsed .brilliance-lockup-text,
+    html:not(.sidebar-pinned):not(.sidebar-hover-expanded) .brilliance-lockup-text {
+      display: none;
+    }
+    html.sidebar-pinned-collapsed .brilliance-lockup,
+    html:not(.sidebar-pinned):not(.sidebar-hover-expanded) .brilliance-lockup {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+    /* Mobile: lockup is a small horizontal strip aligned to the bottom of the side panel. */
+    @media (max-width: 768px) {
+      .brilliance-lockup {
+        padding: 8px 12px;
+        font-size: 9px;
+      }
+      .brilliance-lockup-text { font-size: 9px; }
+      .brilliance-lockup-by { font-size: 8px; }
     }
     /* v24.20: Blob shape selector buttons */
     .blob-shape-btn {
@@ -3805,7 +5750,12 @@
     }
     
     /* v11.5.4: Orchestration views — default to collapsed sidebar */
-    #rhythmView, #pulseView, #brandIntelView, #identityView, #scheduleView {
+    /* v33.59: Added #evolveView. Without this rule the panel never claims the screen,
+       so the flat content rendered as a 918px box on the right of an empty 1221px
+       parent. */
+    #rhythmView, #pulseView, #brandIntelView, #identityView, #scheduleView,
+    #evolveView,
+    #boardView /* v33.73 */ {
       position: fixed;
       top: 38px;
       left: var(--sidebar-collapsed-width);
@@ -3844,6 +5794,8 @@
     html.sidebar-pinned-collapsed #researchView,
     html.sidebar-pinned-collapsed #sectionLandingView,
     html.sidebar-pinned-collapsed #scribeView, /* v29.0 */
+    html.sidebar-pinned-collapsed #evolveView, /* v33.59 */
+    html.sidebar-pinned-collapsed #boardView, /* v33.73 */
     html.sidebar-pinned-collapsed #sidebarNavCustom {
       left: var(--sidebar-collapsed-width);
       transition: left var(--sidebar-transition);
@@ -3875,6 +5827,8 @@
     html.sidebar-pinned #researchView,
     html.sidebar-pinned #sectionLandingView,
     html.sidebar-pinned #scribeView, /* v29.0 */
+    html.sidebar-pinned #evolveView, /* v33.59 */
+    html.sidebar-pinned #boardView, /* v33.73 */
     html.sidebar-pinned #sidebarNavCustom {
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
@@ -3906,6 +5860,8 @@
     html.sidebar-hover-expanded #researchView,
     html.sidebar-hover-expanded #sectionLandingView,
     html.sidebar-hover-expanded #scribeView, /* v29.0 */
+    html.sidebar-hover-expanded #evolveView, /* v33.59 */
+    html.sidebar-hover-expanded #boardView, /* v33.73 */
     html.sidebar-hover-expanded #sidebarNavCustom {
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
@@ -11373,7 +13329,11 @@
     .library-panel.open {
       display: flex;
     }
-    .library-header {
+    /* v34.63: Scoped to legacy slide-out .library-panel — was bleeding the
+       padding/border/background onto #libraryView's flex row of action buttons,
+       which is a different element entirely. The new view defines its own
+       .library-header at line ~14508 (just a flex row, no chrome). */
+    .library-panel .library-header {
       padding: 16px 20px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
@@ -13412,15 +15372,21 @@
       margin-top: var(--space-6);
     }
     
-    /* v28.4: Library Tab Bar (Files vs Visual Assets) */
+    /* v28.4: Library Tab Bar (Files vs Visual Assets)
+       v34.63: was `background: var(--bg-tertiary)` which is `#ffffff` in light mode —
+       creating a stark white pill on the cream workspace. Use `--bg-secondary`
+       (cream-warm) so the pill sits in the workspace, not on top of it. */
     .library-tab-bar {
       display: flex;
       gap: var(--space-2);
       margin-bottom: var(--space-4);
       padding: 3px;
-      background: var(--bg-tertiary);
+      background: var(--bg-secondary);
       border-radius: var(--radius-lg);
       width: fit-content;
+    }
+    html.light-mode .library-tab-bar {
+      background: rgba(0,0,0,0.04);
     }
 
     .library-tab-btn {
@@ -15318,8 +17284,11 @@
     html.light-mode .library-panel {
       background: var(--bg-primary);
     }
+    /* v34.63: Library header is a flex row of buttons; no parent background.
+       Previous `background: var(--bg-elevated)` painted a stark white slab
+       behind the action row in light mode. Buttons carry their own surface. */
     html.light-mode .library-header {
-      background: var(--bg-elevated);
+      background: transparent;
     }
     html.light-mode .save-library-dialog {
       background: var(--bg-elevated);
@@ -17721,6 +19690,75 @@
     html.light-mode .settings-row input[type="range"]::-moz-range-track,
     html.light-mode .settings-section input[type="range"]::-moz-range-track {
       background: rgba(0,0,0,0.12);
+    }
+
+    /* v33.96: Brilli Intensity preset buttons (Subtle / Calm / Default) — the
+       inline styles use rgba(255,255,255,*) which collapse to invisible against
+       the cream light-mode background. Override with darker tones for legibility. */
+    html.light-mode .brilli-intensity-preset {
+      background: rgba(60, 50, 30, 0.04) !important;
+      border: 1px solid rgba(60, 50, 30, 0.22) !important;
+      color: #5a4d2e !important;
+    }
+    html.light-mode .brilli-intensity-preset:hover {
+      background: rgba(60, 50, 30, 0.08) !important;
+      border-color: rgba(60, 50, 30, 0.35) !important;
+      color: #3a2f17 !important;
+    }
+    html.light-mode .brilli-intensity-preset[data-intensity="100"] {
+      background: rgba(168, 140, 86, 0.16) !important;
+      border-color: rgba(168, 140, 86, 0.55) !important;
+      color: #6b5520 !important;
+    }
+    html.light-mode .brilli-intensity-preset[data-intensity="100"]:hover {
+      background: rgba(168, 140, 86, 0.24) !important;
+      border-color: rgba(168, 140, 86, 0.7) !important;
+    }
+
+    /* v34.4: Light-mode form picker — modal panel + cards need darker borders so
+       the form options remain visible on the cream background. The default
+       inline styles use rgba(255,255,255,*) which collapses against light bg. */
+    html.light-mode #brilliFormPickerOverlay .modal {
+      background: #faf6ec !important;
+      border: 1px solid rgba(60, 50, 30, 0.28) !important;
+      color: #2a2418 !important;
+    }
+    html.light-mode #brilliFormPickerOverlay .modal > div:first-child {
+      color: #2a2418 !important;
+    }
+    html.light-mode #brilliFormPickerOverlay #brilliFormPickerGrid > div {
+      border: 1px solid rgba(60, 50, 30, 0.28) !important;
+      background: rgba(60, 50, 30, 0.04) !important;
+    }
+    html.light-mode #brilliFormPickerOverlay #brilliFormPickerGrid > div:hover {
+      border-color: rgba(168, 140, 86, 0.7) !important;
+    }
+    html.light-mode #brilliFormPickerOverlay #brilliFormPickerGrid > div > div:nth-child(2) {
+      color: #2a2418 !important;
+    }
+    html.light-mode #brilliFormPickerOverlay #brilliFormPickerGrid > div > div:nth-child(3) {
+      color: rgba(60, 50, 30, 0.7) !important;
+    }
+    html.light-mode #brilliFormPickerCloseBtn {
+      border-color: rgba(168, 140, 86, 0.55) !important;
+      color: #6b5520 !important;
+    }
+
+    /* v34.10: Inline Brilli form chip strip in Settings → Appearance.
+       Hide WebKit scrollbar so the horizontal-scroll fallback on narrow viewports
+       stays clean. Also fade-out edges to hint at off-screen chips. */
+    .brilli-form-chip-strip::-webkit-scrollbar { display: none; }
+    .brilli-form-chip-strip [data-brilli-chip]:hover {
+      transform: translateY(-1px);
+      border-color: rgba(201, 169, 97, 0.45) !important;
+    }
+    html.light-mode .brilli-form-chip-strip [data-brilli-chip] {
+      background: rgba(60, 50, 30, 0.04) !important;
+      border-color: rgba(60, 50, 30, 0.2) !important;
+      color: #5a4d2e !important;
+    }
+    html.light-mode .brilli-form-chip-strip [data-brilli-chip]:hover {
+      border-color: rgba(168, 140, 86, 0.55) !important;
     }
 
     /* v10.5.25: Icon Picker for Categories */
@@ -22722,8 +24760,38 @@
     .cal-day-expanded { max-height:none !important; }
     .calendars-panel { background:var(--bg-primary,#111);border:1px solid var(--border-color,#2a2a2a);border-radius:12px;padding:16px;margin-bottom:16px;display:none; }
     .calendars-panel.open { display:block; }
-    .cal-provider-section { margin-bottom:12px; }
-    .cal-provider-label { font-size:10px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-tertiary,#555);margin-bottom:6px;font-weight:600; }
+    .cal-provider-section { margin-bottom:14px; }
+    .cal-provider-label { font-size:10px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;font-weight:600; }
+    /* v34.81: tile grid for the calendars panel — square-ish per-calendar
+       cards instead of a vertical row list. */
+    .cal-tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 8px;
+    }
+    .cal-tile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      min-height: 42px;
+    }
+    .cal-tile:hover { border-color: var(--accent-muted, var(--accent)); background: var(--bg-tertiary); }
+    .cal-tile.on { border-color: var(--accent-muted, var(--accent)); }
+    .cal-tile input[type="checkbox"] { accent-color: var(--accent, #a89878); margin: 0; }
+    .cal-tile-swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--border-color); cursor: pointer; flex-shrink: 0; }
+    .cal-tile-name { font-size: 13px; font-weight: 500; color: var(--text-primary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    html.light-mode .cal-tile { background: var(--bg-elevated); }
+    html.light-mode .cal-tile:hover { background: var(--bg-tertiary); }
+    @media (max-width: 480px) {
+      .cal-tile-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+    }
+    /* Legacy row class kept as a fallback for anywhere still rendering it. */
     .cal-calendar-row { display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer; }
     .cal-calendar-row:hover { background:var(--bg-secondary,#1a1a1a); }
     .cal-calendar-row input[type="checkbox"] { accent-color:var(--accent,#a89878); }
@@ -25821,6 +27889,47 @@
       }
     }
 
+    /* v34.63: Studio action bar buttons (Search ops, AI Generate, Custom,
+       Split Pane). They were missing desktop styles and falling through to
+       global button defaults — which paint stark white pills in light mode.
+       Match the .library-header-btn pattern. */
+    .studio-action-bar {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .studio-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: var(--text-base);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .studio-action-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .studio-action-btn svg { flex-shrink: 0; }
+    html.light-mode .studio-action-btn {
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.10);
+      color: var(--text-secondary);
+    }
+    html.light-mode .studio-action-btn:hover {
+      background: rgba(0,0,0,0.07);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     /* Guardrails Styles - v22.37 Tabbed UI Overhaul */
     .guardrails-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); margin-bottom: var(--space-5); }
     .guardrails-tab-bar { display: flex; gap: 4px; padding: 0 0 var(--space-4); border-bottom: 1px solid var(--border-color); margin-bottom: var(--space-5); overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
@@ -28355,6 +30464,20 @@
       display: flex;
       flex-direction: column;
       gap: var(--space-3);
+    }
+    /* v34.70: hard guard — Life identity container was collapsing into a
+       horizontal scroll row in some states (renderLifeIdentityView used to
+       set display:block, which let parent flex bleed into child cards).
+       Force vertical full-width regardless of parent flex direction. */
+    #lifeIdentityCardsContainer {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: var(--space-3) !important;
+      width: 100%;
+    }
+    #lifeIdentityCardsContainer > .identity-card {
+      width: 100%;
+      flex: 0 0 auto;
     }
     
     .identity-card {
@@ -34936,21 +37059,45 @@
       justify-content: center;
     }
     
+    /* v34.64: Brilliance pill voice — gold gradient primary, gold-outline
+       secondary. Replaces the v24.x #b2997b/#8b7b67 muted gradient with the
+       v34.x gold (e2c79b → c9a961 → a88a4a) so every onboarding step inherits
+       the same CTA aesthetic as Daily Brief / Quick Add / Shortcuts. 99px pill
+       radius, 11px UPPERCASE 0.18em letter-spacing, dark text. */
     .onboarding-btn-primary {
-      background: linear-gradient(135deg, var(--accent-hover, #b2997b), var(--accent, #a89878), var(--accent-hover, #8b7b67)) !important;
-      color: #fff !important;
+      padding: 13px 32px !important;
+      background: linear-gradient(135deg, #e2c79b, #c9a961, #a88a4a) !important;
+      color: #0a0a0a !important;
+      -webkit-text-fill-color: #0a0a0a !important;
       border: none !important;
+      border-radius: 99px !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.18em !important;
+      text-transform: uppercase !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .onboarding-btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(178,153,123,0.25);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(201,169,97,0.32);
     }
 
     .onboarding-btn-secondary {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
+      padding: 9px 16px !important;
+      background: transparent !important;
+      color: #c9a961 !important;
+      -webkit-text-fill-color: #c9a961 !important;
+      border: 1px solid rgba(201,169,97,0.32) !important;
+      border-radius: 99px !important;
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.06em !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
 
     .onboarding-btn-secondary:hover {
@@ -36406,20 +38553,22 @@
       --mobile-text-dim: #888888;
     }
     
-    /* Light mode mobile overrides */
+    /* Light mode mobile overrides
+       v33.60: Mobile bg deepened to match new desktop --bg-primary cream tone. */
     html.light-mode {
-      --mobile-bg: #f8f8f8;
+      --mobile-bg: #f5f3ee;
       --mobile-surface: #ffffff;
-      --mobile-surface-elevated: #f0f0f0;
-      --mobile-border: #e0e0e0;
+      --mobile-surface-elevated: #ebe9e2;
+      --mobile-border: #d6d2c8;
       --mobile-text: #1a1a1a;
       --mobile-text-dim: #666666;
     }
     
-    /* v11.0.5: Fix white bar in light mode mobile - ensure body matches nav background */
+    /* v11.0.5: Fix white bar in light mode mobile - ensure body matches nav background
+       v33.60: Updated from #f8f8f8 → #f5f3ee to match desktop's deepened bg-primary. */
     @media (max-width: 768px) {
       html.light-mode body {
-        background: #f8f8f8;
+        background: #f5f3ee;
       }
       html.light-mode .panel-view,
       html.light-mode #agentView, /* v28.8: removed #signalView */
@@ -36432,8 +38581,10 @@
       html.light-mode #libraryView,
       html.light-mode #adminView,
       html.light-mode #mailView,
-      html.light-mode #researchView {
-        background: #f8f8f8;
+      html.light-mode #researchView,
+      html.light-mode #evolveView, /* v33.59 */
+      html.light-mode #boardView /* v33.73 */ {
+        background: #f5f3ee;
       }
     }
     
@@ -36841,6 +38992,22 @@
       user-select: none;
       -webkit-touch-callout: none;
       touch-action: manipulation;
+    }
+
+    /* v33.4: Brilli status dot at left edge of liquid-nav pill (mockup 08). */
+    .liquid-brilli-dot {
+      flex-shrink: 0;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin: 0 6px 0 4px;
+      background: radial-gradient(circle, #f5e6c8, #c9a961);
+      box-shadow: 0 0 6px rgba(201,169,97,0.55);
+      animation: liquidBrilliPulse 3s ease-in-out infinite;
+      align-self: center;
+    }
+    @keyframes liquidBrilliPulse {
+      0%, 100% { opacity: 0.55; transform: scale(0.92); }
+      50%      { opacity: 1;    transform: scale(1.1); }
     }
 
     /* v15.43: Glass pill — holds the 4 primary tabs */
@@ -37720,7 +39887,9 @@
       #rhythmView, #pulseView, #brandIntelView, #tuningView,
       #settingsView, #memoryView, #exportView, #libraryView,
       #analyticsView, #scheduleView, #inventoryView, #clientsView, #automationsView,
-      #syncView, #commerceView, #adminView, #mailView, #folioView, #socialView, #researchView, #sectionLandingView {
+      #syncView, #commerceView, #adminView, #mailView, #folioView, #socialView, #researchView, #sectionLandingView,
+      #evolveView, /* v33.59 */
+      #boardView /* v33.73 */ {
         position: fixed !important;
         left: 0 !important;
         right: 0 !important;
@@ -40240,10 +42409,30 @@
         margin-top: var(--blob-text-gap, -10px) !important;
       }
 
-      /* v24.24: Blob group moves up on mobile */
-      #agentView #blobTitleGroup {
-        margin-top: var(--blob-vertical-offset, -140px) !important;
+      /* v33.44: Mobile orb + title + concierge — true viewport center via fixed positioning.
+         v33.42's flex-center didn't reliably take effect because the parent panel-view
+         doesn't always span full viewport height on mobile (tab bars, keyboard, etc.).
+         Fixed-positioning anchors the group to viewport center. The chat input is also
+         position:fixed at bottom, so they don't conflict. When the conversation opens,
+         agentLandingContent is hidden via display:none and this rule is moot. */
+      #agentView #agentLandingContent {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        position: relative !important;
       }
+      #agentView #agentLandingContent #blobTitleGroup {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        margin-top: 0 !important;
+        width: auto !important;
+        max-width: calc(100vw - 32px) !important;
+        z-index: 2 !important;
+      }
+      /* When chat conversation has started, the landing is hidden and the fixed positioning
+         is automatically removed since the parent is display:none. */
       
       /* Remove any ::after */
       #agentView #agentLandingContent::after {
@@ -43196,7 +45385,10 @@
     /* 8.5: Section Help Overlay */
     .section-help-btn { display: inline-flex; align-items: center; justify-content: center; width: 24px; min-width: 24px; height: 24px; min-height: 24px; border-radius: 50%; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); -webkit-text-fill-color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0; margin-left: auto; box-sizing: border-box; padding: 0; }
     .section-help-btn:hover { border-color: var(--brand-accent, #a89878); color: var(--brand-accent, #a89878); -webkit-text-fill-color: var(--brand-accent, #a89878); background: rgba(168,152,120,0.08); }
-    .section-help-overlay { position: fixed; inset: 0; z-index: 10001; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; animation: helpFadeIn 0.2s ease; }
+    /* v34.63: Backdrop matched to v34.x modal family (0.7 / blur 10) so the
+       help card opens with the same visual depth as Daily Brief / Quick Add
+       / Shortcuts instead of feeling like a different surface. */
+    .section-help-overlay { position: fixed; inset: 0; z-index: 10001; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; animation: helpFadeIn 0.2s ease; }
     .section-help-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 16px 64px rgba(0,0,0,0.4); width: 90%; max-width: 420px; padding: 28px 24px 20px; animation: helpSlideUp 0.25s ease; }
     .section-help-card h3 { font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
     .section-help-card .help-purpose { font-size: 13px; color: var(--text-muted); margin: 0 0 16px; line-height: 1.5; }
@@ -43877,7 +46069,9 @@
     html.light-mode .auto-agent-input-row textarea { color: var(--text-primary); }
     html.light-mode .auto-agent-add-btn { background: var(--brand-accent, #a89878); color: #fff; }
     html.light-mode .auto-agent-edit-btn { border-color: rgba(0,0,0,0.15); color: var(--text-primary); background: rgba(0,0,0,0.04); }
-    html.light-mode .auto-agent-preview { border-color: rgba(0,0,0,0.12); background: #fff; }
+    /* v34.76: cream-tinted instead of stark #fff so the preview card sits in
+       the workspace instead of slabbing on top of it. */
+    html.light-mode .auto-agent-preview { border-color: rgba(0,0,0,0.12); background: #faf7f0; }
     html.light-mode .auto-agent-preview-header { border-color: rgba(0,0,0,0.08); }
     html.light-mode .auto-agent-preview-actions { border-color: rgba(0,0,0,0.08); }
     html.light-mode .auto-agent-preview-step { background: rgba(0,0,0,0.03); }
@@ -43955,11 +46149,13 @@
     .folio-side-tab.active { color: var(--brand-accent, #a89878); box-shadow: inset 0 -2px 0 var(--brand-accent, #a89878); }
     .folio-side-content { flex: 1; overflow-y: auto; padding: 16px; }
     /* Folio light mode */
-    html.light-mode .folio-card { background: #fff; border-color: var(--brand-accent-20, rgba(168,152,120,0.2)); }
+    /* v34.76: cream-tinted instead of stark #fff so Folio cards + side panel
+       integrate with the workspace palette instead of slabbing on top. */
+    html.light-mode .folio-card { background: #faf7f0; border-color: var(--brand-accent-20, rgba(168,152,120,0.2)); }
     html.light-mode .folio-card:hover { border-color: var(--brand-accent, #a89878); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-    html.light-mode .folio-card-preview { background: #f5f5f5; }
-    html.light-mode .folio-fullscreen-overlay { background: rgba(255,255,255,0.9); }
-    html.light-mode .folio-side-panel { background: #fff; }
+    html.light-mode .folio-card-preview { background: #f0ece2; }
+    html.light-mode .folio-fullscreen-overlay { background: rgba(245,243,238,0.92); }
+    html.light-mode .folio-side-panel { background: #faf7f0; }
     html.light-mode .folio-chat .auto-agent-send-btn { background: var(--brand-accent, #a89878); border-color: var(--brand-accent, #a89878); color: #fff; }
     /* Folio preview iframe container */
     .folio-preview-frame { height: 60vh; overflow: auto; background: transparent; position: relative; width: 100%; }
@@ -46012,21 +48208,52 @@
       }
     }
 
-    /* v22.44: Calendar list management */
-    .cal-list-group { margin-bottom: 12px; }
-    .cal-list-group-title { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; padding-left: 2px; }
-    .cal-list-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 4px; border-radius: 6px; transition: background 0.15s; }
-    .cal-list-item:hover { background: rgba(255,255,255,0.04); }
+    /* v22.44: Calendar list management.
+       v34.81: Reflowed from a single column list to a responsive grid of
+       compact "calendar tiles". Each tile shows the color swatch / check,
+       the name, and a default-star action — square-ish, tight, denser. */
+    .cal-list-group { margin-bottom: 16px; }
+    .cal-list-group-title { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin: 4px 2px 10px; }
+    .cal-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+    }
+    .cal-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 10px 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      min-height: 44px;
+    }
+    .cal-list-item:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-muted, var(--accent));
+    }
+    .cal-list-item.is-default {
+      border-color: var(--accent);
+      background: var(--accent-glow, rgba(168,152,120,0.08));
+    }
     .cal-list-item-left { display: flex; align-items: center; gap: 8px; cursor: pointer; flex: 1; min-width: 0; }
-    .cal-list-swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .cal-list-swatch { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
     .cal-list-check { flex-shrink: 0; }
-    .cal-list-name { font-size: var(--text-sm); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cal-list-name { font-size: var(--text-sm); font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cal-list-badge { font-size: 10px; color: var(--text-muted); background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; margin-left: 4px; flex-shrink: 0; }
-    .cal-list-default-btn { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; opacity: 0.6; transition: opacity 0.15s; flex-shrink: 0; }
-    .cal-list-default-btn:hover { opacity: 1; }
+    .cal-list-default-btn { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; opacity: 0.5; transition: opacity 0.15s, transform 0.1s; flex-shrink: 0; }
+    .cal-list-default-btn:hover { opacity: 1; transform: scale(1.08); }
     .cal-list-default-btn.active { opacity: 1; }
-    html.light-mode .cal-list-item:hover { background: rgba(0,0,0,0.04); }
+    html.light-mode .cal-list-item { background: var(--bg-elevated); }
+    html.light-mode .cal-list-item:hover { background: var(--bg-tertiary); }
     html.light-mode .cal-list-badge { background: rgba(0,0,0,0.06); color: var(--text-secondary); }
+    @media (max-width: 480px) {
+      .cal-list-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+      .cal-list-item { padding: 8px 10px; min-height: 40px; }
+    }
 
     .social-account-card {
       border: 1px solid var(--border-color);
@@ -47151,14 +49378,18 @@
 /* v29.5: archive-toggle styles moved to .scribe-sidebar-filters scope */
 .scribe-sidebar-header { position: relative; }
 .scribe-nb-archive-actions { display: flex; gap: 4px; padding: 4px 0 0; }
-.scribe-nb-restore-btn, .scribe-nb-perm-delete-btn { padding: 2px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-size: 10px; font-family: inherit; }
+.scribe-nb-restore-btn, .scribe-nb-perm-delete-btn { padding: 2px 8px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-size: 10px; font-family: inherit; }
+html.light-mode .scribe-nb-restore-btn, html.light-mode .scribe-nb-perm-delete-btn { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.10); }
 .scribe-nb-restore-btn:hover { color: var(--accent); border-color: var(--accent); }
 .scribe-nb-perm-delete-btn:hover { color: var(--error, #ef4444); border-color: var(--error, #ef4444); }
 .scribe-main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); min-height: 0; height: 100%; }
 .scribe-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px; }
 .scribe-active-editor { display: flex; flex-direction: column; height: 100%; overflow: hidden; min-height: 0; }
-.scribe-title-row { display: flex; align-items: center; gap: 8px; padding: 8px 8px 4px; flex-shrink: 0; }
-.scribe-title-input { flex: 1; padding: 4px 8px; background: transparent; border: none; color: var(--text-primary); font-size: 18px; font-weight: 700; font-family: inherit; outline: none; }
+/* v34.69: title row now centers the title and gives the editor surface a wider,
+   more deliberate column. Flexes still allow per-action buttons to stay on the
+   right edge; the title input fills the remaining space and centers its text. */
+.scribe-title-row { display: flex; align-items: center; gap: 8px; padding: 12px 16px 6px; flex-shrink: 0; }
+.scribe-title-input { flex: 1; padding: 4px 8px; background: transparent; border: none; color: var(--text-primary); font-size: 20px; font-weight: 700; font-family: inherit; outline: none; text-align: center; letter-spacing: -0.01em; }
 .scribe-title-input::placeholder { color: var(--text-muted); }
 .scribe-title-actions { display: flex; gap: 4px; flex-shrink: 0; }
 .scribe-title-actions button { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-secondary); cursor: pointer; font-size: 11px; font-family: inherit; transition: all 0.15s; flex-shrink: 0; }
@@ -47173,10 +49404,10 @@
 .scribe-tag-remove:hover { opacity: 1; color: var(--error, #ef4444); }
 .scribe-tag-input { padding: 2px 6px; background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--text-primary); font-size: 11px; font-family: inherit; outline: none; width: 80px; }
 .scribe-tag-input:focus { border-color: var(--border-color); }
-.scribe-tinymce-wrap { flex: 1; min-height: 0; overflow: hidden; position: relative; }
-.scribe-tinymce-wrap .tox.tox-tinymce { height: 100% !important; }
-.scribe-tinymce-wrap .tox .tox-edit-area { flex: 1; overflow: hidden; }
-.scribe-tinymce-wrap .tox .tox-edit-area__iframe { height: 100% !important; }
+.scribe-tinymce-wrap { flex: 1; min-height: 0; overflow: hidden; position: relative; background: var(--bg-primary); }
+.scribe-tinymce-wrap .tox.tox-tinymce { height: 100% !important; background: var(--bg-primary) !important; }
+.scribe-tinymce-wrap .tox .tox-edit-area { flex: 1; overflow: hidden; background: var(--bg-primary) !important; }
+.scribe-tinymce-wrap .tox .tox-edit-area__iframe { height: 100% !important; background: var(--bg-primary) !important; }
 .scribe-tinymce-wrap .tox.tox-tinymce { border: none !important; border-radius: 0 !important; outline: none !important; box-shadow: none !important; }
 .scribe-tinymce-wrap .tox .tox-edit-area { border: none !important; outline: none !important; }
 .scribe-tinymce-wrap .tox .tox-edit-area__iframe { border: none !important; outline: none !important; }
@@ -47219,6 +49450,10 @@ html.light-mode .scribe-new-btn { background: #8a7d65; color: #fff; }
 html.light-mode .scribe-search { background: #f0ede8; border-color: #ddd; color: #333; }
 html.light-mode .scribe-search { background: rgba(0,0,0,0.03); color: var(--text-primary); }
 /* v29.2: TinyMCE light mode — override dark skin */
+html.light-mode .scribe-tinymce-wrap { background: #fafaf7 !important; }
+html.light-mode .scribe-tinymce-wrap .tox.tox-tinymce { background: #fafaf7 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-edit-area { background: #fafaf7 !important; }
+html.light-mode .scribe-tinymce-wrap .tox .tox-edit-area__iframe { background: #fafaf7 !important; }
 html.light-mode .scribe-tinymce-wrap .tox .tox-toolbar__primary { background: #f5f5f5 !important; border-bottom-color: #e0e0e0 !important; }
 html.light-mode .scribe-tinymce-wrap .tox .tox-toolbar__group { border-right-color: #e0e0e0 !important; }
 html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn { color: #444 !important; }
@@ -47226,6 +49461,33 @@ html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn:hover { background: rgba(0,0
 html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--enabled,
 html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--enabled:hover { background: rgba(168,152,120,0.15) !important; color: #6d6352 !important; }
 html.light-mode .scribe-tinymce-wrap .tox .tox-statusbar { background: #f5f5f5 !important; border-top-color: #e0e0e0 !important; color: #888 !important; }
+/* v34.63: TinyMCE popover / dropdown menus (Block format, Font, Color, Size,
+   Table picker, etc.) had ZERO theme overrides. Default oxide skin renders
+   them pure white, which is the white-box bleed in Image #65 when the user
+   opened any toolbar dropdown in dark mode. Override every floating chrome
+   surface so theme is consistent end-to-end. */
+.tox .tox-menu, .tox .tox-collection, .tox .tox-collection__group, .tox .tox-pop, .tox .tox-pop__dialog, .tox .tox-dialog, .tox .tox-dialog__body, .tox .tox-toolbar__overflow, .tox .tox-swatches, .tox .tox-swatches-menu {
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+.tox .tox-collection__item { color: var(--text-secondary) !important; }
+.tox .tox-collection__item:hover, .tox .tox-collection__item--active, .tox .tox-collection__item--enabled {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+.tox .tox-tbtn--bespoke .tox-tbtn__select-label { color: var(--text-secondary) !important; }
+html.light-mode .tox .tox-menu, html.light-mode .tox .tox-collection, html.light-mode .tox .tox-collection__group, html.light-mode .tox .tox-pop, html.light-mode .tox .tox-pop__dialog, html.light-mode .tox .tox-dialog, html.light-mode .tox .tox-dialog__body, html.light-mode .tox .tox-toolbar__overflow, html.light-mode .tox .tox-swatches, html.light-mode .tox .tox-swatches-menu {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  border-color: #e0e0e0 !important;
+}
+html.light-mode .tox .tox-collection__item { color: #4a4a4a !important; }
+html.light-mode .tox .tox-collection__item:hover, html.light-mode .tox .tox-collection__item--active, html.light-mode .tox .tox-collection__item--enabled {
+  background: rgba(168,152,120,0.10) !important;
+  color: #1a1a1a !important;
+}
+html.light-mode .tox .tox-tbtn--bespoke .tox-tbtn__select-label { color: #444 !important; }
 html.light-mode .scribe-tinymce-wrap .tox .tox-statusbar__text-container { color: #888 !important; }
 html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--select { color: #444 !important; }
 html.light-mode .scribe-tinymce-wrap .tox .tox-tbtn--bespoke .tox-tbtn__select-label { color: #444 !important; }
@@ -47276,7 +49538,7 @@ html.light-mode .scribe-knowledge-toggle-btn:hover { color: var(--text-primary);
 .scribe-ai-cancel-btn { padding: 8px 16px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 13px; }
 .scribe-ai-submit-btn { padding: 8px 20px; background: var(--accent, #a89878); border: none; border-radius: 8px; color: #fff; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; }
 .scribe-ai-submit-btn:hover { opacity: 0.85; }
-html.light-mode .scribe-voice-popover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+html.light-mode .scribe-voice-popover { background: #faf7f0; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
 html.light-mode .scribe-voice-item:hover { background: rgba(0,0,0,0.04); }
 html.light-mode .scribe-ai-modal { background: #fff; }
 html.light-mode .scribe-ai-topic-input { background: #f5f5f5; }

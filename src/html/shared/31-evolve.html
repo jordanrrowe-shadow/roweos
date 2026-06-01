@@ -1,0 +1,77 @@
+<!-- v33.4 / v33.44 / v33.50: Evolve view. Flat layout matching Studio — no nested shell box.
+     Breadcrumb + title + description at top, horizontal pill nav, content flows full-width below. -->
+<div id="evolveView" class="panel-view hidden">
+  <div class="evolve-v2">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+      <span class="breadcrumb-item active">Evolve</span>
+    </div>
+
+    <!-- Page header -->
+    <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;">
+      <span>Evolve</span>
+      <!-- v33.52: Help button matches Studio pattern. -->
+      <button class="section-help-btn" onclick="showSectionHelp('evolve')" title="How to use Evolve">?</button>
+    </div>
+    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Educational Intelligence: translate every concept through your existing mental models.</p>
+
+    <!-- Stats strip: countdown + XP + streak. Flows inline. -->
+    <div class="evolve-stats-strip">
+      <div class="evolve-stats-item">
+        <div class="evolve-stats-value" id="evolveSideCountdown"><span class="num">-</span><span class="lab">no deadline</span></div>
+      </div>
+      <div class="evolve-stats-item">
+        <div class="evolve-stats-label">Goal</div>
+        <div class="evolve-stats-goal" id="evolveSideGoal"></div>
+      </div>
+      <div class="evolve-stats-item evolve-stats-item-right">
+        <div class="evolve-stats-row" id="evolveSideStats"></div>
+        <div class="evolve-progress-bar"><div class="fill" id="evolveSideProgressFill" style="width:0%;"></div></div>
+      </div>
+    </div>
+
+    <!-- Horizontal pill tab nav (like studioPillNav) -->
+    <nav class="evolve-pill-nav" id="evolveTabsNav">
+      <a class="evolve-pill active" data-evolve-tab="today">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span>Today</span>
+      </a>
+      <a class="evolve-pill" data-evolve-tab="practice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Practice</span>
+        <span class="badge" id="evolveTabPracticeBadge"></span>
+      </a>
+      <a class="evolve-pill" data-evolve-tab="translate">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 8h6m-3-3v3m0 0v3m6-1h6M14 7l-2 4m4-4l2 4m-2-4l4 0M9 18s2-1 4-1 4 1 4 1"/></svg>
+        <span>Translator</span>
+      </a>
+      <a class="evolve-pill" data-evolve-tab="verify">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 12l2 2 4-4M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.7 1 6.4 2.6"/></svg>
+        <span>Verify</span>
+      </a>
+      <a class="evolve-pill" data-evolve-tab="skills">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L3 9l6-1z"/></svg>
+        <span>Skills</span>
+      </a>
+    </nav>
+
+    <!-- Translator context strip (was in side rail) -->
+    <div class="evolve-context-row">
+      <span class="lab">Translator context</span>
+      <span class="ctx" id="evolveSideContext">Set a profile to begin.</span>
+    </div>
+
+    <!-- Tab content area (no border / no inner box / full width) -->
+    <div class="evolve-content-area">
+      <div id="evolveTabToday" class="evolve-tab-pane active"></div>
+      <div id="evolveTabPractice" class="evolve-tab-pane hidden"></div>
+      <div id="evolveTabTranslate" class="evolve-tab-pane hidden"></div>
+      <div id="evolveTabVerify" class="evolve-tab-pane hidden"></div>
+      <div id="evolveTabSkills" class="evolve-tab-pane hidden"></div>
+    </div>
+
+    <!-- Hidden side-rail-style header (legacy IDs that the JS still references) -->
+    <h2 id="evolveSideHeadTitle" style="display:none;">Evolve</h2>
+  </div>
+</div>

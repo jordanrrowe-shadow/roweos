@@ -1873,7 +1873,7 @@ function renderAvailablePool() {
 
   var data = getCustomSidebar();
   // All possible viewIds
-  var allViews = ['agent','pulse','studio','folio','research','rhythm','library','automations','mail','memory','tuning','guardrails','clients','commerce','inventory','sync','settings','bloom','social'];
+  var allViews = ['agent','pulse','studio','folio','research','rhythm','library','automations','mail','memory','tuning','guardrails','clients','commerce','inventory','sync','settings','bloom','social','board']; // v33.73: + board (Thought Board scaffold)
   // Find which are in use
   var usedViews = (data.standalone || []).slice();
   for (var g = 0; g < data.groups.length; g++) {
@@ -2135,7 +2135,7 @@ var _pageLandingConfigs = {
   // v28.9: Media Lab merged into Studio - landing config removed
   // v29.0: Scribe - Knowledge Workspace
   'scribe': {
-    label: 'SCRIBE',
+    label: 'NOTEBOOK',
     tagline: 'Your Knowledge Workspace',
     description: 'Create notebooks, synthesize knowledge, and connect ideas across your brands and life.',
     features: [
@@ -2144,6 +2144,21 @@ var _pageLandingConfigs = {
     ],
     secondary: [],
     tabHandler: 'showScribeSection'
+  },
+  // v33.16: Evolve landing config (flag-gated visibility via sidebar but landing always defined).
+  'evolve': {
+    label: 'EVOLVE',
+    tagline: 'Educational Intelligence',
+    description: 'Master anything. Evolve uses your Memory profile to translate every concept through your existing mental models.',
+    features: [
+      { id: 'today', label: 'Today', desc: 'Pulse Dashboard with countdown + Liquid Rhythm Planner' },
+      { id: 'practice', label: 'Practice', desc: 'Adaptive multi-model quiz with Why/Why-Not Matrix' },
+      { id: 'translate', label: 'Translator', desc: 'Map known terms to generic + competitor + exam terminology' },
+      { id: 'verify', label: 'Verify', desc: 'Peer-review your understanding with VERIFIED / CORRECTED' },
+      { id: 'skills', label: 'Skills', desc: 'Skill tree with sources + reflections (SyncV5 collections)' }
+    ],
+    secondary: [],
+    tabHandler: 'showEvolveSection'
   },
   'automations': {
     label: 'AUTOMATIONS',
@@ -2646,7 +2661,7 @@ function showView(view) {
   }
 
   // Hide all views
-  var allViews = ['agent', 'studio', 'identity', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'clients', 'commerce', 'journal', 'sync', 'automations', 'admin', 'bloom', 'mail', 'folio', 'research', 'social', 'sectionLanding', 'scribe']; // v29.0: Added scribe
+  var allViews = ['agent', 'studio', 'identity', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'clients', 'commerce', 'journal', 'sync', 'automations', 'admin', 'bloom', 'mail', 'folio', 'research', 'social', 'sectionLanding', 'scribe', 'evolve', 'board']; // v33.73: + board (Thought Board scaffold)
   allViews.forEach(function(v) {
     var el = document.getElementById(v + 'View');
     if (el) el.classList.add('hidden');
@@ -2861,6 +2876,13 @@ function showView(view) {
     showTuning();
     renderTuningHistory();
     renderAgentHistory(); // v15.25: Refresh History on navigation so new Studio runs appear
+    // v33.70: Time Ribbon header — render after the existing data is loaded so
+    // agentCommands is fully populated.
+    try { if (window.TimeRibbon && typeof window.TimeRibbon.render === 'function') window.TimeRibbon.render(); } catch(e){}
+  }
+  // v33.73: Thought Board scaffold — additive Tier 3 surface.
+  if (view === 'board') {
+    try { if (window.ThoughtBoard && typeof window.ThoughtBoard.render === 'function') window.ThoughtBoard.render(); } catch(e){}
   }
   if (view === 'settings') {
     showSettings();
@@ -3008,6 +3030,18 @@ function showView(view) {
     if (typeof initAutomationsLab === 'function') initAutomationsLab();
     if (typeof markAutomationsViewed === 'function') markAutomationsViewed(); // v24.13
   }
+  // v34.15: Mark Bloom as seen when user opens it — clears the sidebar dot.
+  if (view === 'bloom') {
+    if (typeof markBloomViewed === 'function') markBloomViewed();
+  }
+  // v34.16: Mark Notebooks/Scribe as seen so the concierge pill stops counting.
+  if (view === 'scribe') {
+    if (typeof markScribeViewed === 'function') markScribeViewed();
+  }
+  // v34.41: Mark Library as seen so the new Library concierge pill clears.
+  if (view === 'library') {
+    if (typeof markLibraryViewed === 'function') markLibraryViewed();
+  }
   // v25.0: Folio - Living Canvas
   if (view === 'folio') {
     if (typeof initFolioView === 'function') initFolioView();
@@ -3025,6 +3059,34 @@ function showView(view) {
   // v29.0: Scribe - Knowledge Workspace
   if (view === 'scribe') {
     if (typeof initScribe === 'function') initScribe();
+  }
+
+  // v33.4 / v33.47: Evolve view dispatch — full multi-tab UI.
+  // Calls renderEvolveShell() to populate side rail (countdown + tabs + context) AND the
+  // active tab content. The showEvolveView() entry point also calls this, but navigations
+  // via showView('evolve') directly (bookmark URLs, showPageLanding redirects) need it too.
+  if (view === 'evolve') {
+    try {
+      if (typeof Evolve !== 'undefined' && typeof Evolve.renderEvolveShell === 'function') {
+        Evolve.renderEvolveShell();
+      } else if (typeof Evolve !== 'undefined' && typeof Evolve.renderPulseDashboard === 'function') {
+        // Fallback: only Today pane available
+        var todayPane = document.getElementById('evolveTabToday');
+        if (todayPane) Evolve.renderPulseDashboard(todayPane);
+      }
+      // v33.6: Brilli tutor pose on Evolve view — attending mode (slow pulse, brighter core).
+      if (typeof Brilli !== 'undefined' && window._sidebarBrilliInst) {
+        Brilli.setMode(window._sidebarBrilliInst, 'attending');
+      }
+    } catch(eEvolve) { console.warn('[Evolve] render failed', eEvolve); }
+  } else {
+    // Reset sidebar Brilli to idle when leaving Evolve.
+    try {
+      if (typeof Brilli !== 'undefined' && window._sidebarBrilliInst) {
+        var inst = window._sidebarBrilliInst;
+        if (inst.mode === 'attending') Brilli.setMode(inst, 'idle');
+      }
+    } catch(e) {}
   }
 
   // v28.8: Focus mobile layout block removed - signal retired
@@ -3346,6 +3408,14 @@ function onBrandChange() {
   // v16.11: Re-render Clients view when brand changes
   if (currentView === 'clients' && typeof renderClientsView === 'function') {
     renderClientsView();
+  }
+
+  // v34.74: Refresh the Commerce/Analytics stat cards on brand switch.
+  // Total Clients now uses getClientsForBrand() so the count was stale until
+  // the view was navigated away and re-entered. Same fix wired for the
+  // dashboard cards.
+  if (currentView === 'commerce' && typeof updateCommerceStats === 'function') {
+    try { updateCommerceStats(); } catch(e) {}
   }
 
   // v18.0: Refresh social account cards for new brand's connections
@@ -3913,6 +3983,71 @@ function exportChatMsg(btn, format) {
   if (format === 'pptx') {
     exportChatMsgAsPptx(htmlContent, textContent);
     return;
+  }
+}
+
+// v33.74: Pin the current Studio output to the Thought Board. Pulls visible
+// text from #studioOutputContent / #deliv and uses the active operation name
+// as the title.
+function pinStudioOutputToThoughtBoard() {
+  try {
+    var outEl = document.getElementById('studioOutputContent');
+    var delivEl = document.getElementById('deliv');
+    var text = '';
+    if (outEl) text = (outEl.innerText || outEl.textContent || '').trim();
+    if (!text && delivEl) text = (delivEl.value || '').trim();
+    if (!text) {
+      if (typeof showToast === 'function') showToast('Run an operation first, then pin.', 'info');
+      return;
+    }
+    var op = (window.currentStudioOp && window.currentStudioOp.name) || 'Studio output';
+    var firstLine = text.split(/\n+/)[0].slice(0, 80);
+    var rest = text.length > firstLine.length ? text.slice(firstLine.length).trim().slice(0, 600) : text.slice(0, 600);
+    if (window.ThoughtBoard && typeof window.ThoughtBoard.addPin === 'function') {
+      window.ThoughtBoard.addPin({
+        kind: 'studio',
+        title: op + ' · ' + firstLine,
+        body: rest,
+        source: { view: 'studio', refId: '', label: 'Studio · ' + op }
+      });
+      if (typeof showToast === 'function') showToast('Pinned Studio output to Thought Board.', 'success');
+    } else {
+      if (typeof showToast === 'function') showToast('Thought Board not loaded.', 'error');
+    }
+  } catch(e) {
+    if (typeof showToast === 'function') showToast('Could not pin: ' + (e && e.message || 'unknown'), 'error');
+  }
+}
+
+// v33.74: Pin a chat message to the Thought Board. Reuses exportChatMsg's
+// bubble-finding pattern; pulls visible text and a short title (first line).
+function pinChatMsgToThoughtBoard(btn) {
+  try {
+    var msgEl = btn && btn.closest ? btn.closest('.conversation-message') : null;
+    if (!msgEl) return;
+    var bubble = msgEl.querySelector('.conversation-message-content');
+    if (!bubble) return;
+    var text = (bubble.innerText || bubble.textContent || '').trim();
+    if (!text) {
+      if (typeof showToast === 'function') showToast('Nothing to pin yet.', 'info');
+      return;
+    }
+    var firstLine = text.split(/\n+/)[0].slice(0, 80);
+    var rest = text.slice(firstLine.length).trim().slice(0, 600);
+    var role = msgEl.classList && msgEl.classList.contains('user') ? 'user' : 'assistant';
+    if (window.ThoughtBoard && typeof window.ThoughtBoard.addPin === 'function') {
+      window.ThoughtBoard.addPin({
+        kind: 'chat',
+        title: firstLine || 'Pinned chat moment',
+        body: rest,
+        source: { view: 'agent', refId: '', label: role === 'user' ? 'Chat · you' : 'Chat · Brilliance' }
+      });
+      if (typeof showToast === 'function') showToast('Pinned to Thought Board.', 'success');
+    } else {
+      if (typeof showToast === 'function') showToast('Thought Board not loaded.', 'error');
+    }
+  } catch(e) {
+    if (typeof showToast === 'function') showToast('Could not pin: ' + (e && e.message || 'unknown error'), 'error');
   }
 }
 
@@ -5353,10 +5488,12 @@ function switchToBrandMode() {
   if (mobileBrandSel) mobileBrandSel.value = lastBrandIdx;
 
   // v12.0.1: Reload mode-specific data
-  initTodoCategories();
-  initTodos();
-  initCalendar();
-  initJournal(); // v12.2.4
+  // v33.63: initTodos was removed in v28.8 Focus retirement but unguarded callers
+  // were missed — guard with typeof to prevent ReferenceError on init.
+  if (typeof initTodoCategories === 'function') initTodoCategories();
+  if (typeof initTodos === 'function') initTodos();
+  if (typeof initCalendar === 'function') initCalendar();
+  if (typeof initJournal === 'function') initJournal(); // v12.2.4
 
   // v15.18: Reload inventory for brand mode
   if (typeof loadInventoryData === 'function') loadInventoryData();
@@ -5419,6 +5556,10 @@ function switchToBrandMode() {
     applyCurrentBrandAccent();
   }
 
+  // v33.93: Sync Studio action bar labels + Automations Agent suggestions for mode parity
+  if (typeof updateStudioActionBarLabels === 'function') updateStudioActionBarLabels();
+  if (typeof renderAutoAgentSuggestions === 'function') renderAutoAgentSuggestions();
+
   showToast('Switched to BrandAI mode', 'success');
 }
 
@@ -5455,10 +5596,11 @@ function switchToLifeMode(profileIdx) {
   localStorage.setItem('roweos_mode', 'life');
 
   // v12.0.1: Reload mode-specific data
-  initTodoCategories();
-  initTodos();
-  initCalendar();
-  initJournal(); // v12.2.4
+  // v33.63: same guard as the brand-mode path above.
+  if (typeof initTodoCategories === 'function') initTodoCategories();
+  if (typeof initTodos === 'function') initTodos();
+  if (typeof initCalendar === 'function') initCalendar();
+  if (typeof initJournal === 'function') initJournal(); // v12.2.4
 
   // v15.18: Reload inventory for life mode
   if (typeof loadInventoryData === 'function') loadInventoryData();
@@ -5516,6 +5658,10 @@ function switchToLifeMode(profileIdx) {
 
   var currentProfile = typeof getCurrentLifeProfile === 'function' ? getCurrentLifeProfile() : null;
   var profileName = currentProfile ? currentProfile.name : localStorage.getItem('roweos_user_name') || 'My Life';
+  // v33.93: Sync Studio action bar labels + Automations Agent suggestions for mode parity
+  if (typeof updateStudioActionBarLabels === 'function') updateStudioActionBarLabels();
+  if (typeof renderAutoAgentSuggestions === 'function') renderAutoAgentSuggestions();
+
   showToast('Switched to LifeAI - ' + profileName, 'success');
 }
 
@@ -5897,7 +6043,17 @@ function getBrandLogoKeyById(brandId) {
  * Now uses brand ID for reorder-safe logo keys with migration from index-based keys
  */
 function getCurrentLogoKey(brandIdx) {
-  // v28.3: Check both ID-based (v29+) and index-based (pre-v29) logo keys
+  // v33.82: Always prefer the ID-stable key when brand.id is available. The
+  // prior fallback to `roweos_brand_<origIdx>_logo` caused logos to follow
+  // ARRAY POSITION across reorders, so reordering brand A from slot 0 to slot
+  // 2 made it inherit brand C's logo. v32.0-C's IDB logo storage made this
+  // worse — the ID-key check via localStorage.getItem(idKey) returned null
+  // for IDB-only logos and silently fell through to the index fallback.
+  //
+  // New rule: brand.id ⇒ id-key, full stop. Async readers (readBrandLogoSync)
+  // already handle "no localStorage value, look in IDB" correctly. Only fall
+  // back to the legacy index key if the brand has no id at all (pre-v27.3
+  // legacy data).
   var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
   if (mode === 'life') {
     var lifeIdx = parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0');
@@ -5908,18 +6064,12 @@ function getCurrentLogoKey(brandIdx) {
   }
   if (typeof brandIdx !== 'number' || isNaN(brandIdx) || brandIdx < 0) brandIdx = 0;
   var brand = brands[brandIdx];
-  // Try ID-based key first (v29+)
   if (brand && brand.id) {
-    var idKey = 'roweos_brandlogo_' + brand.id;
-    if (localStorage.getItem(idKey)) return idKey;
+    return 'roweos_brandlogo_' + brand.id;
   }
-  // Fallback: index-based key using _order (original index, survives reorder)
+  // Legacy fallback only — brand has no stable id (pre-v27.3 data).
   var origIdx = (brand && typeof brand._order === 'number') ? brand._order : brandIdx;
-  var indexKey = 'roweos_brand_' + origIdx + '_logo';
-  if (localStorage.getItem(indexKey)) return indexKey;
-  // Return ID-based key for new saves (even if empty), falling back to index key
-  if (brand && brand.id) return 'roweos_brandlogo_' + brand.id;
-  return indexKey;
+  return 'roweos_brand_' + origIdx + '_logo';
 }
 
 /**
@@ -6729,17 +6879,23 @@ function classifyInteraction(userMessage, systemPrompt, options) {
   // Image/multimodal content - Gemini excels at native multimodal
   if (hasImages) return 'multimodal';
 
-  // v30.1: Image generation detection - action verb + image noun (same pattern as isNanobananaImageRequest)
-  var _imgActions = ['generate', 'create', 'draw', 'make', 'design', 'render', 'paint', 'sketch', 'visualize', 'produce'];
-  var _imgNouns = ['image', 'picture', 'photo', 'illustration', 'logo', 'icon', 'banner', 'poster', 'artwork', 'graphic', 'visual', 'thumbnail'];
-  var _hasImgAction = false, _hasImgNoun = false;
-  for (var _ia = 0; _ia < _imgActions.length; _ia++) {
-    if (msg.indexOf(_imgActions[_ia]) !== -1) { _hasImgAction = true; break; }
+  // v30.1: Image generation detection - action verb + image noun.
+  // v34.108: Tightened the match. Previous version did `msg.indexOf(verb) !== -1`
+  // AND `msg.indexOf(noun) !== -1` separately, which fired whenever both words
+  // appeared ANYWHERE in the message - including in attached PDF/file content
+  // concatenated into the prompt. A resume PDF + job description very often
+  // contains "design"/"graphic"/"create"/"icon", so a user asking "please write
+  // an email" while attaching files was getting routed to image generation.
+  // Now requires the verb and noun to be within 40 chars of each other,
+  // matching the stricter IMAGE_INTENT_RE in 20-ui-misc.js. Also bails out
+  // when the prompt clearly asks for a written deliverable (email, draft,
+  // paragraph, summary, etc.) - those should never image-gen even if a
+  // verb+noun pair happens to appear later in attached context.
+  var _writtenIntent = /\b(write|draft|compose|email|reply|paragraph|summary|summarize|outline|note|memo|letter|message|caption|copy(?:write)?|article|post|tweet)\b/.test(msg);
+  if (!_writtenIntent) {
+    var _imgIntentRe = /\b(?:generate|create|make|render|draw|design|paint|produce|sketch|visualize)\b[^.!?]{0,40}\b(?:an?\s+)?(?:image|picture|photo|illustration|render|graphic|visual|logo|icon|sketch|painting|drawing|design|artwork|wallpaper|mockup|poster|banner|thumbnail|portrait)\b/i;
+    if (_imgIntentRe.test(msgStr)) return 'image_generation';
   }
-  for (var _in = 0; _in < _imgNouns.length; _in++) {
-    if (msg.indexOf(_imgNouns[_in]) !== -1) { _hasImgNoun = true; break; }
-  }
-  if (_hasImgAction && _hasImgNoun) return 'image_generation';
 
   // Code-related keywords
   if (/\b(code|function|debug|program|script|api|endpoint|css|html|javascript|python|sql|regex|refactor|implement|deploy|compile|syntax)\b/.test(msg)) return 'code';

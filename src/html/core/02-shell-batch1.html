@@ -33,13 +33,45 @@
 
       <div style="text-align:center;position:relative;z-index:1;">
         <div style="font-family:'DM Sans',sans-serif;font-size:18px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:rgba(201,181,122,0.45);margin-bottom:20px;opacity:0;animation:splashFadeUp 0.8s ease forwards 0.3s;">Welcome, to</div>
-        <img src="/icons/roweos-wordmark.png" alt="Brilliance" style="max-width:480px;width:80vw;height:auto;margin-bottom:8px;opacity:0;animation:splashFadeUp 0.9s ease forwards 0.5s;" onerror="this.outerHTML='<div style=&quot;font-family:Cormorant Garamond,Georgia,serif;font-size:82px;font-weight:300;letter-spacing:3px;background:linear-gradient(135deg,#e0cc8a,#c9b57a,#d4b978);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px;&quot;>Brilliance</div>'">
-        <div style="width:48px;height:1px;background:rgba(201,181,122,0.35);margin:0 auto 20px;opacity:0;animation:splashFadeUp 0.6s ease forwards 0.7s;"></div>
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-style:italic;color:rgba(255,255,255,0.3);letter-spacing:0.5px;margin-bottom:48px;opacity:0;animation:splashFadeUp 0.7s ease forwards 0.9s;">Brand &amp; Life Intelligence</div>
-        <a onclick="triggerGoldTransition()" style="display:inline-block;padding:16px 40px;border:1px solid rgba(201,181,122,0.4);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:#c9b57a;cursor:pointer;transition:all 0.4s ease;text-decoration:none;opacity:0;animation:splashFadeUp 0.7s ease forwards 1.2s;" onmouseover="this.style.background='rgba(201,181,122,0.08)';this.style.borderColor='rgba(201,181,122,0.6)';this.style.boxShadow='0 0 40px rgba(201,181,122,0.06)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(201,181,122,0.4)';this.style.boxShadow='none'">Begin Experience</a>
-        <div style="margin-top:32px;opacity:0;animation:splashFadeUp 0.6s ease forwards 1.5s;display:flex;flex-direction:column;align-items:center;gap:14px;">
-          <span style="padding:4px 14px;border:1px solid rgba(201,181,122,0.2);border-radius:6px;color:rgba(201,181,122,0.5);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Sans',sans-serif;">Early Access</span>
-          <a href="/info" style="font-size:12px;color:rgba(201,181,122,0.4);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s;" onmouseover="this.style.color='rgba(201,181,122,0.7)'" onmouseout="this.style.color='rgba(201,181,122,0.4)'">Learn More</a>
+
+        <!-- v34.2: Cursive gold "Brilliance by RoweOS" monogram replaces the
+             celestial orb on the welcome splash. Same image is now used as the
+             email-header brand mark for parity. Subtle bloom halo behind the
+             monogram so it doesn't read flat against the dark background. -->
+        <div style="width:220px;height:220px;margin:0 auto 18px;position:relative;isolation:isolate;opacity:0;animation:splashFadeUp 1s ease forwards 0.4s;" aria-hidden="true">
+          <div style="position:absolute;inset:-30px;background:radial-gradient(circle,rgba(201,169,97,0.28),rgba(201,169,97,0.08) 35%,transparent 70%);border-radius:50%;z-index:0;animation:landingMonogramBloom 6s ease-in-out infinite;"></div>
+          <img src="/images/brilliance/monogram-circle.png" alt="Brilliance" style="position:relative;z-index:1;width:100%;height:100%;object-fit:contain;display:block;animation:landingMonogramBreathe 6s ease-in-out infinite;" />
+        </div>
+        <style>
+          @keyframes landingMonogramBloom{0%,100%{opacity:0.65;transform:scale(1)}50%{opacity:0.95;transform:scale(1.05)}}
+          @keyframes landingMonogramBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
+          @media (prefers-reduced-motion:reduce){#authGate [aria-hidden] *{animation:none !important}}
+        </style>
+
+        <!-- v34.2: Brilliance monogram-circle already contains the cursive "Brilliance"
+             wordmark + "by RoweOS" subscript baked into the image, so the redundant
+             `<h1>Brilliance</h1>` and "by RoweOS" lines are retired. Just a thin gold
+             rule + "Intelligence OS" line as breathing room above the tagline. -->
+        <div style="width:48px;height:1px;background:rgba(201,181,122,0.35);margin:8px auto 14px;opacity:0;animation:splashFadeUp 0.6s ease forwards 0.85s;"></div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.32em;text-transform:uppercase;color:rgba(201,169,97,0.7);margin-bottom:32px;opacity:0;animation:splashFadeUp 0.7s ease forwards 1s;">Intelligence OS</div>
+
+        <!-- v34.2: "Be Brilliant." hero tagline -->
+        <div style="font-family:'Playfair Display','Cormorant Garamond',Georgia,serif;font-size:clamp(34px,5.5vw,58px);line-height:1.05;letter-spacing:-0.01em;color:#f0e6d3;margin:0 0 22px;opacity:0;animation:splashFadeUp 0.9s ease forwards 1.25s;">
+          <span style="font-style:normal;font-weight:500;color:#f5ecd9;">Be</span> <span style="font-style:italic;font-weight:400;color:#e2c79b;">Brilliant.</span>
+        </div>
+
+        <!-- v34.2: Begin (filled gold) + See the Platform (outline) -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;opacity:0;animation:splashFadeUp 0.7s ease forwards 1.4s;">
+          <a onclick="triggerGoldTransition()" style="display:inline-block;padding:14px 38px;background:linear-gradient(135deg,#e2c79b 0%,#c9a961 50%,#a88a4a 100%);color:#14110a;border:none;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.28em;text-transform:uppercase;cursor:pointer;text-decoration:none;box-shadow:0 1px 0 rgba(255,255,255,0.18) inset,0 8px 24px -8px rgba(201,169,97,0.45);transition:transform 0.18s ease,box-shadow 0.18s ease;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 1px 0 rgba(255,255,255,0.22) inset,0 12px 30px -8px rgba(201,169,97,0.6)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 1px 0 rgba(255,255,255,0.18) inset,0 8px 24px -8px rgba(201,169,97,0.45)'">Begin</a>
+          <a href="/info" style="display:inline-block;padding:14px 30px;background:transparent;color:rgba(232,219,196,0.85);border:1px solid rgba(201,169,97,0.45);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.28em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:all 0.18s ease;" onmouseover="this.style.borderColor='rgba(201,169,97,0.75)';this.style.color='#f5ecd9';this.style.background='rgba(201,169,97,0.06)'" onmouseout="this.style.borderColor='rgba(201,169,97,0.45)';this.style.color='rgba(232,219,196,0.85)';this.style.background='transparent'">See the Platform</a>
+        </div>
+
+        <!-- v34.2: Backed by Google for Startups footer (replaces Early Access pill + standalone Learn More) -->
+        <div style="margin-top:40px;display:inline-flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(232,219,196,0.45);letter-spacing:0.24em;text-transform:uppercase;opacity:0;animation:splashFadeUp 0.6s ease forwards 1.6s;">
+          <span style="color:rgba(232,219,196,0.55);">Backed by</span>
+          <span style="color:rgba(201,169,97,0.4);">&middot;</span>
+          <img src="/images/promo/google-for-startups.png" alt="Google for Startups" style="height:14px;width:auto;opacity:0.7;">
+          <span style="color:rgba(232,219,196,0.7);">Google for Startups</span>
         </div>
       </div>
     </div>
@@ -271,7 +303,7 @@
           <div class="tier-eyebrow">Essentials</div>
           <div class="tier-name">Solo</div>
           <div class="tier-price-row"><div class="tier-price">$9</div><div class="tier-price-suffix">/mo</div></div>
-          <div class="tier-price-note">after your 7 day free trial</div>
+          <div class="tier-price-note">after your 14 day free trial</div>
           <div class="tier-divider"></div>
           <div style="flex:1;">
             <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span><span class="tier-feat-strong">1 Brand or LifeAI profile.</span> Your single source of intelligence.</span></div>
@@ -282,7 +314,7 @@
             <div class="tier-feat"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#a89878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Community support</div>
           </div>
           <div style="margin-top:24px;">
-            <button class="tier-cta tier-cta-secondary" onclick="selectTier('solo')">Start 7 Day Free Trial</button>
+            <button class="tier-cta tier-cta-secondary" onclick="selectTier('solo')">Start 14 Day Free Trial</button>
             <div class="tier-fineprint">Card required. $9/mo after trial.</div>
           </div>
         </div>

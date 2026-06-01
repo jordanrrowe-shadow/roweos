@@ -217,8 +217,17 @@ function initJournal() {
  */
 function saveJournal() {
   localStorage.setItem('roweos_journal', JSON.stringify(window.journalEntries || []));
-  if (typeof writeDB === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
-    writeDB('profile/main', { journal: window.journalEntries || [] });
+  // v33.32 (Sprint 1): use the services/sync facade with safe fallback.
+  if (typeof firebaseUser !== 'undefined' && firebaseUser) {
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+        window.BrillianceServices.sync.writeDB('profile/main', { journal: window.journalEntries || [] });
+      } else if (typeof writeDB === 'function') {
+        writeDB('profile/main', { journal: window.journalEntries || [] });
+      }
+    } catch(e) {
+      if (typeof writeDB === 'function') writeDB('profile/main', { journal: window.journalEntries || [] });
+    }
   }
 }
 

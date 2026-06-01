@@ -42,6 +42,11 @@
                 <div style="font-size: var(--text-sm); color: var(--text-tertiary);">Pending Changes</div>
                 <div id="syncHubPendingCount" style="font-weight: 500;">0</div>
               </div>
+              <!-- v33.92: Freshness clock — live timestamp showing when local data was last touched. -->
+              <div>
+                <div style="font-size: var(--text-sm); color: var(--text-tertiary);">Local Last Updated</div>
+                <div id="syncHubFreshness" style="font-weight: 500;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;">-</div>
+              </div>
             </div>
           </div>
 
@@ -55,6 +60,26 @@
             <div id="syncDataInventory" style="display: grid; gap: var(--space-3);">
               <!-- Populated by renderSyncInventory() -->
             </div>
+          </div>
+
+          <!-- v33.81: Reconciliation tools — addresses the "perpetual Aligning…" issue.
+               Shows what's drifting between local + cloud, then offers a one-click
+               reconcile that respects local tombstones. -->
+          <div id="syncReconcilePanel" style="margin-bottom: var(--space-6); padding: var(--space-4) var(--space-5); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg);">
+            <div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:280px;">
+                <h3 style="font-size: var(--text-lg); font-weight: 600; margin: 0 0 6px;">Reconcile + Purge</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.55;">If a category is stuck "Aligning…" because the cloud kept items you already deleted, run reconcile to delete cloud items that match your local tombstones. <strong>Purge stale</strong> tombstones every cloud item missing from this device. Use after a hard reset of an old UUID.</p>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-small" onclick="window.SyncReconcileUI&&window.SyncReconcileUI.preview()" id="syncReconcilePreviewBtn">Preview drift</button>
+                <button class="btn btn-secondary btn-small" onclick="window.SyncReconcileUI&&window.SyncReconcileUI.runReconcile()" id="syncReconcileRunBtn">Reconcile tombstones</button>
+                <button class="btn btn-secondary btn-small" onclick="window.SyncReconcileUI&&window.SyncReconcileUI.runPurge()" id="syncPurgeStaleBtn" style="border-color:rgba(220,38,38,0.4);color:#dc2626;">Purge stale UUID data…</button>
+                <!-- v33.9: Hard refresh — clears Cache Storage + Service Worker so iOS PWAs invalidate stale cached assets. -->
+                <button class="btn btn-secondary btn-small" onclick="window.SyncReconcileUI&&window.SyncReconcileUI.hardRefresh()" id="syncHardRefreshBtn" title="Clear PWA cache and force a fresh data pull. Use if iOS shows stale data the desktop does not.">Hard refresh (PWA)</button>
+              </div>
+            </div>
+            <pre id="syncReconcileReport" style="margin: 14px 0 0; padding: 12px 14px; background: rgba(0,0,0,0.18); border: 1px solid var(--border-color); border-radius: 8px; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1.55; max-height: 280px; overflow: auto; white-space: pre-wrap; display: none;"></pre>
           </div>
 
           <!-- v23.0: Sync Mode Toggle - Perfect Cloud / Perfect Local / Advanced -->

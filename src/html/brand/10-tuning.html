@@ -8,25 +8,37 @@
             <span class="breadcrumb-item active">History</span>
           </div>
           
+          <!-- v34.69: History view restructured. Time Ribbon is now the primary
+               surface — lifted to the top with a brand/life mode pill row directly
+               beneath. The conversation + studio output sections become detail
+               panels filtered by the active pill. -->
           <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;">
-            <span>Conversation History</span>
+            <span>History</span>
             <button class="btn btn-secondary btn-small" onclick="exportTuningData()" style="margin-left:auto;margin-right:8px;">Export Training Data</button>
             <button class="section-help-btn" onclick="showSectionHelp('tuning')" title="How to use History">?</button>
           </div>
-          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Review past conversations, continue where you left off, and provide feedback to improve AI responses.</p>
-          
-          <!-- v10.5.25: Mode Filter Tabs -->
-          <div class="history-mode-tabs">
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">A vertical timeline of every conversation. Brand on the left branch, life on the right. Click any node to resume.</p>
+
+          <!-- v34.70: BrillianceTimeline mounts here. The container keeps the legacy
+               id #timeRibbon so existing call sites (showView('tuning'),
+               filterHistoryByMode) continue to work; 49-timeline-tree.js overrides
+               window.TimeRibbon.render so the new tree renders instead. -->
+          <div id="timeRibbon" data-state="loading" style="margin-bottom:var(--space-5);min-height:120px;"></div>
+
+          <!-- Mode pills: brand vs life vs all. Filters which detail panels show below. -->
+          <div class="history-mode-tabs" style="margin-bottom:var(--space-4);">
             <button class="history-mode-tab active" data-mode="all" onclick="filterHistoryByMode('all')">All</button>
             <button class="history-mode-tab" data-mode="brand" onclick="filterHistoryByMode('brand')">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              BrandAI
+              Brand
             </button>
             <button class="history-mode-tab" data-mode="life" onclick="filterHistoryByMode('life')">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              LifeAI
+              Life
             </button>
           </div>
+          <!-- Eyebrow above the detail sections so users understand the pills filter both ribbon scope and panels below. -->
+          <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Conversations &amp; outputs</div>
           
           <!-- BrandAI Conversations Section -->
           <div class="tuning-section" id="brandConversationsSection">

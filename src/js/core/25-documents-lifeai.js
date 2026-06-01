@@ -285,8 +285,18 @@ function saveBrandMemory() {
     }
   }
   // v25.1: Write-through to Firestore (replaces deprecated syncToFirebase)
-  if (typeof writeDB === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
-    writeDB('profile/main', { brandMemory: JSON.parse(localStorage.getItem('roweos_brand_memory') || '{}') });
+  // v33.35 (Sprint 1): services/sync facade with safe fallback.
+  if (typeof firebaseUser !== 'undefined' && firebaseUser) {
+    var _bmPayload = { brandMemory: JSON.parse(localStorage.getItem('roweos_brand_memory') || '{}') };
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+        window.BrillianceServices.sync.writeDB('profile/main', _bmPayload);
+      } else if (typeof writeDB === 'function') {
+        writeDB('profile/main', _bmPayload);
+      }
+    } catch(eD) {
+      if (typeof writeDB === 'function') writeDB('profile/main', _bmPayload);
+    }
   }
 }
 
@@ -5199,7 +5209,7 @@ function renderLifeOps() {
   if (creatorContainer) {
     var customOps = generatedLifeOps || [];
     if (customOps.length === 0) {
-      creatorContainer.innerHTML = '<p style="color: var(--text-muted); padding: var(--space-4); text-align: center; font-size: var(--text-base);">Use the input above to create custom tasks, or click "Generate Personalized Tasks" for AI suggestions based on your profile.</p>';
+      creatorContainer.innerHTML = '<p style="color: var(--text-muted); padding: var(--space-4); text-align: center; font-size: var(--text-base);">Use the input above to create custom tasks, or click "AI Generate" for life-specific operations based on your profile.</p>';
     } else {
       var html = '';
       customOps.forEach(function(op) {
@@ -5276,7 +5286,7 @@ function selectLifeAgent(category) {
   var creatorContainer = document.getElementById('lifeOps');
   if (creatorContainer) {
     if (filteredGenerated.length === 0) {
-      creatorContainer.innerHTML = '<p style="color: var(--text-muted); padding: var(--space-4); text-align: center; font-size: var(--text-base);">Use the input above to create custom tasks, or click "Generate Personalized Tasks" for AI suggestions based on your profile.</p>';
+      creatorContainer.innerHTML = '<p style="color: var(--text-muted); padding: var(--space-4); text-align: center; font-size: var(--text-base);">Use the input above to create custom tasks, or click "AI Generate" for life-specific operations based on your profile.</p>';
     } else {
       var html = '';
       filteredGenerated.forEach(function(op) {
@@ -5528,7 +5538,7 @@ async function generateLifeAIRecommendations() {
     showToast('Could not generate operations: ' + e.message, 'error');
   } finally {
     btn.classList.remove('generating');
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.5 3.5l1.4 1.4M11.1 11.1l1.4 1.4M3.5 12.5l1.4-1.4M11.1 4.9l1.4-1.4"/></svg><span>Generate Personalized Tasks</span>';
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.5 3.5l1.4 1.4M11.1 11.1l1.4 1.4M3.5 12.5l1.4-1.4M11.1 4.9l1.4-1.4"/></svg><span>AI Generate</span>';
   }
 }
 
@@ -6030,7 +6040,7 @@ function analyzeLifePatterns() {
   }
 
   if (patterns.length === 0) {
-    container.innerHTML = '<div class="life-empty-state">Not enough data yet. Keep using RoweOS!</div>';
+    container.innerHTML = '<div class="life-empty-state">Not enough data yet. Keep using Brilliance!</div>';
     return;
   }
 
@@ -7392,13 +7402,20 @@ function updateRhythmForMode() {
 // PULSE 3.0 - GOALS & CHECKLISTS (v10.6)
 // ═══════════════════════════════════════════════════════════════
 
+// v34.67 Phase C #9: pulseGoals init reads through SyncV5 facade. v4 path runs
+// when reads flag is OFF (default) — zero behavior change for non-cohort users.
 var pulseGoals = (function() {
-  try {
-    var _pg = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
-    // v28.1: v4 stores as { data: [...] } wrapper -- unwrap if needed
-    if (_pg && !Array.isArray(_pg) && Array.isArray(_pg.data)) return _pg.data;
-    return Array.isArray(_pg) ? _pg : [];
-  } catch(e) { return []; }
+  function _v4Read() {
+    try {
+      var _pg = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+      if (_pg && !Array.isArray(_pg) && Array.isArray(_pg.data)) return _pg.data;
+      return Array.isArray(_pg) ? _pg : [];
+    } catch(e) { return []; }
+  }
+  if (typeof window !== 'undefined' && window.SyncV5 && typeof window.SyncV5.readArray === 'function') {
+    return window.SyncV5.readArray('pulse_v5', _v4Read);
+  }
+  return _v4Read();
 })();
 
 // v29.3: Dirty-goal tracking for per-doc sync
@@ -8574,13 +8591,24 @@ function renderPulse3Overview() {
   var totalItems = 0;
   var completedItems = 0;
   // v15.37: Mode filter
+  // v34.71 Life parity gap #8: goals with undefined `source` (legacy / created
+  // before tagging was strict) were excluded from life view because
+  // `g.source !== 'lifeai'` is true for undefined. Treat undefined as belonging
+  // to the user's current mode so legacy data shows up where it should.
   var modeFilteredGoals = pulseGoals;
   if (!pulseShowAllGoals) {
     var lifeMode = isLifeMode();
     modeFilteredGoals = pulseGoals.filter(function(g) {
-      if (lifeMode && g.source !== 'lifeai') return false;
-      if (!lifeMode && g.source === 'lifeai') return false;
-      return true;
+      var src = g.source;
+      if (lifeMode) {
+        // life view: keep lifeai-tagged + untagged; reject explicit brandai
+        if (src === 'brandai') return false;
+        return true;
+      } else {
+        // brand view: keep brandai-tagged + untagged; reject explicit lifeai
+        if (src === 'lifeai') return false;
+        return true;
+      }
     });
   }
   var activeGoals = modeFilteredGoals.filter(function(g) { return !g.archived; }).length;

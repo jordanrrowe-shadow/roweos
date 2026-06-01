@@ -103,8 +103,18 @@ function talkToBrandAIFromReminder(id, context) {
 }
 
 // Reminder history storage
+// v34.67 Phase C #9: routed through SyncV5.readArray. Falls back to v4 (the
+// previous JSON.parse path) when roweos_sync_v5_reads flag is OFF — which it
+// is by default, so behavior is unchanged for everyone except admins running
+// the v5 reads cohort.
 function getReminders() {
-  try { var _r = JSON.parse(localStorage.getItem('roweos_reminders') || '[]'); return Array.isArray(_r) ? _r : []; } catch(e) { return []; }
+  function _v4Read() {
+    try { var _r = JSON.parse(localStorage.getItem('roweos_reminders') || '[]'); return Array.isArray(_r) ? _r : []; } catch(e) { return []; }
+  }
+  if (typeof window !== 'undefined' && window.SyncV5 && typeof window.SyncV5.readArray === 'function') {
+    return window.SyncV5.readArray('reminders_v5', _v4Read);
+  }
+  return _v4Read();
 }
 
 function saveReminders(reminders) {
@@ -1221,6 +1231,72 @@ function updateSidebarBadges() {
       else autoBadge.classList.remove('has-unread');
     }
   } catch(e) {}
+  // v34.13: Pulse — dot if there are any open goals OR any due reminders.
+  try {
+    var pulseBadge = document.getElementById('ncBadgePulse');
+    if (pulseBadge) {
+      var hasOpenGoal = false;
+      try {
+        var pg = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
+        if (Array.isArray(pg)) {
+          hasOpenGoal = pg.some(function(g){ return g && !g.completed && !g.archived; });
+        }
+      } catch(e) {}
+      if (!hasOpenGoal) {
+        try {
+          var rems = JSON.parse(localStorage.getItem('roweos_reminders') || '[]');
+          if (Array.isArray(rems)) {
+            var nowMs = Date.now();
+            hasOpenGoal = rems.some(function(r){
+              if (!r) return false;
+              if (r.status === 'completed' || r.status === 'dismissed' || r.status === 'archived') return false;
+              var s = r.scheduledAt ? Date.parse(r.scheduledAt) : 0;
+              return s && s <= nowMs;
+            });
+          }
+        } catch(eR) {}
+      }
+      if (hasOpenGoal) pulseBadge.classList.add('has-unread');
+      else pulseBadge.classList.remove('has-unread');
+    }
+  } catch(e) {}
+  // v34.13/v34.15: Bloom — `roweos_bloom_library` is `{scope: [items]}` not a flat
+  // array, so v34.13's flat-array check never fired. Replaced with a "new since
+  // last viewed" check using `roweos_bloom_last_seen` (matches the Automations
+  // pattern). Walk every scope's items and look for any `_modifiedAt` /
+  // `savedAt` / `createdAt` newer than the last-seen timestamp.
+  try {
+    var bloomBadge = document.getElementById('ncBadgeBloom');
+    if (bloomBadge) {
+      var hasBloomUnread = false;
+      try {
+        var blRaw = localStorage.getItem('roweos_bloom_library');
+        if (blRaw) {
+          var bl = JSON.parse(blRaw);
+          var lastSeenBloom = parseInt(localStorage.getItem('roweos_bloom_last_seen') || '0');
+          if (bl && typeof bl === 'object') {
+            var scopes = Object.keys(bl);
+            for (var bsi = 0; bsi < scopes.length; bsi++) {
+              var bsItems = bl[scopes[bsi]];
+              if (!Array.isArray(bsItems)) continue;
+              for (var bii = 0; bii < bsItems.length; bii++) {
+                var bItem = bsItems[bii];
+                if (!bItem) continue;
+                var bTs = 0;
+                if (typeof bItem._modifiedAt === 'number') bTs = bItem._modifiedAt;
+                else if (bItem.savedAt) bTs = Date.parse(bItem.savedAt) || 0;
+                else if (bItem.createdAt) bTs = Date.parse(bItem.createdAt) || 0;
+                if (bTs > lastSeenBloom) { hasBloomUnread = true; break; }
+              }
+              if (hasBloomUnread) break;
+            }
+          }
+        }
+      } catch(e) {}
+      if (hasBloomUnread) bloomBadge.classList.add('has-unread');
+      else bloomBadge.classList.remove('has-unread');
+    }
+  } catch(e) {}
   // Mail: check for unread inbox messages
   try {
     var mailBadge = document.getElementById('ncBadgeMail');
@@ -1252,6 +1328,32 @@ function markAutomationsViewed() {
   var badge = document.getElementById('ncBadgeAutomations');
   if (badge) badge.classList.remove('has-unread');
 }
+
+// v34.15: Mark Bloom as seen when view opens — clears the sidebar dot.
+function markBloomViewed() {
+  try { localStorage.setItem('roweos_bloom_last_seen', String(Date.now())); } catch(e){}
+  var badge = document.getElementById('ncBadgeBloom');
+  if (badge) badge.classList.remove('has-unread');
+}
+window.markBloomViewed = markBloomViewed;
+
+// v34.16: Mark Notebooks/Scribe as seen — used by the new concierge pill.
+function markScribeViewed() {
+  try { localStorage.setItem('roweos_scribe_last_seen', String(Date.now())); } catch(e){}
+  if (typeof _renderConciergeRow === 'function') {
+    try { _renderConciergeRow(); } catch(e){}
+  }
+}
+window.markScribeViewed = markScribeViewed;
+
+// v34.41: Mark Library as seen — used by the new Library concierge pill.
+function markLibraryViewed() {
+  try { localStorage.setItem('roweos_library_last_seen', String(Date.now())); } catch(e){}
+  if (typeof _renderConciergeRow === 'function') {
+    try { _renderConciergeRow(); } catch(e){}
+  }
+}
+window.markLibraryViewed = markLibraryViewed;
 
 function isNotificationPanelOpen() {
   var panel = document.getElementById('notificationCenterPanel');

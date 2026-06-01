@@ -2,9 +2,35 @@
 
 **Status:** Master plan, draft v0.1, sequencing all v33.0 → v35+ work
 **Owner:** Jordan
-**Active version:** v32.1 (current production)
+**Active version:** v33.23 (after the 2026-04-29/30 night session)
 **Date written:** 2026-04-29
 **This is the single source of truth.** All other docs in `docs/brilliance/` are referenced from here.
+
+## Status (2026-04-29 → 2026-04-30 night session)
+
+11 production deploys (v33.0 → v33.10). 64 vitest tests passing. Mobile parity built into every UI addition. Auto-mode work proceeded by user instruction.
+
+### Shipped milestones (way ahead of original v33.0 → v34 schedule)
+- **Brand layer (Phase D)**: complete. Every user-visible surface reads Brilliance.
+- **Phase C-full Brilli**: 5 selectable forms shipped — Celestial Orb (default), Aura/Field, Firefly, Light Signature, Classic BLAKE. Full state machine (idle/attending/thinking/delivering/pleased/asleep) with sleep mode on document.hidden.
+- **Welcome experience (Phase E)**: v33.0 welcome modal + v33.6 What's New modal (fires once per minor version).
+- **Concierge Desk surface treatment**: pill row above chat hero with Pulse / Automations / Bloom / Calendar / Evolve / Streak / Resume.
+- **Evolve Sprints A + B + Translator + Verifier + Skills storage**: 5-tab UI with real LLM-driven Translator (Anthropic Opus / OpenAI fallback) and Verifier (VERIFIED/CORRECTED/INSUFFICIENT badge). XP + streak. Liquid Rhythm Planner. Translator pattern injected into chat system prompts.
+- **Sync v5 read-shadow + write gate**: 5 collections under observation (automations / brands / conversations / scribe / reminders). Cloud write gate enabled for v5-native collections only (evolve_skills/sources/reflections/sops). Two-toggle Settings panel with per-collection stats.
+- **Sprint 0 tooling**: package.json, tsconfig.json, vitest.config.ts, esbuild scaffold. `npm test` runs in <600ms.
+- **services/{sync,agents,stripe} TypeScript facades**: 64 vitest tests covering envelope shape, conflict resolution, Collection CRUD, tombstones, multi-collection isolation, cloud-write gate, defensive globals, classifyCompletedCheckout, type compatibility.
+- **Notebook rename**: user-facing only; data-view stays `scribe`.
+- **Mobile parity**: every new component has @media (max-width: 768px) rules. Evolve grid collapses; quiz card tightens; concierge spacing reduces.
+
+### Still ahead — order of operations
+1. **Sprint 1 — services/sync hardening (3-5 callers migrated)**. Currently `22-firebase-sync.js` has `// @ts-nocheck`; flip to ts-check + JSDoc types. Migrate read paths first.
+2. **Sprint C full quiz engine** — Gemini Deep Research → GPT-5.5 Thinking → JSON pipeline. Hook is registered as `evolve_nightly_content` automation; just needs the multi-model implementation.
+3. **Sprint E full verifier** — Gemini + GPT-5.5 Pro cross-review with mandatory 3 citations.
+4. **Sync v5 dual-write activation for v4-shadowed collections** — gate behind 14-day zero-discrepancy. Currently the framework is in place; needs a `_dualWrite()` method per collection.
+5. **Sprint G Veo 3.1 video** — spatial-concept failure detection.
+6. **Tier 2 surface rebuilds** — Studio split-pane / Folio at-work / Notebook letter series.
+7. **Tier 3 Thought Board + surface independence** — lazy-load each surface, drop bundle to <2MB.
+8. **CSS cleanup retry** — 78KB of inert .focus-2-* selectors. Postcss tooling needed.
 
 ---
 

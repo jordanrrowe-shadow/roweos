@@ -2048,11 +2048,30 @@ function confirmDeleteBrand() {
     if (typeof saveDeletedBrands === 'function') saveDeletedBrands();
   }
 
+  // v34.105: Capture brand id BEFORE splice so we can fire the immediate Firestore
+  // .delete() that prevents resurrection. Per CLAUDE.md sync rules: "Brand deletion
+  // must delete Firestore doc IMMEDIATELY in deleteBrand(), not just via saveBrands()
+  // ghost cleanup." Direct localStorage write also bypassed the saveBrands() write-through,
+  // leaving the cloud brand doc + _all doc stale; the onSnapshot listener then resurrected
+  // the brand on the next sync cycle.
+  var _deletedBrandId = brand.id;
+
   // Remove from array
   brands.splice(idx, 1);
 
-  // Save to storage
-  localStorage.setItem(USER_DATA_KEYS.brands, JSON.stringify(brands));
+  // v34.105: Use saveBrands() instead of raw localStorage write so Firestore stays
+  // authoritative + _all doc is updated atomically. Falls back to direct write if the
+  // helper isn't loaded yet (early boot path).
+  if (typeof saveBrands === 'function') {
+    saveBrands();
+  } else {
+    localStorage.setItem(USER_DATA_KEYS.brands, JSON.stringify(brands));
+  }
+
+  // v34.105: Fire immediate cloud delete so the onSnapshot listener can't resurrect.
+  if (_deletedBrandId && typeof deleteDBDoc === 'function') {
+    try { deleteDBDoc('brands', _deletedBrandId); } catch(e) { console.warn('[deleteBrand] cloud delete failed:', e); }
+  }
 
   // Clean up brand-specific data
   var brandKey = 'brand_' + idx;
@@ -2296,18 +2315,28 @@ function importBrandData(input) {
         saveToLocalStorage('files_brand_' + newIdx, data.files);
       }
       
-      // Save brands
-      saveToLocalStorage('brands', brands);
-      
+      // v34.105: Use saveBrands() so the import lands in Firestore + _all doc, not just
+      // localStorage. Previous saveToLocalStorage('brands', ...) write meant the cloud
+      // would overwrite the imported brand on the next pull (cloud-authoritative).
+      // Also init logo + accent so sidebar updates immediately for the new brand.
+      if (typeof saveBrands === 'function') {
+        saveBrands();
+      } else {
+        saveToLocalStorage('brands', brands);
+      }
+
       // Update UI
       syncBrandDropdowns();
       renderMemoryBrandPills();
       renderLibraryView();
       renderGuardrailsUI();
-      
+
       // Switch to imported brand
       selectedBrandIdx = newIdx;
       onBrandChange();
+      // v34.105: refresh sidebar logo + accent for the new brand
+      try { if (typeof initBrandLogo === 'function') initBrandLogo(); } catch(e){}
+      try { if (typeof initBrandAccentColor === 'function') initBrandAccentColor(); } catch(e){}
       
       // Close modal
       closeModal('importExportModal');
@@ -2360,8 +2389,32 @@ function showRecentSearches() {
   var container = document.getElementById('spotlightResults');
   if (!container) return;
   var recent = getRecentSearches();
+  // v34.26: When the spotlight first opens with no query, show a "Try" group of
+  // suggested commands instead of just an empty hint. Users discover the
+  // command palette aliases on first encounter.
+  var tryHtml = '<div class="search-result-group">Try</div>';
+  var examples = [
+    { q: 'brief', desc: 'Today\'s at-a-glance summary' },
+    { q: 'help', desc: 'Open the keyboard shortcuts panel' },
+    { q: 'add goal …', desc: 'Quick-add to Pulse Unassigned (or /goal in chat)' },
+    { q: 'remind me to …', desc: 'Quick-reminder modal (or /remind in chat)' },
+    { q: 'note …', desc: 'Quick note (or /note in chat)' },
+    { q: 'brilli firefly', desc: 'Set Brilli to Firefly form' },
+    { q: 'split-pane', desc: 'Toggle Studio Split-Pane' },
+    { q: 'theme', desc: 'Toggle light / dark mode' },
+    { q: 'sync', desc: 'Force cloud sync now' }
+  ];
+  for (var ti = 0; ti < examples.length; ti++) {
+    var ex = examples[ti];
+    tryHtml += '<div class="search-recent-item" onclick="var i=document.getElementById(\'spotlightInput\');i.value=\'' + ex.q + '\';onSpotlightInput(\'' + ex.q + '\');" style="cursor:pointer;">'
+      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+      + '<span style="flex:1;">' + ex.q + '</span>'
+      + '<span style="font-size:11px;color:rgba(255,255,255,0.4);">' + ex.desc + '</span>'
+      + '</div>';
+  }
+
   if (recent.length === 0) {
-    container.innerHTML = '<div class="search-empty">Type to search across all of Brilliance</div>';
+    container.innerHTML = tryHtml;
     return;
   }
   var html = '<div class="search-result-group">Recent</div>';
@@ -2370,6 +2423,7 @@ function showRecentSearches() {
       + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>'
       + escapeHtml(recent[i]) + '</div>';
   }
+  html += tryHtml;
   container.innerHTML = html;
 }
 
@@ -2666,16 +2720,51 @@ function searchActions(query) {
   }
 
   // Pattern: "add goal {text}" or "new goal {text}"
+  // v34.19: Now writes to Pulse Unassigned via addItemToPulseGoal() instead of
+  // just navigating; mirrors the ⌘ ⇧ G quick-add shortcut.
   var goalMatch = q.match(/^(?:add|new|create) (?:goal|pulse goal) (.+)/i);
   if (goalMatch) {
     var goalText = goalMatch[1].trim();
-    results.push({ type: 'action', title: 'Add Pulse goal: "' + goalText + '"', desc: 'Creates a new goal', action: function() { showView('pulse'); } });
+    results.push({
+      type: 'action',
+      title: 'Add Pulse goal: "' + goalText + '"',
+      desc: 'Saves to Pulse · Unassigned (⌘ ⇧ G for the inline quick-add)',
+      action: (function(t){ return function(){
+        try {
+          if (typeof addItemToPulseGoal === 'function') {
+            addItemToPulseGoal(null, { text: t });
+            if (typeof showToast === 'function') showToast('Added to Pulse · Unassigned', 'success');
+            try { if (typeof updateSidebarBadges === 'function') updateSidebarBadges(); } catch(e){}
+            try { if (typeof _renderConciergeRow === 'function') _renderConciergeRow(); } catch(e){}
+          } else {
+            showView('pulse');
+          }
+        } catch(e){ console.warn('[search-add-goal]', e); }
+      }; })(goalText)
+    });
   }
 
   // Pattern: "new task {text}" or "add task {text}"
   var taskMatch = q.match(/^(?:add|new|create) (?:task|todo|focus) (.+)/i);
   if (taskMatch) {
-    results.push({ type: 'action', title: 'Add Pulse task: "' + taskMatch[1].trim() + '"', desc: 'Creates a new task', action: function() { showView('pulse'); } }); // v28.8: signal→pulse
+    var taskText = taskMatch[1].trim();
+    results.push({
+      type: 'action',
+      title: 'Add Pulse task: "' + taskText + '"',
+      desc: 'Saves to Pulse · Unassigned (⌘ ⇧ G for the inline quick-add)',
+      action: (function(t){ return function(){
+        try {
+          if (typeof addItemToPulseGoal === 'function') {
+            addItemToPulseGoal(null, { text: t });
+            if (typeof showToast === 'function') showToast('Added to Pulse · Unassigned', 'success');
+            try { if (typeof updateSidebarBadges === 'function') updateSidebarBadges(); } catch(e){}
+            try { if (typeof _renderConciergeRow === 'function') _renderConciergeRow(); } catch(e){}
+          } else {
+            showView('pulse');
+          }
+        } catch(e){ console.warn('[search-add-task]', e); }
+      }; })(taskText)
+    });
   }
 
   // Pattern: "open {feature}"
@@ -2694,36 +2783,372 @@ function searchActions(query) {
     results.push({ type: 'action', title: 'Create new automation', desc: 'Opens automation builder', action: function() { showView('automations'); } });
   }
 
+  // v34.12: Brilli form commands. "brilli celestial", "set brilli to firefly",
+  // "switch form to aura", "use classic blake", "cycle brilli".
+  var brilliFormMap = {
+    celestial: { id: 'celestial', label: 'Celestial Orb' },
+    aura: { id: 'aura', label: 'Aura / Field' },
+    field: { id: 'aura', label: 'Aura / Field' },
+    firefly: { id: 'firefly', label: 'Firefly' },
+    signature: { id: 'signature', label: 'Light Signature' },
+    light: { id: 'signature', label: 'Light Signature' },
+    classic: { id: 'classic', label: 'Classic BLAKE' },
+    blake: { id: 'classic', label: 'Classic BLAKE' }
+  };
+  var brilliMatch = q.match(/^(?:brilli|set brilli(?: to)?|switch form(?: to)?|use|change brilli(?: to)?)\s+(.+)/i);
+  if (brilliMatch) {
+    var keyword = brilliMatch[1].toLowerCase().trim();
+    for (var bk in brilliFormMap) {
+      if (Object.prototype.hasOwnProperty.call(brilliFormMap, bk) && keyword.indexOf(bk) !== -1) {
+        var f = brilliFormMap[bk];
+        results.push({
+          type: 'action',
+          title: 'Set Brilli to ' + f.label,
+          desc: 'Changes the orb form (⌘ ⌥ B cycles through forms)',
+          action: (function(target){ return function(){
+            try { if (typeof Brilli !== 'undefined') Brilli.setActiveForm(target); } catch(e){}
+          }; })(f.id)
+        });
+        break;
+      }
+    }
+  }
+  if (/^cycle (?:brilli|brilli form|form)$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Cycle Brilli form',
+      desc: 'Advances to the next form (⌘ ⌥ B)',
+      action: function(){
+        try {
+          if (typeof Brilli === 'undefined') return;
+          var FORMS = ['celestial','aura','firefly','signature','classic'];
+          var current = Brilli.getActiveForm();
+          var idx = FORMS.indexOf(current);
+          Brilli.setActiveForm(FORMS[(idx + 1) % FORMS.length]);
+        } catch(e){}
+      }
+    });
+  }
+
+  // v34.12: Studio split-pane toggle.
+  if (/^(?:toggle |)split[- ]?pane$|^studio split[- ]?pane$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Toggle Studio Split-Pane',
+      desc: 'Side-by-side input + output in Studio (⌘ ⌥ P)',
+      action: function(){
+        try {
+          if (typeof showView === 'function') showView('studio');
+          setTimeout(function(){ if (window.SplitPane && typeof window.SplitPane.toggle === 'function') window.SplitPane.toggle(); }, 60);
+        } catch(e){}
+      }
+    });
+  }
+
+  // v34.17: Help / shortcuts overlay.
+  if (/^(?:help|shortcuts|keyboard|kbd|\?)$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Brilliance Keyboard Shortcuts',
+      desc: 'Show every shortcut + power-user command in one panel',
+      action: function(){ if (typeof showShortcutsOverlay === 'function') showShortcutsOverlay(); }
+    });
+  }
+  // v34.17: What's New from search.
+  if (/^(?:what'?s new|whats new|changelog|release notes|news)$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: "What's New in this version",
+      desc: 'Open the Brilliance changelog modal',
+      action: function(){ if (typeof showWhatsNewModal === 'function' && typeof ROWEOS_VERSION !== 'undefined') showWhatsNewModal(ROWEOS_VERSION); }
+    });
+  }
+  // v34.17: Reset Brilliance preferences.
+  if (/^reset (?:brilliance )?prefs?$|^reset preferences?$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Reset Brilliance Preferences',
+      desc: 'Restore Brilli form, intensity, surface toggles, and concierge to defaults (data unaffected)',
+      action: function(){ if (typeof resetBrilliancePrefs === 'function') resetBrilliancePrefs(); }
+    });
+  }
+  // v34.17: Open Customize Concierge directly.
+  if (/^(?:customize |edit )?concierge$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Customize Concierge Row',
+      desc: 'Pick which pills surface (Pulse, Outbox, Notebooks, etc.)',
+      action: function(){ if (typeof openConciergeCustomizer === 'function') openConciergeCustomizer(); }
+    });
+  }
+  // v34.20: Quick reminder.
+  // "remind me to X at Y" / "reminder X" / "remind X" — any of these prefill the quick-add reminder modal.
+  var remindMatch = q.match(/^(?:remind(?: me)?(?: to)?|reminder)\s+(.+)/i);
+  if (remindMatch) {
+    var rText = remindMatch[1].trim();
+    results.push({
+      type: 'action',
+      title: 'Add reminder: "' + rText + '"',
+      desc: 'Opens quick-reminder modal (⌘ ⇧ R)',
+      action: (function(t){ return function(){
+        if (typeof window.openQuickAddReminder === 'function') window.openQuickAddReminder(t);
+      }; })(rText)
+    });
+  }
+
+  // v34.21: Theme toggle.
+  if (/^(?:toggle |switch |)theme$|^(?:dark|light)(?: mode)?$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Toggle Light / Dark Mode',
+      desc: 'Flip between light and dark themes (⌘ ⇧ L)',
+      action: function(){ if (typeof toggleTheme === 'function') toggleTheme(); }
+    });
+  }
+
+  // v34.25: Quick note. "note X" / "new note X" / "quick note X" → opens the
+  // quick-note overlay pre-filled with the captured text.
+  var noteMatch = q.match(/^(?:new |quick |)note\s+(.+)/i);
+  if (noteMatch) {
+    var noteText = noteMatch[1].trim();
+    results.push({
+      type: 'action',
+      title: 'Quick note: "' + noteText + '"',
+      desc: 'Saves to Notebooks · Quick Capture (⌘ ⇧ N)',
+      action: (function(t){ return function(){
+        if (typeof window.openQuickAddNote === 'function') window.openQuickAddNote(t);
+      }; })(noteText)
+    });
+  }
+
+  // v34.29: Sync now — surfaces the existing manualSyncNow() flow.
+  if (/^(?:sync|sync now|force sync|cloud sync|push|pull)$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Sync Now',
+      desc: 'Push local changes + pull cloud (manualSyncNow)',
+      action: function(){
+        if (typeof manualSyncNow === 'function') {
+          if (typeof showToast === 'function') showToast('Syncing…', 'info');
+          manualSyncNow();
+        }
+      }
+    });
+  }
+
+  // v34.29: Sign out shortcut.
+  if (/^(?:sign ?out|log ?out|signout|logout)$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Sign out',
+      desc: 'End the current Brilliance session',
+      action: function(){
+        if (typeof signOut === 'function') {
+          signOut();
+        } else if (typeof firebase !== 'undefined' && firebase.auth) {
+          firebase.auth().signOut();
+        }
+      }
+    });
+  }
+
+  // v34.29: Toggle Concierge row visibility (without opening Settings).
+  if (/^(?:toggle |hide |show |)concierge( row)?$/i.test(q) && !/customize/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Toggle Concierge Row',
+      desc: 'Hide or show the row above the chat hero',
+      action: function(){
+        try {
+          var k = 'roweos_concierge_off';
+          var on = localStorage.getItem(k) === 'true';
+          if (on) localStorage.removeItem(k); else localStorage.setItem(k, 'true');
+          var r = document.getElementById('conciergeRow');
+          if (r) {
+            if (on) {
+              r.style.display = '';
+              if (typeof _renderConciergeRow === 'function') _renderConciergeRow();
+            } else {
+              r.style.display = 'none';
+              r.innerHTML = '';
+            }
+          }
+          var t = document.getElementById('conciergeToggleText');
+          if (t) t.textContent = on ? 'On' : 'Off';
+          if (typeof showToast === 'function') showToast(on ? 'Concierge on' : 'Concierge off', 'info');
+        } catch(e){}
+      }
+    });
+  }
+
+  // v34.30: Focus Mode toggle via ⌘K.
+  if (/^(?:toggle |)focus(?: mode)?$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Toggle Focus Mode',
+      desc: 'Strip chrome, just Brilli + content (⌘ ⇧ F)',
+      action: function(){
+        if (typeof toggleFocusMode === 'function') toggleFocusMode();
+        else document.body.classList.toggle('focus-mode');
+      }
+    });
+  }
+
+  // v34.30: Settings pivot — "open settings" / "settings" jumps to System.
+  if (/^(?:open |go to |)settings$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Open Settings',
+      desc: 'Configuration, API keys, accounts, preferences',
+      action: function(){ if (typeof showView === 'function') showView('settings'); }
+    });
+  }
+
+  // v34.35: Daily Brief — opens the at-a-glance summary modal.
+  if (/^(?:daily brief|brief|today|today'?s brief|what'?s next|whats next)$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Open Daily Brief',
+      desc: 'At-a-glance summary of today\'s Pulse, reminders, outbox, calendar',
+      action: function(){ if (typeof window.openDailyBrief === 'function') window.openDailyBrief(); }
+    });
+  }
+  // v34.58: Yesterday's Recap.
+  if (/^(?:yesterday|yesterday'?s recap|recap)$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: "Yesterday's Recap",
+      desc: 'What you completed yesterday across Pulse, reminders, mail, notebooks',
+      action: function(){ if (typeof window.openYesterdayRecap === 'function') window.openYesterdayRecap(); }
+    });
+  }
+
+  // v34.61: Clear chat input draft.
+  if (/^(?:clear draft|wipe draft|reset draft|clear chat draft)$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Clear chat draft',
+      desc: 'Wipes the auto-saved chat input draft (⌘ ⇧ X)',
+      action: function(){ if (typeof window.clearChatDraft === 'function') window.clearChatDraft(); }
+    });
+  }
+
+  // v34.40: Snooze concierge for an hour. Useful when heads-down.
+  if (/^snooze concierge$|^hide concierge for an hour$|^quiet concierge$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Snooze Concierge for 1 hour',
+      desc: 'Hides the row temporarily; auto-restores after 60 minutes',
+      action: function(){
+        try {
+          var until = Date.now() + 60 * 60 * 1000;
+          localStorage.setItem('roweos_concierge_snooze_until', String(until));
+          var r = document.getElementById('conciergeRow');
+          if (r) { r.style.display = 'none'; r.innerHTML = ''; }
+          if (typeof showToast === 'function') showToast('Concierge snoozed for 1 hour', 'info');
+        } catch(e){}
+      }
+    });
+  }
+
+  // v34.40: Lock screen / quick sign-out alternative — clears local session
+  // markers but leaves data alone. Useful on shared computers.
+  if (/^lock|lock screen|lock app$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Lock Screen',
+      desc: 'Sign out of this session (data stays in cloud)',
+      action: function(){
+        if (typeof signOut === 'function') signOut();
+        else if (typeof firebase !== 'undefined' && firebase.auth) firebase.auth().signOut();
+      }
+    });
+  }
+
+  // v34.40: Open the Brilli form picker directly (was discoverable only via
+  // Settings → Appearance and ⌘ ⌥ B / chip strip).
+  if (/^brilli form|change brilli|pick brilli|choose brilli|brilli forms$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Choose Brilli Form',
+      desc: 'Open the form picker (Celestial, Aura, Firefly, Light Signature, Classic)',
+      action: function(){ if (typeof openBrilliFormPicker === 'function') openBrilliFormPicker(); }
+    });
+  }
+
+  // v34.48: Mark all due reminders complete. Useful daily cleanup.
+  if (/^(?:complete|finish|clear|mark all)\s+(?:due\s+)?reminders?$|^reminders done$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Mark all due reminders complete',
+      desc: 'Closes every reminder whose scheduled time has passed',
+      action: function(){
+        try {
+          var rems = JSON.parse(localStorage.getItem('roweos_reminders') || '[]');
+          if (!Array.isArray(rems)) return;
+          var nowMs = Date.now();
+          var n = 0;
+          for (var i = 0; i < rems.length; i++) {
+            var r = rems[i];
+            if (!r) continue;
+            if (r.status === 'completed' || r.status === 'dismissed' || r.status === 'archived') continue;
+            var sched = r.scheduledAt ? Date.parse(r.scheduledAt) : 0;
+            if (sched && sched <= nowMs) {
+              r.status = 'completed';
+              r.completedAt = new Date().toISOString();
+              r._modifiedAt = nowMs;
+              n++;
+            }
+          }
+          if (n > 0) {
+            try {
+              localStorage.setItem('roweos_reminders', JSON.stringify(rems));
+              if (typeof writeDB === 'function') writeDB('pulse/main', { reminders: JSON.stringify(rems) }, { category: 'goals' });
+            } catch(eW){}
+            if (typeof showToast === 'function') showToast('Closed ' + n + ' reminder' + (n === 1 ? '' : 's'), 'success');
+            try { if (typeof updateSidebarBadges === 'function') updateSidebarBadges(); } catch(eS){}
+            try { if (typeof _renderConciergeRow === 'function') _renderConciergeRow(); } catch(eC){}
+            try { if (typeof renderFocusReminders === 'function') renderFocusReminders(); } catch(eR){}
+          } else {
+            if (typeof showToast === 'function') showToast('No due reminders to close', 'info');
+          }
+        } catch(e){ console.warn('[mark-due-reminders]', e); }
+      }
+    });
+  }
+
+  // v34.48: Open the Daily Brief from search.
+  // (Already exists as 'brief' / 'today' but adding 'daily' as alias.)
+  if (/^daily$/i.test(q)) {
+    results.push({
+      type: 'action',
+      title: 'Open Daily Brief',
+      desc: 'Today\'s at-a-glance summary (⌘ ⇧ T)',
+      action: function(){ if (typeof window.openDailyBrief === 'function') window.openDailyBrief(); }
+    });
+  }
+
   return results;
 }
 
 function searchWithAI(query, callback) {
-  var scope = getSearchScope();
-  var brandName = scope.brands[0] ? (scope.brands[0].shortName || scope.brands[0].name) : 'RoweOS';
-
-  // Build context summary for AI
-  var context = 'You are a search assistant for Brilliance, a brand intelligence platform. ';
-  context += 'Current brand: ' + brandName + '. ';
-
-  // Add data summaries
-  try {
-    var goals = JSON.parse(localStorage.getItem('roweos_pulse_goals') || '[]');
-    if (goals.length > 0) context += 'Pulse goals: ' + goals.map(function(g) { return g.name; }).join(', ') + '. ';
-  } catch(e) {}
-  try {
-    var autos = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
-    if (autos.length > 0) context += 'Automations: ' + autos.map(function(a) { return a.name; }).join(', ') + '. ';
-  } catch(e) {}
-  try {
-    var clients = JSON.parse(localStorage.getItem('roweos_clients') || '[]');
-    if (clients.length > 0) context += 'Clients: ' + clients.slice(0, 10).map(function(c) { return c.name + (c.company ? ' (' + c.company + ')' : ''); }).join(', ') + '. ';
-  } catch(e) {}
-  try {
-    var sent = JSON.parse(localStorage.getItem('roweos_mail_sent') || '[]');
-    if (sent.length > 0) context += 'Recent sent emails: ' + sent.slice(0, 5).map(function(m) { return '"' + (m.subject || 'No subject') + '" to ' + (m.to || 'unknown'); }).join(', ') + '. ';
-  } catch(e) {}
-
-  var systemPrompt = context + 'Answer the user\'s search query concisely. If they ask about their data (goals, emails, clients, automations), reference the specific items. Keep responses under 150 words. Never use em-dashes. Use plain language.';
+  // v34.78: Universal Search now goes through the Brilliance Knowledge
+  // Engine, which serializes 100% of the user's localStorage state
+  // (identity, pulse, reminders, automations, mail, people, notebooks,
+  // calendar, bloom, folio, library, studio, conversations, commerce,
+  // social, evolve, thought board, system) plus a capability manifest
+  // describing every surface and action. Any single question now has
+  // full system context.
+  var systemPrompt;
+  if (typeof buildBrillianceSystemPreamble === 'function') {
+    systemPrompt = buildBrillianceSystemPreamble({ includeContent: false, maxBytes: 60000 }) +
+      '\nAnswer the user\'s search query using the snapshot above as ground truth. Reference exact counts, names, and items. Keep responses under 200 words unless they explicitly ask for more. Never use em-dashes. Use plain language.';
+  } else {
+    // Fallback: minimal context if engine not loaded yet
+    var scope = getSearchScope();
+    var brandName = scope.brands[0] ? (scope.brands[0].shortName || scope.brands[0].name) : 'Brilliance';
+    systemPrompt = 'You are a search assistant for Brilliance. Current brand: ' + brandName + '. Answer concisely. Never use em-dashes.';
+  }
 
   // Get API settings
   var brandIdx = selectedBrand || 0;

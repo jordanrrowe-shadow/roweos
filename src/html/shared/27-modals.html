@@ -58,6 +58,7 @@
             <option value="company">Company (Founder)</option>
             <option value="check-in">Check-in (Feedback)</option>
             <optgroup label="Onboarding &amp; Engagement">
+              <option value="brilliance_transition">Brilliance Transition (Rebrand)</option>
               <option value="onboarding_survey">Onboarding Survey</option>
               <option value="reengagement">Re-engagement</option>
               <option value="feature_announcement">Feature Announcement</option>
@@ -103,7 +104,11 @@
               <option value="6">XXL</option>
             </select>
           </div>
-          <div id="betaEmailPreviewContent" style="border:1px solid var(--border-color);border-top:1px solid var(--border-color);border-radius:0 0 var(--radius-md) var(--radius-md);overflow:hidden;background:#0a0a0a;"></div>
+          <!-- v34.69: container width capped to email-standard 640px so the
+               iframe doesn't show a stark white margin in the admin compose
+               UI. Centered with margin auto so it sits visually balanced
+               regardless of how wide the modal grows. -->
+          <div id="betaEmailPreviewContent" style="border:1px solid var(--border-color);border-top:1px solid var(--border-color);border-radius:0 0 var(--radius-md) var(--radius-md);overflow:hidden;background:#0a0a0a;max-width:640px;margin:0 auto;width:100%;"></div>
         </div>
       </div>
       <!-- v22.7: Pinned footer - always visible -->
@@ -407,7 +412,7 @@
           <svg class="svg-icon-lg" viewBox="0 0 24 24">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
           </svg>
-          Send Feedback
+          Send Brilliance Feedback
         </div>
         <button class="modal-close" onclick="closeFeedbackModal()">&times;</button>
       </div>
@@ -439,105 +444,132 @@
           </div>
         </div>
 
-        <!-- v20.20: Feature area cards (multi-select) -->
+        <!-- v34.85: Feature area cards refreshed to match the current Brilliance surface map.
+             Order MUST stay in sync with the `areas` array in 22-firebase-sync.js
+             (toggleFeedbackArea + openFeedbackModal selection-clear loop both index by it). -->
         <div id="feedbackAreaSection" style="margin-bottom:16px;">
           <label style="display:block;font-size:var(--text-sm);font-weight:600;color:var(--text-secondary);margin-bottom:4px;">Which area(s)?</label>
-          <p style="font-size:11px;color:var(--text-tertiary);margin:0 0 8px;">Select all that apply</p>
+          <p style="font-size:11px;color:var(--text-tertiary);margin:0 0 8px;">Select all that apply. Brand mode and Life mode share the same surfaces.</p>
           <div class="feedback-area-grid" id="feedbackAreaGrid">
             <div class="feedback-area-card" onclick="toggleFeedbackArea('chat')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
               <div class="fac-name">Chat</div>
-              <div class="fac-desc">Your AI agents</div>
-            </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('studio')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
-              <div class="fac-name">Studio</div>
-              <div class="fac-desc">Operations and content</div>
-            </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('focus')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-              <div class="fac-name">Focus</div>
-              <div class="fac-desc">Tasks and daily focus</div>
+              <div class="fac-desc">BrandAI / LifeAI agents</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('pulse')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
               <div class="fac-name">Pulse</div>
-              <div class="fac-desc">Goals and momentum</div>
+              <div class="fac-desc">Goals, items, daily anchor</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('rhythm')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
               <div class="fac-name">Rhythm</div>
-              <div class="fac-desc">Scheduling and routines</div>
+              <div class="fac-desc">Calendar, routines, scheduling</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('studio')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+              <div class="fac-name">Studio</div>
+              <div class="fac-desc">Operations, content, image / video</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('notebooks')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+              <div class="fac-name">Notebooks</div>
+              <div class="fac-desc">Long-form writing, knowledge capture</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('evolve')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/><path d="M9 11l3 3 3-3"/></svg></div>
+              <div class="fac-name">Evolve</div>
+              <div class="fac-desc">Adaptive learning, quiz, verifier</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('thought_board')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+              <div class="fac-name">Thought Board</div>
+              <div class="fac-desc">Pin board, idea exploration</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('folio')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+              <div class="fac-name">Folio</div>
+              <div class="fac-desc">Visual artifact builder</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('library')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
               <div class="fac-name">Library</div>
-              <div class="fac-desc">Storage and assets</div>
+              <div class="fac-desc">Files, knowledge base</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('bloom')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12l2 2 4-4"/></svg></div>
+              <div class="fac-name">Bloom</div>
+              <div class="fac-desc">AI brand feed, saved seeds</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('mail')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div class="fac-name">Mail</div>
+              <div class="fac-desc">Inbox, outbox, scheduled</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('social')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 010 20"/><path d="M12 2a15 15 0 000 20"/></svg></div>
+              <div class="fac-name">Social</div>
+              <div class="fac-desc">Cross-platform publishing</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('automations')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
               <div class="fac-name">Automations</div>
               <div class="fac-desc">Pipelines and schedules</div>
             </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('identity')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-              <div class="fac-name">Identity</div>
-              <div class="fac-desc">Brand voice and tuning</div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('clients')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+              <div class="fac-name">People / Clients</div>
+              <div class="fac-desc">Pipeline, contacts, CRM</div>
             </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('memory')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a4 4 0 014 4c0 2-2 3-2 6h-4c0-3-2-4-2-6a4 4 0 014-4z"/><line x1="10" y1="16" x2="14" y2="16"/><line x1="10" y1="19" x2="14" y2="19"/></svg></div>
-              <div class="fac-name">Memory</div>
-              <div class="fac-desc">Persistent context</div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('analytics')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+              <div class="fac-name">Analytics</div>
+              <div class="fac-desc">API costs, invoices, performance</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('inventory')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
               <div class="fac-name">Inventory</div>
               <div class="fac-desc">Products and services</div>
             </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('clients')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
-              <div class="fac-name">Clients</div>
-              <div class="fac-desc">Contacts and CRM</div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('identity')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+              <div class="fac-name">Identity</div>
+              <div class="fac-desc">Brand mission, voice, life context</div>
             </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('analytics')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-              <div class="fac-name">Analytics</div>
-              <div class="fac-desc">Usage and performance</div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('history')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/><path d="M3 12a9 9 0 0114-7.5"/></svg></div>
+              <div class="fac-name">History</div>
+              <div class="fac-desc">Conversation timeline, recall</div>
             </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('settings')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
-              <div class="fac-name">Settings</div>
-              <div class="fac-desc">App configuration</div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('brilli')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9" opacity="0.4"/></svg></div>
+              <div class="fac-name">Brilli</div>
+              <div class="fac-desc">Orb persona, ambient state</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('search')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <div class="fac-name">Knowledge / Search</div>
+              <div class="fac-desc">Universal Search, Brilliance Knowledge</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('notifications')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
               <div class="fac-name">Notifications</div>
-              <div class="fac-desc">Alerts and push</div>
-            </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('mail')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-              <div class="fac-name">Mail</div>
-              <div class="fac-desc">Compose, inbox, outbox</div>
-            </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('bloom')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12l2 2 4-4"/></svg></div>
-              <div class="fac-name">Bloom</div>
-              <div class="fac-desc">AI news feed</div>
-            </div>
-            <div class="feedback-area-card" onclick="toggleFeedbackArea('folio')">
-              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-              <div class="fac-name">Folio</div>
-              <div class="fac-desc">Visual builder</div>
+              <div class="fac-desc">Alerts, reminders, push</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('sync')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10"/><path d="M20.49 15a9 9 0 01-14.85 3.36L1 14"/></svg></div>
               <div class="fac-name">Sync</div>
-              <div class="fac-desc">Cloud sync</div>
+              <div class="fac-desc">Cloud sync, cross-device data</div>
+            </div>
+            <div class="feedback-area-card" onclick="toggleFeedbackArea('settings')">
+              <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+              <div class="fac-name">Settings</div>
+              <div class="fac-desc">Preferences, theme, integrations</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('onboarding')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
               <div class="fac-name">Onboarding</div>
-              <div class="fac-desc">Setup wizard</div>
+              <div class="fac-desc">Welcome, setup, account</div>
             </div>
             <div class="feedback-area-card" onclick="toggleFeedbackArea('admin')">
               <div class="fac-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
@@ -571,7 +603,7 @@
         <!-- Description -->
         <div style="margin-bottom:16px;">
           <label style="display:block;font-size:var(--text-sm);font-weight:600;color:var(--text-secondary);margin-bottom:6px;">Description</label>
-          <textarea id="feedbackDescription" placeholder="Tell us what's on your mind..." rows="4" style="width:100%;padding:10px 14px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);resize:vertical;font-family:inherit;line-height:1.6;box-sizing:border-box;"></textarea>
+          <textarea id="feedbackDescription" placeholder="What's working, what's broken, what's missing? The more specific, the faster it ships." rows="4" style="width:100%;padding:10px 14px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-md);color:var(--text-primary);font-size:var(--text-sm);resize:vertical;font-family:inherit;line-height:1.6;box-sizing:border-box;"></textarea>
         </div>
 
         <!-- Screenshots -->
@@ -597,7 +629,7 @@
     <div class="search-container">
       <div class="search-input-wrapper">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" class="search-input" id="spotlightInput" placeholder="Search or ask anything..." oninput="onSpotlightInput(this.value)" onkeydown="onSpotlightKeydown(event)" autofocus>
+        <input type="text" class="search-input" id="spotlightInput" placeholder="Search, ask, or try “help”, “brilli firefly”, “split-pane”, “add goal …”" oninput="onSpotlightInput(this.value)" onkeydown="onSpotlightKeydown(event)" autofocus>
         <span class="search-kbd">ESC</span>
       </div>
       <div class="search-mode-bar">

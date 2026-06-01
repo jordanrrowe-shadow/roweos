@@ -18,7 +18,7 @@ var liquidNavTabs = {
   },
   scribe: {
     id: 'scribe',
-    label: 'Scribe',
+    label: 'Notebook',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>'
   },
   rhythm: {
@@ -1261,8 +1261,17 @@ function saveBrandModelConfig() {
     localStorage.setItem(USER_DATA_KEYS.brandSettings, JSON.stringify(brandSettings));
     // v25.0: Write-through handles push via writeDB in saveBrandSettings
     stampLocalSave();
-    if (typeof writeDB === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
-      writeDB('profile/main', { brandSettings: brandSettings });
+    // v33.32 (Sprint 1): services/sync facade with safe fallback.
+    if (typeof firebaseUser !== 'undefined' && firebaseUser) {
+      try {
+        if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+          window.BrillianceServices.sync.writeDB('profile/main', { brandSettings: brandSettings });
+        } else if (typeof writeDB === 'function') {
+          writeDB('profile/main', { brandSettings: brandSettings });
+        }
+      } catch(e) {
+        if (typeof writeDB === 'function') writeDB('profile/main', { brandSettings: brandSettings });
+      }
     }
   } catch (e) {
     console.error('[Storage] Failed to save brand model config:', e);
@@ -1400,7 +1409,7 @@ function openApiKeyModal(provider) {
   html += '</div>';
   html += '<div style="font-size:11px;color:var(--text-muted);line-height:1.7;">';
   html += '<span style="color:' + config.color + ';">1.</span> Visit <a href="' + config.docsUrl + '" target="_blank" style="color:' + config.color + ';text-decoration:none;">' + config.docsLabel + '</a> to create an API key<br>';
-  html += '<span style="color:' + config.color + ';">2.</span> Or email <a href="mailto:roweos@therowecollection.com" style="color:' + config.color + ';text-decoration:none;">roweos@therowecollection.com</a> for private Beta key access';
+  html += '<span style="color:' + config.color + ';">2.</span> Or email <a href="mailto:jordan@therowecollection.com" style="color:' + config.color + ';text-decoration:none;">jordan@therowecollection.com</a> if you\'d rather we provision a key for you';
   html += '</div>';
   html += '</div>';
 
@@ -1514,7 +1523,7 @@ function openNanobananaKeyModal() {
         '</div>' +
         '<div style="border-top:1px solid var(--border-color);padding-top:10px;font-size:12px;color:var(--text-muted);line-height:1.7;">' +
           '<span style="color:var(--accent);">1.</span> Visit <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent);text-decoration:none;">Google AI Studio</a> to create an API key<br>' +
-          '<span style="color:var(--accent);">2.</span> Or email <a href="mailto:roweos@therowecollection.com" style="color:var(--accent);text-decoration:none;">roweos@therowecollection.com</a> for private Beta key access' +
+          '<span style="color:var(--accent);">2.</span> Or email <a href="mailto:jordan@therowecollection.com" style="color:var(--accent);text-decoration:none;">jordan@therowecollection.com</a> if you\'d rather we provision a key for you' +
         '</div>' +
       '</div>' +
       '<div class="api-key-modal-actions" style="margin-top: var(--space-5);">' +
@@ -2222,6 +2231,10 @@ function initializeFirebase(shouldSignIn) {
   } catch(e) { console.warn('[Storage] persist() error:', e); }
 
   // v26.3: Explicit auth persistence for PWA -- keep user signed in across app restarts
+  // v34.99: Reverted v34.98's Safari Private persistence downgrade. The
+  // probe was firing in non-Private Safari too (some Safari builds report
+  // <200MB even in regular browsing). LOCAL persistence is the right
+  // default everywhere; let Firebase decide the storage backend.
   try {
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   } catch(e) { console.warn('[Firebase] setPersistence error:', e); }
@@ -2270,7 +2283,7 @@ function initializeFirebase(shouldSignIn) {
           console.log('Firebase: Redirect login success for', result.user.email);
           firebaseLoginCompleted = true;
           firebaseUser = result.user;
-          sessionStorage.removeItem('roweos_firebase_auth_pending');
+          try{sessionStorage.removeItem('roweos_firebase_auth_pending');}catch(e){}try{localStorage.removeItem('roweos_firebase_auth_pending');}catch(e){}
           completeFirebaseLogin(result.user);
         }
       })
@@ -2283,7 +2296,7 @@ function initializeFirebase(shouldSignIn) {
           showToast('Sign-in error: ' + (error.message || '').substring(0, 60), 'error');
         }
         // Clear pending flag on error
-        sessionStorage.removeItem('roweos_firebase_auth_pending');
+        try{sessionStorage.removeItem('roweos_firebase_auth_pending');}catch(e){}try{localStorage.removeItem('roweos_firebase_auth_pending');}catch(e){}
       });
     
     // STEP 2: Also listen for auth state changes (backup and for existing sessions)
@@ -2360,12 +2373,12 @@ function initializeFirebase(shouldSignIn) {
 
         // Only complete login if not already done by getRedirectResult
         if (!firebaseLoginCompleted) {
-          var hasPendingAuth = sessionStorage.getItem('roweos_firebase_auth_pending');
+          var hasPendingAuth = (function(){try{return sessionStorage.getItem('roweos_firebase_auth_pending')||localStorage.getItem('roweos_firebase_auth_pending');}catch(e){try{return localStorage.getItem('roweos_firebase_auth_pending');}catch(e2){return null;}}})();
 
           if (hasPendingAuth) {
             console.log('Firebase: Completing pending auth for', user.email);
             firebaseLoginCompleted = true;
-            sessionStorage.removeItem('roweos_firebase_auth_pending');
+            try{sessionStorage.removeItem('roweos_firebase_auth_pending');}catch(e){}try{localStorage.removeItem('roweos_firebase_auth_pending');}catch(e){}
             completeFirebaseLogin(user);
           } else {
             console.log('Firebase: Existing session for', user.email);
@@ -2411,7 +2424,16 @@ function initializeFirebase(shouldSignIn) {
   return Promise.resolve();
 }
 
-// v15.0: Centralized Google Sign-In handler (ES5, no async)
+// v34.97: Detect desktop Safari (NOT Chromium), where signInWithPopup
+// gets stuck in Private Browsing because ITP blocks the popup→opener
+// postMessage handoff. We force redirect flow there.
+// v34.99: Reverted v34.97's "force redirect on desktop Safari" — that
+// caused new loops on regular (non-private) Safari. Restored the
+// original popup-everywhere flow, which is what worked for months
+// before. Safari Private Browsing remains a known constraint that
+// requires a custom auth domain (proxy /__/auth/* through roweos.com)
+// to fully fix — TODO once the OAuth Console redirect URI is added.
+
 function handleGoogleSignIn() {
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
@@ -2424,47 +2446,51 @@ function handleGoogleSignIn() {
   if (isStandalone && isIOS) {
     showToast('Opening sign-in...', 'info');
     return firebase.auth().signInWithPopup(provider).then(function(result) {
-      if (result && result.user) {
-        console.log('Firebase: iOS PWA popup success:', result.user.email);
-      }
+      if (result && result.user) console.log('Firebase: iOS PWA popup success:', result.user.email);
     }).catch(function(popupError) {
       console.log('Firebase: iOS PWA popup failed:', popupError.code);
       showToast('Please sign in via Safari browser, then re-add the app to your home screen', 'warning', 8000);
       window.open(window.location.href, '_blank');
     });
   } else if (isIOS && !isStandalone) {
-    // v16.10: iOS Safari - popup instead of redirect (Safari ITP blocks redirect flow)
+    // v16.10: iOS Safari - popup first, fallback to redirect on storage error
     showToast('Opening sign-in...', 'info');
     return firebase.auth().signInWithPopup(provider).then(function(result) {
-      if (result && result.user) {
-        console.log('Firebase: iOS Safari popup success:', result.user.email);
-      }
+      if (result && result.user) console.log('Firebase: iOS Safari popup success:', result.user.email);
     }).catch(function(popupError) {
       console.log('Firebase: iOS Safari popup failed:', popupError.code, '- trying redirect');
-      sessionStorage.setItem('roweos_firebase_auth_pending', 'true');
+      try{sessionStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}try{localStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}
       return firebase.auth().signInWithRedirect(provider);
     });
   } else if (isMobile && !isStandalone) {
-    sessionStorage.setItem('roweos_firebase_auth_pending', 'true');
+    try{sessionStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}try{localStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}
     showToast('Redirecting to Google sign-in...', 'info');
     return firebase.auth().signInWithRedirect(provider);
   } else if (isAndroid && isStandalone) {
-    sessionStorage.setItem('roweos_firebase_auth_pending', 'true');
+    try{sessionStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}try{localStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}
     showToast('Redirecting to Google sign-in...', 'info');
     return firebase.auth().signInWithRedirect(provider);
   } else {
+    // Desktop (Chromium AND Safari): popup. Only fall back to redirect
+    // when the browser explicitly blocks the popup. This is the flow
+    // that worked for months before the v34.97 misadventure.
     return firebase.auth().signInWithPopup(provider).then(function(result) {
-      if (result && result.user) {
-        console.log('Firebase popup sign-in success:', result.user.email);
-      }
+      if (result && result.user) console.log('Firebase popup sign-in success:', result.user.email);
     }).catch(function(error) {
       if (error.code === 'auth/popup-blocked') {
         showToast('Popup blocked - redirecting...', 'info');
+        try{sessionStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}try{localStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}
         return firebase.auth().signInWithRedirect(provider);
       } else if (error.code === 'auth/popup-closed-by-user') {
         showToast('Sign-in cancelled', 'info');
+        var s = document.getElementById('authGateStatus');
+        if (s) s.textContent = '';
       } else if (error.code === 'auth/unauthorized-domain') {
         showToast('Add this domain to Firebase: Authentication > Settings > Authorized domains', 'error');
+      } else if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/web-storage-unsupported') {
+        try{sessionStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}try{localStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}
+        showToast('Browser blocked the popup. Redirecting...', 'info');
+        return firebase.auth().signInWithRedirect(provider);
       } else {
         console.error('Firebase sign-in error:', error);
         showToast('Sign-in error: ' + error.message, 'error');
@@ -2491,12 +2517,12 @@ function handleXSignIn() {
       if (popupError.code === 'auth/popup-closed-by-user') {
         showToast('Sign-in cancelled', 'info');
       } else {
-        sessionStorage.setItem('roweos_firebase_auth_pending', 'true');
+        try{sessionStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}try{localStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}
         return firebase.auth().signInWithRedirect(provider);
       }
     });
   } else if (isMobile) {
-    sessionStorage.setItem('roweos_firebase_auth_pending', 'true');
+    try{sessionStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}try{localStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}
     showToast('Redirecting to X sign-in...', 'info');
     return firebase.auth().signInWithRedirect(provider);
   } else {
@@ -2671,7 +2697,7 @@ function handleAppleSignIn() {
   var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 
   if (isMobile && !isStandalone) {
-    sessionStorage.setItem('roweos_firebase_auth_pending', 'true');
+    try{sessionStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}try{localStorage.setItem('roweos_firebase_auth_pending', 'true');}catch(e){}
     showToast('Redirecting to Apple sign-in...', 'info');
     return firebase.auth().signInWithRedirect(provider);
   } else {

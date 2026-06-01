@@ -56,14 +56,8 @@
                     <div class="auto-agent-welcome-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
                     <div class="auto-agent-welcome-title">Automations Agent</div>
                     <div class="auto-agent-welcome-sub">Describe what you want to automate and I will build it for you.</div>
-                    <div class="auto-agent-suggestions">
-                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Generate a social media post and publish it to X tonight at 9pm')">Post to X tonight at 9pm</button>
-                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Research my competitors using Intelligence Agent and email me a summary report')">Competitor research + email</button>
-                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Find potential clients in my industry, write personalized outreach emails for each, and queue them to my Outbox')">Prospect outreach campaign</button>
-                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Write a weekly newsletter summarizing brand updates and queue it to Outbox every Monday at 9am')">Weekly newsletter</button>
-                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Generate content, create an image, and post to X, Threads, and Instagram')">Cross-platform campaign</button>
-                      <button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt('Research a potential client, generate a pitch PDF, write a cover email, and queue everything to Outbox')">Client pitch packet</button>
-                    </div>
+                    <!-- v33.93: Suggestions are now rendered by JS (renderAutoAgentSuggestions) so they swap with mode -->
+                    <div class="auto-agent-suggestions" id="autoAgentSuggestions"></div>
                   </div>
                 </div>
                 <button class="auto-agent-scroll-btn" id="autoAgentScrollBtn" onclick="scrollAutoAgentToBottom()" title="Scroll to bottom">

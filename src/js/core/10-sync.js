@@ -1483,6 +1483,14 @@ function saveBrands() {
           data._modifiedAt = brand._modifiedAt || now;
           var docId = brand.id || ('brand_name_' + (brand.name || '').toLowerCase().replace(/[^a-z0-9]/g, '_'));
           batch.set(db.doc(basePath + '/brands/' + docId), data, { merge: true });
+          // v34.67 Phase A #3: mirror this brand into v5 brands_v5 collection.
+          // No-op when dual-write flag is OFF. saveBrands writes brands directly via
+          // db.batch() not through writeDB, so it bypasses the writeDB v5 hook.
+          try {
+            if (typeof window !== 'undefined' && window.SyncV5 && typeof window.SyncV5.mirrorV4Write === 'function') {
+              window.SyncV5.mirrorV4Write('brands_v5', docId, data);
+            }
+          } catch(_v5e) {}
         });
         // Delete ghosts in the SAME batch (atomic - no window for onSnapshot to resurrect)
         existingSnap.forEach(function(doc) {
@@ -1664,9 +1672,24 @@ function initializeBrands() {
 }
 
 // Load/reload brands from localStorage (used by Firebase sync)
+// v34.67 Phase C #9: when reads flag is ON, return v5 brands as the source of
+// truth (still maintaining the brands array shape callers expect). When OFF,
+// continue reading from localStorage exactly as before.
 function loadBrands() {
   console.log('=== LOADING BRANDS (Firebase sync) ===');
-  
+
+  // v5 path
+  if (typeof window !== 'undefined' && window.SyncV5 && typeof window.SyncV5.readsEnabled === 'function' && window.SyncV5.readsEnabled() && typeof window.SyncV5.readArray === 'function') {
+    try {
+      var v5Brands = window.SyncV5.readArray('brands_v5', function(){ return null; });
+      if (Array.isArray(v5Brands) && v5Brands.length > 0) {
+        console.log('[loadBrands] v5 read returned', v5Brands.length, 'brands');
+        if (typeof brands !== 'undefined') brands = v5Brands;
+        return v5Brands;
+      }
+    } catch (eV5) { console.warn('[loadBrands] v5 read failed, falling back to v4:', eV5.message); }
+  }
+
   var stored = localStorage.getItem(USER_DATA_KEYS.brands);
   console.log('loadBrands: localStorage value:', stored ? 'Found (' + stored.length + ' chars)' : 'NULL');
   
@@ -2569,14 +2592,18 @@ function markWelcomed() {
   localStorage.setItem(USER_DATA_KEYS.welcomed, 'true');
 }
 
-// Show welcome screen (first launch only)
+// v33.82: The legacy welcomeScreen ("Welcome to RoweOS" with diamond logo) is
+// retired in favor of the v33.0 onboardingModal. Routing every old caller into
+// the new flow ensures no user sees the stale RoweOS-branded screen again
+// (which historically resurfaced from cached iOS PWAs even after the rebrand).
 function showWelcomeScreen() {
-  console.log('=== Showing welcome screen (first launch) ===');
-  
+  console.log('[Welcome] legacy welcome screen — redirecting to onboardingModal');
   var welcome = document.getElementById('welcomeScreen');
-  if (welcome) {
-    welcome.style.display = 'flex';
+  if (welcome) welcome.style.display = 'none';
+  if (typeof showOnboarding === 'function') {
+    try { showOnboarding(); return; } catch(e){}
   }
+  // Fallback: keep hidden — never show the old screen.
 }
 
 // Hide welcome screen
@@ -2716,7 +2743,7 @@ var ops = [
   // ═══════════════════════════════════════════════════════════════
   // ROWEOS PLATFORM OPERATIONS - IDs 26-35
   // ═══════════════════════════════════════════════════════════════
-  { id: 26, name: 'Feature Explanation', desc: 'Learn how to use specific RoweOS features', category: 'platform', brand: null, outputs: ['Step-by-step guide', 'Best practices', 'Common pitfalls', 'Pro tips', 'Related features'] },
+  { id: 26, name: 'Feature Explanation', desc: 'Learn how to use specific Brilliance features', category: 'platform', brand: null, outputs: ['Step-by-step guide', 'Best practices', 'Common pitfalls', 'Pro tips', 'Related features'] },
   { id: 27, name: 'Agent Capabilities Overview', desc: 'Understand what each agent can do', category: 'platform', brand: null, outputs: ['Agent purpose', 'Example use cases', 'When to use', 'Output types', 'Integration tips'] },
   { id: 28, name: 'Workflow Design Help', desc: 'Create custom workflows for your brand', category: 'platform', brand: null, outputs: ['Workflow steps', 'Agent sequencing', 'Automation opportunities', 'Integration points', 'Efficiency tips'] },
   { id: 29, name: 'Custom Operation Builder', desc: 'Design and template custom operations', category: 'platform', brand: null, outputs: ['Operation template', 'Prompt structure', 'Variable placeholders', 'Output format', 'Testing checklist'] },
@@ -2814,7 +2841,7 @@ var ops = [
   ] },
   { id: 509, name: 'Email Campaign Copy', desc: 'Write persuasive email campaigns with A/B subject lines and send timing', category: 'marketing', brand: null, outputs: ['Email copy', 'Subject line A/B options', 'Preview text', 'CTA copy', 'Send timing'], params: [
     { id: 'campaignType', label: 'Campaign Type', type: 'select', options: ['Product Launch', 'Sale / Promotion', 'Re-engagement', 'Abandoned Cart', 'Seasonal', 'Brand Story', 'Event Promo'], default: 'Product Launch' },
-    { id: 'senderName', label: 'Sender Name', type: 'text', placeholder: 'e.g. The RoweOS Team' },
+    { id: 'senderName', label: 'Sender Name', type: 'text', placeholder: 'e.g. The Brilliance Team' },
     { id: 'recipientDesc', label: 'Target Audience', type: 'text', placeholder: 'e.g. lapsed customers, VIP list' },
     { id: 'subjectLine', label: 'Key Message / Subject', type: 'text', placeholder: 'Main message or offer' },
     { id: 'tone', label: 'Tone', type: 'select', options: ['Persuasive', 'Friendly', 'Urgent', 'Exclusive', 'Playful', 'Bold'], default: 'Persuasive' },
@@ -2874,7 +2901,7 @@ var ops = [
     { id: 'focus', label: 'Focus', type: 'select', options: ['General Overview', 'Competition', 'Demographics', 'Real Estate', 'Events & Networking'], default: 'General Overview' }
   ]},
   // v22.31: Client pitch packet generation
-  { id: 1113, name: 'Client Pitch Packet', desc: 'Research a potential client and generate a branded RoweOS pitch document showing how each feature benefits their specific business', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Client profile', 'Feature benefits map', 'Implementation roadmap', 'Outreach email draft'], params: [
+  { id: 1113, name: 'Client Pitch Packet', desc: 'Research a potential client and generate a branded Brilliance pitch document showing how each feature benefits their specific business', category: 'intelligence', brand: null, preferredProvider: 'openai', preferredModel: 'gpt-5.5', outputs: ['Client profile', 'Feature benefits map', 'Implementation roadmap', 'Outreach email draft'], params: [
     { id: 'clientName', label: 'Client / Company Name', type: 'text' },
     { id: 'clientUrl', label: 'Website URL (optional)', type: 'text' },
     { id: 'industry', label: 'Industry', type: 'text' },

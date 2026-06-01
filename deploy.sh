@@ -9,6 +9,23 @@ cd "$PROJECT_DIR"
 
 echo "=== RoweOS Deploy ==="
 
+# v34.63: Pre-deploy mechanical audit (version consistency, em-dash sweep,
+# stark-white slab pattern, build+test verify, ES5 / no-base64 patterns).
+# Catches the kinds of regressions Image #65 / #66 represented. Skip with
+# SKIP_AUDIT=1 when iterating fast (e.g. v.X bug chasing).
+if [ -z "$SKIP_AUDIT" ] && [ -f "$PROJECT_DIR/scripts/pre-deploy-audit.sh" ]; then
+  echo ""
+  echo "Running pre-deploy audit..."
+  if ! bash "$PROJECT_DIR/scripts/pre-deploy-audit.sh"; then
+    echo ""
+    echo "Pre-deploy audit FAILED. Fix the issues above, or rerun with"
+    echo "    SKIP_AUDIT=1 ./deploy.sh"
+    echo "to bypass (use only when intentional)."
+    exit 1
+  fi
+  echo ""
+fi
+
 # 0. Build from modular source
 echo "Building from source..."
 bash "$PROJECT_DIR/src/build.sh"

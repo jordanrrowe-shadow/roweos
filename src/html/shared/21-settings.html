@@ -106,6 +106,297 @@
                 <span class="settings-chevron">›</span>
               </div>
             </div>
+            <!-- v33.1: Brilli Form selector. v34.6: Live preview dot replaces the static icon.
+                 v34.9: Inline chip strip below the row for one-tap form switching;
+                 ⌘⌥B / Ctrl+Alt+B keyboard hint surfaced. -->
+            <div class="settings-row" onclick="if(event.target.closest('.brilli-form-chip-strip'))return;openBrilliFormPicker()">
+              <div class="settings-row-left">
+                <div id="brilliFormSettingsPreview" class="settings-row-icon" style="width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#f5e6c8 0%,#c9a961 55%,rgba(168,138,74,0.3) 100%);box-shadow:0 0 12px rgba(201,169,97,0.35);flex-shrink:0;"></div>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Brilli Form <span style="font-size:9px;color:var(--text-muted);font-weight:400;letter-spacing:0.04em;margin-left:8px;opacity:0.7;">⌘ ⌥ B to cycle</span></div>
+                  <div class="settings-row-desc" id="brilliFormDesc">Celestial Orb</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="brilliFormToggleText">Celestial</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v34.9: Inline form chip strip — one-tap switch without opening the picker modal.
+                 v34.10: Horizontal scroll on narrow viewports so all 5 chips remain reachable
+                 without wrapping awkwardly into a second line. -->
+            <div class="brilli-form-chip-strip" style="display:flex;gap:6px;padding:8px 16px 14px 16px;flex-wrap:nowrap;align-items:center;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;">
+              <button type="button" data-brilli-chip="celestial" onclick="if(typeof Brilli!=='undefined')Brilli.setActiveForm('celestial')" title="Celestial Orb" style="display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:99px;color:var(--text-secondary);cursor:pointer;font-size:11px;font-weight:500;letter-spacing:0.02em;transition:all 0.15s;">
+                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#f5e6c8 0%,#c9a961 55%,rgba(168,138,74,0.3) 100%);box-shadow:0 0 6px rgba(201,169,97,0.35);"></span>Celestial
+              </button>
+              <button type="button" data-brilli-chip="aura" onclick="if(typeof Brilli!=='undefined')Brilli.setActiveForm('aura')" title="Aura / Field" style="display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:99px;color:var(--text-secondary);cursor:pointer;font-size:11px;font-weight:500;letter-spacing:0.02em;transition:all 0.15s;">
+                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff5dc 0%,#e2c79b 30%,#c9a961 60%,rgba(201,169,97,0) 100%);box-shadow:0 0 7px rgba(201,169,97,0.5),inset 0 0 3px rgba(255,248,232,0.3);"></span>Aura
+              </button>
+              <button type="button" data-brilli-chip="firefly" onclick="if(typeof Brilli!=='undefined')Brilli.setActiveForm('firefly')" title="Firefly" style="display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:99px;color:var(--text-secondary);cursor:pointer;font-size:11px;font-weight:500;letter-spacing:0.02em;transition:all 0.15s;">
+                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 45% 55%,#fff8e8 0%,#e2c79b 35%,rgba(168,138,74,0.45) 70%,rgba(168,138,74,0) 100%);box-shadow:0 0 7px rgba(201,169,97,0.55);"></span>Firefly
+              </button>
+              <button type="button" data-brilli-chip="signature" onclick="if(typeof Brilli!=='undefined')Brilli.setActiveForm('signature')" title="Light Signature" style="display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:99px;color:var(--text-secondary);cursor:pointer;font-size:11px;font-weight:500;letter-spacing:0.02em;transition:all 0.15s;">
+                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:conic-gradient(from 0deg,rgba(201,169,97,0.05),#e2c79b 30%,#fff8e8 50%,#e2c79b 70%,rgba(201,169,97,0.05));box-shadow:0 0 6px rgba(201,169,97,0.4);"></span>Signature
+              </button>
+              <button type="button" data-brilli-chip="classic" onclick="if(typeof Brilli!=='undefined')Brilli.setActiveForm('classic')" title="Classic BLAKE" style="display:flex;align-items:center;gap:6px;padding:5px 10px 5px 6px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:99px;color:var(--text-secondary);cursor:pointer;font-size:11px;font-weight:500;letter-spacing:0.02em;transition:all 0.15s;">
+                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#f5e6c8 0%,#c9a961 60%,rgba(168,138,74,0.5) 100%);box-shadow:0 0 7px rgba(201,169,97,0.3);"></span>Classic
+              </button>
+            </div>
+            <!-- v33.23: Concierge Desk toggle -->
+            <div class="settings-row" onclick="(function(){var k='roweos_concierge_off';var on=localStorage.getItem(k)==='true';if(on){localStorage.removeItem(k);}else{localStorage.setItem(k,'true');}var r=document.getElementById('conciergeRow');if(r){if(on){r.style.display='';if(typeof _renderConciergeRow==='function')_renderConciergeRow();}else{r.style.display='none';r.innerHTML='';}}var t=document.getElementById('conciergeToggleText');if(t)t.textContent=on?'On':'Off';})();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <rect x="3" y="6" width="18" height="3" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <rect x="6" y="11" width="12" height="2" rx="1" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Concierge Row</div>
+                  <div class="settings-row-desc">"What's active today" pill row above chat hero.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="conciergeToggleText">On</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v34.5: Concierge customization — choose which pills appear. -->
+            <div class="settings-row" onclick="if(typeof openConciergeCustomizer==='function')openConciergeCustomizer();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  <circle cx="7" cy="6" r="1.5" fill="currentColor"/>
+                  <circle cx="14" cy="12" r="1.5" fill="currentColor"/>
+                  <circle cx="10" cy="18" r="1.5" fill="currentColor"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Customize Concierge</div>
+                  <div class="settings-row-desc">Choose which pills appear (Pulse, Automations, Bloom, Today, Reminders, Resume).</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v34.14: Reset Brilliance prefs — surfaces resetBrilliancePrefs() (was console-only). -->
+            <div class="settings-row" onclick="if(typeof resetBrilliancePrefs==='function')resetBrilliancePrefs();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M21 12a9 9 0 1 1-3-6.7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  <path d="M21 4v5h-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Reset Brilliance Preferences</div>
+                  <div class="settings-row-desc">Restore Brilli form, intensity, surface toggles, and concierge to defaults. Your data is unaffected.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v34.50: Daily Brief auto-show toggle. When ON, opens the Brief once per
+                 day on first agent landing. Persisted in roweos_daily_brief_auto. -->
+            <div class="settings-row" onclick="(function(){var k='roweos_daily_brief_auto';var on=localStorage.getItem(k)==='true';if(on){localStorage.removeItem(k);}else{localStorage.setItem(k,'true');}var t=document.getElementById('dailyBriefAutoText');if(t)t.textContent=on?'Off':'On';if(typeof showToast==='function')showToast(on?'Auto-Brief disabled':'Auto-Brief enabled, opens once per day','info');})();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Auto-open Daily Brief</div>
+                  <div class="settings-row-desc">Show today's at-a-glance summary on first sign-in each day. <strong>⌘ ⇧ T</strong> always works.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="dailyBriefAutoText">Off</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v34.23: Surface the Keyboard Shortcuts overlay so users can find it
+                 without knowing the `?` keystroke or ⌘K aliases. -->
+            <div class="settings-row" onclick="if(typeof showShortcutsOverlay==='function')showShortcutsOverlay();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Keyboard Shortcuts</div>
+                  <div class="settings-row-desc">Every Brilliance keystroke + ⌘K command in one panel. Also opens with <strong>?</strong>.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v33.23: Evolve enable toggle -->
+            <div class="settings-row" onclick="(function(){var k='roweos_evolve_enabled';var on=localStorage.getItem(k)==='true';if(on){localStorage.removeItem(k);}else{localStorage.setItem(k,'true');}document.documentElement.setAttribute('data-evolve',on?'off':'on');var t=document.getElementById('evolveToggleText');if(t)t.textContent=on?'Off':'On';if(typeof showToast==='function')showToast(on?'Evolve disabled':'Evolve enabled. Reload for full effect.','info');})();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="2"/>
+                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Evolve <span style="font-size:9px;letter-spacing:0.18em;color:rgba(201,169,97,0.7);background:rgba(201,169,97,0.10);padding:2px 8px;border-radius:99px;margin-left:6px;">Preview</span></div>
+                  <div class="settings-row-desc">Educational Intelligence: multi-tab UI with Translator + Verifier. Reload after enabling.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="evolveToggleText">Off</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v34.79: Quiz Engine — auto-activates with Evolve. Toggle is an off-switch. -->
+            <div class="settings-row" onclick="(function(){var k='roweos_evolve_quiz_engine_off';var off=localStorage.getItem(k)==='true';if(off){localStorage.removeItem(k);}else{localStorage.setItem(k,'true');}var t=document.getElementById('quizEngineToggleText');if(t)t.textContent=off?'On':'Off';if(typeof showToast==='function')showToast(off?'Quiz Engine enabled':'Quiz Engine disabled','info');})();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Quiz Engine</div>
+                  <div class="settings-row-desc">Adaptive quizzes built nightly from your goal and known context. Gemini drafts the outline, Claude writes the questions, schema validator gates the pool.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="quizEngineToggleText">On</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v34.79: Verifier Engine — auto-activates with Evolve. Toggle is an off-switch. -->
+            <div class="settings-row" onclick="(function(){var k='roweos_evolve_verifier_engine_off';var off=localStorage.getItem(k)==='true';if(off){localStorage.removeItem(k);}else{localStorage.setItem(k,'true');}var t=document.getElementById('verifierEngineToggleText');if(t)t.textContent=off?'On':'Off';if(typeof showToast==='function')showToast(off?'Verifier Engine enabled':'Verifier Engine disabled','info');})();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.7 1 6.4 2.6" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Verifier Engine</div>
+                  <div class="settings-row-desc">Two-pass peer review with verdict + citations. Pass 1 fact-checks the claim, Pass 2 runs adversarial skepticism on the result, synthesis combines them.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="verifierEngineToggleText">On</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v33.72: Focus Mode allow toggle (Cmd+Shift+F surface modifier). -->
+            <div class="settings-row" onclick="(function(){var k='roweos_focus_mode_disabled';var disabled=localStorage.getItem(k)==='true';if(disabled){localStorage.removeItem(k);}else{localStorage.setItem(k,'true');}var t=document.getElementById('focusModeAllowText');if(t)t.textContent=disabled?'On':'Off';if(typeof showToast==='function')showToast(disabled?'Focus Mode shortcut enabled (⌘⇧F)':'Focus Mode shortcut disabled.','info');})();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Focus Mode shortcut</div>
+                  <div class="settings-row-desc">⌘⇧F (or Ctrl+Shift+F) strips ambient chrome on any surface. Esc exits. Disable here if you trigger it by accident.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="focusModeAllowText">On</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v33.77: Studio Split-Pane Workspace toggle (Tier 2). -->
+            <div class="settings-row" onclick="if(window.SplitPane){window.SplitPane.toggle();var on=window.SplitPane.isOn();var t=document.getElementById('splitPaneToggleText');if(t)t.textContent=on?'On':'Off';}">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M12 3v18" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Studio · Split-Pane Workspace</div>
+                  <div class="settings-row-desc">Run an operation with input + live output side by side. Single-column flow under 1100px viewport. Reversible.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="splitPaneToggleText">Off</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v33.77: Folio Studio-at-Work toggle (Tier 2). -->
+            <div class="settings-row" onclick="if(window.FolioEasel){window.FolioEasel.toggle();var on=window.FolioEasel.isOn();var t=document.getElementById('folioEaselToggleText');if(t)t.textContent=on?'On':'Off';}">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="13" height="13" rx="1.5" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M18 7h3v13h-3z M7 22V19" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Folio · Studio at Work</div>
+                  <div class="settings-row-desc">Treats the active artifact as the centerpiece. Chat moves to a narrow right gutter. Reversible.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="folioEaselToggleText">Off</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v33.72: Letter Series mode toggle for Notebook (Tier 2 surface). -->
+            <div class="settings-row" onclick="if(window.LetterSeries){window.LetterSeries.toggle();var on=window.LetterSeries.isOn();var t=document.getElementById('letterSeriesToggleText');if(t)t.textContent=on?'On':'Off';}">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h6" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Notebook · Letter Series</div>
+                  <div class="settings-row-desc">Cream paper, Cormorant Garamond serif, narrow column, gold drop caps. Reversible. Your data stays the same; only the visual treatment changes.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="letterSeriesToggleText">Off</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v33.49: Reset all Brilliance v33.x preferences to defaults -->
+            <div class="settings-row" onclick="if(window.resetBrilliancePrefs)resetBrilliancePrefs();">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Reset Brilliance preferences</div>
+                  <div class="settings-row-desc">Restore Brilli form + intensity, Evolve / engine flags, Sync v5 flags, Concierge state to defaults. Data unaffected.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+            <!-- v33.13/v33.15: Brilli Intensity slider with presets -->
+            <div class="settings-row" style="flex-direction:column;align-items:stretch;cursor:default;">
+              <div style="display:flex;align-items:center;width:100%;gap:12px;">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M3 12h3M18 12h3M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <div class="settings-row-text" style="flex:1;">
+                  <div class="settings-row-label">Brilli Intensity</div>
+                  <div class="settings-row-desc">How active Brilli's animations feel.</div>
+                </div>
+                <span id="brilliIntensityValue" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:40px;text-align:right;">100</span>
+              </div>
+              <input type="range" min="0" max="100" step="5" id="brilliIntensitySlider"
+                     style="margin-top:12px;width:100%;accent-color:#c9a961;"
+                     oninput="if(window.Brilli){Brilli.setIntensity(this.value);document.getElementById('brilliIntensityValue').textContent=this.value;}" />
+              <div style="display:flex;gap:6px;margin-top:10px;">
+                <button class="brilli-intensity-preset" data-intensity="30" onclick="if(window.Brilli){Brilli.setIntensity(30);document.getElementById('brilliIntensitySlider').value=30;document.getElementById('brilliIntensityValue').textContent=30;}" style="flex:1;padding:6px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;color:rgba(255,255,255,0.7);font-size:11px;letter-spacing:0.06em;cursor:pointer;font-family:inherit;">Subtle</button>
+                <button class="brilli-intensity-preset" data-intensity="60" onclick="if(window.Brilli){Brilli.setIntensity(60);document.getElementById('brilliIntensitySlider').value=60;document.getElementById('brilliIntensityValue').textContent=60;}" style="flex:1;padding:6px 10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;color:rgba(255,255,255,0.7);font-size:11px;letter-spacing:0.06em;cursor:pointer;font-family:inherit;">Calm</button>
+                <button class="brilli-intensity-preset" data-intensity="100" onclick="if(window.Brilli){Brilli.setIntensity(100);document.getElementById('brilliIntensitySlider').value=100;document.getElementById('brilliIntensityValue').textContent=100;}" style="flex:1;padding:6px 10px;background:rgba(201,181,122,0.08);border:1px solid rgba(201,181,122,0.3);border-radius:6px;color:#c9a961;font-size:11px;letter-spacing:0.06em;cursor:pointer;font-family:inherit;">Default</button>
+              </div>
+            </div>
+            <!-- v33.97: Per-form Ambient toggle — gives each Brilli form its own
+                 passive ambient layer (orbit rings, drift particles, ribbon arcs)
+                 plus a click-burst that briefly speeds up the ambient. -->
+            <div class="settings-row" style="cursor:pointer;" onclick="(function(e){if(e.target.tagName==='INPUT')return;var i=document.getElementById('formAmbientToggle');if(i){i.checked=!i.checked;i.dispatchEvent(new Event('change'));}})(event)">
+              <div style="width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--accent, #a89878);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9" stroke-dasharray="4 3"/></svg>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div class="settings-row-label">Per-form Ambient</div>
+                <div class="settings-row-desc">Each Brilli form gets a passive ambient layer (orbit rings, drift particles, ribbon arcs). Click Brilli to spin them.</div>
+              </div>
+              <label class="toggle-switch" onclick="event.stopPropagation();">
+                <input type="checkbox" id="formAmbientToggle" onchange="if(window.Brilli){Brilli.setFormAmbient(this.checked);}">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
             <!-- v24.24: Blob Customizer - collapsible -->
             <div class="settings-row" style="cursor:pointer;flex-direction:column;align-items:stretch;" onclick="toggleSettingsExpander('blobExpander',event);onBlobExpanderOpen()">
               <div style="display:flex;align-items:center;gap:12px;width:100%;">
@@ -671,6 +962,62 @@
 
             <!-- Connections folder -->
             <div class="settings-folder-content" data-folder="connections">
+
+          <!-- v34.87: Native Workspace section. Gives any LLM connected to Brilliance
+               read / search / write access to a folder on the user's actual computer
+               (macOS or Windows) via the File System Access API. -->
+          <div class="settings-section">
+            <div class="settings-section-title">Native Workspace</div>
+            <p style="color:var(--text-muted);font-size:11px;line-height:1.55;margin:-4px 0 12px;padding:0 2px;">Connect a folder on your computer so Brilliance can read, search, and (with your permission) edit files directly. Writes always confirm before saving. Works in Chrome, Edge, and the Brilliance desktop app.</p>
+
+            <div class="settings-row" id="nativeWorkspaceRow" onclick="window.toggleNativeWorkspace && window.toggleNativeWorkspace()">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Workspace Folder</div>
+                  <div class="settings-row-desc" id="nativeWorkspaceDesc">Not connected</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="nativeWorkspaceStatus">Connect</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+
+            <div class="settings-row" id="nativeWorkspaceModeRow" style="display:none;" onclick="window.toggleNativeWorkspaceMode && window.toggleNativeWorkspaceMode()">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Permission</div>
+                  <div class="settings-row-desc" id="nativeWorkspaceModeDesc">Read + Write (with confirmation)</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="nativeWorkspaceModeText">Read + Write</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+
+            <div class="settings-row" id="nativeWorkspaceTrustRow" style="display:none;" onclick="window.toggleNativeWorkspaceTrust && window.toggleNativeWorkspaceTrust()">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m5 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Trust writes for this session</div>
+                  <div class="settings-row-desc">Skip the confirmation modal until you reload Brilliance.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="nativeWorkspaceTrustText">Off</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
+          </div>
 
           <!-- v16.12: Calendar Integrations Section -->
           <div class="settings-section">
@@ -1392,6 +1739,23 @@
                 <span class="settings-chevron">›</span>
               </div>
             </div>
+            <!-- v33.2: Sync v5 Preview row -->
+            <div class="settings-row" onclick="openSyncV5Panel()">
+              <div class="settings-row-left">
+                <svg class="settings-row-icon svg-icon" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                </svg>
+                <div class="settings-row-text">
+                  <div class="settings-row-label">Sync v5 (Preview) <span style="font-size:9px;letter-spacing:0.18em;color:rgba(255,255,255,0.35);margin-left:6px;">⇧⌘S</span></div>
+                  <div class="settings-row-desc" id="syncV5StatusLabel">Continuous timestamp-based sync. Read-shadow only, no writes.</div>
+                </div>
+              </div>
+              <div class="settings-row-action">
+                <span id="syncV5StateText" style="font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:0.1em;text-transform:uppercase;">Off</span>
+                <span class="settings-chevron">›</span>
+              </div>
+            </div>
           </div>
 
           <div class="settings-section">
@@ -1535,7 +1899,7 @@
                 <div class="settings-row-text">
                   <div class="settings-row-label">Version</div>
                   <!-- v32.1: Version bump -->
-                  <div class="settings-row-desc" id="settingsVersionDisplay">v33.0</div>
+                  <div class="settings-row-desc" id="settingsVersionDisplay">v34.121</div>
                 </div>
               </div>
               <div class="settings-row-action">
@@ -1629,39 +1993,17 @@
               <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
                 <div style="display:flex;align-items:center;gap:12px;width:100%;">
                   <div>
-                    <!-- v31.1: Version bump -->
-                    <div style="font-size:16px;font-weight:500;color:var(--text-primary);" id="updateCurrentVersion">Current Version: v31.1</div>
+                    <!-- v33.82: Pulled from ROWEOS_VERSION constant at runtime so the row never goes stale. -->
+                    <div style="font-size:16px;font-weight:500;color:var(--text-primary);" id="updateCurrentVersion">Current Version: <span id="updateCurrentVersionValue"></span></div>
                     <div style="font-size:13px;color:var(--text-secondary);margin-top:4px;" id="updateStatus">Click below to check for updates</div>
                   </div>
                 </div>
                 <button onclick="checkForUpdate()" style="padding:10px 20px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:500;" id="updateCheckBtn">Check for Updates</button>
               </div>
               <div class="settings-section-title" style="margin-top:24px;">Changelog</div>
+              <!-- v33.82: rendered by renderUpdateChangelog() from window.BRILLIANCE_CHANGELOG (pulled from CHANGELOG.md). -->
               <div id="updateChangelog" style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
-                <div style="margin-bottom:12px;">
-                  <strong style="color:var(--text-primary);">v26.0</strong> <span style="color:var(--text-tertiary);">March 23, 2026</span>
-                  <ul style="margin:4px 0 0 16px;padding:0;">
-                    <li>Navigation redesign: grouped sidebar, section landing pages, pill navigation</li>
-                    <li>Favorites sidebar section</li>
-                    <li>Per-page landing pages for complex sections</li>
-                  </ul>
-                </div>
-                <div style="margin-bottom:12px;">
-                  <strong style="color:var(--text-primary);">v25.6</strong> <span style="color:var(--text-tertiary);">March 23, 2026</span>
-                  <ul style="margin:4px 0 0 16px;padding:0;">
-                    <li>Cloud Functions scheduler diagnostics and fixes</li>
-                    <li>Mail timestamp UTC to local conversion</li>
-                    <li>Deep Research polling error handling</li>
-                    <li>Cloud outbox email pattern</li>
-                  </ul>
-                </div>
-                <div style="margin-bottom:12px;">
-                  <strong style="color:var(--text-primary);">v25.5</strong> <span style="color:var(--text-tertiary);">March 22, 2026</span>
-                  <ul style="margin:4px 0 0 16px;padding:0;">
-                    <li>Social Hub: 10 bug fixes (CORS, likes, token, engage, publish, keyword groups)</li>
-                    <li>Help icon, guided tour, and feedback button</li>
-                  </ul>
-                </div>
+                <div style="opacity:0.55;font-style:italic;">Loading changelog…</div>
               </div>
             </div>
 

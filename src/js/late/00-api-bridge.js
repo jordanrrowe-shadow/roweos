@@ -63,8 +63,13 @@
   function setApiKey(provider, key) {
     if (key) {
       // Save to main storage
+      // v34.107: guard JSON.parse so a corrupted roweos_api_keys value doesn't
+      // throw and prevent any future API key updates. Falls back to empty {}
+      // which the next set call will overwrite cleanly.
       var storedKeys = localStorage.getItem("roweos_api_keys");
-      var apiKeys = storedKeys ? JSON.parse(storedKeys) : {};
+      var apiKeys = {};
+      try { apiKeys = storedKeys ? JSON.parse(storedKeys) : {}; } catch(e) { apiKeys = {}; }
+      if (!apiKeys || typeof apiKeys !== 'object') apiKeys = {};
       apiKeys[provider] = key;
       localStorage.setItem("roweos_api_keys", JSON.stringify(apiKeys));
       // Also save to old format for compatibility
@@ -72,7 +77,9 @@
     } else {
       var storedKeys2 = localStorage.getItem("roweos_api_keys");
       if (storedKeys2) {
-        var apiKeys2 = JSON.parse(storedKeys2);
+        var apiKeys2 = {};
+        try { apiKeys2 = JSON.parse(storedKeys2); } catch(e) { apiKeys2 = {}; }
+        if (!apiKeys2 || typeof apiKeys2 !== 'object') apiKeys2 = {};
         delete apiKeys2[provider];
         localStorage.setItem("roweos_api_keys", JSON.stringify(apiKeys2));
       }
@@ -723,22 +730,85 @@ function promptNewMailOutboxFolder() {
   if (name) createMailOutboxFolder(name);
 }
 
+// v34.119: Mail caches no longer keep heavy fields in memory. The previous
+// pattern stored full email html + canvasHtml + attachments[] inline in JS heap
+// for every outbox + sent item indefinitely. With base64-embedded images, a
+// single sent email could be 5-20MB; 100 emails = 500MB-2GB just for these
+// two caches. Now: localStorage stays the source of truth for full content,
+// the in-memory cache only holds the same array but with data URIs stripped
+// from html/canvasHtml/attachments. Read-by-id paths fetch full content from
+// localStorage on demand.
+function _thinMailItemForCache(item) {
+  if (!item || typeof item !== 'object') return item;
+  // Shallow clone - don't mutate the caller's object
+  var thin = {};
+  for (var k in item) {
+    if (!Object.prototype.hasOwnProperty.call(item, k)) continue;
+    if (k === 'html' || k === 'canvasHtml' || k === 'body') {
+      // Strip data:image/* URIs from the body so the cache copy doesn't hold
+      // base64 image data. Originals stay in localStorage intact.
+      var v = item[k];
+      if (typeof v === 'string' && v.indexOf('data:image') !== -1) {
+        thin[k] = v.replace(/data:image\/[^;"'\s>)]+;base64,[A-Za-z0-9+\/=]+/g, '[image-stripped-from-cache]');
+      } else {
+        thin[k] = v;
+      }
+    } else if (k === 'attachments' && Array.isArray(item[k])) {
+      // Keep attachment metadata (name, size) but drop the data URI payload.
+      thin[k] = item[k].map(function(att) {
+        if (!att || typeof att !== 'object') return att;
+        var slim = {};
+        for (var ak in att) {
+          if (!Object.prototype.hasOwnProperty.call(att, ak)) continue;
+          if (ak === 'data' || ak === 'dataUrl' || ak === 'base64') continue;
+          slim[ak] = att[ak];
+        }
+        slim._strippedFromCache = true;
+        return slim;
+      });
+    } else {
+      thin[k] = item[k];
+    }
+  }
+  return thin;
+}
+
+function _thinMailListForCache(items) {
+  if (!Array.isArray(items)) return items;
+  return items.map(_thinMailItemForCache);
+}
+
 function getMailOutbox() {
-  // Check in-memory cache first (set when IDB overflow occurs)
-  if (_mailOutboxCache !== null) return _mailOutboxCache;
-  try { return JSON.parse(localStorage.getItem('roweos_mail_outbox') || '[]'); } catch(e) { return []; }
+  // Always read from localStorage - it's authoritative + full-fidelity.
+  // The cache below is only used as a fallback when localStorage is briefly
+  // unavailable (sync race with IDB shim restoration).
+  try {
+    var raw = localStorage.getItem('roweos_mail_outbox');
+    if (raw) {
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch(e) {}
+  return _mailOutboxCache !== null ? _mailOutboxCache : [];
 }
 function saveMailOutbox(items) {
-  _mailOutboxCache = items; // Always keep in-memory copy
+  // Cache holds a thinned copy (no inline base64). localStorage gets the full data.
+  _mailOutboxCache = _thinMailListForCache(items);
   localStorage.setItem('roweos_mail_outbox', JSON.stringify(items));
   writeDB('profile/mail', { outbox: items }); // v25.1
 }
 function getMailSent() {
-  if (_mailSentCache !== null) return _mailSentCache;
-  try { return JSON.parse(localStorage.getItem('roweos_mail_sent') || '[]'); } catch(e) { return []; }
+  try {
+    var raw = localStorage.getItem('roweos_mail_sent');
+    if (raw) {
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch(e) {}
+  return _mailSentCache !== null ? _mailSentCache : [];
 }
 function saveMailSent(items) {
-  _mailSentCache = items;
+  _mailSentCache = _thinMailListForCache(items);
   localStorage.setItem('roweos_mail_sent', JSON.stringify(items));
   writeDB('profile/mail', { sent: items }); // v25.1
 }
@@ -822,6 +892,19 @@ function getDefaultFromAddress() {
   if (outlookAccts.length > 0) return outlookAccts[0].email;
   if (config.customFromAddresses && config.customFromAddresses[0]) return config.customFromAddresses[0];
   return '';
+}
+
+// v34.103: Mode-aware default From address. Life mode pipelines should use the user's
+// personal connected email (Gmail/Outlook), not a brand-tagged default. Brand mode
+// pipelines fall back to the user's chosen default in mail config.
+function getDefaultFromAddressForMode(mode) {
+  if (mode === 'life') {
+    var gm = getMailGmailAccounts();
+    if (gm.length > 0) return 'gmail:' + gm[0].email;
+    var ol = getMailOutlookAccounts();
+    if (ol.length > 0) return 'outlook:' + ol[0].email;
+  }
+  return getDefaultFromAddress();
 }
 // v22.33: Build From <option> HTML for any From dropdown - admin-only built-ins
 function buildFromOptionsHtml(selectedVal) {
@@ -1009,6 +1092,30 @@ function mailSendOutboxItem(itemId) {
     outbox.splice(idx, 1);
     saveMailOutbox(outbox);
     updateMailBadge();
+    // v34.111: Log the send to Firestore email_log via the new server endpoint so
+    // the admin Campaigns dashboard reflects Gmail/Outlook OAuth sends. The
+    // client posts directly to api.googleapis.com / graph.microsoft.com on the
+    // OAuth path; nothing was reaching email_log. Best-effort - swallow errors
+    // since the actual mail already succeeded.
+    try {
+      if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+        firebase.auth().currentUser.getIdToken().then(function(idToken) {
+          fetch('/api/log-mail-sent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+            body: JSON.stringify({
+              template: item.pipelineName ? 'pipeline' : 'mail',
+              userEmail: item.to,
+              subject: item.subject || '',
+              sentAt: new Date().toISOString(),
+              status: 'sent',
+              resendId: emailId || '',
+              campaign: item.pipelineName || ''
+            })
+          }).catch(function(){});
+        }).catch(function(){});
+      }
+    } catch(_eLog){}
     showToast('Email sent to ' + item.to + (sendVia !== 'resend' ? ' via ' + sendVia.charAt(0).toUpperCase() + sendVia.slice(1) : ''), 'success');
     renderMailView();
     // v25.3: Client Identity extraction - auto-creates client if not found when checkbox is checked
@@ -1684,12 +1791,20 @@ function mailRenderBody(body, template, canvasHtml, hideLogo, logoPosition) {
     var accent = '#a89878';
     try { accent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
     // v22.31: Check temp mail logo first, then localStorage, then brands array
+    // v34.71 Life parity gap #7: in life mode, skip the brand[0]-logo fallback
+    // chain entirely. Personal emails should NOT carry a brand logo. If user
+    // explicitly uploaded a per-life-profile logo via _mailTempLogo we still
+    // honor it; otherwise we leave logo empty so the email goes out clean.
     var logo = '';
+    var _isLifeMail = false;
+    try { _isLifeMail = localStorage.getItem('roweos_app_mode') === 'life'; } catch(e){}
     try {
       if (window._mailTempLogo) { logo = window._mailTempLogo; }
-      if (!logo) { logo = localStorage.getItem(getCurrentLogoKey(_bidx)) || ''; }
-      if (!logo) { var _b = brands[_bidx]; logo = (_b && (_b.logo || _b.brandLogo)) || ''; }
-      if (!logo) { var logoEl = document.querySelector('.brand-logo-img'); if (logoEl && logoEl.src && logoEl.src.indexOf('data:') === 0) logo = logoEl.src; }
+      if (!_isLifeMail) {
+        if (!logo) { logo = localStorage.getItem(getCurrentLogoKey(_bidx)) || ''; }
+        if (!logo) { var _b = brands[_bidx]; logo = (_b && (_b.logo || _b.brandLogo)) || ''; }
+        if (!logo) { var logoEl = document.querySelector('.brand-logo-img'); if (logoEl && logoEl.src && logoEl.src.indexOf('data:') === 0) logo = logoEl.src; }
+      }
     } catch(e) {}
     // v22.36: Upload base64 logo to Firebase Storage for email use
     if (logo && logo.indexOf('data:') === 0) {
@@ -5579,9 +5694,13 @@ function switchMailTab(tab) {
     try {
       var _bidx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
       var _logo = '';
+      var _isLifeMail2 = false;
+      try { _isLifeMail2 = localStorage.getItem('roweos_app_mode') === 'life'; } catch(eL){}
       if (window._mailTempLogo) { _logo = window._mailTempLogo; }
-      if (!_logo) { _logo = localStorage.getItem(getCurrentLogoKey(_bidx)) || ''; }
-      if (!_logo) { var _b = brands[_bidx]; _logo = (_b && (_b.logo || _b.brandLogo)) || ''; }
+      if (!_isLifeMail2) {
+        if (!_logo) { _logo = localStorage.getItem(getCurrentLogoKey(_bidx)) || ''; }
+        if (!_logo) { var _b = brands[_bidx]; _logo = (_b && (_b.logo || _b.brandLogo)) || ''; }
+      }
       if (_logo && _logo.indexOf('data:') === 0) mailEnsureLogoUrl(_logo);
     } catch(e) {}
   }
@@ -5678,7 +5797,8 @@ function renderMailView() {
   // v23.11: Start auto-fetch interval for inbox
   mailStartAutoFetch();
   // v22.44: Pre-upload logo to Firebase Storage so URL is ready for email templates
-  if (!window._mailLogoUrl && typeof mailEnsureLogoUrl === 'function') {
+  // v34.71 Life parity gap #7: skip in life mode — no brand logo on personal mail.
+  if (!window._mailLogoUrl && typeof mailEnsureLogoUrl === 'function' && (function(){ try { return localStorage.getItem('roweos_app_mode') !== 'life'; } catch(e){ return true; } })()) {
     try {
       var _bidx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
       var _logo = localStorage.getItem(getCurrentLogoKey(_bidx)) || '';
@@ -7073,7 +7193,10 @@ function mailGenerateAiTemplate() {
 
   // v28.4: Prefer base64 for logo (never expires). Firebase Storage URLs expire after ~1hr.
   var logoReady = Promise.resolve(window._mailLogoBase64 || window._mailLogoUrl || null);
-  if (!window._mailLogoBase64 && !window._mailLogoUrl) {
+  // v34.71 Life parity gap #7: skip brand-logo lookup in life mode.
+  var _isLifeMail3 = false;
+  try { _isLifeMail3 = localStorage.getItem('roweos_app_mode') === 'life'; } catch(eL){}
+  if (!_isLifeMail3 && !window._mailLogoBase64 && !window._mailLogoUrl) {
     try {
       var _idx = typeof selectedBrand !== 'undefined' ? selectedBrand : 0;
       var base64Logo = localStorage.getItem(getCurrentLogoKey(_idx)) || '';
@@ -7668,6 +7791,16 @@ function mailConnectGmail() {
 
 // v22.24: Listen for Gmail/Outlook connection from callback popup
 window.addEventListener('message', function(event) {
+  // v34.105: validate origin so an arbitrary opener / iframe can't inject OAuth tokens.
+  // Allowed: same-origin (popup opened from this page) and the social-callback host
+  // (in production a proxied roweos.com path, but the origin matches window.location.origin).
+  // Permit roweos.com explicitly so production accepts the legitimate callback even if the
+  // active tab is on roweos.vercel.app (deploy preview) and vice versa.
+  var _allowedOrigins = [window.location.origin, 'https://roweos.com', 'https://www.roweos.com', 'https://roweos.vercel.app'];
+  if (event.origin && _allowedOrigins.indexOf(event.origin) === -1) {
+    console.warn('[mail postMessage] rejected origin:', event.origin);
+    return;
+  }
   if (event.data && event.data.type === 'gmail_mail_connected') {
     // v24.26: Removed connection toast - expected to always be connected
     // v23.1: Clear disconnected flag so sync won't block this provider
@@ -7684,6 +7817,21 @@ window.addEventListener('message', function(event) {
     } else if (_gmAccts.length > 0 && _gmAccts[0].token) {
       mailFetchGmailInbox(_gmAccts[0]);
     }
+    // v34.103: Reflect in onboarding step if visible
+    try {
+      var _obGmCard = document.getElementById('onboardingEmailGmailCard');
+      var _obGmStatus = document.getElementById('onboardingEmailGmailStatus');
+      var _obGmShown = _connectedEmail || (_gmAccts[0] && _gmAccts[0].email) || '';
+      if (_obGmCard) { _obGmCard.dataset.connected = 'true'; _obGmCard.style.borderColor = '#22c55e'; }
+      if (_obGmStatus) {
+        _obGmStatus.style.color = '#22c55e';
+        _obGmStatus.style.fontWeight = '500';
+        _obGmStatus.innerHTML = '&#10004; Connected' + (_obGmShown ? ' as <strong>' + escapeHtml(_obGmShown) + '</strong>' : '');
+      }
+      // v34.103: Pre-fill default From if blank
+      var _obFrom = document.getElementById('onboardingDefaultFromEmail');
+      if (_obFrom && !_obFrom.value && _obGmShown) _obFrom.value = _obGmShown;
+    } catch(e) {}
   }
   if (event.data && event.data.type === 'outlook_mail_connected') {
     // v24.26: Removed connection toast - expected to always be connected
@@ -7699,6 +7847,20 @@ window.addEventListener('message', function(event) {
         if (typeof mailFetchOutlookInbox === 'function') mailFetchOutlookInbox(_matchedOlAcct);
       }
     }
+    // v34.103: Reflect in onboarding step if visible
+    try {
+      var _obOlCard = document.getElementById('onboardingEmailOutlookCard');
+      var _obOlStatus = document.getElementById('onboardingEmailOutlookStatus');
+      var _obOlShown = _connectedOutlookEmail || (_olAccts[0] && _olAccts[0].email) || '';
+      if (_obOlCard) { _obOlCard.dataset.connected = 'true'; _obOlCard.style.borderColor = '#22c55e'; }
+      if (_obOlStatus) {
+        _obOlStatus.style.color = '#22c55e';
+        _obOlStatus.style.fontWeight = '500';
+        _obOlStatus.innerHTML = '&#10004; Connected' + (_obOlShown ? ' as <strong>' + escapeHtml(_obOlShown) + '</strong>' : '');
+      }
+      var _obFromOl = document.getElementById('onboardingDefaultFromEmail');
+      if (_obFromOl && !_obFromOl.value && _obOlShown) _obFromOl.value = _obOlShown;
+    } catch(e) {}
   }
   // v22.33: Outlook Calendar connected
   if (event.data && event.data.type === 'outlook_calendar_connected') {
@@ -7709,11 +7871,16 @@ window.addEventListener('message', function(event) {
     fetchOutlookCalendarList(function() {
       syncOutlookCalendarEvents();
     });
-    // Update onboarding status if visible
+    // v34.103: Update onboarding status with green border + connected email
     var obStatus = document.getElementById('onboardingOutlookCalStatus');
-    if (obStatus) { obStatus.style.display = 'block'; }
     var obCard = document.getElementById('onboardingOutlookCalCard');
-    if (obCard) { obCard.dataset.connected = 'true'; obCard.style.borderColor = '#0078d4'; }
+    var _obOcEmail = (event.data && event.data.email) || localStorage.getItem('roweos_outlook_cal_email') || '';
+    if (obCard) { obCard.dataset.connected = 'true'; obCard.style.borderColor = '#22c55e'; }
+    if (obStatus) {
+      obStatus.style.display = 'block';
+      obStatus.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M20 6L9 17l-5-5"/></svg>' +
+        'Connected' + (_obOcEmail ? ' as <strong>' + escapeHtml(_obOcEmail) + '</strong>' : '');
+    }
   }
 });
 
@@ -9707,12 +9874,15 @@ var _mailVoiceSelection = '';
 
 function mailUpdateWritingToolsLabels() {
   // v22.28: Mode-aware labels for writing tools
+  // v33.94: Also swap the "Brand Voice" button label for parity
   var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
   var aiName = mode === 'life' ? 'LifeAI' : 'BrandAI';
   var btnLabel = document.getElementById('mailVoiceToolsLabel');
   if (btnLabel) btnLabel.textContent = aiName + ' Tools';
   var popLabel = document.getElementById('mailVoicePopoverLabel');
   if (popLabel) popLabel.textContent = aiName + ' Writing Tools';
+  var brandVoiceLabel = document.getElementById('mailVoiceBrandLabel');
+  if (brandVoiceLabel) brandVoiceLabel.textContent = mode === 'life' ? 'Personal Voice' : 'Brand Voice';
 }
 
 function mailShowVoiceTools(e) {
@@ -10735,7 +10905,604 @@ function updateBlobColor() {
 
 function setBlobState(state) {
   _blobState = state;
+  // v33.1: drive Brilli hero alongside the legacy blob.
+  try {
+    if (typeof Brilli !== 'undefined' && window._brilliHeroInst) {
+      var map = { idle:'idle', thinking:'thinking', responding:'delivering', streaming:'delivering', complete:'pleased', pleased:'pleased', attending:'attending' };
+      var bm = map[state] || 'idle';
+      Brilli.setMode(window._brilliHeroInst, bm);
+    }
+  } catch(e) {}
 }
+
+// v33.1: Mount Brilli hero on the chat landing once DOM is ready.
+// Uses Brilli's selectable-form system; renders nothing if classic is active.
+function _initBrilliHero() {
+  try {
+    var host = document.getElementById('brilliHero');
+    if (!host || typeof Brilli === 'undefined') return;
+    if (window._brilliHeroInst) {
+      try { Brilli.unmount(window._brilliHeroInst); } catch(e){}
+      window._brilliHeroInst = null;
+    }
+    var form = Brilli.getActiveForm();
+    if (form === 'classic') return; // classic uses the existing blob
+    window._brilliHeroInst = Brilli.mount(host, { size: 'hero', mode: 'idle', form: form });
+  } catch(e) {}
+}
+
+// v33.1: Mount sidebar Brilli status dot (pin size, idle, static).
+function _initSidebarBrilli() {
+  try {
+    var host = document.getElementById('sidebarBrilliDot');
+    if (!host || typeof Brilli === 'undefined') return;
+    if (window._sidebarBrilliInst) {
+      try { Brilli.unmount(window._sidebarBrilliInst); } catch(e){}
+      window._sidebarBrilliInst = null;
+    }
+    var form = Brilli.getActiveForm();
+    if (form === 'classic') return; // classic: leave the slot empty (legacy logo handles brand mark)
+    window._sidebarBrilliInst = Brilli.mount(host, { size: 'pin', mode: 'idle', form: form });
+  } catch(e) {}
+}
+
+// v33.11: Sync state visualization — when SyncV5 reports a discrepancy or new event,
+// flash the sidebar Brilli to signal something happened. Tightly throttled (max 1/sec)
+// so it never feels noisy.
+var _lastSyncFlashAt = 0;
+function _onSyncStatsTick() {
+  try {
+    if (typeof SyncV5 === 'undefined') return;
+    SyncV5.subscribeStats(function(s){
+      var now = Date.now();
+      if (now - _lastSyncFlashAt < 1000) return;
+      _lastSyncFlashAt = now;
+      // Discrepancy = warning pulse (orange-ish via attending), event = subtle (idle stays).
+      try {
+        if (typeof Brilli !== 'undefined' && window._sidebarBrilliInst) {
+          if (s.discrepancies > 0 && s.lastDiscrepancyAt > now - 1500) {
+            Brilli.setMode(window._sidebarBrilliInst, 'thinking');
+            setTimeout(function(){
+              try { if (window._sidebarBrilliInst) Brilli.setMode(window._sidebarBrilliInst, 'idle'); } catch(e){}
+            }, 600);
+          }
+        }
+      } catch(e){}
+    });
+  } catch(e){}
+}
+
+// v33.4: Concierge Desk row — show what's active today across surfaces.
+// v33.21: Honor user dismissal preference (localStorage roweos_concierge_off).
+// v34.5: Per-pill enable map in roweos_concierge_pills (object of bool, omitted = enabled).
+function _conciergePillEnabled(key) {
+  try {
+    var raw = localStorage.getItem('roweos_concierge_pills');
+    if (!raw) return true;
+    var map = JSON.parse(raw);
+    if (!map || typeof map !== 'object') return true;
+    if (map[key] === false) return false;
+    return true;
+  } catch(e){ return true; }
+}
+function _renderConciergeRow() {
+  try {
+    var row = document.getElementById('conciergeRow');
+    if (!row) return;
+    if (localStorage.getItem('roweos_concierge_off') === 'true') {
+      row.innerHTML = '';
+      row.style.display = 'none';
+      return;
+    }
+    // v34.40: Honor temporary snooze (set via ⌘K "snooze concierge").
+    try {
+      var snoozeUntil = parseInt(localStorage.getItem('roweos_concierge_snooze_until') || '0');
+      if (snoozeUntil && Date.now() < snoozeUntil) {
+        row.innerHTML = '';
+        row.style.display = 'none';
+        return;
+      }
+      // Cleanup expired snooze.
+      if (snoozeUntil && Date.now() >= snoozeUntil) {
+        localStorage.removeItem('roweos_concierge_snooze_until');
+      }
+    } catch(e){}
+    row.style.display = '';
+    var pills = [];
+
+    // Pulse: today's goals/tasks
+    // v34.28: Walk goal items and surface "X due today" / "X overdue" when
+    // there are dated tasks. Falls back to the goal-count phrasing when no
+    // items have dates. Overdue gets the highest urgency for the row.
+    try {
+      var pulseRaw = localStorage.getItem('roweos_pulse_goals');
+      if (pulseRaw && _conciergePillEnabled('pulse')) {
+        var pulseGoals = JSON.parse(pulseRaw);
+        var openGoals = (Array.isArray(pulseGoals) ? pulseGoals : []).filter(function(g){ return g && !g.completed && !g.archived; });
+        if (openGoals.length > 0) {
+          var todayStr = (function(){
+            var dd = new Date();
+            return dd.getFullYear() + '-' + String(dd.getMonth() + 1).padStart(2, '0') + '-' + String(dd.getDate()).padStart(2, '0');
+          })();
+          var overdueCount = 0;
+          var dueTodayCount = 0;
+          for (var pgi = 0; pgi < openGoals.length; pgi++) {
+            var g = openGoals[pgi];
+            if (!g.items || !g.items.length) continue;
+            for (var pii = 0; pii < g.items.length; pii++) {
+              var it = g.items[pii];
+              if (!it || it.completed) continue;
+              var dt = it.date || it.dueDate;
+              if (!dt) continue;
+              var dtStr = String(dt).slice(0, 10);
+              if (dtStr === todayStr) dueTodayCount++;
+              else if (dtStr < todayStr) overdueCount++;
+            }
+          }
+          var lab, val, urgency;
+          if (overdueCount > 0) {
+            lab = 'Pulse';
+            val = overdueCount + (overdueCount === 1 ? ' overdue' : ' overdue');
+            urgency = 95; // close to Reminders-due
+          } else if (dueTodayCount > 0) {
+            lab = 'Pulse';
+            val = dueTodayCount + ' due today';
+            urgency = 75; // sits just above Today calendar
+          } else {
+            lab = 'Pulse';
+            val = openGoals.length + (openGoals.length === 1 ? ' goal' : ' goals');
+            urgency = 40;
+          }
+          pills.push({ lab: lab, val: val, view: 'pulse', _urgency: urgency,
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>' });
+        }
+      }
+    } catch(e){}
+
+    // Automations: queued
+    try {
+      var autoRaw = localStorage.getItem('roweos_automations');
+      if (autoRaw && _conciergePillEnabled('automations')) {
+        var autos = JSON.parse(autoRaw);
+        var enabledAutos = (Array.isArray(autos) ? autos : []).filter(function(a){ return a && a.enabled !== false; });
+        if (enabledAutos.length > 0) {
+          pills.push({ lab: 'Automations', val: enabledAutos.length + ' active', view: 'automations', _urgency: 30,
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/><path d="M13 8l3-5M11 16l-3 5"/></svg>' });
+        }
+      }
+    } catch(e){}
+
+    // Bloom: new since last viewed.
+    // v34.15: roweos_bloom_library is `{scope: [items]}` not a flat array. Walk all
+    // scopes and count items with `_modifiedAt`/`savedAt`/`createdAt` newer than
+    // `roweos_bloom_last_seen`. Same logic the sidebar badge uses.
+    try {
+      var bloomRaw = localStorage.getItem('roweos_bloom_library');
+      if (bloomRaw && _conciergePillEnabled('bloom')) {
+        var bloom = JSON.parse(bloomRaw);
+        var lastSeenBl = parseInt(localStorage.getItem('roweos_bloom_last_seen') || '0');
+        var newCount = 0;
+        if (bloom && typeof bloom === 'object' && !Array.isArray(bloom)) {
+          var blScopes = Object.keys(bloom);
+          for (var bsi = 0; bsi < blScopes.length; bsi++) {
+            var bsItems = bloom[blScopes[bsi]];
+            if (!Array.isArray(bsItems)) continue;
+            for (var bii = 0; bii < bsItems.length; bii++) {
+              var bItem = bsItems[bii];
+              if (!bItem) continue;
+              var bTs = 0;
+              if (typeof bItem._modifiedAt === 'number') bTs = bItem._modifiedAt;
+              else if (bItem.savedAt) bTs = Date.parse(bItem.savedAt) || 0;
+              else if (bItem.createdAt) bTs = Date.parse(bItem.createdAt) || 0;
+              if (bTs > lastSeenBl) newCount++;
+            }
+          }
+        } else if (Array.isArray(bloom)) {
+          // Legacy flat-array fallback for any old data.
+          newCount = bloom.filter(function(b){ return b && !b.read; }).length;
+        }
+        if (newCount > 0) {
+          pills.push({ lab: 'Bloom', val: newCount + ' new', view: 'bloom', _urgency: 15,
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="11" r="2.2"/></svg>' });
+        }
+      }
+    } catch(e){}
+
+    // Today's calendar events
+    try {
+      var calRaw = localStorage.getItem('roweos_calendar');
+      if (calRaw && _conciergePillEnabled('today')) {
+        var events = JSON.parse(calRaw);
+        var today = new Date().toISOString().slice(0, 10);
+        var todayEvents = (Array.isArray(events) ? events : []).filter(function(e){
+          if (!e || !e.start) return false;
+          return String(e.start).indexOf(today) === 0;
+        });
+        if (todayEvents.length > 0) {
+          pills.push({ lab: 'Today', val: todayEvents.length + ' on calendar', view: 'rhythm', _urgency: 70,
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' });
+        }
+      }
+    } catch(e){}
+
+    // Evolve (if enabled): days remaining + today's task progress + streak
+    try {
+      if (typeof Evolve !== 'undefined' && Evolve.isEnabled() && _conciergePillEnabled('evolve')) {
+        var profile = Evolve.getProfile();
+        if (profile && profile.targetGoal) {
+          var d = Evolve.daysToDeadline(profile);
+          if (d != null) {
+            pills.push({ lab: 'Evolve', val: Math.abs(d) + (d >= 0 ? 'd left' : 'd past'), view: 'evolve', _urgency: 25,
+              icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>' });
+          }
+          // Today's task completion ratio
+          if (typeof Evolve.recalibrateMomentum === 'function') {
+            try {
+              var rhythm = Evolve.recalibrateMomentum(profile);
+              var todayKey = (function(){ var dd = new Date(); return dd.getFullYear() + '-' + (dd.getMonth() + 1).toString().padStart(2,'0') + '-' + dd.getDate().toString().padStart(2,'0'); })();
+              var done = profile.completedToday && profile.completedToday[todayKey] ? Object.keys(profile.completedToday[todayKey]).length : 0;
+              if (rhythm.tasks.length > 0) {
+                pills.push({ lab: 'Today', val: done + '/' + rhythm.tasks.length + ' done', view: 'evolve', _urgency: 65,
+                  icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>' });
+              }
+            } catch(eEv){}
+          }
+          if (profile.dailyStreak >= 2) {
+            pills.push({ lab: 'Streak', val: profile.dailyStreak + ' days', view: 'evolve', _urgency: 20,
+              icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 0-2 6-6 6s-6 4-6 8c0 6 4 6 6 6h12c2 0 6 0 6-6 0-4-2-8-6-8s-6-6-6-6z" transform="scale(0.8) translate(3,2)"/></svg>' });
+          }
+        }
+      }
+    } catch(e){}
+
+    // v33.22: Due reminders count
+    try {
+      var remRaw = localStorage.getItem('roweos_reminders');
+      if (remRaw && _conciergePillEnabled('reminders')) {
+        var rems = JSON.parse(remRaw);
+        if (Array.isArray(rems)) {
+          var nowMs = Date.now();
+          var dueCount = rems.filter(function(r){
+            if (!r) return false;
+            if (r.status === 'completed' || r.status === 'dismissed' || r.status === 'archived') return false;
+            var sched = r.scheduledAt ? Date.parse(r.scheduledAt) : 0;
+            return sched && sched <= nowMs;
+          }).length;
+          if (dueCount > 0) {
+            pills.push({ lab: 'Reminders', val: dueCount + ' due', view: 'pulse', _urgency: 100,
+              icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>' });
+          }
+        }
+      }
+    } catch(e){}
+
+    // v34.16: Mail outbox — pending sends.
+    try {
+      if (_conciergePillEnabled('outbox')) {
+        var outRaw = localStorage.getItem('roweos_mail_outbox');
+        if (outRaw) {
+          var outbox = JSON.parse(outRaw);
+          var pendingCount = (Array.isArray(outbox) ? outbox : []).filter(function(m){
+            if (!m) return false;
+            // Count anything not yet sent or marked as sent.
+            return m.status !== 'sent' && m.status !== 'failed' && m.status !== 'cancelled';
+          }).length;
+          if (pendingCount > 0) {
+            pills.push({ lab: 'Outbox', val: pendingCount + (pendingCount === 1 ? ' pending' : ' pending'), view: 'mail', _action: 'mail-outbox', _urgency: 90,
+              icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/></svg>' });
+          }
+        }
+      }
+    } catch(e){}
+
+    // v34.41: Library — files added since last viewed. Walks every
+    // `roweos_brand_library_*` and `roweos_life_library` storage key (multi-brand
+    // structure) and counts items newer than `roweos_library_last_seen`.
+    try {
+      if (_conciergePillEnabled('library')) {
+        var libLastSeen = parseInt(localStorage.getItem('roweos_library_last_seen') || '0');
+        var libNewCount = 0;
+        var libKeys = [];
+        for (var lk = 0; lk < localStorage.length; lk++) {
+          var keyName = localStorage.key(lk);
+          if (!keyName) continue;
+          if (keyName.indexOf('roweos_brand_library_') === 0 || keyName === 'roweos_life_library') {
+            libKeys.push(keyName);
+          }
+        }
+        for (var lki = 0; lki < libKeys.length; lki++) {
+          try {
+            var libRaw = localStorage.getItem(libKeys[lki]);
+            if (!libRaw) continue;
+            var libArr = JSON.parse(libRaw);
+            if (!Array.isArray(libArr)) continue;
+            for (var lii = 0; lii < libArr.length; lii++) {
+              var f = libArr[lii];
+              if (!f) continue;
+              var fTs = (typeof f._modifiedAt === 'number') ? f._modifiedAt : (f.uploadedAt ? Date.parse(f.uploadedAt) : (f.createdAt ? Date.parse(f.createdAt) : 0));
+              if (fTs > libLastSeen) libNewCount++;
+            }
+          } catch(eL){}
+        }
+        if (libNewCount > 0) {
+          pills.push({ lab: 'Library', val: libNewCount + ' new', view: 'library', _urgency: 12,
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>' });
+        }
+      }
+    } catch(e){}
+
+    // v34.16: Notebooks — new since last viewed.
+    try {
+      if (_conciergePillEnabled('notebooks')) {
+        var nbRaw = localStorage.getItem('roweos_scribe_notebooks');
+        if (nbRaw) {
+          var nbs = JSON.parse(nbRaw);
+          if (Array.isArray(nbs) && nbs.length > 0) {
+            var lastSeenNb = parseInt(localStorage.getItem('roweos_scribe_last_seen') || '0');
+            var newNbCount = nbs.filter(function(n){
+              if (!n) return false;
+              var ts = 0;
+              if (typeof n._modifiedAt === 'number') ts = n._modifiedAt;
+              else if (n.updatedAt) ts = Date.parse(n.updatedAt) || 0;
+              else if (n.createdAt) ts = Date.parse(n.createdAt) || 0;
+              return ts > lastSeenNb;
+            }).length;
+            if (newNbCount > 0) {
+              pills.push({ lab: 'Notebooks', val: newNbCount + ' new', view: 'scribe', _urgency: 18,
+                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>' });
+            }
+          }
+        }
+      }
+    } catch(e){}
+
+    // Recent conversation (resume) — only when at least 1 prior chat
+    // v34.38: Resume pill now ACTUALLY loads the conversation via chatWithHistoryItem.
+    // v34.81: Source the pill from the IN-MEMORY agentCommands global (the same
+    // source chatWithHistoryItem reads from), not localStorage. Prevents the
+    // "Could not find history item" toast when the pill renders from a cache
+    // that's ahead of the runtime array (cross-device sync race, etc.).
+    // Also requires the conversation entry to actually contain reply content
+    // — otherwise there's nothing to resume into.
+    try {
+      var resumeSource = (typeof window !== 'undefined' && Array.isArray(window.agentCommands) && window.agentCommands.length > 0)
+        ? window.agentCommands
+        : null;
+      if (resumeSource && _conciergePillEnabled('resume')) {
+        var sortedConvs = resumeSource.slice().map(function(c, i){ return { c: c, _origIdx: i }; }).sort(function(a, b){
+          return (b.c.lastMessageAt || b.c._modifiedAt || 0) - (a.c.lastMessageAt || a.c._modifiedAt || 0);
+        });
+        // Find the first entry that actually has resumable content
+        var latestPair = null;
+        for (var ri = 0; ri < sortedConvs.length; ri++) {
+          var cand = sortedConvs[ri].c;
+          var hasContent = (cand && cand.title) && (
+            (cand.conversation && cand.conversation.length > 0) ||
+            (typeof cand.response === 'string' && cand.response.trim().length > 0)
+          );
+          if (hasContent) { latestPair = sortedConvs[ri]; break; }
+        }
+        if (latestPair && latestPair.c) {
+          var latest = latestPair.c;
+          pills.push({ lab: 'Resume', val: (latest.title.length > 22 ? latest.title.slice(0, 22) + '…' : latest.title), view: 'agent', _urgency: 10,
+            _action: 'resume-latest', _resumeIdx: latestPair._origIdx,
+            icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>' });
+        }
+      }
+    } catch(e){}
+
+    // v33.17: Empty-state pill so the surface is never bare.
+    // v34.24: Rotates through helpful tips so users learn power-user features
+    // even when there's no data to surface. Picks deterministically based on
+    // the day-of-year so the tip stays consistent for the day but changes daily.
+    if (pills.length === 0) {
+      var emptyTips = [
+        { lab: 'Begin', val: 'Set a goal in Pulse', view: 'pulse' },
+        { lab: 'Try', val: '⌘ ⇧ G to capture a goal', view: 'pulse' },
+        { lab: 'Try', val: '⌘ ⇧ R for a quick reminder', view: 'pulse' },
+        { lab: 'Try', val: '⌘ ⇧ T for today\'s Daily Brief', view: 'agent', _action: 'daily-brief' },
+        { lab: 'Try', val: '? for the shortcuts panel', view: 'agent', _action: 'shortcuts' },
+        { lab: 'Try', val: '⌘ ⌥ B to cycle Brilli', view: 'agent' },
+        { lab: 'Customize', val: 'Pick which pills appear', view: 'agent', _action: 'concierge' }
+      ];
+      var dayIdx = (function(){
+        var d = new Date();
+        return Math.floor((d.getTime() - new Date(d.getFullYear(),0,0).getTime()) / 86400000);
+      })();
+      var tip = emptyTips[dayIdx % emptyTips.length];
+      pills.push({ lab: tip.lab, val: tip.val, view: tip.view,
+        _action: tip._action,
+        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7l5 5-5 5M7 12h10"/></svg>' });
+    }
+
+    // v34.27: Sort pills by urgency descending so the most time-sensitive item
+    // is always first. Reminders (100) → Outbox (90) → Today calendar (70) →
+    // Today/Evolve (65) → Pulse goals (40) → Automations (30) → Evolve days (25) →
+    // Evolve streak (20) → Notebooks (18) → Bloom (15) → Resume (10).
+    pills.sort(function(a, b){
+      var au = (typeof a._urgency === 'number') ? a._urgency : 0;
+      var bu = (typeof b._urgency === 'number') ? b._urgency : 0;
+      return bu - au;
+    });
+
+    var html = '';
+    for (var i = 0; i < pills.length; i++) {
+      var p = pills[i];
+      // v34.24: `_action` overrides view navigation so empty-state tip pills can
+      // open the shortcuts overlay or concierge customizer directly.
+      // v34.31: `mail-outbox` action navigates to Mail and switches to the
+      // Outbox tab so users land on the pending list rather than Inbox.
+      var clickJs;
+      if (p._action === 'shortcuts') {
+        clickJs = "if(typeof showShortcutsOverlay==='function')showShortcutsOverlay();";
+      } else if (p._action === 'concierge') {
+        clickJs = "if(typeof openConciergeCustomizer==='function')openConciergeCustomizer();";
+      } else if (p._action === 'mail-outbox') {
+        clickJs = "if(typeof showView==='function')showView('mail');setTimeout(function(){if(typeof switchMailTab==='function')switchMailTab('outbox');},80);";
+      } else if (p._action === 'daily-brief') {
+        clickJs = "if(typeof window.openDailyBrief==='function')window.openDailyBrief();";
+      } else if (p._action === 'resume-latest') {
+        // v34.38: actually load the conversation. chatWithHistoryItem handles
+        // brand-mode / life-mode switching + navigates to agent view.
+        clickJs = "if(typeof chatWithHistoryItem==='function')chatWithHistoryItem(" + (typeof p._resumeIdx === 'number' ? p._resumeIdx : 0) + ");else if(typeof showView==='function')showView('agent');";
+      } else {
+        clickJs = "if(typeof showView==='function')showView('" + p.view + "')";
+      }
+      // v34.106: escape pill label + value - both can come from user-controlled
+      // localStorage data (goal titles, notebook names, resume conversation titles).
+      // p.icon is module-controlled SVG markup, kept as-is.
+      html += '<a class="concierge-pill" href="javascript:void(0)" onclick="' + clickJs + '" tabindex="0">' +
+              p.icon +
+              '<span class="lab">' + escapeHtml(String(p.lab || '')) + '</span>' +
+              '<span class="val">' + escapeHtml(String(p.val || '')) + '</span>' +
+              '</a>';
+    }
+    // v34.4: Removed dismiss X — toggle lives in Settings → Concierge only.
+    row.innerHTML = html;
+  } catch(eRow){}
+}
+
+// v33.21: Hide concierge for the session + persist preference.
+window._dismissConcierge = function() {
+  try { localStorage.setItem('roweos_concierge_off', 'true'); } catch(e){}
+  var row = document.getElementById('conciergeRow');
+  if (row) { row.innerHTML = ''; row.style.display = 'none'; }
+};
+
+// v34.5: Customizer modal — pick which concierge pills surface.
+window.openConciergeCustomizer = function openConciergeCustomizer() {
+  var existing = document.getElementById('conciergeCustomizerOverlay');
+  if (existing) existing.parentNode.removeChild(existing);
+
+  var raw = '';
+  try { raw = localStorage.getItem('roweos_concierge_pills') || '{}'; } catch(e){ raw = '{}'; }
+  var map; try { map = JSON.parse(raw); } catch(eP){ map = {}; }
+  if (!map || typeof map !== 'object') map = {};
+
+  var overlay = document.createElement('div');
+  overlay.id = 'conciergeCustomizerOverlay';
+  overlay.className = 'modal-overlay show';
+  overlay.style.cssText = 'display:flex;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:99500;visibility:visible;opacity:1;';
+  overlay.onclick = function(e){ if (e.target === overlay) overlay.parentNode.removeChild(overlay); };
+
+  var modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.cssText = 'max-width:440px;width:92%;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;padding:24px;color:var(--text-primary);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;';
+
+  var pillKeys = [
+    { key: 'pulse',       label: 'Pulse',       desc: 'Open goals count' },
+    { key: 'automations', label: 'Automations', desc: 'Active automation count' },
+    { key: 'bloom',       label: 'Bloom',       desc: 'New Bloom items since last viewed' },
+    { key: 'today',       label: 'Today',       desc: "Today's calendar events" },
+    { key: 'evolve',      label: 'Evolve',      desc: 'Days left + streak (if enabled)' },
+    { key: 'reminders',   label: 'Reminders',   desc: 'Due reminders' },
+    // v34.16: Two new pill types — pending outbox sends + new notebook entries.
+    { key: 'outbox',      label: 'Outbox',      desc: 'Pending mail sends' },
+    { key: 'notebooks',   label: 'Notebooks',   desc: 'New notebook entries since last viewed' },
+    // v34.41: Library — files added since last viewed.
+    { key: 'library',     label: 'Library',     desc: 'New files added since last viewed' },
+    { key: 'resume',      label: 'Resume',      desc: 'Most recent conversation' }
+  ];
+
+  var rows = '';
+  for (var i = 0; i < pillKeys.length; i++) {
+    var pk = pillKeys[i];
+    var enabled = map[pk.key] !== false;
+    rows += '<label style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;">' +
+      '<input type="checkbox" data-pill-key="' + pk.key + '" ' + (enabled ? 'checked' : '') + ' style="accent-color:var(--accent);width:16px;height:16px;flex:none;" />' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:13px;font-weight:600;color:var(--text-primary);">' + pk.label + '</div>' +
+        '<div style="font-size:11.5px;color:var(--text-muted);">' + pk.desc + '</div>' +
+      '</div>' +
+    '</label>';
+  }
+
+  modal.innerHTML =
+    '<div style="font-size:18px;font-weight:600;margin-bottom:6px;letter-spacing:-0.01em;">Customize Concierge Row</div>' +
+    '<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">Pills only appear when relevant data exists. Uncheck to hide a pill even when it would show.</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;">' + rows + '</div>' +
+    '<div style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+      '<button id="conciergeCustReset" style="padding:9px 14px;background:transparent;border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);font-size:12.5px;font-weight:500;cursor:pointer;">Reset to Defaults</button>' +
+      '<button id="conciergeCustClose" style="padding:9px 18px;background:var(--accent);border:1px solid var(--accent);border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Done</button>' +
+    '</div>';
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  // Persist on change.
+  var inputs = modal.querySelectorAll('input[data-pill-key]');
+  for (var j = 0; j < inputs.length; j++) {
+    inputs[j].onchange = function(){
+      var k = this.getAttribute('data-pill-key');
+      map[k] = !!this.checked;
+      try { localStorage.setItem('roweos_concierge_pills', JSON.stringify(map)); } catch(e){}
+      if (typeof _renderConciergeRow === 'function') _renderConciergeRow();
+    };
+  }
+  document.getElementById('conciergeCustClose').onclick = function(){
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  };
+  // v34.6: Reset clears the per-pill map and re-checks every box.
+  document.getElementById('conciergeCustReset').onclick = function(){
+    try { localStorage.removeItem('roweos_concierge_pills'); } catch(e){}
+    map = {};
+    var resetInputs = modal.querySelectorAll('input[data-pill-key]');
+    for (var k = 0; k < resetInputs.length; k++) resetInputs[k].checked = true;
+    if (typeof _renderConciergeRow === 'function') _renderConciergeRow();
+    try { if (typeof showToast === 'function') showToast('Concierge defaults restored', 'info'); } catch(eT){}
+  };
+};
+
+// v33.3: Drive Brilli 'attending' state on chat input focus.
+function _wireBrilliAttending() {
+  try {
+    var input = document.getElementById('agentCommand');
+    if (!input || input._brilliAttendingWired) return;
+    input.addEventListener('focus', function(){
+      try {
+        if (typeof Brilli !== 'undefined' && window._brilliHeroInst) {
+          // Don't override active states (thinking/delivering).
+          var inst = window._brilliHeroInst;
+          if (inst.mode === 'idle') Brilli.setMode(inst, 'attending');
+        }
+      } catch(e){}
+    });
+    input.addEventListener('blur', function(){
+      try {
+        if (typeof Brilli !== 'undefined' && window._brilliHeroInst) {
+          var inst = window._brilliHeroInst;
+          if (inst.mode === 'attending') Brilli.setMode(inst, 'idle');
+        }
+      } catch(e){}
+    });
+    input._brilliAttendingWired = true;
+  } catch(e){}
+}
+
+try {
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(_initBrilliHero, 0);
+    setTimeout(_initSidebarBrilli, 0);
+    setTimeout(_wireBrilliAttending, 100);
+    setTimeout(_renderConciergeRow, 200);
+    setTimeout(_onSyncStatsTick, 500);
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){
+      _initBrilliHero();
+      _initSidebarBrilli();
+      _wireBrilliAttending();
+      _renderConciergeRow();
+      _onSyncStatsTick();
+    });
+  }
+  window.addEventListener('brilli:form-changed', function(){
+    try { document.documentElement.setAttribute('data-brilli-form', Brilli.getActiveForm()); } catch(e){}
+    _initBrilliHero();
+    _initSidebarBrilli();
+    _wireBrilliAttending();
+  });
+  // Refresh Concierge Row when returning to chat view.
+  window.addEventListener('focus', _renderConciergeRow);
+} catch(e) {}
 
 // v24.24: Blob shape names for cycling (excludes 'none' and 'helix')
 var _blobShapeNames = ['smooth', 'fluid', 'organic', 'crystal', 'sphere'];

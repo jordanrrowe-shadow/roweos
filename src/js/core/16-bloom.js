@@ -63,7 +63,17 @@ var BLOOM_FILTERS = [
 var BLOOM_POST_TYPES = ['insight', 'social', 'idea', 'analysis'];
 
 // v22.51: Bloom save persistence
+// v34.71 Life parity gap #3: previously routed every save through brands[brandIdx],
+// which fell back to brand 0 for life-mode entries — life saves collided with
+// the first brand's storage. Now branches on app_mode and emits a life-namespaced
+// key when in life mode.
 function bloomGetSaveKey(brandIdx) {
+  try {
+    if (localStorage.getItem('roweos_app_mode') === 'life') {
+      var lifeIdx = (typeof currentLifeProfileIdx !== 'undefined' && currentLifeProfileIdx !== null) ? currentLifeProfileIdx : 0;
+      return 'roweos_bloom_saved_life_' + lifeIdx;
+    }
+  } catch(e){}
   var brand = brands[brandIdx] || brands[0];
   if (!brand) return 'roweos_bloom_saved_unknown';
   return 'roweos_bloom_saved_' + (brand.shortName || brand.name).replace(/\s+/g, '_').toLowerCase();
@@ -113,10 +123,21 @@ var BLOOM_CATEGORY_MAP = {
 };
 
 // v22.12: Phase 2 - Signal Storage Layer
+// v34.71 Life parity gap #3: same fix as bloomGetSaveKey — life-mode entries get
+// a life-namespaced signal key, no longer collide with brand 0's signals.
 function bloomGetSignals(brandIdx) {
-  var brand = brands[brandIdx] || brands[0];
-  if (!brand) return null;
-  var key = 'roweos_bloom_signals_' + (brand.shortName || brand.name).replace(/\s+/g, '_').toLowerCase();
+  var key;
+  try {
+    if (localStorage.getItem('roweos_app_mode') === 'life') {
+      var lifeIdx = (typeof currentLifeProfileIdx !== 'undefined' && currentLifeProfileIdx !== null) ? currentLifeProfileIdx : 0;
+      key = 'roweos_bloom_signals_life_' + lifeIdx;
+    }
+  } catch(e){}
+  if (!key) {
+    var brand = brands[brandIdx] || brands[0];
+    if (!brand) return null;
+    key = 'roweos_bloom_signals_' + (brand.shortName || brand.name).replace(/\s+/g, '_').toLowerCase();
+  }
   try {
     var raw = localStorage.getItem(key);
     if (raw) {
@@ -143,9 +164,23 @@ function bloomGetSignals(brandIdx) {
 }
 
 function bloomSaveSignals(brandIdx, signals) {
-  var brand = brands[brandIdx] || brands[0];
-  if (!brand || !signals) return;
-  var key = 'roweos_bloom_signals_' + (brand.shortName || brand.name).replace(/\s+/g, '_').toLowerCase();
+  if (!signals) return;
+  // v34.105: Mirror bloomGetSignals life-mode key derivation. Without this,
+  // life-mode reads pull from roweos_bloom_signals_life_N but writes always
+  // landed on the brand key — every like/save/filter in life mode was
+  // silently lost on the next read.
+  var key;
+  try {
+    if (localStorage.getItem('roweos_app_mode') === 'life') {
+      var lifeIdx = (typeof currentLifeProfileIdx !== 'undefined' && currentLifeProfileIdx !== null) ? currentLifeProfileIdx : 0;
+      key = 'roweos_bloom_signals_life_' + lifeIdx;
+    }
+  } catch(e){}
+  if (!key) {
+    var brand = brands[brandIdx] || brands[0];
+    if (!brand) return;
+    key = 'roweos_bloom_signals_' + (brand.shortName || brand.name).replace(/\s+/g, '_').toLowerCase();
+  }
   signals.lastUpdated = Date.now();
   // Prune ops to top 30 by score
   var opKeys = Object.keys(signals.ops);

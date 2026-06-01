@@ -972,6 +972,8 @@ function bloomPushToIdentity(postId, section) {
 function initAutomationsLab() {
   renderAutoLabStats();
   renderAutoLabWorkflows();
+  // v33.93: Mode-aware Automations Agent suggestions
+  if (typeof renderAutoAgentSuggestions === 'function') renderAutoAgentSuggestions();
 }
 
 /**
@@ -1178,8 +1180,20 @@ function renderAutoLabStats() {
   try { history = JSON.parse(localStorage.getItem('roweos_auto_lab_history') || '[]'); } catch(e) {}
   var todayStr = new Date().toISOString().slice(0, 10);
   var runsToday = history.filter(function(h) { return h.timestamp && h.timestamp.slice(0, 10) === todayStr; }).length;
-  var successCount = history.filter(function(h) { return h.success; }).length;
-  var successRate = history.length > 0 ? Math.round((successCount / history.length) * 100) : 100;
+  // v34.100: Honest success rate. Was treating any history entry without an
+  // explicit `success: false` as a success — including ones with failedSteps,
+  // pipeline errors, or partial completions. Now: a run counts as successful
+  // ONLY if h.success === true AND it has no failedSteps. Empty history shows
+  // "—" instead of "100%" so the stat reflects reality.
+  function _isHistorySuccess(h) {
+    if (!h || h.success === false) return false;
+    if (h.failedSteps && Array.isArray(h.failedSteps) && h.failedSteps.length > 0) return false;
+    if (h.error || h.errorMessage) return false;
+    if (h.summary && /failed|error/i.test(h.summary)) return false;
+    return h.success === true;
+  }
+  var successCount = history.filter(_isHistorySuccess).length;
+  var successRate = history.length > 0 ? Math.round((successCount / history.length) * 100) + '%' : '—';
 
   // v22.37: Stat cards like Analytics view
   var _cardStyle = 'background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:var(--space-4) var(--space-5);';
@@ -2073,13 +2087,10 @@ function newAutoAgentChat() {
       + '<div class="auto-agent-welcome-icon"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--brand-accent, #a89878)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>'
       + '<div class="auto-agent-welcome-title">Automations Agent</div>'
       + '<div class="auto-agent-welcome-sub">Describe what you want to automate and I will build it for you.</div>'
-      + '<div class="auto-agent-suggestions">'
-      + '<button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt(\'Generate a social media post and publish it to X tonight at 9pm\')">Post to X tonight at 9pm</button>'
-      + '<button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt(\'Create an image and post it to Instagram with a caption\')">Image + Instagram post</button>'
-      + '<button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt(\'Research my competitors and email me a report every Monday\')">Weekly competitor report</button>'
-      + '<button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt(\'Generate content, create an image, and post to X, Threads, and Instagram\')">Cross-platform campaign</button>'
-      + '</div></div>';
+      + '<div class="auto-agent-suggestions" id="autoAgentSuggestions"></div></div>';
   }
+  // v33.93: Render mode-aware suggestions
+  if (typeof renderAutoAgentSuggestions === 'function') renderAutoAgentSuggestions();
   var chips = document.getElementById('autoAgentFileChips');
   if (chips) chips.innerHTML = '';
   var input = document.getElementById('autoAgentInput');
@@ -2091,6 +2102,40 @@ function autoAgentQuickPrompt(text) {
   if (input) input.value = text;
   sendAutoAgentMessage();
 }
+
+// v33.93: Mode-aware Automations Agent quick-prompt suggestions for BrandAI/LifeAI parity
+function renderAutoAgentSuggestions() {
+  try {
+    var el = document.getElementById('autoAgentSuggestions');
+    if (!el) return;
+    var mode = (typeof currentMode !== 'undefined' && currentMode) ? currentMode : 'brand';
+    var suggestions = mode === 'life'
+      ? [
+          { label: 'Daily journal prompt', prompt: 'Each morning at 7am, generate a reflective journaling prompt based on my goals and recent entries' },
+          { label: 'Weekly habit review', prompt: 'Every Sunday, summarize my habits this week and email me a gentle progress report' },
+          { label: 'Goal check-in', prompt: 'Twice a week, check my LifeAI goals and ask me one focused question to keep momentum' },
+          { label: 'Wellness reminder pulse', prompt: 'During work hours, send me a wellness check-in every 3 hours with one small action' },
+          { label: 'Evening wind-down', prompt: 'Each night at 9pm, draft a wind-down routine for tomorrow based on what I logged today' },
+          { label: 'Personal weekly digest', prompt: 'Every Friday, summarize my routines, goals, and reflections into a personal digest' }
+        ]
+      : [
+          { label: 'Post to X tonight at 9pm', prompt: 'Generate a social media post and publish it to X tonight at 9pm' },
+          { label: 'Competitor research + email', prompt: 'Research my competitors using Intelligence Agent and email me a summary report' },
+          { label: 'Prospect outreach campaign', prompt: 'Find potential clients in my industry, write personalized outreach emails for each, and queue them to my Outbox' },
+          { label: 'Weekly newsletter', prompt: 'Write a weekly newsletter summarizing brand updates and queue it to Outbox every Monday at 9am' },
+          { label: 'Cross-platform campaign', prompt: 'Generate content, create an image, and post to X, Threads, and Instagram' },
+          { label: 'Client pitch packet', prompt: 'Research a potential client, generate a pitch PDF, write a cover email, and queue everything to Outbox' }
+        ];
+    var html = '';
+    for (var i = 0; i < suggestions.length; i++) {
+      var s = suggestions[i];
+      var safePrompt = String(s.prompt || '').replace(/'/g, "\\'");
+      html += '<button class="auto-agent-suggest-btn" onclick="autoAgentQuickPrompt(\'' + safePrompt + '\')">' + escapeHtml(s.label) + '</button>';
+    }
+    el.innerHTML = html;
+  } catch(e) {}
+}
+window.renderAutoAgentSuggestions = renderAutoAgentSuggestions;
 
 function handleAutoAgentFile(input) {
   if (!input.files || !input.files.length) return;
@@ -3042,17 +3087,34 @@ function switchFolioTab(tab) {
 }
 
 // --- Folio Data Model ---
+// v34.71 Life parity gap #1: storage now scoped by mode. Brand mode keeps the
+// legacy `roweos_folio_items` key (no migration needed). Life mode uses
+// `roweos_folio_items_life_<idx>` so personal folio outputs don't pollute the
+// brand storage and vice versa.
+function _folioStorageKey() {
+  try {
+    if (localStorage.getItem('roweos_app_mode') === 'life') {
+      var lifeIdx = (typeof currentLifeProfileIdx !== 'undefined' && currentLifeProfileIdx !== null) ? currentLifeProfileIdx : 0;
+      return 'roweos_folio_items_life_' + lifeIdx;
+    }
+  } catch(e){}
+  return 'roweos_folio_items';
+}
+
 function getFolioItems() {
   try {
-    return JSON.parse(localStorage.getItem('roweos_folio_items') || '[]');
+    return JSON.parse(localStorage.getItem(_folioStorageKey()) || '[]');
   } catch(e) { return []; }
 }
 
 function saveFolioItems(items) {
   try {
-    localStorage.setItem('roweos_folio_items', JSON.stringify(items));
+    localStorage.setItem(_folioStorageKey(), JSON.stringify(items));
     // v25.3: Use 'data' field to match pull path (was 'items', pull reads 'data')
-    writeDB('folio/main', { data: items });
+    // v34.71: Cloud doc path mirrors localStorage scope so cloud doesn't merge
+    // brand and life folios into one bucket.
+    var cloudPath = (localStorage.getItem('roweos_app_mode') === 'life') ? 'folio/life' : 'folio/main';
+    writeDB(cloudPath, { data: items });
     return true;
   } catch(e) {
     console.error('[Folio] Save failed:', e.message);
@@ -3571,7 +3633,7 @@ function deleteFolioComment(itemId, commentId) {
 function buildFolioChatSystemPrompt() {
   var brandIdx = (typeof selectedBrand === 'number' && !isNaN(selectedBrand)) ? selectedBrand : parseInt(localStorage.getItem('selectedBrand') || '0', 10);
   var brand = (typeof brands !== 'undefined' && brands[brandIdx]) ? brands[brandIdx] : null;
-  var brandName = brand ? (brand.shortName || brand.name) : 'RoweOS';
+  var brandName = brand ? (brand.shortName || brand.name) : 'Brilliance';
 
   // Get the brand's accent color from CSS
   var accentColor = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878';
@@ -3600,8 +3662,20 @@ function buildFolioChatSystemPrompt() {
       'Use viewport units (vw/vh) for sizing.\n\n';
   }
 
-  // Inject full brand identity context (same as main BrandAI chat)
-  if (brand) {
+  // v34.71 Life parity gap #1: Folio chat now branches on app_mode. In life
+  // mode it uses the LifeAI system prompt (life profile, focus areas, goals)
+  // instead of brand context, so personal Folio outputs reflect the user's
+  // life voice, not brand 0's voice.
+  var _isLifeMode = false;
+  try { _isLifeMode = localStorage.getItem('roweos_app_mode') === 'life'; } catch(e){}
+
+  if (_isLifeMode && typeof buildLifeAISystemPrompt === 'function') {
+    try {
+      var lifePrompt = buildLifeAISystemPrompt();
+      if (lifePrompt) prompt += '\n\nLIFE CONTEXT:\n' + lifePrompt + '\n';
+    } catch(eL) { console.warn('[Folio] life prompt failed:', eL && eL.message); }
+  } else if (brand) {
+    // Inject full brand identity context (same as main BrandAI chat)
     prompt += 'BRAND CONTEXT:\n' +
       '- Name: ' + (brand.name || '') + '\n' +
       '- Tagline: ' + (brand.tagline || 'N/A') + '\n' +
@@ -3613,18 +3687,18 @@ function buildFolioChatSystemPrompt() {
     if (brand.tone) prompt += '- Tone: ' + brand.tone + '\n';
     if (brand.colorPalette) prompt += '- Brand Colors: ' + brand.colorPalette + '\n';
     if (brand.typography) prompt += '- Typography: ' + brand.typography + '\n';
-  }
 
-  // Brand identity intelligence (knowledge base, document analysis)
-  if (typeof getBrandIdentityIntelligence === 'function' && brand) {
-    var bii = getBrandIdentityIntelligence(brand);
-    if (bii) prompt += '\n' + bii + '\n';
-  }
+    // Brand identity intelligence (knowledge base, document analysis) — brand mode only
+    if (typeof getBrandIdentityIntelligence === 'function') {
+      var bii = getBrandIdentityIntelligence(brand);
+      if (bii) prompt += '\n' + bii + '\n';
+    }
 
-  // Owner context from LifeAI (cross-mode)
-  if (typeof getBrandOwnerContext === 'function') {
-    var oc = getBrandOwnerContext();
-    if (oc) prompt += '\n' + oc + '\n';
+    // Owner context from LifeAI (cross-mode)
+    if (typeof getBrandOwnerContext === 'function') {
+      var oc = getBrandOwnerContext();
+      if (oc) prompt += '\n' + oc + '\n';
+    }
   }
 
   // Guardrails
@@ -3956,7 +4030,16 @@ function saveFolioPreviewToLibrary(previewId) {
     metadata: { source: 'folio-chat' }
   });
   try { localStorage.setItem('roweos_file_library', JSON.stringify(fileLibrary)); } catch(e) {}
-  if (typeof writeDB === 'function') writeDB('library/brand', { data: JSON.stringify(fileLibrary) });
+  // v33.35 (Sprint 1): services/sync facade.
+  try {
+    if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+      window.BrillianceServices.sync.writeDB('library/brand', { data: JSON.stringify(fileLibrary) });
+    } else if (typeof writeDB === 'function') {
+      writeDB('library/brand', { data: JSON.stringify(fileLibrary) });
+    }
+  } catch(eA) {
+    if (typeof writeDB === 'function') writeDB('library/brand', { data: JSON.stringify(fileLibrary) });
+  }
   showToast('Folio visual saved to Library', 'success');
 }
 
@@ -4349,7 +4432,12 @@ var PIPELINE_STEP_TYPES = {
   message:      { color: '#818cf8', rgb: '129,140,248', label: 'AI Message',    desc: 'Send to AI for a response',    icon: '<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>' },
   create:       { color: '#38bdf8', rgb: '56,189,248',  label: 'Task',          desc: 'Create a task',                icon: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>' },
   pulse:        { color: '#e879f9', rgb: '232,121,249', label: 'Goal',          desc: 'Update a Pulse goal',          icon: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>' },
-  rhythm:       { color: '#fb7185', rgb: '251,113,133', label: 'Event',         desc: 'Add a calendar event',         icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>' }
+  rhythm:       { color: '#fb7185', rgb: '251,113,133', label: 'Event',         desc: 'Add a calendar event',         icon: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>' },
+  // v34.101: New step types covering the v34.x surfaces.
+  notebook:     { color: '#a89878', rgb: '168,152,120', label: 'Notebook',       desc: 'Append output to a notebook',  icon: '<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="9" y1="8" x2="16" y2="8"/><line x1="9" y1="12" x2="16" y2="12"/>' },
+  bloom_save:   { color: '#86efac', rgb: '134,239,172', label: 'Bloom Save',     desc: 'Save output as a Bloom seed',  icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12l2 2 4-4"/>' },
+  thoughtboard: { color: '#fcd34d', rgb: '252,211,77',  label: 'Thought Pin',    desc: 'Pin output to Thought Board',  icon: '<path d="M12 17v5"/><path d="M9 10.76V6h1V2h4v4h1v4.76l3 3.04V17H6v-2.2z"/>' },
+  evolve_quiz:  { color: '#7dd3fc', rgb: '125,211,252', label: 'Evolve Refresh', desc: 'Regenerate Evolve quiz pool',  icon: '<circle cx="12" cy="12" r="10"/><path d="M9 11l3 3 3-3"/><path d="M12 7v7"/>' }
 };
 
 var _pipelineSteps = [];
@@ -4789,9 +4877,12 @@ function renderPipelineStepConfig(step, index) {
     emailTemplateOpts.forEach(function(t) { html += '<option value="' + t[0] + '"' + (emailTemplateVal === t[0] ? ' selected' : '') + '>' + t[1] + '</option>'; });
     html += '</select></div>';
     // v22.8: Send Email pipeline step
-    var emailFrom = (step.config && step.config.emailFrom) ? step.config.emailFrom : getDefaultFromAddress();
+    // v34.103: Default reflects current pipeline mode - life pipelines prefer personal Gmail/Outlook,
+    // brand pipelines use the configured default From address.
+    var _emailStepMode = (typeof getCurrentMode === 'function') ? getCurrentMode() : 'brand';
+    var emailFrom = (step.config && step.config.emailFrom) ? step.config.emailFrom : getDefaultFromAddressForMode(_emailStepMode);
     var emailFromCustom = (step.config && step.config.emailFromCustom) ? step.config.emailFromCustom : '';
-    html += '<div class="auto-lab-form-field"><label>From</label>';
+    html += '<div class="auto-lab-form-field"><label>From <span style="font-weight:400;font-size:11px;color:var(--text-muted);">(' + (_emailStepMode === 'life' ? 'Life mode default: your personal mail' : 'Brand mode default: brand mail') + ')</span></label>';
     html += '<select id="pipelineStepEmailFrom_' + index + '" onchange="var c=document.getElementById(\'pipelineStepEmailFromCustom_' + index + '\');if(c)c.parentElement.style.display=this.value===\'custom\'?\'block\':\'none\';">';
     html += buildFromOptionsHtml(emailFrom);
     var _knownPipeFrom = buildFromOptionsHtml(emailFrom).indexOf('value="' + (emailFrom || '').replace(/"/g, '') + '"') !== -1;
@@ -4869,10 +4960,12 @@ function renderPipelineStepConfig(step, index) {
     outboxTemplateOpts.forEach(function(t) { html += '<option value="' + t[0] + '"' + (outboxTemplate === t[0] ? ' selected' : '') + '>' + t[1] + '</option>'; });
     html += '</select></div>';
     // v22.26: Use default from address, include Gmail/Outlook connected accounts
+    // v34.103: Outbox step also mode-aware - respects life vs brand
     var _obMailCfg = {};
     try { _obMailCfg = JSON.parse(localStorage.getItem('roweos_mail_config') || '{}'); } catch(e) {}
-    var outboxFrom = (step.config && step.config.emailFrom) ? step.config.emailFrom : (_obMailCfg.defaultFromAddress || getDefaultFromAddress());
-    html += '<div class="auto-lab-form-field"><label>From</label>';
+    var _outboxStepMode = (typeof getCurrentMode === 'function') ? getCurrentMode() : 'brand';
+    var outboxFrom = (step.config && step.config.emailFrom) ? step.config.emailFrom : (_outboxStepMode === 'life' ? getDefaultFromAddressForMode('life') : (_obMailCfg.defaultFromAddress || getDefaultFromAddress()));
+    html += '<div class="auto-lab-form-field"><label>From <span style="font-weight:400;font-size:11px;color:var(--text-muted);">(' + (_outboxStepMode === 'life' ? 'Life mode default' : 'Brand mode default') + ')</span></label>';
     html += '<select id="pipelineStepOutboxFrom_' + index + '">';
     html += buildFromOptionsHtml(outboxFrom);
     html += '</select></div>';
@@ -4896,7 +4989,7 @@ function renderPipelineStepConfig(step, index) {
     html += '<div class="auto-lab-form-field" style="flex:1;"><label>Source Step Key</label>';
     html += '<input type="text" id="pipelineStepPdfSource_' + index + '" placeholder="' + (index > 0 ? 'step' + index + '_output' : 'step1_output') + '" value="' + escapeHtml(pdfSourceStep) + '"></div>';
     html += '<div class="auto-lab-form-field" style="flex:1;"><label>PDF Title</label>';
-    html += '<input type="text" id="pipelineStepPdfTitle_' + index + '" placeholder="RoweOS Pitch" value="' + escapeHtml(pdfTitle) + '"></div>';
+    html += '<input type="text" id="pipelineStepPdfTitle_' + index + '" placeholder="Brilliance Pitch" value="' + escapeHtml(pdfTitle) + '"></div>';
     html += '<div class="auto-lab-form-field" style="flex:1;"><label>Orientation</label>';
     html += '<select id="pipelineStepPdfOrient_' + index + '">';
     html += '<option value="portrait"' + (pdfOrient === 'portrait' ? ' selected' : '') + '>Portrait</option>';
@@ -5647,6 +5740,13 @@ function savePipeline() {
       if (emailBccSelfEl2) _pipelineSteps[i].config.bccSelf = emailBccSelfEl2.checked;
       var emailQueueEl2 = document.getElementById('pipelineStepEmailQueue_' + i);
       if (emailQueueEl2) _pipelineSteps[i].config.queueToOutbox = emailQueueEl2.checked;
+      // v34.103: Logo toggle + alignment - savePipeline was dropping these (only collectPipelineStepData
+      // captured them on UI re-render, never on Save). Result: user picks "Center" / unchecks logo,
+      // clicks Save, but the saved automation never has the field.
+      var emailLogoEl2 = document.getElementById('pipelineStepEmailLogo_' + i);
+      if (emailLogoEl2) _pipelineSteps[i].config.includeLogo = emailLogoEl2.checked;
+      var emailLogoAlignEl2 = document.getElementById('pipelineStepLogoAlign_' + i);
+      if (emailLogoAlignEl2) _pipelineSteps[i].config.logoAlignment = emailLogoAlignEl2.value;
     } else if (action === 'outbox') {
       // v22.24: Save outbox step data
       var outboxToEl2 = document.getElementById('pipelineStepOutboxTo_' + i);
@@ -5660,6 +5760,11 @@ function savePipeline() {
       if (outboxFromEl2) _pipelineSteps[i].config.emailFrom = outboxFromEl2.value;
       var outboxBccSelfEl2 = document.getElementById('pipelineStepOutboxBccSelf_' + i);
       if (outboxBccSelfEl2) _pipelineSteps[i].config.bccSelf = outboxBccSelfEl2.checked;
+      // v34.106: outboxFolder - same class as v34.103 logoAlignment bug. The collect
+      // path captured this on UI re-render but Save dropped it; users picking a folder
+      // saw it disappear after pipeline save and outbox queued to root.
+      var outboxFolderEl2 = document.getElementById('pipelineStepOutboxFolder_' + i);
+      if (outboxFolderEl2) _pipelineSteps[i].config.outboxFolder = outboxFolderEl2.value;
     } else if (action === 'batch_email') {
       // v22.28: Save batch email step data
       _pipelineSteps[i].config = _pipelineSteps[i].config || {};
@@ -5683,6 +5788,11 @@ function savePipeline() {
       _pipelineSteps[i].config = _pipelineSteps[i].config || {};
       var resBrandEl2 = document.getElementById('pipelineStepResearchBrandCtx_' + i);
       if (resBrandEl2) _pipelineSteps[i].config.includeBrandContext = resBrandEl2.checked;
+      // v34.106: contextRef (Research Instructions textarea) - same v34.103 class.
+      // collectPipelineStepData captured this on UI rebuild; Save dropped it. Result:
+      // user fills the additional-instructions textarea, clicks Save, blank on reload.
+      var resCtxEl2 = document.getElementById('pipelineStepResearchCtx_' + i);
+      if (resCtxEl2) stepTarget.contextRef = resCtxEl2.value;
     } else if (action === 'pulse') {
       // v28.4: Save pulse step data (goalId + context) - was missing, causing data loss on save
       var pulseGoalEl2 = document.getElementById('pipelineStepGoal_' + i);
@@ -5759,6 +5869,10 @@ function savePipeline() {
     enabled: editId ? (function() { try { var _ea = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); var _ep = _ea.find(function(a) { return String(a.id) === String(editId); }); return _ep ? _ep.enabled !== false : true; } catch(e) { return true; } })() : true,
     mode: typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand',
     brandIdx: typeof selectedBrand !== 'undefined' ? selectedBrand : 0,
+    // v34.100: Capture life profile index too so life-mode pipelines render
+    // with the correct profile's name at execution time (was defaulting to
+    // brand 0 = AppleCare for Jordan's life pipelines).
+    lifeIdx: (function(){ try { var n = parseInt(localStorage.getItem('roweos_selected_life') || '0', 10); return isNaN(n) ? 0 : n; } catch(e) { return 0; } })(),
     // v23.2: Category
     category: (function() { var el = document.getElementById('pipelineCategory'); var v = el ? el.value : ''; if (v === 'Custom') { var ci = document.getElementById('pipelineCustomCatInput'); v = (ci && ci.value.trim()) || 'Custom'; } return v; })(),
     // v24.4: Custom category color
@@ -6511,6 +6625,15 @@ function markAutomationDone(id) {
     clearInterval(_runningTimerInterval);
     _runningTimerInterval = null;
   }
+  // v33.1: Pulse sidebar Brilli to 'pleased' on automation completion.
+  try {
+    if (typeof Brilli !== 'undefined' && window._sidebarBrilliInst) {
+      Brilli.setMode(window._sidebarBrilliInst, 'pleased');
+      setTimeout(function(){
+        try { Brilli.setMode(window._sidebarBrilliInst, 'idle'); } catch(e){}
+      }, 1400);
+    }
+  } catch(e) {}
   // v23.10: Restore card button to Run Now
   _updateAutoCardStopBtn(id, false);
   // v24.12: Clean up running animation classes and timer badges from card
@@ -6609,12 +6732,22 @@ function _updateAutoCardStopBtn(id, isRunning) {
 }
 
 // v22.8: Single source of truth for merged automation list - used by scheduler and notification center
+// v34.67 Phase C #9: routed through SyncV5.readArray for the local automations
+// half. Falls back to v4 JSON.parse path when reads flag is OFF (default).
 function getMergedAutomations() {
   var scheduledTasks = typeof getScheduledTasks === 'function' ? getScheduledTasks() : [];
   var merged = {};
   scheduledTasks.forEach(function(t) { merged[String(t.id)] = t; });
   try {
-    var autoArr = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+    var autoArr;
+    if (typeof window !== 'undefined' && window.SyncV5 && typeof window.SyncV5.readArray === 'function') {
+      autoArr = window.SyncV5.readArray('automations_v5', function(){
+        try { var p = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); return Array.isArray(p) ? p : []; } catch(e){ return []; }
+      });
+    } else {
+      autoArr = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+    }
+    if (!Array.isArray(autoArr)) autoArr = [];
     autoArr.forEach(function(a) {
       var existing = merged[String(a.id)];
       if (!existing) {

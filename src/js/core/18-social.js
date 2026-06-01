@@ -60,8 +60,12 @@ window.readStudioGallery = readStudioGallery;
 
 function persistStudioGallery(images) {
   if (!Array.isArray(images)) images = [];
-  // Cap to last 50 — keeps quota reasonable; oldest fall off
-  if (images.length > 50) images = images.slice(-50);
+  // v34.119: cap reduced from 50 to 20 because each entry is a full base64
+  // dataUrl (5-20MB typical). At 50, the in-memory cache could hold up to
+  // ~1GB. localStorage + IDB still store the full set so older items aren't
+  // visible in the in-memory mirror but persist; if needed they can be
+  // rehydrated from disk by re-running _hydrateStudioGalleryCache.
+  if (images.length > 20) images = images.slice(-20);
   // 1. In-memory cache (primary source of truth — survives quota eviction)
   window._studioGalleryMem = images;
   var serialized = JSON.stringify(images);
@@ -75,9 +79,11 @@ function persistStudioGallery(images) {
   // 3. localStorage (best-effort — shim will offload to IDB on quota anyway)
   try { localStorage.setItem('roweos_auto_lab_images', serialized); }
   catch (e) { console.warn('[StudioGallery] localStorage write failed:', e); }
-  // 4. Firebase write-through
+  // 4. Firebase write-through. v33.34 (Sprint 1): services/sync facade.
   try {
-    if (typeof writeDB === 'function') {
+    if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+      window.BrillianceServices.sync.writeDB('library/studio_gallery', { data: serialized }, { category: 'library' });
+    } else if (typeof writeDB === 'function') {
       writeDB('library/studio_gallery', { data: serialized }, { category: 'library' });
     }
   } catch (e) { console.warn('[StudioGallery] Firebase write failed:', e); }
@@ -325,11 +331,17 @@ function connectX() {
   } catch(e) {}
 
   generateCodeChallenge(codeVerifier).then(function(challenge) {
+    // v34.103: DM scopes (dm.read / dm.write) require elevated X API access. If the user's
+    // X app doesn't have DMs enabled, requesting them causes "Something went wrong" on the
+    // consent screen. Only request DMs when the user has explicitly opted in via Settings.
+    var _xWantsDM = false;
+    try { _xWantsDM = localStorage.getItem('roweos_x_request_dm_scopes') === 'true'; } catch(e) {}
+    var _xScopes = 'tweet.write%20tweet.read%20users.read%20offline.access' + (_xWantsDM ? '%20dm.read%20dm.write' : '');
     var authUrl = 'https://x.com/i/oauth2/authorize' +
       '?response_type=code' +
       '&client_id=' + encodeURIComponent(clientId) +
       '&redirect_uri=' + encodeURIComponent(redirectUri) +
-      '&scope=tweet.write%20tweet.read%20users.read%20offline.access%20dm.read%20dm.write' +
+      '&scope=' + _xScopes +
       '&state=' + encodeURIComponent(state) +
       '&code_challenge=' + challenge +
       '&code_challenge_method=S256';
@@ -3075,13 +3087,41 @@ function executeWorkflow(workflow) {
   });
   if (preflightErrors.length > 0) {
     showToast(preflightErrors[0], 'error');
+    // v34.100: Record preflight failures in execution history so users see WHY
+    // their pipeline didn't run. Was silently returning, leaving history stale
+    // and making it look like the scheduler stopped working entirely.
+    try {
+      if (typeof addAutoLabHistory === 'function') {
+        addAutoLabHistory({ name: workflow.name || 'Pipeline', action: 'pipeline', id: workflow.id }, false, 'Pre-flight failed: ' + preflightErrors.join('; '));
+      }
+      if (typeof addCompletedAutomation === 'function') {
+        addCompletedAutomation({ name: workflow.name, id: workflow.id, action: 'pipeline' }, false);
+      }
+    } catch(e) {}
     return Promise.resolve({ completedSteps: [], failedSteps: preflightErrors.map(function(e) { return { error: e }; }), context: {} });
   }
 
   var context = {};
   context._workflowName = workflow.name || ''; // v30.1: Pass workflow name to steps
-  // v19.2: Use workflow's saved brandIdx for brand context
-  if (typeof brands !== 'undefined' && brands[brandIdx]) {
+  // v34.100: Honor the pipeline's saved mode. Life-mode pipelines were
+  // silently rendering with the active brand's name + logo because we
+  // never branched on workflow.mode. Now: life pipelines get the life
+  // profile name + life-mode flag, brand pipelines get the brand context
+  // they were saved with (not whatever brand happens to be active right
+  // now).
+  context._mode = workflow.mode === 'life' ? 'life' : 'brand';
+  if (context._mode === 'life') {
+    var _lifeIdx = (typeof workflow.lifeIdx === 'number') ? workflow.lifeIdx : 0;
+    var _lifeProfile = null;
+    try {
+      var _lifes = JSON.parse(localStorage.getItem('roweos_life_profiles') || '[]');
+      _lifeProfile = (Array.isArray(_lifes) && _lifes[_lifeIdx]) ? _lifes[_lifeIdx] : (_lifes && _lifes[0]) || null;
+    } catch(e){}
+    var _userName = '';
+    try { _userName = (typeof firebaseUser !== 'undefined' && firebaseUser && firebaseUser.displayName) || localStorage.getItem('roweos_user_name') || ''; } catch(e){}
+    context.brandName = (_lifeProfile && (_lifeProfile.name || _lifeProfile.label)) || _userName || 'Life';
+    context._lifeIdx = _lifeIdx;
+  } else if (typeof brands !== 'undefined' && brands[brandIdx]) {
     context.brandName = brands[brandIdx].shortName || brands[brandIdx].name;
     context._brandIdx = brandIdx;
   }
@@ -3629,6 +3669,20 @@ function executeWorkflowStep(step, context) {
         return Promise.resolve(content);
       }
       var formatted = formatForPlatform(content, platform);
+      // v34.105: Honor approval guardrails on the pipeline path the same way postToSocial does.
+      // Previously the pipeline 'post' action skipped socialPostRequiresApproval() and
+      // _forceApprovalQueue, so a scheduled pipeline could publish live regardless of the
+      // user's "Require approval" setting. Users had no protection against accidental sends.
+      if (!window._socialOutboxBypass && (
+            (typeof socialPostRequiresApproval === 'function' && socialPostRequiresApproval()) ||
+            window._forceApprovalQueue
+          )) {
+        if (typeof addToSocialOutbox === 'function') {
+          addToSocialOutbox(platform, formatted, postImageUrl || null);
+        }
+        showToast('Queued ' + (SOCIAL_PLATFORM_NAMES[platform] || platform) + ' post for approval', 'info');
+        return Promise.resolve(content);
+      }
       return getSocialToken(platform).then(function(tokenData) {
         if (!tokenData || !tokenData.accessToken) {
           postFailures.push(platform + ': no token');
@@ -3982,13 +4036,13 @@ function executeWorkflowStep(step, context) {
     if (!pdfContent) {
       return Promise.reject(new Error('PDF generation failed: no content available'));
     }
-    var pdfTitle = (step.config && step.config.pdfTitle) ? resolveTemplateVars(step.config.pdfTitle, context) : 'RoweOS Export';
+    var pdfTitle = (step.config && step.config.pdfTitle) ? resolveTemplateVars(step.config.pdfTitle, context) : 'Brilliance Export';
     var pdfOrient = (step.config && step.config.orientation) ? step.config.orientation : 'portrait';
     var pdfFilename = pdfTitle.replace(/\s+/g, '_') + '_' + Date.now() + '.pdf';
     try {
       var pdfResult = roweosPDF(pdfContent, {
         title: pdfTitle,
-        subtitle: 'Generated by RoweOS Pipeline',
+        subtitle: 'Generated by Brilliance Pipeline',
         orientation: pdfOrient,
         filename: pdfFilename,
         returnBase64: true
@@ -4039,7 +4093,7 @@ function executeWorkflowStep(step, context) {
     }
     // v22.22: Fallback subject if empty (prevents "Subject is required" API error)
     if (!emailSubject) {
-      emailSubject = (context && context.brandName ? context.brandName : 'RoweOS') + ' - Pipeline Output';
+      emailSubject = (context && context.brandName ? context.brandName : 'Brilliance') + ' - Pipeline Output';
     }
     // v22.9: Use template type from step config
     var emailTemplate = (step.config && step.config.emailTemplate) ? step.config.emailTemplate : 'professional';
@@ -4088,7 +4142,13 @@ function executeWorkflowStep(step, context) {
       // v23.11: Respect logo toggle from pipeline step config
       // v24.4: Prefer uploaded URL over base64 (email clients block base64 images)
       var _showLogo = !(step.config && step.config.includeLogo === false);
-      if (_showLogo) {
+      // v34.100: In life mode, the document.querySelector('.brand-logo-img')
+      // grab pulls whatever brand is currently visible in the sidebar — wrong
+      // for a life-owned pipeline. Skip the brand-DOM grab when mode is life;
+      // life profiles don't have logos so the email renders text-only header.
+      if (_showLogo && context && context._mode === 'life') {
+        _logo = '';
+      } else if (_showLogo) {
         // v28.4: Prefer base64 over Firebase Storage URL (Storage URLs expire after ~1hr)
         if (window._mailLogoBase64) {
           _logo = window._mailLogoBase64;
@@ -4096,7 +4156,6 @@ function executeWorkflowStep(step, context) {
           try {
             var _logoEl = document.querySelector('.brand-logo-img');
             if (_logoEl) _logo = _logoEl.src;
-            // Resize logo for email use (fire-and-forget)
             if (_logo && _logo.indexOf('data:') === 0 && typeof mailEnsureLogoUrl === 'function') {
               mailEnsureLogoUrl(_logo);
             }
@@ -4333,7 +4392,7 @@ function executeWorkflowStep(step, context) {
     // Fallback subject
     if (!outboxSubject) {
       if (outboxSubject !== '' || !target.emailSubject) {
-        outboxSubject = (context && context.brandName ? context.brandName : 'RoweOS') + ' - Pipeline Output';
+        outboxSubject = (context && context.brandName ? context.brandName : 'Brilliance') + ' - Pipeline Output';
       }
     }
     // Render markdown to HTML
@@ -4364,25 +4423,38 @@ function executeWorkflowStep(step, context) {
     if (outboxTemplate === 'plain') {
       outboxHtml = '<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;">' + _obRendered + '</div>';
     } else {
-      var _obBrand = (context && context.brandName) ? context.brandName : 'Brand';
+      var _obBrandName = (context && context.brandName) ? context.brandName : 'Brand';
       var _obAccent = '#a89878';
       try { _obAccent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
       var _obLogo = '';
-      var _obBrandIdx = (context && context._brandIdx !== undefined) ? context._brandIdx : (typeof selectedBrand !== 'undefined' ? selectedBrand : 0);
-      // v32.0-C: prefer brand object + ID-keyed storage; fall back to legacy position key for in-flight migrations
-      try {
-        var _obBrand = (typeof brands !== 'undefined' && brands[_obBrandIdx]) ? brands[_obBrandIdx] : null;
-        if (typeof window.readBrandLogoSync === 'function' && _obBrand) {
-          _obLogo = window.readBrandLogoSync(_obBrand) || '';
-        }
-        if (!_obLogo) _obLogo = localStorage.getItem('roweos_brand_' + _obBrandIdx + '_logo') || '';
-      } catch(e) {}
-      if (!_obLogo) { try { var _obLogoEl = document.querySelector('.brand-logo-img'); if (_obLogoEl) _obLogo = _obLogoEl.src; } catch(e) {} }
+      // v34.100: Mode-aware logo. Life-mode pipelines render text-only header.
+      // Brand-mode pipelines look up the brand's logo by ID, then fall back to
+      // the position-keyed logo, then the active sidebar logo as a last resort.
+      // Also fixed a pre-existing shadowing bug where _obBrand was reassigned
+      // from the name string to a brand OBJECT, then passed as brandName.
+      var _obIsLife = context && context._mode === 'life';
+      // v34.103: Honor includeLogo === false for outbox step (was missing).
+      var _obShowLogo = !(step.config && step.config.includeLogo === false);
+      if (_obShowLogo && !_obIsLife) {
+        var _obBrandIdx = (context && context._brandIdx !== undefined) ? context._brandIdx : (typeof selectedBrand !== 'undefined' ? selectedBrand : 0);
+        try {
+          var _obBrandObj = (typeof brands !== 'undefined' && brands[_obBrandIdx]) ? brands[_obBrandIdx] : null;
+          if (typeof window.readBrandLogoSync === 'function' && _obBrandObj) {
+            _obLogo = window.readBrandLogoSync(_obBrandObj) || '';
+          }
+          if (!_obLogo) _obLogo = localStorage.getItem('roweos_brand_' + _obBrandIdx + '_logo') || '';
+        } catch(e) {}
+        if (!_obLogo) { try { var _obLogoEl = document.querySelector('.brand-logo-img'); if (_obLogoEl) _obLogo = _obLogoEl.src; } catch(e) {} }
+      }
+      var _obBrand = _obBrandName;
+      // v34.103: Honor step.config.logoAlignment for outbox step (was missing).
+      var _obLogoAlign = (step.config && step.config.logoAlignment) || 'center';
       window._studioEmailContext = {
         contentHtml: '<div style="font-size:15px;line-height:1.7;">' + _obRendered + '</div>',
         brandName: _obBrand,
         accentColor: _obAccent,
         brandLogo: _obLogo,
+        logoAlignment: _obLogoAlign,
         date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
       };
       outboxHtml = generateBrandedEmail(outboxTemplate);
@@ -4497,18 +4569,21 @@ function executeWorkflowStep(step, context) {
     var _beAccent = '#a89878';
     try { _beAccent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
     // v28.4: Prefer base64 over Firebase Storage URL (Storage URLs expire after ~1hr)
+    // v34.100: Skip logo grab in life mode (life profiles have no logo).
     var _beLogo = '';
-    if (window._mailLogoBase64) {
-      _beLogo = window._mailLogoBase64;
-    } else {
-      try {
-        var _beLogoEl = document.querySelector('.brand-logo-img');
-        if (_beLogoEl) _beLogo = _beLogoEl.src;
-        // Resize logo for email use (fire-and-forget)
-        if (_beLogo && _beLogo.indexOf('data:') === 0 && typeof mailEnsureLogoUrl === 'function') {
-          mailEnsureLogoUrl(_beLogo);
-        }
-      } catch(e) {}
+    var _beIsLife = context && context._mode === 'life';
+    if (!_beIsLife) {
+      if (window._mailLogoBase64) {
+        _beLogo = window._mailLogoBase64;
+      } else {
+        try {
+          var _beLogoEl = document.querySelector('.brand-logo-img');
+          if (_beLogoEl) _beLogo = _beLogoEl.src;
+          if (_beLogo && _beLogo.indexOf('data:') === 0 && typeof mailEnsureLogoUrl === 'function') {
+            mailEnsureLogoUrl(_beLogo);
+          }
+        } catch(e) {}
+      }
     }
     // v22.31: Resolve PDF attachment before email loop
     var _beAttachments = [];
@@ -4518,7 +4593,7 @@ function executeWorkflowStep(step, context) {
         var _pdfData = JSON.parse(context[_beAttachKey]);
         if (_pdfData && _pdfData.base64) {
           _beAttachments.push({
-            filename: _pdfData.filename || 'RoweOS-Pitch.pdf',
+            filename: _pdfData.filename || 'Brilliance-Pitch.pdf',
             content: _pdfData.base64,
             type: 'application/pdf'
           });
@@ -4574,11 +4649,14 @@ function executeWorkflowStep(step, context) {
       if (batchTemplate === 'plain') {
         beHtml = '<div style="font-family:-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:20px;">' + _beRendered + '</div>';
       } else {
+        // v34.103: Honor step.config.logoAlignment for batch_email step (was missing).
+        var _beLogoAlign = (step.config && step.config.logoAlignment) || 'center';
         window._studioEmailContext = {
           contentHtml: '<div style="font-size:15px;line-height:1.7;">' + _beRendered + '</div>',
           brandName: _beBrandName,
           accentColor: _beAccent,
           brandLogo: _beLogo,
+          logoAlignment: _beLogoAlign,
           date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
         };
         beHtml = generateBrandedEmail(batchTemplate);
@@ -4716,6 +4794,141 @@ function executeWorkflowStep(step, context) {
     var notifyText = resolveTemplateVars(target.text || '', context);
     showToast(notifyText || ('Pipeline step ' + step.stepId + ' complete'), 'info');
     return Promise.resolve(notifyText);
+  }
+
+  // v34.101: Notebook step — append the previous step's text output to a
+  // notebook in roweos_scribe_notebooks. Honors pipeline mode for source tag.
+  if (action === 'notebook') {
+    try {
+      var nbContent = resolveTemplateVars(target.contentRef || target.text || '', context);
+      if (!nbContent) {
+        var nbKeys = Object.keys(context || {});
+        for (var nki = nbKeys.length - 1; nki >= 0; nki--) {
+          var nkv = context[nbKeys[nki]];
+          if (typeof nkv === 'string' && nkv.length > 0 && nbKeys[nki] !== 'brandName' && nbKeys[nki].indexOf('_') !== 0) {
+            nbContent = nkv; break;
+          }
+        }
+      }
+      if (!nbContent) return Promise.reject(new Error('Notebook step: no content to write'));
+      var nbTitle = resolveTemplateVars(target.notebookTitle || step.config && step.config.notebookTitle || '', context) || ((context && context._workflowName) || 'Pipeline output');
+      var notebooks = [];
+      try { notebooks = JSON.parse(localStorage.getItem('roweos_scribe_notebooks') || '[]'); } catch(e){}
+      if (!Array.isArray(notebooks)) notebooks = [];
+      var modeSrc = (context && context._mode === 'life') ? 'lifeai' : 'brandai';
+      var existing = notebooks.find(function(n) { return n.title === nbTitle && (!n.source || n.source === modeSrc); });
+      var stamp = '\n\n---\n## ' + new Date().toLocaleString() + '\n\n' + nbContent;
+      if (existing) {
+        existing.content = (existing.content || '') + stamp;
+        existing._modifiedAt = Date.now();
+      } else {
+        notebooks.push({
+          id: 'nb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+          title: nbTitle,
+          content: stamp.replace(/^\n\n---\n/, ''),
+          source: modeSrc,
+          _modifiedAt: Date.now(),
+          createdAt: Date.now()
+        });
+      }
+      localStorage.setItem('roweos_scribe_notebooks', JSON.stringify(notebooks));
+      try { if (typeof writeDB === 'function') writeDB('scribe/main', { notebooks: notebooks }); } catch(e){}
+      showToast('Wrote to notebook: ' + nbTitle, 'success');
+      return Promise.resolve('Notebook updated: ' + nbTitle + ' (' + nbContent.length + ' chars)');
+    } catch (err) {
+      return Promise.reject(new Error('Notebook step failed: ' + (err && err.message)));
+    }
+  }
+
+  // v34.101: Bloom Save — persist the previous step's output as a Bloom seed.
+  if (action === 'bloom_save') {
+    try {
+      var bloomTitle = resolveTemplateVars(target.title || '', context) || ((context && context._workflowName) || 'Pipeline seed');
+      var bloomBody = resolveTemplateVars(target.contentRef || target.text || '', context);
+      if (!bloomBody) {
+        var bkk = Object.keys(context || {});
+        for (var bki = bkk.length - 1; bki >= 0; bki--) {
+          var bkv = context[bkk[bki]];
+          if (typeof bkv === 'string' && bkv.length > 0 && bkk[bki] !== 'brandName' && bkk[bki].indexOf('_') !== 0) {
+            bloomBody = bkv; break;
+          }
+        }
+      }
+      if (!bloomBody) return Promise.reject(new Error('Bloom save: no content'));
+      var bloomLib = {};
+      try { bloomLib = JSON.parse(localStorage.getItem('roweos_bloom_library') || '{}') || {}; } catch(e){}
+      var bScope = (context && context._mode === 'life') ? ('life_' + (context._lifeIdx || 0)) : ('brand_' + (context._brandIdx || 0));
+      if (!Array.isArray(bloomLib[bScope])) bloomLib[bScope] = [];
+      bloomLib[bScope].unshift({
+        id: 'bloom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+        title: bloomTitle,
+        summary: bloomBody.substring(0, 500),
+        body: bloomBody,
+        source: 'pipeline',
+        _modifiedAt: Date.now(),
+        savedAt: Date.now()
+      });
+      localStorage.setItem('roweos_bloom_library', JSON.stringify(bloomLib));
+      try { if (typeof writeDB === 'function') writeDB('profile/main', { bloomLibrary: bloomLib }); } catch(e){}
+      showToast('Saved to Bloom: ' + bloomTitle, 'success');
+      return Promise.resolve('Bloom seed saved: ' + bloomTitle);
+    } catch (err) {
+      return Promise.reject(new Error('Bloom step failed: ' + (err && err.message)));
+    }
+  }
+
+  // v34.101: Thought Board pin — pin output as a Thought Board card.
+  if (action === 'thoughtboard') {
+    try {
+      var pinTitle = resolveTemplateVars(target.title || '', context) || ((context && context._workflowName) || 'Pipeline pin');
+      var pinBody = resolveTemplateVars(target.contentRef || target.text || '', context);
+      if (!pinBody) {
+        var tk = Object.keys(context || {});
+        for (var tki = tk.length - 1; tki >= 0; tki--) {
+          var tkv = context[tk[tki]];
+          if (typeof tkv === 'string' && tkv.length > 0 && tk[tki] !== 'brandName' && tk[tki].indexOf('_') !== 0) {
+            pinBody = tkv; break;
+          }
+        }
+      }
+      var pins = [];
+      try { pins = JSON.parse(localStorage.getItem('roweos_thought_board') || '[]'); } catch(e){}
+      if (!Array.isArray(pins)) pins = [];
+      pins.push({
+        id: 'pin_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+        kind: 'note',
+        title: pinTitle,
+        body: pinBody || '',
+        source: { view: 'pipeline', refId: (context && context._workflowName) || '', label: (context && context._workflowName) || 'Pipeline' },
+        x: Math.random() * 0.7 + 0.1,
+        y: Math.random() * 0.7 + 0.1,
+        _modifiedAt: Date.now()
+      });
+      localStorage.setItem('roweos_thought_board', JSON.stringify(pins));
+      try { if (typeof writeDB === 'function') writeDB('profile/main', { thought_board_pins: pins }); } catch(e){}
+      showToast('Pinned to Thought Board: ' + pinTitle, 'success');
+      return Promise.resolve('Thought Board pin: ' + pinTitle);
+    } catch (err) {
+      return Promise.reject(new Error('Thought Board step failed: ' + (err && err.message)));
+    }
+  }
+
+  // v34.101: Evolve quiz refresh — clear pool + force regenerate.
+  if (action === 'evolve_quiz') {
+    try {
+      try { localStorage.removeItem('roweos_evolve_quiz_pool'); } catch(e){}
+      try { localStorage.removeItem('roweos_evolve_quiz_completed'); } catch(e){}
+      if (typeof QuizEngine !== 'undefined' && QuizEngine.refillPool) {
+        return QuizEngine.refillPool().then(function(res) {
+          var msg = res && res.skipped ? ('Evolve refresh skipped: ' + res.reason) : ('Evolve quiz pool refreshed (' + (res.added || 0) + ' new questions)');
+          showToast(msg, 'info');
+          return msg;
+        });
+      }
+      return Promise.resolve('Evolve quiz pool cleared (engine unavailable)');
+    } catch (err) {
+      return Promise.reject(new Error('Evolve refresh failed: ' + (err && err.message)));
+    }
   }
 
   // For other actions, delegate to existing task execution
@@ -5101,11 +5314,19 @@ function addAutoLabHistory(task, success, result, opts) {
   }
   // v22.29: Increased from 5K to 50K to show full execution output
   cleanResult = cleanResult.substring(0, 50000);
+  // v34.100: Tag entry with mode so users in life-mode see life runs and
+  // brand-mode users see brand runs. History list shows BOTH by default;
+  // mode is just a filter the user can toggle later.
+  var _entryMode = task.mode ||
+    (task.brandIdx != null ? 'brand' : null) ||
+    (function(){ try { return localStorage.getItem('roweos_app_mode') === 'life' ? 'life' : 'brand'; } catch(e) { return 'brand'; } })();
   history.push({
     id: Date.now(),
     name: task.name || 'Unknown',
     action: task.action || 'unknown',
     brand: task.brand || '',
+    mode: _entryMode,
+    taskId: task.id || '',
     success: !!success,
     result: cleanResult,
     timestamp: new Date().toISOString(),
@@ -5790,8 +6011,15 @@ function imageChatSaveToFolio(actionId) {
       addedAt: new Date().toISOString()
     });
     localStorage.setItem('roweos_folio_main', JSON.stringify(folio));
-    if (typeof writeDB === 'function') {
-      writeDB('folio/main', folio, { category: 'folio' });
+    // v33.34 (Sprint 1): services/sync facade.
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+        window.BrillianceServices.sync.writeDB('folio/main', folio, { category: 'folio' });
+      } else if (typeof writeDB === 'function') {
+        writeDB('folio/main', folio, { category: 'folio' });
+      }
+    } catch(eS) {
+      if (typeof writeDB === 'function') writeDB('folio/main', folio, { category: 'folio' });
     }
     showToast('Saved to Folio', 'success');
   } catch (e) { showToast('Folio save failed: ' + e.message, 'error'); }

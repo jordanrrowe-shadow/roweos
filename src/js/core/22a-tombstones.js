@@ -1116,6 +1116,217 @@ function purgeLegacyFocusResidue(opts) {
 }
 window.purgeLegacyFocusResidue = purgeLegacyFocusResidue;
 
+// =============================================================================
+// v33.81: Sync reconciliation + UUID purge — addresses the user's flagged issue
+// where cloud retains items the user has tombstoned across devices, leaving
+// the Sync Hub stuck at "Aligning… (-N)" forever.
+//
+// Three new APIs:
+//   - reconcileCategoryWithTombstones(catId)       resolves cloud-only items
+//                                                   that are already tombstoned
+//                                                   on this device by deleting
+//                                                   them from cloud.
+//   - reconcileAllWithTombstones()                  walks every registry entry.
+//   - purgeUUIDStale({ direction, dryRun })         all-stale wipe — for the
+//                                                   user's UUID, deletes every
+//                                                   cloud item that this device
+//                                                   has tombstoned. Optional
+//                                                   dryRun returns the plan.
+// =============================================================================
+
+// Build a deterministic list of cloud item ids by reading the cloud path.
+// Returns a Promise<{ok, ids[], error}>. Subcollection only — blob/inline are
+// already 1:1 with the local array, so reconcile is unnecessary there.
+function _listCloudIdsForCategory(cat) {
+  return new Promise(function(resolve) {
+    if (!cat || cat.cloudShape !== 'subcollection') {
+      resolve({ ok: true, ids: [], error: null });
+      return;
+    }
+    var firebaseUser = (typeof window !== 'undefined') ? window.firebaseUser : null;
+    var firebase = (typeof window !== 'undefined') ? window.firebase : null;
+    if (!firebase || !firebase.firestore || !firebaseUser || !firebaseUser.uid) {
+      resolve({ ok: false, ids: [], error: 'firestore unavailable' });
+      return;
+    }
+    try {
+      var basePath = 'roweos_users/' + firebaseUser.uid + '/' + cat.cloudPath;
+      firebase.firestore().collection(basePath).get().then(function(snap) {
+        var ids = [];
+        snap.forEach(function(doc) {
+          // Skip the legacy aggregate "_all" doc and any reserved metadata docs.
+          if (doc.id !== '_all' && doc.id !== 'main' && doc.id !== '_meta') ids.push(doc.id);
+        });
+        resolve({ ok: true, ids: ids, error: null });
+      }, function(err) {
+        resolve({ ok: false, ids: [], error: err && err.message || 'read failed' });
+      });
+    } catch (e) {
+      resolve({ ok: false, ids: [], error: e && e.message || 'exception' });
+    }
+  });
+}
+window._listCloudIdsForCategory = _listCloudIdsForCategory;
+
+// Returns Promise<{ok, deleted, tombstoned, alreadyDeleted, error}>.
+// For a single category: list cloud subcollection ids, intersect with local
+// tombstone set, and call _deleteCloudItem for each match. Skips blob/inline
+// shapes (no orphan possible — local array IS the cloud doc).
+function reconcileCategoryWithTombstones(categoryIdOrLabel) {
+  var cat = getCategoryById(categoryIdOrLabel);
+  if (!cat) return Promise.resolve({ ok: false, deleted: 0, error: 'unknown category' });
+  if (cat.cloudShape !== 'subcollection') {
+    return Promise.resolve({ ok: true, deleted: 0, skipped: 'not-subcollection', cat: cat.id });
+  }
+  var tombSet = _readTombstoneSet(cat);
+  return _listCloudIdsForCategory(cat).then(function(listRes) {
+    if (!listRes.ok) return { ok: false, deleted: 0, error: listRes.error, cat: cat.id };
+    var stale = listRes.ids.filter(function(id) { return !!tombSet[id]; });
+    if (stale.length === 0) {
+      return { ok: true, deleted: 0, alreadyClean: true, cat: cat.id };
+    }
+    var promises = stale.map(function(id) {
+      return _deleteCloudItem(cat, id).then(function(r) {
+        return { id: id, ok: !!r.ok, error: r.error };
+      });
+    });
+    return Promise.all(promises).then(function(results) {
+      var deleted = 0;
+      var failed = [];
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].ok) deleted++;
+        else failed.push(results[i]);
+      }
+      return {
+        ok: failed.length === 0,
+        deleted: deleted,
+        failed: failed,
+        cat: cat.id
+      };
+    });
+  });
+}
+window.reconcileCategoryWithTombstones = reconcileCategoryWithTombstones;
+
+// Walk every registry entry. Returns Promise<{ok, totalDeleted, perCategory[]}>.
+function reconcileAllWithTombstones() {
+  var perCategory = [];
+  var chain = Promise.resolve();
+  for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+    (function(cat) {
+      chain = chain.then(function() {
+        return reconcileCategoryWithTombstones(cat.id).then(function(r) {
+          perCategory.push(r);
+        });
+      });
+    })(SYNC_CATEGORIES[i]);
+  }
+  return chain.then(function() {
+    var totalDeleted = 0;
+    var allOk = true;
+    for (var p = 0; p < perCategory.length; p++) {
+      totalDeleted += (perCategory[p].deleted || 0);
+      if (perCategory[p].ok === false) allOk = false;
+    }
+    return { ok: allOk, totalDeleted: totalDeleted, perCategory: perCategory };
+  });
+}
+window.reconcileAllWithTombstones = reconcileAllWithTombstones;
+
+// Build a snapshot diff for the entire registry. Used by Sync Hub UI to
+// show what reconcile WOULD do before user confirms.
+//   Returns Promise<{
+//     perCategory: [{ id, label, localCount, cloudCount,
+//                     tombstoneCount, cloudStaleCount, cloudOrphanCount }]
+//   }>
+//   - cloudStaleCount: cloud items that match local tombstones (would be deleted)
+//   - cloudOrphanCount: cloud items absent from local AND absent from tombstones
+//                      (would normally trigger an 'Aligning…' alarm — these
+//                      are the ones the user must decide on: pull or tombstone)
+function buildSyncReconciliationReport() {
+  var rows = [];
+  var chain = Promise.resolve();
+  for (var i = 0; i < SYNC_CATEGORIES.length; i++) {
+    (function(cat) {
+      chain = chain.then(function() {
+        if (cat.cloudShape !== 'subcollection') {
+          rows.push({ id: cat.id, label: cat.label, skipped: 'not-subcollection' });
+          return;
+        }
+        var tombSet = _readTombstoneSet(cat);
+        var tombArr = Object.keys(tombSet);
+        var localArr = _readCategoryArray(cat);
+        var localIds = {};
+        for (var L = 0; L < localArr.length; L++) {
+          if (localArr[L] && localArr[L][cat.idField] != null) {
+            localIds[localArr[L][cat.idField]] = true;
+          }
+        }
+        return _listCloudIdsForCategory(cat).then(function(listRes) {
+          if (!listRes.ok) {
+            rows.push({ id: cat.id, label: cat.label, error: listRes.error });
+            return;
+          }
+          var stale = 0, orphan = 0, orphanIds = [];
+          for (var c = 0; c < listRes.ids.length; c++) {
+            var cid = listRes.ids[c];
+            if (tombSet[cid]) stale++;
+            else if (!localIds[cid]) { orphan++; orphanIds.push(cid); }
+          }
+          rows.push({
+            id: cat.id, label: cat.label,
+            localCount: localArr.length,
+            cloudCount: listRes.ids.length,
+            tombstoneCount: tombArr.length,
+            cloudStaleCount: stale,
+            cloudOrphanCount: orphan,
+            cloudOrphanIds: orphanIds.slice(0, 50)
+          });
+        });
+      });
+    })(SYNC_CATEGORIES[i]);
+  }
+  return chain.then(function() { return { perCategory: rows }; });
+}
+window.buildSyncReconciliationReport = buildSyncReconciliationReport;
+
+// User-facing nuclear option: tombstone every cloud item that is NOT in local.
+// For each subcollection category, lists cloud ids, tombstones every id that's
+// missing from the local array, then deletes them from cloud. This is the "I
+// already deleted these on the desktop, stop resurrecting them on iOS" button.
+//
+// Requires explicit { confirmed: true } to run; otherwise returns dryRun report.
+function purgeUUIDStale(opts) {
+  opts = opts || {};
+  return buildSyncReconciliationReport().then(function(report) {
+    if (!opts.confirmed) {
+      return { dryRun: true, plan: report.perCategory };
+    }
+    // Confirmed: tombstone+delete every orphan listed in the report.
+    var perCategory = [];
+    var chain = Promise.resolve();
+    for (var i = 0; i < report.perCategory.length; i++) {
+      (function(row) {
+        if (!row || !row.cloudOrphanIds || row.cloudOrphanIds.length === 0) return;
+        chain = chain.then(function() {
+          return tombstoneAndDeleteMany(row.id, row.cloudOrphanIds).then(function(r) {
+            perCategory.push({ id: row.id, label: row.label, count: r.count, ok: r.ok, failed: r.failed });
+          });
+        });
+      })(report.perCategory[i]);
+    }
+    return chain.then(function() {
+      var totalCount = 0; var allOk = true;
+      for (var p = 0; p < perCategory.length; p++) {
+        totalCount += (perCategory[p].count || 0);
+        if (perCategory[p].ok === false) allOk = false;
+      }
+      return { ok: allOk, totalPurged: totalCount, perCategory: perCategory };
+    });
+  });
+}
+window.purgeUUIDStale = purgeUUIDStale;
+
 function restoreFromPrePurgeBackup_v32() {
   var raw = localStorage.getItem('roweos_pre_purge_backup_v32');
   if (!raw) {

@@ -1223,7 +1223,7 @@ function goToOnboardingStep(step) {
   console.log('=== goToOnboardingStep called with step:', step);
 
   // Hide all steps (including new wizard steps 6-11 and import steps)
-  var stepIds = ['onboardingStep0', 'onboardingStepPWA', 'onboardingStepMode', 'onboardingStepName', 'onboardingStepProvider', 'onboardingStep1', 'onboardingBrandName', 'onboardingBrandOwnership', 'onboardingStep2', 'onboardingTemplateSelection', 'onboardingTemplateBranding', 'onboardingStep3', 'onboardingStep4', 'onboardingStep5', 'onboardingStepLogo', 'onboardingStepFirebase', 'onboardingStepSync', 'onboardingStepCalendar', 'onboardingStepSocial', 'onboardingStepEmail', 'onboardingStepAutomations', 'onboardingStyleStep', 'onboardingStepSidebarPref', 'onboardingStepMobileNavPref', 'onboardingStepBlobPref', 'onboardingStepPush', 'onboardingStepCrossDevice', 'onboardingStepBetaWelcome', 'onboardingStep6', 'onboardingStep7', 'onboardingStep8', 'onboardingStep9', 'onboardingStep10', 'onboardingStep11', 'onboardingWebsiteImport', 'onboardingDocumentUpload', 'onboardingLifeStep1', 'onboardingLifeStep2', 'onboardingLifeStep3', 'onboardingLifeStep4', 'onboardingLifeBuilding', 'onboardingLifeStudioPreview', 'onboardingLifeStep5', 'onboardingStepCrossMode', 'onboardingWebSearchReview'];
+  var stepIds = ['onboardingStep0', 'onboardingStepPWA', 'onboardingStepMode', 'onboardingStepName', 'onboardingStepProvider', 'onboardingStep1', 'onboardingBrandName', 'onboardingBrandOwnership', 'onboardingStep2', 'onboardingTemplateSelection', 'onboardingTemplateBranding', 'onboardingStep3', 'onboardingStep4', 'onboardingStep5', 'onboardingStepLogo', 'onboardingStepFirebase', 'onboardingStepSync', 'onboardingStepCalendar', 'onboardingStepSocial', 'onboardingStepEmail', 'onboardingStepAutomations', 'onboardingStyleStep', 'onboardingStepSidebarPref', 'onboardingStepMobileNavPref', 'onboardingStepBlobPref', 'onboardingStepPush', 'onboardingStepCrossDevice', 'onboardingStepMakeYours', 'onboardingStepNativeWorkspace', 'onboardingStepBetaWelcome', 'onboardingStep6', 'onboardingStep7', 'onboardingStep8', 'onboardingStep9', 'onboardingStep10', 'onboardingStep11', 'onboardingWebsiteImport', 'onboardingDocumentUpload', 'onboardingLifeStep1', 'onboardingLifeStep2', 'onboardingLifeStep3', 'onboardingLifeStep4', 'onboardingLifeBuilding', 'onboardingLifeStudioPreview', 'onboardingLifeStep5', 'onboardingStepCrossMode', 'onboardingWebSearchReview'];
   stepIds.forEach(function(id) {
     var stepEl = document.getElementById(id);
     if (stepEl) {
@@ -1271,6 +1271,21 @@ function goToOnboardingStep(step) {
         provBackBtn.setAttribute('onclick', "goToOnboardingStep('name')");
       }
     }
+  } else if (step === 'makeYours') {
+    // v34.64: Make-it-yours customization step. Reset selection visuals on entry.
+    targetStepId = 'onboardingStepMakeYours';
+    setTimeout(function() {
+      try {
+        if (typeof selectOnboardingBrilliForm === 'function') {
+          var initialForm = (typeof Brilli !== 'undefined' && typeof Brilli.getActiveForm === 'function')
+            ? Brilli.getActiveForm() : 'celestial';
+          selectOnboardingBrilliForm(initialForm);
+        }
+        if (typeof selectOnboardingTheme === 'function') {
+          selectOnboardingTheme(document.documentElement.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+      } catch (e) {}
+    }, 50);
   } else if (step === 'logo') {
     targetStepId = 'onboardingStepLogo';
   } else if (step === 'firebase') {
@@ -1390,6 +1405,9 @@ function goToOnboardingStep(step) {
     setTimeout(function() { populateCrossModeContent(); }, 50);
   } else if (step === 'betaWelcome') {
     targetStepId = 'onboardingStepBetaWelcome';
+  } else if (step === 'nativeWorkspace') {
+    targetStepId = 'onboardingStepNativeWorkspace';
+    setTimeout(function() { try { if (typeof refreshOnboardingNativeWorkspaceStatus === 'function') refreshOnboardingNativeWorkspaceStatus(); } catch(e){} }, 50);
   } else if (step === 'ownership') {
     targetStepId = 'onboardingBrandOwnership';
   } else if (step === 'lifeBuilding') {
@@ -2555,13 +2573,218 @@ function populateDockInstructions() {
 }
 
 function proceedFromDockStep() {
-  goToOnboardingStep('betaWelcome');
+  // v34.64: Route through "Make it yours" before final welcome.
+  goToOnboardingStep('makeYours');
 }
 
 // v21.0: Cross-device step proceed
 function proceedFromCrossDevice() {
+  // v34.64: Route through "Make it yours" before final welcome.
+  goToOnboardingStep('makeYours');
+}
+
+// v34.64: Make-it-yours step — applies Brilli form, theme, and auto-Brief
+// preferences captured during onboarding, then advances to betaWelcome.
+function selectOnboardingBrilliForm(formId) {
+  var FORMS = ['celestial','aura','firefly','signature','classic'];
+  if (FORMS.indexOf(formId) === -1) return;
+  window._onboardingBrilliForm = formId;
+  // Visual state: highlight the selected card.
+  var grid = document.getElementById('onboardingBrilliFormGrid');
+  if (!grid) return;
+  var cards = grid.querySelectorAll('button[data-brilli-form]');
+  for (var i = 0; i < cards.length; i++) {
+    var c = cards[i];
+    if (c.getAttribute('data-brilli-form') === formId) {
+      c.style.borderColor = 'rgba(201,169,97,0.55)';
+      c.style.background = 'rgba(201,169,97,0.10)';
+    } else {
+      c.style.borderColor = 'rgba(201,169,97,0.18)';
+      c.style.background = 'rgba(255,255,255,0.02)';
+    }
+  }
+}
+
+function selectOnboardingTheme(theme) {
+  if (theme !== 'dark' && theme !== 'light') return;
+  window._onboardingTheme = theme;
+  var darkBtn = document.getElementById('onboardingThemeDark');
+  var lightBtn = document.getElementById('onboardingThemeLight');
+  function _activate(btn) {
+    if (!btn) return;
+    btn.style.borderColor = 'rgba(201,169,97,0.55)';
+    btn.style.background = 'rgba(201,169,97,0.10)';
+    btn.style.color = '#c9a961';
+  }
+  function _deactivate(btn) {
+    if (!btn) return;
+    btn.style.borderColor = 'rgba(201,169,97,0.18)';
+    btn.style.background = 'transparent';
+    btn.style.color = 'var(--text-secondary)';
+  }
+  if (theme === 'dark') { _activate(darkBtn); _deactivate(lightBtn); }
+  else { _activate(lightBtn); _deactivate(darkBtn); }
+}
+
+function proceedFromMakeYours(skip) {
+  if (!skip) {
+    try {
+      // Brilli form
+      var form = window._onboardingBrilliForm || 'celestial';
+      if (typeof Brilli !== 'undefined' && typeof Brilli.setActiveForm === 'function') {
+        Brilli.setActiveForm(form);
+      }
+      try { document.documentElement.setAttribute('data-brilli-form', form); } catch (e) {}
+
+      // Theme
+      var theme = window._onboardingTheme || (document.documentElement.classList.contains('light-mode') ? 'light' : 'dark');
+      var isLightNow = document.documentElement.classList.contains('light-mode');
+      if ((theme === 'light' && !isLightNow) || (theme === 'dark' && isLightNow)) {
+        if (typeof toggleTheme === 'function') toggleTheme(true);
+      }
+      try { localStorage.setItem('roweos-theme', theme); localStorage.setItem('roweos_theme', theme); } catch (e) {}
+
+      // Auto-open Daily Brief preference
+      var autoBrief = document.getElementById('onboardingAutoBrief');
+      var autoOn = !autoBrief || autoBrief.checked !== false;
+      try { localStorage.setItem('roweos_daily_brief_auto', autoOn ? 'true' : 'false'); } catch (e) {}
+    } catch (e) {
+      console.warn('[onboarding] make-yours apply failed:', e);
+    }
+  }
+  // v34.93: Route through the Native Workspace step before the final welcome.
+  goToOnboardingStep('nativeWorkspace');
+}
+
+// v34.93: Native Workspace onboarding handlers.
+// Connect, persist, sync the user's preference to Firestore (the
+// FileSystemDirectoryHandle itself is per-device by browser security
+// design — what we sync is the *intent* + folder name + mode so the
+// other device can prompt the user to reconnect.)
+function refreshOnboardingNativeWorkspaceStatus() {
+  var statusEl = document.getElementById('onboardingNativeFsStatus');
+  var statusText = document.getElementById('onboardingNativeFsStatusText');
+  var connectBtn = document.getElementById('onboardingNativeFsConnectBtn');
+  if (!statusEl || !window.NativeFS) return;
+  if (!window.NativeFS.isSupported()) {
+    statusEl.style.display = 'flex';
+    statusEl.style.borderColor = 'rgba(251,191,36,0.32)';
+    statusEl.style.background = 'rgba(251,191,36,0.06)';
+    statusEl.style.color = '#fcd34d';
+    if (statusText) statusText.textContent = 'Your browser does not support folder access. Use Chrome, Edge, or the desktop app to enable this later.';
+    if (connectBtn) { connectBtn.textContent = 'Continue'; connectBtn.onclick = function(){ proceedFromNativeWorkspace(true); }; }
+    return;
+  }
+  // v34.95: Show a Safari-fallback notice so users know what they're getting.
+  var backend = window.NativeFS.getBackend ? window.NativeFS.getBackend() : 'native';
+  if (backend === 'fallback') {
+    var note = document.getElementById('onboardingNativeFsBackendNote');
+    if (!note && statusEl.parentNode) {
+      note = document.createElement('div');
+      note.id = 'onboardingNativeFsBackendNote';
+      note.style.cssText = 'border:1px solid rgba(251,191,36,0.28);border-radius:12px;padding:12px 16px;background:rgba(251,191,36,0.06);font-size:12px;color:#fcd34d;line-height:1.55;margin-top:8px;';
+      note.innerHTML = '<strong>Safari read-only mode.</strong> Safari can let Brilliance READ your folder for the current session, but writes become downloads you drop back into the folder, and the connection resets when you close the app. For full read+write with persistent grants, open Brilliance in Chrome, Edge, or the desktop app.';
+      statusEl.parentNode.insertBefore(note, statusEl);
+    }
+  }
+  window.NativeFS.getRootName().then(function(name) {
+    if (name) {
+      statusEl.style.display = 'flex';
+      if (statusText) {
+        statusText.textContent = backend === 'fallback'
+          ? 'Connected (read-only fallback): ' + name
+          : 'Connected: ' + name;
+      }
+      if (connectBtn) connectBtn.textContent = 'Continue';
+    } else {
+      statusEl.style.display = 'none';
+      if (connectBtn) connectBtn.textContent = backend === 'fallback' ? 'Connect (Safari fallback)' : 'Connect a folder';
+    }
+  });
+}
+
+function onboardingConnectNativeWorkspace() {
+  if (!window.NativeFS) return;
+  // v34.96: Same Safari user-gesture rule as Settings — call connect()
+  // SYNCHRONOUSLY, not after an awaited IDB round-trip. Use the cached
+  // sync flag to decide whether to advance or open the picker.
+  if (window.NativeFS.isConnectedSync && window.NativeFS.isConnectedSync()) {
+    proceedFromNativeWorkspace();
+    return;
+  }
+  if (typeof showToast === 'function') showToast('Opening folder picker...', 'info');
+  window.NativeFS.connect().then(function(res) {
+    if (res.ok) {
+      if (typeof showToast === 'function') {
+        var msg = 'Connected: ' + res.name;
+        if (res.fileCount) msg += ' (' + res.fileCount + ' files)';
+        showToast(msg, 'success');
+      }
+      _syncNativeWorkspacePreference(res.name);
+      refreshOnboardingNativeWorkspaceStatus();
+    } else if (res.error && res.error.indexOf('dismissed') === -1 && res.error.indexOf('No files') === -1) {
+      if (typeof showToast === 'function') showToast('Could not connect: ' + res.error, 'error');
+      console.warn('[Onboarding NativeFS]', res.error);
+    }
+  });
+}
+
+function proceedFromNativeWorkspace(skip) {
+  // Either way, capture the user's last interaction with the step so we don't
+  // re-show it on next session. Sync to cloud so the other device knows.
+  try {
+    localStorage.setItem('roweos_native_fs_onboarded', 'true');
+    if (window.NativeFS) {
+      window.NativeFS.getRootName().then(function(name) {
+        _syncNativeWorkspacePreference(name || null);
+      });
+    }
+  } catch (_e) {}
   goToOnboardingStep('betaWelcome');
 }
+
+// Cloud-side mirror: stores user intent (have they ever connected, what
+// folder name, which mode) so a second device can prompt the user to
+// connect their LOCAL folder. Handles themselves are sandboxed per-device.
+function _syncNativeWorkspacePreference(folderName) {
+  try {
+    if (typeof writeDB !== 'function') return;
+    var pref = {
+      onboarded: true,
+      onboardedAt: Date.now(),
+      lastFolderName: folderName || null,
+      mode: (window.NativeFS && window.NativeFS.getMode) ? window.NativeFS.getMode() : 'readwrite',
+      lastConnectedAt: folderName ? Date.now() : null,
+      lastDevice: (function(){
+        try {
+          var ua = navigator.userAgent || '';
+          if (/Macintosh/.test(ua)) return 'mac';
+          if (/Windows/.test(ua)) return 'windows';
+          if (/Linux/.test(ua)) return 'linux';
+          if (/iPhone|iPad/.test(ua)) return 'ios';
+          if (/Android/.test(ua)) return 'android';
+        } catch(e){}
+        return 'unknown';
+      })()
+    };
+    writeDB('profile/main', { native_workspace: pref });
+  } catch(e) { console.warn('[onboarding] native workspace sync failed:', e); }
+}
+
+// Toggle slider visual state when checkbox changes
+document.addEventListener('change', function(ev) {
+  if (!ev.target || ev.target.id !== 'onboardingAutoBrief') return;
+  var slider = document.getElementById('onboardingAutoBriefSlider');
+  var knob = document.getElementById('onboardingAutoBriefKnob');
+  if (!slider || !knob) return;
+  if (ev.target.checked) {
+    slider.style.background = 'rgba(201,169,97,0.5)';
+    knob.style.left = '23px';
+  } else {
+    slider.style.background = 'rgba(255,255,255,0.18)';
+    knob.style.left = '3px';
+  }
+});
 
 // v21.0: Populate cross-device content based on current device
 function populateCrossDeviceContent() {
@@ -2756,7 +2979,21 @@ function connectOnboardingGoogleCalendar() {
         var status = document.getElementById('onboardingGcalStatus');
         var inputs = document.getElementById('onboardingGcalInputs');
         if (card) { card.style.borderColor = '#22c55e'; card.dataset.connected = 'true'; }
-        if (status) status.style.display = 'block';
+        if (status) {
+          status.style.display = 'block';
+          // v34.103: Show connected email (primary calendar id is user email)
+          try {
+            var primaryEmail = '';
+            if (typeof _gcalCalendars !== 'undefined' && _gcalCalendars && _gcalCalendars.length) {
+              for (var i = 0; i < _gcalCalendars.length; i++) {
+                if (_gcalCalendars[i].primary) { primaryEmail = _gcalCalendars[i].id; break; }
+              }
+              if (!primaryEmail && _gcalCalendars[0]) primaryEmail = _gcalCalendars[0].id;
+            }
+            status.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M20 6L9 17l-5-5"/></svg>' +
+              'Connected' + (primaryEmail ? ' as <strong>' + escapeHtml(primaryEmail) + '</strong>' : '');
+          } catch(e) {}
+        }
         if (inputs) inputs.style.display = 'none';
       } else if (pollCount > 30) {
         // v28.5: Show guidance if connection timed out (likely "Access blocked")
@@ -2790,7 +3027,12 @@ function connectOnboardingICloudCalendar() {
         var status = document.getElementById('onboardingIcloudStatus');
         var inputs = document.getElementById('onboardingIcloudInputs');
         if (card) { card.style.borderColor = '#22c55e'; card.dataset.connected = 'true'; }
-        if (status) status.style.display = 'block';
+        if (status) {
+          status.style.display = 'block';
+          // v34.103: Show connected Apple ID
+          status.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M20 6L9 17l-5-5"/></svg>' +
+            'Connected as <strong>' + escapeHtml(appleId) + '</strong>';
+        }
         if (inputs) inputs.style.display = 'none';
       }
     }
@@ -3143,7 +3385,12 @@ function renderLifeIdentityView() {
   });
 
   if (lifeContainer) {
-    lifeContainer.style.display = 'block';
+    // v34.70: was 'block' which collapsed `.identity-cards` flex column layout —
+    // child cards then went horizontal due to inherited flex parent on the panel.
+    // Use 'flex' so the .identity-cards { flex-direction: column } rule still applies.
+    lifeContainer.style.display = 'flex';
+    lifeContainer.style.flexDirection = 'column';
+    lifeContainer.style.gap = 'var(--space-3)';
     lifeContainer.innerHTML = buildLifeIdentityCards(profile);
   }
 
@@ -3918,6 +4165,72 @@ function buildLifeIdentityCards(profile) {
     identityItemCount += (profile.identityData[cat] || []).length;
   });
   
+  // v34.71 Life parity gap #5: 4 new cards to bring Life identity from 8 cards
+  // up toward Brand's 14. Same .identity-card markup as siblings so they stack
+  // with the existing layout. Each card is pure UI shell — content is editable
+  // contenteditable text saved to profile.aiInsights[<key>] via the existing
+  // saveLifeAIInsightField flow. Lazy by design: no special backend.
+
+  // Digital Presence (social handles + personal site)
+  var dpVal = (profile.aiInsights && profile.aiInsights.digitalPresence) || '';
+  html += '<div class="identity-card" data-section="life-digital">';
+  html += '  <div class="identity-card-header" onclick="toggleIdentityCard(this)">';
+  html += '    <div class="identity-card-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>';
+  html += '    <div class="identity-card-title"><h3>Digital Presence</h3><p>Your handles, sites, and online identity</p></div>';
+  html += '    <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+  html += '  </div>';
+  html += '  <div class="identity-card-body">';
+  html += '    <div class="identity-field-group"><div class="identity-ai-insights">';
+  html += '      <div class="identity-ai-richtext" contenteditable="true" data-placeholder="Personal site, X/Threads/Instagram handles, LinkedIn, etc." onblur="saveLifeAIInsightField(\'digitalPresence\', this.innerText)">' + formatAIInsights(dpVal) + '</div>';
+  html += '    </div></div>';
+  html += '  </div>';
+  html += '</div>';
+
+  // Bloom Knowledge (preferences for the personal feed)
+  var bloomVal = (profile.aiInsights && profile.aiInsights.bloomKnowledge) || '';
+  html += '<div class="identity-card" data-section="life-bloom-knowledge">';
+  html += '  <div class="identity-card-header" onclick="toggleIdentityCard(this)">';
+  html += '    <div class="identity-card-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg></div>';
+  html += '    <div class="identity-card-title"><h3>Bloom Preferences</h3><p>What you want your personal feed to surface</p></div>';
+  html += '    <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+  html += '  </div>';
+  html += '  <div class="identity-card-body">';
+  html += '    <div class="identity-field-group"><div class="identity-ai-insights">';
+  html += '      <div class="identity-ai-richtext" contenteditable="true" data-placeholder="Topics, themes, voices you want LifeAI to cultivate in your Bloom feed." onblur="saveLifeAIInsightField(\'bloomKnowledge\', this.innerText)">' + formatAIInsights(bloomVal) + '</div>';
+  html += '    </div></div>';
+  html += '  </div>';
+  html += '</div>';
+
+  // Automation Memory (how you want recurring tasks handled)
+  var automationVal = (profile.aiInsights && profile.aiInsights.automationMemory) || '';
+  html += '<div class="identity-card" data-section="life-automation-memory">';
+  html += '  <div class="identity-card-header" onclick="toggleIdentityCard(this)">';
+  html += '    <div class="identity-card-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>';
+  html += '    <div class="identity-card-title"><h3>Automation Memory</h3><p>Recurring patterns LifeAI should learn</p></div>';
+  html += '    <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+  html += '  </div>';
+  html += '  <div class="identity-card-body">';
+  html += '    <div class="identity-field-group"><div class="identity-ai-insights">';
+  html += '      <div class="identity-ai-richtext" contenteditable="true" data-placeholder="Weekly review every Sunday. Morning check-in at 7am. Quarterly goal recalibration. Etc." onblur="saveLifeAIInsightField(\'automationMemory\', this.innerText)">' + formatAIInsights(automationVal) + '</div>';
+  html += '    </div></div>';
+  html += '  </div>';
+  html += '</div>';
+
+  // Photos / Avatar variants
+  var photosVal = (profile.aiInsights && profile.aiInsights.photos) || '';
+  html += '<div class="identity-card" data-section="life-photos">';
+  html += '  <div class="identity-card-header" onclick="toggleIdentityCard(this)">';
+  html += '    <div class="identity-card-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>';
+  html += '    <div class="identity-card-title"><h3>Photos & Visuals</h3><p>Reference photos, avatars, visual style</p></div>';
+  html += '    <svg class="identity-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+  html += '  </div>';
+  html += '  <div class="identity-card-body">';
+  html += '    <div class="identity-field-group"><div class="identity-ai-insights">';
+  html += '      <div class="identity-ai-richtext" contenteditable="true" data-placeholder="Describe how you look, dress, or want to be visualized. Studio image generation will use this." onblur="saveLifeAIInsightField(\'photos\', this.innerText)">' + formatAIInsights(photosVal) + '</div>';
+  html += '    </div></div>';
+  html += '  </div>';
+  html += '</div>';
+
   html += '<div class="identity-card" data-section="life-intelligence">';
   html += '  <div class="identity-card-header" onclick="toggleIdentityCard(this)">';
   html += '    <div class="identity-card-icon" style="color: var(--life-accent);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></div>';

@@ -1,6 +1,174 @@
 // v30.1: Admin Email Management
 // Client-side logic for the Emails tab in the Admin panel
 
+// v34.66: Campaigns / Responses aggregated dashboard.
+// Per-user list lives in adminLoadEmailData(); this view aggregates the SAME
+// Firestore queries (email_log + onboarding_responses + clicks) into rollups so
+// admins can see "how is this campaign performing" instead of "what did this
+// user do". One Firestore round-trip; renders into the same #adminEmailContent.
+function adminLoadCampaignsView() {
+  if (typeof isAdmin !== 'function' || !isAdmin() || typeof firebase === 'undefined') return;
+  var contentEl = document.getElementById('adminEmailContent');
+  if (!contentEl) return;
+  contentEl.innerHTML = '<div style="color:var(--text-muted);padding:8px 0;">Loading campaigns…</div>';
+  var db = firebase.firestore();
+
+  var emailLogP = db.collection('email_log').limit(2000).get().catch(function(e) { console.warn('[Campaigns] email_log:', e.message); return null; });
+  var responsesP = db.collectionGroup('responses').limit(500).get().catch(function(e) { console.warn('[Campaigns] responses:', e.message); return null; });
+  var clicksP = db.collectionGroup('clicks').limit(500).get().catch(function(e) { console.warn('[Campaigns] clicks:', e.message); return null; });
+
+  Promise.all([emailLogP, responsesP, clicksP]).then(function(results) {
+    var logs = (results[0] && results[0].docs) ? results[0].docs.map(function(d) { return d.data() || {}; }) : [];
+    var resps = (results[1] && results[1].docs) ? results[1].docs.map(function(d) { return d.data() || {}; }) : [];
+    var clicks = (results[2] && results[2].docs) ? results[2].docs.map(function(d) { return d.data() || {}; }) : [];
+
+    // Aggregate by template
+    var byTemplate = {};
+    var totalSends = 0, totalFailed = 0;
+    for (var i = 0; i < logs.length; i++) {
+      var L = logs[i] || {};
+      var tpl = L.template || 'unknown';
+      if (!byTemplate[tpl]) byTemplate[tpl] = { template: tpl, sends: 0, failed: 0, recent: [], senders: {} };
+      byTemplate[tpl].sends++;
+      totalSends++;
+      if (L.status === 'failed') { byTemplate[tpl].failed++; totalFailed++; }
+      var sb = L.sentBy || '(legacy)';
+      byTemplate[tpl].senders[sb] = (byTemplate[tpl].senders[sb] || 0) + 1;
+      if (byTemplate[tpl].recent.length < 3) {
+        var when = L.sentAt ? (typeof L.sentAt === 'string' ? new Date(L.sentAt).getTime() : (L.sentAt.toDate ? L.sentAt.toDate().getTime() : 0)) : 0;
+        byTemplate[tpl].recent.push({ to: L.userEmail || '', at: when });
+      }
+    }
+
+    // Aggregate clicks by campaign
+    var byCampaign = {};
+    var totalClicks = 0;
+    for (var c = 0; c < clicks.length; c++) {
+      var C = clicks[c] || {};
+      var camp = C.campaign || 'unknown';
+      if (!byCampaign[camp]) byCampaign[camp] = { campaign: camp, recipients: 0, totalClicks: 0 };
+      byCampaign[camp].recipients++;
+      var n = C.clickCount || 1;
+      byCampaign[camp].totalClicks += n;
+      totalClicks += n;
+    }
+
+    // Aggregate responses by question + answer
+    var byQA = {};
+    var totalResponses = 0;
+    for (var r = 0; r < resps.length; r++) {
+      var R = resps[r] || {};
+      var q = R.question || '(no question)';
+      var a = R.answer || '(no answer)';
+      if (!byQA[q]) byQA[q] = { question: q, total: 0, answers: {} };
+      byQA[q].total++;
+      byQA[q].answers[a] = (byQA[q].answers[a] || 0) + 1;
+      totalResponses++;
+    }
+
+    // Sort
+    var tplRows = Object.keys(byTemplate).map(function(k) { return byTemplate[k]; })
+      .sort(function(a, b) { return b.sends - a.sends; });
+    var campRows = Object.keys(byCampaign).map(function(k) { return byCampaign[k]; })
+      .sort(function(a, b) { return b.totalClicks - a.totalClicks; });
+    var qaRows = Object.keys(byQA).map(function(k) { return byQA[k]; })
+      .sort(function(a, b) { return b.total - a.total; });
+
+    var esc = (typeof escapeHtml === 'function') ? escapeHtml : function(s) { return String(s == null ? '' : s); };
+
+    var html = '';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">';
+    html += '  <div style="font-weight:600;color:var(--text-primary);">Campaigns dashboard</div>';
+    html += '  <button onclick="adminLoadEmailData()" style="padding:4px 12px;background:transparent;border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">&larr; Per-user list</button>';
+    html += '</div>';
+
+    // Top stats strip
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:18px;">';
+    html += _campaignStatTile('Total sends', totalSends, 'rgba(201,169,97,0.18)');
+    html += _campaignStatTile('Failed', totalFailed, 'rgba(220,38,38,0.18)');
+    html += _campaignStatTile('Total clicks', totalClicks, 'rgba(34,197,94,0.18)');
+    html += _campaignStatTile('Total responses', totalResponses, 'rgba(168,152,120,0.18)');
+    html += '</div>';
+
+    // Templates rollup
+    html += '<div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">By template</div>';
+    if (tplRows.length === 0) {
+      html += '<div style="color:var(--text-muted);font-size:13px;padding:10px 12px;border:1px dashed var(--border-color);border-radius:8px;margin-bottom:18px;">No sends recorded yet. Future sends will appear here.</div>';
+    } else {
+      html += '<div style="border:1px solid var(--border-color);border-radius:8px;overflow:hidden;margin-bottom:18px;">';
+      for (var ti = 0; ti < tplRows.length; ti++) {
+        var T = tplRows[ti];
+        var sendersStr = Object.keys(T.senders).map(function(k) { return k + ':' + T.senders[k]; }).join(' · ');
+        var even = ti % 2 === 0;
+        html += '<div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:' + (even ? 'transparent' : 'rgba(255,255,255,0.02)') + ';flex-wrap:wrap;">';
+        html += '  <div style="flex:1 1 220px;font-weight:600;color:var(--text-primary);">' + esc(T.template) + '</div>';
+        html += '  <div style="width:80px;color:var(--text-secondary);font-size:13px;text-align:right;">' + T.sends + ' sent</div>';
+        html += '  <div style="width:80px;color:' + (T.failed ? '#dc2626' : 'var(--text-muted)') + ';font-size:13px;text-align:right;">' + (T.failed ? T.failed + ' failed' : 'no fails') + '</div>';
+        html += '  <div style="flex:1 1 220px;color:var(--text-muted);font-size:11px;text-align:right;">' + esc(sendersStr) + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Campaign clicks
+    html += '<div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">By campaign (link clicks)</div>';
+    if (campRows.length === 0) {
+      html += '<div style="color:var(--text-muted);font-size:13px;padding:10px 12px;border:1px dashed var(--border-color);border-radius:8px;margin-bottom:18px;">No campaign click data yet.</div>';
+    } else {
+      html += '<div style="border:1px solid var(--border-color);border-radius:8px;overflow:hidden;margin-bottom:18px;">';
+      for (var ci = 0; ci < campRows.length; ci++) {
+        var CR = campRows[ci];
+        var even2 = ci % 2 === 0;
+        html += '<div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:' + (even2 ? 'transparent' : 'rgba(255,255,255,0.02)') + ';">';
+        html += '  <div style="flex:1;font-weight:600;color:var(--text-primary);">' + esc(CR.campaign) + '</div>';
+        html += '  <div style="width:120px;color:var(--text-secondary);font-size:13px;text-align:right;">' + CR.recipients + ' recipients</div>';
+        html += '  <div style="width:100px;color:#22c55e;font-size:13px;text-align:right;font-weight:600;">' + CR.totalClicks + ' clicks</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Onboarding responses by question/answer
+    html += '<div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Survey responses</div>';
+    if (qaRows.length === 0) {
+      html += '<div style="color:var(--text-muted);font-size:13px;padding:10px 12px;border:1px dashed var(--border-color);border-radius:8px;">No survey responses yet. Onboarding survey button clicks land here once users start replying.</div>';
+    } else {
+      for (var qi = 0; qi < qaRows.length; qi++) {
+        var QA = qaRows[qi];
+        html += '<div style="border:1px solid var(--border-color);border-radius:8px;padding:12px 14px;margin-bottom:10px;">';
+        html += '  <div style="font-weight:600;color:var(--text-primary);margin-bottom:8px;">' + esc(QA.question) + ' <span style="color:var(--text-muted);font-weight:400;font-size:12px;">(' + QA.total + ' responses)</span></div>';
+        var ansKeys = Object.keys(QA.answers).sort(function(a, b) { return QA.answers[b] - QA.answers[a]; });
+        for (var ai = 0; ai < ansKeys.length; ai++) {
+          var ans = ansKeys[ai];
+          var n = QA.answers[ans];
+          var pct = QA.total > 0 ? Math.round((n / QA.total) * 100) : 0;
+          html += '  <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);margin-bottom:4px;">';
+          html += '    <div style="flex:1;">' + esc(ans) + '</div>';
+          html += '    <div style="width:50px;text-align:right;font-weight:600;color:var(--text-primary);">' + n + '</div>';
+          html += '    <div style="width:50px;text-align:right;color:var(--text-muted);font-size:11px;">' + pct + '%</div>';
+          html += '    <div style="flex:0 0 120px;height:6px;background:rgba(201,169,97,0.10);border-radius:3px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,#c9a961,#a88a4a);"></div></div>';
+          html += '  </div>';
+        }
+        html += '</div>';
+      }
+    }
+
+    contentEl.innerHTML = html;
+  }, function(err) {
+    contentEl.innerHTML = '<div style="color:#dc2626;padding:8px 0;">Failed to load: ' + (err && err.message || err) + '</div>';
+  });
+}
+
+function _campaignStatTile(label, value, accent) {
+  return '<div style="border:1px solid var(--border-color);border-radius:8px;padding:12px 14px;background:' + accent + ';">'
+    + '<div style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">' + label + '</div>'
+    + '<div style="font-size:22px;font-weight:600;color:var(--text-primary);font-family:Georgia,serif;">' + value + '</div>'
+    + '</div>';
+}
+
+window.adminLoadCampaignsView = adminLoadCampaignsView;
+
+
 // v30.5: Sort state for user list
 var _adminEmailSortBy = 'name';
 // v31.2: Sort direction (asc|desc) and Select Mode (checkboxes hidden by default)
@@ -504,10 +672,12 @@ function adminRenderEmailUserList(users, emailLogs, responses) {
   var _allBtnStyle = 'padding:6px 14px;background:var(--accent);border:1px solid var(--accent);border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.3px;margin-right:6px;';
   html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 12px 0;">';
   html += '<span id="adminEmailSelectedCount" style="font-size:12px;color:var(--text-muted);font-weight:500;">' + (_adminEmailSelectMode ? 'Select rows to send to' : '') + '</span>';
-  html += '<div style="display:flex;align-items:center;">';
+  html += '<div style="display:flex;align-items:center;gap:6px;">';
   if (_adminEmailSelectMode) {
     html += '<button type="button" onclick="adminEmailSelectAllUsers()" style="' + _allBtnStyle + '">Select All (' + users.length + ')</button>';
   }
+  // v34.4: Add Person to email list — optional access key link.
+  html += '<button type="button" onclick="adminOpenAddPersonModal()" style="padding:6px 14px;background:var(--accent);border:1px solid var(--accent);border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.3px;">+ Add Person</button>';
   html += '<button type="button" onclick="adminToggleEmailSelectMode()" style="' + _selBtnStyle + '">' + _selBtnLabel + '</button>';
   html += '</div>';
   html += '</div>';
@@ -613,7 +783,7 @@ function adminToggleAllEmailUsers(checked) {
 
 // v31.2: Map signup source codes to human-friendly labels.
 function _adminFormatSignupSource(src) {
-  if (!src) return '—';
+  if (!src) return '-';
   var s = String(src).toLowerCase();
   if (s === 'info' || s === 'info_page' || s === 'roweos.com/info') return 'Info Page';
   if (s === 'app_signup' || s === 'welcome' || s === 'auth_gate' || s === 'roweos.com') return 'Welcome Page';
@@ -918,12 +1088,15 @@ function adminShowEmailUserDetail(uid, userName, userEmail) {
     'feature_announcement': 'feature_announcement',
     'access_key_delivery': 'default',
     'checkin': 'checkin_new',
-    'subscription_info': 'subscription_info'
+    'subscription_info': 'subscription_info',
+    // v33.84: RoweOS → Brilliance transition announcement
+    'brilliance_transition': 'brilliance_transition'
   };
   var templateLabels = {
-    'founder_lifetime_offer': 'Founder Lifetime Offer'
+    'founder_lifetime_offer': 'Founder Lifetime Offer',
+    'brilliance_transition': 'Brilliance Transition'
   };
-  var templates = ['founder_lifetime_offer', 'welcome', 'onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info'];
+  var templates = ['brilliance_transition', 'founder_lifetime_offer', 'welcome', 'onboarding_survey', 'reengagement', 'feature_announcement', 'access_key_delivery', 'checkin', 'subscription_info'];
   templates.forEach(function(tmpl) {
     var composerTmpl = templateMap[tmpl] || tmpl;
     var isFeatured = tmpl === 'founder_lifetime_offer';
@@ -1036,12 +1209,21 @@ function adminDeleteUserEverywhere(email, uid) {
   var label = email || uid;
   if (!confirm('Permanently delete ' + label + ' from EVERYWHERE?\n\nThis removes:\n  - Firebase Auth account\n  - roweos_users doc + subcollections\n  - All signups (newsletter_subscribers, signups, info_leads)\n  - All access_keys assigned to this email\n  - All email_log entries\n  - All onboarding_responses\n  - admin_notifications\n\nCannot be undone.')) return;
 
-  var callerUid = firebase.auth().currentUser ? firebase.auth().currentUser.uid : '';
+  // v34.107: server now requires Authorization: Bearer <idToken> instead of
+  // body.callerUid. Fetch a fresh token (force refresh = false; ID tokens are
+  // already short-lived and refreshed automatically by the SDK).
+  var _curUser = firebase.auth().currentUser;
+  if (!_curUser) { showToast('Not signed in', 'error'); return; }
   showToast('Deleting ' + label + ' everywhere...', 'info');
-  fetch('/api/admin-delete-user', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, uid: uid, callerUid: callerUid })
+  _curUser.getIdToken().then(function(idToken) {
+    return fetch('/api/admin-delete-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + idToken
+      },
+      body: JSON.stringify({ email: email, uid: uid })
+    });
   }).then(function(resp) {
     return resp.json().then(function(data) { return { ok: resp.ok, data: data }; });
   }).then(function(result) {
@@ -1213,6 +1395,34 @@ function adminOpenComposerForUser(templateName, recipientEmail, recipientName) {
   }
 }
 
+// v34.8: Send the selected template to the admin's own email. Useful for previewing
+// how a real send renders (Resend pipeline, monogram image fetch, gold gradients,
+// dark-mode rendering) before launching a bulk send to the user list.
+function adminSendTemplateToSelf() {
+  if (!isAdmin()) return;
+  var templateEl = document.getElementById('adminEmailTemplate');
+  if (!templateEl) return;
+  var template = templateEl.value;
+  if (!template) {
+    showToast('Select a template first', 'error');
+    return;
+  }
+  var u = (typeof firebaseUser !== 'undefined' && firebaseUser) ? firebaseUser : null;
+  if (!u || !u.email) {
+    showToast('No admin email available', 'error');
+    return;
+  }
+  showToast('Sending test of ' + template + ' to ' + u.email + '...', 'info');
+  adminSendTemplateToUser(template, u.uid, u.email, u.displayName || 'Admin', null, true).then(function(ok){
+    if (ok) {
+      showToast('Test sent to ' + u.email + ', check your inbox', 'success');
+    } else {
+      showToast('Test send failed, check console', 'error');
+    }
+  });
+}
+window.adminSendTemplateToSelf = adminSendTemplateToSelf;
+
 function adminSendSelectedTemplate() {
   if (!isAdmin()) return;
   var templateEl = document.getElementById('adminEmailTemplate');
@@ -1326,19 +1536,25 @@ function adminResendFailed(template, userId, userEmail, userName, btnEl) {
 
 function adminSendTemplateToUser(template, userId, userEmail, userName, metadata, silent) {
   if (!isAdmin()) return Promise.resolve(false);
-  var callerUid = firebase.auth().currentUser ? firebase.auth().currentUser.uid : '';
-
-  return fetch('/api/send-template-email', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      template: template,
-      userId: userId,
-      userEmail: userEmail,
-      userName: userName,
-      callerUid: callerUid,
-      metadata: metadata || {}
-    })
+  // v34.107: server now requires Authorization: Bearer <idToken> instead of
+  // body.callerUid. The token is short-lived and refreshed automatically.
+  var _curUser = firebase.auth().currentUser;
+  if (!_curUser) return Promise.resolve(false);
+  return _curUser.getIdToken().then(function(idToken) {
+    return fetch('/api/send-template-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + idToken
+      },
+      body: JSON.stringify({
+        template: template,
+        userId: userId,
+        userEmail: userEmail,
+        userName: userName,
+        metadata: metadata || {}
+      })
+    });
   }).then(function(resp) {
     if (!resp.ok) throw new Error('Send failed: ' + resp.status);
     return resp.json();
@@ -1530,7 +1746,7 @@ function adminRenderCampaigns() {
       name: 'Welcome',
       desc: 'New signup welcome message',
       clickCounter: 'welcome_open',
-      clickLabel: 'Open RoweOS',
+      clickLabel: 'Open Brilliance',
       secondaryClickCounter: 'welcome_plans',
       secondaryClickLabel: 'Plans',
       extraCounters: [
@@ -1540,9 +1756,29 @@ function adminRenderCampaigns() {
       ]
     },
     'onboarding_survey': { name: 'Onboarding Survey', desc: 'New user experience feedback' },
+    // v33.84: RoweOS → Brilliance transition announcement (full feature recap + Get API Keys CTA).
+    // v34.38: Counter names corrected to match the actual `trackedUrl()` calls in
+    // both client-side `generateBrillianceTransitionEmail()` and server-side
+    // `buildBrillianceTransition()`. The previous `transition_open` / `transition_keys`
+    // names never received clicks so the response breakdown showed zeros.
+    // Real counters: `brilliance_transition_cta` (body Get API Keys), `brilliance_transition_open`
+    // (Or open Brilliance), `brilliance_transition_plans` (footer Plans), `brilliance_transition_apikeys`
+    // (footer Get API Keys). All surfaced so engagement on every CTA registers.
+    'brilliance_transition': {
+      name: 'Brilliance Transition',
+      desc: 'RoweOS → Brilliance announcement with full surface-system recap and a Get API Keys CTA.',
+      clickCounter: 'brilliance_transition_cta', clickLabel: 'CTA · Get API Keys',
+      secondaryClickCounter: 'brilliance_transition_open', secondaryClickLabel: 'Open Brilliance',
+      extraCounters: [
+        { counter: 'brilliance_transition_open', label: 'Inline · Open Brilliance' },
+        { counter: 'brilliance_transition_plans', label: 'Footer · Plans' },
+        { counter: 'brilliance_transition_apikeys', label: 'Footer · API Keys' }
+      ],
+      conversionSources: ['brilliance_transition', 'transition']
+    },
     'reengagement': {
       name: 'Re-engagement', desc: 'Win back inactive users',
-      clickCounter: 'reengagement_open', clickLabel: 'Open RoweOS',
+      clickCounter: 'reengagement_open', clickLabel: 'Open Brilliance',
       extraCounters: [
         { counter: 'reengagement_plans', label: 'Footer · Plans' },
         { counter: 'reengagement_apikeys', label: 'Footer · API Keys' }
@@ -1714,7 +1950,7 @@ function adminRenderCampaigns() {
 
   // Stat 1: New RoweOS Users
   html += '<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;padding:24px;">';
-  html += '<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:8px;">New RoweOS Users</div>';
+  html += '<div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;margin-bottom:8px;">New Brilliance Users</div>';
   html += '<div style="display:flex;align-items:baseline;gap:12px;">';
   html += '<div style="font-size:36px;font-weight:700;color:var(--text-primary);line-height:1;">' + totalUsers + '</div>';
   if (newThisWeek > 0) {
@@ -1757,8 +1993,10 @@ function adminRenderCampaigns() {
     }
   }
 
-  // Sort templates: Founder100 first (active campaign), then known ones, then unknowns
-  var knownOrder = ['founder_lifetime_offer', 'welcome', 'onboarding_survey', 'reengagement', 'feature_announcement', 'checkin', 'access_key_delivery', 'subscription_info'];
+  // Sort templates: rebrand-active first, then Founder100, then the rest.
+  // v34.38: brilliance_transition added to the order so it gets a stable position
+  // at the top of the breakdown.
+  var knownOrder = ['brilliance_transition', 'founder_lifetime_offer', 'welcome', 'onboarding_survey', 'reengagement', 'feature_announcement', 'checkin', 'access_key_delivery', 'subscription_info'];
   var templateKeys = Object.keys(campaignMap);
   templateKeys.sort(function(a, b) {
     var ia = knownOrder.indexOf(a);
@@ -2186,3 +2424,120 @@ function adminRenderCampaigns() {
 
   panel.innerHTML = html;
 }
+
+// v34.4: Add Person to email list. Writes a `newsletter_subscribers` doc, optionally
+// linking an existing access key (sets the key's `assignedEmail` so it shows on
+// the user's profile + counts as theirs in admin).
+function adminOpenAddPersonModal() {
+  var existing = document.getElementById('adminAddPersonOverlay');
+  if (existing) existing.parentNode.removeChild(existing);
+
+  var overlay = document.createElement('div');
+  overlay.id = 'adminAddPersonOverlay';
+  overlay.className = 'modal-overlay show';
+  overlay.style.cssText = 'display:flex;align-items:center;justify-content:center;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:99500;visibility:visible;opacity:1;';
+  overlay.onclick = function(e){ if (e.target === overlay) overlay.parentNode.removeChild(overlay); };
+
+  var modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.cssText = 'max-width:480px;width:92%;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;padding:24px;color:var(--text-primary);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;';
+  modal.innerHTML =
+    '<div style="font-size:18px;font-weight:600;margin-bottom:6px;letter-spacing:-0.01em;">Add Person to Email List</div>' +
+    '<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:16px;line-height:1.5;">Adds a subscriber. Optionally link an existing access key so all sends and responses stay tied to that person.</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;">' +
+      '<label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;">Email <span style="color:#ef4444;">*</span></label>' +
+      '<input type="email" id="addPersonEmail" placeholder="name@example.com" style="padding:9px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-size:13px;" />' +
+      '<label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;">Name (optional)</label>' +
+      '<input type="text" id="addPersonName" placeholder="Full name" style="padding:9px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-size:13px;" />' +
+      '<label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;">Link Access Key (optional)</label>' +
+      '<input type="text" id="addPersonKey" placeholder="ROWE-XXXX-XXXX" style="padding:9px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-size:13px;font-family:monospace;letter-spacing:0.5px;" />' +
+      '<label style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;">Source tag</label>' +
+      '<input type="text" id="addPersonSource" value="manual_admin_add" style="padding:9px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);font-size:13px;" />' +
+    '</div>' +
+    '<div style="margin-top:18px;display:flex;justify-content:flex-end;gap:8px;">' +
+      '<button id="addPersonCancel" style="padding:9px 16px;background:transparent;border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);font-size:13px;cursor:pointer;">Cancel</button>' +
+      '<button id="addPersonSave" style="padding:9px 18px;background:var(--accent);border:1px solid var(--accent);border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Add</button>' +
+    '</div>';
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  setTimeout(function(){ var inp = document.getElementById('addPersonEmail'); if (inp) inp.focus(); }, 50);
+
+  document.getElementById('addPersonCancel').onclick = function(){
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  };
+
+  // v34.6: Inline status row replaces "silent failure" — toasts can be missed and
+  // Firestore "permission-denied" errors need to surface with the actionable hint.
+  var statusEl = document.createElement('div');
+  statusEl.id = 'addPersonStatus';
+  statusEl.style.cssText = 'margin-top:12px;font-size:12px;color:var(--text-muted);min-height:16px;';
+  modal.appendChild(statusEl);
+
+  document.getElementById('addPersonSave').onclick = function(){
+    var email = (document.getElementById('addPersonEmail').value || '').trim().toLowerCase();
+    var name  = (document.getElementById('addPersonName').value || '').trim();
+    var key   = (document.getElementById('addPersonKey').value || '').trim().toUpperCase();
+    var src   = (document.getElementById('addPersonSource').value || 'manual_admin_add').trim();
+    var setStatus = function(msg, color){
+      statusEl.textContent = msg;
+      statusEl.style.color = color || 'var(--text-muted)';
+    };
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      setStatus('Enter a valid email address.', '#ef4444');
+      return;
+    }
+    if (key && !/^[A-Z0-9-]{6,}$/.test(key)) {
+      setStatus('Access key looks malformed (letters/digits/dashes only).', '#ef4444');
+      return;
+    }
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+      setStatus('Firebase not ready. Refresh the page and try again.', '#ef4444');
+      return;
+    }
+    if (typeof firebaseUser === 'undefined' || !firebaseUser) {
+      setStatus('You must be signed in to add a person.', '#ef4444');
+      return;
+    }
+    var db = firebase.firestore();
+    var btn = document.getElementById('addPersonSave');
+    btn.disabled = true;
+    btn.textContent = 'Adding...';
+    setStatus('Writing subscriber...', 'var(--text-muted)');
+
+    var subDoc = {
+      email: email,
+      name: name || null,
+      subscribedAt: new Date().toISOString(),
+      signupSource: src || 'manual_admin_add',
+      addedByAdmin: true,
+      addedByUid: firebaseUser.uid
+    };
+
+    db.collection('newsletter_subscribers').doc(email).set(subDoc, { merge: true })
+      .then(function(){
+        if (!key) return null;
+        setStatus('Linking access key ' + key + '...', 'var(--text-muted)');
+        return db.collection('access_keys').doc(key).set({ assignedEmail: email, assignedAt: new Date().toISOString(), assignedByAdmin: true }, { merge: true });
+      })
+      .then(function(){
+        setStatus('Added ' + email + (key ? ' (key linked).' : '.'), '#22c55e');
+        try { showToast('Added ' + email, 'success'); } catch(e){}
+        setTimeout(function(){
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+          if (typeof adminLoadEmailData === 'function') adminLoadEmailData();
+        }, 700);
+      })
+      .catch(function(err){
+        console.error('[Admin] addPerson failed:', err);
+        var msg = (err && err.code === 'permission-denied')
+          ? 'Permission denied. Firestore rules block this write. Run: firebase deploy --only firestore:rules'
+          : ('Add failed: ' + (err && err.message ? err.message : String(err)));
+        setStatus(msg, '#ef4444');
+        try { showToast(msg, 'error'); } catch(e){}
+        btn.disabled = false;
+        btn.textContent = 'Add';
+      });
+  };
+}
+window.adminOpenAddPersonModal = adminOpenAddPersonModal;

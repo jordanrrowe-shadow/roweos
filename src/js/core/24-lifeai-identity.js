@@ -2005,7 +2005,7 @@ function completeOnboarding() {
 
 // v24.25: Comprehensive BrandAI guided tour with deep-dive steps
 var TOUR_STEPS = [
-  { id: 'welcome', type: 'center', target: null, title: 'Welcome to RoweOS', description: 'Your brand is set up and B.L.A.K.E. is ready. Let us show you around.', icon: 'sparkles' },
+  { id: 'welcome', type: 'center', target: null, title: 'Welcome to Brilliance', description: 'Your brand is set up and Brilli is ready. Let us show you around.', icon: 'sparkles' },
   { id: 'brandai', type: 'deep-dive', target: 'agent', title: 'BrandAI Chat', description: 'Your AI chat assistant, tailored to your brand.', icon: 'chat', features: ['Claude, GPT, and Gemini in one conversation', 'Attach images and documents for AI analysis', 'Conversations auto-save to History'], helpHint: true },
   { id: 'pulse', type: 'deep-dive', target: 'pulse', title: 'Pulse', description: 'Goal tracking with visual timelines.', icon: 'target', features: ['Short-term and long-term goal tracking', 'Progress visualization and completion rates', 'Quick-add goals from any view'] },
   { id: 'studio', type: 'deep-dive', target: 'studio', title: 'Studio', description: '150+ operations across 5 AI agents.', icon: 'edit', features: ['Strategy, Marketing, Operations, Documents, Intelligence', 'Image generation with Nano Banana 3.0 Pro', 'Video generation with Veo 3.1', 'Export results as PDF, Word, or Excel'] },
@@ -3454,10 +3454,12 @@ function toggleTheme(silent) {
   // Update toggle buttons (desktop and mobile)
   updateThemeButtons(isLight);
 
-  // Update theme color meta tag
+  // v33.82: theme-color now matches the actual page bg (cream #f5f3ee in light)
+  // so the macOS title bar / mobile chrome stops showing a stark white margin
+  // above the cream UI.
   var themeColor = document.getElementById('themeColor');
   if (themeColor) {
-    themeColor.content = isLight ? '#ffffff' : '#0a0a0a';
+    themeColor.content = isLight ? '#f5f3ee' : '#0a0a0a';
   }
 
   // v28.2: Save preference to BOTH keys (hyphen for loadTheme, underscore for cloud sync)
@@ -3496,6 +3498,12 @@ function toggleTheme(silent) {
 
   // v26.2: Swap logo for dark/light theme
   if (typeof swapLogoForTheme === 'function') swapLogoForTheme();
+
+  // v34.63: Re-init Scribe TinyMCE so iframe content_style picks up new palette
+  if (typeof reinitScribeTinymceForTheme === 'function') reinitScribeTinymceForTheme();
+
+  // v34.63: Rebuild mobile FAB so its inline color tokens flip to the new theme
+  if (typeof window._rebuildMobileFab === 'function') window._rebuildMobileFab();
 
   // v24.27: Removed theme toast - user can see the change
 }
@@ -3602,7 +3610,7 @@ function loadTheme() {
   if (isLight) {
     html.classList.add('light-mode');
     var themeColor = document.getElementById('themeColor');
-    if (themeColor) themeColor.content = '#ffffff';
+    if (themeColor) themeColor.content = '#f5f3ee'; // v33.82: match page bg
   }
   
   updateThemeButtons(isLight);

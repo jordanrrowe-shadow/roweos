@@ -602,6 +602,68 @@ function _offloadLargestKeys() {
   return freed;
 }
 
+// v34.120: ROOT-CAUSE MEMORY FIX. loadFromFirebaseV2 (the cloud pull) used to
+// re-write large base64 values (studio gallery, brand/life logos, library,
+// conversations) to localStorage on EVERY pull. Those values sit above the ~5MB
+// quota, so each write threw QuotaExceededError and re-offloaded to IndexedDB -
+// allocating and structured-cloning multi-MB strings on every snapshot/cross-
+// device pull. With pulls firing in bursts this churned gigabytes (tab footprint
+// >13GB) while the tracked in-memory caches stayed tiny (~3MB). These helpers
+// write/offload ONLY when the value actually changed, comparing a tiny persistent
+// signature instead of re-reading the giant value.
+
+// Fast, size-independent signature: length + sampled-char hash (<=~4096 samples).
+function _cheapSig(str) {
+  if (str == null) return 'null';
+  var len = str.length;
+  var step = (len >> 12) || 1; // cap sampling regardless of string size
+  var h = 0;
+  for (var i = 0; i < len; i += step) { h = (h * 31 + str.charCodeAt(i)) | 0; }
+  return len + '_' + (h >>> 0);
+}
+
+// True existence check that accounts for IDB-offloaded keys. A bare
+// localStorage.getItem returns null synchronously for values offloaded to IDB
+// (>1MB), so "!localStorage.getItem(k)" wrongly reports large values as absent.
+function localStorageHas(key) {
+  try { if (_origGetItemFn.call(localStorage, key) !== null) return true; } catch(e) {}
+  try { return !!(_idbKeys && _idbKeys[key]); } catch(e) {}
+  return false;
+}
+
+// localStorage.setItem for a LARGE value, but only when it changed. Compares a
+// tiny companion '<key>__sig' (written via the raw setter so it never offloads).
+// Returns true if it wrote, false if skipped. Drop-in for setItem on big values:
+// identical effect when changed, no churn when unchanged.
+function setLargeItemIfChanged(key, value) {
+  if (value == null) return false;
+  var sigKey = key + '__sig';
+  var newSig = _cheapSig(value);
+  var prevSig = null;
+  try { prevSig = _origGetItemFn.call(localStorage, sigKey); } catch(e) {}
+  if (prevSig === newSig && localStorageHas(key)) return false; // unchanged + present
+  try { localStorage.setItem(key, value); } catch(e) {}
+  try { _origSetItem.call(localStorage, sigKey, newSig); } catch(e) {}
+  return true;
+}
+
+// _idbPut for a LARGE value, but only when it changed (same signature scheme).
+function idbPutIfChanged(key, value) {
+  if (value == null) return false;
+  if (typeof _idbPut !== 'function') return false;
+  var str = (typeof value === 'string') ? value : JSON.stringify(value);
+  var sigKey = key + '__sig';
+  var newSig = _cheapSig(str);
+  var prevSig = null;
+  try { prevSig = _origGetItemFn.call(localStorage, sigKey); } catch(e) {}
+  var known = false;
+  try { known = !!(_idbKeys && _idbKeys[key]); } catch(e) {}
+  if (prevSig === newSig && known) return false;
+  try { _idbPut(key, str); if (typeof _markIdbKey === 'function') _markIdbKey(key); } catch(e) {}
+  try { _origSetItem.call(localStorage, sigKey, newSig); } catch(e) {}
+  return true;
+}
+
 // v22.36: Override localStorage methods globally via Storage.prototype
 // (Safari doesn't allow overriding instance methods directly)
 Storage.prototype.setItem = function(key, value) {
@@ -616,18 +678,173 @@ Storage.prototype.removeItem = function(key) {
   }
 };
 
+// v34.111: Synchronous in-memory shadow for IDB-offloaded keys.
+// v34.118: REWRITTEN - the v34.111 version eagerly hydrated every offloaded key
+// at boot AND held them in memory permanently. Combined with multimodal
+// conversations, library files, and auto_lab_images frequently being 10-100MB
+// each, this caused the Safari tab to balloon to multiple GB. Now: NO eager
+// hydration, LAZY fill on first read only, hard size cap with LRU eviction,
+// and a per-value size cap so a single huge value can't dominate the cache.
+// The original problem (sync getItem returning null while async hydrate is in
+// flight) is still addressed by the lazy path - any synchronous reader that
+// hits the cache miss fires off the async fetch, and the SECOND read (which
+// the next render or polling check inevitably issues) gets the cached value.
+var _idbMemoryCache = {};
+var _idbCacheLru = []; // ordered list of keys, most-recently-used at the end
+var _idbCacheBytes = 0;
+var _IDB_CACHE_MAX_BYTES = 8 * 1024 * 1024;   // 8 MB total cache cap
+var _IDB_VALUE_MAX_BYTES = 1 * 1024 * 1024;   // 1 MB per-value cap (skip caching anything bigger)
+
+function _idbCacheTouch(key) {
+  var idx = _idbCacheLru.indexOf(key);
+  if (idx !== -1) _idbCacheLru.splice(idx, 1);
+  _idbCacheLru.push(key);
+}
+
+function _idbCacheEvict() {
+  while (_idbCacheBytes > _IDB_CACHE_MAX_BYTES && _idbCacheLru.length > 0) {
+    var oldKey = _idbCacheLru.shift();
+    var oldVal = _idbMemoryCache[oldKey];
+    if (typeof oldVal === 'string') _idbCacheBytes -= oldVal.length * 2; // rough JS UTF-16 size
+    delete _idbMemoryCache[oldKey];
+  }
+  if (_idbCacheBytes < 0) _idbCacheBytes = 0;
+}
+
+function _idbCachePut(key, val) {
+  if (typeof val !== 'string') return;
+  var bytes = val.length * 2;
+  if (bytes > _IDB_VALUE_MAX_BYTES) {
+    // Don't cache huge values - they live in IDB only and the async fetch
+    // path remains the source of truth. Caller will get null on the first
+    // sync read; that's the cost of not bloating memory.
+    return;
+  }
+  // If replacing an existing entry, subtract its bytes first.
+  if (_idbMemoryCache.hasOwnProperty(key) && typeof _idbMemoryCache[key] === 'string') {
+    _idbCacheBytes -= _idbMemoryCache[key].length * 2;
+  }
+  _idbMemoryCache[key] = val;
+  _idbCacheBytes += bytes;
+  _idbCacheTouch(key);
+  if (_idbCacheBytes > _IDB_CACHE_MAX_BYTES) _idbCacheEvict();
+}
+
+function _idbCacheDelete(key) {
+  if (_idbMemoryCache.hasOwnProperty(key)) {
+    var v = _idbMemoryCache[key];
+    if (typeof v === 'string') _idbCacheBytes -= v.length * 2;
+    delete _idbMemoryCache[key];
+    var idx = _idbCacheLru.indexOf(key);
+    if (idx !== -1) _idbCacheLru.splice(idx, 1);
+    if (_idbCacheBytes < 0) _idbCacheBytes = 0;
+  }
+}
+
+// Expose a tiny diagnostic so memory issues can be inspected from console.
+window._idbCacheStats = function() {
+  return {
+    keys: Object.keys(_idbMemoryCache).length,
+    bytes: _idbCacheBytes,
+    mb: (_idbCacheBytes / (1024 * 1024)).toFixed(2),
+    capMb: (_IDB_CACHE_MAX_BYTES / (1024 * 1024)).toFixed(2),
+    perValueMb: (_IDB_VALUE_MAX_BYTES / (1024 * 1024)).toFixed(2)
+  };
+};
+
+// v34.119: Comprehensive memory diagnostic. Returns an object showing the size
+// of every known in-memory cache so you can pinpoint what's actually holding
+// the JS heap. Run from console: brillianceMemoryReport()
+window.brillianceMemoryReport = function() {
+  function _bytes(v) {
+    if (v == null) return 0;
+    if (typeof v === 'string') return v.length * 2;
+    try { return JSON.stringify(v).length * 2; } catch (e) { return 0; }
+  }
+  function _mb(b) { return (b / (1024 * 1024)).toFixed(2); }
+  var report = { caches: {}, totalMb: 0 };
+  var add = function(name, bytes) {
+    report.caches[name] = { bytes: bytes, mb: _mb(bytes) };
+    report.totalMb = (parseFloat(report.totalMb) + parseFloat(_mb(bytes))).toFixed(2);
+  };
+  // IDB shim memory cache
+  add('_idbMemoryCache', _idbCacheBytes);
+  // Studio gallery
+  try { add('_studioGalleryMem', _bytes(window._studioGalleryMem)); } catch(e) {}
+  // Mail caches
+  try { add('_mailOutboxCache', _bytes(window._mailOutboxCache !== undefined ? window._mailOutboxCache : null)); } catch(e) {}
+  try { add('_mailSentCache', _bytes(window._mailSentCache !== undefined ? window._mailSentCache : null)); } catch(e) {}
+  // Major arrays
+  try { add('scribeNotebooks', _bytes(window.scribeNotebooks)); } catch(e) {}
+  try { add('brands', _bytes(window.brands)); } catch(e) {}
+  try { add('pulseGoals', _bytes(window.pulseGoals)); } catch(e) {}
+  try { add('agentCommands', _bytes(window.agentCommands)); } catch(e) {}
+  try { add('lifeAgentCommands', _bytes(window.lifeAgentCommands)); } catch(e) {}
+  try { add('runs', _bytes(window.runs)); } catch(e) {}
+  try { add('reminders', _bytes(window.reminders)); } catch(e) {}
+  // Singletons that might hold base64
+  try { add('_mailLogoBase64', _bytes(window._mailLogoBase64)); } catch(e) {}
+  // Three.js scene presence (size is approximate via uniform/geometry inspect)
+  try {
+    var threeKeys = ['_blobScene','_blobMesh','_blobPreviewScene','_blobPreviewMesh','_helixPreviewScene','_helixPreviewGroup','_onbBlobScene'];
+    var threeAlive = 0;
+    threeKeys.forEach(function(k) { if (window[k]) threeAlive++; });
+    report.three_js_scenes_alive = threeAlive;
+  } catch(e) {}
+  // performance.memory if available (Chromium only, not Safari)
+  try {
+    if (performance && performance.memory) {
+      report.performance_memory = {
+        usedJsHeapMb: (performance.memory.usedJSHeapSize / (1024*1024)).toFixed(2),
+        totalJsHeapMb: (performance.memory.totalJSHeapSize / (1024*1024)).toFixed(2)
+      };
+    }
+  } catch(e) {}
+  console.table(report.caches);
+  return report;
+};
+
+// v34.119: Manual flush. Run brillianceFlushCaches() in console to drop every
+// in-memory cache. Data on disk (localStorage + IDB) is untouched, so caches
+// will lazily refill on next access. Intended as an emergency lever for
+// memory pressure investigations - if memory drops dramatically after this
+// runs, the leak is in one of the flushed caches.
+window.brillianceFlushCaches = function() {
+  // IDB shim cache
+  try {
+    Object.keys(_idbMemoryCache).forEach(function(k) { delete _idbMemoryCache[k]; });
+    _idbCacheBytes = 0;
+    _idbCacheLru.length = 0;
+  } catch(e) {}
+  // Studio gallery
+  try { window._studioGalleryMem = null; } catch(e) {}
+  // Mail caches
+  try { if (typeof _mailOutboxCache !== 'undefined') window._mailOutboxCache = null; } catch(e) {}
+  try { if (typeof _mailSentCache !== 'undefined') window._mailSentCache = null; } catch(e) {}
+  console.log('[brillianceFlushCaches] Done. Run brillianceMemoryReport() to verify.');
+  if (typeof showToast === 'function') showToast('Memory caches flushed', 'info');
+};
+
 Storage.prototype.getItem = function(key) {
   var val = _origGetItemFn.call(this, key);
   if (val !== null) return val;
   if (_idbKeys[key]) {
+    if (_idbMemoryCache.hasOwnProperty(key)) {
+      _idbCacheTouch(key);
+      return _idbMemoryCache[key];
+    }
     _idbGet(key, function(idbVal) {
       if (idbVal !== null) {
+        _idbCachePut(key, idbVal);
         try {
           _origSetItem.call(localStorage, key, idbVal);
           _idbDelete(key);
           _unmarkIdbKey(key);
+          // Successfully restored to localStorage - drop from memory cache
+          // since localStorage now serves the synchronous read.
+          _idbCacheDelete(key);
           console.log('[Storage] Lazy-restored', key, 'from IndexedDB');
-        } catch(e) { /* leave in IDB */ }
+        } catch(e) { /* leave in IDB; capped cache still serves it */ }
       }
     });
   }

@@ -1,0 +1,45 @@
+
+      <!-- v33.73: Thought Board (Tier 3 surface scaffold) — per docs/brilliance/12-surface-system.md "Thought Board" section. New surface for free-form research / multi-thread idea exploration. Pinboard view (default) and Constellation view (toggle). Pinned cards come from Chat, Notebook, Studio (cross-surface deep links land in v34). -->
+      <div id="boardView" class="panel-view hidden">
+        <div class="board-v2">
+          <!-- Breadcrumb -->
+          <div class="breadcrumb">
+            <span class="breadcrumb-item"><a href="#" onclick="showView('agent'); return false;">Home</a></span>
+            <span class="breadcrumb-item active">Thought Board</span>
+          </div>
+
+          <!-- Page header -->
+          <div class="panel-header" style="margin-bottom: var(--space-2);display:flex;align-items:center;">
+            <span>Thought Board</span>
+            <button class="section-help-btn" onclick="showSectionHelp('board')" title="How to use the Thought Board">?</button>
+          </div>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: var(--space-5); line-height: 1.5;">Pin ideas from Chat, Notebook, and Studio. Explore them as a free-form pinboard or as a 2D constellation.</p>
+
+          <!-- Mode toggle: Pinboard | Constellation -->
+          <nav class="board-mode-nav" id="boardModeNav">
+            <a class="board-mode-pill active" data-board-mode="pinboard" onclick="window.ThoughtBoard&&window.ThoughtBoard.setMode('pinboard');return false;" href="#">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              <span>Pinboard</span>
+            </a>
+            <a class="board-mode-pill" data-board-mode="constellation" onclick="window.ThoughtBoard&&window.ThoughtBoard.setMode('constellation');return false;" href="#">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="8" r="1.6"/><circle cx="12" cy="14" r="1.8"/><circle cx="6" cy="18" r="1.4"/><circle cx="19" cy="17" r="1.6"/><path d="M6 6l12 2M6 6l6 8M18 8l-6 6M12 14l-6 4M12 14l7 3"/></svg>
+              <span>Constellation</span>
+            </a>
+            <button type="button" class="board-add-pin" onclick="window.ThoughtBoard&&window.ThoughtBoard.addPinPrompt();" title="Add a manual pin">+ Pin</button>
+          </nav>
+
+          <!-- Stats / hint strip -->
+          <div class="board-context-row">
+            <span class="lab">Surface</span>
+            <span class="ctx" id="boardSummary">Loading…</span>
+          </div>
+
+          <!-- Content area: pinboard grid OR constellation canvas -->
+          <div class="board-content-area">
+            <div id="boardPinboardPane" class="board-pane active"></div>
+            <div id="boardConstellationPane" class="board-pane hidden">
+              <div class="board-constellation-stage" id="boardConstellationStage"></div>
+            </div>
+          </div>
+        </div>
+      </div>

@@ -265,6 +265,10 @@
                   </div>
                   <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                     <select id="adminEmailTemplate" style="padding:6px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-primary);font-size:var(--text-xs);">
+                      <!-- v34.7: Brilliance Transition was missing from bulk-send dropdown
+                           even though Quick Actions buttons had it. Added at top so it's
+                           the most visible option during the rebrand window. -->
+                      <option value="brilliance_transition">Brilliance Transition (Rebrand)</option>
                       <option value="founder_lifetime_offer">Founder Lifetime Offer (Founder100)</option>
                       <option value="welcome">Welcome</option>
                       <option value="onboarding_survey">Onboarding Survey</option>
@@ -275,6 +279,10 @@
                       <option value="subscription_info">Subscription Info</option>
                     </select>
                     <button onclick="adminSendSelectedTemplate()" style="padding:6px 14px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;font-size:var(--text-xs);white-space:nowrap;">Send to Selected</button>
+                    <!-- v34.8: Test the selected template against your own inbox before bulk sending. -->
+                    <button onclick="adminSendTemplateToSelf()" title="Send the selected template to your own admin email so you can verify how it renders before bulk-sending." style="padding:6px 14px;background:transparent;border:1px solid var(--accent);border-radius:var(--radius-sm);color:var(--accent);font-weight:500;cursor:pointer;font-size:var(--text-xs);white-space:nowrap;">Send Test to Me</button>
+                    <!-- v34.66: Toggle between per-user list and aggregated Campaigns dashboard. -->
+                    <button onclick="adminLoadCampaignsView()" style="padding:4px 12px;background:transparent;border:1px solid var(--accent);border-radius:var(--radius-sm);color:var(--accent);cursor:pointer;font-size:var(--text-xs);font-weight:500;">Campaigns</button>
                     <button onclick="adminLoadEmailData()" style="padding:4px 12px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-size:var(--text-xs);">Refresh</button>
                   </div>
                 </div>

@@ -1,10 +1,14 @@
           <!-- v24.20: Blob + title group - vertically centered together -->
           <div id="blobTitleGroup" style="display:flex;flex-direction:column;align-items:center;margin-top:var(--blob-vertical-offset, -350px);">
-            <div id="blobContainer" style="width: 280px; height: 280px; cursor: pointer; z-index: 1;" onclick="if(typeof cycleBlobShape==='function')cycleBlobShape()">
+            <!-- v33.1: Brilli hero mount (Canvas 2D). Gated by html[data-brilli-form]. v34.4: picker access removed from hero — Settings → Appearance only. -->
+            <div id="brilliHero" style="width: 280px; height: 280px; z-index: 1; display:flex; align-items:center; justify-content:center; outline:none;" aria-hidden="true"></div>
+            <div id="blobContainer" style="width: 280px; height: 280px; cursor: pointer; z-index: 1; position: relative;" onclick="if(typeof cycleBlobShape==='function')cycleBlobShape()">
               <canvas id="blobCanvas" width="560" height="560" style="width: 100%; height: 100%;"></canvas>
             </div>
             <!-- v10.5.25: Platform Title (mode-aware) - centered below blob -->
             <div class="landing-platform-title" id="desktopPlatformTitle">Brand Intelligence Platform</div>
+            <!-- v33.4 / v33.42: Concierge Desk pill row — placed AFTER the title so it sits cleanly below it without colliding. -->
+            <div id="conciergeRow" class="concierge-row" aria-hidden="true"></div>
           </div>
         </div>
         
@@ -120,6 +124,11 @@
                 <!-- v15.3: Deep Research toggle on landing (same circle style) -->
                 <button id="landingDeepResearchToggle" class="chat-tool-btn-v2 tool-icon-btn deep-research-landing-btn" onclick="toggleDeepResearch()" title="Toggle Deep Research" style="display:none;">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6"/><path d="M11 8v6"/></svg>
+                </button>
+                <!-- v34.38: Reduce-ambient (helix dim) toggle on landing input too. Was only available
+                     after first chat send via the followup input bar. Users wanted to adjust before sending. -->
+                <button class="chat-tool-btn-v2 helix-dim-btn tool-icon-btn" id="helixDimBtnLanding" onclick="toggleReduceAmbient()" title="Reduce background effect">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v20"/><path d="M12 2a10 10 0 010 20" fill="currentColor" opacity="0.3"/></svg>
                 </button>
                 <!-- 4. Save to Library button - DESKTOP ONLY on landing -->
                 <button class="chat-tool-btn-v2 tool-icon-btn landing-desktop-only" id="landingSaveBtn" onclick="openSaveConversationToLibrary()" title="Save conversation to Library">

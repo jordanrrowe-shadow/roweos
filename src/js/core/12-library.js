@@ -5560,18 +5560,21 @@ function init() {
   showHistory();
   renderAgentHistory();
   initLibrary();
-  initTodos();
-  initTodoCategories();
+  // v33.63: guarded — initTodos / initTodoCategories were removed in v28.8 Focus retirement.
+  if (typeof initTodos === 'function') initTodos();
+  if (typeof initTodoCategories === 'function') initTodoCategories();
   // v13.9: Defer Focus init to prevent blocking page load with large datasets
   setTimeout(function() {
     try { if (typeof initFocus2 === 'function') initFocus2(); } catch(e) { console.warn('[Init] initFocus2 error:', e.message); }
   }, 100);
-  initDeletedBrands();
-  initCalendar();
-  initJournal(); // v12.2.4
-  initScheduledPrompts();
-  initScheduledTasksEngine(); // Start scheduled task execution engine
-  updateAPIsStatus();
+  // v33.63: guarded — initDeletedBrands / initCalendar / initJournal / initScheduledPrompts /
+  // initScheduledTasksEngine / updateAPIsStatus may be missing post-cleanup.
+  if (typeof initDeletedBrands === 'function') initDeletedBrands();
+  if (typeof initCalendar === 'function') initCalendar();
+  if (typeof initJournal === 'function') initJournal(); // v12.2.4
+  if (typeof initScheduledPrompts === 'function') initScheduledPrompts();
+  if (typeof initScheduledTasksEngine === 'function') initScheduledTasksEngine(); // Start scheduled task execution engine
+  if (typeof updateAPIsStatus === 'function') updateAPIsStatus();
 
   // v17.0: Initialize social media integration
   if (typeof initSocialMedia === 'function') initSocialMedia();
@@ -6225,14 +6228,28 @@ function showConfigPanel(op) {
   var configAgentName = agentMap[catLabel] || 'Operations';
   var configAgentColor = agentColorMap[configAgentName] || 'var(--accent)';
   var configAgentDesc = agentDescMap[configAgentName] || '';
+  // v34.80: Insert the agent-info row AFTER the entire .studio-v2-config-header
+  // (not inside its flex row). Putting flex-basis:100% inside a no-wrap flex row
+  // was squeezing the task title to one character per line. Mounting it before
+  // the .studio-v2-config-body keeps the badges + description as a separate row
+  // and lets the title use its full flex:1 width again.
   var agentInfoEl = document.getElementById('configAgentInfo');
   if (!agentInfoEl) {
-    var header = nameEl ? nameEl.parentElement : null;
-    if (header) {
+    var titleEl = nameEl ? nameEl.parentElement : null; // .studio-v2-config-title
+    var headerEl = titleEl ? titleEl.parentElement : null; // .studio-v2-config-header
+    var configRoot = headerEl ? headerEl.parentElement : null; // .studio-v2-config
+    var bodyEl = configRoot ? configRoot.querySelector('.studio-v2-config-body') : null;
+    if (configRoot) {
       var infoDiv = document.createElement('div');
       infoDiv.id = 'configAgentInfo';
-      infoDiv.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;width:100%;flex-basis:100%;';
-      header.parentElement.insertBefore(infoDiv, header.nextSibling);
+      infoDiv.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 20px;border-bottom:1px solid var(--border-color);background:var(--bg-tertiary);';
+      if (bodyEl) {
+        configRoot.insertBefore(infoDiv, bodyEl);
+      } else if (headerEl) {
+        configRoot.insertBefore(infoDiv, headerEl.nextSibling);
+      } else {
+        configRoot.appendChild(infoDiv);
+      }
       agentInfoEl = infoDiv;
     }
   }
@@ -7343,8 +7360,10 @@ document.addEventListener('click', function(e) {
 });
 
 // v9.1.14: Generate preview snippet based on operation type
+// v33.94: Mode-aware — life mode swaps to personal-voice copy
 function getOperationPreviewSnippet(op) {
-  var snippets = {
+  var mode = typeof getCurrentMode === 'function' ? getCurrentMode() : 'brand';
+  var brandSnippets = {
     'marketing': 'Ready to amplify your brand voice with compelling content...',
     'strategic': 'Strategic insights to sharpen your competitive edge...',
     'operations': 'Streamlined processes for peak efficiency...',
@@ -7353,7 +7372,20 @@ function getOperationPreviewSnippet(op) {
     'platform': 'Master Brilliance and unlock its full potential...',
     'brand-specific': 'Custom solutions built for your unique brand...'
   };
-  return snippets[op.category] || 'AI-powered output customized for your brand...';
+  var lifeSnippets = {
+    'marketing': 'Personal storytelling that sounds genuinely like you...',
+    'strategic': 'Clarity on what matters most to you right now...',
+    'operations': 'Routines and rhythms tuned to your life...',
+    'documents': 'Personal letters, journals, and notes, in your voice...',
+    'research': 'Insights pulled from your goals and preferences...',
+    'platform': 'Master Brilliance and unlock its full potential...',
+    'life-specific': 'Custom guidance built for your unique life...'
+  };
+  var snippets = mode === 'life' ? lifeSnippets : brandSnippets;
+  var fallback = mode === 'life'
+    ? 'AI-powered output personalized to you...'
+    : 'AI-powered output customized for your brand...';
+  return snippets[op.category] || fallback;
 }
 
 // Display selected operation in workspace

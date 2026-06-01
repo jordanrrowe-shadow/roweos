@@ -1892,14 +1892,16 @@ function toggleStudioExpander(type) {
 // v28.9: AI Generate - runs generation with glow animation on button
 function runStudioAIGenerate(btn) {
   if (!btn) return;
-  // Add glow animation
+  // v33.93: Mode-aware dispatch — Brand mode → generateBrandAIRecommendations, Life mode → generateLifeAIRecommendations
   btn.classList.add('studio-ai-generating');
   btn.disabled = true;
   var origHTML = btn.innerHTML;
   btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="studio-spin"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span>Generating...</span>';
 
-  // Call the actual generation function
-  if (typeof generateBrandAIRecommendations === 'function') {
+  var mode = (typeof currentMode !== 'undefined' && currentMode) ? currentMode : 'brand';
+  if (mode === 'life' && typeof generateLifeAIRecommendations === 'function') {
+    generateLifeAIRecommendations();
+  } else if (typeof generateBrandAIRecommendations === 'function') {
     generateBrandAIRecommendations();
   }
 
@@ -1910,6 +1912,28 @@ function runStudioAIGenerate(btn) {
     btn.disabled = false;
   }, 3000);
 }
+
+// v33.93: Mode-aware labels for the Studio action bar — keeps BrandAI/LifeAI parity
+function updateStudioActionBarLabels() {
+  try {
+    var mode = (typeof currentMode !== 'undefined' && currentMode) ? currentMode : 'brand';
+    var bar = document.getElementById('studioActionBar');
+    if (!bar) return;
+    var aiBtn = bar.querySelector('button[onclick^="runStudioAIGenerate"]');
+    if (aiBtn) {
+      aiBtn.setAttribute('title', mode === 'life'
+        ? 'AI-generate life-specific operations from your profile'
+        : 'AI-generate brand-specific operations');
+    }
+    var customBtn = bar.querySelector('button[onclick*="custom"]');
+    if (customBtn) {
+      customBtn.setAttribute('title', mode === 'life'
+        ? 'Create a custom life operation'
+        : 'Create a custom operation');
+    }
+  } catch(e) {}
+}
+window.updateStudioActionBarLabels = updateStudioActionBarLabels;
 
 // ═══════════════════════════════════════════════════════════════
 // AGENT SELECTION v10.0
@@ -2189,8 +2213,15 @@ function deleteStudioGalleryVideo(vidId) {
     var videos = JSON.parse(localStorage.getItem('roweos_auto_lab_videos') || '[]');
     videos = videos.filter(function(v, i) { return !(v && (v.id === vidId || ('legacy_' + i) === vidId)); });
     localStorage.setItem('roweos_auto_lab_videos', JSON.stringify(videos));
-    if (typeof writeDB === 'function') {
-      writeDB('library/studio_videos', { data: JSON.stringify(videos) }, { category: 'library' });
+    // v33.33 (Sprint 1): services/sync facade, falls back to legacy global.
+    try {
+      if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+        window.BrillianceServices.sync.writeDB('library/studio_videos', { data: JSON.stringify(videos) }, { category: 'library' });
+      } else if (typeof writeDB === 'function') {
+        writeDB('library/studio_videos', { data: JSON.stringify(videos) }, { category: 'library' });
+      }
+    } catch(eW) {
+      if (typeof writeDB === 'function') writeDB('library/studio_videos', { data: JSON.stringify(videos) }, { category: 'library' });
     }
   } catch (e) { console.warn('[StudioGallery] video delete failed:', e); }
   var panel = document.getElementById('studioMediaPanel');
@@ -2449,7 +2480,7 @@ function updateAgentInfoCard() {
 function getAgentSystemPrompt(agentId) {
   var agent = agents.find(function(a) { return a.id === agentId; });
   if (!agent) return '';
-  
+
   var brand = brands[selectedBrand];
   var prompt = agent.systemPrompt
     .replace('{brandName}', brand.name)
@@ -2457,7 +2488,20 @@ function getAgentSystemPrompt(agentId) {
     .replace('{brandVoice}', brand.voice || '')
     .replace('{brandTone}', brand.tone || '')
     .replace('{brandPositioning}', brand.positioning || '');
-  
+
+  // v33.3: Translator pattern. When Evolve is enabled and the user has a goal,
+  // every chat call gets the EvolveProfile prompt appended. This is what makes
+  // every concept translate through the user's existing mental models.
+  try {
+    if (typeof Evolve !== 'undefined' && Evolve.isEnabled()) {
+      var evolveProfile = Evolve.getProfile();
+      if (evolveProfile && evolveProfile.targetGoal) {
+        var translatorPrompt = Evolve.generateEvolveSystemPrompt(evolveProfile);
+        if (translatorPrompt) prompt += '\n\nLEARNER CONTEXT (Evolve):\n' + translatorPrompt;
+      }
+    }
+  } catch(eEvolve) {}
+
   return prompt;
 }
 
@@ -2501,7 +2545,7 @@ function buildBrandSystemPrompt(brand, agent) {
   // v32.0-D: image edit refusal guard. If the user asks to edit an image but
   // no image is attached, tell them to drag one in — don't say the system
   // can't edit images, because it can.
-  systemPrompt += '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images — it can.';
+  systemPrompt += '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images, it can.';
 
   // v11.0.5: Check for custom agent prompt from Guardrails
   if (agent) {
@@ -2531,6 +2575,19 @@ function buildBrandSystemPrompt(brand, agent) {
 
   // v19.7: Append automation creation capability
   systemPrompt += buildAutomationCapabilityPrompt();
+
+  // v33.3: Translator pattern. When Evolve is enabled and the user has a goal,
+  // append EvolveProfile so every Studio call also translates concepts through
+  // the user's existing mental models.
+  try {
+    if (typeof Evolve !== 'undefined' && Evolve.isEnabled()) {
+      var evolveProfile = Evolve.getProfile();
+      if (evolveProfile && evolveProfile.targetGoal) {
+        var translatorPrompt = Evolve.generateEvolveSystemPrompt(evolveProfile);
+        if (translatorPrompt) systemPrompt += '\n\nLEARNER CONTEXT (Evolve):\n' + translatorPrompt;
+      }
+    }
+  } catch(eEvolve) {}
 
   return systemPrompt;
 }
@@ -2827,7 +2884,7 @@ function buildLifeAISystemPrompt() {
     // v32.0-D: image edit refusal guard
     return customPrompt + buildAutomationCapabilityPrompt() +
       '\n\nWhen the user\'s message contains "[Web page content from ...]", that is REAL fetched content from that URL. Use it directly. Never say you cannot access URLs.' +
-      '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images — it can.';
+      '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images, it can.';
   }
 
   // v10.5.25: Check agent type for specialized prompts
@@ -2836,7 +2893,7 @@ function buildLifeAISystemPrompt() {
   var prompt = buildLifeAISystemPromptForCategory(agentType) + buildAutomationCapabilityPrompt();
   prompt += '\n\nWhen the user\'s message contains "[Web page content from ...]", that is REAL fetched content from that URL. Use it directly. Never say you cannot access URLs. The system fetches pages for you automatically.';
   // v32.0-D: image edit refusal guard
-  prompt += '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images — it can.';
+  prompt += '\n\nIf the user asks to edit an image but no image is attached, say so explicitly and tell them to drag the image into the chat. Do not say the system cannot edit images, it can.';
   return prompt;
 }
 
@@ -3437,7 +3494,9 @@ function showHistory() {
     var item = document.createElement('div');
     item.className = 'history-item';
     var aiTag = run.aiGenerated ? '<span style="background:#22c55e;color:#000;padding:2px 6px;border-radius:4px;font-size:10px;margin-left:8px;">AI</span>' : '';
-    item.innerHTML = '<div style="font-weight:600">' + run.op + aiTag + '</div><div style="font-size:13px;color:#888">' + run.brand + ' • ' + run.time + '</div>';
+    // v34.106: escape user-controlled run fields. run.op may be a custom op name
+    // and run.brand a user-set brand name; AI-generated op names are also possible.
+    item.innerHTML = '<div style="font-weight:600">' + escapeHtml(run.op || '') + aiTag + '</div><div style="font-size:13px;color:#888">' + escapeHtml(run.brand || '') + ' • ' + escapeHtml(run.time || '') + '</div>';
     item.onclick = function() { 
       showOutput(run); 
       showView('studio'); 
@@ -3604,7 +3663,8 @@ function showOutput(run) {
     }
 
     // Calculate stats
-    var wordCount = run.deliv.split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+    // v34.106: guard run.deliv - can be undefined for video runs and pre-deliv legacy entries
+    var wordCount = (run.deliv || '').split(/\s+/).filter(function(w) { return w.length > 0; }).length;
     var readingTime = Math.ceil(wordCount / 200);
 
     // v22.33: Clean meta - just word count and read time
@@ -4173,16 +4233,21 @@ function exportAs(format) {
     filename += '.md';
     mimeType = 'text/markdown';
   } else if (format === 'html') {
+    // v34.106: escape user-controlled run fields in exported HTML so opening the
+    // file doesn't execute injected scripts when run.op / run.brand contain HTML.
+    var _exOp = escapeHtml(run.op || '');
+    var _exBrand = escapeHtml(run.brand || '');
+    var _exTime = escapeHtml(run.time || '');
     content = '<!DOCTYPE html>\n<html>\n<head>\n';
     content += '<meta charset="UTF-8">\n';
-    content += '<title>' + run.op + ' - ' + run.brand + '</title>\n';
+    content += '<title>' + _exOp + ' - ' + _exBrand + '</title>\n';
     content += '<style>\n';
     content += 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: var(--space-5); line-height: 1.6; color: #333; }\n';
     content += 'h1 { color: #8b7355; border-bottom: 2px solid #b8986a; padding-bottom: 10px; }\n';
     content += '</style>\n</head>\n<body>\n';
-    content += '<h1>' + run.op + '</h1>\n';
-    content += '<div class="meta">Brand: ' + run.brand + ' | Generated: ' + run.time + '</div>\n';
-    content += '<div>' + (run._editedHtml || marked.parse(run.deliv)) + '</div>\n';
+    content += '<h1>' + _exOp + '</h1>\n';
+    content += '<div class="meta">Brand: ' + _exBrand + ' | Generated: ' + _exTime + '</div>\n';
+    content += '<div>' + (run._editedHtml || marked.parse(run.deliv || '')) + '</div>\n';
     content += '</body>\n</html>';
     filename += '.html';
     mimeType = 'text/html';
@@ -4453,8 +4518,13 @@ function printOutput() {
     return;
   }
   
+  // v34.106: escape user-controlled run fields in document.write to prevent
+  // injected </title><script> from breaking out of the print window context.
+  var _printOp = escapeHtml(run.op || '');
+  var _printBrand = escapeHtml(run.brand || '');
+  var _printTime = escapeHtml(run.time || '');
   printWindow.document.write('<!DOCTYPE html><html><head>');
-  printWindow.document.write('<title>' + run.op + ' - ' + run.brand + '</title>');
+  printWindow.document.write('<title>' + _printOp + ' - ' + _printBrand + '</title>');
   printWindow.document.write('<style>');
   printWindow.document.write('body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 700px; margin: 40px auto; padding: var(--space-5); line-height: 1.6; color: #333; }');
   printWindow.document.write('h1 { color: #8b7355; border-bottom: 2px solid #b8986a; padding-bottom: 10px; font-size: var(--text-3xl); }');
@@ -4469,8 +4539,8 @@ function printOutput() {
   printWindow.document.write('th { background: #f0f0f0; color: #8b7355; }');
   printWindow.document.write('@media print { body { margin: 0; max-width: none; } }');
   printWindow.document.write('</style></head><body>');
-  printWindow.document.write('<h1>' + run.op + '</h1>');
-  printWindow.document.write('<div class="meta"><strong>Brand:</strong> ' + run.brand + ' &nbsp;|&nbsp; <strong>Generated:</strong> ' + run.time);
+  printWindow.document.write('<h1>' + _printOp + '</h1>');
+  printWindow.document.write('<div class="meta"><strong>Brand:</strong> ' + _printBrand + ' &nbsp;|&nbsp; <strong>Generated:</strong> ' + _printTime);
   if (run.aiGenerated) printWindow.document.write(' &nbsp;|&nbsp; <em>AI Generated</em>');
   printWindow.document.write('</div>');
   printWindow.document.write(content);
@@ -5044,7 +5114,7 @@ function newAgentOperation() {
   // v10.5.25: Clear attached content
   window.studioAttachedContent = null;
   var subjectBtn = document.getElementById('subjectButtonText');
-  if (subjectBtn) subjectBtn.textContent = 'Add from RoweOS Library';
+  if (subjectBtn) subjectBtn.textContent = 'Add from Library';
   
   // v10.5.25: Clear context
   var contextEl = document.getElementById('studioContext');
@@ -5935,34 +6005,44 @@ async function callAnthropicStreaming(model, apiKey, messages, systemPrompt, onC
   var cachedResponse = getCachedResponse(messages, systemPrompt);
   if (cachedResponse) {
     console.log('[Cache] Using cached response');
-    // v18.4: Track cache hit for analytics
     trackAPIUsage('anthropic', model, 0, 0, true, false);
-    // Simulate streaming for cached response
     var words = cachedResponse.split(' ');
     var fullText = '';
     for (var w = 0; w < words.length; w++) {
       fullText += (w > 0 ? ' ' : '') + words[w];
       onChunk(words[w] + ' ', fullText);
-      await new Promise(function(r) { setTimeout(r, 10); }); // Small delay for visual effect
+      await new Promise(function(r) { setTimeout(r, 10); });
     }
     onComplete(cachedResponse);
     return;
   }
 
+  // v34.87: When the user has connected a Native Workspace, attach the
+  // workspace_* tool definitions and run a tool_use → tool_result loop.
+  // Loop is capped at 6 iterations to prevent runaway calls.
+  // v34.94: Always inject the addendum (even when not connected) so Claude
+  // tells the user how to enable it instead of saying "I don't have access".
+  var nativeFsConnected = false;
+  try {
+    if (typeof window !== 'undefined' && window.NativeFS) {
+      nativeFsConnected = await window.NativeFS.isConnected();
+      var addendum = await window.NativeFS.getSystemPromptAddendum();
+      if (addendum) systemPrompt = (systemPrompt || '') + addendum;
+    }
+  } catch (_e) {}
+
   var apiMessages = messages.map(function(m) {
     return { role: m.role, content: m.content };
   });
 
+  var fullText = '';
+  var totalInputTokens = 0;
+  var totalOutputTokens = 0;
+  var maxToolIterations = 6;
+
   try {
-    var fetchOpts = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
+    for (var iter = 0; iter < maxToolIterations; iter++) {
+      var body = {
         model: model,
         max_tokens: 8192,
         stream: true,
@@ -5970,72 +6050,143 @@ async function callAnthropicStreaming(model, apiKey, messages, systemPrompt, onC
           ? [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }]
           : undefined,
         messages: apiMessages
-      })
-    };
-    if (abortSignal) fetchOpts.signal = abortSignal;
-    var response = await fetch('https://api.anthropic.com/v1/messages', fetchOpts);
-    
-    if (!response.ok) {
-      var errorData = await response.json().catch(function() { return {}; }); // v30.1: Guard JSON parse failure
-      throw new Error('HTTP ' + response.status + ': ' + (errorData.error ? errorData.error.message : 'API Error'));
-    }
+      };
+      if (nativeFsConnected) body.tools = window.NativeFS.getAnthropicTools();
 
-    var reader = response.body.getReader();
-    var decoder = new TextDecoder();
-    var fullText = '';
-    var buffer = '';
-    // v15.14: Track token usage from stream events
-    var usageInputTokens = 0;
-    var usageOutputTokens = 0;
+      var fetchOpts = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify(body)
+      };
+      if (abortSignal) fetchOpts.signal = abortSignal;
+      var response = await fetch('https://api.anthropic.com/v1/messages', fetchOpts);
 
-    while (true) {
-      var result = await reader.read();
-      if (result.done) break;
+      if (!response.ok) {
+        var errorData = await response.json().catch(function() { return {}; });
+        throw new Error('HTTP ' + response.status + ': ' + (errorData.error ? errorData.error.message : 'API Error'));
+      }
 
-      buffer += decoder.decode(result.value, { stream: true });
-      var lines = buffer.split('\n');
-      buffer = lines.pop() || '';
+      var reader = response.body.getReader();
+      var decoder = new TextDecoder();
+      var buffer = '';
+      var iterText = '';
+      var stopReason = null;
+      var contentBlocks = []; // accumulator for THIS turn (text + tool_use)
+      var blockIdx = -1;
+      var partialJSON = '';
 
-      for (var i = 0; i < lines.length; i++) {
-        var line = lines[i].trim();
-        if (line.startsWith('data: ')) {
+      while (true) {
+        var result = await reader.read();
+        if (result.done) break;
+        buffer += decoder.decode(result.value, { stream: true });
+        var lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i].trim();
+          if (!line.startsWith('data: ')) continue;
           var jsonStr = line.slice(6);
           if (jsonStr === '[DONE]') continue;
           try {
             var data = JSON.parse(jsonStr);
-            if (data.type === 'content_block_delta' && data.delta && data.delta.text) {
-              fullText += data.delta.text;
-              onChunk(data.delta.text, fullText);
-            }
-            // v15.14: Capture usage from message_start event
+
             if (data.type === 'message_start' && data.message && data.message.usage) {
-              usageInputTokens = data.message.usage.input_tokens || 0;
+              totalInputTokens += data.message.usage.input_tokens || 0;
             }
-            // v15.14: Capture output tokens from message_delta event
-            if (data.type === 'message_delta' && data.usage) {
-              usageOutputTokens = data.usage.output_tokens || 0;
+            if (data.type === 'content_block_start' && data.content_block) {
+              blockIdx = data.index;
+              contentBlocks[blockIdx] = JSON.parse(JSON.stringify(data.content_block));
+              partialJSON = '';
+            }
+            if (data.type === 'content_block_delta' && data.delta) {
+              if (data.delta.type === 'text_delta' && data.delta.text) {
+                fullText += data.delta.text;
+                iterText += data.delta.text;
+                onChunk(data.delta.text, fullText);
+                if (contentBlocks[data.index]) {
+                  contentBlocks[data.index].text = (contentBlocks[data.index].text || '') + data.delta.text;
+                }
+              }
+              if (data.delta.type === 'input_json_delta' && data.delta.partial_json) {
+                partialJSON += data.delta.partial_json;
+              }
+            }
+            if (data.type === 'content_block_stop') {
+              var block = contentBlocks[data.index];
+              if (block && block.type === 'tool_use') {
+                try { block.input = partialJSON ? JSON.parse(partialJSON) : {}; } catch(_pj) { block.input = {}; }
+              }
+              partialJSON = '';
+            }
+            if (data.type === 'message_delta') {
+              if (data.usage && typeof data.usage.output_tokens === 'number') {
+                totalOutputTokens += data.usage.output_tokens;
+              }
+              if (data.delta && data.delta.stop_reason) {
+                stopReason = data.delta.stop_reason;
+              }
             }
           } catch (e) { /* skip invalid JSON */ }
         }
       }
+
+      // If the model didn't request tools, we're done.
+      if (stopReason !== 'tool_use') break;
+
+      // Otherwise: append assistant message (text + tool_use blocks),
+      // execute the tool calls, append a user message with tool_result blocks,
+      // and loop.
+      apiMessages.push({ role: 'assistant', content: contentBlocks });
+
+      var toolResults = [];
+      for (var bi = 0; bi < contentBlocks.length; bi++) {
+        var b = contentBlocks[bi];
+        if (!b || b.type !== 'tool_use') continue;
+        var stamp = '\n\n→ ' + b.name + '(' + JSON.stringify(b.input || {}).slice(0, 140) + ')\n';
+        fullText += stamp;
+        onChunk(stamp, fullText);
+        var execResult = { ok: false, error: 'No executor' };
+        try {
+          if (window.NativeFS && window.NativeFS.executeTool) {
+            execResult = await window.NativeFS.executeTool(b.name, b.input || {});
+          }
+        } catch (toolErr) {
+          execResult = { ok: false, error: (toolErr && toolErr.message) || String(toolErr) };
+        }
+        var summary = execResult.ok
+          ? '   ✓ ' + (Array.isArray(execResult.result) ? (execResult.result.length + ' results') : 'done')
+          : '   ✗ ' + (execResult.error || 'failed');
+        fullText += summary + '\n';
+        onChunk(summary + '\n', fullText);
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: b.id,
+          content: JSON.stringify(execResult).slice(0, 60000),
+          is_error: !execResult.ok
+        });
+      }
+      apiMessages.push({ role: 'user', content: toolResults });
+      // loop continues
     }
 
-    // v12.0.3: Save to cache before completing
     setCachedResponse(messages, systemPrompt, fullText);
-    // v15.14: Track API usage for analytics
-    if (usageInputTokens > 0 || usageOutputTokens > 0) {
-      trackAPIUsage('claude', model, usageInputTokens, usageOutputTokens, false, false);
+    if (totalInputTokens > 0 || totalOutputTokens > 0) {
+      trackAPIUsage('claude', model, totalInputTokens, totalOutputTokens, false, false);
     }
     onComplete(fullText);
   } catch (err) {
-    // v16.4: Handle abort gracefully - return partial text
-    if (err.name === 'AbortError') {
+    if (err && err.name === 'AbortError') {
       console.log('[Chat Web] Anthropic stream aborted, returning partial text');
       onComplete(fullText || '');
       return;
     }
     console.error('[Chat Web] Anthropic streaming error:', err);
-    onError(err.message || 'Unknown error');
+    onError((err && err.message) || 'Unknown error');
   }
 }
 
@@ -7847,7 +7998,7 @@ function handleImageEditRequest(prompt, attachments, opts) {
     }
     // Imagen does not support edits — fall back to Nano Banana 3.0 Pro.
     if (pref === 'imagen' || pref === 'imagen3') {
-      if (typeof showToast === 'function') showToast("Imagen doesn't support edits — using Nano Banana 3.0 Pro", 'info');
+      if (typeof showToast === 'function') showToast("Imagen doesn't support edits. Using Nano Banana 3.0 Pro", 'info');
     }
     // Default / nano-banana / auto: Nano Banana 3.0 Pro (only honour model
     // override if it's an image-capable Gemini model).

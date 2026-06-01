@@ -1298,11 +1298,15 @@ function dismissSectionHelp(sectionId) {
 }
 
 // v26.2: Per-section preferences
+// v33.82: Default skipLanding to TRUE so landing pages are off by default.
+// User can re-enable per-section in the section help dropdown ("Skip landing").
 function getSectionPrefs(viewId) {
   try {
     var all = JSON.parse(localStorage.getItem('roweos_section_prefs') || '{}');
-    return all[viewId] || {};
-  } catch(e) { return {}; }
+    var prefs = all[viewId] || {};
+    if (typeof prefs.skipLanding === 'undefined') prefs.skipLanding = true;
+    return prefs;
+  } catch(e) { return { skipLanding: true }; }
 }
 
 function setSectionPref(viewId, key, value) {
@@ -1724,6 +1728,23 @@ var GUIDED_TOURS = {
     { selector: '#researchCardsContainer', title: 'Identity Cards', text: 'Results appear as identity section cards. Each shows AI-synthesized intelligence from all sources.' },
     { selector: '#researchActionsBar', title: 'Use Your Results', text: 'Save to a brand or life identity, send to an agent chat, save to Library, add to Folio, or copy as markdown.' },
     { selector: '#researchHistoryGrid', title: 'Research History', text: 'Past researches are saved here. Click any card to re-view results without running the search again.' }
+  ],
+  // v33.52: Evolve guided tour matching the v33.50 flat layout (5 pill tabs + stats strip).
+  evolve: [
+    { selector: '.evolve-stats-strip', title: 'At a glance', text: 'Your countdown, goal, XP, and streak in one strip. Set a goal in your profile to anchor everything Evolve does.' },
+    { selector: '[data-evolve-tab="today"]', title: 'Today', text: 'Your daily plan: micro-tasks plus a quiz. Complete them to earn XP and keep your streak alive.' },
+    { selector: '[data-evolve-tab="practice"]', title: 'Practice', text: 'Multiple-choice quiz cards. Each question has a Why / Why-Not Matrix that teaches you when an option is right and when it is not.' },
+    { selector: '[data-evolve-tab="translate"]', title: 'Translator', text: 'Paste any concept. Evolve translates it through the mental models you already have so the new idea sticks.' },
+    { selector: '[data-evolve-tab="verify"]', title: 'Verify', text: 'Cross-checks any claim with two independent models and tags it VERIFIED, CORRECTED, or INSUFFICIENT.' },
+    { selector: '[data-evolve-tab="skills"]', title: 'Skills', text: 'Your library of skills, sources, reflections, and brand SOPs. Add custom prompts and notes here.' }
+  ],
+  // v33.80: Thought Board tour — Tier 3 surface walk-through.
+  board: [
+    { selector: '.board-mode-nav', title: 'Two views', text: 'Pinboard for active manipulation, Constellation for navigation. Same pins, two ways to see them.' },
+    { selector: '[data-board-mode="pinboard"]', title: 'Pinboard', text: 'A grid of cards. Each card is a pinned thought from Chat, Notebook, Studio, or a manual entry.' },
+    { selector: '[data-board-mode="constellation"]', title: 'Constellation', text: 'A 2D map of your pins. Each thought is a star with a label. Hover or click a star to see what is pinned there.' },
+    { selector: '.board-add-pin', title: 'Manual pin', text: 'Add a thought by hand. For chat / notebook / studio content, use the Pin buttons there. They pre-fill the source label.' },
+    { selector: '#boardPinCount', title: 'Live count', text: 'The little gold pill in the sidebar shows how many pins you have, even when you are on another surface.' }
   ]
 };
 
@@ -1735,6 +1756,16 @@ function startGuidedTour(sectionId) {
     showToast('No guided tour available for this section yet', 'info');
     return;
   }
+  // v34.102: Force tier refresh before tour starts. Without this, a user who
+  // just purchased Founder via Stripe sees gated features lock the tour
+  // because the 5-min cache still has the pre-purchase tier ('basic'/'free').
+  try {
+    if (typeof getUserTier === 'function') {
+      getUserTier(true).then(function() {
+        if (typeof updateSidebarTierLocks === 'function') updateSidebarTierLocks();
+      }).catch(function(){});
+    }
+  } catch(e) {}
   _tourState = { active: true, sectionId: sectionId, stepIndex: 0, steps: steps };
   showTourStep(0);
 }
@@ -2237,14 +2268,22 @@ function nextMonth() {
 function renderScheduledTasksList() {
   var container = document.getElementById('scheduledTasksList');
   if (!container) return;
-  
+
   var tasks = getScheduledTasks();
-  
+  // v34.71 Life parity gap #4: filter by app_mode so life users only see life
+  // automations (and brand mode hides _life tasks). Untagged legacy tasks fall
+  // back to brand mode for backward compatibility.
+  var _appMode = (function(){ try { return localStorage.getItem('roweos_app_mode') === 'life' ? 'life' : 'brand'; } catch(e){ return 'brand'; } })();
+  tasks = tasks.filter(function(t) {
+    var isLifeTask = (t.brand === '_life' || t.mode === 'life');
+    return _appMode === 'life' ? isLifeTask : !isLifeTask;
+  });
+
   if (tasks.length === 0) {
     container.innerHTML = '<div style=\"padding: var(--space-6); color: var(--text-tertiary); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg);\">No scheduled tasks yet. Click \"+ New Task\" to create your first automation.</div>';
     return;
   }
-  
+
   // v15.23: Use user's accent color instead of hardcoded green
   var accentColor = getAccentFallback();
   var html = '<div style="display: flex; flex-direction: column; gap: var(--space-3);">';
@@ -2253,8 +2292,13 @@ function renderScheduledTasksList() {
     var taskColor = task.color || '#6366f1';
     var taskTime = task.time || '09:00';
     var nextRun = getNextRunTime(task);
-    
-    html += '<div style="display: flex; justify-content: between; align-items: center; padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md); border-left: 3px solid ' + taskColor + ';">';
+
+    // v34.71 gap #393: was `border-left: 3px solid <taskColor>` — violates the
+    // CLAUDE.md no-one-sided-borders rule. Switched to a uniform border with
+    // a low-opacity colored background tint so the task color still reads but
+    // the card is symmetric.
+    var taskTint = taskColor + '12'; // ~7% alpha hex
+    html += '<div style="display: flex; justify-content: between; align-items: center; padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: inset 4px 0 0 ' + taskTint + ', inset -4px 0 0 ' + taskTint + ';">';
     html += '<div style="flex: 1;">';
     html += '<div style="font-weight: 600; font-size: var(--text-base); margin-bottom: var(--space-1); display: flex; align-items: center; gap: var(--space-2);">';
     html += '<span>' + task.name + '</span>';
@@ -2301,6 +2345,23 @@ function getScheduledTasks() {
 }
 
 function saveScheduledTasks(tasks) {
+  // v34.71 Life parity gap #4: stamp mode on any task missing one. Without
+  // this, life-mode users creating an automation get task.mode='brand' (the
+  // default) which routed it through brand context at runtime AND made it
+  // invisible to the life filter on the list. Now any creation site is
+  // covered automatically — no need to touch every push site.
+  try {
+    var _appMode = localStorage.getItem('roweos_app_mode') === 'life' ? 'life' : 'brand';
+    if (Array.isArray(tasks)) {
+      for (var i = 0; i < tasks.length; i++) {
+        if (tasks[i] && !tasks[i].mode) tasks[i].mode = _appMode;
+        // Also stamp brand='_life' for life tasks so the executor's brand
+        // routing finds the right context. Only stamp if brand is empty.
+        if (tasks[i] && _appMode === 'life' && !tasks[i].brand) tasks[i].brand = '_life';
+      }
+    }
+  } catch(e){}
+
   localStorage.setItem('roweos_scheduled_tasks', JSON.stringify(tasks));
   // v25.1: Also update roweos_automations (dual storage) and write each automation to Firestore
   var allAutos = [];
@@ -2875,7 +2936,15 @@ function checkAndRunDueTasks() {
 
 // v15.14: Auto-execute scheduled prompts at their scheduled time
 function checkAndRunDueScheduledPrompts(now, currentTime) {
-  if (!scheduledPrompts || !Array.isArray(scheduledPrompts) || scheduledPrompts.length === 0) return;
+  // v33.64: scheduledPrompts global was removed during a prior cleanup; read directly
+  // from localStorage with the same key the sync layer uses.
+  var scheduledPrompts = [];
+  try {
+    var _spRaw = localStorage.getItem('roweosScheduledPrompts');
+    if (_spRaw) scheduledPrompts = JSON.parse(_spRaw);
+    if (!Array.isArray(scheduledPrompts)) scheduledPrompts = [];
+  } catch(e) { scheduledPrompts = []; }
+  if (scheduledPrompts.length === 0) return;
   var dayOfWeek = now.getDay();
 
   scheduledPrompts.forEach(function(sp) {
@@ -3119,6 +3188,29 @@ async function executeScheduledTask(task, idx) {
     return;
   }
 
+  // v34.79: Evolve nightly content-gen — dispatch the QuizEngine pipeline.
+  // No-ops cleanly if the user has no goal or no API keys configured.
+  if (task.type === 'evolve' && task.id === 'evolve_nightly_content') {
+    try {
+      if (typeof QuizEngine !== 'undefined' && QuizEngine.refillPool) {
+        var qres = await QuizEngine.refillPool();
+        var ok = qres && !qres.skipped;
+        if (typeof addCompletedAutomation === 'function') addCompletedAutomation(task, ok);
+        if (typeof addNotification === 'function') {
+          addNotification('automation',
+            ok ? 'Evolve · Quiz pool refilled' : 'Evolve · Skipped',
+            ok ? ('Added ' + (qres.added || 0) + ' new questions to your pool.') : (qres && qres.reason ? qres.reason : 'No work to do'),
+            { taskId: task.id });
+        }
+      }
+    } catch(eEvolve) {
+      console.warn('[Scheduler] Evolve nightly content-gen failed:', eEvolve);
+    }
+    if (typeof markAutomationDone === 'function') markAutomationDone(task.id);
+    delete window._schedulerRunningTaskIds[task.id];
+    return;
+  }
+
   // v17.4: Handle pipeline type - execute all steps via workflow engine
   // v18.1: BUG 6 - Use result.failedSteps for accurate history
   if (task.type === 'pipeline' && task.steps && task.steps.length > 0) {
@@ -3321,7 +3413,7 @@ async function executeScheduledTask(task, idx) {
   // v22.9: Handle "email" action - send email via Resend API
   if (task.action === 'email') {
     var emailTo = (task.target && task.target.emailTo) ? task.target.emailTo : '';
-    var emailSubject = (task.target && task.target.emailSubject) ? task.target.emailSubject : task.name || 'RoweOS Email';
+    var emailSubject = (task.target && task.target.emailSubject) ? task.target.emailSubject : task.name || 'Brilliance Email';
     var emailBody = (task.target && task.target.emailBody) ? task.target.emailBody : '';
     var emailCc = (task.target && task.target.emailCc) ? task.target.emailCc.split(',').map(function(e) { return e.trim(); }).filter(Boolean) : [];
     var emailBcc = (task.target && task.target.emailBcc) ? task.target.emailBcc.split(',').map(function(e) { return e.trim(); }).filter(Boolean) : [];
@@ -3349,20 +3441,29 @@ async function executeScheduledTask(task, idx) {
         var brandName = brand.shortName || brand.name || 'Brand';
         var accent = '#a89878';
         try { accent = getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim() || '#a89878'; } catch(e) {}
+        // v34.106: honor task.config.includeLogo + task.config.logoAlignment.
+        // Pipeline email step honored these since v34.103, but the standalone email
+        // automation executor was always rendering the logo regardless of toggle and
+        // always using 'center' alignment regardless of the user's choice.
+        var _schedShowLogo = !(task.config && task.config.includeLogo === false);
+        var _schedLogoAlign = (task.config && task.config.logoAlignment) || 'center';
         var logo = '';
-        // v32.0-C: prefer brand object + ID-keyed storage; fall back to legacy position key
-        try {
-          if (typeof window.readBrandLogoSync === 'function' && brand) {
-            logo = window.readBrandLogoSync(brand) || '';
-          }
-          if (!logo) logo = localStorage.getItem('roweos_brand_' + brandIdx + '_logo') || '';
-        } catch(e) {}
-        if (!logo) { try { var logoEl = document.querySelector('.brand-logo-img'); if (logoEl) logo = logoEl.src; } catch(e) {} }
+        if (_schedShowLogo) {
+          // v32.0-C: prefer brand object + ID-keyed storage; fall back to legacy position key
+          try {
+            if (typeof window.readBrandLogoSync === 'function' && brand) {
+              logo = window.readBrandLogoSync(brand) || '';
+            }
+            if (!logo) logo = localStorage.getItem('roweos_brand_' + brandIdx + '_logo') || '';
+          } catch(e) {}
+          if (!logo) { try { var logoEl = document.querySelector('.brand-logo-img'); if (logoEl) logo = logoEl.src; } catch(e) {} }
+        }
         window._studioEmailContext = {
           contentHtml: '<div style="font-size:15px;line-height:1.7;white-space:pre-wrap;">' + escapeHtml(emailBody).replace(/\n/g, '<br>') + '</div>',
           brandName: brandName,
           accentColor: accent,
           brandLogo: logo,
+          logoAlignment: _schedLogoAlign,
           date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
         };
         htmlBody = generateBrandedEmail(emailTemplate);

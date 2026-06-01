@@ -16,21 +16,199 @@ var _scribeArchiveMode = false; // v29.3: Archive view toggle (for later)
 var _scribeActivePageId = null; // v29.3: Currently editing page (null = notebook level)
 var _scribeExpandedNotebooks = {}; // v29.3: Track expanded notebooks in sidebar
 
+// v34.116: Notebook recovery utility. Scans every place a previous notebook list
+// might still exist - Firestore local cache (Firebase's IndexedDB persistence
+// retains the last-known document even after a destructive write to cloud),
+// localStorage backup snapshot, recovery breadcrumb, server cloud doc - and
+// merges everything by id into a single restored set. Surfaced as
+// window.recoverNotebooks() so the user can run it from console or from a
+// future Settings → Notebooks → Restore button.
+window.recoverNotebooks = function recoverNotebooks() {
+  return new Promise(function(resolve) {
+    var sources = {};
+    var add = function(name, list) {
+      if (!Array.isArray(list)) return;
+      var clean = list.filter(function(n) { return n && n.id; });
+      if (clean.length > 0) sources[name] = clean;
+    };
+
+    // Source 1: current in-memory list (whatever loadScribeNotebooks produced)
+    add('memory', scribeNotebooks);
+
+    // Source 2: localStorage primary key
+    try {
+      var rawA = localStorage.getItem('roweos_scribe_notebooks');
+      if (rawA) add('localStorage_primary', JSON.parse(rawA));
+    } catch(e) {}
+
+    // Source 3: rolling backup (v34.115+)
+    try {
+      var rawB = localStorage.getItem('roweos_scribe_notebooks_backup');
+      if (rawB) add('localStorage_backup', JSON.parse(rawB));
+    } catch(e) {}
+
+    // Source 4: pending-create breadcrumb (v34.110+, single notebook)
+    try {
+      var rawC = localStorage.getItem('roweos_scribe_pending_create');
+      if (rawC) {
+        var pc = JSON.parse(rawC);
+        if (pc && pc.nb && pc.nb.id) add('pending_create_breadcrumb', [pc.nb]);
+      }
+    } catch(e) {}
+
+    // Source 5: any other localStorage keys that look like notebook arrays.
+    // Heuristic - keys containing "scribe" or "notebook" with array-shaped JSON
+    // whose first element has the notebook fields. Catches stale snapshots
+    // saved by experimental code paths or earlier versions.
+    try {
+      for (var li = 0; li < localStorage.length; li++) {
+        var k = localStorage.key(li);
+        if (!k) continue;
+        if (k === 'roweos_scribe_notebooks' || k === 'roweos_scribe_notebooks_backup') continue;
+        if (!/scribe|notebook/i.test(k)) continue;
+        try {
+          var v = localStorage.getItem(k);
+          if (!v || v.charAt(0) !== '[') continue;
+          var parsed = JSON.parse(v);
+          if (Array.isArray(parsed) && parsed.length > 0
+              && parsed[0] && typeof parsed[0] === 'object'
+              && parsed[0].id && (parsed[0].title !== undefined || parsed[0].content !== undefined)) {
+            add('ls_' + k, parsed);
+          }
+        } catch(eP) {}
+      }
+    } catch(e) {}
+
+    // Source 6: Firestore - read from CACHE only (no network). Firebase's
+    // IndexedDB persistence retains the most recent server snapshot. Even if
+    // cloud was overwritten, this cache may still hold the previous state
+    // from before the wipe propagated.
+    var firestorePromises = [];
+    if (typeof firebase !== 'undefined' && firebase.firestore && firebaseUser && firebaseUser.uid) {
+      var basePath = 'roweos_users/' + firebaseUser.uid + '/scribe/notebooks';
+      firestorePromises.push(
+        firebase.firestore().doc(basePath).get({ source: 'cache' }).then(function(doc) {
+          if (doc.exists) {
+            var data = doc.data();
+            if (data && Array.isArray(data.notebooks)) add('firestore_cache', data.notebooks);
+          }
+        }).catch(function(){})
+      );
+      // Also try server source as a separate channel - if cloud somehow has
+      // newer/different data, we'd want to see it.
+      firestorePromises.push(
+        firebase.firestore().doc(basePath).get({ source: 'server' }).then(function(doc) {
+          if (doc.exists) {
+            var data = doc.data();
+            if (data && Array.isArray(data.notebooks)) add('firestore_server', data.notebooks);
+          }
+        }).catch(function(){})
+      );
+    }
+
+    Promise.all(firestorePromises).then(function() {
+      // Merge all sources by id, preferring the highest _modifiedAt.
+      var byId = {};
+      var sourceCount = Object.keys(sources).length;
+      Object.keys(sources).forEach(function(srcName) {
+        sources[srcName].forEach(function(nb) {
+          if (!byId[nb.id]) {
+            byId[nb.id] = { nb: nb, fromSources: [srcName] };
+          } else {
+            byId[nb.id].fromSources.push(srcName);
+            // Prefer the version with higher _modifiedAt
+            var existingTs = byId[nb.id].nb._modifiedAt || 0;
+            var newTs = nb._modifiedAt || 0;
+            if (newTs > existingTs) byId[nb.id].nb = nb;
+          }
+        });
+      });
+
+      var recovered = [];
+      Object.keys(byId).forEach(function(id) { recovered.push(byId[id].nb); });
+      // Sort by updatedAt descending so the most recent are first
+      recovered.sort(function(a, b) { return (b.updatedAt || '').localeCompare(a.updatedAt || ''); });
+
+      var report = {
+        sources: sourceCount,
+        sourceNames: Object.keys(sources),
+        recovered: recovered.length,
+        notebooks: recovered,
+        details: byId
+      };
+
+      console.log('[recoverNotebooks] Sources scanned:', sourceCount, '/ Notebooks recovered:', recovered.length);
+      console.log('[recoverNotebooks] Sources:', report.sourceNames);
+      console.log('[recoverNotebooks] Per-notebook source map:', byId);
+
+      // v34.117: ADDITIVE-ONLY recovery. Previous version replaced the entire
+      // scribeNotebooks array if recovered.length > current.length, then pushed
+      // the result to cloud via writeDB. That cascade could overwrite cloud
+      // with whatever happened to be in Firestore's stale local cache, which
+      // is the OPPOSITE of safe. Now: union the recovered set INTO the current
+      // list, only adding ids that aren't already present, never replacing or
+      // removing anything. The union is then written to localStorage and only
+      // pushed to cloud if at least one notebook was added (otherwise it's a
+      // no-op). The cloud write goes through the normal saveScribeNotebooks
+      // path which has its own empty-list guard.
+      var current = Array.isArray(scribeNotebooks) ? scribeNotebooks.slice() : [];
+      var existingIds = {};
+      current.forEach(function(nb) { if (nb && nb.id) existingIds[nb.id] = true; });
+      var added = 0;
+      recovered.forEach(function(nb) {
+        if (nb && nb.id && !existingIds[nb.id]) {
+          current.unshift(nb);
+          existingIds[nb.id] = true;
+          added++;
+        }
+      });
+      if (added > 0) {
+        scribeNotebooks = current;
+        // Use saveScribeNotebooks rather than direct localStorage + writeDB so
+        // the safety guard + backup-snapshot + empty-list-skip protections
+        // all apply to the recovered state too.
+        if (typeof saveScribeNotebooks === 'function') saveScribeNotebooks();
+        if (typeof renderScribeNotebookList === 'function') renderScribeNotebookList();
+        if (typeof showToast === 'function') {
+          showToast('Recovered ' + added + ' missing notebook' + (added === 1 ? '' : 's'), 'success');
+        }
+      } else if (recovered.length > 0) {
+        if (typeof showToast === 'function') {
+          showToast('All ' + recovered.length + ' recoverable notebook' + (recovered.length === 1 ? '' : 's') + ' already in your list', 'info');
+        }
+      } else {
+        if (typeof showToast === 'function') {
+          showToast('No recoverable notebooks found in any source', 'warning');
+        }
+      }
+
+      resolve(report);
+    });
+  });
+};
+
 // === LOAD / SAVE === // v29.0:
 
 function loadScribeNotebooks() { // v29.0:
-  try {
-    var raw = localStorage.getItem(SCRIBE_STORAGE_KEY);
-    if (raw) {
+  // v34.67 Phase C #9: prefer v5 when reads flag is on; v4 fallback otherwise.
+  function _v4Read() {
+    try {
+      var raw = localStorage.getItem(SCRIBE_STORAGE_KEY);
+      if (!raw) return [];
       var parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        scribeNotebooks = parsed;
-      } else {
-        scribeNotebooks = [];
-      }
-    } else {
-      scribeNotebooks = [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.warn('[Scribe] Failed to load notebooks:', e);
+      return [];
     }
+  }
+  try {
+    if (typeof window !== 'undefined' && window.SyncV5 && typeof window.SyncV5.readArray === 'function') {
+      scribeNotebooks = window.SyncV5.readArray('scribe_v5', _v4Read);
+    } else {
+      scribeNotebooks = _v4Read();
+    }
+    if (!Array.isArray(scribeNotebooks)) scribeNotebooks = [];
   } catch (e) {
     console.warn('[Scribe] Failed to load notebooks:', e);
     scribeNotebooks = [];
@@ -38,14 +216,78 @@ function loadScribeNotebooks() { // v29.0:
 }
 
 function saveScribeNotebooks() { // v29.0:
+  // v34.115: SAFETY GUARD against accidental empty-array writes. The autosave
+  // path can fire during TinyMCE init / notebook-select windows where the
+  // editor is briefly empty. If scribeNotebooks somehow shrank to 0 but the
+  // backup says we had notebooks recently, abort the save - something corrupt
+  // is happening and we don't want to write [] to localStorage AND propagate
+  // it to Firestore via writeDB. The user can still explicitly delete via
+  // deleteScribeNotebook which doesn't go through this path's empty check.
+  try {
+    if ((!scribeNotebooks || scribeNotebooks.length === 0)) {
+      var _backupRaw = localStorage.getItem('roweos_scribe_notebooks_backup');
+      if (_backupRaw) {
+        var _backup = JSON.parse(_backupRaw);
+        if (Array.isArray(_backup) && _backup.length > 0) {
+          console.warn('[Scribe] Refusing to save empty list - backup has', _backup.length, 'notebooks. Restoring.');
+          scribeNotebooks = _backup;
+          // fall through to normal save path with restored data
+        }
+      }
+    }
+  } catch(_eGuard) {}
   try {
     localStorage.setItem(SCRIBE_STORAGE_KEY, JSON.stringify(scribeNotebooks));
+    // v34.115: rolling backup. Keeps a snapshot of the last known-good
+    // notebook list so the empty-write guard above can restore. Updated only
+    // when the array has at least one entry, so a real "delete the last
+    // notebook" still works.
+    if (scribeNotebooks && scribeNotebooks.length > 0) {
+      try { localStorage.setItem('roweos_scribe_notebooks_backup', JSON.stringify(scribeNotebooks)); } catch(_eBk) {}
+    }
   } catch (e) {
     console.warn('[Scribe] Failed to save notebooks:', e);
   }
-  // v29.0: Write-through to Firebase (same pattern as Pulse goals)
-  if (typeof writeDB === 'function') {
-    writeDB('scribe/notebooks', { notebooks: scribeNotebooks }, { category: 'scribe' });
+  // v34.110: clear the pending-create breadcrumb once the just-created notebook
+  // is confirmed in the saved array. Any save that still contains the id is
+  // proof of life. If the id is missing on a save (i.e. it was deleted),
+  // we leave the breadcrumb alone so the next init's recovery check can see
+  // it - the user may have lost the notebook to an SDK assertion.
+  try {
+    var _pendingRaw = localStorage.getItem('roweos_scribe_pending_create');
+    if (_pendingRaw) {
+      var _pending = JSON.parse(_pendingRaw);
+      if (_pending && _pending.id) {
+        var _stillThere = false;
+        for (var _pi = 0; _pi < scribeNotebooks.length; _pi++) {
+          if (scribeNotebooks[_pi] && scribeNotebooks[_pi].id === _pending.id) { _stillThere = true; break; }
+        }
+        if (_stillThere) localStorage.removeItem('roweos_scribe_pending_create');
+      }
+    }
+  } catch(_eP) {}
+  // v34.117: HARD SAFETY - never write empty notebooks to cloud. If the
+  // in-memory array is somehow empty at this point (despite the safety guard
+  // above and the backup restore), skip the writeDB call entirely. Cloud
+  // overwrites are the destructive direction; localStorage was already written
+  // a few lines up. The next saveScribeNotebooks call with real data will
+  // push to cloud normally.
+  if (!scribeNotebooks || scribeNotebooks.length === 0) {
+    console.warn('[Scribe] Skipping cloud write - notebooks array is empty');
+    return;
+  }
+  // v29.0: Write-through to Firebase (same pattern as Pulse goals).
+  // v33.31 (Sprint 1 pilot): use the services/sync facade. Bridge forwards all
+  // positional args including the options object, so behavior matches the legacy
+  // global. Falls back gracefully if the bridge isn't loaded yet.
+  try {
+    if (typeof window !== 'undefined' && window.BrillianceServices && window.BrillianceServices.sync) {
+      window.BrillianceServices.sync.writeDB('scribe/notebooks', { notebooks: scribeNotebooks }, { category: 'scribe' });
+    } else if (typeof writeDB === 'function') {
+      writeDB('scribe/notebooks', { notebooks: scribeNotebooks }, { category: 'scribe' });
+    }
+  } catch(e) {
+    if (typeof writeDB === 'function') writeDB('scribe/notebooks', { notebooks: scribeNotebooks }, { category: 'scribe' });
   }
 }
 
@@ -56,6 +298,83 @@ var _scribeTinymceReady = false;
 
 function initScribe() { // v29.2:
   loadScribeNotebooks();
+  // v34.115: backup-restore check. If load returned empty but our rolling
+  // backup has notebooks, restore from backup.
+  // v34.117: REMOVED auto-invocation of recoverNotebooks(). Recovery is now
+  // strictly user-initiated via the console or the Settings → Sync surface.
+  // The auto-invoke combined with cloud-cache reads created an edge case
+  // where stale Firestore cache state could be pushed BACK to cloud,
+  // potentially overwriting newer real data. Backup-restore stays - that's
+  // strictly local and additive.
+  if (!scribeNotebooks || scribeNotebooks.length === 0) {
+    try {
+      var _bkRaw = localStorage.getItem('roweos_scribe_notebooks_backup');
+      if (_bkRaw) {
+        var _bk = JSON.parse(_bkRaw);
+        if (Array.isArray(_bk) && _bk.length > 0) {
+          scribeNotebooks = _bk;
+          console.warn('[Scribe] Restored', _bk.length, 'notebooks from backup snapshot');
+          // Don't call saveScribeNotebooks - that pushes to cloud. Just persist
+          // the restored list to localStorage so the next save uses it.
+          try { localStorage.setItem(SCRIBE_STORAGE_KEY, JSON.stringify(_bk)); } catch(_eL){}
+          if (typeof showToast === 'function') {
+            showToast('Restored ' + _bk.length + ' notebook' + (_bk.length === 1 ? '' : 's') + ' from backup', 'info');
+          }
+        }
+      }
+    } catch(_eBkR) {}
+  }
+  // v34.117: take a backup snapshot RIGHT NOW if we have notebooks but no
+  // backup yet. Catches any user who loaded the app pre-v34.115 - now they
+  // get a backup at the moment they next open the Notebooks view, so future
+  // wipes have somewhere to restore from.
+  try {
+    if (scribeNotebooks && scribeNotebooks.length > 0) {
+      var _existingBk = localStorage.getItem('roweos_scribe_notebooks_backup');
+      if (!_existingBk) {
+        localStorage.setItem('roweos_scribe_notebooks_backup', JSON.stringify(scribeNotebooks));
+        console.log('[Scribe] Created initial backup snapshot of', scribeNotebooks.length, 'notebooks');
+      }
+    }
+  } catch(_eIBK) {}
+  // v34.110: recovery check. If the previous session created a notebook
+  // (breadcrumb in roweos_scribe_pending_create) but it is missing from the
+  // loaded list, restore it. This catches the rare "I made a notebook then
+  // it vanished after I closed out" path - typically caused by a Firestore
+  // SDK INTERNAL ASSERTION mid-write that left the in-memory state empty
+  // before the next save persisted it. Backup is the full notebook object
+  // captured at create time.
+  try {
+    var _recRaw = localStorage.getItem('roweos_scribe_pending_create');
+    if (_recRaw) {
+      var _rec = JSON.parse(_recRaw);
+      if (_rec && _rec.id && _rec.nb) {
+        var _foundRec = false;
+        for (var _ri = 0; _ri < scribeNotebooks.length; _ri++) {
+          if (scribeNotebooks[_ri] && scribeNotebooks[_ri].id === _rec.id) { _foundRec = true; break; }
+        }
+        if (!_foundRec) {
+          console.warn('[Scribe] Recovering lost notebook from previous session:', _rec.id);
+          scribeNotebooks.unshift(_rec.nb);
+          saveScribeNotebooks();
+          if (typeof showToast === 'function') showToast('Recovered notebook from previous session', 'info');
+        } else {
+          // The notebook is in the list - clear the breadcrumb.
+          localStorage.removeItem('roweos_scribe_pending_create');
+        }
+      }
+    }
+  } catch(_eR) {}
+  // v34.110: belt-and-suspenders save flush before the page unloads. Catches
+  // the case where TinyMCE's debounced autosave (~500ms after change) hadn't
+  // fired yet when the user closed the tab. Idempotent - a no-op if the
+  // notebooks array is already persisted.
+  if (!window._scribeUnloadWired) {
+    window._scribeUnloadWired = true;
+    window.addEventListener('beforeunload', function() {
+      try { localStorage.setItem(SCRIBE_STORAGE_KEY, JSON.stringify(scribeNotebooks)); } catch(_eU) {}
+    });
+  }
   renderScribeNotebookList();
   if (scribeNotebooks.length > 0) {
     var lastActive = _scribeActiveId;
@@ -102,16 +421,33 @@ function initScribeTinymce() {
     branding: false,
     promotion: false,
     resize: false,
-    plugins: 'lists link image table code wordcount searchreplace fullscreen autolink preview',
-    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | hr blockquote | code fullscreen searchreplace wordcount',
+    // v34.114: removed `wordcount` plugin. It was loaded in addition to our own
+    // updateScribeWordCount and walked the whole document on every keystroke for
+    // its built-in counter. Our custom debounced counter is enough; the plugin
+    // was the major typing-lag contributor on long notebooks. Toolbar entry
+    // also dropped (it was just a stat readout, not an action).
+    plugins: 'lists link image table code searchreplace fullscreen autolink preview',
+    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | hr blockquote | code fullscreen searchreplace',
     toolbar_mode: 'wrap',
     content_style: _isLightMode
       ? 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #333; background: #fff; line-height: 1.7; padding: 16px; } a { color: #6d6352; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #ddd; padding: 8px; } blockquote { border-left: 3px solid #a89878; margin: 12px 0; padding: 8px 16px; opacity: 0.85; } img { max-width: 100%; height: auto; } code { background: rgba(168,152,120,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace; } pre { background: rgba(0,0,0,0.04); padding: 12px; border-radius: 8px; overflow-x: auto; }'
       : 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #e8e0d4; background: #1a1816; line-height: 1.7; padding: 16px; } a { color: #a89878; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #333; padding: 8px; } blockquote { border-left: 3px solid #a89878; margin: 12px 0; padding: 8px 16px; opacity: 0.85; } img { max-width: 100%; height: auto; } code { background: rgba(168,152,120,0.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; } pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto; }',
     setup: function(editor) {
-      editor.on('change keyup', function() {
+      // v34.114: consolidated to a single keyup handler. The previous
+      // `editor.on('change keyup', ...)` ran the body TWICE per keystroke since
+      // both events fire per char in TinyMCE 7.
+      // v34.115: REVERTED v34.114's separate SetContent/ExecCommand autosave
+      // hook - it fired whenever editor.setContent() was called during a
+      // notebook-select, then 1s later saveActiveScribeNotebook ran with the
+      // newly-loaded editor state but on the just-selected notebook's id,
+      // potentially writing partial content during the TinyMCE init timing
+      // window. Toolbar formatting + paste are still caught via the keyup
+      // handler (TinyMCE 7 fires keyup on most user interactions including
+      // toolbar clicks via keyboard), and `change` is added back for the cases
+      // keyup misses. Both are still debounced internally.
+      editor.on('keyup change', function() {
         scheduleScribeAutoSave();
-        updateScribeWordCount(); // v29.3
+        updateScribeWordCount();
       });
       editor.on('init', function() {
         _scribeTinymceReady = true;
@@ -142,6 +478,38 @@ function initScribeTinymce() {
   });
 }
 
+// v34.63: Re-init TinyMCE on theme toggle so iframe content_style picks up
+// the new dark/light palette. Without this, the editor body keeps the
+// background it had at first init — producing the white-bleed shown in
+// Image #65 when a user toggled mode after opening Scribe.
+function reinitScribeTinymceForTheme() {
+  try {
+    if (typeof tinymce === 'undefined') return;
+    if (!_scribeTinymceReady) return;
+    var existing = tinymce.get('scribeContentArea');
+    if (!existing) return;
+    var savedContent = '';
+    try { savedContent = existing.getContent() || ''; } catch (e) { savedContent = ''; }
+    tinymce.remove('#scribeContentArea');
+    _scribeTinymceReady = false;
+    setTimeout(function() {
+      initScribeTinymce();
+      // restore content once new editor has finished init
+      var pollAttempts = 0;
+      var pollId = setInterval(function() {
+        pollAttempts++;
+        var ed = tinymce.get('scribeContentArea');
+        if (ed && _scribeTinymceReady) {
+          try { ed.setContent(savedContent); } catch (e) {}
+          clearInterval(pollId);
+        } else if (pollAttempts > 40) {
+          clearInterval(pollId);
+        }
+      }, 50);
+    }, 30);
+  } catch (e) { /* swallow — non-critical UI refresh */ }
+}
+
 function _showScribeEmptyState() { // v29.0:
   _scribeActiveId = null;
   var editorArea = document.getElementById('scribeActiveEditor');
@@ -165,7 +533,14 @@ function createScribeNotebook() { // v29.0:
     linkedLibraryItems: [],
     tags: [],
     brandIdx: (typeof selectedBrand !== 'undefined' ? selectedBrand : null),
-    source: (typeof currentMode !== 'undefined' && currentMode === 'lifeai') ? 'lifeai' : 'brandai',
+    // v34.71 Life parity gap #2: was checking `currentMode === 'lifeai'` but
+    // currentMode is undefined in this file AND the actual mode value is 'life',
+    // not 'lifeai' — so every notebook saved as 'brandai' regardless of mode.
+    // Now reads the canonical app_mode key.
+    source: (function(){
+      try { return localStorage.getItem('roweos_app_mode') === 'life' ? 'lifeai' : 'brandai'; }
+      catch(e) { return 'brandai'; }
+    })(),
     createdAt: now,
     updatedAt: now,
     _modifiedAt: ts,
@@ -173,6 +548,14 @@ function createScribeNotebook() { // v29.0:
   };
   scribeNotebooks.unshift(nb);
   saveScribeNotebooks();
+  // v34.110: recovery breadcrumb. Stash a backup copy of the just-created
+  // notebook so if anything between now and the next reload silently strips
+  // it from scribeNotebooks (Firestore SDK assertion mid-write, in-memory
+  // overwrite from a failed pull, etc.), we can detect+restore on next init.
+  // Cleared on any successful subsequent save that contains this id.
+  try {
+    localStorage.setItem('roweos_scribe_pending_create', JSON.stringify({ id: nb.id, nb: nb, ts: ts }));
+  } catch(e) {}
   renderScribeNotebookList();
   selectScribeNotebook(nb.id);
   // v29.0: Focus the title input
@@ -232,12 +615,23 @@ function renderScribeNotebookList() { // v29.0:
   if (!listEl) return;
 
   // v29.0: Filter out archived, sort by updatedAt descending
+  // v34.71 Life parity gap #2: also filter by mode source so life users don't
+  // see brand notebooks mixed in (and vice versa). Notebooks created before the
+  // source-tagging fix have undefined source — those are treated as belonging
+  // to the user's current mode (best guess) so legacy data doesn't disappear.
+  var _appMode = (function(){ try { return localStorage.getItem('roweos_app_mode') === 'life' ? 'life' : 'brand'; } catch(e){ return 'brand'; } })();
   var visible = scribeNotebooks.filter(function(nb) {
     // v29.3: Archive mode shows only archived, normal mode hides archived
     if (_scribeArchiveMode) return nb.archived === true;
     if (nb.archived) return false;
-    // v29.3: Brand filtering - null brandIdx shows in all brands
-    if (!_scribeShowAllBrands && typeof selectedBrand !== 'undefined') {
+    // Mode filter: brand mode shows brandai + untagged; life mode shows lifeai + untagged
+    if (_appMode === 'life') {
+      if (nb.source === 'brandai') return false;
+    } else {
+      if (nb.source === 'lifeai') return false;
+    }
+    // v29.3: Brand filtering - null brandIdx shows in all brands. Skipped in life mode.
+    if (_appMode !== 'life' && !_scribeShowAllBrands && typeof selectedBrand !== 'undefined') {
       if (nb.brandIdx !== null && nb.brandIdx !== undefined && nb.brandIdx !== selectedBrand) return false;
     }
     return true;
@@ -1181,15 +1575,25 @@ function initScribeResizeHandle() {
 
 // === WORD COUNT === // v29.3:
 
+// v34.113: debounced word-count update. Was running on every keyup, calling
+// editor.getContent({ format: 'text' }) which walks the full TinyMCE content
+// tree, then split + filter on the result. On a long notebook this is
+// 50-200ms of work per keystroke - directly responsible for the typing lag.
+// Now debounced 300ms; the count is informational, not realtime-critical.
+var _scribeWordCountTimer = null;
 function updateScribeWordCount() {
-  var el = document.getElementById('scribeWordCount');
-  if (!el) return;
-  var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
-  if (!editor) { el.textContent = '0 words'; return; }
-  var text = editor.getContent({ format: 'text' }) || '';
-  var words = text.split(/\s+/).filter(function(s) { return s.length > 0; }).length;
-  var chars = text.length;
-  el.textContent = words + ' word' + (words !== 1 ? 's' : '') + '  |  ' + chars + ' characters';
+  if (_scribeWordCountTimer) clearTimeout(_scribeWordCountTimer);
+  _scribeWordCountTimer = setTimeout(function() {
+    _scribeWordCountTimer = null;
+    var el = document.getElementById('scribeWordCount');
+    if (!el) return;
+    var editor = (typeof tinymce !== 'undefined') ? tinymce.get('scribeContentArea') : null;
+    if (!editor) { el.textContent = '0 words'; return; }
+    var text = editor.getContent({ format: 'text' }) || '';
+    var words = text.split(/\s+/).filter(function(s) { return s.length > 0; }).length;
+    var chars = text.length;
+    el.textContent = words + ' word' + (words !== 1 ? 's' : '') + '  |  ' + chars + ' characters';
+  }, 300);
 }
 
 // === HELPERS === // v29.0:
@@ -1235,8 +1639,18 @@ function initScribeMentions() {
     if (_scribeMentionActive) {
       if (e.key === 'Escape') { hideScribeMentionDropdown(); return; }
       if (e.key === 'Enter') { e.preventDefault(); selectScribeMention(0); return; }
+      // While the dropdown is open, every keystroke filters the list.
+      checkForMentionTrigger(editor);
+      return;
     }
-    checkForMentionTrigger(editor);
+    // v34.114: only invoke the trigger check when the user actually pressed `@`
+    // (or Backspace, in case they backspaced into a mention region). Previously
+    // every keyup ran getRng() + textContent + substring + lastIndexOf even on
+    // pure typing - per-keystroke selection lookup is the major TinyMCE
+    // editor.on cost on long notebooks.
+    if (e.key === '@' || e.key === 'Backspace') {
+      checkForMentionTrigger(editor);
+    }
   });
 
   editor.on('keydown', function(e) {
@@ -1399,4 +1813,36 @@ function getActiveScribeNotebook() {
     if (scribeNotebooks[i].id === _scribeActiveId) return scribeNotebooks[i];
   }
   return null;
+}
+
+// v33.74: Pin the active notebook to the Thought Board. Pulls the notebook
+// title + first ~600 chars of the editor content. No-op if no notebook is
+// active or the Thought Board module hasn't loaded.
+function pinScribeToThoughtBoard() {
+  try {
+    var nb = getActiveScribeNotebook();
+    if (!nb) {
+      if (typeof showToast === 'function') showToast('Open or create a notebook first.', 'info');
+      return;
+    }
+    var title = (nb.title || 'Untitled notebook').slice(0, 80);
+    var bodyEl = document.getElementById('scribeContentArea');
+    var body = '';
+    try { body = (bodyEl && bodyEl.value) || nb.content || ''; } catch(e){ body = nb.content || ''; }
+    // strip HTML tags for the pin body preview
+    body = String(body).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 600);
+    if (window.ThoughtBoard && typeof window.ThoughtBoard.addPin === 'function') {
+      window.ThoughtBoard.addPin({
+        kind: 'notebook',
+        title: title,
+        body: body,
+        source: { view: 'scribe', refId: String(nb.id || ''), label: 'Notebook · ' + title }
+      });
+      if (typeof showToast === 'function') showToast('Pinned notebook to Thought Board.', 'success');
+    } else {
+      if (typeof showToast === 'function') showToast('Thought Board not loaded.', 'error');
+    }
+  } catch(e) {
+    if (typeof showToast === 'function') showToast('Could not pin: ' + (e && e.message || 'unknown'), 'error');
+  }
 }

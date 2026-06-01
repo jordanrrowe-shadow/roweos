@@ -1,3 +1,79 @@
+// @ts-nocheck
+// v33.3/v33.36 — JSDoc types live in services/sync/index.ts. This file's public API
+// is the v4 implementation the facade wraps. Migration order:
+//   v33.31-v33.35 Sprint 1 — caller migrations to BrillianceServices.sync.* (DONE for primary callers)
+//   v33.36 — JSDoc head block (this comment) for tool-tip parity (DONE)
+//   v34   — sync v5 dual-write replaces v4 calls behind services/sync
+//
+// ─── PUBLIC API ──────────────────────────────────────────────────────────────
+//
+// /**
+//  * Write data to a Firestore doc beneath the current user's namespace.
+//  * Mirrors a full localStorage write-through. Cloud-authoritative on read.
+//  * @param {string} docPath  e.g. 'profile/main', 'pulse/main'
+//  * @param {object} data     Payload merged at the doc level.
+//  * @param {object} [options]
+//  * @param {string} [options.category]  Categorical sync gate (shouldSyncCategory).
+//  * @param {boolean} [options.merge=true] Pass false to overwrite the doc.
+//  * @returns {void}
+//  */
+// function writeDB(docPath, data, options) { ... }
+//
+// /**
+//  * Read a doc and return the raw v4 payload (or null).
+//  * @param {string} docPath
+//  * @returns {Promise<unknown>}
+//  */
+// function readDB(docPath) { ... }
+//
+// /**
+//  * Write a single doc inside a subcollection.
+//  * @param {string} collectionPath e.g. 'chats', 'automations'
+//  * @param {string} docId
+//  * @param {object} data
+//  * @param {string} [category]
+//  */
+// function writeDBDoc(collectionPath, docId, data, category) { ... }
+//
+// /**
+//  * Delete a single doc inside a subcollection. Not a tombstone — caller must
+//  * also write a tombstone marker into a sibling 'deleted_*' set if cross-device
+//  * resurrection is a risk (see roweos_deleted_chat_ids pattern).
+//  */
+// function deleteDBDoc(collectionPath, docId) { ... }
+//
+// /**
+//  * Cloud-authoritative full pull. Cloud always wins on conflict.
+//  * `mergeByTimestamp()` resolves per-item conflicts using `_modifiedAt` ms.
+//  */
+// function loadFromFirebaseV2() { ... }
+//
+// /**
+//  * Push brands first (3s wait for ghost cleanup), then pulls.
+//  * v28.3 contract — replaces v4 pull-only manualSyncNow.
+//  */
+// function manualSyncNow() { ... }
+//
+// /**
+//  * Per-item conflict resolution. Local + cloud arrays merged by id;
+//  * higher `_modifiedAt` wins; missing items in cloud-array = deletion.
+//  * @template T
+//  * @param {T[]} local
+//  * @param {T[]} cloud
+//  * @param {string} [idField='id']
+//  * @returns {T[]}
+//  */
+// function mergeByTimestamp(local, cloud, idField) { ... }
+//
+// /**
+//  * Schedule an auto-sync push after a short debounce window.
+//  * Used by direct localStorage writes that bypass writeDB.
+//  * @param {number} [delayMs]
+//  */
+// function scheduleAutoSync(delayMs) { ... }
+//
+// ─────────────────────────────────────────────────────────────────────────────
+//
 // ═══════════════════════════════════════════════════════════════════════════════
 // v23.0: SYNC SAFETY - IndexedDB Snapshots + Backup Engine
 // Pre-sync snapshots prevent data loss during cross-device conflicts
@@ -2070,9 +2146,18 @@ function applyCloudData(data) {
     console.log('[Firebase] Loaded journal entries:', data.journal.length);
   }
   // v25.0: Pulse - Firestore is truth, no tombstone merge needed
+  // v34.107: per CLAUDE.md - "Deletion tracking keys must also be synced to Firebase
+  // AND merged on pull - otherwise deleted items resurrect from cloud." The V2 path
+  // (loadFromFirebaseV2) applies applyTombstoneFilter('pulseGoals', ...) before write;
+  // this V1 path (used by silent-restore + manual sync) was missing that filter, so
+  // any goal the user deleted that still existed in the V1 root doc resurrected on
+  // every V1 pull.
   if (data.pulse) {
     if (data.pulse.goals && shouldSyncCategory('goals')) {
-      localStorage.setItem('roweos_pulse_goals', JSON.stringify(data.pulse.goals));
+      var _v1FilteredGoals = (typeof applyTombstoneFilter === 'function')
+        ? applyTombstoneFilter('pulseGoals', data.pulse.goals)
+        : data.pulse.goals;
+      localStorage.setItem('roweos_pulse_goals', JSON.stringify(_v1FilteredGoals));
     }
     if (data.pulse.journal) localStorage.setItem('roweos_pulse_journal', JSON.stringify(data.pulse.journal));
     if (data.pulse.insights) localStorage.setItem('roweos_pulse_insights', JSON.stringify(data.pulse.insights));
@@ -2252,8 +2337,12 @@ function setupRealtimeSync() {
       // v24.15: Cross-device check BEFORE grace period - never block updates from other devices
       if (data.meta && data.meta.lastDeviceId && data.meta.lastDeviceId !== deviceId) {
         console.log('[Firebase V3] Cross-device update detected from ' + data.meta.lastDeviceId + ', pulling V2 data...');
-        if (typeof loadFromFirebaseV2 === 'function') {
+        if (typeof scheduleCloudPull === 'function') {
           // v24.2: Skip mode sync on cross-device updates to prevent mode flipping
+          // v34.120: debounced - a burst of root-doc snapshots (multi-device/tab)
+          // now coalesces into ONE pull instead of N full re-write passes.
+          scheduleCloudPull(false, true);
+        } else if (typeof loadFromFirebaseV2 === 'function') {
           loadFromFirebaseV2(false, true);
         } else {
           applyCloudData(data);
@@ -3075,7 +3164,7 @@ function sendEarlyAccessEmail(user, accessKey) {
   if (typeof generateBetaWelcomeEmail === 'function') {
     htmlBody = generateBetaWelcomeEmail(accessKey, 'Founder');
   } else {
-    htmlBody = '<div style="font-family:sans-serif;padding:40px;"><h2>Welcome to RoweOS Early Access</h2><p>Your access key: <strong>' + accessKey + '</strong></p><p>Visit <a href="https://roweos.com">roweos.com</a> to get started.</p></div>';
+    htmlBody = '<div style="font-family:sans-serif;padding:40px;"><h2>Welcome to Brilliance Early Access</h2><p>Your access key: <strong>' + accessKey + '</strong></p><p>Visit <a href="https://roweos.com">roweos.com</a> to get started.</p></div>';
   }
 
   fetch('/api/resend-welcome', {
@@ -3083,7 +3172,7 @@ function sendEarlyAccessEmail(user, accessKey) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       email: email,
-      subject: 'Welcome to RoweOS - Your Account is Ready',
+      subject: 'Welcome to Brilliance - Your Account is Ready',
       from: 'roweos@therowecollection.com',
       html: htmlBody,
       bcc: ['jordan@therowecollection.com'],
@@ -3413,9 +3502,16 @@ function showUpgradeModal(feature, requiredTier) {
   var existing = document.getElementById('upgradeModal');
   if (existing) existing.remove();
 
+  // v34.102: When the upgrade modal fires from inside a guided tour, the tour
+  // overlay is already darkening the page. Adding our own 0.6-alpha black on
+  // top stacks to ~0.84 darkness, making the popup almost unreadable. Detect
+  // tour state and use a much lighter backdrop in that case.
+  var _tourActive = !!document.querySelector('.tour-overlay, .tour-spotlight');
+  var _backdropAlpha = _tourActive ? '0.18' : '0.6';
+  var _backdropBlur = _tourActive ? '0px' : '4px';
   var modal = document.createElement('div');
   modal.id = 'upgradeModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);animation:fadeIn 0.2s ease;';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,' + _backdropAlpha + ');backdrop-filter:blur(' + _backdropBlur + ');animation:fadeIn 0.2s ease;';
   modal.onclick = function(e) { if (e.target === modal) closeUpgradeModal(); };
   modal.innerHTML =
     '<div style="max-width:520px;width:90%;padding:28px;background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-xl);box-shadow:0 20px 60px rgba(0,0,0,0.4);" onclick="event.stopPropagation()">' +
@@ -3523,7 +3619,7 @@ function claimBrandConfig(code) {
           usageCount: firebase.firestore.FieldValue.increment(1)
         }).catch(function(e) {});
         try { localStorage.removeItem('roweos_pending_join'); } catch(e) {}
-        var inviteName = config.name || 'RoweOS';
+        var inviteName = config.name || 'Brilliance';
         showToast('Welcome to ' + inviteName + '! Set up your brand to get started.', 'success');
         console.log('[BrandConfig] Invite-only config claimed:', code);
         return;
@@ -4394,10 +4490,33 @@ function showAuthGate() {
     gate.style.display = 'flex';
     gate.style.opacity = '1';
   }
-  // v20.14: Always reset to splash view (Phase 1) - never show login form directly.
-  // The splash has no email/password fields so iOS autofill won't trigger.
   var splash = document.getElementById('authSplash');
   var login = document.getElementById('authLogin');
+  // v34.99: After sign-out, the splash still had opacity:0 left over from the
+  // gold transition that ran during the original sign-in. Result was a black
+  // screen with the auth gate technically present but invisible. Reset all
+  // transition state explicitly. Also clear the gold flash overlay so it
+  // doesn't sit on top of whichever phase we end up showing.
+  if (splash) {
+    splash.style.transition = 'none';
+    splash.style.opacity = '1';
+  }
+  var gold = document.getElementById('goldTransitionOverlay');
+  if (gold) {
+    gold.style.transition = 'none';
+    gold.style.opacity = '0';
+    gold.style.animation = '';
+    gold.style.pointerEvents = 'none';
+  }
+  // v34.109: Reload always lands on the "Be Brilliant" splash for everyone.
+  // Previously (v34.99) returning users were shortcut directly to the login
+  // form so they wouldn't see the welcome screen again - but the user prefers
+  // the branded splash on every reload. The Begin button calls
+  // triggerGoldTransition() which fades the splash and reveals authLogin, so
+  // returning users still get to the sign-in form in one tap.
+  // The post-sign-out path (showAuthGate called by signOut) also lands here
+  // and is fine - splash on sign-out feels intentional, like a "logged out"
+  // landing page.
   if (splash) splash.style.display = 'flex';
   if (login) login.style.display = 'none';
   // Reset sign-in sub-views within login
@@ -4438,6 +4557,11 @@ function hideAuthGate() {
   setTimeout(function() {
     try { if (typeof maybeShowBrillianceWelcome === 'function') maybeShowBrillianceWelcome(); } catch(e) { console.warn('[Welcome] error:', e); }
   }, 800);
+  // v33.6: "What's new" modal — fires once per minor version (v33.5, v33.6, etc.) for users
+  // who already saw the v33.0 welcome. Different content; same dismiss flow.
+  setTimeout(function() {
+    try { if (typeof maybeShowWhatsNew === 'function') maybeShowWhatsNew(); } catch(e) { console.warn('[WhatsNew] error:', e); }
+  }, 1400);
 }
 
 // v33.0: Welcome modal trigger logic. Fires once per user when:
@@ -4473,6 +4597,136 @@ function maybeShowBrillianceWelcome() {
   }
 }
 window.maybeShowBrillianceWelcome = maybeShowBrillianceWelcome;
+
+// v33.6: What's New modal. Fires when user has seen v33.0 welcome but
+// hasn't seen the current minor version's "what's new" yet.
+function maybeShowWhatsNew() {
+  try {
+    // Don't compete with the first-launch welcome.
+    if (localStorage.getItem('brilliance_welcomed_v33') !== 'true') return;
+    // v34.39: Don't stack on top of the data restore prompt or auth gate.
+    var rp = document.getElementById('dataRestorePrompt');
+    if (rp && rp.style.display && rp.style.display !== 'none') return;
+    var ag = document.getElementById('authGate');
+    if (ag && ag.style.display && ag.style.display !== 'none') return;
+    var seen = localStorage.getItem('brilliance_whatsnew_seen') || '';
+    var current = (typeof ROWEOS_VERSION === 'string') ? ROWEOS_VERSION : 'v33.6';
+    if (seen === current) return;
+    // Skip welcome dialog if user has explicitly opted out.
+    if (localStorage.getItem('brilliance_whatsnew_off') === 'true') {
+      localStorage.setItem('brilliance_whatsnew_seen', current);
+      return;
+    }
+    showWhatsNewModal(current);
+  } catch(e) {
+    console.warn('[WhatsNew] failed:', e);
+    try { localStorage.setItem('brilliance_whatsnew_seen', ROWEOS_VERSION || 'v33.6'); } catch(_) {}
+  }
+}
+window.maybeShowWhatsNew = maybeShowWhatsNew;
+
+function showWhatsNewModal(version) {
+  // Build inline modal — content is hardcoded per version cycle.
+  var existing = document.getElementById('brillianceWhatsNewOverlay');
+  if (existing) existing.parentNode.removeChild(existing);
+
+  // v34.101: Refreshed for the v34.78–v34.100 ships. Catches up on the 90-version
+  // run since the v34.10 list. Anything still in the previous list (Brilliance
+  // rebrand, Brilli, Concierge, Welcome screens, Studio split-pane, Focus Mode)
+  // remains discoverable via Settings + ⌘K, no need to keep all of them surfaced
+  // here forever. New items lead.
+  var items = [
+    { title: 'Native Workspace · file system access', desc: 'Connect a folder on your Mac or PC and Brilliance can read, search, and (with confirmation) edit real files. Same idea as Perplexity Comet or Claude Cowork. Settings → Connections → Native Workspace. Safari has a read-only fallback.' },
+    { title: 'Brilliance Knowledge Engine', desc: 'Ask Brilliance "how many goals do I have", "what\'s in my outbox", "do I have anything due today" — it answers from a live snapshot of your actual data across 18 surfaces, not by guessing.' },
+    { title: 'Evolve · Quiz + Verifier engines live', desc: 'Practice tab now generates real adaptive quizzes from your goal (Gemini outline → Claude questions). Verify tab runs a two-pass deep verification (claim-check + adversarial skepticism) with citations. No more demo cards.' },
+    { title: 'Notebooks (Scribe)', desc: 'Long-form writing surface with the in-app editor, AI compose, voice tools, and "Ask about this notebook" chat. Pin notebooks to the Thought Board, switch on Letter Series for cream paper + serif.' },
+    { title: 'Thought Board', desc: 'A pinboard for cross-surface ideas. Pin from Notebooks, Studio, Chat. Now syncs across devices.' },
+    { title: 'History · Brilliance branching timeline', desc: 'Replaces the old time ribbon. Vertical SVG with central spine, brand on the left, life on the right. Click any node to resume.' },
+    { title: 'Pulse + Daily Brief + Yesterday\'s Recap', desc: 'Pulse merged Focus into one surface. Daily Brief (⌘ ⇧ T) is your morning anchor; Yesterday\'s Recap walks back what got done. Quick-add a goal (⌘ ⇧ G), reminder (⌘ ⇧ R), note (⌘ ⇧ N) from anywhere.' },
+    { title: '14-day Founder trial', desc: 'New accounts start with full access to the Founder tier for 14 days, no payment info required. Auto-downgrade on expiration. Trial reminders by email.' },
+    { title: 'Sync v5 dual-write staged', desc: 'Universal envelope, per-collection cloud writes, daily drift audit, tombstone GC. Behind 4 flags; v4 still source of truth. Settings → Sync v5 → "View audit" if you want to peek.' },
+    { title: 'Stripe checkout · subscriptions + API key bundles', desc: 'Pre-loaded API keys for Anthropic, OpenAI, and Google purchasable in-app. Auto-delivered to your account post-checkout.' },
+    { title: 'Mail integrations · Gmail + Outlook + iCloud', desc: 'Connect any of the three; outbox, scheduled sends, OAuth tokens stored per-brand-and-life-profile. Cloud Functions handle the actual send when the app is closed.' },
+    { title: 'Calendar integrations · Google + Outlook + iCloud (CalDAV)', desc: 'Two-way write-back. Per-calendar color picker. Now available in BOTH brand and life mode (life parity v34.81). Calendar list redesigned as a grid of tiles.' },
+    { title: 'Universal Search · ⌘K', desc: 'Three modes: AI (default, full Knowledge Engine context), Navigate (fuzzy match), Actions (command patterns). Tab cycles modes. Side panel via the magnifying glass.' },
+    { title: 'Keyboard shortcuts overlay (?)', desc: 'Hit ? anywhere to see every Brilliance shortcut and ⌘K command. Includes brand cycle (⌘ ⇧ [ / ]), theme toggle (⌘ ⇧ L), Studio split-pane (⌘ ⌥ P), brilli cycle (⌘ ⌥ B).' },
+    { title: 'Slash commands in chat', desc: 'Type /goal, /reminder, /note, /brief, /sync, /theme, /focus, /brilli, /yesterday, /random, or any view name (/pulse, /studio, /mail …) for instant action without ⌘K.' },
+    { title: 'Mobile Quick Capture FAB', desc: 'Floating + button on mobile expands to Daily Brief / Quick Goal / Reminder / Note. Same modals as desktop, no separate code path.' },
+    { title: 'Native PWA install prompt', desc: 'Gold-bordered banner on first eligible visit. Install Brilliance to your dock for native notifications and faster open. Hidden once you install or dismiss.' },
+    { title: 'Email observability + Campaigns dashboard', desc: 'Every transactional email writes to a log. Admin email panel aggregates sends by template, click-throughs, and per-recipient activity.' },
+    { title: 'Light-mode polish (v34.76 / v34.77)', desc: 'Cream-tinted elevated surfaces. No more stark white slabs jutting out of the warm cream workspace.' }
+  ];
+
+  var overlay = document.createElement('div');
+  overlay.id = 'brillianceWhatsNewOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);z-index:99100;opacity:0;transition:opacity 0.4s;';
+  overlay.onclick = function(e){ if (e.target === overlay) dismissWhatsNew(); };
+
+  // v33.80: Light-mode-aware modal styling.
+  var _isLight = (function(){
+    try { return document.documentElement.classList.contains('light-mode'); } catch(e){ return false; }
+  })();
+  var modal = document.createElement('div');
+  modal.style.cssText = 'max-width:540px;width:92%;max-height:88vh;overflow:auto;background:' + (_isLight ? '#ffffff' : '#0f0f0f') + ';border:1px solid ' + (_isLight ? 'rgba(168,140,86,0.3)' : 'rgba(201,181,122,0.22)') + ';border-radius:14px;padding:32px;color:' + (_isLight ? '#1a1a1a' : '#f5ecd9') + ';font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:0 24px 80px ' + (_isLight ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.6)') + ';';
+
+  var listHtml = items.map(function(it){
+    return '<div style="padding:14px 0;border-bottom:1px solid ' + (_isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)') + ';">' +
+      '<div style="font-family:Georgia,serif;font-size:16px;font-weight:500;color:' + (_isLight ? '#5a4d2e' : '#e2c79b') + ';margin-bottom:4px;">' + it.title + '</div>' +
+      '<div style="font-size:13px;color:' + (_isLight ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.6)') + ';line-height:1.6;">' + it.desc + '</div>' +
+    '</div>';
+  }).join('');
+
+  // v34.10: Use the gold monogram disc for visual continuity with the splash + welcome modal.
+  modal.innerHTML =
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">' +
+      '<div style="position:relative;width:48px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+        '<div style="position:absolute;inset:-6px;background:radial-gradient(circle,rgba(201,169,97,0.22) 0%,rgba(201,169,97,0) 70%);border-radius:50%;"></div>' +
+        '<img src="/images/brilliance/monogram-circle.png" alt="" style="position:relative;width:48px;height:48px;border-radius:50%;object-fit:cover;" onerror="this.outerHTML=\'<div style=&quot;width:42px;height:42px;border-radius:50%;background:radial-gradient(circle,#fff8e8,#c9a961 60%,rgba(168,138,74,0.3) 100%);box-shadow:0 0 28px rgba(201,169,97,0.45);&quot;></div>\';" />' +
+      '</div>' +
+      '<div>' +
+        '<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:' + (_isLight ? '#7a6741' : '#c9a961') + ';font-weight:500;">Brilliance ' + version + '</div>' +
+        '<div style="font-size:22px;font-weight:600;letter-spacing:-0.01em;color:' + (_isLight ? '#1a1a1a' : '#f5ecd9') + ';">What\'s new</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="font-size:13px;color:' + (_isLight ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)') + ';line-height:1.6;margin-bottom:18px;">A summary of what shipped in this version. The platform is unchanged for users; we\'re shipping new tools, not breaking old ones.</div>' +
+    '<div>' + listHtml + '</div>' +
+    '<div style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:12px;">' +
+      '<label style="display:flex;align-items:center;gap:8px;font-size:11px;color:' + (_isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.45)') + ';cursor:pointer;">' +
+        '<input type="checkbox" id="whatsNewSilenceCheck" style="cursor:pointer;"> Don\'t show "What\'s new" again' +
+      '</label>' +
+      '<button id="whatsNewContinueBtn" style="padding:11px 24px;background:linear-gradient(135deg,#e2c79b,#c9a961,#a88a4a);border:none;border-radius:99px;color:#0a0a0a;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;">Continue</button>' +
+    '</div>';
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  setTimeout(function(){ overlay.style.opacity = '1'; }, 16);
+
+  modal.querySelector('#whatsNewContinueBtn').onclick = dismissWhatsNew;
+  document.addEventListener('keydown', function escH(e){
+    if (e.key === 'Escape') { dismissWhatsNew(); document.removeEventListener('keydown', escH); }
+  });
+}
+window.showWhatsNewModal = showWhatsNewModal;
+
+function dismissWhatsNew() {
+  try {
+    var overlay = document.getElementById('brillianceWhatsNewOverlay');
+    var silenceCheck = overlay && overlay.querySelector('#whatsNewSilenceCheck');
+    if (silenceCheck && silenceCheck.checked) {
+      try { localStorage.setItem('brilliance_whatsnew_off', 'true'); } catch(e){}
+    }
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 400);
+    }
+    var current = (typeof ROWEOS_VERSION === 'string') ? ROWEOS_VERSION : 'v33.6';
+    localStorage.setItem('brilliance_whatsnew_seen', current);
+    if (typeof writeDB === 'function' && typeof firebaseUser !== 'undefined' && firebaseUser) {
+      try { writeDB('profile/whatsnew_seen', { value: current, _modifiedAt: Date.now() }); } catch(e){}
+    }
+  } catch(e) { console.warn('[WhatsNew] dismiss error:', e); }
+}
+window.dismissWhatsNew = dismissWhatsNew;
 
 function dismissBrillianceWelcome() {
   try {
@@ -4682,7 +4936,7 @@ function showFounderTrialActivation(keyString) {
     + '<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#d4b896" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L15 8.5 L22 9.3 L17 14.1 L18.2 21 L12 17.8 L5.8 21 L7 14.1 L2 9.3 L9 8.5 Z"/></svg>'
     + '</div>'
     + '<div class="founder-shimmer" style="font-size:11px;letter-spacing:3.5px;color:#a89878;text-transform:uppercase;margin-bottom:14px;">Founder · Reserved Access</div>'
-    + '<h1 style="font-family:Georgia,serif;font-size:34px;font-weight:400;line-height:1.2;margin:0 0 14px;color:#f5ecd9;">Welcome to RoweOS, Founder.</h1>'
+    + '<h1 style="font-family:Georgia,serif;font-size:34px;font-weight:400;line-height:1.2;margin:0 0 14px;color:#f5ecd9;">Welcome to Brilliance, Founder.</h1>'
     + '<p style="font-size:15px;color:#a89878;line-height:1.6;margin:0 auto;max-width:440px;">You are one of <span style="color:#d4b896;font-weight:500;">99 people</span> chosen for early Founder access. Your key has been waiting for you. Activate your 14-day trial below to begin.</p>'
     + '</div>'
 
@@ -4861,7 +5115,9 @@ function showDataRestorePrompt(data) {
   var greeting = document.getElementById('restoreGreeting');
   if (greeting && firebaseUser) {
     var name = firebaseUser.displayName || firebaseUser.email;
-    greeting.textContent = 'Welcome back, ' + name.split(' ')[0] + '!';
+    var first = name.split(' ')[0].split('@')[0];
+    // v34.6: Italic gold accent on the name to match Brilliance branding.
+    greeting.innerHTML = 'Welcome back, <span style="font-style:italic;color:#e2c79b;font-weight:500;">' + first + '</span>.';
   }
   if (prompt) prompt.style.display = 'flex';
 }
@@ -4877,6 +5133,9 @@ function acceptDataRestore() {
       // v30.2: Call loadBrands() directly - reloadAllData() may be throttled
       if (typeof loadBrands === 'function') loadBrands();
       if (typeof initBrandLogo === 'function') initBrandLogo();
+      // v34.4: Mark device as initialized so PWA refreshes silent-restore instead of re-prompting.
+      try { localStorage.setItem('roweos_initialized', 'true'); } catch(eL){}
+      try { if (firebaseUser && firebaseUser.uid) localStorage.setItem('roweos_last_uid', firebaseUser.uid); } catch(eU){}
       showToast('Data restored from cloud - check Sync for details', 'success');
     } catch(e) {
       console.error('[Restore] Error:', e);
@@ -4992,6 +5251,14 @@ function handleAuthState(user) {
   console.log('[Auth] User signed in:', user.email);
   var statusEl = document.getElementById('authGateStatus');
 
+  // v34.39: Stamp the returning-user signal IMMEDIATELY on every successful auth,
+  // before any cloud check. PWA hard reloads can fire onAuthStateChanged before
+  // the storage shim has hydrated `brands`/`roweos_initialized` from IndexedDB,
+  // and Safari can occasionally lose localStorage between sessions. We want
+  // FUTURE loads to always have a fresh `roweos_last_uid` to anchor on, so
+  // silent-restore wins next time even if other signals are missing.
+  try { localStorage.setItem('roweos_last_uid', user.uid); } catch(eU){}
+
   // v15.0: Admin bypasses access key requirement
   if (isAdmin()) {
     console.log('[Auth] Admin user detected - bypassing access key check');
@@ -5004,8 +5271,26 @@ function handleAuthState(user) {
         if (doc.exists && doc.data().brands && doc.data().brands.length > 0) {
           if (!brands || brands.length === 0) {
             // v29.1: If device was previously initialized, silently restore instead of scary prompt
+            // v34.4: Also silent-restore if we have a record of this exact UID having logged
+            // in here before — fixes PWA refresh cycling that re-shows the prompt.
+            // v34.39: Broaden the returning-user check. Any of these means
+            // "this device has used Brilliance before" and silent-restore is safe:
+            //   - roweos_initialized=true (legacy flag, set on first init)
+            //   - roweos_last_uid matches current user (v34.4 cycle fix)
+            //   - whatsnew_seen has any version (set after first welcome modal)
+            //   - any roweos_brand_* / roweos_lifeai_* / roweos_app_mode key exists
+            // The OLD check was too strict — only `_initialized` or `_last_uid`,
+            // and could fail on PWA hard reloads when those localStorage keys
+            // briefly returned null before the storage shim hydrated.
             var _wasInit = localStorage.getItem('roweos_initialized') === 'true';
-            if (_wasInit) {
+            var _seenUid = localStorage.getItem('roweos_last_uid');
+            var _whatsnewSeen = !!localStorage.getItem('brilliance_whatsnew_seen');
+            var _hasAppMode = !!localStorage.getItem('roweos_app_mode');
+            var _hasTheme = !!localStorage.getItem('roweos_theme');
+            var _hasOnboardingDone = localStorage.getItem('roweos_onboarding_complete') === 'true';
+            var _isReturning = _wasInit || (_seenUid && user && _seenUid === user.uid) ||
+              _whatsnewSeen || _hasAppMode || _hasTheme || _hasOnboardingDone;
+            if (_isReturning) {
               console.log('[Auth] Previously initialized device - silent restore from cloud');
               try {
                 applyCloudData(doc.data());
@@ -5013,6 +5298,8 @@ function handleAuthState(user) {
                 // v30.2: Call loadBrands() directly - reloadAllData() may be throttled
                 if (typeof loadBrands === 'function') loadBrands();
                 if (typeof initBrandLogo === 'function') initBrandLogo();
+                try { localStorage.setItem('roweos_initialized', 'true'); } catch(eL){}
+                try { if (user && user.uid) localStorage.setItem('roweos_last_uid', user.uid); } catch(eU){}
               } catch(e) { console.warn('[Auth] Silent restore error:', e); }
               hideAuthGate();
               // v30.1: Chain setupRealtimeSync after loadFromFirebase to prevent concurrent writers
@@ -5202,8 +5489,11 @@ function _handlePostKeyCloudCheck(user) {
         // Has cloud data
         if (!brands || brands.length === 0) {
           // v29.1: If device was previously initialized, silently restore instead of scary prompt
+          // v34.4: Match by saved UID to fix PWA refresh cycling (init flag may be lost).
           var _wasInit = localStorage.getItem('roweos_initialized') === 'true';
-          if (_wasInit) {
+          var _seenUid = localStorage.getItem('roweos_last_uid');
+          var _isReturning = _wasInit || (_seenUid && user && _seenUid === user.uid);
+          if (_isReturning) {
             console.log('[Auth] Previously initialized device - silent restore from cloud');
             try {
               applyCloudData(doc.data());
@@ -5211,6 +5501,8 @@ function _handlePostKeyCloudCheck(user) {
               // v30.2: Call loadBrands() directly - reloadAllData() may be throttled
               if (typeof loadBrands === 'function') loadBrands();
               if (typeof initBrandLogo === 'function') initBrandLogo();
+              try { localStorage.setItem('roweos_initialized', 'true'); } catch(eL){}
+              try { if (user && user.uid) localStorage.setItem('roweos_last_uid', user.uid); } catch(eU){}
             } catch(e) { console.warn('[Auth] Silent restore error:', e); }
             hideAuthGate();
             // v30.1: Chain setupRealtimeSync after loadFromFirebase to prevent concurrent writers
@@ -5323,7 +5615,7 @@ function renderSettingsPlan() {
     var tierColors = { free: 'rgba(255,255,255,0.06)', basic: 'rgba(96,165,250,0.15)', solo: 'rgba(96,165,250,0.15)', founder: 'rgba(168,152,120,0.2)', premium: 'rgba(212,175,55,0.2)' };
     var tierTextColors = { free: 'var(--text-secondary)', basic: '#60a5fa', solo: '#60a5fa', founder: '#a89878', premium: '#d4af37' };
     var tierFeatures = {
-      free: 'Sign up for a plan to unlock RoweOS. Chat, Library, Memory, Pulse, and Rhythm included in all tiers.',
+      free: 'Sign up for a plan to unlock Brilliance. Chat, Library, Memory, Pulse, and Rhythm included in all tiers.',
       basic: 'Solo: 1 Brand, 1 Life profile. Chat, Library, Memory, Pulse, Rhythm, basic automations.',
       solo: 'Solo: 1 Brand, 1 Life profile. Chat, Library, Memory, Pulse, Rhythm, basic automations.',
       founder: 'Founder: Up to 5 Brands and 5 Life profiles. Studio, full automations, mail, social, focus, analytics, identity, and cloud sync.',
@@ -5643,7 +5935,12 @@ function toggleFeedbackArea(area) {
   }
   // Update card visual
   var cards = document.querySelectorAll('.feedback-area-card');
-  var areas = ['chat','studio','focus','pulse','rhythm','library','automations','identity','memory','inventory','clients','analytics','settings','notifications','mail','bloom','sync','onboarding','admin','other'];
+  // v34.85: Order MUST stay in lock-step with the .feedback-area-card list in
+  // 27-modals.html. Adding / removing here without re-ordering the cards
+  // shifts the visual selection state. Surfaces match the Brilliance v34.x map:
+  // Focus is RETIRED (Pulse subsumed it), and Notebooks / Evolve / Thought Board /
+  // Social / Brilli / Knowledge-Search / History / Folio are now first-class.
+  var areas = ['chat','pulse','rhythm','studio','notebooks','evolve','thought_board','folio','library','bloom','mail','social','automations','clients','analytics','inventory','identity','history','brilli','search','notifications','sync','settings','onboarding','admin','other'];
   for (var i = 0; i < cards.length; i++) {
     if (_feedbackAreas.indexOf(areas[i]) !== -1) {
       cards[i].classList.add('selected');
@@ -7018,9 +7315,9 @@ function generateCompanyWelcomeEmail(vars) {
     + '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;max-width:600px;margin:0 auto;background:' + bg + ';color:' + dimText + ';">'
     // Header
     + '<div style="background:linear-gradient(135deg,#1a1a1a 0%,' + bg + ' 100%);padding:48px 40px 32px;border-radius:12px 12px 0 0;text-align:center;">'
-    + '<img src="https://roweos.com/logo.png" alt="RoweOS" style="width:80px;height:80px;border-radius:16px;margin-bottom:16px;">'
-    + '<h1 style="color:' + gold + ';margin:0;font-size:28px;font-weight:300;letter-spacing:3px;">RoweOS</h1>'
-    + '<p style="color:#666;margin:8px 0 0;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Operating intelligence, built for brands &amp; life</p>'
+    + '<img src="https://roweos.com/images/brilliance/monogram-circle.png" alt="Brilliance" style="width:96px;height:96px;border-radius:50%;margin-bottom:16px;">'
+    + '<h1 style="color:' + gold + ';margin:0;font-size:28px;font-weight:300;letter-spacing:3px;">Brilliance</h1>'
+    + '<p style="color:#666;margin:8px 0 0;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Brand &amp; Life Intelligence Platform</p>'
     + '<div style="display:inline-block;padding:6px 20px;background:rgba(168,152,120,0.1);border:1px solid rgba(168,152,120,0.2);border-radius:20px;margin-top:16px;">'
     + '<span style="font-size:12px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:' + gold + ';">' + escapeHtml(companyName) + '</span>'
     + '</div>'
@@ -7028,7 +7325,7 @@ function generateCompanyWelcomeEmail(vars) {
     // Content
     + '<div style="background:#111;padding:36px 40px 40px;">'
     + '<h2 style="color:#fff;font-size:22px;font-weight:500;margin:0 0 8px;">' + greeting + '</h2>'
-    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 28px;">You\'ve been granted Founder access to RoweOS for <strong style="color:#fff;">' + escapeHtml(companyName) + '</strong> - a private AI operating system for managing your brands, team, and operations from a single platform.</p>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 28px;">You\'ve been granted Founder access to Brilliance for <strong style="color:#fff;">' + escapeHtml(companyName) + '</strong> - a private AI operating system for managing your brands, team, and operations from a single platform.</p>'
     // Key block
     + '<div style="background:#1a1a1a;border:1px solid ' + gold + '44;border-radius:8px;padding:18px;text-align:center;margin-bottom:28px;">'
     + '<p style="color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 10px;">Your Access Key</p>'
@@ -7049,7 +7346,7 @@ function generateCompanyWelcomeEmail(vars) {
     // Team invitation
     + '<div style="background:rgba(168,152,120,0.06);border:1px solid rgba(168,152,120,0.15);border-radius:8px;padding:20px;margin-bottom:28px;">'
     + '<p style="color:#fff;font-size:14px;font-weight:500;margin:0 0 8px;">Inviting Team Members</p>'
-    + '<p style="color:#ccc;font-size:13px;line-height:1.6;margin:0;">As a Founder, you can share your brand configuration with team members. Use the <strong style="color:#fff;">Share Brand</strong> button in Identity to generate a join link. Team members will need their own RoweOS accounts and access keys.</p>'
+    + '<p style="color:#ccc;font-size:13px;line-height:1.6;margin:0;">As a Founder, you can share your brand configuration with team members. Use the <strong style="color:#fff;">Share Brand</strong> button in Identity to generate a join link. Team members will need their own Brilliance accounts and access keys.</p>'
     + '</div>'
     // Footer
     + '<p style="color:#555;font-size:12px;margin:28px 0 0;padding-top:20px;border-top:1px solid #222;">'
@@ -7074,36 +7371,40 @@ function loadComposerTemplate(name) {
     html = generateBrandedEmail(layout);
   } else if (name === 'check-in') {
     html = generateCheckInEmail(key);
-    if (subjectEl) subjectEl.value = 'How\'s RoweOS working for you?';
+    if (subjectEl) subjectEl.value = 'How\'s Brilliance working for you?';
   } else if (name === 'onboarding_survey') {
     html = generateOnboardingSurveyPreview();
-    if (subjectEl) subjectEl.value = 'Quick questions about your RoweOS experience';
+    if (subjectEl) subjectEl.value = 'Quick questions about your Brilliance experience';
   } else if (name === 'reengagement') {
     html = generateReengagementPreview();
     if (subjectEl) subjectEl.value = 'Your AI brand team is waiting for you';
   } else if (name === 'feature_announcement') {
     html = generateFeatureAnnouncementPreview();
-    if (subjectEl) subjectEl.value = 'New in RoweOS: [Feature Name]';
+    if (subjectEl) subjectEl.value = 'New in Brilliance: [Feature Name]';
   } else if (name === 'checkin_new') {
     html = generateCheckinRatingPreview();
-    if (subjectEl) subjectEl.value = 'How\'s RoweOS working for you?';
+    if (subjectEl) subjectEl.value = 'How\'s Brilliance working for you?';
   } else if (name === 'subscription_info') {
     html = generateSubscriptionInfoPreview();
-    if (subjectEl) subjectEl.value = 'RoweOS Plans, API Keys, and AI Routing';
+    if (subjectEl) subjectEl.value = 'Brilliance Plans, API Keys, and AI Routing';
   } else if (name === 'founder_lifetime_offer') {
     html = generateFounderLifetimeOfferPreview();
-    if (subjectEl) subjectEl.value = 'Your Founder Lifetime Discount - RoweOS is ready';
+    if (subjectEl) subjectEl.value = 'Your Founder Lifetime Discount - Brilliance is ready';
+  } else if (name === 'brilliance_transition') {
+    // v33.84: RoweOS → Brilliance transition announcement.
+    html = generateBrillianceTransitionEmail();
+    if (subjectEl) subjectEl.value = 'Welcome to Brilliance. What changed, and how we keep building.';
   } else if (name === 'individual') {
     html = generateBetaWelcomeEmail(key, 'solo');
-    if (subjectEl) subjectEl.value = 'Welcome to RoweOS Solo - Your Access Key';
+    if (subjectEl) subjectEl.value = 'Welcome to Brilliance Solo - Your Access Key';
   } else if (name === 'company') {
     html = generateCompanyWelcomeEmail({ accessKey: key, companyName: 'Company Name', firstName: '' });
-    if (subjectEl) subjectEl.value = 'Welcome to RoweOS Founder - Company Access Key';
+    if (subjectEl) subjectEl.value = 'Welcome to Brilliance Founder - Company Access Key';
   } else {
     // default: original beta template
     html = generateBetaWelcomeEmail(key, tier);
     var tierLabel = (tier || 'solo').charAt(0).toUpperCase() + (tier || 'solo').slice(1);
-    if (subjectEl) subjectEl.value = 'Welcome to RoweOS ' + tierLabel + ' - Your Access Key';
+    if (subjectEl) subjectEl.value = 'Welcome to Brilliance ' + tierLabel + ' - Your Access Key';
   }
 
   // v22.7: Determine if template has light or dark background
@@ -7171,14 +7472,16 @@ function loadComposerTemplate(name) {
 
 // v30.1: Shared email preview wrapper with logo and dark background
 function _emailPreviewWrap(subtitle, body) {
+  // v33.98: Header now uses the new Brilliance app-icon (square gradient mark)
+  // and the Brilliance wordmark image as the title, instead of the legacy
+  // /logo.png R-glyph. App icon is 72px to feel substantial without dominating.
   return '<!DOCTYPE html><html><head><meta charset="utf-8"></head>'
     + '<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
     + '<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;"><tr><td align="center">'
     + '<table width="560" cellpadding="0" cellspacing="0" style="background:#0a0a0a;border-radius:12px;border:1px solid #2a2a2a;">'
     + '<tr><td style="background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);padding:40px 32px 24px;text-align:center;border-bottom:1px solid #1e1e1e;border-radius:12px 12px 0 0;">'
-    + '<img src="https://roweos.com/logo.png" alt="RoweOS" style="width:64px;height:64px;border-radius:12px;margin-bottom:12px;">'
-    + '<h1 style="margin:0;font-size:28px;font-weight:300;color:#a89878;letter-spacing:2px;">RoweOS</h1>'
-    + (subtitle ? '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1.5px;text-transform:uppercase;">' + subtitle + '</p>' : '<p style="margin:8px 0 0;font-size:12px;color:#666;letter-spacing:1.5px;text-transform:uppercase;">Operating intelligence, built for brands &amp; life</p>')
+    + '<img src="https://roweos.com/images/brilliance/monogram-circle.png" alt="Brilliance" style="width:140px;height:140px;border-radius:50%;margin:0 0 14px;display:inline-block;">'
+    + (subtitle ? '<p style="margin:10px 0 0;font-size:12px;color:#9a9a9a;letter-spacing:1.6px;text-transform:uppercase;">' + subtitle + '</p>' : '<p style="margin:10px 0 0;font-size:12px;color:#9a9a9a;letter-spacing:1.6px;text-transform:uppercase;">Intelligence, accessible.</p>')
     + '</td></tr><tr><td style="padding:32px;background:#111;">' + body + '</td></tr>'
     + '<tr><td style="padding:24px 32px 0;text-align:center;border-top:1px solid #2a2a2a;">'
     + '<p style="font-family:\'DM Sans\',sans-serif;font-size:20px;font-weight:300;color:#a89878;letter-spacing:1px;margin:0 0 4px;">Intelligence, accessible.</p>'
@@ -7201,16 +7504,99 @@ function _emailGreeting() {
   return firstName ? 'Hi ' + firstName + ',' : 'Hi there,';
 }
 
+// v33.98: RoweOS → Brilliance transition announcement. Rewritten for warmth
+// over technical detail: no em-dashes, less feature-list-shaped, with the
+// "Three engines. One platform." provider cards from roweos.com/info pinned
+// at the bottom and a single "Get API Keys" CTA. Sync Reconcile (admin-tier
+// detail) removed; engineering specifics replaced with what users feel.
+function generateBrillianceTransitionEmail() {
+  var section = function(title, desc) {
+    return '<div style="padding:16px 18px;background:#161616;border:1px solid rgba(168,152,120,0.14);border-radius:10px;margin-bottom:10px;">'
+      + '<p style="margin:0 0 6px;font-family:Georgia,serif;font-size:15px;font-weight:500;color:#e2c79b;">' + title + '</p>'
+      + '<p style="margin:0;font-size:13px;line-height:1.6;color:#cfcfcf;">' + desc + '</p></div>';
+  };
+  // v34.3: Provider cards now mirror the actual roweos.com/info "Three engines.
+  // One platform." card design — gold-tinted square icon tile with the provider's
+  // brand mark as inline SVG (Anthropic A-monogram, Gemini sparkle, OpenAI knot),
+  // italic Georgia name, tracked uppercase sublabel. Replaces the v33.98/v34.2
+  // attempt that pulled external Wikipedia SVGs (broken/blocked in many email
+  // clients) wrapped in chunky outline boxes. SVG paths copied verbatim from
+  // dist/info.html so the email matches the live page pixel-for-pixel.
+  var ANTHROPIC_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" style="display:block;"><path fill="#c9a961" d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>';
+  var GEMINI_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" style="display:block;"><path fill="#c9a961" d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>';
+  var OPENAI_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" style="display:block;"><path fill="#c9a961" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>';
+  var providerLogo = function(svgMark, name, sub) {
+    return '<td align="center" valign="top" style="padding:10px 6px;width:33.33%;">'
+      + '<div style="display:inline-block;padding:24px 18px 22px;background:#181614;border:1px solid rgba(168,152,120,0.18);border-radius:14px;width:150px;">'
+      + '<div style="width:44px;height:44px;margin:0 auto 14px;background:#1f1d1a;border:1px solid rgba(168,152,120,0.22);border-radius:10px;display:flex;align-items:center;justify-content:center;">'
+      + svgMark
+      + '</div>'
+      + '<div style="font-family:Georgia,serif;font-size:18px;color:#f0e6d3;line-height:1;margin-bottom:6px;">' + name + '</div>'
+      + '<div style="font-size:10px;color:#9a8e76;letter-spacing:1.6px;text-transform:uppercase;font-weight:500;">' + sub + '</div>'
+      + '</div></td>';
+  };
+
+  var body = ''
+    // Personal greeting + opening line
+    + '<p style="color:#dadada;font-size:15px;line-height:1.65;margin:0 0 16px;">' + _emailGreeting() + '</p>'
+    + '<p style="color:#f0e6d3;font-family:Georgia,serif;font-size:22px;line-height:1.4;font-weight:400;margin:0 0 14px;">RoweOS is now <em style="color:#e2c79b;font-style:italic;">Brilliance</em>.</p>'
+    + '<p style="color:#cfcfcf;font-size:14px;line-height:1.75;margin:0 0 12px;">Brilliance is built to run the brands you operate, the life you\'re actually living, and the small thousand decisions in between. One workspace where your business intelligence and your personal world sit beside each other and inform each other.</p>'
+    + '<p style="color:#cfcfcf;font-size:14px;line-height:1.75;margin:0 0 12px;">Set a goal in the morning and Brilliance carries it into your calendar, your automations, your writing, and your inbox without you handing it off ten times. Ask a question about a client and the answer pulls from every conversation you\'ve already had with that client. Capture an idea in three seconds and trust the system to find it again when it matters.</p>'
+    + '<p style="color:#cfcfcf;font-size:14px;line-height:1.75;margin:0 0 28px;">Same platform you\'ve been using. Same memory of every brand and every life you\'ve built inside it. Same work waiting where you left it. What\'s changed is the name, the orb, and a quiet rebuild of how the surfaces feel when you sit down at them. Brilliance has always been the intelligence inside RoweOS. We finally gave it a face.</p>'
+
+    // What you\'ll feel when you open it (no feature-list jargon)
+    + '<h2 style="font-family:Georgia,serif;color:#e2c79b;font-size:19px;font-weight:500;margin:0 0 14px;letter-spacing:0.3px;">When you open Brilliance</h2>'
+    + section('A gold orb on the chat hero',
+        'Brilli is the new face of your AI. It glows when listening, breathes when thinking, and steadies when answering. Tap it and the orbit lines spin. Choose the form that feels right: Celestial, Aura, Firefly, Light Signature, or the classic BLAKE shape.')
+    + section('A quieter way to focus',
+        'Press ⌘ ⇧ F (or Ctrl Shift F) and the chrome falls away. Just your work, Brilli, and the input. Press Esc to bring everything back.')
+    + section('A Concierge above the chat',
+        'A small row of pills that shows what\'s active in your day: today\'s calendar, your live Pulse goals, what\'s scheduled in Automations, the latest from Bloom and Evolve. One tap takes you there.')
+    + section('History becomes a Time Ribbon',
+        'Past conversations live on a horizontal scrubbing timeline. Each marker is a moment. Click any one to resume the conversation, or branch a new path from that point.')
+    + section('Notebook in Letter Series',
+        'Toggle a writing mode that reads like correspondence: cream paper, narrow column, gold drop caps. Your notes stay exactly the same. Only the treatment changes.')
+    + section('Studio with a Split Pane',
+        'Run an operation on the left and watch the result form on the right. The Output panel pins to the side so it stays visible while you scroll.')
+    + section('Folio with Studio at Work',
+        'When you\'re shaping an artifact, Folio puts the artifact in the center and tucks the chat into a narrow side gutter. The thing you\'re making feels like the room.')
+    + section('A new surface called Thought Board',
+        'Pin a passage from Chat, a note from Notebook, an output from Studio. Two views: a Pinboard grid for quick scanning, a Constellation map for connections. The sidebar shows a live count.')
+
+    // Be brilliant with any model — the three engines section
+    + '<h2 style="font-family:Georgia,serif;color:#e2c79b;font-size:19px;font-weight:500;margin:32px 0 6px;letter-spacing:0.3px;text-align:center;">Be brilliant with any model</h2>'
+    + '<p style="color:#9a9a9a;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 6px;text-align:center;">AI Infrastructure</p>'
+    + '<p style="color:#cfcfcf;font-size:14px;line-height:1.7;margin:0 0 22px;text-align:center;max-width:420px;margin-left:auto;margin-right:auto;">Brilliance connects to the world\'s leading AI providers. Choose your model, switch anytime.</p>'
+    + '<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;"><tr>'
+      + providerLogo(ANTHROPIC_SVG, 'Claude', 'Anthropic')
+      + providerLogo(GEMINI_SVG, 'Gemini', 'Google')
+      + providerLogo(OPENAI_SVG, 'ChatGPT', 'OpenAI')
+    + '</tr></table>'
+    + '<p style="color:#cfcfcf;font-size:13px;line-height:1.7;margin:0 0 22px;text-align:center;max-width:440px;margin-left:auto;margin-right:auto;">Bring your own keys and pay only for what you use, or pick up a ready to go API key pack from us so you can start the moment your trial activates.</p>'
+
+    // Single primary CTA
+    + '<div style="text-align:center;margin:0 0 12px;">'
+      + '<a href="https://roweos.com/purchase" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#e2c79b,#c9a961,#a88a4a);color:#0a0a0a;font-size:13px;font-weight:600;text-decoration:none;border-radius:99px;letter-spacing:0.18em;text-transform:uppercase;">Get API Keys</a>'
+    + '</div>'
+    + '<div style="text-align:center;margin:0 0 28px;">'
+      + '<a href="https://roweos.com" style="display:inline-block;padding:8px 18px;color:#a89878;font-size:13px;text-decoration:none;">Or open Brilliance</a>'
+    + '</div>'
+
+    + '<p style="color:#888;font-size:12px;line-height:1.7;margin:8px 0 0;text-align:center;">Part of the Google for Startups Cloud Program. Built by The Rowe Collection in Austin, TX.</p>';
+
+  return _emailPreviewWrap('Transition Announcement', body);
+}
+
 // v30.1: Onboarding Survey email preview
 function generateOnboardingSurveyPreview() {
   var btn = function(label) { return '<a href="#" style="display:inline-block;padding:10px 20px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:8px;color:#e0e0e0;text-decoration:none;font-size:13px;font-weight:500;margin:0 6px 8px 0;">' + label + '</a>'; };
   var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">' + _emailGreeting() + '</p>'
-    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">We\'d love to learn about your experience with RoweOS so far. A few quick questions (just click your answer):</p>'
+    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">We\'d love to learn about your experience with Brilliance so far. A few quick questions (just click your answer):</p>'
     + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">Do you know how to set up your own AI API key?</p>'
     + '<div>' + btn('Yes, I have my own') + '<a href="https://roweos.com/info" style="display:inline-block;padding:10px 20px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:8px;color:#e0e0e0;text-decoration:none;font-size:13px;font-weight:500;margin:0 6px 8px 0;">No, help me get one</a>' + '</div></div>'
-    + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">Do you need a beta API key?</p>'
-    + '<div>' + btn('Yes, I need one') + btn('No, I have my own') + btn('Not sure what this means') + '</div></div>'
-    + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How did you hear about RoweOS?</p>'
+    + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">Would you like us to provision a key for you?</p>'
+    + '<div>' + btn('Yes, please provision one') + btn('No, I have my own') + btn('Not sure what this means') + '</div></div>'
+    + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How did you hear about Brilliance?</p>'
     + '<div>' + btn('Twitter / X') + btn('Google Search') + btn('Friend / Referral') + btn('LinkedIn') + btn('Product Hunt') + btn('Other') + '</div></div>'
     + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How has your experience been so far?</p>'
     + '<div>' + btn('Smooth, love it') + btn('Good, some questions') + btn('Hit some bumps') + btn('Need help') + '</div></div>'
@@ -7230,7 +7616,7 @@ function generateReengagementPreview() {
     + card('Run a Studio operation', '200+ pre-built AI operations for strategy, marketing, content, and more.')
     + card('Set up your brand identity', 'Give your AI agents the context they need to write in your voice.')
     + card('Ask BLAKE anything', 'Your brand\'s AI is ready. Start a conversation in Chat.')
-    + '<div style="text-align:center;margin:28px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Open RoweOS</a></div>'
+    + '<div style="text-align:center;margin:28px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Open Brilliance</a></div>'
     + '<p style="color:#888;font-size:13px;text-align:center;margin:0;">Need help getting started? Just reply to this email.</p>';
   return _emailPreviewWrap(null, body);
 }
@@ -7250,11 +7636,11 @@ function generateFeatureAnnouncementPreview() {
 function generateCheckinRatingPreview() {
   var btn = function(label) { return '<a href="#" style="display:inline-block;padding:10px 20px;background:#1a1a1a;border:1px solid rgba(168,152,120,0.27);border-radius:8px;color:#e0e0e0;text-decoration:none;font-size:13px;font-weight:500;margin:0 6px 8px 0;">' + label + '</a>'; };
   var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 20px;">' + _emailGreeting() + '</p>'
-    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">How\'s everything going with RoweOS? We\'d love a quick pulse check:</p>'
+    + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 28px;">How\'s everything going with Brilliance? We\'d love a quick pulse check:</p>'
     + '<div style="margin-bottom:28px;"><p style="color:#a89878;font-size:13px;font-weight:600;margin:0 0 10px;text-transform:uppercase;letter-spacing:1px;">How would you rate your experience?</p>'
     + '<div>' + btn('Loving it') + btn('It\'s good') + btn('Could be better') + btn('Having issues') + '</div></div>'
-    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 24px;">What would make RoweOS better for you? Just reply to this email with your thoughts.</p>'
-    + '<div style="text-align:center;margin:20px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Open RoweOS</a></div>';
+    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 24px;">What would make Brilliance better for you? Just reply to this email with your thoughts.</p>'
+    + '<div style="text-align:center;margin:20px 0 12px;"><a href="https://roweos.com" style="display:inline-block;padding:12px 32px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">Open Brilliance</a></div>';
   return _emailPreviewWrap('Check-In', body);
 }
 
@@ -7264,7 +7650,7 @@ function generateSubscriptionInfoPreview() {
     return '<a href="' + url + '" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">' + label + '</a>';
   };
   var body = '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 16px;">' + _emailGreeting() + '</p>'
-    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 24px;">Here is everything you need to know about RoweOS plans, AI API keys, and smart model routing.</p>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 24px;">Here is everything you need to know about Brilliance plans, AI API keys, and smart model routing.</p>'
     // Section 1: Choose Your Plan
     + '<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">Choose Your Plan</h2>'
     + '<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-collapse:separate;border-spacing:0;">'
@@ -7309,7 +7695,7 @@ function generateSubscriptionInfoPreview() {
     + '<div style="border-top:1px solid #2a2a2a;margin:0 0 24px;"></div>'
     // Section 2: AI API Keys
     + '<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">AI API Keys - Pay As You Go</h2>'
-    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 20px;">RoweOS works with your own API keys from three providers:</p>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 20px;">Brilliance works with your own API keys from three providers:</p>'
     + '<div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;padding:14px 16px;margin:0 0 10px;">'
     + '<p style="margin:0 0 4px;font-size:14px;color:#e0e0e0;font-weight:500;">Anthropic (Claude)</p>'
     + '<p style="margin:0;font-size:12px;color:#888;">Latest: Opus 4.7, Sonnet 4.6, Haiku 4.5 + mini app building</p></div>'
@@ -7323,9 +7709,9 @@ function generateSubscriptionInfoPreview() {
     + '<div style="text-align:center;margin:0 0 32px;">' + cta('https://roweos.com/purchase', 'Get API Keys') + '</div>'
     // Divider
     + '<div style="border-top:1px solid #2a2a2a;margin:0 0 24px;"></div>'
-    // Section 3: RoweOS AI
-    + '<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">RoweOS AI - Unlock Smart Routing</h2>'
-    + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:0 0 16px;">When you have all three AI providers configured, RoweOS AI automatically selects the best model for each task. Strategy questions route to Claude. Creative content routes to GPT. Research and analysis routes to Gemini.</p>'
+    // Section 3: Brilliance AI
+    + '<h2 style="margin:0 0 16px;font-size:18px;color:#a89878;font-weight:500;letter-spacing:0.5px;">Brilliance AI - Unlock Smart Routing</h2>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:0 0 16px;">When you have all three AI providers configured, Brilliance AI automatically selects the best model for each task. Strategy questions route to Claude. Creative content routes to GPT. Research and analysis routes to Gemini.</p>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:0;">One prompt, the right model, every time.</p>';
   return _emailPreviewWrap('Subscription', body);
 }
@@ -7350,7 +7736,7 @@ function generateFounderLifetimeOfferPreview() {
     + '<p style="color:#d4b896;font-size:11px;letter-spacing:2.4px;text-transform:uppercase;margin:0 0 8px;text-align:center;">Founder · Reserved Access</p>'
     + '<p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 18px;text-align:center;">' + _emailGreeting() + '</p>'
     + '<h2 style="margin:0 0 12px;font-family:Georgia,serif;font-size:26px;font-weight:400;color:#f5ecd9;text-align:center;line-height:1.25;">Your Founder seat is ready.</h2>'
-    + '<p style="color:#a89878;font-size:14px;line-height:1.7;margin:0 0 28px;text-align:center;">You\'re one of the first 100 chosen for early Founder access to RoweOS. As a thank you, your trial unlocks at <span style="color:#d4b896;font-weight:500;">half price for life</span>.</p>'
+    + '<p style="color:#a89878;font-size:14px;line-height:1.7;margin:0 0 28px;text-align:center;">You\'re one of the first 100 chosen for early Founder access to Brilliance. As a thank you, your trial unlocks at <span style="color:#d4b896;font-weight:500;">half price for life</span>.</p>'
 
     // Coupon code card
     + '<div style="background:linear-gradient(180deg,#1a1a1a,#0e0e0e);border:1px solid rgba(212,184,150,0.4);border-radius:14px;padding:24px;margin:0 0 24px;text-align:center;">'
@@ -7369,8 +7755,8 @@ function generateFounderLifetimeOfferPreview() {
 
     // Vision section
     + '<div style="border-top:1px solid #2a2a2a;padding:28px 0 0;margin:0 0 24px;">'
-    + '<h3 style="margin:0 0 12px;font-family:Georgia,serif;font-size:20px;font-weight:400;color:#f5ecd9;">What you can build with RoweOS.</h3>'
-    + '<p style="color:#ccc;font-size:14px;line-height:1.75;margin:0 0 14px;">RoweOS is an operating system for the way you actually work. One workspace where your brand intelligence and your personal life sit side by side. Run five brands at once. Have an AI Strategy agent draft your quarter, a Marketing agent ship your social calendar, an Operations agent file your weekly review.</p>'
+    + '<h3 style="margin:0 0 12px;font-family:Georgia,serif;font-size:20px;font-weight:400;color:#f5ecd9;">What you can build with Brilliance.</h3>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.75;margin:0 0 14px;">Brilliance is an operating system for the way you actually work. One workspace where your brand intelligence and your personal life sit side by side. Run five brands at once. Have an AI Strategy agent draft your quarter, a Marketing agent ship your social calendar, an Operations agent file your weekly review.</p>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.75;margin:0;">Then flip to LifeAI and have a Wellness Coach calendar your week, a Tax Copilot reconcile receipts, a Personal AI remember the names of your clients\' kids. One brain, two halves, no context switching.</p>'
     + '</div>'
 
@@ -7390,7 +7776,7 @@ function generateFounderLifetimeOfferPreview() {
     + '<div style="background:linear-gradient(180deg,rgba(168,152,120,0.07),rgba(168,152,120,0.02));border:1px solid rgba(168,152,120,0.22);border-radius:14px;padding:22px 24px;margin:0 0 24px;">'
     + '<p style="color:#a89878;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">Optional Add-on</p>'
     + '<h3 style="margin:0 0 8px;font-family:Georgia,serif;font-size:18px;font-weight:400;color:#f5ecd9;">Skip the API key setup.</h3>'
-    + '<p style="color:#ccc;font-size:13.5px;line-height:1.65;margin:0 0 14px;">RoweOS routes to OpenAI, Anthropic, and Google. You can bring your own API keys, or buy a Rowe managed key pack with a single charge so you can start running operations the moment your trial activates. No monthly billing, no provider accounts to set up.</p>'
+    + '<p style="color:#ccc;font-size:13.5px;line-height:1.65;margin:0 0 14px;">Brilliance routes to OpenAI, Anthropic, and Google. You can bring your own API keys, or buy a Rowe managed key pack with a single charge so you can start running operations the moment your trial activates. No monthly billing, no provider accounts to set up.</p>'
     + '<a href="https://roweos.com/purchase" style="display:inline-block;padding:11px 22px;background:rgba(168,152,120,0.15);border:1px solid rgba(168,152,120,0.45);border-radius:9px;color:#d4b896;text-decoration:none;font-size:13px;font-weight:500;letter-spacing:0.3px;">Browse API Key Packs →</a>'
     + '</div>'
 
@@ -7398,7 +7784,7 @@ function generateFounderLifetimeOfferPreview() {
     + '<div style="text-align:center;padding:18px 16px;background:#0e0e0e;border:1px solid #1e1e1e;border-radius:12px;margin:0 0 24px;">'
     + '<p style="color:#666;font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;margin:0 0 8px;">Backed by</p>'
     + '<p style="font-family:Georgia,serif;font-size:17px;color:#d4b896;margin:0;">Google for Startups</p>'
-    + '<p style="color:#888;font-size:11.5px;margin:6px 0 0;line-height:1.5;max-width:380px;margin-left:auto;margin-right:auto;">RoweOS is part of the Google for Startups Cloud Program. Supported infrastructure, vetted product, real builders.</p>'
+    + '<p style="color:#888;font-size:11.5px;margin:6px 0 0;line-height:1.5;max-width:380px;margin-left:auto;margin-right:auto;">Brilliance is part of the Google for Startups Cloud Program. Supported infrastructure, vetted product, real builders.</p>'
     + '</div>'
 
     // Closing
@@ -7417,13 +7803,13 @@ function generateBetaWelcomeEmail(accessKey, tier) {
     + '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e0e0e0;">'
     // Header
     + '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);padding:48px 40px 32px;border-radius:12px 12px 0 0;text-align:center;">'
-    + '<img src="https://roweos.com/logo.png" alt="RoweOS" style="width:80px;height:80px;border-radius:16px;margin-bottom:16px;">'
-    + '<h1 style="color:#a89878;margin:0;font-size:28px;font-weight:300;letter-spacing:3px;">RoweOS</h1>'
-    + '<p style="color:#666;margin:8px 0 0;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Operating intelligence, built for brands &amp; life</p>'
+    + '<img src="https://roweos.com/images/brilliance/monogram-circle.png" alt="Brilliance" style="width:96px;height:96px;border-radius:50%;margin-bottom:16px;">'
+    + '<h1 style="color:#a89878;margin:0;font-size:28px;font-weight:300;letter-spacing:3px;">Brilliance</h1>'
+    + '<p style="color:#666;margin:8px 0 0;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Brand &amp; Life Intelligence Platform</p>'
     + '</div>'
     // Content
     + '<div style="background:#111;padding:36px 40px 40px;">'
-    + '<h2 style="color:#fff;font-size:22px;font-weight:500;margin:0 0 8px;">Welcome to RoweOS ' + tierLabel + '</h2>'
+    + '<h2 style="color:#fff;font-size:22px;font-weight:500;margin:0 0 8px;">Welcome to Brilliance ' + tierLabel + '</h2>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.6;margin:0 0 28px;">Your 14-day free trial is now active. Here is everything you need to get started.</p>'
     // Getting Started
     + '<div style="background:#1a1a1a;border-radius:8px;padding:20px;margin-bottom:28px;">'
@@ -7448,11 +7834,11 @@ function generateBetaWelcomeEmail(accessKey, tier) {
     // API Keys
     + '<div style="background:#1a1a1a;border-radius:8px;padding:20px;margin-bottom:28px;">'
     + '<p style="color:#a89878;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 12px;">AI Model Access</p>'
-    + '<p style="color:#ccc;font-size:13px;line-height:1.6;margin:0;">RoweOS works with Claude, GPT, and Google AI. Add your own API keys in <strong style="color:#fff;">Settings</strong>, or purchase pre-loaded keys directly inside the app.</p>'
+    + '<p style="color:#ccc;font-size:13px;line-height:1.6;margin:0;">Brilliance works with Claude, GPT, and Google AI. Add your own API keys in <strong style="color:#fff;">Settings</strong>, or purchase pre-loaded keys directly inside the app.</p>'
     + '</div>'
     // CTA button
     + '<div style="text-align:center;margin-bottom:28px;">'
-    + '<a href="https://roweos.com" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:15px;font-weight:600;text-decoration:none;border-radius:10px;">Open RoweOS</a>'
+    + '<a href="https://roweos.com" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#a89878,#c4a882);color:#0a0a0a;font-size:15px;font-weight:600;text-decoration:none;border-radius:10px;">Open Brilliance</a>'
     + '</div>'
     // Other plans
     + '<p style="color:#666;font-size:12px;text-align:center;margin:0 0 28px;">Explore all plans at <a href="https://roweos.com/purchase" style="color:#a89878;text-decoration:none;">roweos.com/purchase</a></p>'
@@ -7477,13 +7863,13 @@ function generateCheckInEmail(accessKey) {
     + '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#e0e0e0;">'
     // Header
     + '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#0a0a0a 100%);padding:48px 40px 32px;border-radius:12px 12px 0 0;text-align:center;">'
-    + '<img src="https://roweos.com/logo.png" alt="RoweOS" style="width:80px;height:80px;border-radius:16px;margin-bottom:16px;">'
-    + '<h1 style="color:#a89878;margin:0;font-size:28px;font-weight:300;letter-spacing:3px;">RoweOS</h1>'
-    + '<p style="color:#666;margin:8px 0 0;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Operating intelligence, built for brands &amp; life</p>'
+    + '<img src="https://roweos.com/images/brilliance/monogram-circle.png" alt="Brilliance" style="width:96px;height:96px;border-radius:50%;margin-bottom:16px;">'
+    + '<h1 style="color:#a89878;margin:0;font-size:28px;font-weight:300;letter-spacing:3px;">Brilliance</h1>'
+    + '<p style="color:#666;margin:8px 0 0;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;">Brand &amp; Life Intelligence Platform</p>'
     + '</div>'
     // Content
     + '<div style="background:#111;padding:36px 40px 40px;">'
-    + '<h2 style="color:#fff;font-size:22px;font-weight:500;margin:0 0 8px;">Hope you\'ve been enjoying RoweOS</h2>'
+    + '<h2 style="color:#fff;font-size:22px;font-weight:500;margin:0 0 8px;">Hope you\'ve been enjoying Brilliance</h2>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:0 0 24px;">I wanted to personally check in and see how things are going. Your experience and feedback are incredibly valuable as we continue building.</p>'
     // Feedback section
     + '<div style="background:#1a1a1a;border:1px solid #a8987844;border-radius:8px;padding:24px;margin-bottom:24px;">'
@@ -7499,7 +7885,7 @@ function generateCheckInEmail(accessKey) {
     + '<p style="color:#fff;font-size:14px;font-weight:500;margin:0 0 12px;">How to share feedback</p>'
     + '<ol style="line-height:2;color:#ccc;margin:0;padding-left:20px;font-size:13px;">'
     + '<li><strong style="color:#fff;">Reply to this email</strong> with your thoughts</li>'
-    + '<li>Use the <strong style="color:#fff;">Feedback</strong> button inside RoweOS (bottom-left)</li>'
+    + '<li>Use the <strong style="color:#fff;">Feedback</strong> button inside Brilliance (bottom-left)</li>'
     + '<li>Or just message me directly at <a href="mailto:jordan@therowecollection.com" style="color:#a89878;text-decoration:none;">jordan@therowecollection.com</a></li>'
     + '</ol>'
     + '</div>'
@@ -7509,7 +7895,7 @@ function generateCheckInEmail(accessKey) {
     + '<p style="color:#ccc;font-size:13px;line-height:1.6;margin:0;">Try asking your BrandAI to create a content calendar, write a client proposal, or brainstorm new service offerings. The more context you give it in your Brand Identity, the better it gets.</p>'
     + '</div>'
     + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:0;">Thanks for being an early adopter. Your input directly shapes what we build next.</p>'
-    + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:16px 0 0;">Best,<br><strong style="color:#fff;">Jordan Rowe</strong><br><span style="color:#888;font-size:12px;">Creator, RoweOS</span></p>'
+    + '<p style="color:#ccc;font-size:14px;line-height:1.7;margin:16px 0 0;">Best,<br><strong style="color:#fff;">Jordan Rowe</strong><br><span style="color:#888;font-size:12px;">Creator, Brilliance</span></p>'
     // Footer
     + '<p style="color:#555;font-size:12px;margin:28px 0 0;padding-top:20px;border-top:1px solid #222;">'
     + 'Your access key: <code style="color:#a89878;letter-spacing:1px;">' + (accessKey || 'ROWE-XXXX-XXXX') + '</code>'
@@ -7531,7 +7917,7 @@ function openEmailComposer(accessKey, tier, recipientEmail) {
   var subjectEl = document.getElementById('composerSubject');
   var fromEl = document.getElementById('composerFrom');
   if (toEl) toEl.value = recipientEmail || '';
-  if (subjectEl) subjectEl.value = 'Welcome to RoweOS ' + tierLabel + ' - Your Access Key';
+  if (subjectEl) subjectEl.value = 'Welcome to Brilliance ' + tierLabel + ' - Your Access Key';
   // v22.33: Populate From dropdown dynamically
   if (fromEl && typeof buildFromOptionsHtml === 'function') {
     var _defFrom = (typeof getDefaultFromAddress === 'function' ? getDefaultFromAddress() : '');
@@ -7702,17 +8088,24 @@ function sendComposedEmail() {
     if (!confirm('Send ' + selectedTemplate.replace(/_/g, ' ') + ' email to ' + to + '?')) return;
     var recipientName = window._composerRecipientName || '';
     showToast('Sending via template API...', 'info');
-    fetch('/api/send-template-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        template: apiTemplates[selectedTemplate],
-        userId: '',
-        userEmail: to,
-        userName: recipientName,
-        callerUid: firebaseUser ? firebaseUser.uid : '',
-        metadata: {}
-      })
+    // v34.107: server requires Authorization: Bearer <idToken>. Fetch a fresh token
+    // before posting; without an authenticated admin we bail.
+    if (!firebaseUser) { showToast('Not signed in', 'error'); return; }
+    firebaseUser.getIdToken().then(function(idToken) {
+      return fetch('/api/send-template-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + idToken
+        },
+        body: JSON.stringify({
+          template: apiTemplates[selectedTemplate],
+          userId: '',
+          userEmail: to,
+          userName: recipientName,
+          metadata: {}
+        })
+      });
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (data.success) {
         showToast('Email sent to ' + to, 'success');
@@ -8098,7 +8491,7 @@ function generateBrandedProfessional(content, brandName, accent, logoHtml, date,
     + '</div>'
     // Footer
     + '<div style="padding:20px 40px;border-top:1px solid #eee;text-align:right;">'
-    + '<p style="color:#bbb;font-size:10px;margin:0;font-style:italic;">Sent via RoweOS</p>'
+    + '<p style="color:#bbb;font-size:10px;margin:0;font-style:italic;">Sent via Brilliance</p>'
     + '</div>'
     + '</div>'
     + '</body></html>';
@@ -8179,7 +8572,7 @@ function generateBrandedNewsletter(content, brandName, accent, logoHtml, date, l
     + '</div>'
     // Footer
     + '<div style="background:#fafafa;padding:24px 40px;text-align:center;border-top:1px solid #eee;border-radius:0 0 8px 8px;">'
-    + '<p style="color:#999;font-size:11px;margin:0;">Designed &amp; Sent from RoweOS</p>'
+    + '<p style="color:#999;font-size:11px;margin:0;">Designed &amp; Sent from Brilliance</p>'
     + '</div>'
     + '</div>'
     + '</body></html>';
@@ -9028,7 +9421,9 @@ function purgeCloudTodos() {
   if (!db) { showToast('Database not available', 'error'); return; }
 
   var todosData = [];
-  try { todosData = JSON.parse(localStorage.getItem(getTodosKey()) || '[]'); } catch(e) {}
+  // v33.63: getTodosKey was removed in v28.8 Focus retirement; defensive fallback.
+  var _todosKey = (typeof getTodosKey === 'function') ? getTodosKey() : 'roweosTodos';
+  try { todosData = JSON.parse(localStorage.getItem(_todosKey) || '[]'); } catch(e) {}
 
   var basePath = 'roweos_users/' + firebaseUser.uid;
 
@@ -9941,6 +10336,57 @@ function safeSyncWrite(key, cloudData) {
   localStorage.setItem(key, cloudStr);
 }
 
+// v34.121: Bounded-concurrency, deferred loader for Bloom thumbnails. Replaces the
+// unbounded fetch storm in the restore path - on a fresh full restore (empty local
+// cache) the old code fired fetch() for EVERY cloud bloom item across EVERY scope at
+// once, spiking the networking process to multiple GB and helping wedge the main
+// thread at boot. This drains a pre-capped queue at most 2 at a time. Read-only
+// thumbnail downloads, same storage writes under the same per-scope cap.
+var _bloomThumbActive = 0;
+function _drainBloomThumbnailQueue(queue) {
+  if (!queue || !queue.length) return;
+  var MAX_CONC = 2;
+  function next() {
+    if (!queue.length || _bloomThumbActive >= MAX_CONC) return;
+    var job = queue.shift();
+    _bloomThumbActive++;
+    fetch(job.item.thumbnailUrl).then(function(resp) { return resp.blob(); }).then(function(blob) {
+      var reader = new FileReader();
+      reader.onloadend = function() {
+        try {
+          job.item.base64 = reader.result;
+          var lib = (typeof getBloomLibrary === 'function') ? getBloomLibrary() : {};
+          if (!lib[job.scope]) lib[job.scope] = [];
+          if (lib[job.scope].length < BLOOM_LIBRARY_MAX) {
+            lib[job.scope].push(job.item);
+            try { setLargeItemIfChanged('roweos_bloom_library', JSON.stringify(lib)); } catch(e) {}
+          }
+        } catch(e) {}
+        _bloomThumbActive--;
+        next();
+      };
+      reader.onerror = function() { _bloomThumbActive--; next(); };
+      reader.readAsDataURL(blob);
+    }).catch(function() { _bloomThumbActive--; next(); });
+  }
+  for (var i = 0; i < MAX_CONC; i++) next();
+}
+
+// v34.120: Debounced cloud pull. A burst of root-doc onSnapshot events
+// (multi-device / multi-tab) previously fired a full loadFromFirebaseV2 each
+// time; combined with the per-pull re-write of large base64 values this churned
+// gigabytes. Coalesce a burst into one trailing pull ~1.2s after it settles.
+var _cloudPullDebounceTimer = null;
+function scheduleCloudPull(showNotification, skipModeSync) {
+  if (typeof loadFromFirebaseV2 !== 'function') return;
+  if (_cloudPullDebounceTimer) clearTimeout(_cloudPullDebounceTimer);
+  _cloudPullDebounceTimer = setTimeout(function() {
+    _cloudPullDebounceTimer = null;
+    try { loadFromFirebaseV2(showNotification, skipModeSync); }
+    catch (e) { console.warn('[Sync] debounced cloud pull failed', e); }
+  }, 1200);
+}
+
 function loadFromFirebaseV2(showNotification, skipModeSync) {
   if (!firebaseUser || !firebase) return Promise.resolve();
 
@@ -10069,14 +10515,24 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             var merged = [];
             for (var k in byId) { if (byId.hasOwnProperty(k)) merged.push(byId[k]); }
             merged.sort(function(a, b) { return new Date(a.createdAt || 0) - new Date(b.createdAt || 0); });
-            window._studioGalleryMem = merged;
+            // v34.121: cap the in-memory mirror to the newest 20 (matches persistStudioGallery's
+            // write-path cap). The FULL set still goes to IDB below; readers use _studioGalleryMem.
+            // Prevents a fresh restore from holding the entire historical gallery (multi-GB base64)
+            // in the heap - restore was the only place that bypassed the 20-item cap.
+            window._studioGalleryMem = (merged.length > 20) ? merged.slice(-20) : merged;
+            // v34.120: write to IDB only when changed (was: _idbPut + a redundant
+            // localStorage.setItem of the SAME multi-MB JSON every pull, which
+            // always blew quota and re-offloaded - gigabytes of churn). The gallery
+            // lives in IDB + the _studioGalleryMem mirror that readers use, so the
+            // localStorage write was pure waste and is removed.
             try {
-              if (typeof _idbPut === 'function') {
+              if (typeof idbPutIfChanged === 'function') {
+                idbPutIfChanged('roweos_auto_lab_images', JSON.stringify(merged));
+              } else if (typeof _idbPut === 'function') {
                 _idbPut('roweos_auto_lab_images', JSON.stringify(merged));
                 if (typeof _markIdbKey === 'function') _markIdbKey('roweos_auto_lab_images');
               }
             } catch (e) {}
-            try { localStorage.setItem('roweos_auto_lab_images', JSON.stringify(merged)); } catch (e) {}
             // Re-render any visible gallery surfaces
             try { var sg = document.getElementById('studioMediaPanel'); if (sg && typeof renderStudioGallery === 'function') renderStudioGallery(sg); } catch (e) {}
             try { if (typeof renderImageLabChatThread === 'function') renderImageLabChatThread(); } catch (e) {}
@@ -10130,12 +10586,75 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
 
     // Profile
     var cloudLastDevice = null;
+    var cloudLastSync = null; // v34.112: ms timestamp of cloud's most-recent push
     if (profileDoc.exists) {
       var profile = profileDoc.data();
       if (profile.brandSettings) {
         // v23.0: Timestamp-based conflict resolution for brandSettings
         _mergeCloudBrandSettings(profile.brandSettings);
       }
+      // v34.93: Restore Native Workspace preference. The handle itself is
+      // per-device (browser security), but if the user connected a folder
+      // on another device we surface a one-time prompt so they can connect
+      // a local folder here too.
+      try {
+        if (profile.native_workspace && profile.native_workspace.onboarded) {
+          var nw = profile.native_workspace;
+          if (nw.mode && window.NativeFS && typeof window.NativeFS.setMode === 'function') {
+            window.NativeFS.setMode(nw.mode);
+          }
+          // Mark onboarded locally so we don't re-show the onboarding step
+          try { localStorage.setItem('roweos_native_fs_onboarded', 'true'); } catch(_e){}
+          // v34.108: Stash the other-device folder name so Settings → Native Workspace
+          // can inform the user inline. Previously we fired a toast on every cross-device
+          // pull - the prompted-flag was set inside a 4s setTimeout, so multiple pulls
+          // queued multiple toasts before any of them set the flag. Per user direction:
+          // no auto-toast; surface the cross-device state only when they visit Settings.
+          try {
+            if (nw.lastFolderName) {
+              localStorage.setItem('roweos_native_fs_xdevice_name', String(nw.lastFolderName));
+            } else {
+              localStorage.removeItem('roweos_native_fs_xdevice_name');
+            }
+          } catch(_eXd) {}
+        }
+      } catch(eNw) { console.warn('[Sync] native_workspace pull failed:', eNw); }
+
+      // v34.81: Restore Evolve profile (goal, deadline, known context, XP, streak)
+      // and Thought Board pins from cloud so they show up across devices.
+      try {
+        if (profile.evolve && profile.evolve.profile && typeof profile.evolve.profile === 'object') {
+          var localEv = null;
+          try { localEv = JSON.parse(localStorage.getItem('roweos_evolve_profile') || 'null'); } catch(e){}
+          var cloudEv = profile.evolve.profile;
+          // Cloud wins if missing locally, or cloud has higher XP/streak (handles cross-device merge)
+          var cloudWins = !localEv ||
+            (cloudEv.currentXP || 0) > (localEv.currentXP || 0) ||
+            (cloudEv.dailyStreak || 0) > (localEv.dailyStreak || 0) ||
+            (cloudEv.lastSessionAt || 0) > (localEv.lastSessionAt || 0) ||
+            (!localEv.targetGoal && cloudEv.targetGoal);
+          if (cloudWins) {
+            localStorage.setItem('roweos_evolve_profile', JSON.stringify(cloudEv));
+          }
+        }
+        if (Array.isArray(profile.thought_board_pins)) {
+          var localPins = [];
+          try { localPins = JSON.parse(localStorage.getItem('roweos_thought_board') || '[]'); } catch(e){}
+          if (!Array.isArray(localPins)) localPins = [];
+          // Merge: union by id, prefer newer _modifiedAt
+          var byId = {};
+          localPins.forEach(function(p) { if (p && p.id) byId[p.id] = p; });
+          profile.thought_board_pins.forEach(function(p) {
+            if (!p || !p.id) return;
+            var existing = byId[p.id];
+            if (!existing || (p._modifiedAt || 0) > (existing._modifiedAt || 0)) {
+              byId[p.id] = p;
+            }
+          });
+          var merged = Object.keys(byId).map(function(k){ return byId[k]; });
+          localStorage.setItem('roweos_thought_board', JSON.stringify(merged));
+        }
+      } catch(e) { console.warn('[Sync] evolve/thought_board pull failed:', e); }
       // v28.3: Cloud theme only applies on first load (no local preference yet)
       // Theme is device-local - user's toggle is always authoritative
       if (profile.settings && profile.settings.theme) {
@@ -10317,6 +10836,14 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       if (profile.meta && profile.meta.lastDevice) {
         cloudLastDevice = profile.meta.lastDevice;
       }
+      // v34.112: capture cloud's last-sync timestamp so the cross-device toast
+      // can require recency (avoid spamming when a stale _deviceId is still in
+      // a brand doc but no actual recent push happened).
+      if (profile.meta && profile.meta.lastSyncAt) {
+        cloudLastSync = profile.meta.lastSyncAt;
+      } else if (profile.meta && profile.meta.lastSync) {
+        cloudLastSync = profile.meta.lastSync;
+      }
     }
 
     // v28.1: When v4 active, profile/main doesn't exist -- read brand_settings/main + settings/api_keys
@@ -10488,13 +11015,18 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
                 var d = snap.data() || {};
                 if (d.logo) {
                   b.logo = d.logo;
-                  if (typeof window._idbPut === 'function') {
+                  // v34.120: only structured-clone into IDB when the logo changed
+                  if (typeof idbPutIfChanged === 'function') {
+                    try { idbPutIfChanged('roweos_brand_logo_' + b.id, d.logo); } catch (e) {}
+                  } else if (typeof window._idbPut === 'function') {
                     try { window._idbPut('roweos_brand_logo_' + b.id, d.logo); } catch (e) {}
                   }
                 }
                 if (d.logoLight) {
                   b.logoLight = d.logoLight;
-                  if (typeof window._idbPut === 'function') {
+                  if (typeof idbPutIfChanged === 'function') {
+                    try { idbPutIfChanged('roweos_brand_logo_' + b.id + '_light', d.logoLight); } catch (e) {}
+                  } else if (typeof window._idbPut === 'function') {
                     try { window._idbPut('roweos_brand_logo_' + b.id + '_light', d.logoLight); } catch (e) {}
                   }
                 }
@@ -10540,7 +11072,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           if (!Array.isArray(localHist)) localHist = [];
           if (localHist.length === 0) {
             // Local empty - take cloud as-is
-            localStorage.setItem('roweos_conversations', cloudHistJson);
+            setLargeItemIfChanged('roweos_conversations', cloudHistJson); // v34.120: write-if-changed
           } else if (cloudHist.length === 0) {
             // Cloud empty - keep local (don't overwrite with nothing)
             console.log('[Sync] Cloud history empty, preserving ' + localHist.length + ' local conversations');
@@ -10566,7 +11098,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
                 merged.push(conv);
               }
             });
-            localStorage.setItem('roweos_conversations', JSON.stringify(merged));
+            setLargeItemIfChanged('roweos_conversations', JSON.stringify(merged)); // v34.120: write-if-changed
             if (merged.length > localHist.length || merged.length > cloudHist.length) {
               console.log('[Sync] Merged conversations: cloud=' + cloudHist.length + ' local=' + localHist.length + ' merged=' + merged.length);
             }
@@ -11075,7 +11607,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     // v15.3: Library (restore from V2 subcollections)
     if (libraryBrandDoc.exists && shouldSyncCategory('library')) {
       var libData = libraryBrandDoc.data();
-      if (libData.data) localStorage.setItem('roweosLibrary', libData.data);
+      if (libData.data) setLargeItemIfChanged('roweosLibrary', libData.data); // v34.120: write-if-changed
       // v24.9: Restore library favorites
       if (libData.favorites && Array.isArray(libData.favorites)) {
         var _localFavs = sp('roweos_library_favorites', []);
@@ -11097,19 +11629,19 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             Object.keys(lifeProfiles).forEach(function(pk) {
               var idx = pk.replace('profile_', '');
               var val = lifeProfiles[pk];
-              localStorage.setItem('roweos_life_library_profile_' + idx, typeof val === 'string' ? val : JSON.stringify(val));
+              setLargeItemIfChanged('roweos_life_library_profile_' + idx, typeof val === 'string' ? val : JSON.stringify(val)); // v34.120: write-if-changed
             });
           } else {
             // Legacy format -- store as profile 0
-            localStorage.setItem('roweos_life_library_profile_0', _lifeLibStr);
+            setLargeItemIfChanged('roweos_life_library_profile_0', _lifeLibStr); // v34.120: write-if-changed
           }
           // v15.30: Also keep legacy key for backwards compatibility
-          localStorage.setItem('roweos_life_library', _lifeLibStr);
+          setLargeItemIfChanged('roweos_life_library', _lifeLibStr); // v34.120: write-if-changed
         } catch(e) {
           // Fallback: store raw value as profile 0
           var _fallbackStr = (typeof lifeLibData.data === 'string') ? lifeLibData.data : JSON.stringify(lifeLibData.data);
-          localStorage.setItem('roweos_life_library_profile_0', _fallbackStr);
-          localStorage.setItem('roweos_life_library', _fallbackStr);
+          setLargeItemIfChanged('roweos_life_library_profile_0', _fallbackStr); // v34.120: write-if-changed
+          setLargeItemIfChanged('roweos_life_library', _fallbackStr); // v34.120: write-if-changed
         }
         // Invalidate cache
         fileLibrary['_life'] = null;
@@ -11126,13 +11658,17 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
           if (logoKey === 'roweos_lifeai_logo') {
             var profileIdx = parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0');
             var perProfileKey = 'roweos_lifeai_logo_profile_' + profileIdx;
-            if (!localStorage.getItem(perProfileKey)) {
+            // v34.120: localStorageHas() detects IDB-offloaded logos; the old
+            // !localStorage.getItem() returned null for >1MB offloaded logos and
+            // re-wrote (re-offloaded) them every pull - root-cause memory churn.
+            if (!localStorageHas(perProfileKey)) {
               localStorage.setItem(perProfileKey, logoInfo.base64);
               if (logoInfo.size) localStorage.setItem(perProfileKey + '_size', String(logoInfo.size));
             }
             return;
           }
-          localStorage.setItem(logoKey, logoInfo.base64);
+          // v34.120: write-if-changed - skip re-offloading unchanged logos every pull
+          setLargeItemIfChanged(logoKey, logoInfo.base64);
           // v25.0: Only set cloud size if no local size exists (prevents sync resetting user's custom size)
           if (logoInfo.size && !localStorage.getItem(logoKey + '_size')) {
             localStorage.setItem(logoKey + '_size', String(logoInfo.size));
@@ -11149,13 +11685,15 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             if (logoKey === 'roweos_lifeai_logo') {
               var profileIdx = parseInt(localStorage.getItem('roweos_current_life_profile_idx') || '0');
               var perProfileKey = 'roweos_lifeai_logo_profile_' + profileIdx;
-              if (!localStorage.getItem(perProfileKey)) {
+              // v34.120: localStorageHas() detects IDB-offloaded logos (see above)
+              if (!localStorageHas(perProfileKey)) {
                 localStorage.setItem(perProfileKey, logoInfo.base64);
                 if (logoInfo.size) localStorage.setItem(perProfileKey + '_size', String(logoInfo.size));
               }
               return;
             }
-            localStorage.setItem(logoKey, logoInfo.base64);
+            // v34.120: write-if-changed - skip re-offloading unchanged logos every pull
+            setLargeItemIfChanged(logoKey, logoInfo.base64);
             // v25.0: Only set cloud size if no local size exists
             if (logoInfo.size && !localStorage.getItem(logoKey + '_size')) {
               localStorage.setItem(logoKey + '_size', String(logoInfo.size));
@@ -11260,6 +11798,10 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       if (bld && bld.data) {
         var localLib = getBloomLibrary();
         var cloudScopes = Object.keys(bld.data);
+        // v34.121: collect thumbnails to fetch, pre-capped per scope, then throttle/defer.
+        // Was an UNBOUNDED simultaneous fetch() storm on fresh restore (the 4.73GB
+        // "Brilliance Networking" process + a boot-wedging main-thread livelock).
+        var _bloomToFetch = [];
         for (var cls = 0; cls < cloudScopes.length; cls++) {
           var clScope = cloudScopes[cls];
           if (!localLib[clScope]) localLib[clScope] = [];
@@ -11268,25 +11810,17 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             localIds[localLib[clScope][cli].id] = true;
           }
           var cloudItems = bld.data[clScope] || [];
+          // v34.121: only fetch enough to fill the per-scope cap - the old code downloaded
+          // hundreds of thumbnails but kept only BLOOM_LIBRARY_MAX (the cap was checked
+          // inside the async callback, after every fetch had already fired).
+          var _slotsLeft = BLOOM_LIBRARY_MAX - localLib[clScope].length;
           for (var cci = 0; cci < cloudItems.length; cci++) {
             var ci = cloudItems[cci];
             if (!localIds[ci.id] && ci.thumbnailUrl) {
-              // Download from Storage
-              (function(scope, item) {
-                fetch(item.thumbnailUrl).then(function(resp) { return resp.blob(); }).then(function(blob) {
-                  var reader = new FileReader();
-                  reader.onloadend = function() {
-                    item.base64 = reader.result;
-                    var lib = getBloomLibrary();
-                    if (!lib[scope]) lib[scope] = [];
-                    if (lib[scope].length < BLOOM_LIBRARY_MAX) {
-                      lib[scope].push(item);
-                      try { localStorage.setItem('roweos_bloom_library', JSON.stringify(lib)); } catch(e) {}
-                    }
-                  };
-                  reader.readAsDataURL(blob);
-                }).catch(function() {});
-              })(clScope, { id: ci.id, base64: '', mimeType: ci.mimeType, agentType: ci.agentType, active: ci.active, name: ci.name, addedAt: ci.addedAt, thumbnailUrl: ci.thumbnailUrl });
+              if (_slotsLeft > 0) {
+                _bloomToFetch.push({ scope: clScope, item: { id: ci.id, base64: '', mimeType: ci.mimeType, agentType: ci.agentType, active: ci.active, name: ci.name, addedAt: ci.addedAt, thumbnailUrl: ci.thumbnailUrl } });
+                _slotsLeft--;
+              }
             } else if (localIds[ci.id]) {
               // Sync metadata from cloud
               for (var uli = 0; uli < localLib[clScope].length; uli++) {
@@ -11299,7 +11833,12 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             }
           }
         }
-        try { localStorage.setItem('roweos_bloom_library', JSON.stringify(localLib)); } catch(e) {}
+        try { setLargeItemIfChanged('roweos_bloom_library', JSON.stringify(localLib)); } catch(e) {} // v34.120: write-if-changed
+        // v34.121: drain the thumbnail queue deferred (~6s after boot) at max 2 concurrent,
+        // so it never competes with the boot/restore critical path.
+        if (_bloomToFetch.length > 0 && typeof _drainBloomThumbnailQueue === 'function') {
+          (function(q) { setTimeout(function() { _drainBloomThumbnailQueue(q); }, 6000); })(_bloomToFetch);
+        }
       }
     }
     // v22.17: Restore bloom knowledge from cloud - merge with local by id dedup
@@ -11741,34 +12280,52 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     lastReloadTime = 0;
     reloadAllData();
     // v15.13: Show notification with device info on pull (only for cross-device syncs, not same-device reloads)
+    // v34.112: Dedupe these toasts. Two bugs were spamming them every second:
+    // (1) onSnapshot + _v321ResolveDrift + manual sync all call loadFromFirebaseV2
+    //     - so the same "another device touched a brand" check fires repeatedly.
+    // (2) The brand-doc _deviceId check is a STORED attribute. If iOS ever touched
+    //     a brand, every subsequent pull on web sees "ios_xxxxx" in the doc and
+    //     thinks iOS just synced - even though iOS may not have run for hours.
+    // Fix: only toast for an actively-recent push (cloud lastSync timestamp newer
+    // than any prior toast we showed) and dedupe per device within a 5-minute
+    // window. Tracked in window._lastSyncToast so it survives across pulls but
+    // resets on reload.
     if (showNotification !== false) {
       var deviceLabel = cloudLastDevice || 'cloud';
       var currentDevice = typeof getDeviceType === 'function' ? getDeviceType() : 'web';
-      // v28.1: Re-enabled cross-device toast with v4 _deviceId check
+      window._lastSyncToast = window._lastSyncToast || { byDevice: {} };
+      var _maybeToast = function(label) {
+        if (!label || label === 'cloud') return;
+        var now = Date.now();
+        var prev = window._lastSyncToast.byDevice[label] || 0;
+        // Once per 5 minutes per device. Long enough that two genuine cross-
+        // device pushes from the same source don't both toast, but short enough
+        // that an actual "I just pushed from iOS" message appears within a
+        // working session.
+        if (now - prev < 5 * 60 * 1000) return;
+        window._lastSyncToast.byDevice[label] = now;
+        showToast('Synced from ' + label, 'success');
+      };
       if (typeof syncEngine !== 'undefined' && syncEngine.isV4Active()) {
-        // v4: Use precise device IDs for cross-device detection
         var _localDevId = typeof _getDeviceId === 'function' ? _getDeviceId() : '';
-        // Check if any brand doc has a different _deviceId (means another device pushed)
-        try {
-          var _bArr = JSON.parse(localStorage.getItem('roweos_user_brands') || '[]');
-          var _crossDeviceDetected = false;
-          for (var _cd = 0; _cd < _bArr.length; _cd++) {
-            if (_bArr[_cd]._deviceId && _bArr[_cd]._deviceId !== _localDevId) {
-              _crossDeviceDetected = true;
-              var _remoteName = _bArr[_cd]._deviceId.split('_')[0] || 'another device';
-              deviceLabel = _remoteName.charAt(0).toUpperCase() + _remoteName.slice(1);
-              break;
+        // v34.112: Require the cloud's reported lastSync to be RECENT (within 60s)
+        // so a stale _deviceId baked into a brand doc from hours ago doesn't trigger.
+        var _cloudLastSyncMs = parseInt(cloudLastSync || '0', 10) || 0;
+        var _isRecent = _cloudLastSyncMs > 0 && (Date.now() - _cloudLastSyncMs < 60000);
+        if (_isRecent) {
+          try {
+            var _bArr = JSON.parse(localStorage.getItem('roweos_user_brands') || '[]');
+            for (var _cd = 0; _cd < _bArr.length; _cd++) {
+              if (_bArr[_cd]._deviceId && _bArr[_cd]._deviceId !== _localDevId) {
+                var _remoteName = _bArr[_cd]._deviceId.split('_')[0] || 'another device';
+                _maybeToast(_remoteName.charAt(0).toUpperCase() + _remoteName.slice(1));
+                break;
+              }
             }
-          }
-          if (_crossDeviceDetected) {
-            showToast('Synced from ' + deviceLabel, 'success');
-          }
-        } catch(e) {}
-      } else {
-        // Legacy: use device type string comparison
-        if (deviceLabel !== currentDevice && deviceLabel !== 'cloud') {
-          showToast('Synced from ' + deviceLabel, 'success');
+          } catch(e) {}
         }
+      } else {
+        if (deviceLabel !== currentDevice && deviceLabel !== 'cloud') _maybeToast(deviceLabel);
       }
     }
     // v29.2: Scribe notebooks - cloud-authoritative merge
@@ -11783,10 +12340,50 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         var _localNbs = [];
         try { _localNbs = JSON.parse(localStorage.getItem('roweos_scribe_notebooks') || '[]'); } catch(e) { _localNbs = []; }
         if (!Array.isArray(_localNbs)) _localNbs = [];
-        var _mergedNbs = mergeByTimestamp(_localNbs, _cloudNbs, 'id');
+        // v34.115: HARD-MERGE for notebooks - union local + cloud by id, never
+        // drop a local notebook just because cloud is missing it. Per CLAUDE.md
+        // sync rule: "Cloud-empty for an unsynced category does NOT mean delete
+        // local." mergeByTimestamp with firstSyncCompleted=true was silently
+        // dropping local notebooks that were older than lastSync but absent
+        // from cloud - causing total wipes when a partial cloud doc landed
+        // (e.g. after a Firestore SDK assertion left a write half-done).
+        // Real deletes go through deleteScribeNotebook + tombstone path; this
+        // merge should be additive only.
+        var _mergedById = {};
+        var _mergedOrder = [];
+        _cloudNbs.forEach(function(nb) {
+          if (!nb || !nb.id) return;
+          _mergedById[nb.id] = nb;
+          _mergedOrder.push(nb.id);
+        });
+        _localNbs.forEach(function(nb) {
+          if (!nb || !nb.id) return;
+          if (!_mergedById[nb.id]) {
+            _mergedById[nb.id] = nb;
+            _mergedOrder.push(nb.id);
+          } else {
+            // Both have it - keep the newer by _modifiedAt
+            var cloudTs = _mergedById[nb.id]._modifiedAt || 0;
+            var localTs = nb._modifiedAt || 0;
+            if (localTs > cloudTs) _mergedById[nb.id] = nb;
+          }
+        });
+        var _mergedNbs = _mergedOrder.map(function(id) { return _mergedById[id]; });
         localStorage.setItem('roweos_scribe_notebooks', JSON.stringify(_mergedNbs));
         if (typeof scribeNotebooks !== 'undefined') scribeNotebooks = _mergedNbs;
-        console.log('[Firebase V3] Scribe notebooks synced: ' + _mergedNbs.length);
+        console.log('[Firebase V3] Scribe notebooks union-merged: cloud=' + _cloudNbs.length + ' local=' + _localNbs.length + ' merged=' + _mergedNbs.length);
+        // v34.113: if the Notebooks view is currently visible, re-render the list
+        // so cloud-arriving notebooks appear without forcing the user to click New
+        // Notebook to trigger a refresh. Previously initScribe ran synchronously
+        // BEFORE the cloud pull completed (esp. on first device login or fast
+        // tab-switch), the user saw "No notebooks yet" empty state, then this
+        // merge populated scribeNotebooks but never re-rendered.
+        try {
+          var _scribeVisible = document.getElementById('scribeView') && !document.getElementById('scribeView').classList.contains('hidden');
+          if (_scribeVisible && typeof renderScribeNotebookList === 'function') {
+            renderScribeNotebookList();
+          }
+        } catch(_eRR) {}
       }
     }
 
@@ -11809,7 +12406,7 @@ function migrateChatBlobToSubcollection() {
   var db = firebase.firestore();
   var basePath = 'roweos_users/' + firebaseUser.uid;
 
-  db.doc(basePath + '/chat_migration').get().then(function(doc) {
+  db.doc(basePath + '/_meta/chat_migration').get().then(function(doc) {
     if (doc.exists && doc.data().chatSubcollectionMigrated) {
       localStorage.setItem('roweos_chat_subcollection_migrated', 'true');
       return;
@@ -11840,7 +12437,7 @@ function migrateChatBlobToSubcollection() {
     }
 
     Promise.all(promises).then(function() {
-      db.doc(basePath + '/chat_migration').set({
+      db.doc(basePath + '/_meta/chat_migration').set({
         chatSubcollectionMigrated: true,
         migratedAt: Date.now(),
         chatCount: chats.length
