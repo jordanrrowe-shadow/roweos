@@ -1,55 +1,187 @@
 {
   "version": 2,
   "crons": [
-    { "path": "/api/scheduler", "schedule": "* * * * *" }
+    {
+      "path": "/api/scheduler",
+      "schedule": "0 6 * * *"
+    }
   ],
   "functions": {
-    "api/scheduler.js": { "maxDuration": 300 },
-    "api/social-post.js": { "maxDuration": 60 },
-    "api/social-media.js": { "maxDuration": 30 },
-    "api/blob-proxy.js": { "maxDuration": 30 },
-    "api/stripe-webhook.js": { "maxDuration": 30 },
-    "api/create-api-key-checkout.js": { "maxDuration": 15 },
-    "api/fetch-site-meta.js": { "maxDuration": 15 },
-    "api/gmail-proxy.js": { "maxDuration": 30 },
-    "api/caldav-proxy.js": { "maxDuration": 30 },
-    "api/email-response.js": { "maxDuration": 15 },
-    "api/send-template-email.js": { "maxDuration": 30 },
-    "api/info-signup.js": { "maxDuration": 10 }
+    "api/scheduler.js": {
+      "maxDuration": 300
+    },
+    "api/social-post.js": {
+      "maxDuration": 60
+    },
+    "api/social-media.js": {
+      "maxDuration": 30
+    },
+    "api/blob-proxy.js": {
+      "maxDuration": 30
+    },
+    "api/stripe-webhook.js": {
+      "maxDuration": 30
+    },
+    "api/create-api-key-checkout.js": {
+      "maxDuration": 15
+    },
+    "api/fetch-site-meta.js": {
+      "maxDuration": 15
+    },
+    "api/gmail-proxy.js": {
+      "maxDuration": 30
+    },
+    "api/caldav-proxy.js": {
+      "maxDuration": 30
+    },
+    "api/email-response.js": {
+      "maxDuration": 15
+    },
+    "api/send-template-email.js": {
+      "maxDuration": 30
+    },
+    "api/info-signup.js": {
+      "maxDuration": 10
+    }
   },
   "routes": [
-    { "src": "/newsletter", "dest": "/newsletter.html" },
-    { "src": "/info", "dest": "/info.html" },
-    { "src": "/info/", "dest": "/info.html" },
-    { "src": "/brilliance", "dest": "/brilliance.html" },
-    { "src": "/brilliance/", "dest": "/brilliance.html" },
-    { "src": "/brilliance-mockups", "dest": "/brilliance-mockups/00-index.html" },
-    { "src": "/brilliance-mockups/", "dest": "/brilliance-mockups/00-index.html" },
-    { "src": "/brilliance-mockups/(.*)", "dest": "/brilliance-mockups/$1" },
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/privacy", "dest": "/privacy.html" },
-    { "src": "/terms", "dest": "/terms.html" },
-    { "src": "/social", "status": 308, "headers": { "Location": "/social3" } },
-    { "src": "/social/", "status": 308, "headers": { "Location": "/social3" } },
-    { "src": "/social3", "dest": "/social3.html" },
-    { "src": "/social3/", "dest": "/social3.html" },
-    { "src": "/social4", "dest": "/social4.html" },
-    { "src": "/social4/", "dest": "/social4.html" },
-    { "src": "/images/(.*)", "dest": "/images/$1" },
-    { "src": "/social-callback", "dest": "/social-callback.html" },
-    { "src": "/social-callback.html", "dest": "/social-callback.html" },
-    { "src": "/favicon.ico", "dest": "/favicon.ico" },
-    { "src": "/apple-touch-icon.png", "dest": "/apple-touch-icon.png" },
-    { "src": "/manifest.json", "dest": "/manifest.json" },
-    { "src": "/sw.js", "dest": "/sw.js" },
-    { "src": "/icons/(.*)", "dest": "/icons/$1" },
-    { "src": "/logo.png", "dest": "/logo.png" },
-    { "src": "/portfolio", "dest": "/portfolio.html" },
-    { "src": "/blake", "dest": "/blake.html" },
-    { "src": "/purchase", "dest": "/purchase.html" },
-    { "src": "/finance", "dest": "/finance.html" },
-    { "src": "/finance/", "dest": "/finance.html" },
-    { "src": "/tinymce/(.*)", "dest": "/tinymce/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    {
+      "src": "/newsletter",
+      "dest": "/newsletter.html"
+    },
+    {
+      "src": "/info",
+      "dest": "/info.html"
+    },
+    {
+      "src": "/info/",
+      "dest": "/info.html"
+    },
+    {
+      "src": "/brilliance",
+      "dest": "/brilliance.html"
+    },
+    {
+      "src": "/brilliance/",
+      "dest": "/brilliance.html"
+    },
+    {
+      "src": "/brilliance-mockups",
+      "dest": "/brilliance-mockups/00-index.html"
+    },
+    {
+      "src": "/brilliance-mockups/",
+      "dest": "/brilliance-mockups/00-index.html"
+    },
+    {
+      "src": "/brilliance-mockups/(.*)",
+      "dest": "/brilliance-mockups/$1"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/privacy",
+      "dest": "/privacy.html"
+    },
+    {
+      "src": "/terms",
+      "dest": "/terms.html"
+    },
+    {
+      "src": "/social",
+      "status": 308,
+      "headers": {
+        "Location": "/social3"
+      }
+    },
+    {
+      "src": "/social/",
+      "status": 308,
+      "headers": {
+        "Location": "/social3"
+      }
+    },
+    {
+      "src": "/social3",
+      "dest": "/social3.html"
+    },
+    {
+      "src": "/social3/",
+      "dest": "/social3.html"
+    },
+    {
+      "src": "/social4",
+      "dest": "/social4.html"
+    },
+    {
+      "src": "/social4/",
+      "dest": "/social4.html"
+    },
+    {
+      "src": "/images/(.*)",
+      "dest": "/images/$1"
+    },
+    {
+      "src": "/social-callback",
+      "dest": "/social-callback.html"
+    },
+    {
+      "src": "/social-callback.html",
+      "dest": "/social-callback.html"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "dest": "/apple-touch-icon.png"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/sw.js",
+      "dest": "/sw.js"
+    },
+    {
+      "src": "/icons/(.*)",
+      "dest": "/icons/$1"
+    },
+    {
+      "src": "/logo.png",
+      "dest": "/logo.png"
+    },
+    {
+      "src": "/portfolio",
+      "dest": "/portfolio.html"
+    },
+    {
+      "src": "/blake",
+      "dest": "/blake.html"
+    },
+    {
+      "src": "/purchase",
+      "dest": "/purchase.html"
+    },
+    {
+      "src": "/finance",
+      "dest": "/finance.html"
+    },
+    {
+      "src": "/finance/",
+      "dest": "/finance.html"
+    },
+    {
+      "src": "/tinymce/(.*)",
+      "dest": "/tinymce/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
