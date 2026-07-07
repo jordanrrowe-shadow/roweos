@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Horizon</title>
+    <script>
+      // v35.13: Access gate. The Horizon bundle ships personal seed data, so the
+      // app must not boot for drive-by visitors. The Brilliance shell (admin-only
+      // Horizon view) sets horizon_host_ok before loading this page; existing
+      // users are recognized by their horizon_v1 data. Everyone else goes home.
+      // This is discovery protection, not authentication - real data only ever
+      // lives in the owner's browser storage and their private Firestore backup.
+      (function () {
+        try {
+          if (localStorage.getItem('horizon_host_ok') !== '1' && !localStorage.getItem('horizon_v1')) {
+            location.replace('/');
+          }
+        } catch (e) {
+          location.replace('/');
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-DdowJiFY.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Dh6OVLjn.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

@@ -110,6 +110,8 @@
             <div class="nav-subitem" data-view="sync" onclick="event.stopPropagation(); navigateToSubSection('Governance','sync')">Sync</div>
             <div class="nav-subitem" data-view="settings" onclick="event.stopPropagation(); navigateToSubSection('Governance','settings')">System</div>
             <div class="nav-subitem" id="adminNavItem" data-view="admin" onclick="event.stopPropagation(); navigateToSubSection('Governance','admin')" style="display:none;">Admin</div>
+            <!-- v35.13: Horizon personal finance (admin-only, hidden for everyone else) -->
+            <div class="nav-subitem" id="horizonNavItem" data-view="horizon" onclick="event.stopPropagation(); showView('horizon')" style="display:none;">Horizon</div>
           </div>
         </div>
       </div>
@@ -349,6 +351,16 @@
           <span class="nav-item-label">Admin</span>
           <span class="sidebar-tooltip">Admin</span>
       </div>
+      <!-- v35.13: Horizon personal finance nav item (hidden for non-admins) -->
+      <div class="nav-item" id="horizonNavItemExp" onclick="showView('horizon')" data-view="horizon" style="display:none;">
+          <span class="nav-item-icon svg-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="svg-icon" style="width: 16px; height: 16px;">
+              <path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/>
+            </svg>
+          </span>
+          <span class="nav-item-label">Horizon</span>
+          <span class="sidebar-tooltip">Horizon</span>
+      </div>
       <!-- v19.6: Notification Center bell -->
       <div class="nav-section-divider"></div>
       <div class="nc-nav-item" onclick="toggleNotificationPanel()" title="Notifications">
@@ -419,7 +431,7 @@
           <!-- v32.1: Version bump.
                v34.11: Click opens the What's New modal so users can re-read the changelog
                without digging through Settings → System. Tooltip surfaces the gesture. -->
-          <span class="sidebar-version" id="sidebarVersionDisplay" role="button" tabindex="0" title="What's new in this version" onmouseenter="if(typeof updateSidebarVersionTooltip==='function')updateSidebarVersionTooltip(this);" onclick="if(typeof showWhatsNewModal==='function'&&typeof ROWEOS_VERSION!=='undefined'){showWhatsNewModal(ROWEOS_VERSION);}" onkeydown="if((event.key==='Enter'||event.key===' ')&&typeof showWhatsNewModal==='function'&&typeof ROWEOS_VERSION!=='undefined'){event.preventDefault();showWhatsNewModal(ROWEOS_VERSION);}" style="cursor:pointer;">v35.12</span>
+          <span class="sidebar-version" id="sidebarVersionDisplay" role="button" tabindex="0" title="What's new in this version" onmouseenter="if(typeof updateSidebarVersionTooltip==='function')updateSidebarVersionTooltip(this);" onclick="if(typeof showWhatsNewModal==='function'&&typeof ROWEOS_VERSION!=='undefined'){showWhatsNewModal(ROWEOS_VERSION);}" onkeydown="if((event.key==='Enter'||event.key===' ')&&typeof showWhatsNewModal==='function'&&typeof ROWEOS_VERSION!=='undefined'){event.preventDefault();showWhatsNewModal(ROWEOS_VERSION);}" style="cursor:pointer;">v35.13</span>
         </div>
       </div>
     </div>
@@ -536,7 +548,7 @@
       
       <div class="welcome-footer">
         <!-- v32.1: Version bump -->
-        <p>Brilliance v35.12, same platform · new surfaces</p>
+        <p>Brilliance v35.13, same platform · new surfaces</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -598,7 +610,7 @@
             <button onclick="goToOnboardingStep('pwa')" style="width:100%;padding:13px 32px;background:linear-gradient(135deg,#e2c79b,#c9a961,#a88a4a);border:none;border-radius:99px;color:#0a0a0a;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Begin</button>
           </div>
           <div style="width:80px;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,97,0.3),transparent);margin:6px auto 2px;animation:fadeUp 0.8s ease 0.95s both;"></div>
-          <p id="onboardingVersionTag" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:10px;color:var(--text-muted);opacity:0.5;margin:0;letter-spacing:0.18em;text-transform:uppercase;animation:fadeUp 0.8s ease 1s both;">v35.12</p>
+          <p id="onboardingVersionTag" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:10px;color:var(--text-muted);opacity:0.5;margin:0;letter-spacing:0.18em;text-transform:uppercase;animation:fadeUp 0.8s ease 1s both;">v35.13</p>
         </div>
       </div>
 

@@ -1,5 +1,30 @@
 # Brilliance / RoweOS Changelog
 
+## v35.13 - Horizon personal finance planner integrated
+
+Horizon (previously a standalone deployment at horizon-gamma-gules.vercel.app)
+is now built into Brilliance as an admin-only view. The React SPA is vendored
+at /horizon/ and embedded same-origin in a new Horizon panel, so its data
+(localStorage key horizon_v1) lives under roweos.com.
+
+- New sidebar item "Horizon" (grouped + expanded modes), visible to admin only;
+  showView('horizon') redirects non-admins to Settings, mirroring the Admin
+  panel gate.
+- New HorizonBridge module (54-horizon.js): lazy iframe load (the React bundle
+  does not load at app boot), cloud backup of horizon_v1 to
+  roweos_users/{uid}/horizon/main on change (10s change-detection poll), and
+  restore-from-cloud ONLY when local data is empty - cloud never overwrites
+  non-empty local finance data.
+- Import / Export / Full-screen toolbar: Import accepts the horizon_v1 JSON
+  copied from the old standalone site's DevTools (different origin, so data
+  does not carry over automatically); Export copies the blob to clipboard.
+- Privacy gate: the Horizon bundle ships personal seed data, so
+  /horizon/index.html now refuses to boot (redirects to /) unless opened
+  through the admin-gated view or in a browser that already has horizon_v1.
+  Also tagged noindex/nofollow.
+- Routes /horizon, /horizon/, /horizon/* added to vercel.json ahead of the
+  SPA catch-all.
+
 ## v35.12 - Security + data-integrity hardening (audit pass)
 
 Full principal-level audit at docs/audits/2026-07-07-principal-audit.md. This
