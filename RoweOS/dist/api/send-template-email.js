@@ -105,7 +105,10 @@ async function verifyFirebaseIdToken(idtkToken, idToken) {
 
 function generateHmac(userId, question, answer) {
   var crypto = require('crypto');
-  var secret = process.env.EMAIL_RESPONSE_SECRET || process.env.RESEND_API_KEY || 'fallback-secret';
+  // v35.12: No hardcoded fallback. A literal 'fallback-secret' let anyone who
+  // knew that string forge survey-response links if both env vars were unset.
+  var secret = process.env.EMAIL_RESPONSE_SECRET || process.env.RESEND_API_KEY;
+  if (!secret) throw new Error('Email HMAC secret not configured (set EMAIL_RESPONSE_SECRET)');
   var message = userId + ':' + question + ':' + answer;
   var hmac = crypto.createHmac('sha256', secret).update(message).digest('hex');
   return hmac.substring(0, 16);
@@ -787,7 +790,10 @@ module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', 'https://roweos.com');
   }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // v35.12: This endpoint requires an Authorization: Bearer <idToken> header
+  // (v34.107), but the preflight didn't allow it, so the browser blocked the
+  // real cross-origin admin request. Add Authorization to the allowlist.
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();

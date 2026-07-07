@@ -3017,6 +3017,13 @@ function syncLastRunToAutomations(taskId, timestamp) {
 // v20.11: Write lastRun to scheduled tasks by ID (not array index - index mismatch caused wrong task updates)
 function writeLastRunById(taskId, timestamp, extras) {
   var idStr = String(taskId);
+  // v35.12: Was calling saveScheduledTasks(tasks), which iterates EVERY
+  // automation and does one Firestore write per task. Since writeLastRunById
+  // fires at both the start and end of every run, a user with N automations
+  // paid 2N Firestore writes per single run just for lastRun bookkeeping. Now
+  // we update localStorage in place (cheap) and write ONLY the one changed
+  // automation's doc to Firestore.
+  var _changed = null;
   try {
     var tasks = getScheduledTasks();
     for (var i = 0; i < tasks.length; i++) {
@@ -3027,12 +3034,31 @@ function writeLastRunById(taskId, timestamp, extras) {
             if (extras.hasOwnProperty(k)) tasks[i][k] = extras[k];
           }
         }
-        saveScheduledTasks(tasks);
+        _changed = tasks[i];
+        localStorage.setItem('roweos_scheduled_tasks', JSON.stringify(tasks));
         break;
       }
     }
   } catch(e) {}
-  // Also sync to automations storage
+  // Mirror into the roweos_automations dual store (localStorage only) and write
+  // the single changed doc to Firestore.
+  try {
+    if (_changed) {
+      var allAutos = JSON.parse(localStorage.getItem('roweos_automations') || '[]');
+      if (Array.isArray(allAutos)) {
+        var _found = false;
+        for (var j = 0; j < allAutos.length; j++) {
+          if (String(allAutos[j].id) === idStr) { allAutos[j].lastRun = timestamp;
+            if (extras) { for (var k2 in extras) { if (extras.hasOwnProperty(k2)) allAutos[j][k2] = extras[k2]; } }
+            _found = true; break; }
+        }
+        if (!_found) allAutos.push(_changed);
+        localStorage.setItem('roweos_automations', JSON.stringify(allAutos));
+      }
+      if (typeof writeDBAutomation === 'function') writeDBAutomation(_changed);
+    }
+  } catch(e2) {}
+  // Also sync to automations storage (in-memory/legacy consumers)
   syncLastRunToAutomations(taskId, timestamp);
 }
 
@@ -5305,8 +5331,15 @@ function addAutoLabHistory(task, success, result, opts) {
   // v18.7: Detect image URL in result but DON'T store full base64 in history
   var imageUrl = opts.imageUrl || '';
   if (!imageUrl && result && typeof result === 'string' && result.indexOf('data:image') === 0) {
-    imageUrl = result.substring(0, 200000); // cap base64 for preview
+    // v35.12: was 200000 chars — at the 100-entry history cap that is ~20MB in a
+    // single localStorage key (quota is ~5MB), triggering the trim-and-retry
+    // failure loop on every image-automation run. A short fragment is all the
+    // preview indicator needs.
+    imageUrl = result.substring(0, 8192);
   }
+  // v35.12: also clamp a caller-supplied imageUrl (post action passes a full
+  // base64 data URL) so it can't bypass the cap above.
+  if (imageUrl && imageUrl.length > 8192) imageUrl = imageUrl.substring(0, 8192);
   // v18.7: Strip base64 data from result text to prevent quota issues
   var cleanResult = result ? String(result) : '';
   if (cleanResult.indexOf('data:image') === 0) {

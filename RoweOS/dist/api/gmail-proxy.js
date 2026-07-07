@@ -360,7 +360,10 @@ export default async function handler(req, res) {
         var att = rawAttachments[ai];
         if (att.url) {
           try {
-            var dlResp = await fetch(att.url);
+            // v35.12: SSRF guard — was a raw fetch(att.url) that could reach
+            // cloud metadata (169.254.169.254) or internal Vercel hosts.
+            var _ssrf = require('./_ssrf-guard');
+            var dlResp = await _ssrf.fetchSafe(att.url);
             if (dlResp.ok) {
               var dlBuf = Buffer.from(await dlResp.arrayBuffer());
               resolvedAtts.push({ filename: att.filename || 'attachment', type: att.type || 'application/octet-stream', content: dlBuf.toString('base64') });

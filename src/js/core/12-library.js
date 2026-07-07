@@ -477,7 +477,7 @@ function previewFile(fileId) {
   if (file.type === 'image' || (file.mimeType && file.mimeType.startsWith('image/'))) {
     var imgSrc = file.imageData || file.content;
     var imgHtml = '<div style="text-align: center; padding: var(--space-5);">';
-    imgHtml += '<img src="' + imgSrc + '" style="max-width: 100%; max-height: 60vh; border-radius: var(--radius-md); box-shadow: 0 4px 20px rgba(0,0,0,0.3);" alt="' + file.name + '">';
+    imgHtml += '<img src="' + imgSrc + '" style="max-width: 100%; max-height: 60vh; border-radius: var(--radius-md); box-shadow: 0 4px 20px rgba(0,0,0,0.3);" alt="' + escapeHtml(file.name || '') + '">'; // v35.12: escape user-controlled file name in attribute
     
     // Show metadata if available
     if (file.metadata) {
@@ -486,7 +486,7 @@ function previewFile(fileId) {
         imgHtml += '<div style="margin-bottom: var(--space-2);"><strong style="color: var(--text-secondary);">Prompt:</strong><br><span style="color: var(--text-primary);">' + escapeHtml(file.metadata.prompt || '') + '</span></div>'; // v30.1: XSS fix
       }
       if (file.metadata.model) {
-        imgHtml += '<div style="color: var(--text-tertiary);">Model: ' + file.metadata.model + '</div>';
+        imgHtml += '<div style="color: var(--text-tertiary);">Model: ' + escapeHtml(file.metadata.model || '') + '</div>'; // v35.12: XSS fix
       }
       if (file.metadata.provider) {
         imgHtml += '<div style="color: var(--text-tertiary);">Provider: ' + (file.metadata.provider === 'gemini' ? 'Nano Banana' : 'GPT Image 2') + '</div>'; // v31.0
@@ -496,7 +496,9 @@ function previewFile(fileId) {
     imgHtml += '</div>';
     contentEl.innerHTML = imgHtml;
   } else {
-    contentEl.innerHTML = file.content;
+    // v35.12: file.content is stored AI/Studio output — render it but strip
+    // script/style/iframe and event-handler vectors first. Was assigned raw.
+    contentEl.innerHTML = (typeof sanitizeAiHtml === 'function') ? sanitizeAiHtml(file.content) : escapeHtml(file.content || '');
   }
   
   document.getElementById('filePreviewModal').classList.add('open');

@@ -1139,7 +1139,10 @@ function renderBloomPost(post) {
   }
   if (post.content) {
     var rendered = '';
-    try { rendered = typeof marked !== 'undefined' && marked.parse ? marked.parse(post.content) : post.content; } catch(e) { rendered = post.content; }
+    // v35.12: sanitize marked.parse output (and the raw fallbacks) — post.content
+    // is AI output that can carry injected HTML; was inserted into innerHTML raw.
+    try { rendered = typeof marked !== 'undefined' && marked.parse ? marked.parse(post.content) : escapeHtml(post.content); } catch(e) { rendered = escapeHtml(post.content); }
+    if (typeof sanitizeAiHtml === 'function') rendered = sanitizeAiHtml(rendered);
     html += '<div class="bloom-card-content">' + rendered + '</div>';
   }
 
@@ -1235,7 +1238,7 @@ function renderBloomComment(comment) {
   var time = bloomTimeAgo(comment.timestamp);
   // v22.26: AI comments render as rich text (markdown), user comments stay escaped
   var textHtml = comment.isAI && typeof marked !== 'undefined' && marked.parse
-    ? '<span class="bloom-comment-text bloom-comment-rich">' + marked.parse(comment.text) + '</span>'
+    ? '<span class="bloom-comment-text bloom-comment-rich">' + ((typeof sanitizeAiHtml === 'function') ? sanitizeAiHtml(marked.parse(comment.text)) : escapeHtml(comment.text)) + '</span>' // v35.12: sanitize AI markdown
     : '<span class="bloom-comment-text">' + escapeHtml(comment.text) + '</span>';
   return '<div class="bloom-comment">' +
     '<div class="bloom-comment-avatar" style="background:' + bgColor + '">' + label.charAt(0) + '</div>' +
@@ -1874,6 +1877,14 @@ function bloomGrowNewSeeds() {
  */
 function bloomLoadMoreSeeds() {
   if (_bloomGenerating || _bloomCooldown.active) return;
+  // v35.12: Cap the garden. generateBloomBatch pushes 20 posts (each up to
+  // ~0.5-2MB of base64 for image/video) into _bloomPosts with no ceiling.
+  // Repeated "Load More" clicks accumulated hundreds of MB in the JS heap —
+  // the same uncapped-gallery pattern behind the v34.121 OOM crash.
+  if (typeof _bloomPosts !== 'undefined' && _bloomPosts && _bloomPosts.length >= 80) {
+    if (typeof showToast === 'function') showToast('Garden is full. Use Grow New Seeds for a fresh batch.', 'info');
+    return;
+  }
   var btn = document.getElementById('bloomLoadMoreBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
   generateBloomBatch(_bloomBatchSize);

@@ -98,7 +98,9 @@ async function firestoreCreate(projectId, accessToken, collectionPath, fields) {
 
 // v30.5: Must use identical fallback chain as send-template-email.js generateHmac()
 function generateHmac(uid, question, answer) {
-  var secret = process.env.EMAIL_RESPONSE_SECRET || process.env.RESEND_API_KEY || 'fallback-secret';
+  // v35.12: No hardcoded fallback (kept in sync with send-template-email.js).
+  var secret = process.env.EMAIL_RESPONSE_SECRET || process.env.RESEND_API_KEY;
+  if (!secret) throw new Error('Email HMAC secret not configured (set EMAIL_RESPONSE_SECRET)');
   var message = uid + ':' + question + ':' + answer;
   return crypto.createHmac('sha256', secret)
     .update(message)

@@ -5146,7 +5146,10 @@ function formatMessageContent(content) {
   var imageStore = [];
   displayContent = displayContent.replace(/!\[([^\]]*)\]\((data:image\/[^)]+)\)/g, function(match, alt, src) {
     var idx = imageStore.length;
-    imageStore.push('<img src="' + src + '" alt="' + (alt || 'Generated Image') + '" style="max-width:100%;border-radius:8px;margin:8px 0;" />');
+    // v35.12: escape the alt text. imageStore entries are spliced back in AFTER
+    // the global HTML-escape pass, so raw alt here was an attribute-breakout XSS
+    // sink (AI controls image markdown alt text).
+    imageStore.push('<img src="' + src + '" alt="' + escapeHtml(alt || 'Generated Image') + '" style="max-width:100%;border-radius:8px;margin:8px 0;" />');
     return '%%IMG_PLACEHOLDER_' + idx + '%%';
   });
 
@@ -6575,6 +6578,13 @@ function runAgent() {
     if (_firstText && _detectImageGenIntent(_firstText) && !window._chatImageGenInProgress) {
       window._chatImageGenInProgress = true;
       _firstMsg.value = '';
+      // v35.12: reset the conversation before the gen path, mirroring the image
+      // EDIT path above. runAgent always starts a fresh chat; without this the
+      // new image + prompt were appended onto the previous session's array via
+      // _injectChatImageAssistantTurn, visually merging old and new chats.
+      try {
+        if (typeof currentConversation !== 'undefined') currentConversation.length = 0;
+      } catch (eGR) {}
       var _runBtn = document.getElementById('agentRunBtn');
       if (_runBtn) { _runBtn.disabled = true; _runBtn.classList.add('sending'); }
       _maybeHandleChatImageGen(_firstText, function(handled) {
@@ -7349,7 +7359,11 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
 
     if (!apiKey) {
       showToast('Please configure an API key in Settings', 'error');
-      if (btn) btn.disabled = false;
+      // v35.12: full UI reset (LifeAI path). Bare btn.disabled=false left the
+      // orb in 'thinking' and the button in '.sending' forever; mirror BrandAI.
+      ['agentRunBtn', 'followupBtn'].forEach(function(id) { var b = document.getElementById(id); if (b) { b.disabled = false; b.classList.remove('sending'); } });
+      if (typeof setBlobState === 'function') setBlobState('idle');
+      if (typeof setAgentStatus === 'function') setAgentStatus('ready');
       return;
     }
 
@@ -7654,7 +7668,11 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
 
     if (!apiKey) {
       showToast('Please configure an API key in System settings', 'error');
-      if (btn) btn.disabled = false;
+      // v35.12: full UI reset (StandardAI path). Mirror BrandAI so the orb and
+      // send button don't stay stuck in the sending/thinking state.
+      ['agentRunBtn', 'followupBtn'].forEach(function(id) { var b = document.getElementById(id); if (b) { b.disabled = false; b.classList.remove('sending'); } });
+      if (typeof setBlobState === 'function') setBlobState('idle');
+      if (typeof setAgentStatus === 'function') setAgentStatus('ready');
       return;
     }
     

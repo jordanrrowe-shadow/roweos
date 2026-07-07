@@ -23,7 +23,11 @@ service cloud.firestore {
     }
     match /api_key_pool/{keyId} {
       allow read, create, delete: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
-      allow update: if request.auth != null;
+      // v35.12: Was `allow update: if request.auth != null` — any signed-in user
+      // could reassign or corrupt any pre-purchased paid API key. The only
+      // legitimate client updater is the admin (adminReleasePoolKey, isAdmin-gated);
+      // the Stripe webhook writes via the service account, which bypasses rules.
+      allow update: if request.auth != null && request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93';
     }
     match /users/{userId} {
       allow read, write: if request.auth != null && (request.auth.uid == userId || request.auth.uid == 'cG3DEoz2Kkd9i1cSPLOFqPfUYB93');

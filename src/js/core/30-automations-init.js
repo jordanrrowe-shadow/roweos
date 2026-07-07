@@ -2851,9 +2851,13 @@ function checkAndRunDueTasks() {
     if (!task.enabled) return;
 
     // v19.1: Skip if cloud function ran this task recently (within 10 minutes)
-    if (task.lastExecutor === 'cloud' && task.lastRun) {
+    // v35.12: Also honor 'cloud_running' — the Cloud Function writes that at the
+    // START of execution and only 'cloud' on completion. Checking only 'cloud'
+    // left a window where the client could co-execute with an in-flight cloud
+    // run. Use a 15-min window to match the Cloud Function's own stale-lock TTL.
+    if ((task.lastExecutor === 'cloud' || task.lastExecutor === 'cloud_running') && task.lastRun) {
       var cloudRunAge = Date.now() - new Date(task.lastRun).getTime();
-      if (cloudRunAge < 10 * 60 * 1000) return;
+      if (cloudRunAge < 15 * 60 * 1000) return;
     }
 
     // v13.9: Unify frequency field - Automations Lab saves recurType, scheduler uses frequency
@@ -3080,6 +3084,25 @@ function daysSince(date) {
 async function executeScheduledTask(task, idx) {
   // v30.1: Scope to task ID instead of global boolean
   if (!window._schedulerRunningTaskIds) window._schedulerRunningTaskIds = {};
+  // v35.12: Re-entry + cross-tab guard. Previously the flag was SET but never
+  // CHECKED at entry, so runTaskNow() and the scheduler loop (and two open tabs)
+  // could each start the same task, sending duplicate emails/posts to real
+  // clients. Guard on the in-memory flag (same-tab) AND a localStorage lock with
+  // a 5-minute TTL (cross-tab). The lock self-expires so a crashed run can't
+  // wedge the task permanently.
+  var _lockKey = 'roweos_task_lock_' + String(task.id);
+  if (task.id && window._schedulerRunningTaskIds[task.id]) {
+    console.log('[Scheduler] Task already running in this tab, skipping:', task.name);
+    return;
+  }
+  try {
+    var _lockUntil = parseInt(localStorage.getItem(_lockKey) || '0', 10);
+    if (task.id && _lockUntil && Date.now() < _lockUntil) {
+      console.log('[Scheduler] Task locked by another tab, skipping:', task.name);
+      return;
+    }
+    if (task.id) localStorage.setItem(_lockKey, String(Date.now() + 300000));
+  } catch (eLock) {}
   window._schedulerRunningTaskIds[task.id] = true;
   // v20.14: Write lastRun IMMEDIATELY to prevent double-execution from concurrent scheduler checks
   writeLastRunById(task.id, new Date().toISOString());
@@ -3406,6 +3429,17 @@ async function executeScheduledTask(task, idx) {
       showSingleWorkflowResultsPanel(task, _pSuccess, _pMsg);
       if (typeof markAutomationDone === 'function') markAutomationDone(task.id); // v30.1
       delete window._schedulerRunningTaskIds[task.id]; // v30.1
+      try { localStorage.removeItem('roweos_task_lock_' + String(task.id)); } catch (eL) {} // v35.12
+    }).catch(function(err) {
+      // v35.12: Was no .catch(). A synchronous throw in the completion callback
+      // (addCompletedAutomation, saveTaskResult, writeLastRunById, etc.) skipped
+      // markAutomationDone and the flag cleanup, leaving the automation stuck
+      // "running" for the tab session. Recover the bookkeeping.
+      console.error('[Scheduler] Post action completion error:', err && err.message);
+      if (typeof markAutomationDone === 'function') markAutomationDone(task.id);
+      if (window._schedulerRunningTaskIds) delete window._schedulerRunningTaskIds[task.id];
+      try { writeLastRunById(task.id, new Date().toISOString()); } catch (eW) {}
+      try { localStorage.removeItem('roweos_task_lock_' + String(task.id)); } catch (eL2) {}
     });
     return;
   }

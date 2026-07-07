@@ -998,7 +998,7 @@ function addToMailSent(emailData) {
 }
 
 // --- Send from Outbox ---
-function mailSendOutboxItem(itemId) {
+function mailSendOutboxItem(itemId, _retryCount) {
   var outbox = getMailOutbox();
   var idx = -1;
   for (var i = 0; i < outbox.length; i++) {
@@ -1148,9 +1148,18 @@ function mailSendOutboxItem(itemId) {
       })
     }).then(function(r) {
       if (r.status === 401) {
-        // Token expired - refresh and retry
+        // Token expired - refresh and retry ONCE.
+        // v35.12: was an unbounded recursive retry. A persistently-failing OAuth
+        // token (revoked scope, bad state) looped forever and could duplicate a
+        // send if any attempt partially succeeded. Cap at a single retry, matching
+        // the CloudOutbox path's single-retry sentinel.
+        if ((_retryCount || 0) >= 1) {
+          showToast('Gmail send failed: authorization error. Please reconnect.', 'error');
+          handleSendFailure('Gmail: 401 after token refresh');
+          return null;
+        }
         mailRefreshGmailToken(function(newToken) {
-          if (newToken) mailSendOutboxItem(itemId);
+          if (newToken) mailSendOutboxItem(itemId, 1);
           else showToast('Gmail session expired. Please reconnect.', 'error');
         });
         return null;
@@ -10191,7 +10200,10 @@ function mailCallAI(system, user, callback) {
         max_tokens: 2000
       })
     }).then(function(r) { return r.json(); }).then(function(data) {
-      var text = data.choices && data.choices[0] ? data.choices[0].message.content : '';
+      // v35.12: guard .message — tool/function responses can omit it, and error
+      // shapes return non-standard choices; unguarded .content threw a TypeError
+      // that surfaced identically to a missing API key.
+      var text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) ? data.choices[0].message.content : '';
       callback(text);
     }).catch(function() { callback(null); });
   } else if (chosenProvider === 'google') {
@@ -10203,7 +10215,12 @@ function mailCallAI(system, user, callback) {
         contents: [{ parts: [{ text: user }] }]
       })
     }).then(function(r) { return r.json(); }).then(function(data) {
-      var text = data.candidates && data.candidates[0] && data.candidates[0].content ? data.candidates[0].content.parts[0].text : '';
+      // v35.12: guard parts[] — safety-filtered Gemini responses return an empty
+      // parts array, so parts[0].text threw. Concatenate all text parts safely.
+      var _cand = data.candidates && data.candidates[0] && data.candidates[0].content;
+      var _parts = (_cand && _cand.parts) || [];
+      var text = '';
+      for (var _pi = 0; _pi < _parts.length; _pi++) { if (_parts[_pi].text) text += _parts[_pi].text; }
       callback(text);
     }).catch(function() { callback(null); });
   } else {
@@ -11810,16 +11827,32 @@ async function _wsCallClaude(prompt, apiKey, model, enableWebSearch) {
 }
 
 async function _wsCallGPT(prompt, apiKey, model, enableWebSearch) {
-  var body = { model: model || 'gpt-5.5', messages: [{ role: 'user', content: prompt }], max_tokens: 8192 };
+  // v35.12: web_search_preview is a Responses API tool. This function used to
+  // POST it to /v1/chat/completions, which 400s (invalid_request), and that
+  // error was then misclassified as a billing failure upstream — so OpenAI web
+  // search was silently broken and triggered spurious provider failover. Use the
+  // /v1/responses endpoint (same as the rest of the app's OpenAI calls).
+  var body = { model: model || 'gpt-5.5', input: [{ role: 'user', content: prompt }], max_output_tokens: 8192 };
   if (enableWebSearch) body.tools = [{ type: 'web_search_preview' }];
-  var resp = await fetch('https://api.openai.com/v1/chat/completions', {
+  var resp = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
     body: JSON.stringify(body)
   });
   if (!resp.ok) { var errText = await resp.text(); throw new Error('GPT API error: ' + resp.status + ' ' + errText.substring(0, 200)); }
   var data = await resp.json();
-  return (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+  // Prefer the convenience field; otherwise walk the output items (web-search
+  // runs add non-message items, so find the message item's text content).
+  if (data.output_text) return data.output_text;
+  var out = '';
+  if (Array.isArray(data.output)) {
+    data.output.forEach(function(item) {
+      if (item && Array.isArray(item.content)) {
+        item.content.forEach(function(c) { if (c && c.text) out += c.text; });
+      }
+    });
+  }
+  return out;
 }
 
 async function _wsCallGemini(prompt, apiKey, model, enableWebSearch) {

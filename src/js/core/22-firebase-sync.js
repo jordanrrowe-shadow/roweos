@@ -3088,9 +3088,25 @@ function setupRealtimeSync() {
       if (cloudGoals.length > 0) {
         var cloudIdMap = {};
         cloudGoals.forEach(function(g) { if (g.id) cloudIdMap[g.id] = true; });
-        var graceCutoff = Date.now() - 10000;
+        // v35.12: Widen grace from 10s to 5min AND never drop a goal that is
+        // still queued in roweos_pending_writes. The old 10s window permanently
+        // deleted goals created offline once a remote snapshot arrived >10s
+        // later — the goal was never in Firestore, so this was true data loss.
+        var graceCutoff = Date.now() - 300000;
+        var _pendingIds = {};
+        try {
+          var _pw = JSON.parse(localStorage.getItem('roweos_pending_writes') || '[]');
+          if (Array.isArray(_pw)) {
+            _pw.forEach(function(w) {
+              var _d = w && w.data;
+              if (_d && _d.id) _pendingIds[_d.id] = true;
+              if (_d && Array.isArray(_d.goals)) _d.goals.forEach(function(gg) { if (gg && gg.id) _pendingIds[gg.id] = true; });
+            });
+          }
+        } catch(ePw) {}
         _mergedGoals = _mergedGoals.filter(function(g) {
           if (cloudIdMap[g.id]) return true;
+          if (_pendingIds[g.id]) return true;
           if (g._modifiedAt && g._modifiedAt > graceCutoff) return true;
           return false;
         });
@@ -3453,7 +3469,7 @@ function autoGenerateAccessKey(user, selectedTier) {
   // Check if user already has an access key
   return db.doc('roweos_users/' + uid).get().then(function(doc) {
     if (doc.exists && doc.data().accessKey) {
-      console.log('[EarlyAccess] User already has key:', doc.data().accessKey);
+      console.log('[EarlyAccess] User already has a key'); // v35.12: don't log the key
       return doc.data().accessKey;
     }
 
@@ -3466,7 +3482,7 @@ function autoGenerateAccessKey(user, selectedTier) {
       part2 += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     var accessKey = 'ROWE-' + part1 + '-' + part2;
-    console.log('[EarlyAccess] Generated key:', accessKey, 'for', email, 'tier:', tierToUse);
+    console.log('[EarlyAccess] Generated key for', (email || '').replace(/(.).*(@.*)/, '$1***$2'), 'tier:', tierToUse); // v35.12: mask key + email
 
     // Write to access_keys collection
     // v30.4: Trial keys get 14-day expiry (2 weeks)
@@ -3489,7 +3505,7 @@ function autoGenerateAccessKey(user, selectedTier) {
         email: email
       }, { merge: true });
     }).then(function() {
-      console.log('[EarlyAccess] Key saved and linked:', accessKey);
+      console.log('[EarlyAccess] Key saved and linked'); // v35.12: don't log the key
       // v30.5: Update newsletter_subscribers with key + tier so Admin Signups tab shows it
       _updateSignupWithKey(email, accessKey, tierToUse);
       return accessKey;
@@ -3622,7 +3638,7 @@ function autoDetectAccessKey() {
         // Check if already used by someone else
         if (keyData.usedBy && keyData.usedBy !== firebaseUser.uid) return false;
 
-        console.log('[RoweOS] Auto-detected access key for', firebaseUser.email, ':', keyString);
+        console.log('[RoweOS] Auto-detected access key for', (firebaseUser.email || '').replace(/(.).*(@.*)/, '$1***$2')); // v35.12: mask email, don't log key
 
         // Link it to this user
         return linkAccessKeyToUser(keyString).then(function() {
@@ -11263,9 +11279,13 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       // This catches cross-device connections where social-callback wrote to Firestore
       // but never triggered syncToFirebaseV2 (separate page, no main app code)
       try {
-        var uid = firebase.auth().currentUser && firebase.auth().currentUser.uid;
-        if (uid) {
-          firebase.firestore().collection('roweos_users').doc(uid).collection('social_tokens').get().then(function(tokenSnap) { // v26.7: Fix collection name
+        // v35.12: Renamed from `uid` — as a function-scoped `var` it shadowed the
+        // outer loadFromFirebaseV2 uid (from firebaseUser.uid). If currentUser was
+        // briefly null during a token refresh, the outer uid became null for the
+        // rest of the function.
+        var _socialUid = firebase.auth().currentUser && firebase.auth().currentUser.uid;
+        if (_socialUid) {
+          firebase.firestore().collection('roweos_users').doc(_socialUid).collection('social_tokens').get().then(function(tokenSnap) { // v26.7: Fix collection name
             if (tokenSnap.empty) return;
             var foundNew = false;
             tokenSnap.forEach(function(doc) {
@@ -11577,6 +11597,21 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
                 merged.push(conv);
               }
             });
+            // v35.12: Apply chat deletion tombstones to the legacy blob path too.
+            // Without this, a conversation purged on another device resurrected
+            // here from local-only storage — the same bug the v31.13 tombstone
+            // system fixed on the subcollection path but never on this blob path.
+            try {
+              var _convTomb = {};
+              var _cTArr = JSON.parse(localStorage.getItem('roweos_deleted_chat_ids') || '[]');
+              if (Array.isArray(_cTArr)) _cTArr.forEach(function(id) { _convTomb[String(id)] = true; });
+              if (Object.keys(_convTomb).length > 0) {
+                merged = merged.filter(function(c) { return !(c && c.id && _convTomb[String(c.id)]); });
+              }
+              if (typeof applyTombstoneFilter === 'function') {
+                merged = applyTombstoneFilter('brandAIChats', merged);
+              }
+            } catch(_convTe) {}
             setLargeItemIfChanged('roweos_conversations', JSON.stringify(merged)); // v34.120: write-if-changed
             if (merged.length > localHist.length || merged.length > cloudHist.length) {
               console.log('[Sync] Merged conversations: cloud=' + cloudHist.length + ' local=' + localHist.length + ' merged=' + merged.length);
@@ -12019,7 +12054,12 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
         try {
           var existingTasks = JSON.parse(localStorage.getItem('roweos_scheduled_tasks') || '[]');
           var nonAutoTasks = existingTasks.filter(function(t) { return t.type !== 'workflow' && t.type !== 'pipeline'; });
-          var autoTasks = cloudAutos.filter(function(a) { return a.enabled !== false; }).map(function(a) {
+          // v35.12: Rebuild from the merged automations that safeSyncWrite just
+          // persisted, not raw cloudAutos, so locally-pending automations survive.
+          var _mergedForTasks = cloudAutos;
+          try { _mergedForTasks = JSON.parse(localStorage.getItem('roweos_automations') || '[]'); } catch(eM) {}
+          if (!Array.isArray(_mergedForTasks)) _mergedForTasks = cloudAutos;
+          var autoTasks = _mergedForTasks.filter(function(a) { return a.enabled !== false; }).map(function(a) {
             var full = JSON.parse(JSON.stringify(a));
             if (!full.type) full.type = 'workflow';
             if (full.enabled === undefined) full.enabled = true;

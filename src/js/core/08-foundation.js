@@ -298,6 +298,24 @@ var utils = {
 
 // Backwards compatibility aliases (will be deprecated)
 function escapeHtml(str) { return utils.escapeHtml(str); }
+
+// v35.12: Sanitize HTML that must RENDER (not be shown as escaped text) but may
+// carry untrusted AI/user content — Bloom markdown output, Library document
+// preview. Strips <script>/<style>/<iframe>/<object>/<embed> blocks, inline
+// on* event-handler attributes, and javascript:/data:text-html URIs. This is a
+// defense-in-depth pass, not a full sanitizer; for pure text sinks use
+// escapeHtml. No DOMPurify dependency (none is loaded).
+function sanitizeAiHtml(html) {
+  if (html == null) return '';
+  var s = String(html);
+  s = s.replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '');
+  s = s.replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*\/?>/gi, '');
+  s = s.replace(/\son\w+\s*=\s*"[^"]*"/gi, '');
+  s = s.replace(/\son\w+\s*=\s*'[^']*'/gi, '');
+  s = s.replace(/\son\w+\s*=\s*[^\s>]+/gi, '');
+  s = s.replace(/(href|src|xlink:href)\s*=\s*(["']?)\s*(javascript|data\s*:\s*text\/html|vbscript)\s*:/gi, '$1=$2#');
+  return s;
+}
 function formatTimeAgo(date) { return utils.timeAgo(date); }
 function getTimeAgo(date) { return utils.timeAgo(date); }
 // v12.0.0: formatTime12h takes "HH:MM" string and converts to "H:MM AM/PM"
@@ -1215,6 +1233,14 @@ function openModal(id, data) {
   if (!config) {
     console.warn('[Modal] Unknown modal:', id);
     return null;
+  }
+
+  // v35.12: Single-instance guard. Opening the same modal twice appended a
+  // second element sharing the same id (getElementById non-deterministic),
+  // duplicated the activeModals entry, orphaned the first backdrop listener,
+  // and double-fired onClose. Close any existing instance first.
+  if (typeof isModalOpen === 'function' && isModalOpen(id)) {
+    closeModal(id);
   }
 
   // Store data for later reference

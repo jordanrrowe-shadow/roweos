@@ -1,5 +1,87 @@
 # Brilliance / RoweOS Changelog
 
+## v35.12 - Security + data-integrity hardening (audit pass)
+
+Full principal-level audit at docs/audits/2026-07-07-principal-audit.md. This
+release ships the low-risk Critical/High fixes from that audit. Higher-risk
+items (serverless auth backport, key-delivery rework, trial revocation, git
+history) are flagged in the audit's Open Questions and deferred pending
+decisions.
+
+Data integrity (sync):
+- roweos_last_sync was stamped as a locale string ("7/7/2026, 3:45 PM"), which
+  mergeByTimestamp parsed as the integer 7 - permanently disabling the
+  drop-stale-local-items branch and thus cloud-deletion enforcement on that
+  path. Now stamped as a millisecond epoch. This was the single highest-impact
+  one-liner in the audit.
+- Offline write replay (flushPendingWrites) honored a hardcoded merge:true,
+  ignoring merge:false - so todo deletions made while signed out silently
+  resurrected. Now honors the original write's merge option.
+- Pulse goals snapshot dropped locally-created goals older than 10s that weren't
+  yet in Firestore (permanent loss for offline-created goals). Grace widened to
+  5 min and goals still queued in roweos_pending_writes are never dropped.
+- Automations snapshot rebuilt the scheduler task list from cloud-only data,
+  dropping locally-pending automations. Now rebuilds from the merged set (both
+  the onSnapshot and full-pull paths).
+- Legacy conversation history-blob merge had no tombstone filter, so purged
+  conversations resurrected from other devices. Now applies the same chat
+  tombstone filter the subcollection path uses.
+- Fixed a function-scoped var uid re-declaration in loadFromFirebaseV2 that
+  could null the outer uid during a token refresh.
+- deleteDBDoc's empty outer catch now logs synchronous throws (was silent).
+
+Correctness / duplicate side-effects:
+- Automations could double-execute: executeScheduledTask set its running flag
+  but never checked it at entry, and there was no cross-tab guard - so Run Now +
+  the scheduler, or two open tabs, could each fire the same task and send
+  duplicate emails/posts. Added an entry guard plus a self-expiring (5-min)
+  localStorage cross-tab lock.
+- The client cloud-execution guard only recognized lastExecutor 'cloud'; the
+  Cloud Function writes 'cloud_running' during a run. Now honors both with a
+  15-min window, closing the co-execution gap.
+- The social post action's Promise.all().then() had no .catch(), so a throw in
+  the completion callback left the automation stuck "running". Added recovery.
+- Gmail send retried itself recursively with no depth cap on every 401 - an
+  unbounded loop with duplicate-send risk. Capped at a single retry.
+- OpenAI web search in the research pipeline was silently broken: the
+  web_search_preview tool was POSTed to /v1/chat/completions (should be
+  /v1/responses), and the resulting 400 was misclassified as a billing error,
+  triggering spurious provider failover. Fixed the endpoint and response parse.
+- Chat: image-generation on a fresh chat appended onto the previous session's
+  conversation (missing reset the image-edit path already had). LifeAI and
+  StandardAI missing-key errors left the orb and send button stuck (missing the
+  cleanup the BrandAI path does). Both fixed.
+- Guarded unchecked response shapes in mailCallAI (OpenAI .message, Gemini
+  empty parts[]) that threw and looked like missing-key failures.
+
+Security:
+- XSS: escaped four sinks that render AI/user content - chat image alt text
+  (bypassed the escape pass), Studio table cells (the escaper exempted table
+  tags), Library file-name attribute, and Library document preview + Bloom
+  markdown (new sanitizeAiHtml() strips script/style/iframe/event-handler
+  vectors for the render-HTML cases).
+- Firestore: api_key_pool update was allowed for ANY authenticated user (could
+  reassign/corrupt pre-purchased paid keys); locked to admin (the only
+  legitimate client updater is the isAdmin-gated release function; the webhook
+  uses the service account).
+- SSRF: email attachment downloads (gmail-proxy, resend-welcome) fetched
+  arbitrary att.url with no validation (cloud-metadata reachable). Routed
+  through a shared _ssrf-guard that blocks private/reserved ranges and
+  re-validates every redirect hop (reuses the fetch-site-meta v34.111 defense).
+- Removed the hardcoded 'fallback-secret' HMAC fallback in the email survey
+  endpoints (forgeable responses if env vars were unset); now fails closed.
+- send-template-email preflight now allows the Authorization header it requires.
+- Stopped logging access keys and full emails to the browser console.
+
+Performance:
+- writeLastRunById called saveScheduledTasks, doing one Firestore write per
+  automation - 2N writes per single run. Now writes only the one changed doc.
+- Capped Bloom "Load More Seeds" at 80 posts (was unbounded - the v34.121 OOM
+  pattern) and the autolab-history preview imageUrl at 8KB (was 200KB/entry,
+  ~20MB at the 100-entry cap, causing a quota trim-and-retry loop).
+- Modal system: openModal now closes any existing instance first (duplicate IDs
+  orphaned listeners and double-fired onClose).
+
 ## v35.11 - Image generation restored + smart provider routing
 
 Natural-language image generation broke on both mobile and desktop in

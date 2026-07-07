@@ -3637,7 +3637,10 @@ function renderTable(rows) {
     
     html += '<tr>';
     cells.forEach(function(cell) {
-      html += '<' + tag + '>' + cell.trim() + '</' + tag + '>';
+      // v35.12: escape cell content. markdownToHtml's escaping regex exempts
+      // table tags, so unescaped cells here were an XSS sink reachable via
+      // prompt injection into Studio output.
+      html += '<' + tag + '>' + escapeHtml(cell.trim()) + '</' + tag + '>';
     });
     html += '</tr>';
     

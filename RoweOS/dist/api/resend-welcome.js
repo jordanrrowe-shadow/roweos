@@ -181,7 +181,9 @@ export default async function handler(req, res) {
         if (att.url) {
           // Download from Firebase Storage URL, base64 encode for Resend REST API
           try {
-            var dlResp = await fetch(att.url);
+            // v35.12: SSRF guard — was a raw fetch(att.url).
+            var _ssrf = require('./_ssrf-guard');
+            var dlResp = await _ssrf.fetchSafe(att.url);
             if (dlResp.ok) {
               var dlBuf = Buffer.from(await dlResp.arrayBuffer());
               resolvedAttachments.push({
