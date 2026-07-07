@@ -4915,7 +4915,11 @@ function updateBrandSelectors(force) {
   
   // Core brand dropdowns (using index values) - OPTIMIZED
   // v19.0: Use selectedBrand as authority for main brand selectors (prevents sync race condition resetting to 0)
-  var coreSelectors = ['brand', 'agentBrand', 'studioBrand', 'mobileBrand', 'cloneSourceBrand'];
+  // v35.6: 'mobileBrand' removed — no `id="mobileBrand"` exists in any HTML
+  // partial (grep confirmed). The dead reference was logging "✗ Core selector
+  // not found: 'mobileBrand'" once per updateBrandSelectors() call and the
+  // function was firing 20+ times per session, drowning the console.
+  var coreSelectors = ['brand', 'agentBrand', 'studioBrand', 'cloneSourceBrand'];
   var authorityBrandIdx = (typeof selectedBrand === 'number' && !isNaN(selectedBrand) && selectedBrand >= 0 && selectedBrand < brands.length)
     ? String(selectedBrand) : String(parseInt(localStorage.getItem('roweos_selected_brand') || '0'));
   var savedValues = {};

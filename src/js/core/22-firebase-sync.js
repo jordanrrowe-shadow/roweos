@@ -157,6 +157,24 @@ function _whenSyncDBReady(cb) {
   _syncDBQueue.push(cb);
 }
 
+// v35.9: when Safari closes the SyncDB connection (same failure mode as the
+// kv-store IDB), every subsequent .transaction() throws InvalidStateError. The
+// console showed dozens of "[SyncDB] Put exception: InvalidStateError: ...
+// connection is closing" before v35.9. Drop the stale handle and re-open so
+// subsequent calls have a chance to succeed.
+function _syncDBHandleClosed(e) {
+  if (!e) return false;
+  var name = (e.name || '') + '';
+  var msg = (e.message || '') + '';
+  if (name === 'InvalidStateError' || msg.indexOf('connection is closing') !== -1 || msg.indexOf('database is closed') !== -1) {
+    _syncDB = null;
+    _syncDBReady = false;
+    try { initSyncIndexedDB(); } catch(_) {}
+    return true;
+  }
+  return false;
+}
+
 // v23.1: Renamed to _syncIdb* to avoid colliding with existing _idb* (kv store at ~line 56164)
 function _syncIdbPut(storeName, record, cb) {
   if (!_syncDB) { if (cb) cb(null); return; }
@@ -166,7 +184,10 @@ function _syncIdbPut(storeName, record, cb) {
     var req = store.put(record);
     req.onsuccess = function() { if (cb) cb(req.result); };
     req.onerror = function() { console.warn('[SyncDB] Put error:', req.error); if (cb) cb(null); };
-  } catch(e) { console.warn('[SyncDB] Put exception:', e); if (cb) cb(null); }
+  } catch(e) {
+    if (!_syncDBHandleClosed(e)) console.warn('[SyncDB] Put exception:', e);
+    if (cb) cb(null);
+  }
 }
 
 function _syncIdbGet(storeName, key, cb) {
@@ -2308,7 +2329,351 @@ function reloadAllData() {
 // REAL-TIME SUBSCRIPTIONS (mycinder-style)
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// v35.8: scroll diagnostic. Multiple "scroll fix" releases have failed because
+// the CSS cascade for the chat thread is complex (multiple @media rules at
+// different specificities + inline styles). Stop guessing — read the COMPUTED
+// styles at runtime and find out what's actually applied. Run in console:
+//   brillianceScrollReport()
+window.brillianceScrollReport = function brillianceScrollReport() {
+  function readEl(id) {
+    var el = document.getElementById(id);
+    if (!el) return { id: id, found: false };
+    var cs = getComputedStyle(el);
+    return {
+      id: id,
+      found: true,
+      classList: el.className,
+      offsetHeight: el.offsetHeight,
+      scrollHeight: el.scrollHeight,
+      clientHeight: el.clientHeight,
+      canScroll: el.scrollHeight > el.clientHeight,
+      display: cs.display,
+      flex: cs.flex,
+      flexGrow: cs.flexGrow,
+      flexBasis: cs.flexBasis,
+      minHeight: cs.minHeight,
+      maxHeight: cs.maxHeight,
+      height: cs.height,
+      overflowY: cs.overflowY,
+      overflowX: cs.overflowX,
+      position: cs.position,
+      pointerEvents: cs.pointerEvents,
+      paddingBottom: cs.paddingBottom,
+      inlineStyle: el.getAttribute('style') || ''
+    };
+  }
+  var report = {
+    viewportInner: window.innerWidth + 'x' + window.innerHeight,
+    viewportVisual: (window.visualViewport ? window.visualViewport.width + 'x' + window.visualViewport.height : 'n/a'),
+    bodyOverflow: getComputedStyle(document.body).overflow,
+    htmlOverflow: getComputedStyle(document.documentElement).overflow,
+    agentView: readEl('agentView'),
+    agentConversation: readEl('agentConversation'),
+    conversationThread: readEl('conversationThread')
+  };
+  console.group('[ScrollReport]');
+  console.log('viewport:', report.viewportInner, '| visual:', report.viewportVisual);
+  console.log('body overflow:', report.bodyOverflow, '| html overflow:', report.htmlOverflow);
+  console.log('agentView:', report.agentView);
+  console.log('agentConversation:', report.agentConversation);
+  console.log('conversationThread:', report.conversationThread);
+  if (report.conversationThread.found) {
+    var t = report.conversationThread;
+    console.log('—');
+    if (!t.canScroll) {
+      console.warn('VERDICT: scrollHeight (' + t.scrollHeight + ') <= clientHeight (' + t.clientHeight + ') — there is NOTHING TO SCROLL. The thread is sized to its content (flex/height issue) OR content fits.');
+    } else if (t.overflowY !== 'auto' && t.overflowY !== 'scroll') {
+      console.warn('VERDICT: overflowY is "' + t.overflowY + '" — scroll is disabled by CSS.');
+    } else {
+      console.log('VERDICT: container CAN scroll. If gesture is not registering, look for wheel/touchmove handler or pointer-events.');
+    }
+  }
+  console.groupEnd();
+  return report;
+};
+
+// v35.7: diagnostics so we can SEE what's in local storage instead of guessing.
+// Iterates localStorage and the IDB-offloaded keys (tracked in _idbKeys) and
+// reports per-key sizes, then sums. Run in Safari Console:
+//   await brillianceStorageReport()
+// Outputs sorted by size descending so the largest offenders are obvious.
+window.brillianceStorageReport = function brillianceStorageReport() {
+  return new Promise(function(resolve) {
+    var rows = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k) continue;
+        try {
+          var v = (typeof _origGetItemFn !== 'undefined') ? _origGetItemFn.call(localStorage, k) : localStorage.getItem(k);
+          rows.push({ key: k, bytes: v ? v.length * 2 : 0, where: 'localStorage' });
+        } catch(e) {}
+      }
+    } catch(e) {}
+    var idbKeys = [];
+    try { if (typeof _idbKeys === 'object' && _idbKeys) idbKeys = Object.keys(_idbKeys); } catch(e) {}
+    var pending = idbKeys.length;
+    if (pending === 0) { finish(); return; }
+    idbKeys.forEach(function(k) {
+      try {
+        if (typeof _idbGet !== 'function') { pending--; if (pending === 0) finish(); return; }
+        _idbGet(k).then(function(val) {
+          rows.push({ key: k, bytes: val ? (typeof val === 'string' ? val.length * 2 : JSON.stringify(val).length * 2) : 0, where: 'IndexedDB' });
+        }).catch(function() {}).then(function() {
+          pending--;
+          if (pending === 0) finish();
+        });
+      } catch(e) { pending--; if (pending === 0) finish(); }
+    });
+    function finish() {
+      rows.sort(function(a, b) { return b.bytes - a.bytes; });
+      var total = 0;
+      rows.forEach(function(r) { total += r.bytes; });
+      console.group('[Storage Report] total: ' + (total / 1024 / 1024).toFixed(1) + ' MB across ' + rows.length + ' keys');
+      rows.forEach(function(r) {
+        if (r.bytes > 100 * 1024) {
+          console.log('  ' + (r.bytes / 1024 / 1024).toFixed(2) + ' MB  ' + r.where + '  ' + r.key);
+        }
+      });
+      console.groupEnd();
+      resolve({ totalBytes: total, rows: rows });
+    }
+  });
+};
+
+// v35.7: nuclear cache reset. Clears IDB-offloaded keys (the shim's overflow),
+// then clears Firestore's own IDB persistence by calling clearPersistence(),
+// then reloads. Local source-of-truth (small localStorage keys) is preserved —
+// next boot does a clean cloud pull. Run in Safari Console:
+//   purgeLocalCache()
+window.purgeLocalCache = function purgeLocalCache() {
+  console.warn('[Purge] Clearing local caches. The page will reload.');
+  var tasks = [];
+  // 1. Drop the shim's IDB-offloaded keys.
+  try {
+    var keysToWipe = [];
+    if (typeof _idbKeys === 'object' && _idbKeys) keysToWipe = Object.keys(_idbKeys);
+    keysToWipe.forEach(function(k) {
+      try { if (typeof _idbDelete === 'function') _idbDelete(k); } catch(e) {}
+      try { localStorage.removeItem(k + '__sig'); } catch(e) {}
+    });
+    console.log('[Purge] Cleared ' + keysToWipe.length + ' IDB-offloaded keys.');
+  } catch(e) { console.warn('[Purge] IDB shim wipe failed:', e); }
+  // 2. Clear the Firestore SDK's own persistence layer. The SDK refuses if any
+  //    listeners are still attached, so detach first.
+  try {
+    if (typeof firebaseUnsubscribers !== 'undefined' && firebaseUnsubscribers.length) {
+      firebaseUnsubscribers.forEach(function(unsub) { try { if (typeof unsub === 'function') unsub(); } catch(e) {} });
+      firebaseUnsubscribers = [];
+    }
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+      var fs = firebase.firestore();
+      tasks.push(
+        (typeof fs.terminate === 'function' ? fs.terminate() : Promise.resolve())
+          .catch(function() {})
+          .then(function() {
+            return (typeof fs.clearPersistence === 'function') ? fs.clearPersistence().catch(function() {}) : Promise.resolve();
+          })
+      );
+    }
+  } catch(e) { console.warn('[Purge] Firestore persistence wipe failed:', e); }
+  Promise.all(tasks).then(function() {
+    console.log('[Purge] Done. Reloading.');
+    setTimeout(function() { try { location.reload(); } catch(e) {} }, 300);
+  });
+};
+
+// v35.9: catch Firestore's IDB-persistence UnknownErrors at the window level.
+// These are NOT delivered via the snapshot listener onError callbacks — they
+// bubble as unhandled promise rejections from the SDK's internal poll loop in
+// `indexed_db.ts`. Without a window listener they accumulate silently while
+// the SDK's retry loop allocates memory each cycle. After threshold hits, we
+// disable the SDK network entirely (the same SDK kill switch
+// disableLiveSync() uses) so the retry loop stops. User reopens it manually
+// with enableLiveSync() once they've decided what to do (commonly:
+// purgeLocalCache() to clear the corrupted persistence and start fresh).
+var _fsIdbErrorCount = 0;
+var _fsIdbWindowStart = 0;
+// v35.10: lowered from 4-in-30s to 2-in-30s and broadened the detection
+// criteria after v35.9 deployed but the detector never tripped on the user's
+// repeated UnknownErrors. The pattern is unambiguous: a Promise rejection
+// named "UnknownError" or carrying "Indexed Database server" in the message,
+// or a stack referencing the SDK's indexed_db/persistence files, IS the
+// broken-IDB signal. Don't bother requiring a secondary check.
+var _FS_IDB_THRESHOLD = 2;
+var _FS_IDB_WINDOW_MS = 30 * 1000;
+try {
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('unhandledrejection', function(ev) {
+      try {
+        var r = ev && ev.reason;
+        if (!r) return;
+        var name = (r.name || '') + '';
+        var msg = (r.message || '') + '';
+        var stack = (r.stack || '') + '';
+        var isFsIdb = (
+          name === 'UnknownError' ||
+          msg.indexOf('Indexed Database server') !== -1 ||
+          msg.indexOf('UnknownError') !== -1 ||
+          stack.indexOf('indexed_db') !== -1 ||
+          stack.indexOf('persistence') !== -1
+        );
+        if (!isFsIdb) return;
+        var now = Date.now();
+        if (now - _fsIdbWindowStart > _FS_IDB_WINDOW_MS) {
+          _fsIdbErrorCount = 0;
+          _fsIdbWindowStart = now;
+        }
+        _fsIdbErrorCount++;
+        console.warn('[FirestoreIDB] internal error count=' + _fsIdbErrorCount + '/' + _FS_IDB_THRESHOLD + ' (name=' + name + ')');
+        if (_fsIdbErrorCount >= _FS_IDB_THRESHOLD && !window._liveSyncAutoDisabledIDB) {
+          window._liveSyncAutoDisabledIDB = true;
+          // v35.10: persist the diagnosis so the next boot starts in safe mode
+          // (offline) and shows a banner with the recovery one-button.
+          try { localStorage.setItem('roweos_idb_persistence_broken', '1'); } catch(_) {}
+          console.warn('[FirestoreIDB] Auto-disabling live sync — Firestore persistence is broken.');
+          try { if (typeof window.disableLiveSync === 'function') window.disableLiveSync(); } catch(_) {}
+          // v35.10: auto-schedule purge. The user has been typing the recovery
+          // commands without parentheses ("purgeLocalCache" instead of
+          // "purgeLocalCache()"), so it never ran. Schedule a delayed auto-purge
+          // with a visible 5-second countdown that the user can cancel by
+          // pressing the on-screen "Cancel" button OR by setting
+          // window._cancelAutoPurge = true in the console. Default is RUN.
+          window._cancelAutoPurge = false;
+          var _countdown = 5;
+          function _tick() {
+            if (window._cancelAutoPurge) { console.log('[FirestoreIDB] Auto-purge cancelled by user.'); return; }
+            console.warn('[FirestoreIDB] Auto-purge in ' + _countdown + 's — set window._cancelAutoPurge=true to cancel.');
+            if (_countdown <= 0) {
+              try {
+                console.warn('[FirestoreIDB] Running purgeLocalCache() now.');
+                if (typeof window.purgeLocalCache === 'function') window.purgeLocalCache();
+              } catch(_) {}
+              return;
+            }
+            _countdown--;
+            setTimeout(_tick, 1000);
+          }
+          setTimeout(_tick, 100);
+          if (typeof showToast === 'function') {
+            showToast('Cloud cache corrupted. Auto-resetting in 5s.', 'error');
+          }
+        }
+      } catch(_) {}
+    });
+  }
+} catch(_) {}
+
+// v35.6: shared Firestore-error recorder. The 8 snapshot listeners each have
+// their own onError callback; route them all through this so we have one
+// counter to make the auto-disable decision. After threshold consecutive
+// errors in a short window, call disableLiveSync() so the user isn't held
+// hostage by an infinite CORS retry loop they'd otherwise have to escape via
+// console.
+var _fsErrorCount = 0;
+var _fsErrorWindowStart = 0;
+var _FS_ERROR_THRESHOLD = 6;          // errors per window before auto-disable
+var _FS_ERROR_WINDOW_MS = 60 * 1000;  // 60s window
+function recordFirestoreSnapshotError(label, error) {
+  try {
+    var now = Date.now();
+    if (now - _fsErrorWindowStart > _FS_ERROR_WINDOW_MS) {
+      _fsErrorCount = 0;
+      _fsErrorWindowStart = now;
+    }
+    _fsErrorCount++;
+    var code = (error && error.code) || '';
+    console.warn('[FirestoreErr] ' + label + ' code=' + code + ' count=' + _fsErrorCount + '/' + _FS_ERROR_THRESHOLD);
+    if (_fsErrorCount >= _FS_ERROR_THRESHOLD) {
+      // Already-disabled tracking — don't repeatedly re-disable.
+      if (window._liveSyncAutoDisabled) return;
+      window._liveSyncAutoDisabled = true;
+      console.warn('[FirestoreErr] Auto-disabling live sync after ' + _fsErrorCount + ' errors in ' + Math.round((now - _fsErrorWindowStart) / 1000) + 's.');
+      try {
+        if (typeof window.disableLiveSync === 'function') window.disableLiveSync();
+      } catch(e) {}
+      if (typeof showToast === 'function') {
+        showToast('Cloud sync paused — repeated network errors. Use window.enableLiveSync() to retry.', 'error');
+      }
+    }
+  } catch(e) {}
+}
+
+// v35.6: explicit escape valves for the user to stop Firestore network activity
+// when WebKit's "Brilliance Networking" process bloats from CORS-failing
+// long-polling sessions. The Firestore SDK internally retries failed CORS
+// sessions indefinitely, each session holding XHR request/response buffers
+// in the network process — that's how a 3GB+ networking process happens
+// even with the JS heap under control. Calling disableNetwork() releases
+// those buffers; enableNetwork() resumes when the user wants sync back.
+//
+// Both are also called by the Settings UI toggle and respected at boot via
+// localStorage('roweos_live_sync_disabled').
+window.disableLiveSync = function disableLiveSync() {
+  try {
+    // 1. Detach all snapshot listeners so callbacks stop firing.
+    if (typeof firebaseUnsubscribers !== 'undefined' && firebaseUnsubscribers.length) {
+      firebaseUnsubscribers.forEach(function(unsub) { try { if (typeof unsub === 'function') unsub(); } catch(e) {} });
+      firebaseUnsubscribers = [];
+    }
+    // 2. Tell the SDK to stop all network operations. Pending and future
+    //    reads will read from local cache; writes queue locally.
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+      var fs = firebase.firestore();
+      if (typeof fs.disableNetwork === 'function') {
+        fs.disableNetwork().then(function() {
+          console.log('[LiveSync] Firestore network disabled.');
+        }).catch(function(e) { console.warn('[LiveSync] disableNetwork rejected:', e); });
+      }
+    }
+    // 3. Persist the choice so the next page load respects it.
+    try { localStorage.setItem('roweos_live_sync_disabled', 'true'); } catch(e) {}
+    if (typeof updateSyncIndicator === 'function') updateSyncIndicator('offline');
+    if (typeof showToast === 'function') showToast('Live sync paused. Use Settings or window.enableLiveSync() to resume.', 'info');
+    return true;
+  } catch (e) { console.warn('[LiveSync] disable failed:', e); return false; }
+};
+
+window.enableLiveSync = function enableLiveSync() {
+  try {
+    try { localStorage.setItem('roweos_live_sync_disabled', 'false'); } catch(e) {}
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+      var fs = firebase.firestore();
+      if (typeof fs.enableNetwork === 'function') {
+        fs.enableNetwork().then(function() {
+          console.log('[LiveSync] Firestore network re-enabled.');
+          if (typeof setupRealtimeSync === 'function') setupRealtimeSync();
+          if (typeof updateSyncIndicator === 'function') updateSyncIndicator('idle');
+          if (typeof showToast === 'function') showToast('Live sync resumed.', 'success');
+        }).catch(function(e) { console.warn('[LiveSync] enableNetwork rejected:', e); });
+      }
+    }
+    return true;
+  } catch (e) { console.warn('[LiveSync] enable failed:', e); return false; }
+};
+
 function setupRealtimeSync() {
+  // v35.6: honor the explicit user toggle. If live sync was disabled in a
+  // previous session, don't re-attach listeners (and don't re-enable the
+  // network) at boot. The user re-enables via window.enableLiveSync().
+  try {
+    if (localStorage.getItem('roweos_live_sync_disabled') === 'true') {
+      console.log('[LiveSync] real-time sync is user-disabled; skipping setupRealtimeSync.');
+      // Also tell the SDK to stay offline on this boot so the CORS-failing
+      // long-polling sessions don't even start.
+      try {
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+          var _fs = firebase.firestore();
+          if (typeof _fs.disableNetwork === 'function') {
+            _fs.disableNetwork().catch(function() {});
+          }
+        }
+      } catch(_dE) {}
+      if (typeof updateSyncIndicator === 'function') updateSyncIndicator('offline');
+      return;
+    }
+  } catch(e) {}
+
   if (!firebaseUser || !firebase) return;
 
   // v28.0: Use v4 unified listeners instead of old per-collection listeners
@@ -2364,6 +2729,8 @@ function setupRealtimeSync() {
       } else {
         console.log('[Firebase] Real-time sync error:', error.message || error);
         updateSyncIndicator('error');
+        // v35.6: route into the shared CORS-storm detector.
+        if (typeof recordFirestoreSnapshotError === 'function') recordFirestoreSnapshotError('root', error);
       }
     });
     firebaseUnsubscribers.push(unsubRoot);
@@ -10390,6 +10757,53 @@ function scheduleCloudPull(showNotification, skipModeSync) {
 function loadFromFirebaseV2(showNotification, skipModeSync) {
   if (!firebaseUser || !firebase) return Promise.resolve();
 
+  // v35.7: honor the live-sync-disabled toggle here too. v35.6 added the flag
+  // check to setupRealtimeSync() but left loadFromFirebaseV2 unguarded — which
+  // meant a user calling disableLiveSync() then hard-reloading still hit the
+  // boot's Promise.all of 45 reads, including `db.collection('chats').get()`
+  // which deserializes every chat doc (multimodal base64 → hundreds of MB to
+  // GB depending on history). That's the "20 GB right off the bat" the user
+  // reported — boot-time allocation, not gradual growth. With the flag set,
+  // boot now reads strictly from local cache.
+  try {
+    if (localStorage.getItem('roweos_live_sync_disabled') === 'true') {
+      console.log('[Sync] loadFromFirebaseV2 skipped — live sync is user-disabled.');
+      if (typeof updateSyncIndicator === 'function') updateSyncIndicator('offline');
+      return Promise.resolve();
+    }
+  } catch(e) {}
+
+  // v35.4: in-progress guard. Without this, a snapshot listener firing
+  // (or any other code path) could trigger a second loadFromFirebaseV2 while
+  // the first Promise.all of ~45 Firestore reads is still pending. Under
+  // CORS-failure conditions the inner Firestore SDK retries hold the request
+  // buffers in memory until the session resolves, so launching a second pull
+  // doubles the pending request state. Stacked pulls were the dominant 25GB
+  // contributor on top of the historical Studio gallery merge.
+  if (window._loadFromFirebaseV2InProgress) {
+    try { console.log('[Sync] loadFromFirebaseV2 already in progress; skipping re-entry'); } catch(e) {}
+    return Promise.resolve();
+  }
+  window._loadFromFirebaseV2InProgress = true;
+  // Always clear the guard after a hard ceiling, even if Promise.all hangs
+  // forever. 30 seconds is generous; in practice a healthy network completes
+  // in 1-3s and CORS-failed pulls bail much earlier via the SDK's own retry
+  // exhaustion. After this timer fires the next pull is allowed to start.
+  var _v2GuardTimer = setTimeout(function() {
+    try { console.warn('[Sync] loadFromFirebaseV2 guard ceiling reached (30s); releasing.'); } catch(e) {}
+    window._loadFromFirebaseV2InProgress = false;
+    _v2GuardTimer = null;
+  }, 30000);
+  var _releaseV2Guard = function() {
+    if (_v2GuardTimer) { try { clearTimeout(_v2GuardTimer); } catch(e) {} _v2GuardTimer = null; }
+    window._loadFromFirebaseV2InProgress = false;
+  };
+  // Hook the guard release onto the boot-screen safety as well, so a hung
+  // pull never wedges either subsystem.
+  if (typeof window._bootScreenSafetyTimer !== 'undefined' && window._bootScreenSafetyTimer) {
+    // boot screen timer is independent — just leave it alone.
+  }
+
   // v32.0-A: bootstrap tombstone registry on first launch
   // v32.0-C: Migrate position-keyed logos to ID-keyed storage
   // (Focus purge moved to reconcileOnStartup post-pull — needs cloud data hydrated first)
@@ -10504,9 +10918,43 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
       var studioGalleryDoc = results[results.length - 2];
       if (studioGalleryDoc && studioGalleryDoc.exists) {
         var sgData = studioGalleryDoc.data();
+        // v35.5: signature-skip. The same hot loop that fires this pull also
+        // hammers conversations and brands — when the cloud doc is unchanged
+        // (the common case), there's no point parsing 50 base64-laden gallery
+        // entries again. Cheap signature compare bails out before allocation.
+        var _galCloudUnchanged = false;
         if (sgData && sgData.data) {
+          try {
+            var _galCloudSig = (typeof _cheapSig === 'function') ? _cheapSig(sgData.data) : (sgData.data.length + '_' + sgData.data.charCodeAt(0));
+            if (window._lastGalleryCloudSig === _galCloudSig) {
+              _galCloudUnchanged = true;
+            } else {
+              window._lastGalleryCloudSig = _galCloudSig;
+            }
+          } catch(_gsigE) {}
+        }
+        if (sgData && sgData.data && !_galCloudUnchanged) {
           var cloudGallery = JSON.parse(sgData.data);
           if (Array.isArray(cloudGallery)) {
+            // v35.4: HARD CAP THE CLOUD ARRAY BEFORE MERGE. v34.121 capped the
+            // in-memory mirror to 20 AFTER the merge, but the merge itself still
+            // built a full byId map and merged array over every cloud entry. On a
+            // pre-cap historical gallery of N base64 images (N typically a few
+            // hundred, each ~5MB), the merge temporarily allocated N*size bytes
+            // in JS heap. When Firestore CORS errors trigger repeated pulls and
+            // GC can't keep up with the allocations, the tab climbed past 25GB.
+            // The persistStudioGallery write-path caps to 20 too, so the only
+            // way to have more than 20 in the cloud doc is historical data that
+            // pre-dates the cap or a race during dual-device writes - neither
+            // is worth retaining. Cap cloud to the newest 50 (gives merge some
+            // margin above the final 20-item ceiling) before doing anything else.
+            var _GALLERY_PRE_CAP = 50;
+            if (cloudGallery.length > _GALLERY_PRE_CAP) {
+              var _origLen = cloudGallery.length;
+              cloudGallery.sort(function(a, b) { return new Date((a && a.createdAt) || 0) - new Date((b && b.createdAt) || 0); });
+              cloudGallery = cloudGallery.slice(-_GALLERY_PRE_CAP);
+              try { console.warn('[StudioGallery] Pre-capped cloud array from ' + _origLen + ' to ' + cloudGallery.length + ' to prevent heap blow-up.'); } catch(e) {}
+            }
             // Merge by id with local cache (cloud-authoritative on conflict)
             var localGallery = (typeof readStudioGallery === 'function') ? readStudioGallery() : [];
             var byId = {};
@@ -10520,6 +10968,17 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             // Prevents a fresh restore from holding the entire historical gallery (multi-GB base64)
             // in the heap - restore was the only place that bypassed the 20-item cap.
             window._studioGalleryMem = (merged.length > 20) ? merged.slice(-20) : merged;
+            // v35.5: capture sizes BEFORE the GC-aid nulling so the log below
+            // can still report them. v35.4 nulled cloudGallery/localGallery/byId
+            // here for early GC but `console.log(... cloudGallery.length ...)`
+            // a few lines down then threw TypeError on every pull, which the
+            // try/catch swallowed — so the pre-cap fix never took effect and
+            // the snapshot listener pull loop kept retrying. Capture length
+            // first, then null out the references.
+            var _cloudPulledCount = cloudGallery ? cloudGallery.length : 0;
+            cloudGallery = null;
+            localGallery = null;
+            byId = null;
             // v34.120: write to IDB only when changed (was: _idbPut + a redundant
             // localStorage.setItem of the SAME multi-MB JSON every pull, which
             // always blew quota and re-offloaded - gigabytes of churn). The gallery
@@ -10536,7 +10995,7 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
             // Re-render any visible gallery surfaces
             try { var sg = document.getElementById('studioMediaPanel'); if (sg && typeof renderStudioGallery === 'function') renderStudioGallery(sg); } catch (e) {}
             try { if (typeof renderImageLabChatThread === 'function') renderImageLabChatThread(); } catch (e) {}
-            console.log('[StudioGallery] Pulled', cloudGallery.length, 'cloud entries, merged total', merged.length);
+            console.log('[StudioGallery] Pulled', _cloudPulledCount, 'cloud entries, merged total', merged.length);
           }
         }
       }
@@ -11062,7 +11521,27 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     if (convHistoryDoc.exists && shouldSyncCategory('brandai_chats')) {
       var histData = convHistoryDoc.data();
       var cloudHistJson = histData.json || (histData.data ? JSON.stringify(histData.data) : null);
+      // v35.5: skip the parse + merge entirely when the cloud doc is byte-for-byte
+      // identical to the last one we processed. Conversations are the heaviest
+      // value in cloud (multimodal base64 lives here), and on a long-running
+      // session with snapshot listeners firing repeatedly under CORS retry
+      // pressure, we were re-parsing hundreds of MB of identical JSON every
+      // 1-2 seconds. Each parse allocates ~2x the string size as JS object
+      // heap, the merge then builds another copy. Cheap signature compare
+      // catches the "unchanged" case (the common case) without allocating.
+      var _convCloudUnchanged = false;
       if (cloudHistJson) {
+        try {
+          var _convCloudSig = (typeof _cheapSig === 'function') ? _cheapSig(cloudHistJson) : (cloudHistJson.length + '_' + cloudHistJson.charCodeAt(0));
+          if (window._lastConvCloudSig === _convCloudSig) {
+            _convCloudUnchanged = true;
+            try { console.log('[Sync] Conversations cloud unchanged (sig match); skip merge.'); } catch(e0) {}
+          } else {
+            window._lastConvCloudSig = _convCloudSig;
+          }
+        } catch(_sigE) {}
+      }
+      if (cloudHistJson && !_convCloudUnchanged) {
         // v23.7: Merge cloud history with local - never lose local conversations
         try {
           var cloudHist = JSON.parse(cloudHistJson);
@@ -12391,8 +12870,13 @@ function loadFromFirebaseV2(showNotification, skipModeSync) {
     localStorage.setItem('roweos_first_sync_completed', 'true');
     localStorage.setItem('roweos_last_sync', String(Date.now()));
     console.log('[Firebase V2] Load complete');
+    // v35.4: release the in-progress guard so the next pull can run.
+    try { _releaseV2Guard(); } catch(eR1) {}
   }).catch(function(error) {
     console.error('[Firebase V2] Load error:', error);
+    // v35.4: release the guard on error too, otherwise a failed pull would
+    // wedge all subsequent pulls until the 30s safety timer fires.
+    try { _releaseV2Guard(); } catch(eR2) {}
     // Fallback to v1 single-doc load
     console.log('[Firebase V2] Falling back to v1 load...');
     return loadFromFirebaseV1_legacy(false);

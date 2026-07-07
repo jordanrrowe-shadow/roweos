@@ -137,17 +137,15 @@ SIZE_KB=$(( $(wc -c < "$OUT" | tr -d ' ') / 1024 ))
 echo "Built: $OUT"
 echo "Lines: $LINE_COUNT | Size: ${SIZE_KB}KB (pre-minify)"
 
-# v35.0: post-build minification. Inline <script> blocks are passed through
-# esbuild --minify --target=es2015, inline <style> blocks through esbuild's CSS
-# minifier. The unminified copy is preserved at RoweOS/dist/index.unminified.html
-# so we can diff against it when investigating regressions.
-# Skip with NO_MINIFY=1 bash src/build.sh for local debug builds.
-if [ "${NO_MINIFY:-0}" = "1" ]; then
-  echo "NO_MINIFY=1 set; skipping minification"
-  node "$PROJECT_DIR/scripts/minify-bundle.mjs" --no-minify || echo "[warn] unminified copy step failed"
-else
+# v35.0: post-build minification. v35.0.1 - DISABLED by default after the
+# initial deploy broke login (esbuild's emitted output for one of the inline
+# script blocks tripped a runtime ReferenceError on handleGoogleSignIn).
+# Re-enable with MINIFY=1 once the offending pattern is identified and
+# either patched in source or excluded from minification. Spec at
+# docs/superpowers/specs/2026-06-01-v35-performance-overhaul-design.md.
+if [ "${MINIFY:-0}" = "1" ]; then
   if [ -f "$PROJECT_DIR/scripts/minify-bundle.mjs" ]; then
-    echo "Minifying..."
+    echo "Minifying (MINIFY=1)..."
     node "$PROJECT_DIR/scripts/minify-bundle.mjs" || {
       echo "[warn] minify failed; reverting to unminified source"
       cp "$PROJECT_DIR/RoweOS/dist/index.unminified.html" "$OUT"
@@ -155,6 +153,8 @@ else
     POST_SIZE_KB=$(( $(wc -c < "$OUT" | tr -d ' ') / 1024 ))
     echo "Post-minify size: ${POST_SIZE_KB}KB"
   fi
+else
+  echo "Minification disabled (set MINIFY=1 to enable)"
 fi
 
 echo "=== Build Complete ==="

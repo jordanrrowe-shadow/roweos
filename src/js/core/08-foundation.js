@@ -459,12 +459,58 @@ var _idbQueue = []; // queued writes before DB is ready
   req.onerror = function() { console.warn('[Storage] IndexedDB init failed'); };
 })();
 
+// v35.9: when Safari closes the IDB connection underneath us (happens under
+// quota pressure or after the OS reclaims it), every subsequent
+// _idb.transaction() throws InvalidStateError: "The database connection is
+// closing." Before v35.9 the catch just swallowed the error — writes didn't
+// persist, sigs got out of sync with reality, the calling code thought the
+// write succeeded, and retry storms followed. Now: detect the closing-handle
+// case, drop the cached handle so the boot IIFE's open req gets re-issued,
+// and queue the operation to fire when the new connection lands.
+function _idbHandleClosed(e) {
+  if (!e) return false;
+  var msg = (e.message || '') + '';
+  var name = (e.name || '') + '';
+  if (name === 'InvalidStateError' || msg.indexOf('connection is closing') !== -1 || msg.indexOf('database is closed') !== -1) {
+    _idb = null;
+    _idbReady = false;
+    try { _idbReopen(); } catch(_) {}
+    return true;
+  }
+  return false;
+}
+function _idbReopen() {
+  if (!window.indexedDB) return;
+  try {
+    var req = indexedDB.open('RoweOS_Overflow', 1);
+    req.onsuccess = function(ev) {
+      _idb = ev.target.result;
+      _idbReady = true;
+      console.warn('[Storage] IDB reopened after connection-closing error; draining ' + _idbQueue.length + ' queued ops.');
+      var q = _idbQueue.slice(); _idbQueue = [];
+      for (var i = 0; i < q.length; i++) {
+        try {
+          if (q[i].op === 'put') _idbPut(q[i].key, q[i].value);
+          else if (q[i].op === 'delete') _idbDelete(q[i].key);
+        } catch(_) {}
+      }
+    };
+    req.onerror = function() { console.warn('[Storage] IDB reopen failed'); };
+  } catch(_) {}
+}
+
 function _idbPut(key, value) {
-  if (!_idb) { _idbQueue.push({ key: key, value: value }); return; }
+  if (!_idb) { _idbQueue.push({ op: 'put', key: key, value: value }); return; }
   try {
     var tx = _idb.transaction('kv', 'readwrite');
     tx.objectStore('kv').put(value, key);
-  } catch(e) { console.warn('[Storage] IDB put error:', key, e.message); }
+  } catch(e) {
+    if (_idbHandleClosed(e)) {
+      _idbQueue.push({ op: 'put', key: key, value: value });
+    } else {
+      console.warn('[Storage] IDB put error:', key, e.message);
+    }
+  }
 }
 
 function _idbGet(key, callback) {
@@ -474,7 +520,16 @@ function _idbGet(key, callback) {
     var req = tx.objectStore('kv').get(key);
     req.onsuccess = function() { callback(req.result !== undefined ? req.result : null); };
     req.onerror = function() { callback(null); };
-  } catch(e) { callback(null); }
+  } catch(e) {
+    if (_idbHandleClosed(e)) {
+      // queue a re-attempt after the reopen lands
+      _idbQueue.push({ op: 'get-cb', key: key, cb: callback });
+      // also resolve the current caller with null so they don't hang
+      try { callback(null); } catch(_) {}
+    } else {
+      try { callback(null); } catch(_) {}
+    }
+  }
 }
 
 function _idbDelete(key) {
@@ -482,7 +537,11 @@ function _idbDelete(key) {
   try {
     var tx = _idb.transaction('kv', 'readwrite');
     tx.objectStore('kv').delete(key);
-  } catch(e) {}
+  } catch(e) {
+    if (_idbHandleClosed(e)) {
+      _idbQueue.push({ op: 'delete', key: key });
+    }
+  }
 }
 
 // v22.36: Storage usage calculator

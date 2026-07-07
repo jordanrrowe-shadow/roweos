@@ -19,8 +19,14 @@
   <script src="https://cdn.jsdelivr.net/npm/ical.js@1.5.0/build/ical.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx@9.1.1/build/index.umd.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgenjs.bundle.js" defer></script>
+  <!-- v35.3: docx and pptxgenjs CDN paths corrected after v35.x deploys showed
+       404s in the console. docx@9.1.1 only publishes /dist/index.iife.js (the
+       IIFE/global build); pptxgenjs ships as pptxgen.bundle.js (note: no `js`
+       suffix on the basename). Old paths were left over from earlier versions
+       of those packages. Both still load via `defer` since they're only used
+       by the Word / PowerPoint export paths in 11-agents.js / 13-studio.js. -->
+  <script src="https://cdn.jsdelivr.net/npm/docx@9.1.1/dist/index.iife.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" defer></script>
   <!-- v29.2: TinyMCE 7 for Scribe rich text editor (self-hosted, no API key) -->
   <script src="/tinymce/tinymce.min.js" defer></script>
@@ -39,3 +45,24 @@
   <!-- v22.53: Boot screen - covers everything until auth resolves or auth gate shows -->
   <div id="bootScreen" style="position:fixed;inset:0;z-index:99999;background:#0a0a0a;"></div>
   <script>try{if(localStorage.getItem('roweos-theme')==='light'){document.getElementById('bootScreen').style.background='#f5f3ee';}}catch(e){}</script>
+  <!-- v35.3: boot screen safety net. The boot screen is removed by
+       showAuthGate() / showStartupScreen() after Firestore's Promise.all of
+       ~45 reads resolves. When the network is slow or the Firestore
+       long-polling channel rejects with CORS, that Promise.all hangs for
+       60s+ before timing out and the user is stuck on a black screen.
+       This timer is the belt-and-suspenders: after 10s, force-remove the
+       boot screen so the user sees the auth gate / app even if cloud sync
+       hasn't completed. The Firestore reads continue in the background and
+       merge whenever they arrive. Tracked on window so other code can clear
+       the timer if cloud sync completes normally. -->
+  <script>
+    window._bootScreenSafetyTimer = setTimeout(function() {
+      try {
+        var b = document.getElementById('bootScreen');
+        if (b && b.parentNode) {
+          console.warn('[Boot] Safety timeout reached (10s) — forcing boot screen removal so the app is reachable.');
+          b.remove();
+        }
+      } catch(e) {}
+    }, 10000);
+  </script>

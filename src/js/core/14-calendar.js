@@ -111,8 +111,14 @@ async function generateImageWithNanobanana(prompt, options) {
   console.log('[Nanobanana] Generating image...');
   console.log('[Nanobanana] Prompt:', prompt.substring(0, 100) + '...');
 
-  // v22.13: Always use Nano Banana 3 Pro for all image generation
-  var model = 'gemini-3-pro-image-preview';
+  // v22.13: Default to Nano Banana Pro for all image generation
+  // v35.11: gemini-3-pro-image-preview was shut down 2026-06-25 — use the
+  // stable ID, honor an explicit options.model, and normalize stale stored IDs.
+  var model = 'gemini-3-pro-image';
+  if (options.model && typeof normalizeImageModel === 'function') {
+    var _normModel = normalizeImageModel(options.model);
+    if (_normModel && _normModel.indexOf('gemini') === 0) model = _normModel;
+  }
   var aspectRatio = options.aspectRatio || '1:1';
 
   // v15.13: Build request using Google's Gemini API structure (role required for multi-turn)
@@ -268,7 +274,8 @@ async function generateImageWithNanobanana(prompt, options) {
   };
 }
 
-// v31.11: GPT Image 2 (OpenAI gpt-image-1) — direct browser call
+// v31.11: GPT Image 2 — direct browser call
+// v35.11: upgraded model ID gpt-image-1 -> gpt-image-2
 // Returns same shape as generateImageWithNanobanana: { images: [{base64, mimeType}], text, model, provider }
 async function generateImageWithGptImage(prompt, options) {
   if (!options) options = {};
@@ -289,14 +296,14 @@ async function generateImageWithGptImage(prompt, options) {
     throw new Error('OpenAI API key not configured');
   }
 
-  // Map aspect ratio to gpt-image-1 supported sizes
+  // Map aspect ratio to GPT Image supported sizes
   var aspectRatio = options.aspectRatio || '1:1';
   var size = '1024x1024';
   if (aspectRatio === '16:9' || aspectRatio === '4:3') size = '1536x1024';
   else if (aspectRatio === '9:16' || aspectRatio === '3:4') size = '1024x1536';
 
   var body = {
-    model: 'gpt-image-1',
+    model: 'gpt-image-2',
     prompt: prompt,
     size: size,
     n: 1
@@ -310,7 +317,7 @@ async function generateImageWithGptImage(prompt, options) {
   if (hasRef) {
     url = 'https://api.openai.com/v1/images/edits';
     var fd = new FormData();
-    fd.append('model', 'gpt-image-1');
+    fd.append('model', 'gpt-image-2');
     fd.append('prompt', prompt);
     fd.append('size', size);
     fd.append('n', '1');
@@ -365,7 +372,7 @@ async function generateImageWithGptImage(prompt, options) {
       if (d.b64_json) {
         images.push({ base64: d.b64_json, mimeType: 'image/png' });
       } else if (d.url) {
-        // Fetch the URL and convert to base64 (rare for gpt-image-1; defaults to b64)
+        // Fetch the URL and convert to base64 (rare for GPT Image models; defaults to b64)
         try {
           var imgResp = await fetch(d.url);
           var blob = await imgResp.blob();
@@ -387,7 +394,7 @@ async function generateImageWithGptImage(prompt, options) {
   return {
     images: images,
     text: null,
-    model: 'gpt-image-1',
+    model: 'gpt-image-2',
     aspectRatio: aspectRatio,
     provider: 'openai',
     revisedPrompt: (data && data.data && data.data[0] && data.data[0].revised_prompt) || null
@@ -939,7 +946,8 @@ async function runImageOperation() {
       }
       
       // v13.9: Pass selected Nanobanana model
-      var nanoModel = window.selectedNanobananaModel || (document.getElementById('nanobananaImageModel') ? document.getElementById('nanobananaImageModel').value : 'gemini-2.0-flash-exp-image-generation');
+      var nanoModel = window.selectedNanobananaModel || (document.getElementById('nanobananaImageModel') ? document.getElementById('nanobananaImageModel').value : 'gemini-3-pro-image');
+      if (typeof normalizeImageModel === 'function') nanoModel = normalizeImageModel(nanoModel); // v35.11: retire dead model IDs
       // v25.4: Route Imagen 4 to its own API
       if (nanoModel === 'imagen3') {
         providerName = 'Imagen 4';

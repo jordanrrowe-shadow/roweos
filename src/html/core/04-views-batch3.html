@@ -419,7 +419,7 @@
           <!-- v32.1: Version bump.
                v34.11: Click opens the What's New modal so users can re-read the changelog
                without digging through Settings → System. Tooltip surfaces the gesture. -->
-          <span class="sidebar-version" id="sidebarVersionDisplay" role="button" tabindex="0" title="What's new in this version" onmouseenter="if(typeof updateSidebarVersionTooltip==='function')updateSidebarVersionTooltip(this);" onclick="if(typeof showWhatsNewModal==='function'&&typeof ROWEOS_VERSION!=='undefined'){showWhatsNewModal(ROWEOS_VERSION);}" onkeydown="if((event.key==='Enter'||event.key===' ')&&typeof showWhatsNewModal==='function'&&typeof ROWEOS_VERSION!=='undefined'){event.preventDefault();showWhatsNewModal(ROWEOS_VERSION);}" style="cursor:pointer;">v35.0</span>
+          <span class="sidebar-version" id="sidebarVersionDisplay" role="button" tabindex="0" title="What's new in this version" onmouseenter="if(typeof updateSidebarVersionTooltip==='function')updateSidebarVersionTooltip(this);" onclick="if(typeof showWhatsNewModal==='function'&&typeof ROWEOS_VERSION!=='undefined'){showWhatsNewModal(ROWEOS_VERSION);}" onkeydown="if((event.key==='Enter'||event.key===' ')&&typeof showWhatsNewModal==='function'&&typeof ROWEOS_VERSION!=='undefined'){event.preventDefault();showWhatsNewModal(ROWEOS_VERSION);}" style="cursor:pointer;">v35.11</span>
         </div>
       </div>
     </div>
@@ -536,7 +536,7 @@
       
       <div class="welcome-footer">
         <!-- v32.1: Version bump -->
-        <p>Brilliance v35.0, same platform · new surfaces</p>
+        <p>Brilliance v35.11, same platform · new surfaces</p>
         <p>Mac • iOS • Web</p>
       </div>
     </div>
@@ -598,7 +598,7 @@
             <button onclick="goToOnboardingStep('pwa')" style="width:100%;padding:13px 32px;background:linear-gradient(135deg,#e2c79b,#c9a961,#a88a4a);border:none;border-radius:99px;color:#0a0a0a;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">Begin</button>
           </div>
           <div style="width:80px;height:1px;background:linear-gradient(90deg,transparent,rgba(201,169,97,0.3),transparent);margin:6px auto 2px;animation:fadeUp 0.8s ease 0.95s both;"></div>
-          <p id="onboardingVersionTag" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:10px;color:var(--text-muted);opacity:0.5;margin:0;letter-spacing:0.18em;text-transform:uppercase;animation:fadeUp 0.8s ease 1s both;">v35.0</p>
+          <p id="onboardingVersionTag" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:10px;color:var(--text-muted);opacity:0.5;margin:0;letter-spacing:0.18em;text-transform:uppercase;animation:fadeUp 0.8s ease 1s both;">v35.11</p>
         </div>
       </div>
 
@@ -3367,7 +3367,7 @@
             <div class="model-dropdown-section" id="nanobananaModelSection" style="display:none;">
               <div class="model-dropdown-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#a89878" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M12 2C6.48 2 2 6 2 10c0 2.5 1.5 5 4 6.5V22l3-2 3 2v-5.5c2.5-1.5 4-4 4-6.5 0-4-4.48-8-10-8z"/></svg>Nano Banana</div>
               <div class="model-dropdown-item" onclick="selectModel('nanobanana', 'gemini-2.5-flash-image', 'Nano Banana 3.0')">Nano Banana 3.0</div>
-              <div class="model-dropdown-item" onclick="selectModel('nanobanana', 'gemini-3-pro-image-preview', 'Nano Banana 3.0 Pro')">Nano Banana 3.0 Pro</div>
+              <div class="model-dropdown-item" onclick="selectModel('nanobanana', 'gemini-3-pro-image', 'Nano Banana Pro')">Nano Banana Pro</div>
             </div>
           </div>
         </div>

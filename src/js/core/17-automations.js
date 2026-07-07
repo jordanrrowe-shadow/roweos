@@ -1799,11 +1799,12 @@ function renderAutoLabTargetConfig(action, existing) {
     html += '<div class="auto-lab-form-field"><label>Image Prompt</label>';
     html += '<input type="text" id="autoLabWfTargetText" placeholder="Describe the image to generate..." value="' + escapeHtml(target.text || '') + '"></div>';
     // v20.0: Image model selector - default to Nano Banana Pro 3
-    var imgModelVal = (existing && existing.config && existing.config.imageModel) ? existing.config.imageModel : 'gemini-3-pro-image-preview';
+    var imgModelVal = (existing && existing.config && existing.config.imageModel) ? existing.config.imageModel : 'gemini-3-pro-image';
+    if (typeof normalizeImageModel === 'function') imgModelVal = normalizeImageModel(imgModelVal); // v35.11: retire dead model IDs
     var imgModels = [
-      ['gemini-3-pro-image-preview', 'Nano Banana 3.0 Pro'],
+      ['gemini-3-pro-image', 'Nano Banana Pro'],
       ['gemini-2.5-flash-image', 'Nano Banana 3.0'],
-      ['gemini-2.0-flash-exp-image-generation', 'Flash Image (Legacy)']
+      ['gemini-3.1-flash-image', 'Nano Banana 2']
     ];
     html += '<div class="auto-lab-form-field"><label>Image Model</label>';
     html += '<select id="autoLabWfImageModel">';
@@ -4792,7 +4793,7 @@ function renderPipelineStepConfig(step, index) {
     html += '</select></div>';
     // v18.7: Image sub-model dropdown - only for providers with multiple models
     var imgModel = (step.config && step.config.imageModel) ? step.config.imageModel : '';
-    var imgModelProviders = { gemini: [['gemini-2.0-flash-preview-image-generation','Gemini 2.0 Flash'],['imagen-3.0-generate-002','Imagen 4']], dalle: [['dall-e-3','DALL-E 3'],['dall-e-2','DALL-E 2']] };
+    var imgModelProviders = { gemini: [['gemini-3-pro-image','Nano Banana Pro'],['gemini-3.1-flash-image','Nano Banana 2'],['imagen-4.0-generate-001','Imagen 4']], dalle: [['gpt-image-2','GPT Image 2']] }; // v35.11: retired dead model IDs
     var showImgModel = imgProv && imgModelProviders[imgProv];
     html += '<div class="auto-lab-form-field" id="pipelineStepImgModelWrap_' + index + '" style="' + (showImgModel ? '' : 'display:none;') + '"><label>Image Model</label>';
     html += '<select id="pipelineStepImgModel_' + index + '">';
@@ -5471,7 +5472,7 @@ function updatePipelineStepImageModelOptions(index, provider) {
   var wrap = document.getElementById('pipelineStepImgModelWrap_' + index);
   var sel = document.getElementById('pipelineStepImgModel_' + index);
   if (!wrap || !sel) return;
-  var imgModelProviders = { gemini: [['gemini-2.0-flash-preview-image-generation','Gemini 2.0 Flash'],['imagen-3.0-generate-002','Imagen 4']], dalle: [['dall-e-3','DALL-E 3'],['dall-e-2','DALL-E 2']] };
+  var imgModelProviders = { gemini: [['gemini-3-pro-image','Nano Banana Pro'],['gemini-3.1-flash-image','Nano Banana 2'],['imagen-4.0-generate-001','Imagen 4']], dalle: [['gpt-image-2','GPT Image 2']] }; // v35.11: retired dead model IDs
   if (!provider || !imgModelProviders[provider]) {
     wrap.style.display = 'none';
     sel.innerHTML = '';
@@ -7098,7 +7099,7 @@ function updateAutoLabAgentModels(preselect) {
   // v13.9: Updated Gemini models to 3.0
   var modelsByProvider = {
     gemini: ['gemini-3-flash-preview', 'gemini-3.1-pro-preview'],
-    nanobanana: ['gemini-2.5-flash-image', 'gemini-3-pro-image-preview', 'gemini-2.0-flash-exp-image-generation'],
+    nanobanana: ['gemini-2.5-flash-image', 'gemini-3-pro-image', 'gemini-3.1-flash-image', 'gemini-3-pro-image-preview', 'gemini-2.0-flash-exp-image-generation'], // v35.11: stable IDs added, old kept for stored configs
     anthropic: ['claude-sonnet-4-6', 'claude-haiku-4-20250514', 'claude-opus-4-8'],
     openai: ['gpt-5.5', 'gpt-5.5-pro', 'gpt-5.5-thinking']
   };

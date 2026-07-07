@@ -41483,6 +41483,41 @@
       #conversationThread {
         padding-bottom: 32px;
       }
+
+      /* v35.2: mobile chat scroll fix.
+         The desktop @media (min-width: 769px) block bounds #agentView.conversation-active
+         to height: calc(100vh - 60px), so flex:1 children get a defined upper bound
+         and #conversationThread (overflow-y:auto) can scroll. On mobile the
+         conversation-active rule was missing entirely — agentView had no height
+         constraint, the flex children grew to fit content, and scroll never engaged.
+         Also: flex items default to min-height: auto which expands them past their
+         allocation when content overflows; we explicitly set min-height: 0 on the
+         flex chain so the scroll container respects its flex allocation. */
+      #agentView.conversation-active {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100dvh !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+        position: relative !important;
+      }
+      #agentView.conversation-active #agentConversation {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+      }
+      #agentView.conversation-active #conversationThread {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
+        /* Clear the fixed input bar + mobile bottom nav + iOS safe area. */
+        padding-bottom: calc(140px + var(--mobile-nav-height, 70px) + var(--mobile-safe-bottom, 0px)) !important;
+      }
       
       /* Settings and other list views */
       .settings-content,
@@ -42202,7 +42237,8 @@
       }
       
       #agentView.conversation-active #agentConversation {
-        flex: 1 !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
@@ -42211,7 +42247,7 @@
         flex-direction: column !important;
         overflow: hidden !important;
       }
-      
+
       /* Conversation header - full width */
       /* v24.27: Compact header — minimal padding, transparent */
       #agentView.conversation-active #agentConversationHeader {
@@ -42224,10 +42260,17 @@
       }
       
       /* Messages area - scrollable, expanded to use full available space */
+      /* v35.2: flex:1 1 0% + min-height:0 makes the flex item respect its
+         allocation when content overflows; without min-height:0 the default
+         min-height:auto would let the messages container grow past viewport
+         and kill scroll. -webkit-overflow-scrolling for iOS momentum. */
       #agentView.conversation-active #conversationThread {
-        flex: 1 !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        overscroll-behavior: contain !important;
         padding: 0 48px 220px 48px !important; /* v24.27: no top gap */
         width: 100% !important;
         max-width: 100% !important;
@@ -43140,7 +43183,8 @@
       }
 
       #agentView.conversation-active #agentConversation {
-        flex: 1 !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
@@ -43151,10 +43195,16 @@
       #agentView.conversation-active #conversationThread {
         margin-bottom: 0 !important;
       }
-      
+
       /* Scrollable message area */
+      /* v35.3: the v35.2 fix in the earlier mobile section was being clobbered
+         by THIS rule, which appears later in the cascade and was missing the
+         flex item min-height: 0 needed for overflow:auto to actually scroll.
+         Without min-height: 0 the flex item defaults to min-height: auto and
+         expands past its allocation, which kills the scroll. */
       #agentView.conversation-active #conversationThread {
-        flex: 1 !important;
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         -webkit-overflow-scrolling: touch !important;
@@ -48989,6 +49039,14 @@
 
     /* C1: Chat scroll fix — #agentConversation stays overflow:hidden,
        #conversationThread is the scroll container */
+    /* v35.8: flex-basis was `auto` here, which sizes the flex item to its
+       content. That defeats the WHOLE scroll system: the thread grows to fit
+       all messages, the flex parent has no overflow to clip, and there's
+       nothing to scroll. flex: 1 1 0% means "respect your allocation, scroll
+       the rest". This rule lives inside @media (min-width: 769px), and the
+       higher-specificity #agentView.conversation-active #conversationThread
+       rules already use 1 1 0%, but this one was the OLDEST scroll-fix rule
+       in the file and was undermining everything by stamping `auto` back. */
     #agentConversation {
       overflow: hidden !important;
     }
@@ -48996,7 +49054,7 @@
       overflow-y: auto !important;
       overflow-x: hidden !important;
       -webkit-overflow-scrolling: touch !important;
-      flex: 1 1 auto !important;
+      flex: 1 1 0% !important;
       min-height: 0 !important;
       padding-bottom: 16px !important;
     }

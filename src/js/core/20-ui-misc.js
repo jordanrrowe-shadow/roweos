@@ -3578,6 +3578,69 @@ function showConversationView() {
   if (typeof hideThinkingProgress === 'function') hideThinkingProgress();
   // Add conversation-active class to handle CSS properly
   document.getElementById('agentView').classList.add('conversation-active');
+
+  // v35.9: defensive scroll enforcement. Three previous CSS-based scroll fixes
+  // (v35.2 mobile rule, v35.3 cascade conflict, v35.8 flex-basis fix) didn't
+  // resolve the user's report that the chat doesn't scroll after sending a
+  // message. Set the scroll-critical properties as INLINE !important styles —
+  // setProperty(name, value, 'important') beats any !important CSS rule
+  // regardless of source order or specificity. If some downstream code is
+  // mutating these (we didn't find evidence of that, but exhausted CSS-only
+  // theories), this fights back. Cheap; runs at most once per send.
+  try {
+    var _agentV = document.getElementById('agentView');
+    var _agentC = document.getElementById('agentConversation');
+    var _thread = document.getElementById('conversationThread');
+    if (_agentV) {
+      _agentV.style.setProperty('display', 'flex', 'important');
+      _agentV.style.setProperty('flex-direction', 'column', 'important');
+      _agentV.style.setProperty('overflow', 'hidden', 'important');
+    }
+    if (_agentC) {
+      _agentC.style.setProperty('flex', '1 1 0%', 'important');
+      _agentC.style.setProperty('min-height', '0', 'important');
+      _agentC.style.setProperty('display', 'flex', 'important');
+      _agentC.style.setProperty('flex-direction', 'column', 'important');
+      _agentC.style.setProperty('overflow', 'hidden', 'important');
+    }
+    if (_thread) {
+      _thread.style.setProperty('flex', '1 1 0%', 'important');
+      _thread.style.setProperty('min-height', '0', 'important');
+      _thread.style.setProperty('overflow-y', 'auto', 'important');
+      _thread.style.setProperty('overflow-x', 'hidden', 'important');
+      _thread.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+      _thread.style.setProperty('overscroll-behavior', 'contain', 'important');
+      _thread.style.setProperty('pointer-events', 'auto', 'important');
+    }
+  } catch(e) {}
+
+  // v35.10: auto-run the scroll diagnostic 1.5s after entering conversation
+  // view, so we have evidence WITHOUT relying on the user to type
+  // `brillianceScrollReport()` with parens (which they've been omitting). The
+  // 1.5s lets the streaming response start so the thread has content. Logs
+  // ONLY a one-line verdict so the console isn't flooded — full report is
+  // still available via brillianceScrollReport() for deeper inspection.
+  try {
+    if (typeof window !== 'undefined') {
+      if (window._scrollAutoDiagTimer) clearTimeout(window._scrollAutoDiagTimer);
+      window._scrollAutoDiagTimer = setTimeout(function() {
+        try {
+          var t = document.getElementById('conversationThread');
+          if (!t) { console.warn('[ScrollAutoDiag] conversationThread not found.'); return; }
+          var cs = getComputedStyle(t);
+          var canScroll = t.scrollHeight > t.clientHeight;
+          var oy = cs.overflowY;
+          if (!canScroll) {
+            console.warn('[ScrollAutoDiag] scrollHeight=' + t.scrollHeight + ' clientHeight=' + t.clientHeight + ' — NOTHING TO SCROLL (height/flex). flex=' + cs.flex + ' minHeight=' + cs.minHeight + ' height=' + cs.height);
+          } else if (oy !== 'auto' && oy !== 'scroll') {
+            console.warn('[ScrollAutoDiag] overflowY=' + oy + ' — scroll DISABLED by CSS.');
+          } else {
+            console.log('[ScrollAutoDiag] thread CAN scroll. scrollHeight=' + t.scrollHeight + ' clientHeight=' + t.clientHeight + '. If gesture not registering, run brillianceScrollReport() for full data.');
+          }
+        } catch(diagE) {}
+      }, 1500);
+    }
+  } catch(e) {}
   document.getElementById('agentLandingContent').style.display = 'none';
   var header = document.getElementById('agentConversationHeader');
   header.classList.remove('hidden');
@@ -4764,8 +4827,19 @@ document.addEventListener('click', function(e) {
 
 function renderConversation() {
   var thread = document.getElementById('conversationThread');
+  // v35.2: capture whether the user is near the bottom BEFORE the wipe so we
+  // can decide whether to restore scroll. Without this, every call snapped the
+  // user back to the bottom — breaking the ability to scroll up to read prior
+  // turns while a new turn was rendering. Threshold matches the streaming
+  // smart-scroll guard.
+  var _scrollWasAtBottom = true;
+  try {
+    if (thread && thread.scrollHeight > 0) {
+      _scrollWasAtBottom = (thread.scrollHeight - thread.scrollTop - thread.clientHeight) < 150;
+    }
+  } catch(e) {}
   thread.innerHTML = '';
-  
+
   currentConversation.forEach(function(msg) {
     // Skip messages with undefined content
     if (!msg.content) return;
@@ -4846,10 +4920,22 @@ function renderConversation() {
     // v15.22: Use formatMessageContent() for assistant (handles images, markdown properly)
     // Use simple escapeHtml for user messages to prevent XSS but preserve readability
     if (msg.role === 'assistant') {
-      content = formatMessageContent(content);
-      // v15.22: Fallback - if msg has imageUrl but content lost the image, re-inject it
-      if (msg.imageUrl && content.indexOf('<img') === -1) {
-        content += '<div style="margin-top:8px;"><img src="' + msg.imageUrl + '" alt="Generated Image" style="max-width:100%;border-radius:8px;" /></div>';
+      // v35.2: cache the formatted markdown HTML per-message. formatMessageContent
+      // calls marked.parse() which walks the entire string — on a 30-message
+      // history every renderConversation() was re-parsing every assistant
+      // message, the dominant cost of the agent-view lag. Cache invalidates
+      // automatically when streaming mutates the underlying content.
+      var _msgCacheKey = (typeof msg.content === 'string' ? msg.content.length : 0) + ':' + (msg.imageUrl ? '1' : '0');
+      if (msg._formattedHtml && msg._formattedCacheKey === _msgCacheKey) {
+        content = msg._formattedHtml;
+      } else {
+        content = formatMessageContent(content);
+        // v15.22: Fallback - if msg has imageUrl but content lost the image, re-inject it
+        if (msg.imageUrl && content.indexOf('<img') === -1) {
+          content += '<div style="margin-top:8px;"><img src="' + msg.imageUrl + '" alt="Generated Image" style="max-width:100%;border-radius:8px;" /></div>';
+        }
+        msg._formattedHtml = content;
+        msg._formattedCacheKey = _msgCacheKey;
       }
     } else {
       content = escapeHtml(content).replace(/\n/g, '<br>');
@@ -4890,8 +4976,13 @@ function renderConversation() {
     }
     thread.appendChild(div);
   });
-  
-  thread.scrollTop = thread.scrollHeight;
+
+  // v35.2: only restore scroll-to-bottom if the user was already near the
+  // bottom when render started. If they had scrolled up to read prior turns,
+  // leave the scrollTop alone so the page doesn't snap away under them.
+  if (_scrollWasAtBottom) {
+    thread.scrollTop = thread.scrollHeight;
+  }
 }
 
 // v12.0.3: Render attached file cards for chat messages
@@ -5903,7 +5994,7 @@ async function handleSmartImageGeneration(userMessage, btnId) {
     var base64Data = img.base64;
     var mimeType = img.mimeType || 'image/png';
     var imgSrc = 'data:' + mimeType + ';base64,' + base64Data;
-    var providerLabel = provider === 'nanobanana' ? 'Nano Banana 3 Pro' : 'GPT Image 2';
+    var providerLabel = provider === 'nanobanana' ? 'Nano Banana Pro' : 'GPT Image 2';
 
     // Store image URL for conversation history persistence
     window._lastChatImageUrl = imgSrc;
@@ -6022,29 +6113,63 @@ var IMAGE_INTENT_RE = /\b(?:create|generate|make|render|draw|design|paint|produc
 // IMAGE_INTENT_RE).
 var IMAGE_EDIT_INTENT_RE = /\b(edit|modify|enhance|adjust|fix|change|alter|retouch|remove|replace|crop|resize|recolor|recolour|convert|turn\s+(this\s+)?into|make\s+(this\s+)?(into\s+)?(a\s+)?(transparent|png|jpg|jpeg|webp|black\s+and\s+white|bw|grayscale)|make\s+transparent|background\s+removed?|remove\s+background|upscale|sharpen|blur|brighten|darken|saturate|desaturate|isolate|extract|cut\s*out|cleanup|clean\s*up|clean\s+this\s+up)\b/i;
 window.IMAGE_EDIT_INTENT_RE = IMAGE_EDIT_INTENT_RE;
+// v35.11: Unambiguous image nouns. When one of these is present alongside a
+// generation verb, the request is an image request even if it also mentions a
+// "post", "caption", etc. (e.g. "create an image for my Instagram post").
+var STRONG_IMAGE_NOUN_RE = /\b(?:image|picture|photo|illustration|render(?:ing)?|graphic|visual|logo|icon|painting|drawing|artwork|wallpaper|mockup|poster|banner|thumbnail|portrait|sketch)\b/i;
 function _detectImageGenIntent(text) {
   if (!text || typeof text !== 'string') return null;
   if (text.length > 4000) return null; // long pasted text — probably not an image request
+  if (!IMAGE_INTENT_RE.test(text)) return null;
   // v34.108: bail out when the user is clearly asking for a written deliverable
   // (email, draft, paragraph, summary, etc.). Prevents the "write an email about
   // this resume" → image-gen misroute.
-  if (/\b(write|draft|compose|email|reply|paragraph|summary|summarize|outline|note|memo|letter|message|caption|copy(?:write)?|article|post|tweet)\b/i.test(text)) return null;
-  if (!IMAGE_INTENT_RE.test(text)) return null;
+  // v35.11: only bail when there is NO unambiguous image noun in the prompt.
+  // The old check fired on any prompt containing "post"/"caption"/"note"/etc.,
+  // which silently broke natural-language requests like "generate an image for
+  // my post" — they fell through to the text LLM.
+  if (!STRONG_IMAGE_NOUN_RE.test(text) &&
+      /\b(write|draft|compose|email|reply|paragraph|summary|summarize|outline|note|memo|letter|message|caption|copy(?:write)?|article|post|tweet)\b/i.test(text)) return null;
   return text.trim();
 }
 
+// v35.11: Which image-capable API keys are actually configured. Google covers
+// Nano Banana + Imagen; OpenAI covers GPT Image. Respects the image-gen
+// disable toggle via getNanobananaKey().
+function _imageProviderAvailability() {
+  var avail = { google: false, openai: false };
+  try { avail.google = !!(typeof getNanobananaKey === 'function' && getNanobananaKey()); } catch (e) {}
+  try {
+    var _keys = JSON.parse(localStorage.getItem('roweos_api_keys') || '{}');
+    avail.openai = !!_keys.openai;
+  } catch (e) {}
+  if (!avail.openai) { try { avail.openai = !!localStorage.getItem('openaiApiKey'); } catch (e) {} }
+  return avail;
+}
+window._imageProviderAvailability = _imageProviderAvailability;
+
+function _providerKeyFamily(provider) {
+  return provider === 'gpt-image-2' ? 'openai' : 'google';
+}
+
 function _resolveImageProvider() {
+  var avail = _imageProviderAvailability();
   var stored = '';
   try { stored = localStorage.getItem('roweos_image_provider_pref') || ''; } catch (e) {}
-  if (stored) return stored;
-  // Fall back to active LLM provider
+  // v35.11: honor the stored preference only when its key is actually
+  // configured — otherwise auto-route to whichever image API is available,
+  // regardless of the selected chat AI.
+  if (stored && avail[_providerKeyFamily(stored)]) return stored;
+  // Fall back to active LLM provider, gated by key availability
+  var prov = 'gemini';
   try {
     var settings = JSON.parse(localStorage.getItem('roweos_settings') || '{}');
-    var prov = settings.provider || 'gemini';
-    if (prov === 'openai') return 'gpt-image-2';
-    if (prov === 'anthropic') return 'nano-banana-3-pro';
-    return 'nano-banana-3-pro';
-  } catch (e) { return 'nano-banana-3-pro'; }
+    prov = settings.provider || 'gemini';
+  } catch (e) {}
+  if (prov === 'openai' && avail.openai) return 'gpt-image-2';
+  if (avail.google) return 'nano-banana-3-pro';
+  if (avail.openai) return 'gpt-image-2';
+  return 'nano-banana-3-pro';
 }
 
 // v32.0-D: opts.headerText overrides default header. opts.subText overrides
@@ -6053,6 +6178,12 @@ function _resolveImageProvider() {
 function showImageProviderPickerOnce(callback, opts) {
   opts = opts || {};
   if (localStorage.getItem('roweos_image_provider_pref')) { callback(_resolveImageProvider()); return; }
+  // v35.11: skip the picker when only one image API family has a key —
+  // there is nothing to choose. Don't persist, so the picker appears once
+  // the user adds a second key.
+  var _pickAvail = _imageProviderAvailability();
+  if (_pickAvail.google && !_pickAvail.openai) { callback('nano-banana-3-pro'); return; }
+  if (_pickAvail.openai && !_pickAvail.google) { callback('gpt-image-2'); return; }
   var headerText = opts.headerText || 'Pick your image generator';
   var subText = opts.subText || 'Brilliance detected an image request. Which generator should we use? You can change this later in System.';
   var modal = document.createElement('div');
@@ -6078,34 +6209,67 @@ function showImageProviderPickerOnce(callback, opts) {
   });
 }
 
-async function _runChatImageGen(prompt, provider) {
+// v35.11: Single-provider attempt. Throws on failure (including Imagen's
+// { success: false } return shape, which previously got swallowed into a
+// generic "No image data" error).
+async function _runChatImageGenOnce(prompt, provider) {
   var result;
-  try {
-    if (provider === 'gpt-image-2' && typeof generateImageWithGptImage === 'function') {
-      result = await generateImageWithGptImage(prompt, { aspectRatio: '1:1' });
-    } else if (provider === 'imagen3' && typeof generateImageWithImagen3 === 'function') {
-      result = await generateImageWithImagen3(prompt, '1:1');
-    } else if (typeof generateImageWithNanobanana === 'function') {
-      result = await generateImageWithNanobanana(prompt, { aspectRatio: '1:1' });
-    } else {
-      throw new Error('No image generator available');
-    }
-    if (result && result.images && result.images.length > 0) {
-      return 'data:' + (result.images[0].mimeType || 'image/png') + ';base64,' + result.images[0].base64;
-    }
-    if (result && result.imageData) return 'data:image/png;base64,' + result.imageData;
-    if (result && result.base64) return 'data:image/png;base64,' + result.base64;
-    throw new Error(result && result.text ? 'Model responded with text only: ' + result.text.substring(0, 200) : 'No image data');
-  } catch (err) {
-    throw err;
+  if (provider === 'gpt-image-2' && typeof generateImageWithGptImage === 'function') {
+    result = await generateImageWithGptImage(prompt, { aspectRatio: '1:1' });
+  } else if (provider === 'imagen3' && typeof generateImageWithImagen3 === 'function') {
+    result = await generateImageWithImagen3(prompt, '1:1');
+  } else if (typeof generateImageWithNanobanana === 'function') {
+    result = await generateImageWithNanobanana(prompt, { aspectRatio: '1:1', suppressToasts: true });
+  } else {
+    throw new Error('No image generator available');
   }
+  if (result && result.success === false) {
+    throw new Error(result.error || 'Image generation failed');
+  }
+  if (result && result.images && result.images.length > 0) {
+    return 'data:' + (result.images[0].mimeType || 'image/png') + ';base64,' + result.images[0].base64;
+  }
+  if (result && result.imageData) return 'data:image/png;base64,' + result.imageData;
+  if (result && result.base64) return 'data:image/png;base64,' + result.base64;
+  throw new Error(result && result.text ? 'Model responded with text only: ' + result.text.substring(0, 200) : 'No image data');
+}
+
+async function _runChatImageGen(prompt, provider) {
+  // v35.11: try the preferred provider first, then auto-fall back across every
+  // other image API the user has a key for. Natural-language image requests
+  // should succeed whenever ANY image-capable key exists, no matter which
+  // chat AI is selected.
+  var avail = _imageProviderAvailability();
+  var chain = [];
+  if (avail[_providerKeyFamily(provider)]) chain.push(provider);
+  var fallbacks = ['nano-banana-3-pro', 'imagen3', 'gpt-image-2'];
+  for (var i = 0; i < fallbacks.length; i++) {
+    var fb = fallbacks[i];
+    if (chain.indexOf(fb) !== -1) continue;
+    if (avail[_providerKeyFamily(fb)]) chain.push(fb);
+  }
+  if (chain.length === 0) {
+    throw new Error('No image generation API key configured. Add a Google or OpenAI key in Settings.');
+  }
+  var lastErr = null;
+  for (var c = 0; c < chain.length; c++) {
+    try {
+      var dataUrl = await _runChatImageGenOnce(prompt, chain[c]);
+      return { dataUrl: dataUrl, provider: chain[c] };
+    } catch (err) {
+      lastErr = err;
+      console.warn('[ChatImageGen] ' + chain[c] + ' failed: ' + (err && err.message ? err.message : err) + (c < chain.length - 1 ? ' — trying next provider' : ''));
+    }
+  }
+  throw lastErr || new Error('Image generation failed');
 }
 
 // v31.20: Friendly provider name lookup for the assistant turn label.
 function _friendlyImageProvider(provider) {
   if (provider === 'imagen3') return 'Imagen 4';
   if (provider === 'gpt-image-2') return 'GPT Image 2';
-  if (provider === 'nano-banana-3-pro' || provider === 'gemini-3-pro-image-preview') return 'Nano Banana 3.0 Pro';
+  if (provider === 'nano-banana-3-pro' || provider === 'gemini-3-pro-image' || provider === 'gemini-3-pro-image-preview') return 'Nano Banana Pro';
+  if (provider === 'gemini-3.1-flash-image') return 'Nano Banana 2';
   if (provider === 'gemini-2.5-flash-image') return 'Nano Banana 3.0';
   return provider;
 }
@@ -6167,7 +6331,7 @@ function detectImageEditIntent(prompt, attachments, currentModel) {
     }
   }
   if (!imgAttachments.length) return null;
-  var explicitEditModels = ['gemini-3-pro-image-preview', 'gemini-2.5-flash-image', 'gpt-image-2'];
+  var explicitEditModels = ['gemini-3-pro-image', 'gemini-3.1-flash-image', 'gemini-2.5-flash-image', 'gpt-image-2', 'gemini-3-pro-image-preview']; // v35.11: stable IDs first, old preview kept for stored selections
   var explicitModel = false;
   if (currentModel) {
     for (var m = 0; m < explicitEditModels.length; m++) {
@@ -6269,8 +6433,10 @@ function _maybeHandleChatImageGen(userText, callback) {
   showImageProviderPickerOnce(function(provider) {
     if (typeof showToast === 'function') showToast('Generating image with ' + provider + '...', 'info');
     if (typeof setBlobState === 'function') setBlobState('thinking');
-    _runChatImageGen(intentText, provider).then(function(dataUrl) {
-      _injectChatImageAssistantTurn(userText, dataUrl, provider);
+    _runChatImageGen(intentText, provider).then(function(genResult) {
+      // v35.11: label with the provider that actually produced the image
+      // (may differ from the preference after key-availability fallback)
+      _injectChatImageAssistantTurn(userText, genResult.dataUrl, genResult.provider || provider);
       if (typeof setBlobState === 'function') setBlobState('idle');
       if (typeof showToast === 'function') showToast('Image generated', 'success');
       callback(true);
@@ -7922,7 +8088,7 @@ async function executeAgentRequest(brand, userMessage, btn, btnId) {
   var settings = brandSettings[brandIdx] || {};
   // v30.1: Only read from brandSettings - brand.provider/brand.model are stale fields that cause nanobanana defaulting bug
   var provider = settings.provider || 'anthropic';
-  var model = settings.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.5' : (provider === 'nanobanana' ? 'gemini-3-pro-image-preview' : 'gemini-3.1-pro-preview')));
+  var model = settings.model || (provider === 'anthropic' ? 'claude-sonnet-4-6' : (provider === 'openai' ? 'gpt-5.5' : (provider === 'nanobanana' ? 'gemini-3-pro-image' : 'gemini-3.1-pro-preview')));
 
   // v20.5: RoweOS AI - resolve to actual provider/model before dispatch
   if (provider === 'roweos') {

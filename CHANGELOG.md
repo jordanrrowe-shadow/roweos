@@ -1,5 +1,537 @@
 # Brilliance / RoweOS Changelog
 
+## v35.11 - Image generation restored + smart provider routing
+
+Natural-language image generation broke on both mobile and desktop in
+late June. Three separate causes, all fixed:
+
+1. **Google retired `gemini-3-pro-image-preview` on 2026-06-25.** The
+   ID was hardcoded in every Nano Banana path (chat SmartAI handler,
+   Studio, Image Lab, Bloom, image scheduler, Social Hub), so every
+   Google image call returned 404. All references moved to the stable
+   IDs: `gemini-3-pro-image` (Nano Banana Pro) and
+   `gemini-3.1-flash-image` (Nano Banana 2, replacing the long-dead
+   2.0 experimental "Flash Image (Legacy)" options). A new
+   `normalizeImageModel()` shim runs at every generator's API-call
+   boundary so stale IDs still stored in automation configs, pipeline
+   steps, chat model selections, and Image Lab prefs keep working
+   without a data migration.
+
+2. **The v34.108 written-deliverable bail-out was over-broad.** It
+   rejected image intent for any prompt containing "post", "caption",
+   "note", or "message" - so "generate an image for my Instagram post"
+   silently fell through to the text LLM. `_detectImageGenIntent` now
+   only bails when the prompt has NO unambiguous image noun (image,
+   picture, photo, logo, poster, etc.).
+
+3. **Provider routing ignored key availability.** Image requests now
+   auto-route to whichever image API actually has a key, no matter
+   which chat AI is selected: `_resolveImageProvider` skips a stored
+   preference whose key is missing, the one-time provider picker is
+   bypassed when only one image API is configured, and
+   `_runChatImageGen` falls back across Nano Banana Pro -> Imagen 4 ->
+   GPT Image 2 until one succeeds. The chat turn is labeled with the
+   provider that actually generated the image.
+
+Also in this release:
+
+- `generateImageWithGptImage` upgraded from `gpt-image-1` to
+  `gpt-image-2` (generation + edits endpoints).
+- Imagen's `{ success: false }` error returns are surfaced instead of
+  being swallowed into a generic "No image data".
+- Pipeline image-step dropdowns replaced dead models
+  (`gemini-2.0-flash-preview-image-generation`,
+  `imagen-3.0-generate-002`, DALL-E 2/3) with Nano Banana Pro,
+  Nano Banana 2, Imagen 4, and GPT Image 2.
+- Model labels standardized to "Nano Banana Pro" / "Nano Banana 2".
+- Heads-up: Google has deprecated the Imagen API (shutdown
+  2026-08-17). The fallback chain already prefers Nano Banana, but the
+  Imagen picker option should be removed before that date.
+
+## v35.10 - Auto-recovery + auto-diagnostic (no console typing required)
+
+v35.9 partially worked — the user's console showed
+`[Storage] IDB reopened after connection-closing error; draining N
+queued ops.` proving the `_idb*` shim recovery was firing. But:
+
+1. **Firestore SDK UnknownErrors kept firing**, and the auto-disable
+   threshold of 4-in-30s never tripped (likely because errors were
+   spaced just outside the window).
+2. **The user kept typing recovery commands without parentheses** —
+   `purgeLocalCache` instead of `purgeLocalCache()` — so Safari
+   returned the function source instead of running it. v35.9's
+   recovery never actually executed.
+
+**Fixes — both issues auto-resolve without console typing:**
+
+1. **Lowered Firestore IDB UnknownError threshold from 4 to 2** and
+   broadened detection: `name === 'UnknownError'` OR message contains
+   `'Indexed Database server'` OR stack references `indexed_db` /
+   `persistence`. Any one triggers the counter. After 2 fires the
+   detector auto-runs `purgeLocalCache()` after a 5-second console
+   countdown the user can cancel with `window._cancelAutoPurge = true`.
+   Default is **RUN**. Persists `roweos_idb_persistence_broken=1` so
+   future boots also start in safe mode.
+
+2. **Auto scroll-diagnostic on every chat send.** v35.9's
+   `showConversationView()` ran the nuclear inline-style enforcer but
+   we had no evidence whether scroll worked because the user kept
+   typing `brillianceScrollReport` without parens. Now
+   `showConversationView()` schedules a 1.5s-delayed scroll check
+   (after streaming starts) that logs ONE clear line:
+   - `[ScrollAutoDiag] ... NOTHING TO SCROLL ...` → height/flex bug
+   - `[ScrollAutoDiag] overflowY=... — scroll DISABLED by CSS.` → CSS bug
+   - `[ScrollAutoDiag] thread CAN scroll. ...` → JS handler / gesture issue
+
+No more reliance on the user remembering parens. v35.10 is the IDB
+recovery actually doing what v35.9 wanted to do.
+
+## v35.9 - IDB crash recovery + nuclear scroll enforcer
+
+User's console finally surfaced the real memory cause:
+
+```
+Unhandled Promise Rejection: UnknownError: An internal error was
+  encountered in the Indexed Database server
+  at _poll (indexed_db.ts:356)
+[SyncDB] Put exception: InvalidStateError: Failed to execute
+  'transaction' on 'IDBDatabase': The database connection is closing.
+[SyncDB] Put exception: InvalidStateError: ...        (× many)
+[SyncDB] Put exception: InvalidStateError: ...
+```
+
+Both IndexedDBs were in failure loops:
+- **Our shim's `RoweOS_Overflow` DB** — `_idbPut`/`_idbGet`/`_idbDelete`
+  in `08-foundation.js:462` cached the DB handle in a module var. When
+  Safari closed the connection (which it does under quota pressure or
+  cross-tab eviction), every subsequent `_idb.transaction()` threw
+  `InvalidStateError`. The catch swallowed it silently. Writes never
+  persisted, sigs got out of sync, callers thought the write
+  succeeded, and downstream code re-tried.
+- **Firestore's own persistence DB** — `indexed_db.ts:356` (the SDK's
+  internal poll loop) was raising `UnknownError` from the IDB layer
+  on every iteration. Each iteration allocated a fresh retry buffer.
+  This was the dominant 20-GB contributor, not the JS-heap fixes
+  v35.5 attacked.
+
+**Fixes:**
+
+1. **IDB resilience in both shims.** `_idbPut`, `_idbGet`, `_idbDelete`
+   and `_syncIdbPut` now detect `InvalidStateError`, drop the cached
+   handle, reopen the DB via `indexedDB.open()` again, and replay
+   queued operations from the in-memory queue. The kv shim already
+   had `_idbQueue` for pre-ready writes; the new path reuses it for
+   post-failure replay.
+
+2. **Window `unhandledrejection` listener for Firestore's UnknownError.**
+   These don't surface to snapshot listeners' `onError` callbacks —
+   they bubble as unhandled promise rejections from the SDK's poll
+   loop. Detected by `error.name === 'UnknownError'` plus a stack
+   reference to `indexed_db` / `persistence` / `firestore`. Counter
+   in a 30-second window; threshold 4 triggers auto-`disableLiveSync()`
+   and a toast directing the user to `purgeLocalCache()`. Breaks the
+   retry storm permanently.
+
+3. **Inline-style scroll enforcer in `showConversationView()`.**
+   After three CSS cascade fixes (v35.2, v35.3, v35.8) the user
+   reports scroll STILL doesn't work. Bypassing the cascade entirely:
+   ```js
+   _thread.style.setProperty('flex', '1 1 0%', 'important');
+   _thread.style.setProperty('min-height', '0', 'important');
+   _thread.style.setProperty('overflow-y', 'auto', 'important');
+   ```
+   `setProperty(name, value, 'important')` writes inline `!important`,
+   which beats any CSS rule regardless of source order or specificity.
+   If a downstream JS handler is mutating the style, this re-enforces
+   on every chat send. The same is applied to `#agentView` and
+   `#agentConversation` so the flex chain can't be broken from above.
+
+**User actions:**
+
+If after a hard reload the tab is still heavy, run in console:
+```js
+purgeLocalCache()     // resets Firestore + shim IDBs, reloads
+```
+or
+```js
+disableLiveSync()     // stops cloud traffic without nuking caches
+```
+
+## v35.8 - Scroll cascade #3 + scroll runtime diagnostic
+
+User reports scrolling STILL doesn't work in BrandAI/LifeAI chat after
+v35.2 + v35.3. Per the systematic-debugging skill Phase 4.5 (3+ fixes
+failed = question the architecture, stop adding more fixes), an Explore
+agent dug specifically for runtime causes (JS handlers, dynamic style
+mutation, wheel preventDefault) and CSS rules outside what I'd already
+patched.
+
+**Found:** a third overriding rule at `01-base.css:49049` inside
+`@media (min-width: 769px)`:
+
+```css
+#conversationThread {
+  overflow-y: auto !important;
+  ...
+  flex: 1 1 auto !important;   /* ← BREAKS scroll */
+  min-height: 0 !important;
+  padding-bottom: 16px !important;
+}
+```
+
+`flex-basis: auto` sizes the flex item to its **content**, so on a long
+conversation the thread expands to fit every message, the parent has
+nothing to clip, and `overflow: auto` has no overflow to scroll. The
+correct value is `flex: 1 1 0%` — what my v35.2/v35.3 rules already use
+at higher specificity, but this oldest scroll-fix rule was stamping
+`auto` back. Changed to `flex: 1 1 0%`.
+
+**Also shipped: `brillianceScrollReport()` global.** I've shipped three
+scroll fixes that didn't work because I was reasoning from source about
+cascade winners. Stop guessing — read **computed** styles + offset/scroll
+heights at runtime:
+
+```js
+brillianceScrollReport()
+```
+
+Prints `flex`, `flex-basis`, `min-height`, `overflow-y`, `position`,
+`pointer-events`, plus `offsetHeight`/`scrollHeight`/`clientHeight` for
+`#agentView`, `#agentConversation`, `#conversationThread`, then a
+verdict: nothing to scroll (height issue) / overflow disabled / OK (look
+elsewhere). If v35.8 still doesn't work, run this and the output tells
+us where to look — no more guesses.
+
+## v35.7 - Boot-time 20GB allocation + storage diagnostics
+
+User reported "hit over 20 GB right off the bat" on a fresh load. That's
+boot allocation, not gradual growth — distinct from what v35.5 fixed.
+
+`loadFromFirebaseV2()` runs `Promise.all` of 45 Firestore reads at
+boot, including `db.collection('chats').get()` which returns every
+per-doc chat (multimodal base64 in each, no `.limit()`). On a long-
+running account the chats subcollection can be GB-scale. The
+Firestore SDK's offline cache hydration on top of that compounds the
+allocation.
+
+**Three fixes:**
+
+1. **`loadFromFirebaseV2()` now honors `roweos_live_sync_disabled`.**
+   v35.6 added the flag check to `setupRealtimeSync()` but left the
+   boot pull unguarded — so `disableLiveSync()` plus a hard reload
+   *still* hit the giant Promise.all. With the flag set, boot reads
+   strictly from local cache and the tab opens with zero cloud
+   traffic. Users with massive cloud history can now reach the app
+   while we figure out the right paging strategy.
+
+2. **`window.brillianceStorageReport()`** — async diagnostic. Iterates
+   `localStorage` + the IDB-offloaded keys (tracked via `_idbKeys`),
+   sums sizes, prints sorted descending. Tells us in seconds whether
+   conversations / chats / library / inventory / gallery is the
+   GB-scale offender instead of guessing. Run in Safari console:
+   ```js
+   await brillianceStorageReport()
+   ```
+
+3. **`window.purgeLocalCache()`** — nuclear reset. Clears all
+   IDB-offloaded keys via `_idbDelete`, terminates Firestore and
+   wipes its own persistence layer via `clearPersistence()`, reloads.
+   Small localStorage keys (brands, settings) are preserved. Next
+   boot does a clean cloud pull. Run in Safari console:
+   ```js
+   purgeLocalCache()
+   ```
+
+**Recommended sequence for the user with a bloated tab:**
+1. `disableLiveSync()` — stops the network process growth
+2. Hard reload — boot is now offline-only and fast
+3. `await brillianceStorageReport()` — see what's actually huge
+4. Decide whether to `purgeLocalCache()` (nuclear) or wait for v35.8
+   (targeted query limits on `chats.get()` and similar)
+
+## v35.6 - Brilliance Networking process growth (the OTHER memory bucket)
+
+User reported the JS-heap fixes helped ("definitely better … much more
+efficient") but the Safari **"Brilliance Networking" process** still
+climbed to 3-5 GB on its own — *even idle*. That's WebKit's networking
+process, distinct from the JS heap. v35.5's sig-skip cut JS heap
+allocations but couldn't touch the SDK-internal CORS-failing
+WebChannel sessions, which retain XHR request/response buffers in the
+network process for the duration of every retry attempt.
+
+The Firestore SDK retries failed long-polling sessions indefinitely.
+Each retry has a fresh `gsessionid`, each fresh session has its own
+buffers, each buffer sits in the network process until the session
+either resolves or the SDK gives up (it doesn't, on CORS).
+
+**Fixes:**
+
+1. **Explicit user escape valves.** Two new globals:
+   - `window.disableLiveSync()` — detaches all 8 snapshot listeners
+     AND calls `firebase.firestore().disableNetwork()`, which is the
+     SDK-level kill switch. Persists `roweos_live_sync_disabled=true`
+     so the next page load doesn't re-attach.
+   - `window.enableLiveSync()` — reverses both.
+
+   Document banner during emergencies: type `disableLiveSync()` in
+   the Safari console to drop the network process load immediately.
+
+2. **Boot honors the toggle.** `setupRealtimeSync()` now returns
+   early when the flag is set and tells the SDK to disable network
+   before any session is established, so the user can return to a
+   bloated tab, set the flag, hard-reload, and the network process
+   never inflates again until they manually re-enable.
+
+3. **Auto-detect.** New `recordFirestoreSnapshotError(label, error)`
+   routes errors from the existing onError callbacks through a
+   shared counter. After 6 errors in a 60-second window, auto-fires
+   `disableLiveSync()` and shows a toast directing the user to
+   `enableLiveSync()` when ready. Hooked into the root-doc listener
+   for now; extending to the other 7 listeners is straightforward
+   when we want broader coverage.
+
+4. **`mobileBrand` removed from the brand-selector core list.**
+   `coreSelectors[]` in `26-smart-suggestions-onboarding.js:4918`
+   referenced `'mobileBrand'`, but `grep -rn 'id="mobileBrand"' src/`
+   finds zero hits. Every `updateBrandSelectors()` call was logging
+   `✗ Core selector not found: 'mobileBrand'` — 23 times per session
+   in the user's screenshot. The id-without-element was pure noise.
+
+## v35.5 - v35.4 regression + the actual dominant memory source
+
+User reported the tab still at 20.48 GB after v35.4, with the console
+showing `[StudioGallery] Cloud pull failed: TypeError: null is not an
+object (evaluating 'cloudGallery.length')` repeating ~10x per minute.
+
+**v35.4 regression.**
+v35.4's pre-cap fix nulled `cloudGallery` for early GC immediately
+after assignment to `_studioGalleryMem`. Four lines further down the
+function still read `console.log('[StudioGallery] Pulled',
+cloudGallery.length, ...)`. Every pull threw `TypeError: null is
+not an object`, the surrounding try/catch swallowed it as "Cloud pull
+failed", and the v35.4 pre-cap never took effect — meanwhile the
+snapshot listener pull loop kept retrying. Captured `cloudGallery.length`
+into `_cloudPulledCount` before the GC-aid nulling.
+
+**The actual dominant 20-GB source.**
+v35.4 attacked the gallery merge — the right pattern, but the wrong
+collection. Conversations carry multimodal base64 (chat images live
+here) and the cloud pull path at `22-firebase-sync.js:11122`+ runs:
+```js
+var cloudHist = JSON.parse(cloudHistJson);   // ← multi-GB
+var localHist = JSON.parse(localStorage.getItem('roweos_conversations') || '[]');
+var cloudById = {};                          // ← full set retained
+cloudHist.forEach(...);                      // ← build merged
+var merged = [];
+cloudHist.forEach(...merged.push(conv)...);  // ← yet another copy
+localHist.forEach(...);
+setLargeItemIfChanged('roweos_conversations', JSON.stringify(merged));
+```
+
+For a user with hundreds of MB of conversations in cloud, that's
+~1-2 GB of transient heap per pull. Multiplied by snapshot listeners
+firing repeatedly under CORS retry pressure, and GC unable to keep
+up, the heap climbed past 20 GB.
+
+**Fix — signature-skip.**
+Cheap signature compare on the cloud JSON string before any parse.
+If the cloud doc bytes haven't changed since the last pull (the
+common case in steady state), bail before any allocation. Stored on
+`window._lastConvCloudSig` / `window._lastGalleryCloudSig`, cleared
+naturally on full page reload.
+
+Applied to both:
+- Conversations (line 11128) — the dominant 20 GB cause
+- Studio gallery (line 10546) — even with the v35.4/v35.5 pre-cap to
+  50 entries, no point parsing them if cloud hasn't changed
+
+When cloud HAS changed (only after the user saves a new image or
+sends a new conversation), the parse runs once, pre-cap to 50 still
+applies for gallery, and the merge proceeds normally.
+
+**v35.4 fixes preserved (still in effect):**
+- In-progress guard on `loadFromFirebaseV2` (prevents stacked pulls)
+- 30s safety ceiling on the guard (no permanent wedge)
+- Studio gallery pre-cap at 50 (bounds the post-parse merge)
+
+## v35.4 - 25GB tab memory growth fix
+
+User reported the roweos.com Safari tab at **25.33 GB** in Activity
+Monitor with heavy memory pressure (20.89 GB used of 24 GB physical,
+14.49 GB swap). Hard reload took minutes. Console showed repeated
+Firestore long-polling CORS errors. This is the same memory-growth
+class that v34.120 and v34.121 attacked; this release closes two
+additional paths.
+
+**Investigation followed the systematic-debugging skill** —
+two parallel Explore audits and direct reads of the suspect files
+before proposing fixes. Sync v5 (`35-sync-v5.js`) was investigated as a
+possible culprit but is OFF by default and not contributing.
+
+**Root cause #1 — Studio gallery cloud-pull merge runs uncapped.**
+
+`loadFromFirebaseV2` reads the studio gallery doc from Firestore at
+`/Users/jordanrowe/Developer/roweOS/src/js/core/22-firebase-sync.js:10502-10543`:
+```js
+var cloudGallery = JSON.parse(sgData.data);     // ← full historical
+var localGallery = readStudioGallery();
+var byId = {};                                  // ← full set retained
+// ... merge ...
+window._studioGalleryMem = merged.slice(-20);   // ← cap applied HERE
+```
+
+The v34.121 cap to 20 was applied **after** the merge. If the cloud
+doc still contained historical gallery entries pre-cap (each can be
+5-10 MB of base64), the merge temporarily allocated `cloudGallery
++ byId + merged + JSON.stringify(merged)` at full size — a few GB
+of transient heap per pull. Under Firestore CORS retry pressure
+those pulls fired back-to-back faster than GC could free them. Over
+hours the heap climbed to 25 GB.
+
+**Fix:** pre-cap `cloudGallery` to the newest 50 entries immediately
+after `JSON.parse`, before any merge work. The persist-side cap is
+20, so 50 gives plenty of margin for the merge while keeping
+worst-case temp memory under 500 MB. Also explicitly nulls
+intermediate references after the cap so they're eligible for GC
+without waiting for function exit.
+
+**Root cause #2 — `loadFromFirebaseV2` had no in-progress guard.**
+
+Snapshot listeners and direct callers could re-enter
+`loadFromFirebaseV2` while the previous Promise.all of 45 Firestore
+reads was still pending. Each pending getter holds SDK request state
+in memory until its CORS session resolves. Stacked pulls doubled this
+state without freeing the previous.
+
+**Fix:** `window._loadFromFirebaseV2InProgress` guard at the top
+returns early on re-entry; cleared in both success and error paths
+plus a 30-second safety ceiling so a hung pull can never permanently
+wedge the next one.
+
+**What v34.120 / v34.121 already shipped (still good):**
+- `setLargeItemIfChanged()` / `idbPutIfChanged()` — write-if-changed
+- Bloom thumbnail pre-cap + 6s defer + max-2-concurrent throttle
+- Studio gallery `_studioGalleryMem` cap on the read-back side
+- `scheduleCloudPull()` 1.2s debounce
+
+The v35.4 fixes close the remaining historical-data hot path and the
+stacked-pull amplification. After deploy the tab should stay in the
+hundreds-of-MB range across long sessions instead of climbing into
+GBs.
+
+## v35.3 - Cascade bug, boot safety net, CDN 404s
+
+User reported three issues from a Safari Web Inspector screenshot:
+- 60+ second load time + memory pressure
+- Still can't scroll the BrandAI chat after sending a message
+- Console errors: Firestore CORS rejects on long-polling, plus 404s
+  for docx and pptxgenjs CDN scripts
+
+**Scroll — cascade conflict.**
+The v35.2 mobile fix at `01-base.css` line ~41511 had `min-height: 0`
+correctly, but a LATER mobile rule for the same selector
+(`#agentView.conversation-active #conversationThread`, line ~43199)
+came after it in source order with `flex: 1 !important` and NO
+`min-height: 0`. Same specificity, later source wins — so my v35.2
+fix was getting clobbered on every render. The flex item defaults to
+`min-height: auto`, expands past its allocation, and the
+`overflow: auto` scroll never engages. Added `min-height: 0 !important`
++ `flex: 1 1 0% !important` to the late rule + the matching late
+`#agentConversation` rule so the fix actually wins the cascade.
+
+**Boot — 10s safety timer.**
+`loadFromFirebaseV2()` runs a `Promise.all([45 Firestore reads])` with
+no timeout. When the long-polling channel rejects mid-stream (Safari
+console: "Fetch API cannot load .../Firestore/Listen/channel due to
+access control checks"), the Promise.all hangs indefinitely and the
+boot screen (z-index: 99999 black overlay) is never removed. Added a
+10-second `setTimeout` in `01-cdn-and-boot.html` that force-removes
+the boot screen so the user reaches the app even when cloud sync
+hangs. Background sync continues; merging happens whenever it lands.
+
+**CDN 404s.**
+- `docx@9.1.1/build/index.umd.min.js` returns 404. Actual published
+  browser-friendly build is at `dist/index.iife.js`.
+- `pptxgenjs@3.12.0/dist/pptxgenjs.bundle.js` returns 404. Actual file
+  is `dist/pptxgen.bundle.js` (no `js` in the basename).
+- Each 404 also tripped "Refused to execute" because jsDelivr returns
+  `Content-Type: text/plain` for missing paths, which the `nosniff`
+  header rejects. Corrected URLs eliminate both errors and let the
+  Word / PowerPoint export paths use the proper docx library again
+  (HTML-based `.doc` fallback in 11-agents.js stays as a backstop).
+
+## v35.2 - BrandAI chat scroll + lag fixes
+
+The main agent view (BrandAI chat) wouldn't scroll after sending a
+message and was the laggiest surface in the app. Two root causes:
+
+**Scroll**.
+The chat is a flex chain: `#agentView > #agentConversation >
+#conversationThread`. The desktop rule (`@media (min-width: 769px)`)
+bounds `#agentView.conversation-active` to `height: calc(100vh - 60px)`,
+which gives the flex chain a defined upper bound and lets
+`#conversationThread` (`overflow-y:auto`) scroll. On mobile the
+conversation-active rule was missing entirely — agentView had no height
+constraint, the flex children grew to fit content, and scroll never
+engaged.
+
+A flex item with overflow:auto also needs `min-height: 0` to respect
+its flex allocation when content overflows (the default `min-height:
+auto` lets it expand past the allocation, eating the scroll). That
+constraint was missing in the chain.
+
+Fix: mobile rule for `#agentView.conversation-active` with `height:
+100dvh; overflow: hidden`, plus `min-height: 0` and `flex: 1 1 0%`
+across the flex chain (mobile + desktop), plus
+`-webkit-overflow-scrolling: touch` and `overscroll-behavior: contain`
+on the messages container, plus `padding-bottom: calc(140px +
+var(--mobile-nav-height) + var(--mobile-safe-bottom))` on mobile so
+bottom messages clear the fixed input bar.
+
+Also: `renderConversation()` was unconditionally snapping the user to
+the bottom after every full re-render. If the user had scrolled up to
+read prior turns, every new chunk or new message yanked them back to
+the bottom. Now captures `wasAtBottom` before the innerHTML wipe and
+restores scrollTop only when they were already near the bottom
+(matches the streaming smart-scroll guard, 150px threshold).
+
+**Lag**.
+`renderConversation()` rebuilds the entire history DOM on every call
+and runs `formatMessageContent()` (which calls `marked.parse()`) over
+every assistant message every time. On a 30-message history that's 30
+markdown parses per call, and it's called 2-3 times per send.
+
+Fix: cache the formatted HTML per-message on `msg._formattedHtml`,
+keyed by `content.length:hasImageUrl`. Cache invalidates automatically
+as streaming mutates content. Steady-state renders are now O(1) DOM
+allocations vs O(N) markdown parses.
+
+User messages and the streaming-message div remain re-parsed each call
+(they're short and rare). Format result lives on the in-memory message
+object, so it doesn't bloat localStorage / Firestore.
+
+## v35.1 - Hotfix: disable esbuild minification
+
+The v35.0 deploy minified the bundle via esbuild and broke sign-in:
+clicking "Sign in with Google" raised `ReferenceError: Can't find variable:
+handleGoogleSignIn`. The function declaration was preserved in the
+minified output (verified by grep), so the actual failure was elsewhere
+in the minified script block - esbuild's emitted pattern for some prior
+construct prevented the block from parsing cleanly in WebKit at runtime,
+which in turn left the rest of that block's top-level declarations
+undefined.
+
+The minifier is gated behind `MINIFY=1 bash src/build.sh` while the
+offending pattern is being identified. All other v35.0 wins stay
+shipped: Opus 4.8 swap, Scribe (Notebook) rAF deferrals + resize-handle
+listener leak fix, Object URL revocation in 3 chat-export paths,
+goal-modal keydown listener cleanup, and `defer` on 9 on-demand CDN
+libraries. Wire size returns to pre-v35.0 (~2.4 MB gzipped) for now.
+
+`scripts/minify-bundle.mjs` is unchanged - re-enable for local
+experiments. Build.sh's behavior is now: minify only when `MINIFY=1`,
+otherwise emit the unminified bundle and exit.
+
 ## v35.0 - Performance overhaul + Opus 4.8
 
 The first major-version bump in the v34.x line. A perf-focused release

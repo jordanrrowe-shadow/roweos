@@ -5643,11 +5643,11 @@ function renderAutoLabImageLab(targetId) {
   html += '<input type="text" id="autoLabImagePrompt" placeholder="Describe the image you want to generate...">';
   // v31.5: Default to Nano Banana 3.0 Pro (first option). Added GPT Image 2 (OpenAI provider).
   html += '<select id="autoLabImageModel">';
-  html += '<option value="gemini-3-pro-image-preview">Nano Banana 3.0 Pro</option>';
+  html += '<option value="gemini-3-pro-image">Nano Banana Pro</option>';
   html += '<option value="gemini-2.5-flash-image">Nano Banana 3.0</option>';
   html += '<option value="imagen3">Imagen 4</option>';
   html += '<option value="gpt-image-2">GPT Image 2</option>';
-  html += '<option value="gemini-2.0-flash-exp-image-generation">Gemini 2.0 Flash Image (Legacy)</option>';
+  html += '<option value="gemini-3.1-flash-image">Nano Banana 2</option>';
   html += '</select>';
   html += '<select id="autoLabImageAspect">';
   html += '<option value="1:1">1:1</option>';
@@ -5751,11 +5751,11 @@ function renderImageLabChatHTML() {
   h += '<div class="imagelab-chat-toolbar">';
   // v31.5: Default order — Nano Banana 3.0 Pro first, then 3.0, Imagen 4, GPT Image 2, legacy.
   h += '<select id="imageLabChatModel" onchange="_imageLabChatModel=this.value;renderAutoLabImageLab(window._imageLabTargetId);">';
-  h += '<option value="gemini-3-pro-image-preview"' + (_imageLabChatModel === 'gemini-3-pro-image-preview' ? ' selected' : '') + '>Nano Banana 3.0 Pro</option>';
+  h += '<option value="gemini-3-pro-image"' + (_imageLabChatModel === 'gemini-3-pro-image' || _imageLabChatModel === 'gemini-3-pro-image-preview' ? ' selected' : '') + '>Nano Banana Pro</option>';
   h += '<option value="gemini-2.5-flash-image"' + (_imageLabChatModel === 'gemini-2.5-flash-image' ? ' selected' : '') + '>Nano Banana 3.0</option>';
   h += '<option value="imagen3"' + (_imageLabChatModel === 'imagen3' ? ' selected' : '') + '>Imagen 4</option>';
   h += '<option value="gpt-image-2"' + (_imageLabChatModel === 'gpt-image-2' ? ' selected' : '') + '>GPT Image 2</option>';
-  h += '<option value="gemini-2.0-flash-exp-image-generation"' + (_imageLabChatModel === 'gemini-2.0-flash-exp-image-generation' ? ' selected' : '') + '>Gemini 2.0 Flash Image (Legacy)</option>';
+  h += '<option value="gemini-3.1-flash-image"' + (_imageLabChatModel === 'gemini-3.1-flash-image' || _imageLabChatModel === 'gemini-2.0-flash-exp-image-generation' ? ' selected' : '') + '>Nano Banana 2</option>';
   h += '</select>';
   h += '<select id="imageLabChatAspect">';
   h += '<option value="1:1">1:1</option>';

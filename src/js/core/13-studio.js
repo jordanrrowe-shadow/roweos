@@ -606,8 +606,8 @@ function handleNativeModelSelect(sel) {
       // v31.0: gpt-5.5 family display labels
       'claude-opus-4-8': 'Opus 4.8', 'gpt-5.5': 'GPT-5.5', 'gpt-5.5-pro': 'GPT-5.5 Pro',
       'gpt-5.5-thinking': 'GPT-5.5 Thinking', 'gemini-3.1-pro-preview': '3.1 Pro',
-      'gemini-3-flash-preview': '3.0 Flash', 'gemini-3-pro-image-preview': 'Nano Banana Pro 3',
-      'gemini-2.5-flash-image': 'Nano Banana 3.0', 'gemini-2.0-flash-exp-image-generation': 'Flash Image',
+      'gemini-3-flash-preview': '3.0 Flash', 'gemini-3-pro-image': 'Nano Banana Pro', 'gemini-3-pro-image-preview': 'Nano Banana Pro',
+      'gemini-2.5-flash-image': 'Nano Banana 3.0', 'gemini-3.1-flash-image': 'Nano Banana 2', 'gemini-2.0-flash-exp-image-generation': 'Flash Image',
       'veo-3.1-fast-generate-preview': 'Veo 3.1 Fast', 'veo-3.1-generate-preview': 'Veo 3.1',
       'veo-3-fast-generate-preview': 'Veo 3 Fast', 'veo-3-generate-preview': 'Veo 3',
       'veo-2-generate-preview': 'Veo 2'
@@ -720,9 +720,9 @@ function showStudioModelActionSheet() {
     '<div style="padding:10px 16px 4px;font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--border-color);margin-top:4px;">Image &amp; Video Models</div>' +
     '<div class="studio-mobile-model-section">' +
       '<div class="studio-mobile-model-label">Nano Banana (Image)</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'gemini-3-pro-image-preview' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'nanobanana\', \'gemini-3-pro-image-preview\', \'Nano Banana Pro 3\')">Nano Banana Pro 3</div>' +
+      '<div class="studio-mobile-model-item' + (currentModel === 'gemini-3-pro-image' || currentModel === 'gemini-3-pro-image-preview' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'nanobanana\', \'gemini-3-pro-image\', \'Nano Banana Pro\')">Nano Banana Pro</div>' +
       '<div class="studio-mobile-model-item' + (currentModel === 'gemini-2.5-flash-image' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'nanobanana\', \'gemini-2.5-flash-image\', \'Nano Banana 3.0\')">Nano Banana 3.0</div>' +
-      '<div class="studio-mobile-model-item' + (currentModel === 'gemini-2.0-flash-exp-image-generation' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'nanobanana\', \'gemini-2.0-flash-exp-image-generation\', \'Flash Image\')">Flash Image (Legacy)</div>' +
+      '<div class="studio-mobile-model-item' + (currentModel === 'gemini-3.1-flash-image' || currentModel === 'gemini-2.0-flash-exp-image-generation' ? ' selected' : '') + '" onclick="selectStudioModelMobile(\'nanobanana\', \'gemini-3.1-flash-image\', \'Nano Banana 2\')">Nano Banana 2</div>' +
     '</div>' +
     '<div class="studio-mobile-model-section">' +
       '<div class="studio-mobile-model-label">Veo (Video)</div>' +
@@ -7505,8 +7505,8 @@ async function generateImageWithGemini(prompt, options = {}) {
   }
   
   var aspectRatio = options.aspectRatio || '1:1';
-  // v13.9: Use gemini-3-pro-image-preview (Nanobanana 3.0 Pro)
-  var model = 'gemini-3-pro-image-preview';
+  // v35.11: stable Nano Banana Pro ID (preview shut down 2026-06-25)
+  var model = 'gemini-3-pro-image';
   
   console.log('[generateImageWithGemini] Calling Gemini Image API');
   console.log('[generateImageWithGemini] Model:', model);
@@ -7667,6 +7667,28 @@ async function generateImageWithImagen3(prompt, aspectRatio) {
 // v10.5.25: NANOBANANA INTEGRATION (Text & Image)
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// v35.11: Normalize stale/retired image model IDs to their live replacements.
+// Google shut down gemini-3-pro-image-preview on 2026-06-25 (stable ID is
+// gemini-3-pro-image), and the 2.0 experimental image models are long gone.
+// Stored user selections (chat model, scheduler configs, pipeline steps,
+// Image Lab) may still hold old IDs — every generator normalizes at the API
+// call boundary so nothing 404s.
+function normalizeImageModel(model) {
+  if (!model) return model;
+  var map = {
+    'gemini-3-pro-image-preview': 'gemini-3-pro-image',
+    'gemini-3.1-flash-image-preview': 'gemini-3.1-flash-image',
+    'gemini-2.0-flash-exp-image-generation': 'gemini-3.1-flash-image',
+    'gemini-2.0-flash-preview-image-generation': 'gemini-3.1-flash-image',
+    'imagen-3.0-generate-002': 'imagen-4.0-generate-001',
+    'gpt-image-1': 'gpt-image-2',
+    'dall-e-3': 'gpt-image-2',
+    'dall-e-2': 'gpt-image-2'
+  };
+  return map[model] || model;
+}
+window.normalizeImageModel = normalizeImageModel;
+
 // v10.5.25: Helper to get Nanobanana API key
 // v24.11: Returns '' if image generation is disabled via toggle (key preserved in storage)
 function getNanobananaKey() {
@@ -7758,7 +7780,7 @@ function updateNanobananaSettingsStatus() {
 // v15.18: Image Lab Chat state
 var _imageLabChatHistory = [];     // Gemini API format: [{role, parts}]
 var _imageLabChatMessages = [];    // Display format: [{role, content, imageUrl, timestamp}]
-var _imageLabChatModel = 'gemini-3-pro-image-preview';
+var _imageLabChatModel = 'gemini-3-pro-image'; // v35.11: stable ID
 var _imageLabChatSending = false;
 
 // v15.7: Track active image conversation so follow-ups stay in image mode
@@ -7841,7 +7863,7 @@ function getNanobananaUsageStats() {
 function isNanobananaImageRequest(model, userMessage) {
   if (!model || !userMessage) return false;
   // Only for image-capable models
-  var imageModels = ['gemini-2.5-flash-image', 'gemini-3-pro-image-preview', 'gemini-2.0-flash-exp-image-generation'];
+  var imageModels = ['gemini-2.5-flash-image', 'gemini-3-pro-image', 'gemini-3.1-flash-image', 'gemini-3-pro-image-preview', 'gemini-2.0-flash-exp-image-generation']; // v35.11: added stable IDs, kept old for stored selections
   if (imageModels.indexOf(model) === -1) return false;
   // v15.7: If we're in an active image conversation, keep routing to image handler
   if (nanobananaImageActive) return true;
@@ -8002,7 +8024,7 @@ function handleImageEditRequest(prompt, attachments, opts) {
     }
     // Default / nano-banana / auto: Nano Banana 3.0 Pro (only honour model
     // override if it's an image-capable Gemini model).
-    var pickModel = modelIsGemini ? model : 'gemini-3-pro-image-preview';
+    var pickModel = modelIsGemini ? model : 'gemini-3-pro-image';
     return _handleNanobananaImageEdit(prompt, scaled, { model: pickModel });
   });
 }
@@ -8034,7 +8056,7 @@ function _handleNanobananaImageEdit(prompt, scaledAttachments, opts) {
     return Promise.resolve({ ok: false, error: 'generateImageWithNanobanana missing' });
   }
   return generateImageWithNanobanana(prompt, {
-    model: opts.model || 'gemini-3-pro-image-preview',
+    model: opts.model || 'gemini-3-pro-image',
     referenceImages: refImages,
     aspectRatio: '1:1'
   }).then(function(result) {
@@ -8044,8 +8066,8 @@ function _handleNanobananaImageEdit(prompt, scaledAttachments, opts) {
         ok: true,
         dataUrl: dUrl,
         provider: 'gemini',
-        providerLabel: (typeof _friendlyImageProvider === 'function') ? _friendlyImageProvider(opts.model || 'gemini-3-pro-image-preview') : 'Nano Banana 3.0 Pro',
-        model: opts.model || 'gemini-3-pro-image-preview',
+        providerLabel: (typeof _friendlyImageProvider === 'function') ? _friendlyImageProvider(opts.model || 'gemini-3-pro-image') : 'Nano Banana 3.0 Pro',
+        model: opts.model || 'gemini-3-pro-image',
         _needsRender: true
       };
     }
@@ -8054,8 +8076,8 @@ function _handleNanobananaImageEdit(prompt, scaledAttachments, opts) {
         ok: true,
         dataUrl: result.imageData,
         provider: 'gemini',
-        providerLabel: (typeof _friendlyImageProvider === 'function') ? _friendlyImageProvider(opts.model || 'gemini-3-pro-image-preview') : 'Nano Banana 3.0 Pro',
-        model: opts.model || 'gemini-3-pro-image-preview',
+        providerLabel: (typeof _friendlyImageProvider === 'function') ? _friendlyImageProvider(opts.model || 'gemini-3-pro-image') : 'Nano Banana 3.0 Pro',
+        model: opts.model || 'gemini-3-pro-image',
         _needsRender: true
       };
     }

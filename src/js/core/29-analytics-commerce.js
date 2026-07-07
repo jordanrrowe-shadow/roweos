@@ -532,6 +532,8 @@ function calculateCost(provider, model, inputTokens, outputTokens, webSearchEnab
       'gemini-1.5-pro': { input: 2.00, output: 12.00 }
     },
     'nanobanana': {
+      'gemini-3-pro-image': { perImage: 0.134 },
+      'gemini-3.1-flash-image': { perImage: 0.039 },
       'gemini-3-pro-image-preview': { perImage: 0.134 },
       'gemini-2.5-flash-image': { perImage: 0.039 },
       'gemini-2.0-flash-exp-image-generation': { perImage: 0.039 }
@@ -4860,7 +4862,9 @@ function getModelDisplayName(modelId) {
     'gemini-2.5-flash': 'Gemini 2.5 Flash',
     'gemini-3-flash-preview': 'Gemini 3 Flash',
     'gemini-1.5-pro': 'Gemini 1.5 Pro',
-    'gemini-3-pro-image-preview': 'Nano Banana 3.0 Pro',
+    'gemini-3-pro-image': 'Nano Banana Pro',
+    'gemini-3.1-flash-image': 'Nano Banana 2',
+    'gemini-3-pro-image-preview': 'Nano Banana Pro',
     'gemini-2.5-flash-image': 'Nano Banana Flash',
     'gemini-2.0-flash-exp-image-generation': 'Nano Banana Legacy',
     'auto': 'Brilliance AI'
