@@ -1,5 +1,16 @@
 # Brilliance / RoweOS Changelog
 
+## v35.14 - Horizon removed from RoweOS
+
+Reverts the v35.13 Horizon integration. Horizon is becoming its own standalone
+solo application (Brilliance's AI/planning capabilities are being built into it
+directly), so it no longer lives inside RoweOS. Removed: the admin-only Horizon
+view and its sidebar nav (grouped + expanded), the showView('horizon') handler,
+the HorizonBridge module (54-horizon.js) and its post-auth restore hook, the
+horizonView CSS selectors, the /horizon routes in vercel.json, the
+33-horizon.html panel, and the vendored RoweOS/dist/horizon build. No other
+surface is affected.
+
 ## v35.13 - Horizon personal finance planner integrated
 
 Horizon (previously a standalone deployment at horizon-gamma-gules.vercel.app)

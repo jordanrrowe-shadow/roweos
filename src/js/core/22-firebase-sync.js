@@ -7479,11 +7479,6 @@ function updateAdminNavVisibility() {
   var navItemExp = document.getElementById('adminNavItemExp');
   if (navItem) navItem.style.display = show ? '' : 'none';
   if (navItemExp) navItemExp.style.display = show ? '' : 'none';
-  // v35.13: Horizon personal finance nav follows the same admin-only visibility
-  var hzItem = document.getElementById('horizonNavItem');
-  var hzItemExp = document.getElementById('horizonNavItemExp');
-  if (hzItem) hzItem.style.display = show ? '' : 'none';
-  if (hzItemExp) hzItemExp.style.display = show ? '' : 'none';
 }
 
 function adminGenerateKey() {

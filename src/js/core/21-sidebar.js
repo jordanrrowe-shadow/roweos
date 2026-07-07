@@ -2110,10 +2110,6 @@ function completeFirebaseLogin(user) {
       }
     } catch(apiDeliverErr) {}
 
-    // v35.13: Restore Horizon finance data from cloud backup on fresh devices
-    // (only writes when local horizon_v1 is empty - never clobbers local data)
-    try { if (window.HorizonBridge) HorizonBridge.restoreIfEmpty(); } catch(hzErr) {}
-
     // v22.8: Proactive Firestore cleanup of deleted automation zombies
     try { if (typeof _cleanupDeletedFromFirestore === 'function') _cleanupDeletedFromFirestore(); } catch(e) {}
 

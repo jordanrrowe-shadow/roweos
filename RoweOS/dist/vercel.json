@@ -180,18 +180,6 @@
       "dest": "/tinymce/$1"
     },
     {
-      "src": "/horizon",
-      "dest": "/horizon/index.html"
-    },
-    {
-      "src": "/horizon/",
-      "dest": "/horizon/index.html"
-    },
-    {
-      "src": "/horizon/(.*)",
-      "dest": "/horizon/$1"
-    },
-    {
       "src": "/(.*)",
       "dest": "/index.html"
     }

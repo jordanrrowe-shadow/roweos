@@ -2661,7 +2661,7 @@ function showView(view) {
   }
 
   // Hide all views
-  var allViews = ['agent', 'studio', 'identity', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'clients', 'commerce', 'journal', 'sync', 'automations', 'admin', 'bloom', 'mail', 'folio', 'research', 'social', 'sectionLanding', 'scribe', 'evolve', 'board', 'horizon']; // v33.73: + board (Thought Board scaffold) // v35.13: + horizon (personal finance)
+  var allViews = ['agent', 'studio', 'identity', 'rhythm', 'pulse', 'brandIntel', 'tuning', 'settings', 'memory', 'export', 'library', 'analytics', 'schedule', 'inventory', 'clients', 'commerce', 'journal', 'sync', 'automations', 'admin', 'bloom', 'mail', 'folio', 'research', 'social', 'sectionLanding', 'scribe', 'evolve', 'board']; // v33.73: + board (Thought Board scaffold)
   allViews.forEach(function(v) {
     var el = document.getElementById(v + 'View');
     if (el) el.classList.add('hidden');
@@ -2727,13 +2727,6 @@ function showView(view) {
     if (!isAdmin()) { showView('settings'); return; }
     if (typeof renderAdminPanel === 'function') renderAdminPanel();
     if (typeof renderAdminFeedback === 'function') renderAdminFeedback();
-  }
-
-  // v35.13: Horizon personal finance planner — admin-only (Jordan's personal
-  // finances; the nav item is hidden for everyone else, this gate backs it up)
-  if (view === 'horizon') {
-    if (!isAdmin()) { showView('settings'); return; }
-    if (window.HorizonBridge) HorizonBridge.initView();
   }
 
   // v22.23: Mail view

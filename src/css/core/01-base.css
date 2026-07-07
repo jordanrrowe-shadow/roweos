@@ -5755,8 +5755,7 @@
        parent. */
     #rhythmView, #pulseView, #brandIntelView, #identityView, #scheduleView,
     #evolveView,
-    #boardView, /* v33.73 */
-    #horizonView /* v35.13 */ {
+    #boardView /* v33.73 */ {
       position: fixed;
       top: 38px;
       left: var(--sidebar-collapsed-width);
@@ -5797,7 +5796,6 @@
     html.sidebar-pinned-collapsed #scribeView, /* v29.0 */
     html.sidebar-pinned-collapsed #evolveView, /* v33.59 */
     html.sidebar-pinned-collapsed #boardView, /* v33.73 */
-    html.sidebar-pinned-collapsed #horizonView, /* v35.13 */
     html.sidebar-pinned-collapsed #sidebarNavCustom {
       left: var(--sidebar-collapsed-width);
       transition: left var(--sidebar-transition);
@@ -5831,7 +5829,6 @@
     html.sidebar-pinned #scribeView, /* v29.0 */
     html.sidebar-pinned #evolveView, /* v33.59 */
     html.sidebar-pinned #boardView, /* v33.73 */
-    html.sidebar-pinned #horizonView, /* v35.13 */
     html.sidebar-pinned #sidebarNavCustom {
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
@@ -5865,7 +5862,6 @@
     html.sidebar-hover-expanded #scribeView, /* v29.0 */
     html.sidebar-hover-expanded #evolveView, /* v33.59 */
     html.sidebar-hover-expanded #boardView, /* v33.73 */
-    html.sidebar-hover-expanded #horizonView, /* v35.13 */
     html.sidebar-hover-expanded #sidebarNavCustom {
       left: var(--sidebar-expanded-width);
       transition: left var(--sidebar-transition);
@@ -38587,8 +38583,7 @@
       html.light-mode #mailView,
       html.light-mode #researchView,
       html.light-mode #evolveView, /* v33.59 */
-      html.light-mode #boardView, /* v33.73 */
-      html.light-mode #horizonView /* v35.13 */ {
+      html.light-mode #boardView /* v33.73 */ {
         background: #f5f3ee;
       }
     }
@@ -39894,8 +39889,7 @@
       #analyticsView, #scheduleView, #inventoryView, #clientsView, #automationsView,
       #syncView, #commerceView, #adminView, #mailView, #folioView, #socialView, #researchView, #sectionLandingView,
       #evolveView, /* v33.59 */
-      #boardView, /* v33.73 */
-      #horizonView /* v35.13 */ {
+      #boardView /* v33.73 */ {
         position: fixed !important;
         left: 0 !important;
         right: 0 !important;
